@@ -4,6 +4,8 @@ import { DateTime } from 'luxon'
 import Action from './action.js'
 import Minion from './minion.js'
 
+// @dbml-group Minions
+
 export default class MinionDeathrattleAction extends BaseModel {
   @column({ isPrimary: true })
   declare id: number

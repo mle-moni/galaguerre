@@ -1,6 +1,8 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+// @dbml-group Minions
+
 export default class MinionPower extends BaseModel {
   @column({ isPrimary: true })
   declare id: number

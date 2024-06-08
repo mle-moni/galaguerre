@@ -4,6 +4,8 @@ import { DateTime } from 'luxon'
 import Minion from './minion.js'
 import Passive from './passive.js'
 
+// @dbml-group Minions
+
 export default class MinionPassive extends BaseModel {
   @column({ isPrimary: true })
   declare id: number

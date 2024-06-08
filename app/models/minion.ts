@@ -3,6 +3,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import MinionPower from './minion_power.js'
 
+// @dbml-group Minions
+
 export default class Minion extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
