@@ -8,6 +8,8 @@ import type {
 import Action from './action.js'
 import Boost from './boost.js'
 
+// @dbml-group Minions
+
 export default class Passive extends BaseModel {
   @column({ isPrimary: true })
   declare id: number

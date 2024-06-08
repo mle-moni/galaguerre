@@ -242,5 +242,11 @@ TableGroup Minions {
   MinionPower
   Minion
   MinionPassive
+  Passive
+}
+
+TableGroup Weapons {
+  WeaponDeathrattleAction
+  Weapon
 }
 

@@ -4,6 +4,8 @@ import { DateTime } from 'luxon'
 import Action from './action.js'
 import Weapon from './weapon.js'
 
+// @dbml-group Weapons
+
 export default class WeaponDeathrattleAction extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
