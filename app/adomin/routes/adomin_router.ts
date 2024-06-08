@@ -28,8 +28,7 @@ router
 
         router.post('logout', adominLogout)
       })
-      .use(middleware.auth())
-    // ! please restrict this route group for only admins of your app
+      .use(middleware.admin())
 
     router.post('login', adominLogin)
   })
