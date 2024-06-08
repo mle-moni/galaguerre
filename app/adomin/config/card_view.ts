@@ -8,6 +8,14 @@ import { createFile, deleteFile } from '../../utils/files.js'
 
 export const CARD_VIEW = createModelViewConfig(() => Card, {
   columns: {
+    label: {
+      type: 'string',
+      label: 'Nom',
+    },
+    cost: {
+      type: 'number',
+      label: 'Coût',
+    },
     type: {
       type: 'enum',
       options: GALAGUERRE_CARD_TYPES_OPTIONS,
@@ -18,14 +26,21 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
       modelName: 'Minion',
       labelFields: ['internalLabel', 'attack', 'health'],
       nullable: true,
+      label: 'Monstre',
     },
-    cost: {
-      type: 'number',
-      label: 'Coût',
+    spell: {
+      type: 'belongsToRelation',
+      modelName: 'Spell',
+      labelFields: ['internalLabel'],
+      nullable: true,
+      label: 'Sort',
     },
-    label: {
-      type: 'string',
-      label: 'Nom',
+    weapon: {
+      type: 'belongsToRelation',
+      modelName: 'Weapon',
+      labelFields: ['internalLabel', 'damage', 'durability'],
+      nullable: true,
+      label: 'Arme',
     },
     imageUrl: {
       type: 'file',
@@ -34,6 +49,7 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
       createFile,
       deleteFile,
       label: 'Image',
+      nullable: true,
     },
     cardMode: {
       type: 'enum',

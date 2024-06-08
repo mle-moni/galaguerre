@@ -7,6 +7,8 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
+      table.string('internal_label').notNullable()
+
       table.integer('action_id').references('actions.id').notNullable().onDelete('CASCADE')
 
       table.timestamp('created_at', { useTz: true })

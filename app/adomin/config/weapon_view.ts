@@ -1,19 +1,19 @@
 import { createModelViewConfig } from '#adomin/create_model_view_config'
-import Minion from '#models/minion'
+import Weapon from '#models/weapon'
 
-export const MINION_VIEW = createModelViewConfig(() => Minion, {
+export const WEAPON_VIEW = createModelViewConfig(() => Weapon, {
   columns: {
     internalLabel: {
       type: 'string',
       label: 'Nom interne',
     },
-    attack: {
+    damage: {
       type: 'number',
-      label: 'Attaque',
+      label: 'Dégâts',
     },
-    health: {
+    durability: {
       type: 'number',
-      label: 'Points de vie',
+      label: 'Durabilité',
     },
     createdAt: {
       type: 'date',
@@ -30,6 +30,6 @@ export const MINION_VIEW = createModelViewConfig(() => Minion, {
       editable: false,
     },
   },
-  label: 'Monstre',
-  icon: 'cat',
+  label: 'Arme',
+  icon: 'sword',
 })

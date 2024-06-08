@@ -6,6 +6,9 @@ export default class Weapon extends BaseModel {
   declare id: number
 
   @column()
+  declare internalLabel: string
+
+  @column()
   declare durability: number
 
   @column()

@@ -8,6 +8,9 @@ export default class Spell extends BaseModel {
   declare id: number
 
   @column()
+  declare internalLabel: string
+
+  @column()
   declare actionId: number
 
   @belongsTo(() => Action)
