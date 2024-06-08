@@ -68,4 +68,10 @@ export default defineConfig({
     ],
     forceExit: false,
   },
+  metaFiles: [
+    {
+      pattern: 'docs/dbml/models.svg',
+      reloadServer: false,
+    },
+  ],
 })

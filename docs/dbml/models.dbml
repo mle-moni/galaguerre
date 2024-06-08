@@ -1,0 +1,237 @@
+Table Action [headercolor: #d35400] {
+    id number [primary key, not null]
+    type GalaguerreActionType [not null]
+    isTargeted boolean [not null]
+    drawCount number 
+    drawCardFilterId number 
+    enemyDrawCount number 
+    enemyDrawCardFilterId number 
+    damage number 
+    heal number 
+    boostId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Boost [headercolor: #d35400] {
+    id number [primary key, not null]
+    health number 
+    attack number 
+    spellPower number 
+    minionPowerId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table CardFilterTag [headercolor: #d35400] {
+    id number [primary key, not null]
+    cardFilterId number [not null]
+    tagId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table CardFilter [headercolor: #d35400] {
+    id number [primary key, not null]
+    type GalaguerreCardType [not null]
+    comparisonId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table CardTag [headercolor: #d35400] {
+    id number [primary key, not null]
+    cardId number [not null]
+    tagId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Card [headercolor: #d35400] {
+    id number [primary key, not null]
+    label string [not null]
+    imageUrl string 
+    cost number [not null]
+    type GalaguerreCardType [not null]
+    cardMode GalaguerreCardMode [not null]
+    minionId number 
+    spellId number 
+    weaponId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Comparison [headercolor: #d35400] {
+    id number [primary key, not null]
+    costComparison GalaguerreComparisonType 
+    cost number 
+    attackComparison GalaguerreComparisonType 
+    attack number 
+    healthComparison GalaguerreComparisonType 
+    health number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table MinionBattlecryAction [headercolor: #d35400] {
+    id number [primary key, not null]
+    minionId number [not null]
+    actionId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table MinionDeathrattleAction [headercolor: #d35400] {
+    id number [primary key, not null]
+    minionId number [not null]
+    actionId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table MinionPower [headercolor: #d35400] {
+    id number [primary key, not null]
+    hasTaunt boolean [not null]
+    hasCharge boolean [not null]
+    hasWindfury boolean [not null]
+    isPoisonous boolean [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Minion [headercolor: #d35400] {
+    id number [primary key, not null]
+    health number [not null]
+    attack number [not null]
+    minionPowerId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table MinionPassive [headercolor: #d35400] {
+    id number [primary key, not null]
+    minionId number [not null]
+    passiveId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Passive [headercolor: #d35400] {
+    id number [primary key, not null]
+    type GalaguerrePassiveType [not null]
+    triggersOn GalaguerrePassiveTriggersOn 
+    actionId number 
+    boostId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Spell [headercolor: #d35400] {
+    id number [primary key, not null]
+    actionId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Tag [headercolor: #d35400] {
+    id number [primary key, not null]
+    name string [not null]
+    label string [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Target [headercolor: #d35400] {
+    id number [primary key, not null]
+    type GalaguerreTargetType [not null]
+    comparisonId number 
+    actionId number 
+    boostId number 
+    tagId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table User [headercolor: #d35400] {
+    id number [primary key, not null]
+    pseudo string 
+    email string [not null]
+    password string [not null]
+    isSuperAdmin boolean [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime 
+}
+
+Table WeaponDeathrattleAction [headercolor: #d35400] {
+    id number [primary key, not null]
+    weaponId number [not null]
+    actionId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Weapon [headercolor: #d35400] {
+    id number [primary key, not null]
+    durability number [not null]
+    damage number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+
+Ref: Action.drawCardFilterId > CardFilter.id
+
+Ref: Action.enemyDrawCardFilterId > CardFilter.id
+
+Ref: Action.boostId > Boost.id
+
+Ref: CardFilterTag.cardFilterId > CardFilter.id
+
+Ref: CardFilterTag.tagId > Tag.id
+
+Ref: CardFilter.comparisonId > Comparison.id
+
+Ref: CardTag.cardId > Card.id
+
+Ref: CardTag.tagId > Tag.id
+
+Ref: Card.minionId > Minion.id
+
+Ref: Card.spellId > Spell.id
+
+Ref: Card.weaponId > Weapon.id
+
+Ref: MinionBattlecryAction.minionId > Minion.id
+
+Ref: MinionBattlecryAction.actionId > Action.id
+
+Ref: MinionDeathrattleAction.minionId > Minion.id
+
+Ref: MinionDeathrattleAction.actionId > Action.id
+
+Ref: Minion.minionPowerId > MinionPower.id
+
+Ref: MinionPassive.minionId > Minion.id
+
+Ref: MinionPassive.passiveId > Passive.id
+
+Ref: Passive.actionId > Action.id
+
+Ref: Passive.boostId > Boost.id
+
+Ref: Spell.actionId > Action.id
+
+Ref: Target.comparisonId > Comparison.id
+
+Ref: Target.actionId > Action.id
+
+Ref: Target.boostId > Boost.id
+
+Ref: Target.tagId > Tag.id
+
+Ref: WeaponDeathrattleAction.weaponId > Weapon.id
+
+Ref: WeaponDeathrattleAction.actionId > Action.id
+
+
+

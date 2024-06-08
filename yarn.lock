@@ -407,6 +407,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@aduh95/viz.js@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@aduh95/viz.js@npm:3.4.0"
+  checksum: 10c0/6acb40e881dc0b7ac7a6800a1508e8c420e1f6b09bd42e3289aa2199345729af8aec6ffc52dc72cfe678476fcc341f4a83bc2c3d59cd223232e8495f3a414ab0
+  languageName: node
+  linkType: hard
+
 "@antfu/install-pkg@npm:^0.3.3":
   version: 0.3.3
   resolution: "@antfu/install-pkg@npm:0.3.3"
@@ -990,6 +997,19 @@ __metadata:
   version: 6.3.1
   resolution: "@sindresorhus/is@npm:6.3.1"
   checksum: 10c0/2432ca411aafe7840818493360ba795db07ce7e8efd2bc994736fdbda175e99fa7d6614c7f41a72b28bae68603a86dbd0d810ba45d1ba7c5881929d54049360c
+  languageName: node
+  linkType: hard
+
+"@softwaretechnik/dbml-renderer@npm:^1.0.30":
+  version: 1.0.30
+  resolution: "@softwaretechnik/dbml-renderer@npm:1.0.30"
+  dependencies:
+    "@aduh95/viz.js": "npm:3.4.0"
+    yargs: "npm:^17.7.2"
+    zod: "npm:^3.22.4"
+  bin:
+    dbml-renderer: lib/index.js
+  checksum: 10c0/12762032b0deae7914193a30503de2c0987b464a23580956247ccb391f614d887255e422eac4d1b070a882fda569d3e400baa46ee5c566e42abcae74bc88436a
   languageName: node
   linkType: hard
 
@@ -2096,6 +2116,17 @@ __metadata:
     slice-ansi: "npm:^5.0.0"
     string-width: "npm:^7.0.0"
   checksum: 10c0/d7f0b73e3d9b88cb496e6c086df7410b541b56a43d18ade6a573c9c18bd001b1c3fba1ad578f741a4218fdc794d042385f8ac02c25e1c295a2d8b9f3cb86eb4c
+  languageName: node
+  linkType: hard
+
+"cliui@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "cliui@npm:8.0.1"
+  dependencies:
+    string-width: "npm:^4.2.0"
+    strip-ansi: "npm:^6.0.1"
+    wrap-ansi: "npm:^7.0.0"
+  checksum: 10c0/4bda0f09c340cbb6dfdc1ed508b3ca080f12992c18d68c6be4d9cf51756033d5266e61ec57529e610dacbf4da1c634423b0c1b11037709cc6b09045cbd815df5
   languageName: node
   linkType: hard
 
@@ -3386,6 +3417,7 @@ __metadata:
     "@japa/assert": "npm:^3.0.0"
     "@japa/plugin-adonisjs": "npm:^3.0.1"
     "@japa/runner": "npm:^3.1.4"
+    "@softwaretechnik/dbml-renderer": "npm:^1.0.30"
     "@swc/core": "npm:^1.5.7"
     "@types/luxon": "npm:^3.4.2"
     "@types/node": "npm:^20.12.12"
@@ -3402,6 +3434,13 @@ __metadata:
     xlsx: "npm:^0.18.5"
   languageName: unknown
   linkType: soft
+
+"get-caller-file@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "get-caller-file@npm:2.0.5"
+  checksum: 10c0/c6c7b60271931fa752aeb92f2b47e355eac1af3a2673f47c9589e8f8a41adc74d45551c1bc57b5e66a80609f10ffb72b6f575e4370d61cc3f7f3aaff01757cde
+  languageName: node
+  linkType: hard
 
 "get-east-asian-width@npm:^1.0.0":
   version: 1.2.0
@@ -5873,6 +5912,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"require-directory@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "require-directory@npm:2.1.1"
+  checksum: 10c0/83aa76a7bc1531f68d92c75a2ca2f54f1b01463cb566cf3fbc787d0de8be30c9dbc211d1d46be3497dac5785fe296f2dd11d531945ac29730643357978966e99
+  languageName: node
+  linkType: hard
+
 "resolve-from@npm:^4.0.0":
   version: 4.0.0
   resolution: "resolve-from@npm:4.0.0"
@@ -7101,7 +7147,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0, wrap-ansi@npm:^7.0.0":
   version: 7.0.0
   resolution: "wrap-ansi@npm:7.0.0"
   dependencies:
@@ -7165,6 +7211,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"y18n@npm:^5.0.5":
+  version: 5.0.8
+  resolution: "y18n@npm:5.0.8"
+  checksum: 10c0/4df2842c36e468590c3691c894bc9cdbac41f520566e76e24f59401ba7d8b4811eb1e34524d57e54bc6d864bcb66baab7ffd9ca42bf1eda596618f9162b91249
+  languageName: node
+  linkType: hard
+
 "yallist@npm:^4.0.0":
   version: 4.0.0
   resolution: "yallist@npm:4.0.0"
@@ -7176,6 +7229,21 @@ __metadata:
   version: 21.1.1
   resolution: "yargs-parser@npm:21.1.1"
   checksum: 10c0/f84b5e48169479d2f402239c59f084cfd1c3acc197a05c59b98bab067452e6b3ea46d4dd8ba2985ba7b3d32a343d77df0debd6b343e5dae3da2aab2cdf5886b2
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^17.7.2":
+  version: 17.7.2
+  resolution: "yargs@npm:17.7.2"
+  dependencies:
+    cliui: "npm:^8.0.1"
+    escalade: "npm:^3.1.1"
+    get-caller-file: "npm:^2.0.5"
+    require-directory: "npm:^2.1.1"
+    string-width: "npm:^4.2.3"
+    y18n: "npm:^5.0.5"
+    yargs-parser: "npm:^21.1.1"
+  checksum: 10c0/ccd7e723e61ad5965fffbb791366db689572b80cca80e0f96aad968dfff4156cd7cd1ad18607afe1046d8241e6fb2d6c08bf7fa7bfb5eaec818735d8feac8f05
   languageName: node
   linkType: hard
 
@@ -7236,5 +7304,12 @@ __metadata:
   bin:
     z-schema: bin/z-schema
   checksum: 10c0/e4c812cfe6468c19b2a21d07d4ff8fb70359062d33400b45f89017eaa3efe9d51e85963f2b115eaaa99a16b451782249bf9b1fa8b31d35cc473e7becb3e44264
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.22.4":
+  version: 3.23.8
+  resolution: "zod@npm:3.23.8"
+  checksum: 10c0/8f14c87d6b1b53c944c25ce7a28616896319d95bc46a9660fe441adc0ed0a81253b02b5abdaeffedbeb23bdd25a0bf1c29d2c12dd919aef6447652dd295e3e69
   languageName: node
   linkType: hard
