@@ -1,5 +1,6 @@
 import { AdominConfig } from '#adomin/adomin_config.types'
 import { CARD_VIEW } from './card_view.js'
+import { MINION_VIEW } from './minion_view.js'
 
 /**
  * This file will contain your Adomin Config
@@ -19,5 +20,5 @@ import { CARD_VIEW } from './card_view.js'
 
 export const ADOMIN_CONFIG: AdominConfig = {
   title: 'Your Backoffice Title',
-  views: [CARD_VIEW],
+  views: [CARD_VIEW, MINION_VIEW],
 }

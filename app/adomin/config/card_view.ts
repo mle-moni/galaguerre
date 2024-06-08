@@ -8,10 +8,16 @@ import { createFile, deleteFile } from '../../utils/files.js'
 
 export const CARD_VIEW = createModelViewConfig(() => Card, {
   columns: {
-    cardMode: {
+    type: {
       type: 'enum',
-      options: GALAGUERRE_CARD_MODES_OPTIONS,
-      label: 'Mode',
+      options: GALAGUERRE_CARD_TYPES_OPTIONS,
+      label: 'Type',
+    },
+    minion: {
+      type: 'belongsToRelation',
+      modelName: 'Minion',
+      labelFields: ['internalLabel', 'attack', 'health'],
+      nullable: true,
     },
     cost: {
       type: 'number',
@@ -21,11 +27,6 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
       type: 'string',
       label: 'Nom',
     },
-    type: {
-      type: 'enum',
-      options: GALAGUERRE_CARD_TYPES_OPTIONS,
-      label: 'Type',
-    },
     imageUrl: {
       type: 'file',
       subType: 'url',
@@ -33,6 +34,11 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
       createFile,
       deleteFile,
       label: 'Image',
+    },
+    cardMode: {
+      type: 'enum',
+      options: GALAGUERRE_CARD_MODES_OPTIONS,
+      label: 'Mode',
     },
     createdAt: {
       type: 'date',

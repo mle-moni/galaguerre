@@ -8,6 +8,9 @@ export default class Minion extends BaseModel {
   declare id: number
 
   @column()
+  declare internalLabel: string
+
+  @column()
   declare health: number
 
   @column()
