@@ -49,7 +49,6 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
       createFile,
       deleteFile,
       label: 'Image',
-      nullable: true,
     },
     cardMode: {
       type: 'enum',
