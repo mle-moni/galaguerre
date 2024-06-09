@@ -1,10 +1,10 @@
 import { AdominConfig } from '#adomin/adomin_config.types'
+import { MINION_VIEW } from './card_types/minion_view.js'
+import { SPELL_VIEW } from './card_types/spell_view.js'
+import { WEAPON_VIEW } from './card_types/weapon_view.js'
 import { CARD_VIEW } from './card_view.js'
-import { MINION_FOLDER } from './minion/minion_folder.js'
-import { MINION_VIEW } from './minion/minion_view.js'
-import { SPELL_VIEW } from './spell_view.js'
+import { MINION_FOLDER } from './minion_tools/minion_tools_folder.js'
 import { TOOLS_FOLDER } from './tools/tools_folder.js'
-import { WEAPON_VIEW } from './weapon_view.js'
 
 /**
  * This file will contain your Adomin Config

@@ -16,6 +16,26 @@ export default class extends BaseSchema {
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
+
+      this.defer(async (db) => {
+        await db.schema.raw(`
+        ALTER TABLE ${this.tableName}
+        ADD COLUMN internal_label TEXT GENERATED ALWAYS AS (
+          'FILTRE ' ||
+          COALESCE('Coût ' || cost_comparison || ' ' || cost, '') ||
+          CASE
+            WHEN cost IS NOT NULL THEN ' ET '
+            ELSE ''
+          END ||
+          COALESCE('Attaque ' || attack_comparison || ' ' || attack, '') ||
+          CASE
+            WHEN attack IS NOT NULL THEN ' ET '
+            ELSE ''
+          END ||
+          COALESCE('Points de vie ' || health_comparison || ' ' || health, '')
+        ) STORED;
+      `)
+      })
     })
   }
 

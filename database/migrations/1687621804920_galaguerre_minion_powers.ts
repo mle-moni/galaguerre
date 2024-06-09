@@ -14,6 +14,18 @@ export default class extends BaseSchema {
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
+
+      this.defer(async (db) => {
+        await db.schema.raw(`
+        ALTER TABLE ${this.tableName}
+        ADD COLUMN internal_label TEXT GENERATED ALWAYS AS (
+          'Provocation: ' || has_taunt || ', ' ||
+          'Charge: ' || has_charge || ', ' ||
+          'Furie des vents: ' || has_windfury || ', ' ||
+          'Toxique: ' || is_poisonous
+        ) STORED;
+      `)
+      })
     })
   }
 

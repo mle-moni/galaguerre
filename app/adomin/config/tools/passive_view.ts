@@ -24,6 +24,12 @@ export const PASSIVE_VIEW = createModelViewConfig(() => Passive, {
       labelFields: ['internalLabel'],
       label: 'Action',
     },
+    boost: {
+      type: 'belongsToRelation',
+      modelName: 'Boost',
+      labelFields: ['internalLabel'],
+      label: 'Boost',
+    },
     createdAt: {
       type: 'date',
       subType: 'datetime',

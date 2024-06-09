@@ -1,5 +1,6 @@
 Table Action [headercolor: #d35400] {
     id number [primary key, not null]
+    internalLabel string [not null]
     type GalaguerreActionType [not null]
     isTargeted boolean [not null]
     drawCount number 
@@ -187,6 +188,8 @@ Ref: Action.drawCardFilterId > CardFilter.id
 Ref: Action.enemyDrawCardFilterId > CardFilter.id
 
 Ref: Action.boostId > Boost.id
+
+Ref: Boost.minionPowerId > MinionPower.id
 
 Ref: CardFilterTag.cardFilterId > CardFilter.id
 

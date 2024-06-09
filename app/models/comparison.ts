@@ -1,4 +1,4 @@
-import { BaseModel, column, computed } from '@adonisjs/lucid/orm'
+import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import { GalaguerreComparisonType } from '../galaguerre/galaguerre.types.js'
 
@@ -6,16 +6,8 @@ export default class Comparison extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @computed()
-  get internalLabel() {
-    const costLabel = this.cost ? `Coût ${this.costComparison} ${this.cost}` : ''
-    const attackLabel = this.attack ? `Attaque ${this.attackComparison} ${this.attack}` : ''
-    const healthLabel = this.health ? `Points de vie ${this.healthComparison} ${this.health}` : ''
-
-    const label = [costLabel, attackLabel, healthLabel].filter((l) => l !== '').join(' ET ')
-
-    return `FILTRE ${label}`
-  }
+  @column()
+  declare internalLabel: string
 
   @column()
   declare costComparison: GalaguerreComparisonType | null

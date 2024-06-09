@@ -49,6 +49,12 @@ export const ACTION_VIEW = createModelViewConfig(() => Action, {
       nullable: true,
       fkName: 'enemyDrawCardFilterId',
     },
+    boost: {
+      type: 'belongsToRelation',
+      modelName: 'Boost',
+      labelFields: ['internalLabel'],
+      label: 'Boost',
+    },
     internalLabel: {
       type: 'string',
       label: 'Libellé interne',

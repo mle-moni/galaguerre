@@ -19,6 +19,9 @@ export default class MinionPower extends BaseModel {
   @column()
   declare isPoisonous: boolean
 
+  @column()
+  declare internalLabel: string
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

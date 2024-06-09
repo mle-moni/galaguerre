@@ -7,7 +7,8 @@ export const COMPARISON_VIEW = createModelViewConfig(() => Comparison, {
     internalLabel: {
       type: 'string',
       label: 'Nom interne',
-      computed: true,
+      creatable: false,
+      editable: false,
     },
     costComparison: {
       type: 'enum',
