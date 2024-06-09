@@ -14,7 +14,7 @@ export default class Card extends BaseModel {
   declare label: string
 
   @column()
-  declare imageUrl: string | null
+  declare imageUrl: string
 
   @column()
   declare cost: number

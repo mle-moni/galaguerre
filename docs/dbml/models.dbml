@@ -50,7 +50,7 @@ Table CardTag [headercolor: #d35400] {
 Table Card [headercolor: #d35400] {
     id number [primary key, not null]
     label string [not null]
-    imageUrl string 
+    imageUrl string [not null]
     cost number [not null]
     type GalaguerreCardType [not null]
     cardMode GalaguerreCardMode [not null]

@@ -8,15 +8,15 @@
  viewBox="0.00 0.00 4850.66 4343.39" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 4339.39)">
 <title>dbml</title>
-<g id="clust2" class="cluster">
-<title>cluster_Weapons</title>
-<polygon fill="#dddddd" stroke="#dddddd" points="636.11,-600.39 636.11,-1262.39 2167.38,-1262.39 2167.38,-600.39 636.11,-600.39"/>
-<text text-anchor="middle" x="1401.75" y="-1229.59" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">Weapons</text>
-</g>
 <g id="clust1" class="cluster">
 <title>cluster_Minions</title>
 <polygon fill="#dddddd" stroke="#dddddd" points="653.79,-2684.39 653.79,-4327.39 3020.79,-4327.39 3020.79,-2684.39 653.79,-2684.39"/>
 <text text-anchor="middle" x="1837.29" y="-4294.59" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">Minions</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_Weapons</title>
+<polygon fill="#dddddd" stroke="#dddddd" points="636.11,-600.39 636.11,-1262.39 2167.38,-1262.39 2167.38,-600.39 636.11,-600.39"/>
+<text text-anchor="middle" x="1401.75" y="-1229.59" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">Weapons</text>
 </g>
 <!-- MinionBattlecryAction -->
 <g id="MinionBattlecryAction" class="node">
@@ -870,7 +870,9 @@
 <polygon fill="#e7e2dd" stroke="transparent" points="735.27,-2092.39 735.27,-2152.39 1282.27,-2152.39 1282.27,-2092.39 735.27,-2092.39"/>
 <polygon fill="none" stroke="#29235c" points="735.27,-2092.39 735.27,-2152.39 1282.27,-2152.39 1282.27,-2092.39 735.27,-2092.39"/>
 <text text-anchor="start" x="746.27" y="-2112.59" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">imageUrl &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1193.05" y="-2113.59" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">string</text>
+<text text-anchor="start" x="1153.96" y="-2113.59" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">string</text>
+<text text-anchor="start" x="1232.18" y="-2113.59" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1241.07" y="-2113.59" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="735.27,-2032.39 735.27,-2092.39 1282.27,-2092.39 1282.27,-2032.39 735.27,-2032.39"/>
 <polygon fill="none" stroke="#29235c" points="735.27,-2032.39 735.27,-2092.39 1282.27,-2092.39 1282.27,-2032.39 735.27,-2032.39"/>
 <text text-anchor="start" x="746.27" y="-2052.59" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">cost &#160;&#160;&#160;</text>

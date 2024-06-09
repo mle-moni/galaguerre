@@ -1,7 +1,8 @@
 import { AdominConfig } from '#adomin/adomin_config.types'
 import { CARD_VIEW } from './card_view.js'
-import { MINION_VIEW } from './minion_view.js'
+import { MINION_FOLDER } from './minion/minion_folder.js'
 import { SPELL_VIEW } from './spell_view.js'
+import { TOOLS_FOLDER } from './tools/tools_folder.js'
 import { WEAPON_VIEW } from './weapon_view.js'
 
 /**
@@ -21,6 +22,6 @@ import { WEAPON_VIEW } from './weapon_view.js'
  */
 
 export const ADOMIN_CONFIG: AdominConfig = {
-  title: 'Your Backoffice Title',
-  views: [CARD_VIEW, MINION_VIEW, SPELL_VIEW, WEAPON_VIEW],
+  title: 'Galaguerre',
+  views: [CARD_VIEW, SPELL_VIEW, WEAPON_VIEW, MINION_FOLDER, TOOLS_FOLDER],
 }
