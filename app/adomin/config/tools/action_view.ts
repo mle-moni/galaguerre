@@ -39,6 +39,7 @@ export const ACTION_VIEW = createModelViewConfig(() => Action, {
       labelFields: ['internalLabel'],
       label: 'Filtre de pioche',
       nullable: true,
+      fkName: 'drawCardFilterId',
     },
     enemyDrawCardFilter: {
       type: 'belongsToRelation',
@@ -46,6 +47,25 @@ export const ACTION_VIEW = createModelViewConfig(() => Action, {
       labelFields: ['internalLabel'],
       label: 'Filtre de pioche adverse',
       nullable: true,
+      fkName: 'enemyDrawCardFilterId',
+    },
+    internalLabel: {
+      type: 'string',
+      label: 'Libellé interne',
+    },
+    createdAt: {
+      type: 'date',
+      subType: 'datetime',
+      label: 'Créé le',
+      creatable: false,
+      editable: false,
+    },
+    updatedAt: {
+      type: 'date',
+      subType: 'datetime',
+      label: 'Modifié le',
+      creatable: false,
+      editable: false,
     },
   },
   label: 'Action',

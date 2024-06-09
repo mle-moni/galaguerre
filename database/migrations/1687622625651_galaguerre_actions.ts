@@ -7,6 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
+      table.string('internal_label').notNullable()
       table.string('type').notNullable()
       table.boolean('is_targeted').notNullable()
 

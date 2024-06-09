@@ -10,6 +10,9 @@ export default class Action extends BaseModel {
   declare id: number
 
   @column()
+  declare internalLabel: string
+
+  @column()
   declare type: GalaguerreActionType
 
   @column()
