@@ -54,6 +54,7 @@ export const ACTION_VIEW = createModelViewConfig(() => Action, {
       modelName: 'Boost',
       labelFields: ['internalLabel'],
       label: 'Boost',
+      nullable: true,
     },
     internalLabel: {
       type: 'string',

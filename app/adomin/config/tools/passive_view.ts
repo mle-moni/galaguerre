@@ -23,12 +23,18 @@ export const PASSIVE_VIEW = createModelViewConfig(() => Passive, {
       modelName: 'Action',
       labelFields: ['internalLabel'],
       label: 'Action',
+      nullable: true,
     },
     boost: {
       type: 'belongsToRelation',
       modelName: 'Boost',
       labelFields: ['internalLabel'],
       label: 'Boost',
+      nullable: true,
+    },
+    internalLabel: {
+      type: 'string',
+      label: 'Libellé interne',
     },
     createdAt: {
       type: 'date',

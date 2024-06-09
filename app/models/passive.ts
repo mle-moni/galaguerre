@@ -15,6 +15,9 @@ export default class Passive extends BaseModel {
   declare id: number
 
   @column()
+  declare internalLabel: string
+
+  @column()
   declare type: GalaguerrePassiveType
 
   // triggersOn must not be NULL if type = ACTION
