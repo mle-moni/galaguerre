@@ -15,6 +15,13 @@ export const MINION_VIEW = createModelViewConfig(() => Minion, {
       type: 'number',
       label: 'Points de vie',
     },
+    minionPower: {
+      type: 'belongsToRelation',
+      modelName: 'MinionPower',
+      labelFields: ['internalLabel'],
+      label: 'Pouvoir de monstre',
+      nullable: true,
+    },
     createdAt: {
       type: 'date',
       subType: 'datetime',

@@ -19,10 +19,37 @@ export default class extends BaseSchema {
         await db.schema.raw(`
         ALTER TABLE ${this.tableName}
         ADD COLUMN internal_label TEXT GENERATED ALWAYS AS (
-          'Provocation: ' || has_taunt || ', ' ||
-          'Charge: ' || has_charge || ', ' ||
-          'Furie des vents: ' || has_windfury || ', ' ||
-          'Toxique: ' || is_poisonous
+          TRIM(
+            TRAILING ', ' FROM
+            COALESCE(NULLIF(
+              CASE
+                WHEN has_taunt THEN 'Provocation, '
+                ELSE ''
+              END,
+              ''
+            ), '') ||
+            COALESCE(NULLIF(
+              CASE
+                WHEN has_charge THEN 'Charge, '
+                ELSE ''
+              END,
+              ''
+            ), '') ||
+            COALESCE(NULLIF(
+              CASE
+                WHEN has_windfury THEN 'Furie des vents, '
+                ELSE ''
+              END,
+              ''
+            ), '') ||
+            COALESCE(NULLIF(
+              CASE
+                WHEN is_poisonous THEN 'Toxique, '
+                ELSE ''
+              END,
+              ''
+            ), '')
+          )
         ) STORED;
       `)
       })

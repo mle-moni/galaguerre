@@ -7,6 +7,11 @@ export const SPELL_VIEW = createModelViewConfig(() => Spell, {
       type: 'string',
       label: 'Nom interne',
     },
+    action: {
+      type: 'belongsToRelation',
+      labelFields: ['internalLabel'],
+      modelName: 'Action',
+    },
     createdAt: {
       type: 'date',
       subType: 'datetime',

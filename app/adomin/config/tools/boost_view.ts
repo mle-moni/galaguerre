@@ -23,6 +23,11 @@ export const BOOST_VIEW = createModelViewConfig(() => Boost, {
       modelName: 'MinionPower',
       labelFields: ['internalLabel'],
       label: 'Pouvoir de monstre',
+      nullable: true,
+    },
+    internalLabel: {
+      type: 'string',
+      label: 'Nom interne',
     },
     createdAt: {
       type: 'date',
