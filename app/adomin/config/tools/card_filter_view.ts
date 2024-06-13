@@ -15,6 +15,19 @@ export const CARD_FILTER_VIEW = createModelViewConfig(() => CardFilter, {
       modelName: 'Comparison',
       label: 'Comparaison',
     },
+    internalLabel: {
+      type: 'string',
+      label: 'Internal Label',
+    },
+    tags: {
+      type: 'hasManyRelation',
+      modelName: 'CardFilterTag',
+      labelFields: ['tagLabel'],
+      label: 'Tags filtres',
+      creatable: false,
+      editable: false,
+      allowGlobalFilterSearch: false,
+    },
     createdAt: {
       type: 'date',
       subType: 'datetime',
@@ -32,4 +45,5 @@ export const CARD_FILTER_VIEW = createModelViewConfig(() => CardFilter, {
   },
   label: 'Filtre de carte',
   icon: 'filter',
+  queryBuilderCallback: (q) => q.preload('tags', (q2) => q2.preload('tag')),
 })

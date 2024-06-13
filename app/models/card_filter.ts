@@ -1,7 +1,8 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import type { GalaguerreCardType } from '../galaguerre/galaguerre.types.js'
+import CardFilterTag from './card_filter_tag.js'
 import Comparison from './comparison.js'
 
 export default class CardFilter extends BaseModel {
@@ -19,6 +20,9 @@ export default class CardFilter extends BaseModel {
 
   @belongsTo(() => Comparison)
   declare comparison: BelongsTo<typeof Comparison>
+
+  @hasMany(() => CardFilterTag)
+  declare tags: HasMany<typeof CardFilterTag>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
