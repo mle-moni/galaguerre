@@ -16,21 +16,31 @@ export const TARGET_VIEW = createModelViewConfig(() => Target, {
       label: 'Comparaison',
       nullable: true,
     },
-    action: {
+    internalLabel: {
+      type: 'string',
+      label: 'Internal Label',
+    },
+    tag: {
       type: 'belongsToRelation',
-      labelFields: ['internalLabel'],
-      modelName: 'Action',
-      label: 'Action',
+      labelFields: ['label'],
+      modelName: 'Tag',
+      label: 'Tag',
       nullable: true,
     },
-    boost: {
-      type: 'belongsToRelation',
-      labelFields: ['internalLabel'],
-      modelName: 'Boost',
-      label: 'Boost',
-      nullable: true,
+    createdAt: {
+      type: 'date',
+      subType: 'datetime',
+      label: 'Créé le',
+      creatable: false,
+      editable: false,
     },
-    // TODO finish up
+    updatedAt: {
+      type: 'date',
+      subType: 'datetime',
+      label: 'Modifié le',
+      creatable: false,
+      editable: false,
+    },
   },
   label: 'Cible',
   icon: 'viewfinder',

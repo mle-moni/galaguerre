@@ -87,7 +87,7 @@ export const GALAGUERRE_TARGET_TYPES_OBJ = generateTypeObjectFromEnum(GALAGUERRE
 export const GALAGUERRE_TARGET_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreTargetType> = {
   ALL: 'All',
   HERO: 'Hero',
-  MINION: 'Minion',
+  MINION: 'Monstre',
 }
 export const GALAGUERRE_TARGET_TYPES_OPTIONS = generateOptionsFromLabelObj(
   GALAGUERRE_TARGET_TYPES_LABEL_OBJ

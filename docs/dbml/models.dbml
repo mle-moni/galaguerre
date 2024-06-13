@@ -16,6 +16,7 @@ Table Action [headercolor: #d35400] {
 
 Table Boost [headercolor: #d35400] {
     id number [primary key, not null]
+    internalLabel string [not null]
     health number 
     attack number 
     spellPower number 
@@ -34,6 +35,7 @@ Table CardFilterTag [headercolor: #d35400] {
 
 Table CardFilter [headercolor: #d35400] {
     id number [primary key, not null]
+    internalLabel string [not null]
     type GalaguerreCardType [not null]
     comparisonId number 
     createdAt DateTime [not null]
@@ -64,6 +66,7 @@ Table Card [headercolor: #d35400] {
 
 Table Comparison [headercolor: #d35400] {
     id number [primary key, not null]
+    internalLabel string [not null]
     costComparison GalaguerreComparisonType 
     cost number 
     attackComparison GalaguerreComparisonType 
@@ -96,6 +99,7 @@ Table MinionPower [headercolor: #d35400] {
     hasCharge boolean [not null]
     hasWindfury boolean [not null]
     isPoisonous boolean [not null]
+    internalLabel string [not null]
     createdAt DateTime [not null]
     updatedAt DateTime [not null]
 }
@@ -120,6 +124,7 @@ Table MinionPassive [headercolor: #d35400] {
 
 Table Passive [headercolor: #d35400] {
     id number [primary key, not null]
+    internalLabel string [not null]
     type GalaguerrePassiveType [not null]
     triggersOn GalaguerrePassiveTriggersOn 
     actionId number 
@@ -146,8 +151,7 @@ Table Tag [headercolor: #d35400] {
 
 Table Target [headercolor: #d35400] {
     id number [primary key, not null]
-    type GalaguerreTargetType [not null]
-    comparisonId number 
+    cardFilterId number [not null]
     actionId number 
     boostId number 
     tagId number 
@@ -227,7 +231,7 @@ Ref: Passive.boostId > Boost.id
 
 Ref: Spell.actionId > Action.id
 
-Ref: Target.comparisonId > Comparison.id
+Ref: Target.cardFilterId > CardFilter.id
 
 Ref: Target.actionId > Action.id
 

@@ -8,14 +8,9 @@ export default class extends BaseSchema {
       table.increments('id')
 
       table.string('type').notNullable()
-
-      table.integer('comparison_id').references('comparisons.id').nullable().onDelete('CASCADE')
-
-      table.integer('action_id').references('actions.id').notNullable().onDelete('CASCADE')
-
-      table.integer('boost_id').references('boosts.id').notNullable().onDelete('CASCADE')
-
-      table.integer('tag_id').references('tags.id').notNullable().onDelete('CASCADE')
+      table.string('internal_label').notNullable()
+      table.integer('comparison_id').references('comparisons.id').onDelete('CASCADE')
+      table.integer('tag_id').references('tags.id').onDelete('CASCADE')
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
