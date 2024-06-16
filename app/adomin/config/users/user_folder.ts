@@ -5,7 +5,7 @@ import { USER_VIEW } from './user_view.js'
 
 export const USER_FOLDER = createFolderViewConfig({
   label: 'Utilisateurs',
-  icon: 'users',
   name: 'users',
+  icon: 'folder',
   views: [USER_VIEW, DECK_VIEW, DECK_CARD_VIEW],
 })
