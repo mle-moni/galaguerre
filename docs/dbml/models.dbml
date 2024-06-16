@@ -77,6 +77,22 @@ Table Comparison [headercolor: #d35400] {
     updatedAt DateTime [not null]
 }
 
+Table DeckCard [headercolor: #d35400] {
+    id number [primary key, not null]
+    cardId number [not null]
+    deckId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table Deck [headercolor: #d35400] {
+    id number [primary key, not null]
+    name string [not null]
+    userId number [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
 Table MinionBattlecryAction [headercolor: #d35400] {
     id number [primary key, not null]
     minionId number [not null]
@@ -220,6 +236,12 @@ Ref: Card.spellId > Spell.id
 
 Ref: Card.weaponId > Weapon.id
 
+Ref: DeckCard.cardId > Card.id
+
+Ref: DeckCard.deckId > Deck.id
+
+Ref: Deck.userId > User.id
+
 Ref: MinionBattlecryAction.minionId > Minion.id
 
 Ref: MinionBattlecryAction.actionId > Action.id
@@ -253,6 +275,12 @@ Ref: ToolToTarget.boostId > Boost.id
 Ref: WeaponDeathrattleAction.weaponId > Weapon.id
 
 Ref: WeaponDeathrattleAction.actionId > Action.id
+
+TableGroup Users {
+  DeckCard
+  Deck
+  User
+}
 
 TableGroup Minions {
   MinionBattlecryAction

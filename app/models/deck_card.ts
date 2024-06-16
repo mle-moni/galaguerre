@@ -4,6 +4,8 @@ import { DateTime } from 'luxon'
 import Card from './card.js'
 import Deck from './deck.js'
 
+// @dbml-group Users
+
 export default class DeckCard extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
