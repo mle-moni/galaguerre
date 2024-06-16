@@ -151,10 +151,19 @@ Table Tag [headercolor: #d35400] {
 
 Table Target [headercolor: #d35400] {
     id number [primary key, not null]
-    cardFilterId number [not null]
+    internalLabel string [not null]
+    type GalaguerreTargetType [not null]
+    comparisonId number 
+    tagId number 
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
+Table ToolToTarget [headercolor: #d35400] {
+    id number [primary key, not null]
+    targetId number [not null]
     actionId number 
     boostId number 
-    tagId number 
     createdAt DateTime [not null]
     updatedAt DateTime [not null]
 }
@@ -231,13 +240,15 @@ Ref: Passive.boostId > Boost.id
 
 Ref: Spell.actionId > Action.id
 
-Ref: Target.cardFilterId > CardFilter.id
-
-Ref: Target.actionId > Action.id
-
-Ref: Target.boostId > Boost.id
+Ref: Target.comparisonId > Comparison.id
 
 Ref: Target.tagId > Tag.id
+
+Ref: ToolToTarget.targetId > Target.id
+
+Ref: ToolToTarget.actionId > Action.id
+
+Ref: ToolToTarget.boostId > Boost.id
 
 Ref: WeaponDeathrattleAction.weaponId > Weapon.id
 
