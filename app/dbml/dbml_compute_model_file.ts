@@ -23,10 +23,10 @@ const getParams = (col: ModelColumn) => {
 
 const getForeignKey = (lines: string[], i: number) => {
     if (lines[i].includes("foreignKey:")) {
-        return lines[i].split("foreignKey: '")[1].split("'")[0];
+        return lines[i].split('foreignKey: "')[1].split('"')[0];
     }
     if (lines[i + 1].includes("foreignKey:")) {
-        return lines[i + 1].split("foreignKey: '")[1].split("'")[0];
+        return lines[i + 1].split('foreignKey: "')[1].split('"')[0];
     }
 
     return stringHelpers.camelCase(`${lines[i].split("@belongsTo(() => ")[1].split(/\W/)[0]}Id`);
@@ -78,7 +78,11 @@ export const dbmlComputeModelFile = (file: string, dbmlContext: DbmlContext) => 
             const name = lines[i].split("declare ")[1].split(": ")[0];
             const type = lines[i].split(": ")[1].split("|")[0];
 
-            const finalType = type.replace("[]", "Array");
+            let finalType = type.replace("[]", "Array");
+            if (finalType[finalType.length - 1] === ";") {
+                finalType = finalType.slice(0, -1);
+            }
+
             columns.push({ type: finalType, name, isPrimary, isNullable });
         }
     }

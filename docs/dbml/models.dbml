@@ -93,6 +93,15 @@ Table Deck [headercolor: #d35400] {
     updatedAt DateTime [not null]
 }
 
+Table Game [headercolor: #d35400] {
+    id number [primary key, not null]
+    playerOneId number [not null]
+    playerTwoId number [not null]
+    data GameData [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
 Table MinionBattlecryAction [headercolor: #d35400] {
     id number [primary key, not null]
     minionId number [not null]
@@ -241,6 +250,10 @@ Ref: DeckCard.cardId > Card.id
 Ref: DeckCard.deckId > Deck.id
 
 Ref: Deck.userId > User.id
+
+Ref: Game.playerOneId > User.id
+
+Ref: Game.playerTwoId > User.id
 
 Ref: MinionBattlecryAction.minionId > Minion.id
 
