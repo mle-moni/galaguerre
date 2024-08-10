@@ -1,5 +1,5 @@
 export const dbmlView = async () => {
-  return `
+    return `
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
 <html>
@@ -31,5 +31,5 @@ export const dbmlView = async () => {
     </script>
 
   </body>
-</html>`
-}
+</html>`;
+};

@@ -1,83 +1,83 @@
-import { getFlatViews } from '#adomin/get_flat_views'
-import string from '@adonisjs/core/helpers/string'
-import { HttpContext } from '@adonisjs/core/http'
-import { AdominViewConfig } from '../../adomin_config.types.js'
-import { ColumnConfig, ModelConfig } from '../../create_model_view_config.js'
+import { getFlatViews } from "#adomin/get_flat_views";
+import string from "@adonisjs/core/helpers/string";
+import type { HttpContext } from "@adonisjs/core/http";
+import type { AdominViewConfig } from "../../adomin_config.types.js";
+import type { ColumnConfig, ModelConfig } from "../../create_model_view_config.js";
 import {
-  AdominStaticRightsConfig,
-  computeRightsCheck,
-} from '../adomin_routes_overrides_and_rights.js'
+    type AdominStaticRightsConfig,
+    computeRightsCheck,
+} from "../adomin_routes_overrides_and_rights.js";
 
 export const DEFAULT_STATIC_RIGHTS: AdominStaticRightsConfig = {
-  create: true,
-  read: true,
-  update: true,
-  delete: true,
-}
+    create: true,
+    read: true,
+    update: true,
+    delete: true,
+};
 
 export const getSqlColumnToUse = (field: ColumnConfig) => {
-  if (field.adomin.type === 'belongsToRelation') {
-    return field.adomin.fkName ?? string.camelCase(field.adomin.modelName) + 'Id'
-  }
-  return field.name
-}
+    if (field.adomin.type === "belongsToRelation") {
+        return field.adomin.fkName ?? `${string.camelCase(field.adomin.modelName)}Id`;
+    }
+    return field.name;
+};
 
 export const getModelFieldStrs = (fields: ColumnConfig[]) => {
-  return fields
-    .filter(
-      ({ adomin }) =>
-        adomin.computed !== true &&
-        adomin.type !== 'hasManyRelation' &&
-        adomin.type !== 'hasOneRelation'
-    )
-    .map((f) => getSqlColumnToUse(f))
-}
+    return fields
+        .filter(
+            ({ adomin }) =>
+                adomin.computed !== true &&
+                adomin.type !== "hasManyRelation" &&
+                adomin.type !== "hasOneRelation",
+        )
+        .map((f) => getSqlColumnToUse(f));
+};
 
 export const isModelConfig = (config: AdominViewConfig): config is ModelConfig => {
-  return config.type === 'model'
-}
+    return config.type === "model";
+};
 
 export const getModelConfig = (modelName: string) => {
-  const foundConfig = getFlatViews()
-    .filter(isModelConfig)
-    .find((config) => config.model().name === modelName)
+    const foundConfig = getFlatViews()
+        .filter(isModelConfig)
+        .find((config) => config.model().name === modelName);
 
-  if (!foundConfig) throw new Error(`No ADOMIN config found for model ${modelName}`)
+    if (!foundConfig) throw new Error(`No ADOMIN config found for model ${modelName}`);
 
-  return foundConfig
-}
+    return foundConfig;
+};
 
 export const getModelConfigRoute = async (ctx: HttpContext) => {
-  const { params, response } = ctx
-  const modelString = params.model
+    const { params, response } = ctx;
+    const modelString = params.model;
 
-  const modelConfig = getFlatViews()
-    .filter(isModelConfig)
-    .find(({ model }) => model().name === modelString)
+    const modelConfig = getFlatViews()
+        .filter(isModelConfig)
+        .find(({ model }) => model().name === modelString);
 
-  if (!modelConfig) {
-    return response.notFound({ error: `Model '${modelString}' not found` })
-  }
+    if (!modelConfig) {
+        return response.notFound({ error: `Model '${modelString}' not found` });
+    }
 
-  const { fields, primaryKey, label, labelPluralized, name, isHidden, visibilityCheck } =
-    modelConfig
+    const { fields, primaryKey, label, labelPluralized, name, isHidden, visibilityCheck } =
+        modelConfig;
 
-  const visibilityCheckResult = await computeRightsCheck(ctx, visibilityCheck)
+    const visibilityCheckResult = await computeRightsCheck(ctx, visibilityCheck);
 
-  if (visibilityCheckResult === 'STOP') return
+    if (visibilityCheckResult === "STOP") return;
 
-  const staticRights = {
-    ...DEFAULT_STATIC_RIGHTS,
-    ...modelConfig.staticRights,
-  }
+    const staticRights = {
+        ...DEFAULT_STATIC_RIGHTS,
+        ...modelConfig.staticRights,
+    };
 
-  return {
-    name,
-    label,
-    labelPluralized,
-    fields,
-    primaryKey,
-    isHidden: isHidden ?? false,
-    staticRights,
-  }
-}
+    return {
+        name,
+        label,
+        labelPluralized,
+        fields,
+        primaryKey,
+        isHidden: isHidden ?? false,
+        staticRights,
+    };
+};

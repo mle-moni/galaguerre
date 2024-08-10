@@ -1,16 +1,16 @@
-import type { AdominViewConfig } from './adomin_config.types.js'
-import { ADOMIN_CONFIG } from './config/adomin_config.js'
+import type { AdominViewConfig } from "./adomin_config.types.js";
+import { ADOMIN_CONFIG } from "./config/adomin_config.js";
 
 export const flattenViews = (views: AdominViewConfig[]): AdominViewConfig[] => {
-  const flatViews = views.flatMap((view) => {
-    if (view.type === 'folder') return flattenViews(view.views)
+    const flatViews = views.flatMap((view) => {
+        if (view.type === "folder") return flattenViews(view.views);
 
-    return view
-  })
+        return view;
+    });
 
-  return flatViews
-}
+    return flatViews;
+};
 
 export const getFlatViews = () => {
-  return flattenViews(ADOMIN_CONFIG.views)
-}
+    return flattenViews(ADOMIN_CONFIG.views);
+};

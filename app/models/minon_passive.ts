@@ -1,30 +1,30 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { DateTime } from 'luxon'
-import Minion from './minion.js'
-import Passive from './passive.js'
+import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
+import type { BelongsTo } from "@adonisjs/lucid/types/relations";
+import type { DateTime } from "luxon";
+import Minion from "./minion.js";
+import Passive from "./passive.js";
 
 // @dbml-group Minions
 
 export default class MinionPassive extends BaseModel {
-  @column({ isPrimary: true })
-  declare id: number
+    @column({ isPrimary: true })
+    declare id: number;
 
-  @column()
-  declare minionId: number
+    @column()
+    declare minionId: number;
 
-  @belongsTo(() => Minion)
-  declare minion: BelongsTo<typeof Minion>
+    @belongsTo(() => Minion)
+    declare minion: BelongsTo<typeof Minion>;
 
-  @column()
-  declare passiveId: number
+    @column()
+    declare passiveId: number;
 
-  @belongsTo(() => Passive)
-  declare passive: BelongsTo<typeof Passive>
+    @belongsTo(() => Passive)
+    declare passive: BelongsTo<typeof Passive>;
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime;
 }

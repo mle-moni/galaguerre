@@ -1,11 +1,11 @@
-import { createFolderViewConfig } from '#adomin/create_folder_view_config'
-import { DECK_CARD_VIEW } from './deck_card_view.js'
-import { DECK_VIEW } from './deck_view.js'
-import { USER_VIEW } from './user_view.js'
+import { createFolderViewConfig } from "#adomin/create_folder_view_config";
+import { DECK_CARD_VIEW } from "./deck_card_view.js";
+import { DECK_VIEW } from "./deck_view.js";
+import { USER_VIEW } from "./user_view.js";
 
 export const USER_FOLDER = createFolderViewConfig({
-  label: 'Utilisateurs',
-  name: 'users',
-  icon: 'folder',
-  views: [USER_VIEW, DECK_VIEW, DECK_CARD_VIEW],
-})
+    label: "Utilisateurs",
+    name: "users",
+    icon: "folder",
+    views: [USER_VIEW, DECK_VIEW, DECK_CARD_VIEW],
+});

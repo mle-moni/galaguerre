@@ -1,4 +1,4 @@
-import db from '@adonisjs/lucid/services/db'
+import db from "@adonisjs/lucid/services/db";
 
 const getRawSql = (tableName: string, column: string, interval: string) => `
 WITH monthly_table_data AS (
@@ -36,24 +36,24 @@ SELECT
 FROM
     cumulative_table_data
 ORDER BY
-    month;`
+    month;`;
 
 interface Row {
-  month: string
-  cumulative_count: string
+    month: string;
+    cumulative_count: string;
 }
 
 export const getCumulativeTableData = async (
-  tableName: string,
-  columnName: string,
-  monthes: number = 6
+    tableName: string,
+    columnName: string,
+    monthes = 6,
 ) => {
-  const interval = `${monthes - 1}`
-  const res = await db.rawQuery<{ rows: Row[] }>(getRawSql(tableName, columnName, interval))
-  const data: [string, number][] = res.rows.map(({ month, cumulative_count }) => [
-    month,
-    +cumulative_count,
-  ])
+    const interval = `${monthes - 1}`;
+    const res = await db.rawQuery<{ rows: Row[] }>(getRawSql(tableName, columnName, interval));
+    const data: [string, number][] = res.rows.map(({ month, cumulative_count }) => [
+        month,
+        +cumulative_count,
+    ]);
 
-  return data
-}
+    return data;
+};

@@ -1,15 +1,15 @@
-import { HttpContext } from '@adonisjs/core/http'
-import { ParsedTypedSchema, TypedSchema } from '@adonisjs/validator/types'
+import type { HttpContext } from "@adonisjs/core/http";
+import type { ParsedTypedSchema, TypedSchema } from "@adonisjs/validator/types";
 
 export interface ValidationFunctionResult {
-  valid: boolean
-  /**
-   * if you return valid = false, with errorMessage = undefined,
-   * you will have to send the error response yourself
-   *
-   * e.g. with response.badRequest({ error: 'oups' })
-   */
-  errorMessage?: string
+    valid: boolean;
+    /**
+     * if you return valid = false, with errorMessage = undefined,
+     * you will have to send the error response yourself
+     *
+     * e.g. with response.badRequest({ error: 'oups' })
+     */
+    errorMessage?: string;
 }
 
 /**
@@ -18,51 +18,53 @@ export interface ValidationFunctionResult {
  *
  * e.g. with response.badRequest({ error: 'oups' })
  */
-export type AdominCustomFunctionValidation = (ctx: HttpContext) => Promise<ValidationFunctionResult>
+export type AdominCustomFunctionValidation = (
+    ctx: HttpContext,
+) => Promise<ValidationFunctionResult>;
 
 export type AdominValidationWithSchema = {
-  schema: ParsedTypedSchema<TypedSchema>
-  messages?: { [key: string]: string }
-}
+    schema: ParsedTypedSchema<TypedSchema>;
+    messages?: { [key: string]: string };
+};
 
-export type AdominValidationAtom = AdominValidationWithSchema | AdominCustomFunctionValidation
+export type AdominValidationAtom = AdominValidationWithSchema | AdominCustomFunctionValidation;
 
-const ADOMIN_VALIDATION_MODES = ['create', 'update'] as const
+const ADOMIN_VALIDATION_MODES = ["create", "update"] as const;
 
-export type AdominValidationMode = (typeof ADOMIN_VALIDATION_MODES)[number]
+export type AdominValidationMode = (typeof ADOMIN_VALIDATION_MODES)[number];
 
 export type AdominValidation = {
-  create?: AdominValidationAtom
-  update?: AdominValidationAtom
-}
+    create?: AdominValidationAtom;
+    update?: AdominValidationAtom;
+};
 
 export const isAdonisSchema = (input: unknown): input is ParsedTypedSchema<TypedSchema> => {
-  return typeof input === 'object' && input !== null && 'props' in input && 'tree' in input
-}
+    return typeof input === "object" && input !== null && "props" in input && "tree" in input;
+};
 
 const validateAtom = async (ctx: HttpContext, atom: AdominValidationAtom) => {
-  if (typeof atom === 'function') {
-    const result = await atom(ctx)
+    if (typeof atom === "function") {
+        const result = await atom(ctx);
 
-    if (result.valid === true) return true
-    if (result.errorMessage === undefined) return false
+        if (result.valid === true) return true;
+        if (result.errorMessage === undefined) return false;
 
-    ctx.response.badRequest({ error: result.errorMessage })
+        ctx.response.badRequest({ error: result.errorMessage });
 
-    return false
-  }
+        return false;
+    }
 
-  await ctx.request.validate({ schema: atom.schema, messages: atom.messages })
+    await ctx.request.validate({ schema: atom.schema, messages: atom.messages });
 
-  return true
-}
+    return true;
+};
 
 export const validateOrThrow = async (
-  ctx: HttpContext,
-  validationParams: AdominValidation,
-  mode: AdominValidationMode
+    ctx: HttpContext,
+    validationParams: AdominValidation,
+    mode: AdominValidationMode,
 ) => {
-  const validationAtom = validationParams[mode]
-  if (!validationAtom) return true
-  return validateAtom(ctx, validationAtom)
-}
+    const validationAtom = validationParams[mode];
+    if (!validationAtom) return true;
+    return validateAtom(ctx, validationAtom);
+};

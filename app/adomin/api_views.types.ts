@@ -1,29 +1,29 @@
 interface ApiViewBase {
-  label: string
-  isHidden: boolean
-  visibilityCheckPassed: boolean
-  name: string
-  /**
-   * Icon name, by default this uses Tabler icons
-   *
-   * You can browse the list of available icons at:
-   * https://tabler.io/icons
-   */
-  icon?: string
+    label: string;
+    isHidden: boolean;
+    visibilityCheckPassed: boolean;
+    name: string;
+    /**
+     * Icon name, by default this uses Tabler icons
+     *
+     * You can browse the list of available icons at:
+     * https://tabler.io/icons
+     */
+    icon?: string;
 }
 
 export interface ApiModelView extends ApiViewBase {
-  type: 'model'
-  labelPluralized: string
+    type: "model";
+    labelPluralized: string;
 }
 
 export interface ApiStatView extends ApiViewBase {
-  type: 'stats'
+    type: "stats";
 }
 
 export interface ApiFolderView extends ApiViewBase {
-  type: 'folder'
-  views: ApiAdominView[]
+    type: "folder";
+    views: ApiAdominView[];
 }
 
-export type ApiAdominView = ApiModelView | ApiStatView | ApiFolderView
+export type ApiAdominView = ApiModelView | ApiStatView | ApiFolderView;
