@@ -13,7 +13,8 @@
         "format-check": "biome format",
         "lint": "biome lint --write",
         "lint-check": "biome lint",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "frontend-typecheck": "cd frontend && yarn tsc --noEmit --project tsconfig.json"
     },
     "imports": {
         "#adomin/*": "./app/adomin/*.js",
@@ -45,29 +46,35 @@
         "@swc/core": "^1.5.7",
         "@types/luxon": "^3.4.2",
         "@types/node": "^20.12.12",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "@vitejs/plugin-react": "^4.3.1",
         "hot-hook": "^0.2.6",
         "pino-pretty": "^11.1.0",
         "ts-node": "^10.9.2",
-        "typescript": "^5.4.5"
+        "typescript": "^5.4.5",
+        "vite": "^5.4.0"
     },
     "dependencies": {
         "@adonisjs/auth": "^9.2.1",
         "@adonisjs/core": "^6.9.1",
         "@adonisjs/cors": "^2.2.1",
         "@adonisjs/lucid": "^20.6.0",
+        "@adonisjs/static": "^1.1.1",
         "@adonisjs/validator": "^13.0.2",
+        "@adonisjs/vite": "^3.0.0",
         "@softwaretechnik/dbml-renderer": "^1.0.30",
         "@vinejs/vine": "^2.0.0",
+        "edge.js": "^6.0.2",
         "luxon": "^3.4.4",
         "pg": "^8.12.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
         "reflect-metadata": "^0.2.2",
         "xlsx": "^0.18.5"
     },
     "hotHook": {
-        "boundaries": [
-            "./app/controllers/**/*.ts",
-            "./app/middleware/*.ts"
-        ]
+        "boundaries": ["./app/controllers/**/*.ts", "./app/middleware/*.ts"]
     },
     "packageManager": "yarn@4.2.2"
 }

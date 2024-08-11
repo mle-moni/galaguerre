@@ -1,8 +1,12 @@
 {
     "folders": [
         {
-            "name": "✨ root",
+            "name": "✨ backend",
             "path": "."
+        },
+        {
+            "name": "⚛️ frontend",
+            "path": "./frontend"
         }
     ],
     "settings": {

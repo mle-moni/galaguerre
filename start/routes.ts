@@ -16,11 +16,7 @@ import GamesController from "#controllers/games_controller";
 import { registerUploadRoute } from "../app/utils/files.js";
 import { middleware } from "./kernel.js";
 
-router.get("/", async () => {
-    return {
-        hello: "world",
-    };
-});
+router.get("/", async ({ view }) => view.render("index"));
 
 registerUploadRoute();
 
@@ -28,4 +24,5 @@ router
     .group(() => {
         router.resource("games", GamesController).apiOnly();
     })
-    .use(middleware.auth());
+    .use(middleware.auth())
+    .prefix("/api");
