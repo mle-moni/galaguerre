@@ -1,4 +1,4 @@
-import type { GalaguerreCardType } from "./galaguerre.types.js";
+import type { GalaguerreCardType } from "../app/galaguerre/galaguerre.types.js";
 
 export interface PlayerCard {
     uuid: string;

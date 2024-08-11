@@ -1,7 +1,7 @@
+import type { GameData } from "#api_types/game.types";
 import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
-import type { GameData } from "../galaguerre/game.types.js";
 import User from "./user.js";
 
 export default class Game extends BaseModel {
