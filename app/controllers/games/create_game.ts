@@ -1,6 +1,6 @@
 import Game from "#models/game";
 import type User from "#models/user";
-import type { GameData } from "../galaguerre/game.types.js";
+import type { GameData } from "../../galaguerre/game.types.js";
 
 interface CreateGameOptions {
     playerOne: User;

@@ -20,7 +20,8 @@
             "#tests/*": ["./tests/*.js"],
             "#start/*": ["./start/*.js"],
             "#config/*": ["./config/*.js"],
-            "#adomin/*": ["./adomin/*.js"]
+            "#adomin/*": ["./adomin/*.js"],
+            "#api_types/*": ["./api_types/*.js"]
         }
     },
     "exclude": ["./frontend/**/*", "node_modules", "build"]

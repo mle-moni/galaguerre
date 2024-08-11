@@ -12,7 +12,8 @@ import router from "@adonisjs/core/services/router";
 import "#adomin/routes/adomin_router";
 import "../app/dbml/dbml_router.js";
 
-import GamesController from "#controllers/games_controller";
+import AuthController from "#controllers/auth/auth_controller";
+import GamesController from "#controllers/games/games_controller";
 import { registerUploadRoute } from "../app/utils/files.js";
 import { middleware } from "./kernel.js";
 
@@ -22,6 +23,7 @@ registerUploadRoute();
 router
     .group(() => {
         router.get("/", () => ({ message: "Galaguerre API" }));
+        router.get("/auth/me", [AuthController, "me"]);
     })
     .prefix("/api");
 

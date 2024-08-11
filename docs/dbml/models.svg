@@ -66,50 +66,50 @@
 <!-- Deck -->
 <g id="Deck" class="node">
 <title>Deck</title>
-<ellipse fill="none" stroke="black" stroke-width="0" cx="984.67" cy="-4678.51" rx="271.56" ry="257.27"/>
-<polygon fill="#d35400" stroke="transparent" points="794.67,-4798.51 794.67,-4858.51 1174.67,-4858.51 1174.67,-4798.51 794.67,-4798.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4798.51 794.67,-4858.51 1174.67,-4858.51 1174.67,-4798.51 794.67,-4798.51"/>
-<text text-anchor="start" x="885.98" y="-4819.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#ffffff"> &#160;&#160;&#160;&#160;&#160;&#160;Deck &#160;&#160;&#160;&#160;&#160;&#160;</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4738.51 794.67,-4798.51 1174.67,-4798.51 1174.67,-4738.51 794.67,-4738.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4738.51 794.67,-4798.51 1174.67,-4798.51 1174.67,-4738.51 794.67,-4738.51"/>
-<text text-anchor="start" x="805.67" y="-4759.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
-<text text-anchor="start" x="830.56" y="-4759.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1016.12" y="-4759.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
-<text text-anchor="start" x="1124.58" y="-4759.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-4759.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4678.51 794.67,-4738.51 1174.67,-4738.51 1174.67,-4678.51 794.67,-4678.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4678.51 794.67,-4738.51 1174.67,-4738.51 1174.67,-4678.51 794.67,-4678.51"/>
-<text text-anchor="start" x="805.67" y="-4698.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">name &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1046.36" y="-4699.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">string</text>
-<text text-anchor="start" x="1124.58" y="-4699.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-4699.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4618.51 794.67,-4678.51 1174.67,-4678.51 1174.67,-4618.51 794.67,-4618.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4618.51 794.67,-4678.51 1174.67,-4678.51 1174.67,-4618.51 794.67,-4618.51"/>
-<text text-anchor="start" x="805.67" y="-4638.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">userId &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1016.12" y="-4639.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
-<text text-anchor="start" x="1124.58" y="-4639.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-4639.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4558.51 794.67,-4618.51 1174.67,-4618.51 1174.67,-4558.51 794.67,-4558.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4558.51 794.67,-4618.51 1174.67,-4618.51 1174.67,-4558.51 794.67,-4558.51"/>
-<text text-anchor="start" x="805.67" y="-4578.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">createdAt &#160;&#160;&#160;</text>
-<text text-anchor="start" x="985.92" y="-4579.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
-<text text-anchor="start" x="1124.58" y="-4579.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-4579.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4498.51 794.67,-4558.51 1174.67,-4558.51 1174.67,-4498.51 794.67,-4498.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4498.51 794.67,-4558.51 1174.67,-4558.51 1174.67,-4498.51 794.67,-4498.51"/>
-<text text-anchor="start" x="805.46" y="-4518.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">updatedAt &#160;&#160;&#160;</text>
-<text text-anchor="start" x="986.3" y="-4519.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
-<text text-anchor="start" x="1124.96" y="-4519.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.85" y="-4519.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="none" stroke="#29235c" stroke-width="2" points="793.67,-4497.51 793.67,-4859.51 1175.67,-4859.51 1175.67,-4497.51 793.67,-4497.51"/>
+<ellipse fill="none" stroke="black" stroke-width="0" cx="984.67" cy="-4679.51" rx="271.56" ry="257.27"/>
+<polygon fill="#d35400" stroke="transparent" points="794.67,-4799.51 794.67,-4859.51 1174.67,-4859.51 1174.67,-4799.51 794.67,-4799.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4799.51 794.67,-4859.51 1174.67,-4859.51 1174.67,-4799.51 794.67,-4799.51"/>
+<text text-anchor="start" x="885.98" y="-4820.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#ffffff"> &#160;&#160;&#160;&#160;&#160;&#160;Deck &#160;&#160;&#160;&#160;&#160;&#160;</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4739.51 794.67,-4799.51 1174.67,-4799.51 1174.67,-4739.51 794.67,-4739.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4739.51 794.67,-4799.51 1174.67,-4799.51 1174.67,-4739.51 794.67,-4739.51"/>
+<text text-anchor="start" x="805.67" y="-4760.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
+<text text-anchor="start" x="830.56" y="-4760.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
+<text text-anchor="start" x="1016.12" y="-4760.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
+<text text-anchor="start" x="1124.58" y="-4760.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-4760.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4679.51 794.67,-4739.51 1174.67,-4739.51 1174.67,-4679.51 794.67,-4679.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4679.51 794.67,-4739.51 1174.67,-4739.51 1174.67,-4679.51 794.67,-4679.51"/>
+<text text-anchor="start" x="805.67" y="-4699.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">name &#160;&#160;&#160;</text>
+<text text-anchor="start" x="1046.36" y="-4700.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">string</text>
+<text text-anchor="start" x="1124.58" y="-4700.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-4700.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4619.51 794.67,-4679.51 1174.67,-4679.51 1174.67,-4619.51 794.67,-4619.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4619.51 794.67,-4679.51 1174.67,-4679.51 1174.67,-4619.51 794.67,-4619.51"/>
+<text text-anchor="start" x="805.67" y="-4639.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">userId &#160;&#160;&#160;</text>
+<text text-anchor="start" x="1016.12" y="-4640.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
+<text text-anchor="start" x="1124.58" y="-4640.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-4640.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4559.51 794.67,-4619.51 1174.67,-4619.51 1174.67,-4559.51 794.67,-4559.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4559.51 794.67,-4619.51 1174.67,-4619.51 1174.67,-4559.51 794.67,-4559.51"/>
+<text text-anchor="start" x="805.67" y="-4579.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">createdAt &#160;&#160;&#160;</text>
+<text text-anchor="start" x="985.92" y="-4580.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
+<text text-anchor="start" x="1124.58" y="-4580.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-4580.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4499.51 794.67,-4559.51 1174.67,-4559.51 1174.67,-4499.51 794.67,-4499.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4499.51 794.67,-4559.51 1174.67,-4559.51 1174.67,-4499.51 794.67,-4499.51"/>
+<text text-anchor="start" x="805.46" y="-4519.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">updatedAt &#160;&#160;&#160;</text>
+<text text-anchor="start" x="986.3" y="-4520.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
+<text text-anchor="start" x="1124.96" y="-4520.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.85" y="-4520.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="none" stroke="#29235c" stroke-width="2" points="793.67,-4498.51 793.67,-4860.51 1175.67,-4860.51 1175.67,-4498.51 793.67,-4498.51"/>
 </g>
 <!-- DeckCard&#45;&gt;Deck -->
 <!-- DeckCard&#45;&gt;Deck -->
 <g id="edge28" class="edge">
 <title>DeckCard:e&#45;&gt;Deck:w</title>
-<path fill="none" stroke="#29235c" stroke-width="3" d="M478.53,-4576.51C639.02,-4576.51 630.13,-4760.35 783.34,-4768.25"/>
-<polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="783.59,-4771.75 793.67,-4768.51 783.77,-4764.76 783.59,-4771.75"/>
-<text text-anchor="middle" x="784.78" y="-4778.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">1</text>
+<path fill="none" stroke="#29235c" stroke-width="3" d="M478.53,-4576.51C639.24,-4576.51 629.92,-4761.31 783.33,-4769.25"/>
+<polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="783.59,-4772.75 793.67,-4769.51 783.77,-4765.76 783.59,-4772.75"/>
+<text text-anchor="middle" x="784.78" y="-4779.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">1</text>
 <text text-anchor="middle" x="472.31" y="-4586.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
 </g>
 <!-- Card -->
@@ -186,8 +186,8 @@
 <!-- DeckCard&#45;&gt;Card -->
 <g id="edge26" class="edge">
 <title>DeckCard:e&#45;&gt;Card:w</title>
-<path fill="none" stroke="#29235c" stroke-width="3" d="M478.53,-4636.51C580.8,-4636.51 581.27,-3824.84 595.06,-3723.51 643.03,-3370.93 356.96,-2931.96 700.59,-2923.63"/>
-<polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="700.72,-2927.13 710.67,-2923.51 700.63,-2920.13 700.72,-2927.13"/>
+<path fill="none" stroke="#29235c" stroke-width="3" d="M478.53,-4636.51C590.06,-4636.51 579.69,-3749.98 595.06,-3639.51 638.99,-3323.67 393.69,-2932.02 700.48,-2923.65"/>
+<polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="700.72,-2927.14 710.67,-2923.51 700.63,-2920.14 700.72,-2927.14"/>
 <text text-anchor="middle" x="701.78" y="-2933.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">1</text>
 <text text-anchor="middle" x="472.31" y="-4646.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
 </g>
@@ -243,10 +243,10 @@
 <!-- Deck&#45;&gt;User -->
 <g id="edge30" class="edge">
 <title>Deck:e&#45;&gt;User:w</title>
-<path fill="none" stroke="#29235c" stroke-width="3" d="M1175.67,-4648.51C1359.87,-4648.51 1364,-4833.45 1541.52,-4840.31"/>
+<path fill="none" stroke="#29235c" stroke-width="3" d="M1175.67,-4649.51C1359.67,-4649.51 1364.19,-4833.49 1541.53,-4840.31"/>
 <polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="1541.71,-4843.82 1551.77,-4840.51 1541.84,-4836.82 1541.71,-4843.82"/>
 <text text-anchor="middle" x="1542.88" y="-4850.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">1</text>
-<text text-anchor="middle" x="1169.45" y="-4658.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
+<text text-anchor="middle" x="1169.45" y="-4659.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
 </g>
 <!-- MinionBattlecryAction -->
 <g id="MinionBattlecryAction" class="node">
@@ -1144,7 +1144,7 @@
 <!-- Card&#45;&gt;Minion -->
 <g id="edge20" class="edge">
 <title>Card:e&#45;&gt;Minion:w</title>
-<path fill="none" stroke="#29235c" stroke-width="3" d="M1259.67,-2563.51C1389.19,-2563.51 1364.57,-3594.36 1374.29,-3723.51 1376.54,-3753.46 1380.5,-4242.82 1402.29,-4263.51 1458.77,-4317.14 2031.52,-4293.85 2103.25,-4263.51 2275.78,-4190.54 2213.81,-3963.9 2392.13,-3955.74"/>
+<path fill="none" stroke="#29235c" stroke-width="3" d="M1259.67,-2563.51C1500.14,-2563.51 1356.16,-3399.73 1374.29,-3639.51 1376.91,-3674.11 1377.21,-4239.53 1402.29,-4263.51 1458.58,-4317.33 2031.52,-4293.85 2103.25,-4263.51 2275.78,-4190.54 2213.81,-3963.9 2392.13,-3955.74"/>
 <polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="2392.3,-3959.23 2402.22,-3955.51 2392.14,-3952.23 2392.3,-3959.23"/>
 <text text-anchor="middle" x="2393.32" y="-3926.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">1</text>
 <text text-anchor="middle" x="1253.45" y="-2573.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
@@ -1210,66 +1210,72 @@
 <!-- Game -->
 <g id="Game" class="node">
 <title>Game</title>
-<ellipse fill="none" stroke="black" stroke-width="0" cx="984.67" cy="-4032.51" rx="271.56" ry="299.63"/>
-<polygon fill="#d35400" stroke="transparent" points="794.67,-4182.51 794.67,-4242.51 1174.67,-4242.51 1174.67,-4182.51 794.67,-4182.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4182.51 794.67,-4242.51 1174.67,-4242.51 1174.67,-4182.51 794.67,-4182.51"/>
-<text text-anchor="start" x="878.86" y="-4203.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#ffffff"> &#160;&#160;&#160;&#160;&#160;&#160;Game &#160;&#160;&#160;&#160;&#160;&#160;</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4122.51 794.67,-4182.51 1174.67,-4182.51 1174.67,-4122.51 794.67,-4122.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4122.51 794.67,-4182.51 1174.67,-4182.51 1174.67,-4122.51 794.67,-4122.51"/>
-<text text-anchor="start" x="805.67" y="-4143.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
-<text text-anchor="start" x="830.56" y="-4143.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1016.12" y="-4143.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
-<text text-anchor="start" x="1124.58" y="-4143.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-4143.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4062.51 794.67,-4122.51 1174.67,-4122.51 1174.67,-4062.51 794.67,-4062.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4062.51 794.67,-4122.51 1174.67,-4122.51 1174.67,-4062.51 794.67,-4062.51"/>
-<text text-anchor="start" x="805.67" y="-4082.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">playerOneId &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1016.12" y="-4083.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
-<text text-anchor="start" x="1124.58" y="-4083.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-4083.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4002.51 794.67,-4062.51 1174.67,-4062.51 1174.67,-4002.51 794.67,-4002.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-4002.51 794.67,-4062.51 1174.67,-4062.51 1174.67,-4002.51 794.67,-4002.51"/>
-<text text-anchor="start" x="805.67" y="-4022.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">playerTwoId &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1016.12" y="-4023.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
-<text text-anchor="start" x="1124.58" y="-4023.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-4023.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3942.51 794.67,-4002.51 1174.67,-4002.51 1174.67,-3942.51 794.67,-3942.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-3942.51 794.67,-4002.51 1174.67,-4002.51 1174.67,-3942.51 794.67,-3942.51"/>
-<text text-anchor="start" x="805.67" y="-3962.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">data &#160;&#160;&#160;</text>
-<text text-anchor="start" x="969.89" y="-3963.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">GameData</text>
-<text text-anchor="start" x="1124.58" y="-3963.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-3963.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3882.51 794.67,-3942.51 1174.67,-3942.51 1174.67,-3882.51 794.67,-3882.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-3882.51 794.67,-3942.51 1174.67,-3942.51 1174.67,-3882.51 794.67,-3882.51"/>
-<text text-anchor="start" x="805.67" y="-3902.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">createdAt &#160;&#160;&#160;</text>
-<text text-anchor="start" x="985.92" y="-3903.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
-<text text-anchor="start" x="1124.58" y="-3903.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.48" y="-3903.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3822.51 794.67,-3882.51 1174.67,-3882.51 1174.67,-3822.51 794.67,-3822.51"/>
-<polygon fill="none" stroke="#29235c" points="794.67,-3822.51 794.67,-3882.51 1174.67,-3882.51 1174.67,-3822.51 794.67,-3822.51"/>
-<text text-anchor="start" x="805.46" y="-3842.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">updatedAt &#160;&#160;&#160;</text>
-<text text-anchor="start" x="986.3" y="-3843.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
-<text text-anchor="start" x="1124.96" y="-3843.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
-<text text-anchor="start" x="1133.85" y="-3843.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
-<polygon fill="none" stroke="#29235c" stroke-width="2" points="793.67,-3821.51 793.67,-4243.51 1175.67,-4243.51 1175.67,-3821.51 793.67,-3821.51"/>
+<ellipse fill="none" stroke="black" stroke-width="0" cx="984.67" cy="-3990.51" rx="271.56" ry="342.48"/>
+<polygon fill="#d35400" stroke="transparent" points="794.67,-4170.51 794.67,-4230.51 1174.67,-4230.51 1174.67,-4170.51 794.67,-4170.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4170.51 794.67,-4230.51 1174.67,-4230.51 1174.67,-4170.51 794.67,-4170.51"/>
+<text text-anchor="start" x="878.86" y="-4191.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#ffffff"> &#160;&#160;&#160;&#160;&#160;&#160;Game &#160;&#160;&#160;&#160;&#160;&#160;</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4110.51 794.67,-4170.51 1174.67,-4170.51 1174.67,-4110.51 794.67,-4110.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4110.51 794.67,-4170.51 1174.67,-4170.51 1174.67,-4110.51 794.67,-4110.51"/>
+<text text-anchor="start" x="805.67" y="-4131.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
+<text text-anchor="start" x="830.56" y="-4131.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
+<text text-anchor="start" x="1016.12" y="-4131.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
+<text text-anchor="start" x="1124.58" y="-4131.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-4131.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-4050.51 794.67,-4110.51 1174.67,-4110.51 1174.67,-4050.51 794.67,-4050.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-4050.51 794.67,-4110.51 1174.67,-4110.51 1174.67,-4050.51 794.67,-4050.51"/>
+<text text-anchor="start" x="805.67" y="-4070.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">playerOneId &#160;&#160;&#160;</text>
+<text text-anchor="start" x="1016.12" y="-4071.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
+<text text-anchor="start" x="1124.58" y="-4071.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-4071.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3990.51 794.67,-4050.51 1174.67,-4050.51 1174.67,-3990.51 794.67,-3990.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-3990.51 794.67,-4050.51 1174.67,-4050.51 1174.67,-3990.51 794.67,-3990.51"/>
+<text text-anchor="start" x="805.67" y="-4010.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">playerTwoId &#160;&#160;&#160;</text>
+<text text-anchor="start" x="1016.12" y="-4011.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">number</text>
+<text text-anchor="start" x="1124.58" y="-4011.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-4011.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3930.51 794.67,-3990.51 1174.67,-3990.51 1174.67,-3930.51 794.67,-3930.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-3930.51 794.67,-3990.51 1174.67,-3990.51 1174.67,-3930.51 794.67,-3930.51"/>
+<text text-anchor="start" x="805.67" y="-3950.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">data &#160;&#160;&#160;</text>
+<text text-anchor="start" x="969.89" y="-3951.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">GameData</text>
+<text text-anchor="start" x="1124.58" y="-3951.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-3951.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3870.51 794.67,-3930.51 1174.67,-3930.51 1174.67,-3870.51 794.67,-3870.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-3870.51 794.67,-3930.51 1174.67,-3930.51 1174.67,-3870.51 794.67,-3870.51"/>
+<text text-anchor="start" x="805.67" y="-3890.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">isFinished &#160;&#160;&#160;</text>
+<text text-anchor="start" x="1010.75" y="-3891.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">boolean</text>
+<text text-anchor="start" x="1124.58" y="-3891.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-3891.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3810.51 794.67,-3870.51 1174.67,-3870.51 1174.67,-3810.51 794.67,-3810.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-3810.51 794.67,-3870.51 1174.67,-3870.51 1174.67,-3810.51 794.67,-3810.51"/>
+<text text-anchor="start" x="805.67" y="-3830.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">createdAt &#160;&#160;&#160;</text>
+<text text-anchor="start" x="985.92" y="-3831.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
+<text text-anchor="start" x="1124.58" y="-3831.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.48" y="-3831.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="#e7e2dd" stroke="transparent" points="794.67,-3750.51 794.67,-3810.51 1174.67,-3810.51 1174.67,-3750.51 794.67,-3750.51"/>
+<polygon fill="none" stroke="#29235c" points="794.67,-3750.51 794.67,-3810.51 1174.67,-3810.51 1174.67,-3750.51 794.67,-3750.51"/>
+<text text-anchor="start" x="805.46" y="-3770.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">updatedAt &#160;&#160;&#160;</text>
+<text text-anchor="start" x="986.3" y="-3771.71" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">DateTime</text>
+<text text-anchor="start" x="1124.96" y="-3771.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
+<text text-anchor="start" x="1133.85" y="-3771.71" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
+<polygon fill="none" stroke="#29235c" stroke-width="2" points="793.67,-3749.51 793.67,-4231.51 1175.67,-4231.51 1175.67,-3749.51 793.67,-3749.51"/>
 </g>
 <!-- Game&#45;&gt;User -->
 <!-- Game&#45;&gt;User -->
 <g id="edge32" class="edge">
 <title>Game:e&#45;&gt;User:w</title>
-<path fill="none" stroke="#29235c" stroke-width="3" d="M1175.67,-4092.51C1315.5,-4092.51 1305.92,-4214.53 1374.29,-4336.51 1488.71,-4540.63 1319.39,-4831.83 1541.6,-4840.32"/>
+<path fill="none" stroke="#29235c" stroke-width="3" d="M1175.67,-4080.51C1319.68,-4080.51 1305.35,-4210.08 1374.29,-4336.51 1486.32,-4541.96 1319.32,-4831.87 1541.6,-4840.32"/>
 <polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="1541.71,-4843.82 1551.77,-4840.51 1541.84,-4836.82 1541.71,-4843.82"/>
 <text text-anchor="middle" x="1560.67" y="-4850.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">1</text>
-<text text-anchor="middle" x="1169.45" y="-4102.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
+<text text-anchor="middle" x="1169.45" y="-4090.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
 </g>
 <!-- Game&#45;&gt;User -->
 <!-- Game&#45;&gt;User -->
 <g id="edge34" class="edge">
 <title>Game:e&#45;&gt;User:w</title>
-<path fill="none" stroke="#29235c" stroke-width="3" d="M1175.67,-4032.51C1337.07,-4032.51 1302.83,-4191.8 1374.29,-4336.51 1477.89,-4546.33 1319.07,-4832 1541.59,-4840.32"/>
+<path fill="none" stroke="#29235c" stroke-width="3" d="M1175.67,-4020.51C1341.56,-4020.51 1302.16,-4187.13 1374.29,-4336.51 1476.04,-4547.23 1319.01,-4832.02 1541.59,-4840.32"/>
 <polygon fill="#29235c" stroke="#29235c" stroke-width="3" points="1541.71,-4843.83 1551.77,-4840.51 1541.84,-4836.83 1541.71,-4843.83"/>
 <text text-anchor="middle" x="1542.88" y="-4811.71" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">1</text>
-<text text-anchor="middle" x="1169.45" y="-4042.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
+<text text-anchor="middle" x="1169.45" y="-4030.11" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">*</text>
 </g>
 <!-- Spell&#45;&gt;Action -->
 <!-- Spell&#45;&gt;Action -->

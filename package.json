@@ -65,14 +65,18 @@
         "@adonisjs/vite": "^3.0.0",
         "@softwaretechnik/dbml-renderer": "^1.0.30",
         "@swan-io/chicane": "^2.1.0",
+        "@tanstack/react-query": "^5.51.23",
         "@vinejs/vine": "^2.0.0",
+        "axios": "^1.7.3",
         "edge.js": "^6.0.2",
         "luxon": "^3.4.4",
         "pg": "^8.12.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
+        "react-toastify": "^10.0.5",
         "reflect-metadata": "^0.2.2",
-        "xlsx": "^0.18.5"
+        "xlsx": "^0.18.5",
+        "zod": "^3.23.8"
     },
     "hotHook": {
         "boundaries": [

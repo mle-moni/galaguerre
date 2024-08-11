@@ -5,9 +5,10 @@
         "lib": ["DOM"],
         "jsx": "preserve",
         "paths": {
-            "~/*": ["./src/*"]
+            "~/*": ["./src/*.js"],
+            "#api_types/*": ["../api_types/*.js"]
         }
     },
-    "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+    "include": ["./src/**/*.ts", "./src/**/*.tsx", "../api_types/**/*.ts"],
     "exclude": ["node_modules", "build"]
 }
