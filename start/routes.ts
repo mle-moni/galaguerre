@@ -23,7 +23,6 @@ registerUploadRoute();
 router
     .group(() => {
         router.get("/", () => ({ message: "Galaguerre API" }));
-        router.get("/auth/me", [AuthController, "me"]);
         router.post("/auth/login", [AuthController, "login"]);
         router.post("/auth/logout", [AuthController, "logout"]);
     })
@@ -32,6 +31,7 @@ router
 // authenticated routes
 router
     .group(() => {
+        router.get("/auth/me", [AuthController, "me"]);
         router.resource("games", GamesController).apiOnly();
     })
     .use(middleware.auth())

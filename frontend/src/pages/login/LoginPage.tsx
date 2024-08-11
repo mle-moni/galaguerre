@@ -2,7 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
 import { getUserData } from "~/hooks/use_user";
 import { privateAxios, setToken } from "~/services/axios";
-import { queryClient } from "~/services/query_client";
 
 export const LoginPage = () => {
     const user = getUserData();
@@ -14,7 +13,7 @@ export const LoginPage = () => {
         },
         onSuccess: (data) => {
             setToken(data.token);
-            queryClient.clear();
+            location.reload();
         },
     });
 
