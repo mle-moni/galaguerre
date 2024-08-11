@@ -13,13 +13,17 @@ export const Router = createRouter({
 
 export const AppRouter = () => {
     const route = Router.useRoute(["Home", "Login", "Register"]);
-    const { user, isLoading } = useUser();
+    const { user, isLoading, isError } = useUser();
 
+    if (route?.name === "Login") return <LoginPage />;
+
+    if (isError) {
+        Router.push("Login");
+        return null;
+    }
     if (isLoading) return <div>Loading...</div>;
 
     if (user && route?.name === "Home") return <HomePage />;
-
-    if (route?.name === "Login") return <LoginPage />;
 
     if (route?.name === "Register") return <RegisterPage />;
 

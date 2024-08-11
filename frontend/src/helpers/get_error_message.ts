@@ -4,6 +4,7 @@ export const getErrorMessage = (
     error: unknown,
     backupMessage = "Une erreur imprévue est survenue",
 ) => {
+    console.log("error", error);
     if (isApiSimpleError(error)) {
         return error.error;
     }

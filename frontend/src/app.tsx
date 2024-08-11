@@ -3,7 +3,15 @@ import { createRoot } from "react-dom/client";
 import { ToastContainer } from "react-toastify";
 import { AppRouter } from "./router.jsx";
 
-const queryClient = new QueryClient();
+import "react-toastify/dist/ReactToastify.css";
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            retry: false,
+        },
+    },
+});
 const root = createRoot(document.getElementById("app")!);
 
 root.render(

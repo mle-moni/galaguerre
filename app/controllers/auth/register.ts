@@ -27,10 +27,10 @@ export const register = async ({ request, response }: HttpContext) => {
         .first();
 
     if (foundUser && foundUser.email.toLowerCase() === email.toLowerCase()) {
-        return response.badRequest({ message: "Cet email est déjà utilisé" });
+        return response.badRequest({ error: "Cet email est déjà utilisé" });
     }
 
-    if (foundUser) return response.badRequest({ message: "Ce pseudo est déjà utilisé" });
+    if (foundUser) return response.badRequest({ error: "Ce pseudo est déjà utilisé" });
 
     const createdUser = await User.create({
         email,

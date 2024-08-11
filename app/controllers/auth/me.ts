@@ -5,7 +5,7 @@ import type { HttpContext } from "@adonisjs/core/http";
 export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | void> => {
     const user = auth.user;
 
-    if (!user) return response.unauthorized({ message: "Aucun utilisateur connecté" });
+    if (!user) return response.unauthorized({ error: "Vous n'êtes pas connecté" });
 
     return {
         id: user.id,

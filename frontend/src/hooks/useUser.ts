@@ -3,14 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { privateAxios } from "~/services/axios";
 
 export const useUser = () => {
-    const { data: user, isLoading } = useQuery({
+    const res = useQuery({
         queryKey: ["user"],
         queryFn: async () => {
-            const response = await privateAxios.get<ApiUser>("/auth/me");
+            const response = await privateAxios.get<ApiUser>("/api/auth/me");
 
             return response.data;
         },
     });
 
-    return { user, isLoading };
+    const { data: user, isLoading, isError } = res;
+
+    return { user, isLoading, isError };
 };
