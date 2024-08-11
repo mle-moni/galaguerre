@@ -64,6 +64,7 @@
         "@adonisjs/validator": "^13.0.2",
         "@adonisjs/vite": "^3.0.0",
         "@softwaretechnik/dbml-renderer": "^1.0.30",
+        "@swan-io/chicane": "^2.1.0",
         "@vinejs/vine": "^2.0.0",
         "edge.js": "^6.0.2",
         "luxon": "^3.4.4",
@@ -74,7 +75,10 @@
         "xlsx": "^0.18.5"
     },
     "hotHook": {
-        "boundaries": ["./app/controllers/**/*.ts", "./app/middleware/*.ts"]
+        "boundaries": [
+            "./app/controllers/**/*.ts",
+            "./app/middleware/*.ts"
+        ]
     },
     "packageManager": "yarn@4.2.2"
 }

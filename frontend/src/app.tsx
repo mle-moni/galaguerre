@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
-import { SomeComponent } from "~/some_component.jsx";
+import { AppRouter } from "./router.jsx";
 
 const root = createRoot(document.getElementById("app")!);
 
-root.render(<SomeComponent />);
+root.render(<AppRouter />);

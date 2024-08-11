@@ -16,13 +16,21 @@ import GamesController from "#controllers/games_controller";
 import { registerUploadRoute } from "../app/utils/files.js";
 import { middleware } from "./kernel.js";
 
-router.get("/", async ({ view }) => view.render("index"));
-
 registerUploadRoute();
 
+// public routes
+router
+    .group(() => {
+        router.get("/", () => ({ message: "Galaguerre API" }));
+    })
+    .prefix("/api");
+
+// authenticated routes
 router
     .group(() => {
         router.resource("games", GamesController).apiOnly();
     })
     .use(middleware.auth())
     .prefix("/api");
+
+router.get("/*", async ({ view }) => view.render("index"));
