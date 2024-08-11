@@ -1,31 +1,33 @@
-import { createRouter } from "@swan-io/chicane";
-import { useUser } from "./hooks/useUser.js";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { useUser } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/Error404Page.jsx";
 import { HomePage } from "./pages/home/HomePage.jsx";
 import { LoginPage } from "./pages/login/LoginPage.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 
-export const Router = createRouter({
-    Home: "/",
-    Login: "/login",
-    Register: "/register",
-});
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <HomePage />,
+    },
+    {
+        path: "/login",
+        element: <LoginPage />,
+    },
+    {
+        path: "/register",
+        element: <RegisterPage />,
+    },
+    {
+        path: "*",
+        element: <Error404Page />,
+    },
+]);
 
-export const AppRouter = () => {
-    const route = Router.useRoute(["Home", "Login", "Register"]);
-    const { user, isLoading, isError } = useUser();
+export const AppRouterProvider = () => {
+    const { isLoading } = useUser();
 
-    if (route?.name === "Login") return <LoginPage />;
+    if (isLoading) return <>Loading...</>;
 
-    if (isError) {
-        Router.push("Login");
-        return null;
-    }
-    if (isLoading) return <div>Loading...</div>;
-
-    if (user && route?.name === "Home") return <HomePage />;
-
-    if (route?.name === "Register") return <RegisterPage />;
-
-    return <Error404Page />;
+    return <RouterProvider router={router} />;
 };

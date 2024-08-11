@@ -817,13 +817,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/hash@npm:^0.9.2":
-  version: 0.9.2
-  resolution: "@emotion/hash@npm:0.9.2"
-  checksum: 10c0/0dc254561a3cc0a06a10bbce7f6a997883fd240c8c1928b93713f803a2e9153a257a488537012efe89dbe1246f2abfe2add62cdb3471a13d67137fcb808e81c2
-  languageName: node
-  linkType: hard
-
 "@esbuild/aix-ppc64@npm:0.21.5":
   version: 0.21.5
   resolution: "@esbuild/aix-ppc64@npm:0.21.5"
@@ -1422,6 +1415,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@remix-run/router@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@remix-run/router@npm:1.19.0"
+  checksum: 10c0/8c1503a535035f43747fea063b027aa841690c19a6bd8b6251c53d3aab4d4cae89b0bd4809dc7ab69fdbe61897f43c2683b82fc4cdc5785f9166cf2ea60e5932
+  languageName: node
+  linkType: hard
+
 "@rollup/rollup-android-arm-eabi@npm:4.20.0":
   version: 4.20.0
   resolution: "@rollup/rollup-android-arm-eabi@npm:4.20.0"
@@ -1558,18 +1558,6 @@ __metadata:
   bin:
     dbml-renderer: lib/index.js
   checksum: 10c0/12762032b0deae7914193a30503de2c0987b464a23580956247ccb391f614d887255e422eac4d1b070a882fda569d3e400baa46ee5c566e42abcae74bc88436a
-  languageName: node
-  linkType: hard
-
-"@swan-io/chicane@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@swan-io/chicane@npm:2.1.0"
-  dependencies:
-    "@emotion/hash": "npm:^0.9.2"
-    use-sync-external-store: "npm:^1.2.2"
-  peerDependencies:
-    react: ">=18.0.0"
-  checksum: 10c0/209c055cb76c2abd51db2d514af02efd7bdff0ad0e4d5a79ca49066f64cb51a738ff325bfb01019c72f99fc9f975c569e99d954426a9fb6d485d6cebaa75696b
   languageName: node
   linkType: hard
 
@@ -3902,7 +3890,6 @@ __metadata:
     "@japa/plugin-adonisjs": "npm:^3.0.1"
     "@japa/runner": "npm:^3.1.4"
     "@softwaretechnik/dbml-renderer": "npm:^1.0.30"
-    "@swan-io/chicane": "npm:^2.1.0"
     "@swc/core": "npm:^1.5.7"
     "@tanstack/react-query": "npm:^5.51.23"
     "@types/luxon": "npm:^3.4.2"
@@ -3919,6 +3906,7 @@ __metadata:
     pino-pretty: "npm:^11.1.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
+    react-router-dom: "npm:^6.26.0"
     react-toastify: "npm:^10.0.5"
     reflect-metadata: "npm:^0.2.2"
     ts-node: "npm:^10.9.2"
@@ -6061,6 +6049,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-router-dom@npm:^6.26.0":
+  version: 6.26.0
+  resolution: "react-router-dom@npm:6.26.0"
+  dependencies:
+    "@remix-run/router": "npm:1.19.0"
+    react-router: "npm:6.26.0"
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: 10c0/f59a5b72b1dab6480f97f20fa49b601cb1366e6e1c8def7fd727ccbc4e8cf527f64f7aedd2889534de222dc86634a23e2ed108b99e5443e7b5401a4db104e611
+  languageName: node
+  linkType: hard
+
+"react-router@npm:6.26.0":
+  version: 6.26.0
+  resolution: "react-router@npm:6.26.0"
+  dependencies:
+    "@remix-run/router": "npm:1.19.0"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 10c0/498b97cac077170096715609e65e0039b64e497612ed585b8d3b88733310d23e7ca76ce189b09b6fbc65ca8df1595ca20ccac05a84006803843dfa05107d9540
+  languageName: node
+  linkType: hard
+
 "react-toastify@npm:^10.0.5":
   version: 10.0.5
   resolution: "react-toastify@npm:10.0.5"
@@ -7312,15 +7324,6 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10c0/4ef57b45aa820d7ac6496e9208559986c665e49447cb072744c13b66925a362d96dd5a46c4530a6b8e203e5db5fe849369444440cb22ecfc26c679359e5dfa3c
-  languageName: node
-  linkType: hard
-
-"use-sync-external-store@npm:^1.2.2":
-  version: 1.2.2
-  resolution: "use-sync-external-store@npm:1.2.2"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 10c0/23b1597c10adf15b26ade9e8c318d8cc0abc9ec0ab5fc7ca7338da92e89c2536abd150a5891bf076836c352fdfa104fc7231fb48f806fd9960e0cbe03601abaf
   languageName: node
   linkType: hard
 
