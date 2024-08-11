@@ -24,6 +24,8 @@ router
     .group(() => {
         router.get("/", () => ({ message: "Galaguerre API" }));
         router.get("/auth/me", [AuthController, "me"]);
+        router.post("/auth/login", [AuthController, "login"]);
+        router.post("/auth/logout", [AuthController, "logout"]);
     })
     .prefix("/api");
 
@@ -36,3 +38,7 @@ router
     .prefix("/api");
 
 router.get("/*", async ({ view }) => view.render("index"));
+
+router.post("/*", async ({ response, request }) =>
+    response.notFound({ error: `404: POST ${request.url()}` }),
+);
