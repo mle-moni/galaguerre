@@ -1,6 +1,7 @@
 import type { ApiUser } from "#api_types/auth.types";
 import type { SocketEventByKey, SocketEventKey } from "#api_types/socket_events";
 import { io } from "socket.io-client";
+import { setupEvents } from "./ws_events.js";
 
 let authSuccess = false;
 
@@ -24,3 +25,5 @@ export const subscribeToSocketEvent = <T extends SocketEventKey>(
 ) => {
     CLIENT_SOCKET.on(key, callback as never);
 };
+
+setupEvents(CLIENT_SOCKET);

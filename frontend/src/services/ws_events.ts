@@ -1,23 +1,31 @@
-import { CLIENT_SOCKET, setSocketAuthSuccess, subscribeToSocketEvent } from "./ws_client.js";
+import type { ApiUser } from "#api_types/auth.types";
+import type { Socket } from "socket.io-client";
+import { USER_QUERY_KEY } from "~/hooks/use_user";
+import { queryClient } from "./query_client.js";
+import { setSocketAuthSuccess, subscribeToSocketEvent } from "./ws_client.js";
 
-CLIENT_SOCKET.on("error", (error) => {
-    console.error(error);
-});
+export const setupEvents = (socket: Socket) => {
+    socket.on("error", (error) => {
+        console.error(error);
+    });
 
-CLIENT_SOCKET.on("debug", (...data) => {
-    console.log("debug", ...data);
-});
+    socket.on("debug", (...data) => {
+        console.info("debug", ...data);
+    });
 
-subscribeToSocketEvent("auth_error", ({ error }) => {
-    console.log("auth_error", error);
-    setSocketAuthSuccess(false);
-});
+    subscribeToSocketEvent("auth_error", ({ error }) => {
+        console.error("auth_error", error);
+        setSocketAuthSuccess(false);
+    });
 
-subscribeToSocketEvent("auth_success", () => {
-    setSocketAuthSuccess(true);
-});
+    subscribeToSocketEvent("auth_success", () => {
+        setSocketAuthSuccess(true);
+    });
 
-subscribeToSocketEvent("game:created", () => {
-    console.log("game:created, redirecting to play page");
-    location.reload();
-});
+    subscribeToSocketEvent("game:created", ({ gameId }) => {
+        queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
+            if (!oldUser) return oldUser;
+            return { ...oldUser, currentGameId: gameId };
+        });
+    });
+};
