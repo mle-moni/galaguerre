@@ -1,8 +1,8 @@
 import { Link, Navigate } from "react-router-dom";
-import { getUserData } from "~/hooks/use_user";
+import { useUser } from "~/hooks/use_user";
 
 export const HomePage = () => {
-    const user = getUserData();
+    const user = useUser();
 
     if (!user) return <Navigate to="/login" />;
 

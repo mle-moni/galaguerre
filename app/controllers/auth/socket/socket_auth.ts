@@ -1,4 +1,6 @@
 import User from "#models/user";
+import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { addSocketData } from "#services/sockets/sockets_data";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import vine from "@vinejs/vine";
 import type { Socket } from "socket.io";
@@ -16,21 +18,22 @@ const authSchema = vine.compile(
 export async function socketAuth(socket: Socket, dto: unknown) {
     const [, res] = await authSchema.tryValidate(dto);
     if (res === null) {
-        return socket.emit("auth_error", BAD_AUTH_REQUEST);
+        return emitSocketEvent("auth_error", { error: BAD_AUTH_REQUEST }, socket.id);
     }
     const { socketToken, userId } = res;
     const user = await User.find(userId);
 
     if (user?.socketToken !== socketToken) {
-        return socket.emit("auth_error", BAD_AUTH_REQUEST);
+        return emitSocketEvent("auth_error", { error: BAD_AUTH_REQUEST }, socket.id);
     }
 
     user.socketToken = null;
     await user.save();
 
+    addSocketData(socket.id, userId);
     joinAuthRestrictedEvents(socket);
     socket.join(WsRooms.connectedSockets);
     socket.join(WsRooms.personalSocketRoom(userId));
 
-    socket.emit("auth_success");
+    emitSocketEvent("auth_success", { message: "Socket connected" }, socket.id);
 }

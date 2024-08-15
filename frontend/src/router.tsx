@@ -1,8 +1,9 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { useUser } from "./hooks/use_user.js";
+import { UserContext, useUserQuery } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/Error404Page.jsx";
 import { HomePage } from "./pages/home/HomePage.jsx";
 import { LoginPage } from "./pages/login/LoginPage.jsx";
+import { MatchmakingPage } from "./pages/matchmaking/MatchmakingPage.jsx";
 import { PlayPage } from "./pages/play/PlayPage.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
     {
         path: "/play",
         element: <PlayPage />,
+    },
+    {
+        path: "/matchmaking",
+        element: <MatchmakingPage />,
     },
     {
         path: "/login",
@@ -30,9 +35,13 @@ const router = createBrowserRouter([
 ]);
 
 export const AppRouterProvider = () => {
-    const { isLoading } = useUser();
+    const query = useUserQuery();
 
-    if (isLoading) return <>Loading...</>;
+    if (query.isLoading) return <>Loading...</>;
 
-    return <RouterProvider router={router} />;
+    return (
+        <UserContext.Provider value={query.data ?? null}>
+            <RouterProvider router={router} />
+        </UserContext.Provider>
+    );
 };

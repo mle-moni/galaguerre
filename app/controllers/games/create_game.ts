@@ -1,18 +1,17 @@
 import type { GameData } from "#api_types/game.types";
 import Game from "#models/game";
-import type User from "#models/user";
 
 interface CreateGameOptions {
-    playerOne: User;
-    playerTwo: User;
+    playerOneId: number;
+    playerTwoId: number;
 }
 
-export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) => {
-    const gameData: GameData = getDefaultGameData({ playerOne, playerTwo });
+export const createGame = async ({ playerOneId, playerTwoId }: CreateGameOptions) => {
+    const gameData: GameData = getDefaultGameData({ playerOneId, playerTwoId });
 
     const game = await Game.create({
-        playerOneId: playerOne.id,
-        playerTwoId: playerTwo.id,
+        playerOneId,
+        playerTwoId,
         data: gameData,
     });
 
@@ -21,10 +20,10 @@ export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) =>
 
 const DEFAULT_HEALTH = 30;
 
-export const getDefaultGameData = ({ playerOne, playerTwo }: CreateGameOptions): GameData => ({
+export const getDefaultGameData = ({ playerOneId, playerTwoId }: CreateGameOptions): GameData => ({
     currentRound: 0,
     playerOne: {
-        userId: playerOne.id,
+        userId: playerOneId,
         deck: [],
         hand: [],
         board: {
@@ -35,7 +34,7 @@ export const getDefaultGameData = ({ playerOne, playerTwo }: CreateGameOptions):
         weaponState: null,
     },
     playerTwo: {
-        userId: playerTwo.id,
+        userId: playerTwoId,
         deck: [],
         hand: [],
         board: {

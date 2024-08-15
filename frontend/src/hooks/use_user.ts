@@ -1,30 +1,30 @@
 import type { ApiUser } from "#api_types/auth.types";
 import { useQuery } from "@tanstack/react-query";
+import { createContext, useContext } from "react";
 import { privateAxiosWithoutToasts } from "~/services/axios";
-import { queryClient } from "~/services/query_client";
 import { authenticateSocket } from "~/services/ws_client";
 
-export const useUser = () => {
-    const res = useQuery({
-        queryKey: ["user"],
+export const USER_QUERY_KEY = ["user"];
+
+export const useUserQuery = () => {
+    const query = useQuery({
+        queryKey: USER_QUERY_KEY,
         queryFn: async () => {
             const response = await privateAxiosWithoutToasts.get<ApiUser>("/api/auth/me");
+
+            authenticateSocket(response.data);
 
             return response.data;
         },
     });
 
-    const { data: user, isLoading, isError } = res;
-
-    return { user, isLoading, isError };
+    return query;
 };
 
-export const getUserData = () => {
-    const userData = queryClient.getQueryData<ApiUser>(["user"]) ?? null;
+export const UserContext = createContext<ApiUser | null>(null);
 
-    if (userData) {
-        authenticateSocket(userData);
-    }
+export const useUser = () => {
+    const user = useContext(UserContext);
 
-    return userData;
+    return user;
 };

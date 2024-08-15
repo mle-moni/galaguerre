@@ -3,4 +3,5 @@ export interface ApiUser {
     pseudo: string | null;
     email: string;
     socketToken: string;
+    currentGameId: number | null;
 }

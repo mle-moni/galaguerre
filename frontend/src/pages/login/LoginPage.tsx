@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
-import { getUserData } from "~/hooks/use_user";
+import { useUser } from "~/hooks/use_user";
 import { privateAxios, setToken } from "~/services/axios";
 
 export const LoginPage = () => {
-    const user = getUserData();
+    const user = useUser();
     const loginMutation = useMutation({
         mutationFn: async (data: FormData) => {
             const response = await privateAxios.post("/api/auth/login", data);

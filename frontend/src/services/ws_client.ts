@@ -1,4 +1,5 @@
 import type { ApiUser } from "#api_types/auth.types";
+import type { SocketEventByKey, SocketEventKey } from "#api_types/socket_events";
 import { io } from "socket.io-client";
 
 let authSuccess = false;
@@ -13,19 +14,13 @@ export const authenticateSocket = (user: ApiUser) => {
     CLIENT_SOCKET.emit("auth", { socketToken: user.socketToken, userId: user.id });
 };
 
-CLIENT_SOCKET.on("error", (error) => {
-    console.error(error);
-});
+export const setSocketAuthSuccess = (success: boolean) => {
+    authSuccess = success;
+};
 
-CLIENT_SOCKET.on("auth_error", (error) => {
-    console.log("auth_error", error);
-    authSuccess = false;
-});
-
-CLIENT_SOCKET.on("auth_success", () => {
-    authSuccess = true;
-});
-
-CLIENT_SOCKET.on("debug", (...data) => {
-    console.log("debug", ...data);
-});
+export const subscribeToSocketEvent = <T extends SocketEventKey>(
+    key: T,
+    callback: (data: SocketEventByKey[T]) => void,
+) => {
+    CLIENT_SOCKET.on(key, callback as never);
+};
