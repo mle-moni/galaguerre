@@ -1,7 +1,7 @@
-import { defineConfig } from "@adonisjs/core/app"
+import { defineConfig } from "@adonisjs/core/app";
 
 export default defineConfig({
-  /*
+    /*
 |--------------------------------------------------------------------------
 | Commands
 |--------------------------------------------------------------------------
@@ -10,9 +10,9 @@ export default defineConfig({
 | will be scanned automatically from the "./commands" directory.
 |
 */
-  commands: [() => import("@adonisjs/core/commands"), () => import("@adonisjs/lucid/commands")],
+    commands: [() => import("@adonisjs/core/commands"), () => import("@adonisjs/lucid/commands")],
 
-  /*
+    /*
 |--------------------------------------------------------------------------
 | Service providers
 |--------------------------------------------------------------------------
@@ -21,23 +21,23 @@ export default defineConfig({
 | application
 |
 */
-  providers: [
-    () => import("@adonisjs/core/providers/app_provider"),
-    () => import("@adonisjs/core/providers/hash_provider"),
-    {
-      file: () => import("@adonisjs/core/providers/repl_provider"),
-      environment: ["repl", "test"],
-    },
-    () => import("@adonisjs/core/providers/vinejs_provider"),
-    () => import("@adonisjs/cors/cors_provider"),
-    () => import("@adonisjs/lucid/database_provider"),
-    () => import("@adonisjs/auth/auth_provider"),
-    () => import("@adonisjs/core/providers/edge_provider"),
-    () => import("@adonisjs/vite/vite_provider"),
-    () => import("@adonisjs/static/static_provider"),
-  ],
+    providers: [
+        () => import("@adonisjs/core/providers/app_provider"),
+        () => import("@adonisjs/core/providers/hash_provider"),
+        {
+            file: () => import("@adonisjs/core/providers/repl_provider"),
+            environment: ["repl", "test"],
+        },
+        () => import("@adonisjs/core/providers/vinejs_provider"),
+        () => import("@adonisjs/cors/cors_provider"),
+        () => import("@adonisjs/lucid/database_provider"),
+        () => import("@adonisjs/auth/auth_provider"),
+        () => import("@adonisjs/core/providers/edge_provider"),
+        () => import("@adonisjs/vite/vite_provider"),
+        () => import("@adonisjs/static/static_provider"),
+    ],
 
-  /*
+    /*
 |--------------------------------------------------------------------------
 | Preloads
 |--------------------------------------------------------------------------
@@ -45,9 +45,13 @@ export default defineConfig({
 | List of modules to import before starting the application.
 |
 */
-  preloads: [() => import("#start/routes"), () => import("#start/kernel"), () => import('#start/web_sockets')],
+    preloads: [
+        () => import("#start/routes"),
+        () => import("#start/kernel"),
+        () => import("#start/web_sockets"),
+    ],
 
-  /*
+    /*
 |--------------------------------------------------------------------------
 | Tests
 |--------------------------------------------------------------------------
@@ -56,37 +60,37 @@ export default defineConfig({
 | and add additional suites.
 |
 */
-  tests: {
-    suites: [
-      {
-        files: ["tests/unit/**/*.spec(.ts|.js)"],
-        name: "unit",
-        timeout: 2000,
-      },
-      {
-        files: ["tests/functional/**/*.spec(.ts|.js)"],
-        name: "functional",
-        timeout: 30000,
-      },
+    tests: {
+        suites: [
+            {
+                files: ["tests/unit/**/*.spec(.ts|.js)"],
+                name: "unit",
+                timeout: 2000,
+            },
+            {
+                files: ["tests/functional/**/*.spec(.ts|.js)"],
+                name: "functional",
+                timeout: 30000,
+            },
+        ],
+        forceExit: false,
+    },
+    metaFiles: [
+        {
+            pattern: "docs/dbml/models.svg",
+            reloadServer: false,
+        },
+        {
+            pattern: "public/**",
+            reloadServer: false,
+        },
+        {
+            pattern: "resources/views/**/*.edge",
+            reloadServer: false,
+        },
     ],
-    forceExit: false,
-  },
-  metaFiles: [
-    {
-      pattern: "docs/dbml/models.svg",
-      reloadServer: false,
+    hooks: {
+        onBuildStarting: [() => import("@adonisjs/vite/build_hook")],
     },
-    {
-      pattern: "public/**",
-      reloadServer: false,
-    },
-    {
-      pattern: "resources/views/**/*.edge",
-      reloadServer: false,
-    },
-  ],
-  hooks: {
-    onBuildStarting: [() => import("@adonisjs/vite/build_hook")],
-  },
-  assetsBundler: false,
-})
+    assetsBundler: false,
+});

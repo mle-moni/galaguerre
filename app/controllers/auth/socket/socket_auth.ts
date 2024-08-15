@@ -16,13 +16,13 @@ const authSchema = vine.compile(
 export async function socketAuth(socket: Socket, dto: unknown) {
     const [, res] = await authSchema.tryValidate(dto);
     if (res === null) {
-        return socket.emit("error", BAD_AUTH_REQUEST);
+        return socket.emit("auth_error", BAD_AUTH_REQUEST);
     }
     const { socketToken, userId } = res;
     const user = await User.find(userId);
 
     if (user?.socketToken !== socketToken) {
-        return socket.emit("error", BAD_AUTH_REQUEST);
+        return socket.emit("auth_error", BAD_AUTH_REQUEST);
     }
 
     user.socketToken = null;
@@ -32,5 +32,5 @@ export async function socketAuth(socket: Socket, dto: unknown) {
     socket.join(WsRooms.connectedSockets);
     socket.join(WsRooms.personalSocketRoom(userId));
 
-    socket.emit("ready");
+    socket.emit("auth_success");
 }

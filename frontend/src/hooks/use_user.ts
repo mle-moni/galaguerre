@@ -2,6 +2,7 @@ import type { ApiUser } from "#api_types/auth.types";
 import { useQuery } from "@tanstack/react-query";
 import { privateAxiosWithoutToasts } from "~/services/axios";
 import { queryClient } from "~/services/query_client";
+import { authenticateSocket } from "~/services/ws_client";
 
 export const useUser = () => {
     const res = useQuery({
@@ -19,5 +20,11 @@ export const useUser = () => {
 };
 
 export const getUserData = () => {
-    return queryClient.getQueryData<ApiUser>(["user"]) ?? null;
+    const userData = queryClient.getQueryData<ApiUser>(["user"]) ?? null;
+
+    if (userData) {
+        authenticateSocket(userData);
+    }
+
+    return userData;
 };
