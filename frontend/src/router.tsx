@@ -3,12 +3,17 @@ import { useUser } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/Error404Page.jsx";
 import { HomePage } from "./pages/home/HomePage.jsx";
 import { LoginPage } from "./pages/login/LoginPage.jsx";
+import { PlayPage } from "./pages/play/PlayPage.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <HomePage />,
+    },
+    {
+        path: "/play",
+        element: <PlayPage />,
     },
     {
         path: "/login",

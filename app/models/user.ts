@@ -26,6 +26,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     declare password: string;
 
     @column()
+    declare socketToken: string | null;
+
+    @column()
     declare isSuperAdmin: boolean;
 
     @column.dateTime({ autoCreate: true })

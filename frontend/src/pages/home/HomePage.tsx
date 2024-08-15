@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { getUserData } from "~/hooks/use_user";
 
 export const HomePage = () => {
@@ -6,5 +6,10 @@ export const HomePage = () => {
 
     if (!user) return <Navigate to="/login" />;
 
-    return <h1>Home page</h1>;
+    return (
+        <div>
+            <h1>connecté en tant que {user.email}</h1>
+            <Link to="/play">Jouer</Link>
+        </div>
+    );
 };
