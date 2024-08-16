@@ -19,6 +19,11 @@ export const CARD_FILTER_VIEW = createModelViewConfig(() => CardFilter, {
             type: "string",
             label: "Nom interne",
         },
+        tags: {
+            type: "manyToManyRelation",
+            modelName: "Tag",
+            labelFields: ["label"],
+        },
         createdAt: {
             type: "date",
             subType: "datetime",
@@ -34,20 +39,6 @@ export const CARD_FILTER_VIEW = createModelViewConfig(() => CardFilter, {
             editable: false,
         },
     },
-    virtualColumns: [
-        {
-            name: "tags",
-            getter: async (model) => model.tags.map((cardFilterTag) => cardFilterTag.tag.label),
-            adomin: {
-                type: "array",
-                label: "Catégories filtres",
-                creatable: false,
-                editable: false,
-            },
-            columnOrderIndex: 3,
-        },
-    ],
     label: "Filtre de carte",
     icon: "filter",
-    queryBuilderCallback: (q) => q.preload("tags", (q2) => q2.preload("tag")),
 });
