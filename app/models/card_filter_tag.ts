@@ -1,4 +1,4 @@
-import { BaseModel, belongsTo, column, computed } from "@adonisjs/lucid/orm";
+import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import CardFilter from "./card_filter.js";
@@ -19,11 +19,6 @@ export default class CardFilterTag extends BaseModel {
 
     @belongsTo(() => Tag)
     declare tag: BelongsTo<typeof Tag>;
-
-    @computed()
-    get tagLabel() {
-        return this.tag?.label ?? "[tag not preloaded]";
-    }
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

@@ -29,12 +29,6 @@ export const CARD_FILTER_TAG_VIEW = createModelViewConfig(() => CardFilterTag, {
             creatable: false,
             editable: false,
         },
-        tagLabel: {
-            type: "string",
-            label: "Label du tag",
-            creatable: false,
-            computed: true,
-        },
     },
     label: "Tag de filtre de carte",
     icon: "tag",

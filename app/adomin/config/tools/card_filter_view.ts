@@ -17,16 +17,7 @@ export const CARD_FILTER_VIEW = createModelViewConfig(() => CardFilter, {
         },
         internalLabel: {
             type: "string",
-            label: "Internal Label",
-        },
-        tags: {
-            type: "hasManyRelation",
-            modelName: "CardFilterTag",
-            labelFields: ["tagLabel"],
-            label: "Tags filtres",
-            creatable: false,
-            editable: false,
-            allowGlobalFilterSearch: false,
+            label: "Nom interne",
         },
         createdAt: {
             type: "date",
@@ -43,6 +34,19 @@ export const CARD_FILTER_VIEW = createModelViewConfig(() => CardFilter, {
             editable: false,
         },
     },
+    virtualColumns: [
+        {
+            name: "tags",
+            getter: async (model) => model.tags.map((cardFilterTag) => cardFilterTag.tag.label),
+            adomin: {
+                type: "array",
+                label: "Catégories filtres",
+                creatable: false,
+                editable: false,
+            },
+            columnOrderIndex: 3,
+        },
+    ],
     label: "Filtre de carte",
     icon: "filter",
     queryBuilderCallback: (q) => q.preload("tags", (q2) => q2.preload("tag")),

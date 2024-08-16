@@ -13,14 +13,6 @@ export const DECK_VIEW = createModelViewConfig(() => Deck, {
             labelFields: ["pseudo"],
             label: "Utilisateur",
         },
-        cards: {
-            type: "hasManyRelation",
-            modelName: "DeckCard",
-            labelFields: ["cardLabel"],
-            label: "Cartes",
-            creatable: false,
-            editable: false,
-        },
         selected: {
             type: "boolean",
             label: "Sélectionné",
@@ -40,6 +32,19 @@ export const DECK_VIEW = createModelViewConfig(() => Deck, {
             editable: false,
         },
     },
+    virtualColumns: [
+        {
+            name: "cards",
+            getter: async (model) => model.cards.map((deckCard) => deckCard.card.label),
+            adomin: {
+                type: "array",
+                label: "Cartes",
+                creatable: false,
+                editable: false,
+            },
+            columnOrderIndex: 3,
+        },
+    ],
     label: "Deck",
     icon: "books",
     queryBuilderCallback: (q) => q.preload("cards", (q2) => q2.preload("card")),

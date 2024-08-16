@@ -1,4 +1,4 @@
-import { BaseModel, belongsTo, column, computed } from "@adonisjs/lucid/orm";
+import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import Card from "./card.js";
@@ -21,11 +21,6 @@ export default class DeckCard extends BaseModel {
 
     @belongsTo(() => Deck)
     declare deck: BelongsTo<typeof Deck>;
-
-    @computed()
-    get cardLabel() {
-        return this.card?.label ?? "Carte non chargée";
-    }
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

@@ -18,7 +18,7 @@ export const TARGET_VIEW = createModelViewConfig(() => Target, {
         },
         internalLabel: {
             type: "string",
-            label: "Internal Label",
+            label: "Nom interne",
         },
         tag: {
             type: "belongsToRelation",
