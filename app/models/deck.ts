@@ -16,6 +16,9 @@ export default class Deck extends BaseModel {
     @column()
     declare userId: number;
 
+    @column()
+    declare selected: boolean;
+
     @hasMany(() => DeckCard)
     declare cards: HasMany<typeof DeckCard>;
 

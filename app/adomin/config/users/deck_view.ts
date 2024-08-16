@@ -21,6 +21,10 @@ export const DECK_VIEW = createModelViewConfig(() => Deck, {
             creatable: false,
             editable: false,
         },
+        selected: {
+            type: "boolean",
+            label: "Sélectionné",
+        },
         createdAt: {
             type: "date",
             subType: "datetime",
