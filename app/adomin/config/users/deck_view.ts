@@ -19,6 +19,7 @@ export const DECK_VIEW = createModelViewConfig(() => Deck, {
         },
         cards: {
             type: "manyToManyRelation",
+            label: "Cartes",
             modelName: "Card",
             labelFields: ["label"],
         },

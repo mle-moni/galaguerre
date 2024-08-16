@@ -21,6 +21,7 @@ export const CARD_FILTER_VIEW = createModelViewConfig(() => CardFilter, {
         },
         tags: {
             type: "manyToManyRelation",
+            label: "Tag filtres",
             modelName: "Tag",
             labelFields: ["label"],
         },
