@@ -15,15 +15,11 @@ const messagesProvider = new SimpleMessagesProvider(DEFAULT_MESSAGE_PROVIDER_CON
     password: "mot de passe",
 });
 
-export const adominLogin = async ({ request, response }: HttpContext) => {
+export const adominLogin = async ({ request }: HttpContext) => {
     const { email, password } = await request.validateUsing(loginSchema, { messagesProvider });
 
-    try {
-        const user = await User.verifyCredentials(email, password);
-        const token = await User.accessTokens.create(user);
+    const user = await User.verifyCredentials(email, password);
+    const token = await User.accessTokens.create(user);
 
-        return token;
-    } catch (error) {
-        return response.badRequest({ error: "Identifiants invalides" });
-    }
+    return token;
 };

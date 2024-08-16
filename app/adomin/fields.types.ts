@@ -1,5 +1,6 @@
 import type { MultipartFile } from "@adonisjs/core/bodyparser";
 import type { LucidRow } from "@adonisjs/lucid/types/model";
+import type { RawQuery } from "@adonisjs/lucid/types/querybuilder";
 
 export interface AdominBaseFieldConfig {
     /**
@@ -24,6 +25,10 @@ export interface AdominBaseFieldConfig {
      * If false, user cannot create this field
      */
     creatable?: boolean;
+    /** If false, user cannot sort by this field */
+    sortable?: boolean;
+    /** If false, user cannot filter by this field */
+    filterable?: boolean;
     /**
      * Size of the field on the frontend
      * @default 120
@@ -33,6 +38,32 @@ export interface AdominBaseFieldConfig {
      * If this field is a \@computed() field in your model you must set this to true
      */
     computed?: boolean;
+    /**
+     * Sql filter override, usefull for computed fields
+     *
+     * e.g.
+     * ```ts
+     * const isBeautifullFilter = (input: string | null) => {
+     *   if (input === null) return 'false'
+     *
+     *   if (+input === 0) return `email != 'damien@galadrim.fr'`
+     *
+     *   return `email = 'damien@galadrim.fr'`
+     * }
+     * ```
+     */
+    sqlFilter?: (input: string | null) => string | RawQuery;
+    /**
+     * Sql orderBy override, usefull for computed fields
+     *
+     * e.g.
+     * ```ts
+     * const isBeautifullSort = (ascDesc: 'asc' | 'desc') => {
+     *   return `email = 'damien@galadrim.fr' ${ascDesc}`
+     * }
+     * ```
+     */
+    sqlSort?: (ascDesc: "asc" | "desc") => string | RawQuery;
     /**
    * Export data transformation callback to use for this field
    *
@@ -48,6 +79,16 @@ exportDataTransform: (date) => DateTime.fromISO(date).toFormat('dd/MM/yyyy'),
 ```
    */
     exportDataTransform?: (value: any) => any;
+    /** Relevant only for virtual columns */
+    getter?: (model: LucidRow) => Promise<any>;
+    /**
+     * Setter function to update the value of the computed or virtual column
+     *
+     * It will be called after every non-virtual column change
+     *
+     * In most cases, it will not make sense to use this because the field will be computed from other fields
+     */
+    setter?: (model: LucidRow, value: any) => Promise<void>;
 }
 
 export interface AdominNumberFieldConfig extends AdominBaseFieldConfig {
@@ -124,6 +165,11 @@ export interface AdominStringFieldConfig extends AdominBaseFieldConfig {
      * e.g. "{{value}} €"
      */
     valueDisplayTemplate?: string;
+    /**
+     * If `true`, a `textarea` element is rendered instead of a basic text input
+     * @default false
+     */
+    multiline?: boolean;
 }
 
 export interface AdominBooleanFieldConfig extends AdominBaseFieldConfig {
@@ -219,6 +265,10 @@ export type AdominEnumFieldConfig = AdominBaseFieldConfig & {
 
 export interface AdominArrayFieldConfig extends AdominBaseFieldConfig {
     type: "array";
+    /**
+     * options for the select component
+     */
+    options?: AdominSelectOption<string | number>[];
 }
 
 export type AdominFileFieldConfig = AdominBaseFieldConfig & {
@@ -333,6 +383,11 @@ export interface AdominHasManyRelationFieldConfig extends AdominBaseFieldConfig 
      * @default ', '
      */
     labelFieldsSeparator?: string;
+    /** Name of the foreign key for the referenced model
+     *
+     * e.g. if you have User that hasMany Idea, the default value will be 'userId'
+     */
+    fkName?: string;
     /**
      * type of the foreign key
      * @default 'number'
@@ -340,9 +395,16 @@ export interface AdominHasManyRelationFieldConfig extends AdominBaseFieldConfig 
     fkType?: "string" | "number";
     /**
      * Name of the local key in the referenced model
+     *
+     * e.g. if you have User that hasMany Idea, the value should be the primary key of the Idea model
      * @default 'id'
      */
     localKeyName?: string;
+    /**
+     * Local key type
+     * @default 'number'
+     */
+    localKeyType?: "string" | "number";
     /**
      * If true, adomin will preload the relation
      *
@@ -356,13 +418,12 @@ export interface AdominHasManyRelationFieldConfig extends AdominBaseFieldConfig 
      */
     allowGlobalFilterSearch?: boolean;
     /**
-     * Creation of related models on the fly is not possible yet
+     * If true, adomin will allow to set the relation to null
+     *
+     * e.g. if you have User that hasMany Idea, with allowRemove = true, you allow to set Idea.userId to null
+     * @default false
      */
-    creatable: false;
-    /**
-     * Edition of related models on the fly is not possible yet
-     */
-    editable: false;
+    allowRemove?: boolean;
 }
 
 export interface AdominBelongsToRelationFieldConfig extends AdominBaseFieldConfig {
@@ -464,6 +525,87 @@ export interface AdominHasOneRelationFieldConfig extends AdominBaseFieldConfig {
     editable?: boolean;
 }
 
+export interface AdominManyToManyRelationFieldConfig extends AdominBaseFieldConfig {
+    type: "manyToManyRelation";
+    /**
+     * Model referenced
+     *
+     * e.g. if you have User that has many Groups via UserGroups, the value should be "Group"
+     */
+    modelName: string;
+    /**
+     * Fields to use for label
+     */
+    labelFields: string[];
+    /**
+     * Separator between label fields
+     * @default ', '
+     */
+    labelFieldsSeparator?: string;
+    /** Name of the pivot foreign key for the referenced model
+     *
+     * e.g. if you have User that has many Groups via UserGroups, the value should be "user_id"
+     */
+    pivotFkName?: string;
+    /**
+     * type of the pivot foreign key
+     * @default 'number'
+     */
+    pivotFkType?: "string" | "number";
+    /** Name of the pivot related foreign key for the related model
+     *
+     * e.g. if you have User that has many Groups via UserGroups, the value should be "group_id"
+     */
+    pivotRelatedFkName?: string;
+    /**
+     * type of the pivot related foreign key
+     * @default 'number'
+     */
+    pivotRelatedFkType?: "string" | "number";
+    /**
+     * Name of the local key in the parent model
+     *
+     * e.g. if you have User that has many Groups via UserGroups, the value should be the primary key of the User model
+     * @default 'id'
+     */
+    localKeyName?: string;
+    /**
+     * Local key type
+     * @default 'number'
+     */
+    localKeyType?: "string" | "number";
+    /**
+     * Name of the local key in the related model
+     *
+     * e.g. if you have User that has many Groups via UserGroups, the value should be the primary key of the Group model
+     * @default 'id'
+     */
+    relatedKeyName?: string;
+    /**
+     * Related key type
+     * @default 'number'
+     */
+    relatedKeyType?: "string" | "number";
+    /**
+     * If true, adomin will preload the relation
+     *
+     * Setting to false can be usefull if you need to customize the query with queryBuilderCallback
+     * @default true
+     */
+    preload?: boolean;
+    /**
+     * Name of the pivot table
+     *
+     * e.g. if you have User that has many Groups via UserGroups, the value should be "user_groups"
+     */
+    pivotTable?: string;
+    /**
+     * If true, adomin will allow to search in the related models through the global filter
+     * @default false
+     */
+    allowGlobalFilterSearch?: boolean;
+}
+
 export type AdominFieldConfig =
     | AdominStringFieldConfig
     | AdominNumberFieldConfig
@@ -475,5 +617,6 @@ export type AdominFieldConfig =
     | AdominForeignKeyFieldConfig
     | AdominHasManyRelationFieldConfig
     | AdominBelongsToRelationFieldConfig
-    | AdominHasOneRelationFieldConfig;
+    | AdominHasOneRelationFieldConfig
+    | AdominManyToManyRelationFieldConfig;
 // | AdominObjectFieldConfig

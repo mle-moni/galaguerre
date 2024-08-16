@@ -1,3 +1,4 @@
+import { computeColumnConfigFields } from "#adomin/routes/models/get_model_config";
 import { rules, schema } from "@adonisjs/validator";
 import type { ModelConfig } from "../create_model_view_config.js";
 import type { AdominFieldConfig } from "../fields.types.js";
@@ -8,9 +9,10 @@ export const getValidationSchemaFromConfig = (
     validationMode: AdominValidationMode,
 ) => {
     const foundConfig = modelConfig;
-    const results = foundConfig.fields.map(({ adomin, name: columnName }) => {
-        const notCreatable = adomin.creatable === false || adomin.computed === true;
-        const notEditable = adomin.editable === false || adomin.computed === true;
+    const fields = computeColumnConfigFields(foundConfig.fields);
+    const results = fields.map(({ adomin, name: columnName }) => {
+        const notCreatable = adomin.creatable === false;
+        const notEditable = adomin.editable === false;
 
         if (validationMode === "create" && notCreatable) return null;
         if (validationMode === "update" && notEditable) return null;
@@ -69,6 +71,14 @@ const getValidationSchemaFromFieldConfig = (
         return schema.string([rules.email()]);
     }
 
+    if (config.type === "hasManyRelation") {
+        return schema.array.optional().members(schema[config.localKeyType ?? "number"]());
+    }
+
+    if (config.type === "manyToManyRelation") {
+        return schema.array.optional().members(schema[config.relatedKeyType ?? "number"]());
+    }
+
     if (config.type === "file") {
         const specialSchema = getFileSchema(validationMode, suffix);
 
@@ -90,7 +100,8 @@ const getType = (config: AdominFieldConfig) => {
         case "hasOneRelation":
             return config.fkType ?? "number";
         case "hasManyRelation":
-            throw new Error("hasManyRelation update/create not yet supported");
+        case "manyToManyRelation":
+            throw new Error("hasManyRelation should be handled before calling this function");
         default:
             return config.type;
     }

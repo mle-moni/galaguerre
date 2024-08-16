@@ -46,9 +46,13 @@ const shouldIgnoreFieldFilters = ({
     field: ColumnConfig;
     isGlobal: boolean;
 }) => {
-    if (field.adomin.computed) return true;
-    if (field.adomin.type === "string" && field.adomin.isPassword) return true;
-    if (field.adomin.type === "hasManyRelation" || field.adomin.type === "hasOneRelation") {
+    if (field.adomin.filterable === false) return true;
+
+    if (
+        field.adomin.type === "hasManyRelation" ||
+        field.adomin.type === "hasOneRelation" ||
+        field.adomin.type === "manyToManyRelation"
+    ) {
         const isGlobalSearchable = field.adomin.allowGlobalFilterSearch ?? false;
 
         if (isGlobalSearchable) return false;
@@ -71,7 +75,17 @@ export const applyGlobalFilters = (
             if (shouldIgnoreFieldFilters({ field, isGlobal: true })) continue;
             if (!globalFilter) continue;
 
-            if (field.adomin.type === "hasManyRelation" || field.adomin.type === "hasOneRelation") {
+            if (field.adomin.sqlFilter !== undefined) {
+                const sqlFilter = field.adomin.sqlFilter(globalFilter);
+                builder.andWhereRaw(sqlFilter);
+                continue;
+            }
+
+            if (
+                field.adomin.type === "hasManyRelation" ||
+                field.adomin.type === "hasOneRelation" ||
+                field.adomin.type === "manyToManyRelation"
+            ) {
                 const labelFields = field.adomin.labelFields;
                 builder.orWhereHas(field.name as unknown as undefined, (subquery) => {
                     for (const labelField of labelFields) {
@@ -114,6 +128,12 @@ export const applyColumnFilters = (
 
             if (search === undefined) continue;
 
+            if (field.adomin.sqlFilter !== undefined) {
+                const sqlFilter = field.adomin.sqlFilter(search);
+                builder.andWhereRaw(sqlFilter);
+                continue;
+            }
+
             if (
                 field.adomin.type === "number" &&
                 field.adomin.variant?.type === "bitset" &&
@@ -123,7 +143,11 @@ export const applyColumnFilters = (
                 continue;
             }
 
-            if (field.adomin.type === "hasManyRelation" || field.adomin.type === "hasOneRelation") {
+            if (
+                field.adomin.type === "hasManyRelation" ||
+                field.adomin.type === "hasOneRelation" ||
+                field.adomin.type === "manyToManyRelation"
+            ) {
                 const labelFields = field.adomin.labelFields;
                 builder.andWhereHas(field.name as unknown as undefined, (subquery) => {
                     for (const labelField of labelFields) {
@@ -152,11 +176,7 @@ export const applyColumnFilters = (
 };
 
 const shouldIgnoreSorting = (field: ColumnConfig) => {
-    if (field.adomin.computed) return true;
-    if (field.adomin.type === "hasManyRelation") return true;
-    if (field.adomin.type === "belongsToRelation") return true;
-    if (field.adomin.type === "foreignKey") return true;
-    if (field.adomin.type === "string" && field.adomin.isPassword) return true;
+    if (field.adomin.sortable === false) return true;
 
     return false;
 };
@@ -177,6 +197,11 @@ export const applySorting = (
         if (!field || shouldIgnoreSorting(field)) {
             continue;
         }
+        if (field.adomin.sqlSort !== undefined) {
+            const sqlSort = field.adomin.sqlSort(desc ? "desc" : "asc");
+            query.orderByRaw(sqlSort);
+            continue;
+        }
         const sqlColumn = getSqlColumnToUse(field);
         query.orderBy(sqlColumn, desc ? "desc" : "asc");
     }
@@ -190,7 +215,8 @@ export const loadRelations = (
         if (
             field.adomin.type === "hasManyRelation" ||
             field.adomin.type === "belongsToRelation" ||
-            field.adomin.type === "hasOneRelation"
+            field.adomin.type === "hasOneRelation" ||
+            field.adomin.type === "manyToManyRelation"
         ) {
             if (field.adomin.preload !== false) query.preload(field.name as never);
         }

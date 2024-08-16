@@ -2,7 +2,9 @@ import type { LucidModel, LucidRow } from "@adonisjs/lucid/types/model";
 import { type ColumnConfig, PASSWORD_SERIALIZED_FORM } from "../../../create_model_view_config.js";
 import { getSqlColumnToUse } from "../get_model_config.js";
 import { handleFilePersist } from "./handle_file_persist.js";
+import { handleHasManyUpdate } from "./handle_has_many_update.js";
 import { handleHasOneUpdate } from "./handle_has_one_update.js";
+import { handleManyToManyUpdate } from "./handle_many_to_many_update.js";
 
 /** Attach all fields that need to be applied directly on this model instance */
 export const attachFieldsToModel = async (
@@ -25,6 +27,7 @@ export const attachFieldsToModel = async (
 
         const field = fieldsMap.get(key);
         if (!field || value === undefined) continue;
+        if (field.isVirtual) continue;
 
         if (field.adomin.type === "string" && field.adomin.isPassword) {
             // don't update password if it's not changed
@@ -46,7 +49,11 @@ export const attachFieldsToModel = async (
             continue;
         }
 
-        if (field.adomin.type === "hasOneRelation") {
+        if (
+            field.adomin.type === "hasOneRelation" ||
+            field.adomin.type === "manyToManyRelation" ||
+            field.adomin.type === "hasManyRelation"
+        ) {
             foreignFields.push(field);
             continue;
         }
@@ -85,6 +92,54 @@ export const attachForeignFields = async (
                 value,
                 instance,
             });
+
+            continue;
+        }
+
+        if (field.adomin.type === "hasManyRelation") {
+            await handleHasManyUpdate({
+                fieldConfig: field.adomin,
+                Model,
+                oldHasManyInstances: oldValue,
+                value: value && Array.isArray(value) ? value : [],
+                instance,
+            });
+
+            continue;
+        }
+
+        if (field.adomin.type === "manyToManyRelation") {
+            await handleManyToManyUpdate({
+                fieldConfig: field.adomin,
+                Model,
+                oldManyToManyInstances: oldValue,
+                value: value && Array.isArray(value) ? value : [],
+                instance,
+            });
+
+            continue;
         }
     }
+};
+
+export const updateVirtualColumns = async (
+    instance: LucidRow,
+    fields: ColumnConfig[],
+    data: any,
+) => {
+    const virtualFieldsWithSetter = fields.filter(
+        ({ isVirtual, adomin }) => isVirtual && adomin.setter,
+    );
+
+    const promises = virtualFieldsWithSetter.map(async ({ name, adomin }) => {
+        const setter = adomin.setter;
+
+        if (!setter) throw new Error(`No setter found for virtual column ${name}`);
+
+        const value = data[name];
+
+        await setter(instance, value);
+    });
+
+    await Promise.all(promises);
 };

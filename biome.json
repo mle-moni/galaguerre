@@ -4,9 +4,10 @@
         "enabled": true
     },
     "files": {
-        "ignore": ["dist", "node_modules", "build"]
+        "ignore": ["dist", "node_modules", "build", "public"]
     },
     "linter": {
+        "ignore": ["app/adomin"],
         "enabled": true,
         "rules": {
             "recommended": true,

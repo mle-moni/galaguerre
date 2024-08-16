@@ -5,10 +5,10 @@ import type {
     ApiModelView,
     ApiStatView,
 } from "#adomin/api_views.types";
+import { ADOMIN_CONFIG } from "#adomin/config/adomin_config";
 import type { FolderViewConfig } from "#adomin/create_folder_view_config";
 import type { StatsViewConfig } from "#adomin/create_stats_view_config";
 import type { HttpContext } from "@adonisjs/core/http";
-import { ADOMIN_CONFIG } from "../config/adomin_config.js";
 import type { ModelConfig } from "../create_model_view_config.js";
 import { computeRightsCheck } from "./adomin_routes_overrides_and_rights.js";
 
@@ -97,5 +97,6 @@ export const getAdominConfig = async (ctx: HttpContext) => {
         views,
         userDisplayKey: ADOMIN_CONFIG.userDisplayKey ?? "email",
         user,
+        plugins: ADOMIN_CONFIG.plugins ?? [],
     };
 };
