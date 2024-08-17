@@ -1,4 +1,5 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { CenteredLoader } from "./components/centered_loader.jsx";
 import { UserContext, useUserQuery } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/error_404_page.jsx";
 import { HomePage } from "./pages/home/home_page.jsx";
@@ -37,7 +38,7 @@ const router = createBrowserRouter([
 export const AppRouterProvider = () => {
     const query = useUserQuery();
 
-    if (query.isLoading) return <>Loading...</>;
+    if (query.isLoading) return <CenteredLoader absolute />;
 
     return (
         <UserContext.Provider value={query.data ?? null}>

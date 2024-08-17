@@ -1,32 +1,22 @@
-import "./game.css";
-
 import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame } from "#api_types/game.types";
-import { Container, Stage, Text } from "@pixi/react";
-import { useDimensions } from "~/hooks/use_dimensions";
-import { PlayerHand } from "./hud/player_hand.js";
+import { Text } from "@mantine/core";
+import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
 
 export const GameRenderer = ({ game, user }: { game: ApiGame; user: ApiUser }) => {
-    const dimensions = useDimensions();
     const me = game.data.playerOne.userId === user.id ? game.data.playerOne : game.data.playerTwo;
     const opponent =
         game.data.playerOne.userId === user.id ? game.data.playerTwo : game.data.playerOne;
 
-    const textCenter = dimensions.height / 2 - 50;
-
     return (
         <>
-            <Stage
-                width={dimensions.width}
-                height={dimensions.height}
-                options={{ backgroundColor: 0xda9854 }}
-            >
-                <Container>
-                    <Text text={opponent.pseudo} x={20} y={textCenter - 50} />
-                    <Text text="VS" x={20} y={textCenter} />
-                    <Text text={me.pseudo} x={20} y={textCenter + 50} />
-                </Container>
-            </Stage>
+            <div className="flex absolute left-0 top-0 w-[80px] h-full">
+                <div className="w-full flex flex-col items-center justify-center relative bottom-12">
+                    <Text size="xl">{opponent.pseudo}</Text>
+                    <Text>VS</Text>
+                    <Text size="xl">{me.pseudo}</Text>
+                </div>
+            </div>
             <PlayerHand player={opponent} isOpponent />
             <PlayerHand player={me} />
         </>

@@ -1,7 +1,6 @@
-import "./player_hand.css";
-
 import type { GamePlayer } from "#api_types/game.types";
-import { PlayingCard } from "./playing_card.js";
+import { PlayingCard } from "../playing_card/playing_card.jsx";
+import "./player_hand.css";
 
 export const PlayerHand = ({
     player,
