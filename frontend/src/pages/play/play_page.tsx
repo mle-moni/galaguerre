@@ -1,4 +1,5 @@
 import type { ApiUser } from "#api_types/auth.types";
+
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useDimensions } from "~/hooks/use_dimensions";

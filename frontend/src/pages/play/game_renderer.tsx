@@ -1,5 +1,6 @@
 import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame } from "#api_types/game.types";
+
 import { Text } from "@mantine/core";
 import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
 
