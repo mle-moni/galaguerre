@@ -1,0 +1,17 @@
+.player-hand {
+	bottom: 30px;
+}
+
+.opponent-hand {
+	top: 30px;
+}
+
+.card-hand {
+	display: flex;
+	justify-content: center;
+	gap: 20px;
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: 150px;
+}
