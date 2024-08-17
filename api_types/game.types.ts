@@ -1,13 +1,26 @@
-import type { GalaguerreCardType } from "../app/galaguerre/galaguerre.types.js";
-
-export interface PlayerCard {
+export interface PlayerCardBase {
     uuid: string;
     cardId: number;
-    type: GalaguerreCardType;
     label: string;
     imageUrl: string;
     cost: number;
 }
+export type PlayerCard = PlayerCardBase & PlayerCardType;
+
+export type PlayerCardType =
+    | {
+          type: "MINION";
+          health: number;
+          attack: number;
+      }
+    | {
+          type: "SPELL";
+          // TODO
+      }
+    | {
+          type: "WEAPON";
+          // TODO
+      };
 
 export interface GameAction {
     uuid: string;
@@ -41,7 +54,7 @@ export interface BoardState {
 
 export interface GamePlayer {
     userId: number;
-    deck: PlayerCard[];
+    deckCards: PlayerCard[];
     hand: PlayerCard[];
     board: BoardState;
     weaponState: WeaponState | null;
@@ -50,6 +63,7 @@ export interface GamePlayer {
 }
 
 export interface GameData {
+    state: "INIT" | "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" | "FINISHED";
     currentRound: number;
     playerOne: GamePlayer;
     playerTwo: GamePlayer;

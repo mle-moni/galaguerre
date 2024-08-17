@@ -1,17 +1,24 @@
 import type { GameData } from "#api_types/game.types";
+import type Deck from "#models/deck";
 import Game from "#models/game";
+import { generatePlayerCards } from "./generate_player_cards.js";
 
-interface CreateGameOptions {
-    playerOneId: number;
-    playerTwoId: number;
+interface Player {
+    userId: number;
+    deck: Deck;
 }
 
-export const createGame = async ({ playerOneId, playerTwoId }: CreateGameOptions) => {
-    const gameData: GameData = getDefaultGameData({ playerOneId, playerTwoId });
+interface CreateGameOptions {
+    playerOne: Player;
+    playerTwo: Player;
+}
+
+export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) => {
+    const gameData: GameData = await getDefaultGameData({ playerOne, playerTwo });
 
     const game = await Game.create({
-        playerOneId,
-        playerTwoId,
+        playerOneId: playerOne.userId,
+        playerTwoId: playerTwo.userId,
         data: gameData,
     });
 
@@ -20,29 +27,35 @@ export const createGame = async ({ playerOneId, playerTwoId }: CreateGameOptions
 
 const DEFAULT_HEALTH = 30;
 
-export const getDefaultGameData = ({ playerOneId, playerTwoId }: CreateGameOptions): GameData => ({
-    currentRound: 0,
-    playerOne: {
-        userId: playerOneId,
-        deck: [],
-        hand: [],
-        board: {
-            minions: [],
+export const getDefaultGameData = async ({
+    playerOne,
+    playerTwo,
+}: CreateGameOptions): Promise<GameData> => {
+    return {
+        state: "INIT",
+        currentRound: 0,
+        playerOne: {
+            userId: playerOne.userId,
+            deckCards: generatePlayerCards(playerOne.deck),
+            hand: [],
+            board: {
+                minions: [],
+            },
+            health: DEFAULT_HEALTH,
+            mana: 0,
+            weaponState: null,
         },
-        health: DEFAULT_HEALTH,
-        mana: 0,
-        weaponState: null,
-    },
-    playerTwo: {
-        userId: playerTwoId,
-        deck: [],
-        hand: [],
-        board: {
-            minions: [],
+        playerTwo: {
+            userId: playerTwo.userId,
+            deckCards: generatePlayerCards(playerTwo.deck),
+            hand: [],
+            board: {
+                minions: [],
+            },
+            health: DEFAULT_HEALTH,
+            mana: 0,
+            weaponState: null,
         },
-        health: DEFAULT_HEALTH,
-        mana: 0,
-        weaponState: null,
-    },
-    gameRounds: [],
-});
+        gameRounds: [],
+    };
+};
