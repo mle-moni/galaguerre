@@ -11,11 +11,25 @@ export const GameRenderer = ({ game, user }: { game: ApiGame; user: ApiUser }) =
 
     return (
         <>
-            <div className="flex absolute left-0 top-0 w-[80px] h-full">
+            <div className="flex absolute left-0 top-0 w-[120px] h-full">
                 <div className="w-full flex flex-col items-center justify-center relative bottom-12">
-                    <Text size="xl">{opponent.pseudo}</Text>
-                    <Text>VS</Text>
-                    <Text size="xl">{me.pseudo}</Text>
+                    <div className="rounded-full border-2 border-white border-solid p-4">
+                        <Text size="lg" ta="center">
+                            {opponent.health} pdv
+                        </Text>
+                        <Text size="xl" ta="center">
+                            {opponent.pseudo}
+                        </Text>
+                    </div>
+                    <Text className="m-2">VS</Text>
+                    <div className="rounded-full border-2 border-white border-solid p-4">
+                        <Text size="xl" ta="center">
+                            {me.pseudo}
+                        </Text>
+                        <Text size="lg" ta="center">
+                            {me.health} pdv
+                        </Text>
+                    </div>
                 </div>
             </div>
             <PlayerHand player={opponent} isOpponent />

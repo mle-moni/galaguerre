@@ -26,6 +26,7 @@ export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) =>
     return game;
 };
 
+const DEFAULT_HAND_SIZE = 3;
 const DEFAULT_HEALTH = 30;
 
 export const getDefaultGameData = async ({
@@ -33,12 +34,12 @@ export const getDefaultGameData = async ({
     playerTwo,
 }: CreateGameOptions): Promise<GameData> => {
     const p1Deck = generatePlayerCards(playerOne.deck);
-    const p1Hand = p1Deck.slice(0, 3);
-    const p1DeckCards = p1Deck.slice(3);
+    const p1Hand = p1Deck.slice(0, DEFAULT_HAND_SIZE);
+    const p1DeckCards = p1Deck.slice(DEFAULT_HAND_SIZE);
 
     const p2Deck = generatePlayerCards(playerTwo.deck);
-    const p2Hand = p2Deck.slice(0, 3);
-    const p2DeckCards = p2Deck.slice(3);
+    const p2Hand = p2Deck.slice(0, DEFAULT_HAND_SIZE);
+    const p2DeckCards = p2Deck.slice(DEFAULT_HAND_SIZE);
 
     return {
         state: "INIT",

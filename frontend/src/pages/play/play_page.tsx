@@ -1,3 +1,5 @@
+import "./play_page.css";
+
 import type { ApiUser } from "#api_types/auth.types";
 
 import { Navigate } from "react-router-dom";
