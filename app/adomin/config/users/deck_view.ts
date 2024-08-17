@@ -10,7 +10,7 @@ export const DECK_VIEW = createModelViewConfig(() => Deck, {
         user: {
             type: "belongsToRelation",
             modelName: "User",
-            labelFields: ["pseudo"],
+            labelFields: ["email"],
             label: "Utilisateur",
         },
         selected: {

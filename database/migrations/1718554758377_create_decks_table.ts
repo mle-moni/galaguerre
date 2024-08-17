@@ -10,6 +10,8 @@ export default class extends BaseSchema {
             table.string("name").notNullable();
             table.integer("user_id").references("users.id").notNullable().onDelete("CASCADE");
 
+            table.boolean("selected").defaultTo(false);
+
             table.timestamp("created_at");
             table.timestamp("updated_at");
         });
