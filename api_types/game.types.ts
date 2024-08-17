@@ -54,6 +54,7 @@ export interface BoardState {
 
 export interface GamePlayer {
     userId: number;
+    pseudo: string;
     deckCards: PlayerCard[];
     hand: PlayerCard[];
     board: BoardState;
@@ -68,4 +69,14 @@ export interface GameData {
     playerOne: GamePlayer;
     playerTwo: GamePlayer;
     gameRounds: GameRound[];
+}
+
+export interface ApiGame {
+    id: number;
+    playerOneId: number;
+    playerTwoId: number;
+    data: GameData;
+    isFinished: boolean;
+    createdAt: string;
+    updatedAt: string;
 }

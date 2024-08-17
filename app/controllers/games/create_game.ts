@@ -5,6 +5,7 @@ import { generatePlayerCards } from "./generate_player_cards.js";
 
 interface Player {
     userId: number;
+    pseudo: string;
     deck: Deck;
 }
 
@@ -36,6 +37,7 @@ export const getDefaultGameData = async ({
         currentRound: 0,
         playerOne: {
             userId: playerOne.userId,
+            pseudo: playerOne.pseudo,
             deckCards: generatePlayerCards(playerOne.deck),
             hand: [],
             board: {
@@ -47,6 +49,7 @@ export const getDefaultGameData = async ({
         },
         playerTwo: {
             userId: playerTwo.userId,
+            pseudo: playerTwo.pseudo,
             deckCards: generatePlayerCards(playerTwo.deck),
             hand: [],
             board: {

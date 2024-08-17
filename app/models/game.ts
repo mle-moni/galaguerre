@@ -1,4 +1,4 @@
-import type { GameData } from "#api_types/game.types";
+import type { ApiGame, GameData } from "#api_types/game.types";
 import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
@@ -31,4 +31,16 @@ export default class Game extends BaseModel {
 
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     declare updatedAt: DateTime;
+
+    getApiJson(): ApiGame {
+        return {
+            id: this.id,
+            playerOneId: this.playerOneId,
+            playerTwoId: this.playerTwoId,
+            data: this.data,
+            isFinished: this.isFinished,
+            createdAt: this.createdAt.toISO()!,
+            updatedAt: this.updatedAt.toISO()!,
+        };
+    }
 }

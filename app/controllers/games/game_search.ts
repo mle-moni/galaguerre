@@ -1,5 +1,6 @@
 import type Card from "#models/card";
 import Deck from "#models/deck";
+import type User from "#models/user";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { MATCHMAKING_QUEUE, addMatchmakingQueueItem } from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
@@ -32,15 +33,18 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         .where("userId", opponent.userId)
         .andWhere("selected", true)
         .preload("cards", loadCardRelations)
+        .preload("user")
         .firstOrFail();
 
     const playerOne = {
         userId: opponent.userId,
+        pseudo: generatePseudo(opponentDeck.user),
         deck: opponentDeck,
     };
 
     const playerTwo = {
         userId: user.id,
+        pseudo: generatePseudo(user),
         deck,
     };
 
@@ -54,4 +58,8 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
     emitSocketEvent("game:created", { gameId: game.id }, rooms);
 
     return { message: "Game created", game };
+};
+
+const generatePseudo = (user: User) => {
+    return user.pseudo ?? user.email.split("@")[0];
 };
