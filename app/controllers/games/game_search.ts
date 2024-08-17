@@ -57,7 +57,7 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
 
     emitSocketEvent("game:created", { gameId: game.id }, rooms);
 
-    return { message: "Game created", game };
+    return { message: "Game created" };
 };
 
 const generatePseudo = (user: User) => {

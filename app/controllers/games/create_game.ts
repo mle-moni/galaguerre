@@ -32,14 +32,22 @@ export const getDefaultGameData = async ({
     playerOne,
     playerTwo,
 }: CreateGameOptions): Promise<GameData> => {
+    const p1Deck = generatePlayerCards(playerOne.deck);
+    const p1Hand = p1Deck.slice(0, 3);
+    const p1DeckCards = p1Deck.slice(3);
+
+    const p2Deck = generatePlayerCards(playerTwo.deck);
+    const p2Hand = p2Deck.slice(0, 3);
+    const p2DeckCards = p2Deck.slice(3);
+
     return {
         state: "INIT",
         currentRound: 0,
         playerOne: {
             userId: playerOne.userId,
             pseudo: playerOne.pseudo,
-            deckCards: generatePlayerCards(playerOne.deck),
-            hand: [],
+            deckCards: p1DeckCards,
+            hand: p1Hand,
             board: {
                 minions: [],
             },
@@ -50,8 +58,8 @@ export const getDefaultGameData = async ({
         playerTwo: {
             userId: playerTwo.userId,
             pseudo: playerTwo.pseudo,
-            deckCards: generatePlayerCards(playerTwo.deck),
-            hand: [],
+            deckCards: p2DeckCards,
+            hand: p2Hand,
             board: {
                 minions: [],
             },

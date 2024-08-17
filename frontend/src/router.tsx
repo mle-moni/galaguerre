@@ -1,10 +1,10 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { UserContext, useUserQuery } from "./hooks/use_user.js";
-import { Error404Page } from "./pages/errors/Error404Page.jsx";
-import { HomePage } from "./pages/home/HomePage.jsx";
-import { LoginPage } from "./pages/login/LoginPage.jsx";
-import { MatchmakingPage } from "./pages/matchmaking/MatchmakingPage.jsx";
-import { PlayPage } from "./pages/play/PlayPage.jsx";
+import { Error404Page } from "./pages/errors/error_404_page.jsx";
+import { HomePage } from "./pages/home/home_page.jsx";
+import { LoginPage } from "./pages/login/login_page.jsx";
+import { MatchmakingPage } from "./pages/matchmaking/match_making_page.jsx";
+import { PlayPage } from "./pages/play/play_page.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 
 const router = createBrowserRouter([

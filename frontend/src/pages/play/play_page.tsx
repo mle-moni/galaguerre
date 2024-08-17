@@ -1,8 +1,8 @@
 import type { ApiUser } from "#api_types/auth.types";
 import { Navigate } from "react-router-dom";
 import { useUser } from "~/hooks/use_user";
-import { GameRenderer } from "./GameRenderer.jsx";
-import { useGameState } from "./useGameState.js";
+import { useGameState } from "../../hooks/use_game_state.js";
+import { GameRenderer } from "./game_renderer.js";
 
 interface GameProps {
     user: ApiUser;

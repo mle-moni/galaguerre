@@ -1,17 +1,17 @@
-import type { PlayerCard } from "#api_types/game.types";
+import "./playing_card.css";
 
-import "./card.css";
+import type { PlayerCard } from "#api_types/game.types";
 
 interface CardProps {
     card: PlayerCard;
     isOpponent?: boolean;
 }
 
-export const Card = ({ card, isOpponent }: CardProps) => {
+export const PlayingCard = ({ card, isOpponent }: CardProps) => {
     if (card.type !== "MINION") return <p>Card type {card.type} not supported</p>;
 
     return (
-        <div className="card">
+        <div className="card" draggable>
             {!isOpponent && (
                 <>
                     <div className="cost">{card.cost}</div>

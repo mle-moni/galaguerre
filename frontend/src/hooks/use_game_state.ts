@@ -4,7 +4,7 @@ import { privateAxios } from "~/services/axios";
 
 export const useGameState = (gameId: number) => {
     const query = useQuery({
-        queryKey: ["gameState"],
+        queryKey: ["gameState", gameId],
         queryFn: async () => {
             const response = await privateAxios.get<ApiGame>(`/api/games/${gameId}`);
 
