@@ -5,7 +5,7 @@ import type { ApiUser } from "#api_types/auth.types";
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useDimensions } from "~/hooks/use_dimensions";
-import { useGameState } from "~/hooks/use_game_state";
+import { GameStateContext, useGameState } from "~/hooks/use_game_state";
 import { useUser } from "~/hooks/use_user";
 import { GameRenderer } from "./game_renderer.js";
 
@@ -19,7 +19,11 @@ const Game = ({ gameId, user }: GameProps) => {
 
     if (gameQuery.isLoading || !gameQuery.data) return <CenteredLoader absolute />;
 
-    return <GameRenderer game={gameQuery.data} user={user} />;
+    return (
+        <GameStateContext.Provider value={gameQuery.data}>
+            <GameRenderer game={gameQuery.data} user={user} />
+        </GameStateContext.Provider>
+    );
 };
 
 export const PlayPage = () => {
