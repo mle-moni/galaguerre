@@ -45,7 +45,7 @@ export const PlayerInfos = ({ player, isOpponent }: PlayerInfosProps) => {
 
     return (
         <div
-            className="rounded-full border-2 border-solid p-4 w-full ml-2"
+            className="rounded-full border-2 border-solid p-4 w-full mx-2"
             style={{
                 borderColor,
             }}
