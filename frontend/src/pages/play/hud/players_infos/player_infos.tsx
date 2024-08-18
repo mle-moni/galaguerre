@@ -11,7 +11,7 @@ interface PlayerInfosProps {
 
 export const PlayerInfos = ({ player, isOpponent }: PlayerInfosProps) => {
     const isMyTurn = useIsMyTurn();
-    const gameState = useGameContext().data.state;
+    const gameState = useGameContext().game.data.state;
     const elements = useMemo(() => {
         const jsxArray = [
             <Text key="PSEUDO" size="xl" ta="center">

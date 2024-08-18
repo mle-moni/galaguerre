@@ -3,6 +3,7 @@ import type { ApiGame } from "#api_types/game.types";
 
 import { Board } from "./board/board.jsx";
 import { DecksInfos } from "./hud/decks_infos/decks_infos.jsx";
+import { GameFinalScreen } from "./hud/game_final_screen/game_final_screen.jsx";
 import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
 import { PlayersInfos } from "./hud/players_infos/players_infos.jsx";
 
@@ -26,6 +27,8 @@ export const GameRenderer = ({ game, user }: { game: ApiGame; user: ApiUser }) =
             </div>
             <PlayerHand player={opponent} isOpponent />
             <PlayerHand player={me} />
+
+            <GameFinalScreen />
         </>
     );
 };

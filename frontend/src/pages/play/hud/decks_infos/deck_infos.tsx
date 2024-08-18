@@ -9,12 +9,11 @@ interface DeckInfosProps {
     isOpponent?: boolean;
 }
 
+const filler = <div className="h-[80px]" />;
+
 export const DeckInfos = ({ player, isOpponent }: DeckInfosProps) => {
     const numberOfCards = player.deckCards.length;
     const iconSize = getIconSize(numberOfCards);
-    const isMyTurn = useIsMyTurn();
-
-    const filler = <div className="h-[80px]" />;
 
     return (
         <div className="flex flex-col w-full">
@@ -23,16 +22,27 @@ export const DeckInfos = ({ player, isOpponent }: DeckInfosProps) => {
                 <p className="flex-1 mr-2 text-right text-xl">{numberOfCards}</p>
                 <IconPlayCard className="flex-1" size={iconSize} />
             </div>
-            {!isOpponent && !isMyTurn && filler}
-            {!isOpponent && isMyTurn && (
+            {!isOpponent && (
                 <div className="h-[80px] flex justify-center">
-                    <Button variant="filled" onClick={passTurn}>
-                        Terminé
-                    </Button>
+                    <PlayerButton />
                 </div>
             )}
         </div>
     );
+};
+
+const PlayerButton = () => {
+    const isMyTurn = useIsMyTurn();
+
+    if (isMyTurn) {
+        return (
+            <Button variant="filled" onClick={passTurn}>
+                Terminé
+            </Button>
+        );
+    }
+
+    return null;
 };
 
 const getIconSize = (numCards: number): number => {
