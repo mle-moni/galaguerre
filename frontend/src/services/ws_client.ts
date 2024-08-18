@@ -27,3 +27,7 @@ export const subscribeToSocketEvent = <T extends SocketEventKey>(
 };
 
 setupEvents(CLIENT_SOCKET);
+
+export const passTurn = () => {
+    CLIENT_SOCKET.emit("pass_turn");
+};

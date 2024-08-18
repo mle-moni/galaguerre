@@ -4,6 +4,7 @@ import type { Socket } from "socket.io-client";
 import { getGameStateQueryKey } from "~/hooks/use_game_state";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { queryClient } from "./query_client.js";
+import { notifyApiError, notifySuccess } from "./toasts.js";
 import { setSocketAuthSuccess, subscribeToSocketEvent } from "./ws_client.js";
 
 export const setupEvents = (socket: Socket) => {
@@ -22,6 +23,14 @@ export const setupEvents = (socket: Socket) => {
 
     subscribeToSocketEvent("auth_success", () => {
         setSocketAuthSuccess(true);
+    });
+
+    subscribeToSocketEvent("notify_error", (error) => {
+        notifyApiError(error);
+    });
+
+    subscribeToSocketEvent("notify_success", ({ message }) => {
+        notifySuccess(message);
     });
 
     subscribeToSocketEvent("game:created", ({ gameId }) => {

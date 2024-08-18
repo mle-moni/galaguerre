@@ -1,7 +1,9 @@
 import type { GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
-import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { WsRooms } from "#services/sockets/ws_rooms";
+import { sendGameUpdate } from "./send_game_update.js";
+import { terminateGame } from "./terminate_game.js";
+
+const MAX_MANA = 10;
 
 export const setupNextGameTurn = async (game: Game) => {
     const nextState = getWhoIsNext(game);
@@ -18,33 +20,26 @@ export const setupNextGameTurn = async (game: Game) => {
     }
 
     player.mana = game.data.currentRound;
+    if (player.mana > MAX_MANA) player.mana = MAX_MANA;
 
     const newCardToDraw = player.deckCards.shift();
     if (!newCardToDraw) {
         // fatigue damage
-        player.health -= getFatigueDamage(player);
-        player.maxFatigueDamageTaken++;
+        const fatigueDamage = getFatigueDamage(player);
+        player.health -= fatigueDamage;
+        player.maxFatigueDamageTaken = fatigueDamage;
     } else {
         player.hand.push(newCardToDraw);
     }
 
-    if (player.health <= 0) {
-        game.data.state = "FINISHED";
+    if (p1.health <= 0 || p2.health <= 0) {
+        await terminateGame(game);
+        return;
     }
 
     await game.save();
 
-    emitSocketEvent(
-        "game:update",
-        { game: game.getApiJson(p1.userId) },
-        WsRooms.personalSocketRoom(p1.userId),
-    );
-
-    emitSocketEvent(
-        "game:update",
-        { game: game.getApiJson(p2.userId) },
-        WsRooms.personalSocketRoom(p2.userId),
-    );
+    sendGameUpdate(game);
 };
 
 const getWhoIsNext = (game: Game): "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" => {
@@ -54,9 +49,6 @@ const getWhoIsNext = (game: Game): "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" => {
     return "PLAYER_ONE_TURN";
 };
 
-// fatigue damage formula
-// see https://hearthstone.fandom.com/wiki/Fatigue
 const getFatigueDamage = (player: GamePlayer) => {
-    const n = player.maxFatigueDamageTaken;
-    return (n * (n + 1)) / 2;
+    return player.maxFatigueDamageTaken + 1;
 };
