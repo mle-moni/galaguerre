@@ -1,5 +1,7 @@
 import type { ApiUser } from "#api_types/auth.types";
+import type { ApiGame } from "#api_types/game.types";
 import type { Socket } from "socket.io-client";
+import { getGameStateQueryKey } from "~/hooks/use_game_state";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { queryClient } from "./query_client.js";
 import { setSocketAuthSuccess, subscribeToSocketEvent } from "./ws_client.js";
@@ -26,6 +28,14 @@ export const setupEvents = (socket: Socket) => {
         queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
             if (!oldUser) return oldUser;
             return { ...oldUser, currentGameId: gameId };
+        });
+    });
+
+    subscribeToSocketEvent("game:update", ({ game }) => {
+        queryClient.setQueryData<ApiGame>(getGameStateQueryKey(game.id), (old) => {
+            if (!old) return old;
+
+            return game;
         });
     });
 };

@@ -61,6 +61,7 @@ export interface GamePlayer {
     weaponState: WeaponState | null;
     health: number;
     mana: number;
+    maxFatigueDamageTaken: number;
 }
 
 export interface GameData {

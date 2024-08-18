@@ -2,6 +2,7 @@ import type { GameData } from "#api_types/game.types";
 import type Deck from "#models/deck";
 import Game from "#models/game";
 import { generatePlayerCards } from "./generate_player_cards.js";
+import { setupNextGameTurn } from "./setup_next_game_turn.js";
 
 interface Player {
     userId: number;
@@ -22,12 +23,16 @@ export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) =>
         playerTwoId: playerTwo.userId,
         data: gameData,
     });
+    // wait 3s then make player one draw and start the game
+    setTimeout(() => {
+        setupNextGameTurn(game);
+    }, 3000);
 
     return game;
 };
 
 const DEFAULT_HAND_SIZE = 3;
-const DEFAULT_HEALTH = 30;
+const DEFAULT_HEALTH = 15;
 
 export const getDefaultGameData = async ({
     playerOne,
@@ -54,6 +59,7 @@ export const getDefaultGameData = async ({
             },
             health: DEFAULT_HEALTH,
             mana: 0,
+            maxFatigueDamageTaken: 0,
             weaponState: null,
         },
         playerTwo: {
@@ -66,6 +72,7 @@ export const getDefaultGameData = async ({
             },
             health: DEFAULT_HEALTH,
             mana: 0,
+            maxFatigueDamageTaken: 0,
             weaponState: null,
         },
         gameRounds: [],
