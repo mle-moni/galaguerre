@@ -2,7 +2,7 @@ import type { GamePlayer } from "#api_types/game.types";
 import { Button } from "@mantine/core";
 import { IconPlayCard } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
-import { useIsMyTurn } from "~/hooks/use_game_state";
+import { useGameContext } from "~/hooks/use_game_state";
 import { passTurn } from "~/services/ws_client";
 
 interface DeckInfosProps {
@@ -33,9 +33,9 @@ export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
 });
 
 const PlayerButton = observer(() => {
-    const isMyTurn = useIsMyTurn();
+    const { store } = useGameContext();
 
-    if (isMyTurn) {
+    if (store.isMyTurn) {
         return (
             <Button variant="filled" onClick={passTurn}>
                 Terminé

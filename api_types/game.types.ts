@@ -48,6 +48,8 @@ export interface MinionState {
     attack: number;
 }
 
+export type MinionSpotId = "SPOT_1" | "SPOT_2" | "SPOT_3" | "SPOT_4" | "SPOT_5";
+
 export interface BoardState {
     minions: MinionState[];
 }

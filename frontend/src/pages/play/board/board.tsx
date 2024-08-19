@@ -1,51 +1,56 @@
 import "./board.css";
 
-import type { PlayerCard } from "#api_types/game.types";
+import type { MinionSpotId } from "#api_types/game.types";
 
 import clsx from "clsx";
+import { toJS } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useIsMyTurn } from "~/hooks/use_game_state";
+import { useGameContext } from "~/hooks/use_game_state";
+import type { GameStore } from "~/stores/GameStore";
+
+const SPOTS: MinionSpotId[] = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"];
 
 export const Board = observer(() => {
-    const isMyTurn = useIsMyTurn();
+    const { store } = useGameContext();
 
     return (
         <div className="flex flex-col h-full justify-center items-center">
             <div className="h-[300px] w-full flex justify-center items-center">
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
+                {SPOTS.map((spotId) => (
+                    <MinionSpot key={spotId} store={store} spotId={spotId} isOpponent />
+                ))}
             </div>
             <div className="border-2 border-dashed w-full" />
             <div className="h-[300px] w-full flex justify-center items-center">
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
-                <MinionSpot isMyTurn={isMyTurn} />
+                {SPOTS.map((spotId) => (
+                    <MinionSpot key={spotId} store={store} spotId={spotId} />
+                ))}
             </div>
         </div>
     );
 });
 
 interface MinionSpotProps {
-    isMyTurn: boolean;
+    store: GameStore;
+    spotId: MinionSpotId;
+    isOpponent?: boolean;
 }
 
-const MinionSpot = observer(({ isMyTurn }: MinionSpotProps) => {
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        const card: PlayerCard | null = JSON.parse(e.dataTransfer?.getData("card") ?? null);
-
+const MinionSpot = observer(({ store, isOpponent }: MinionSpotProps) => {
+    const handleDrop = () => {
+        const card = store.cardDragStore.cardDragged;
         if (!card) return;
-
-        console.log(card);
+        console.log(toJS(card));
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        if (!isMyTurn) return;
-        console.log(e.dataTransfer?.types);
+        const card = store.cardDragStore.cardDragged;
+
+        if (!store.isMyTurn || !card) return;
+        if (card.type !== "MINION") return;
+        if (isOpponent) return;
+
+        // authorize drag only for Minions (for now)
         e.preventDefault();
     };
 

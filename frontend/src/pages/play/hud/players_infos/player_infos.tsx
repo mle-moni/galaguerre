@@ -3,16 +3,15 @@ import type { GamePlayer } from "#api_types/game.types";
 import { Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
-import { useGameContext, useIsMyTurn } from "~/hooks/use_game_state";
+import { useGameContext } from "~/hooks/use_game_state";
 
 interface PlayerInfosProps {
     player: GamePlayer;
     isOpponent?: boolean;
 }
 
-export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent }) => {
-    const isMyTurn = useIsMyTurn();
-    const gameState = useGameContext().game.data.state;
+export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = false }) => {
+    const { store } = useGameContext();
     const elements = useMemo(() => {
         const jsxArray = [
             <Text key="PSEUDO" size="xl" ta="center">
@@ -33,16 +32,13 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent }) =
         return jsxArray;
     }, [player, isOpponent]);
 
-    const borderColor = useMemo(() => {
-        if (gameState === "INIT") return "yellow";
-
-        const opponentAndHisTurn = isOpponent && !isMyTurn;
-        const meAndMyTurn = !isOpponent && isMyTurn;
-
-        if (meAndMyTurn || opponentAndHisTurn) return "#2ae32a";
-
-        return "white";
-    }, [isMyTurn, isOpponent, gameState]);
+    const borderColor = useMemo(
+        () =>
+            store.playerInfosStore.getBorderColor({
+                isOpponent,
+            }),
+        [store, isOpponent],
+    );
 
     return (
         <div
