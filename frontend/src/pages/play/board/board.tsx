@@ -36,7 +36,7 @@ interface MinionSpotProps {
     isOpponent?: boolean;
 }
 
-const MinionSpot = observer(({ store, isOpponent }: MinionSpotProps) => {
+const MinionSpot = observer(({ store, isOpponent, spotId }: MinionSpotProps) => {
     const handleDrop = () => {
         const card = store.cardDragStore.cardDragged;
         if (!card) return;
@@ -59,6 +59,11 @@ const MinionSpot = observer(({ store, isOpponent }: MinionSpotProps) => {
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             className={clsx("minion-spot", "w-[120px] h-[150px] bg-red-100 border-dashed m-4")}
+            style={{
+                borderColor: isOpponent
+                    ? store.cardDragStore.opponentSlotsBorderColor[spotId]
+                    : store.cardDragStore.mySlotsBorderColor[spotId],
+            }}
         />
     );
 });

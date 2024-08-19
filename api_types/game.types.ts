@@ -46,13 +46,14 @@ export interface MinionState {
     minionId: number;
     health: number;
     attack: number;
+    placedAtRound: number;
 }
 
 export type MinionSpotId = "SPOT_1" | "SPOT_2" | "SPOT_3" | "SPOT_4" | "SPOT_5";
 
-export interface BoardState {
-    minions: MinionState[];
-}
+export type BoardState = {
+    [K in MinionSpotId]: MinionState | null;
+};
 
 export interface GamePlayer {
     userId: number;

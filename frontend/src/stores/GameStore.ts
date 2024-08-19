@@ -1,5 +1,5 @@
 import type { ApiUser } from "#api_types/auth.types";
-import type { ApiGame } from "#api_types/game.types";
+import type { ApiGame, GamePlayer } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
 import { _assert } from "~/helpers/assertions";
 import { CardDragStore } from "./CardDragStore.js";
@@ -48,6 +48,18 @@ export class GameStore {
 
     get p2() {
         return this.game.data.playerTwo;
+    }
+
+    get opponent(): GamePlayer {
+        if (this.p1.userId === this.user.id) return this.p2;
+
+        return this.p1;
+    }
+
+    get me(): GamePlayer {
+        if (this.p1.userId === this.user.id) return this.p1;
+
+        return this.p2;
     }
 
     get winner() {

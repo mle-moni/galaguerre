@@ -22,10 +22,13 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
         <div
             key={card.uuid}
             style={style}
-            className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f]")}
+            className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f] cursor-pointer")}
             draggable={store.isMyTurn}
             onDragStart={() => {
                 store.cardDragStore.setCardDragged(card);
+            }}
+            onDragEnd={() => {
+                store.cardDragStore.setCardDragged(null);
             }}
         >
             {!isOpponent && (

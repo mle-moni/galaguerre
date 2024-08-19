@@ -32,13 +32,9 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
         return jsxArray;
     }, [player, isOpponent]);
 
-    const borderColor = useMemo(
-        () =>
-            store.playerInfosStore.getBorderColor({
-                isOpponent,
-            }),
-        [store, isOpponent],
-    );
+    const borderColor = store.playerInfosStore.getBorderColor({
+        isOpponent,
+    });
 
     return (
         <div
