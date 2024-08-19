@@ -1,11 +1,11 @@
 import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
-
-type FinalScreenOpenState = "OPENED" | "CLOSED" | "AUTO";
+import { CardDragStore } from "./CardDragStore.js";
 
 export class GameStore {
-    public finalScreenOpenState: FinalScreenOpenState = "AUTO";
+    public isFinalScreenOpen = false;
+    public cardDragStore = new CardDragStore(this);
 
     constructor(
         protected game: ApiGame,
@@ -14,19 +14,12 @@ export class GameStore {
         makeAutoObservable(this);
     }
 
-    setFinalScreenOpenState(state: FinalScreenOpenState) {
-        this.finalScreenOpenState = state;
+    setIsFinalScreenOpen(state: boolean) {
+        this.isFinalScreenOpen = state;
     }
 
     get isFinished() {
         return this.game.data.state === "FINISHED";
-    }
-
-    get isFinalScreenOpen() {
-        if (this.finalScreenOpenState === "AUTO") {
-            return this.game.data.state === "FINISHED";
-        }
-        return this.finalScreenOpenState === "OPENED";
     }
 
     get p1() {

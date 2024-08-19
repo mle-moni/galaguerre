@@ -2,6 +2,8 @@ import "./play_page.css";
 
 import type { ApiUser } from "#api_types/auth.types";
 
+import { observable } from "mobx";
+import { observer } from "mobx-react-lite";
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useDimensions } from "~/hooks/use_dimensions";
@@ -14,7 +16,7 @@ interface GameProps {
     gameId: number;
 }
 
-const Game = ({ gameId, user }: GameProps) => {
+const Game = observable(({ gameId, user }: GameProps) => {
     const gameQuery = useGameState(gameId);
 
     if (gameQuery.isLoading || !gameQuery.data) return <CenteredLoader absolute />;
@@ -24,9 +26,9 @@ const Game = ({ gameId, user }: GameProps) => {
             <GameRenderer game={gameQuery.data} user={user} />
         </GameStateContext.Provider>
     );
-};
+});
 
-export const PlayPage = () => {
+export const PlayPage = observer(() => {
     const dimensions = useDimensions();
     const user = useUser();
 
@@ -44,4 +46,4 @@ export const PlayPage = () => {
             <Game user={user} gameId={user.currentGameId} />
         </div>
     );
-};
+});

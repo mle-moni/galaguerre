@@ -1,7 +1,8 @@
+import { observer } from "mobx-react-lite";
 import { Link, Navigate } from "react-router-dom";
 import { useUser } from "~/hooks/use_user";
 
-export const HomePage = () => {
+export const HomePage = observer(() => {
     const user = useUser();
 
     if (!user) return <Navigate to="/login" />;
@@ -12,4 +13,4 @@ export const HomePage = () => {
             <Link to="/play">Jouer</Link>
         </div>
     );
-};
+});

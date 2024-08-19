@@ -4,7 +4,9 @@ import type { PlayerCard } from "#api_types/game.types";
 
 import { Image } from "@mantine/core";
 import clsx from "clsx";
+import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
+import { useGameContext } from "~/hooks/use_game_state";
 
 interface CardProps {
     card: PlayerCard;
@@ -12,7 +14,8 @@ interface CardProps {
     style?: CSSProperties;
 }
 
-export const PlayingCard = ({ card, isOpponent, style }: CardProps) => {
+export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => {
+    const { store } = useGameContext();
     if (card.type !== "MINION") return <p>Card type {card.type} not supported</p>;
 
     return (
@@ -20,6 +23,10 @@ export const PlayingCard = ({ card, isOpponent, style }: CardProps) => {
             key={card.uuid}
             style={style}
             className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f]")}
+            draggable={true}
+            onDragStart={() => {
+                store.cardDragStore.setCardDragged(card);
+            }}
         >
             {!isOpponent && (
                 <>
@@ -30,6 +37,7 @@ export const PlayingCard = ({ card, isOpponent, style }: CardProps) => {
                             src={card.imageUrl}
                             height={75}
                             alt="Galaguerre card"
+                            draggable={false}
                         />
                     </div>
                     <div className="flex flex-col h-[75px] justify-around">
@@ -43,4 +51,4 @@ export const PlayingCard = ({ card, isOpponent, style }: CardProps) => {
             )}
         </div>
     );
-};
+});

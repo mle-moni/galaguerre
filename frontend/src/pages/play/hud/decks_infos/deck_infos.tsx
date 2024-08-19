@@ -1,6 +1,7 @@
 import type { GamePlayer } from "#api_types/game.types";
 import { Button } from "@mantine/core";
 import { IconPlayCard } from "@tabler/icons-react";
+import { observer } from "mobx-react-lite";
 import { useIsMyTurn } from "~/hooks/use_game_state";
 import { passTurn } from "~/services/ws_client";
 
@@ -11,7 +12,7 @@ interface DeckInfosProps {
 
 const filler = <div className="h-[80px]" />;
 
-export const DeckInfos = ({ player, isOpponent }: DeckInfosProps) => {
+export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
     const numberOfCards = player.deckCards.length;
     const iconSize = getIconSize(numberOfCards);
 
@@ -29,9 +30,9 @@ export const DeckInfos = ({ player, isOpponent }: DeckInfosProps) => {
             )}
         </div>
     );
-};
+});
 
-const PlayerButton = () => {
+const PlayerButton = observer(() => {
     const isMyTurn = useIsMyTurn();
 
     if (isMyTurn) {
@@ -43,7 +44,7 @@ const PlayerButton = () => {
     }
 
     return null;
-};
+});
 
 const getIconSize = (numCards: number): number => {
     const NUM_CARDS_MIN = 0;

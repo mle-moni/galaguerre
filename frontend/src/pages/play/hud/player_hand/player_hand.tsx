@@ -2,12 +2,15 @@ import "./player_hand.css";
 
 import type { GamePlayer } from "#api_types/game.types";
 
+import { observer } from "mobx-react-lite";
 import { PlayingCard } from "../playing_card/playing_card.jsx";
 
-export const PlayerHand = ({
-    player,
-    isOpponent,
-}: { player: GamePlayer; isOpponent?: boolean }) => {
+interface PlayerHandProps {
+    player: GamePlayer;
+    isOpponent?: boolean;
+}
+
+export const PlayerHand = observer<PlayerHandProps>(({ player, isOpponent }) => {
     const className = isOpponent ? "opponent-hand" : "player-hand";
 
     return (
@@ -45,4 +48,4 @@ export const PlayerHand = ({
             })}
         </div>
     );
-};
+});

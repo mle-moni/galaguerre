@@ -2,8 +2,8 @@ import type { ApiGame } from "#api_types/game.types";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext, useMemo } from "react";
 import { _assert } from "~/helpers/assertions";
-import { GameStore } from "~/pages/play/GameStore";
 import { privateAxios } from "~/services/axios";
+import { GameStore } from "~/stores/GameStore";
 import { useUser } from "./use_user.js";
 
 export const getGameStateQueryKey = (gameId: number) => ["gameState", gameId];

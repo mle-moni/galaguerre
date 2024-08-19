@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useUser } from "~/hooks/use_user";
 import { privateAxios } from "~/services/axios";
 
-export const MatchmakingPage = () => {
+export const MatchmakingPage = observer(() => {
     const user = useUser();
     const [searchingMatch, setSearchingMatch] = useState(false);
 
@@ -38,4 +39,4 @@ export const MatchmakingPage = () => {
             {searchingMatch && <h1>Recherche en cours...</h1>}
         </div>
     );
-};
+});

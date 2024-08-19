@@ -7,7 +7,7 @@ import { queryClient } from "~/services/query_client";
 export const GameFinalScreen = observer(() => {
     const { store } = useGameContext();
     const handleClose = () => {
-        store.setFinalScreenOpenState("CLOSED");
+        store.setIsFinalScreenOpen(false);
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
     };
 

@@ -1,6 +1,7 @@
 import type { GamePlayer } from "#api_types/game.types";
 
 import { Text } from "@mantine/core";
+import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import { useGameContext, useIsMyTurn } from "~/hooks/use_game_state";
 
@@ -9,7 +10,7 @@ interface PlayerInfosProps {
     isOpponent?: boolean;
 }
 
-export const PlayerInfos = ({ player, isOpponent }: PlayerInfosProps) => {
+export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent }) => {
     const isMyTurn = useIsMyTurn();
     const gameState = useGameContext().game.data.state;
     const elements = useMemo(() => {
@@ -53,4 +54,4 @@ export const PlayerInfos = ({ player, isOpponent }: PlayerInfosProps) => {
             {elements}
         </div>
     );
-};
+});
