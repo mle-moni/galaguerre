@@ -49,6 +49,7 @@ const MinionSpot = observer(({ store, isOpponent, spotId }: MinionSpotProps) => 
         if (!store.isMyTurn || !card) return;
         if (card.type !== "MINION") return;
         if (isOpponent) return;
+        if (!store.cardDragStore.canPlayMinionOnSpot(spotId)) return;
 
         // authorize drag only for Minions (for now)
         e.preventDefault();
