@@ -6,7 +6,6 @@ import { CardDragStore } from "./CardDragStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
 
 export class GameStore {
-    isFinalScreenOpen = false;
     cardDragStore = new CardDragStore(this);
     playerInfosStore = new PlayerInfosStore(this);
 
@@ -32,10 +31,6 @@ export class GameStore {
         this._user = user;
 
         return this;
-    }
-
-    setIsFinalScreenOpen(state: boolean) {
-        this.isFinalScreenOpen = state;
     }
 
     get isFinished() {

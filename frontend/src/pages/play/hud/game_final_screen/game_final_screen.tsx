@@ -7,17 +7,11 @@ import { queryClient } from "~/services/query_client";
 export const GameFinalScreen = observer(() => {
     const { store } = useGameContext();
     const handleClose = () => {
-        store.setIsFinalScreenOpen(false);
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
     };
 
     return (
-        <Modal
-            centered
-            opened={store.isFinalScreenOpen}
-            onClose={handleClose}
-            title="Partie terminée"
-        >
+        <Modal centered opened={store.isFinished} onClose={handleClose} title="Partie terminée">
             <Text size="lg">{store.winner.pseudo} remporte la partie !</Text>
 
             <Text size="lg">
