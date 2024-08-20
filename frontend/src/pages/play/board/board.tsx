@@ -46,12 +46,10 @@ const MinionSpot = observer(({ store, isOpponent, spotId }: MinionSpotProps) => 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         const card = store.cardDragStore.cardDragged;
 
-        if (!store.isMyTurn || !card) return;
-        if (card.type !== "MINION") return;
-        if (isOpponent) return;
-        if (!store.cardDragStore.canPlayMinionOnSpot(spotId)) return;
+        if (!card || isOpponent) return;
+        if (!store.cardDragStore.canPlayCard(spotId, card)) return;
 
-        // authorize drag only for Minions (for now)
+        // authorize card drop
         e.preventDefault();
     };
 

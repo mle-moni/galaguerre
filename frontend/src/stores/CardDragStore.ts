@@ -33,19 +33,25 @@ export class CardDragStore {
 
     get mySlotsBorderColor(): SlotsBorderColor {
         if (!this.cardDragged) return spotsToSameColor("black");
-        if (this.cardDragged.type !== "MINION") return spotsToSameColor("black");
 
         return {
-            SPOT_1: this.canPlayMinionOnSpot("SPOT_1") ? "green" : "red",
-            SPOT_2: this.canPlayMinionOnSpot("SPOT_2") ? "green" : "red",
-            SPOT_3: this.canPlayMinionOnSpot("SPOT_3") ? "green" : "red",
-            SPOT_4: this.canPlayMinionOnSpot("SPOT_4") ? "green" : "red",
-            SPOT_5: this.canPlayMinionOnSpot("SPOT_5") ? "green" : "red",
+            SPOT_1: this.canPlayCard("SPOT_1", this.cardDragged) ? "green" : "red",
+            SPOT_2: this.canPlayCard("SPOT_2", this.cardDragged) ? "green" : "red",
+            SPOT_3: this.canPlayCard("SPOT_3", this.cardDragged) ? "green" : "red",
+            SPOT_4: this.canPlayCard("SPOT_4", this.cardDragged) ? "green" : "red",
+            SPOT_5: this.canPlayCard("SPOT_5", this.cardDragged) ? "green" : "red",
         };
     }
 
     // assuming it's our turn
     canPlayMinionOnSpot(spotId: MinionSpotId) {
         return this.gameStore.me.board[spotId] === null;
+    }
+
+    canPlayCard(spotId: MinionSpotId, card: PlayerCard): boolean {
+        if (!this.gameStore.isMyTurn) return false;
+        if (card.type === "MINION") return this.canPlayMinionOnSpot(spotId);
+
+        return false;
     }
 }
