@@ -29,4 +29,5 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
 export const partAuthRestrictedEvents = (socket: Socket) => {
     socket.removeAllListeners("debug");
     socket.removeAllListeners("pass_turn");
+    socket.removeAllListeners("game:play_card");
 };
