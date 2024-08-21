@@ -1,4 +1,4 @@
-import type { MinionSpotId, PlayerCard } from "#api_types/game.types";
+import type { MinionSpotId, PlayerCard, SpotOwner } from "#api_types/game.types";
 
 import { makeAutoObservable } from "mobx";
 import type { GameStore } from "./GameStore.js";
@@ -28,29 +28,38 @@ export class CardDragStore {
 
     get opponentSlotsBorderColor(): SlotsBorderColor {
         if (!this.cardDragged) return spotsToSameColor("black");
-        return spotsToSameColor("red");
+
+        return {
+            SPOT_1: this.canPlayCard("SPOT_1", this.cardDragged, "OPPONENT") ? "green" : "red",
+            SPOT_2: this.canPlayCard("SPOT_2", this.cardDragged, "OPPONENT") ? "green" : "red",
+            SPOT_3: this.canPlayCard("SPOT_3", this.cardDragged, "OPPONENT") ? "green" : "red",
+            SPOT_4: this.canPlayCard("SPOT_4", this.cardDragged, "OPPONENT") ? "green" : "red",
+            SPOT_5: this.canPlayCard("SPOT_5", this.cardDragged, "OPPONENT") ? "green" : "red",
+        };
     }
 
     get mySlotsBorderColor(): SlotsBorderColor {
         if (!this.cardDragged) return spotsToSameColor("black");
 
         return {
-            SPOT_1: this.canPlayCard("SPOT_1", this.cardDragged) ? "green" : "red",
-            SPOT_2: this.canPlayCard("SPOT_2", this.cardDragged) ? "green" : "red",
-            SPOT_3: this.canPlayCard("SPOT_3", this.cardDragged) ? "green" : "red",
-            SPOT_4: this.canPlayCard("SPOT_4", this.cardDragged) ? "green" : "red",
-            SPOT_5: this.canPlayCard("SPOT_5", this.cardDragged) ? "green" : "red",
+            SPOT_1: this.canPlayCard("SPOT_1", this.cardDragged, "PLAYER") ? "green" : "red",
+            SPOT_2: this.canPlayCard("SPOT_2", this.cardDragged, "PLAYER") ? "green" : "red",
+            SPOT_3: this.canPlayCard("SPOT_3", this.cardDragged, "PLAYER") ? "green" : "red",
+            SPOT_4: this.canPlayCard("SPOT_4", this.cardDragged, "PLAYER") ? "green" : "red",
+            SPOT_5: this.canPlayCard("SPOT_5", this.cardDragged, "PLAYER") ? "green" : "red",
         };
     }
 
-    // assuming it's our turn
-    canPlayMinionOnSpot(spotId: MinionSpotId) {
+    canPlayMinionOnSpot(spotId: MinionSpotId, spotOwner: SpotOwner) {
+        // cannot play a minion on an opponent spot
+        if (spotOwner === "OPPONENT") return false;
+        // allow to play a minion on a spot if it's empty
         return this.gameStore.me.board[spotId] === null;
     }
 
-    canPlayCard(spotId: MinionSpotId, card: PlayerCard): boolean {
+    canPlayCard(spotId: MinionSpotId, card: PlayerCard, spotOwner: SpotOwner): boolean {
         if (!this.gameStore.isMyTurn) return false;
-        if (card.type === "MINION") return this.canPlayMinionOnSpot(spotId);
+        if (card.type === "MINION") return this.canPlayMinionOnSpot(spotId, spotOwner);
 
         return false;
     }

@@ -49,7 +49,13 @@ export interface MinionState {
     placedAtRound: number;
 }
 
-export type MinionSpotId = "SPOT_1" | "SPOT_2" | "SPOT_3" | "SPOT_4" | "SPOT_5";
+export const SPOT_OWNERS = ["PLAYER", "OPPONENT"] as const;
+
+export type SpotOwner = (typeof SPOT_OWNERS)[number];
+
+export const MINION_SPOT_IDS = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"] as const;
+
+export type MinionSpotId = (typeof MINION_SPOT_IDS)[number];
 
 export type BoardState = {
     [K in MinionSpotId]: MinionState | null;

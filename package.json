@@ -18,6 +18,7 @@
     },
     "imports": {
         "#adomin/*": "./app/adomin/*.js",
+        "#api_types/*": "./api_types/*.js",
         "#controllers/*": "./app/controllers/*.js",
         "#exceptions/*": "./app/exceptions/*.js",
         "#models/*": "./app/models/*.js",
@@ -90,10 +91,7 @@
         "zod": "^3.23.8"
     },
     "hotHook": {
-        "boundaries": [
-            "./app/controllers/**/*.ts",
-            "./app/middleware/*.ts"
-        ]
+        "boundaries": ["./app/controllers/**/*.ts", "./app/middleware/*.ts"]
     },
     "packageManager": "yarn@4.2.2"
 }

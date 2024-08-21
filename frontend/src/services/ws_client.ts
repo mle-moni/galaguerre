@@ -1,5 +1,10 @@
 import type { ApiUser } from "#api_types/auth.types";
-import type { SocketEventByKey, SocketEventKey } from "#api_types/socket_events";
+import type {
+    ClientSocketEventByKey,
+    ClientSocketEventKey,
+    SocketEventByKey,
+    SocketEventKey,
+} from "#api_types/socket_events";
 import { io } from "socket.io-client";
 import { setupEvents } from "./ws_events.js";
 
@@ -30,4 +35,11 @@ setupEvents(CLIENT_SOCKET);
 
 export const passTurn = () => {
     CLIENT_SOCKET.emit("pass_turn");
+};
+
+export const emitSocketEventToServer = <T extends ClientSocketEventKey>(
+    key: T,
+    data: ClientSocketEventByKey[T],
+) => {
+    CLIENT_SOCKET.emit(key, data);
 };

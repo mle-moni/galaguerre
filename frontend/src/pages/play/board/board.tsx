@@ -1,11 +1,12 @@
 import "./board.css";
 
-import type { MinionSpotId } from "#api_types/game.types";
+import type { MinionSpotId, SpotOwner } from "#api_types/game.types";
 
 import clsx from "clsx";
-import { toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
+import { notifyError } from "~/services/toasts";
+import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "~/stores/GameStore";
 
 const SPOTS: MinionSpotId[] = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"];
@@ -17,13 +18,13 @@ export const Board = observer(() => {
         <div className="flex flex-col h-full justify-center items-center">
             <div className="h-[300px] w-full flex justify-center items-center">
                 {SPOTS.map((spotId) => (
-                    <MinionSpot key={spotId} store={store} spotId={spotId} isOpponent />
+                    <MinionSpot key={spotId} store={store} spotId={spotId} spotOwner="OPPONENT" />
                 ))}
             </div>
             <div className="border-2 border-dashed w-full" />
             <div className="h-[300px] w-full flex justify-center items-center">
                 {SPOTS.map((spotId) => (
-                    <MinionSpot key={spotId} store={store} spotId={spotId} />
+                    <MinionSpot key={spotId} store={store} spotId={spotId} spotOwner="PLAYER" />
                 ))}
             </div>
         </div>
@@ -33,21 +34,32 @@ export const Board = observer(() => {
 interface MinionSpotProps {
     store: GameStore;
     spotId: MinionSpotId;
-    isOpponent?: boolean;
+    spotOwner: SpotOwner;
 }
 
-const MinionSpot = observer(({ store, isOpponent, spotId }: MinionSpotProps) => {
+const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
     const handleDrop = () => {
         const card = store.cardDragStore.cardDragged;
         if (!card) return;
-        console.log(toJS(card));
+
+        const canPlayCard = store.cardDragStore.canPlayCard(spotId, card, spotOwner);
+
+        if (!canPlayCard) {
+            notifyError("Vous ne pouvez pas jouer cette carte ici");
+            return;
+        }
+
+        emitSocketEventToServer("game:play_card", {
+            cardId: card.uuid,
+            spotId,
+            owner: spotOwner,
+        });
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         const card = store.cardDragStore.cardDragged;
 
-        if (!card || isOpponent) return;
-        if (!store.cardDragStore.canPlayCard(spotId, card)) return;
+        if (!card) return;
 
         // authorize card drop
         e.preventDefault();
@@ -59,9 +71,10 @@ const MinionSpot = observer(({ store, isOpponent, spotId }: MinionSpotProps) => 
             onDrop={handleDrop}
             className={clsx("minion-spot", "w-[120px] h-[150px] bg-red-100 border-dashed m-4")}
             style={{
-                borderColor: isOpponent
-                    ? store.cardDragStore.opponentSlotsBorderColor[spotId]
-                    : store.cardDragStore.mySlotsBorderColor[spotId],
+                borderColor:
+                    spotOwner === "OPPONENT"
+                        ? store.cardDragStore.opponentSlotsBorderColor[spotId]
+                        : store.cardDragStore.mySlotsBorderColor[spotId],
             }}
         />
     );
