@@ -8,6 +8,7 @@ import { useGameContext } from "~/hooks/use_game_state";
 import { notifyError } from "~/services/toasts";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "~/stores/GameStore";
+import { RenderMinion } from "../hud/playing_card/render_minion.jsx";
 
 const SPOTS: MinionSpotId[] = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"];
 
@@ -38,6 +39,9 @@ interface MinionSpotProps {
 }
 
 const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
+    const verb = spotOwner === "OPPONENT" ? "opponent" : "me";
+    const minionToRender = store[verb].board[spotId];
+
     const handleDrop = () => {
         const card = store.cardDragStore.cardDragged;
         if (!card) return;
@@ -69,13 +73,15 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
         <div
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            className={clsx("minion-spot", "w-[120px] h-[150px] bg-red-100 border-dashed m-4")}
+            className={clsx("minion-spot", "w-[126px] h-[156px] bg-red-100 border-dashed m-4")}
             style={{
                 borderColor:
                     spotOwner === "OPPONENT"
                         ? store.cardDragStore.opponentSlotsBorderColor[spotId]
                         : store.cardDragStore.mySlotsBorderColor[spotId],
             }}
-        />
+        >
+            {minionToRender && <RenderMinion state={minionToRender} />}
+        </div>
     );
 });

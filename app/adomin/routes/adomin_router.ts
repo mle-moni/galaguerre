@@ -1,7 +1,7 @@
 import { middleware } from "#start/kernel";
 import router from "@adonisjs/core/services/router";
-import { adominLogin } from "./adomin_login.js";
-import { adominLogout } from "./adomin_logout.js";
+import { adominLogin } from "../../controllers/auth/adomin_login.js";
+import { adominLogout } from "../../controllers/auth/adomin_logout.js";
 import { getAdominConfig } from "./get_adomin_config.js";
 import { getModelConfigRoute } from "./models/get_model_config.js";
 import { modelList } from "./models/read/model_list.js";

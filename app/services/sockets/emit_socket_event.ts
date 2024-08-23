@@ -4,6 +4,7 @@ import type {
     SocketEventByKey,
     SocketEventKey,
 } from "#api_types/socket_events";
+import logger from "@adonisjs/core/services/logger";
 import vine, { type VineObject } from "@vinejs/vine";
 import type { Socket } from "socket.io";
 import { WS } from "./ws_service.js";
@@ -19,7 +20,7 @@ export const emitSocketEvent = <T extends SocketEventKey>(
 export const subscribeToClientSocketEvent = <T extends ClientSocketEventKey>(
     socket: Socket,
     key: T,
-    callback: (data: ClientSocketEventByKey[T]) => void,
+    callback: (data: ClientSocketEventByKey[T]) => Promise<void>,
     /**
      * You must provide a vine object that matches the data you will receive in the callback
      */
@@ -35,7 +36,12 @@ export const subscribeToClientSocketEvent = <T extends ClientSocketEventKey>(
     socket.on(keyAsString, (data) => {
         schema
             .validate(data)
-            .then((res) => callback(res))
+            .then((res) =>
+                callback(res).catch((e) => {
+                    logger.error(`Error in callback for ${key}`);
+                    logger.error(e);
+                }),
+            )
             .catch(() => {
                 emitSocketEvent(
                     "notify_error",

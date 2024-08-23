@@ -1,6 +1,6 @@
-import { adominLogin } from "#adomin/routes/adomin_login";
-import { adominLogout } from "#adomin/routes/adomin_logout";
 import type { HttpContext } from "@adonisjs/core/http";
+import { adominLogin } from "./adomin_login.js";
+import { adominLogout } from "./adomin_logout.js";
 import { me } from "./me.js";
 import { register } from "./register.js";
 

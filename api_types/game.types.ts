@@ -5,22 +5,23 @@ export interface PlayerCardBase {
     imageUrl: string;
     cost: number;
 }
-export type PlayerCard = PlayerCardBase & PlayerCardType;
+export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 
-export type PlayerCardType =
-    | {
-          type: "MINION";
-          health: number;
-          attack: number;
-      }
-    | {
-          type: "SPELL";
-          // TODO
-      }
-    | {
-          type: "WEAPON";
-          // TODO
-      };
+export type MinionCard = PlayerCardBase & {
+    type: "MINION";
+    health: number;
+    attack: number;
+};
+
+export type SpellCard = PlayerCardBase & {
+    type: "SPELL";
+    // TODO
+};
+
+export type WeaponCard = PlayerCardBase & {
+    type: "WEAPON";
+    // TODO
+};
 
 export interface GameAction {
     uuid: string;
@@ -43,10 +44,10 @@ export interface WeaponState {
 
 export interface MinionState {
     uuid: string;
-    minionId: number;
     health: number;
     attack: number;
     placedAtRound: number;
+    originalCard: PlayerCard;
 }
 
 export const SPOT_OWNERS = ["PLAYER", "OPPONENT"] as const;
