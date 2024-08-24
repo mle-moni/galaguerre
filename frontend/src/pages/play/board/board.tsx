@@ -5,8 +5,6 @@ import type { MinionSpotId, SpotOwner } from "#api_types/game.types";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
-import { notifyError } from "~/services/toasts";
-import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "~/stores/GameStore";
 import { RenderMinion } from "../hud/playing_card/render_minion.jsx";
 
@@ -43,25 +41,11 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
     const minionToRender = store[verb].board[spotId];
 
     const handleDrop = () => {
-        const card = store.cardDragStore.cardDragged;
-        if (!card) return;
-
-        const canPlayCard = store.cardDragStore.canPlayCard(spotId, card, spotOwner);
-
-        if (!canPlayCard) {
-            notifyError("Vous ne pouvez pas jouer cette carte ici");
-            return;
-        }
-
-        emitSocketEventToServer("game:play_card", {
-            cardId: card.uuid,
-            spotId,
-            owner: spotOwner,
-        });
+        store.handleDrop(spotId, spotOwner);
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        const card = store.cardDragStore.cardDragged;
+        const card = store.cardDragStore.cardDragged || store.minionDragStore.minionDragged;
 
         if (!card) return;
 
@@ -75,10 +59,7 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
             onDrop={handleDrop}
             className={clsx("minion-spot", "w-[126px] h-[156px] bg-red-100 border-dashed m-4")}
             style={{
-                borderColor:
-                    spotOwner === "OPPONENT"
-                        ? store.cardDragStore.opponentSlotsBorderColor[spotId]
-                        : store.cardDragStore.mySlotsBorderColor[spotId],
+                borderColor: store.getMinionSpotBackgroundColor(spotId, spotOwner),
             }}
         >
             {minionToRender && <RenderMinion state={minionToRender} />}

@@ -19,12 +19,12 @@ export const RenderMinion = observer(({ state, style }: MinionToRenderProps) => 
             style={style}
             className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f] cursor-pointer")}
             draggable={store.isMyTurn}
-            // onDragStart={() => {
-            //     store.cardDragStore.setCardDragged(card);
-            // }}
-            // onDragEnd={() => {
-            //     store.cardDragStore.setCardDragged(null);
-            // }}
+            onDragStart={() => {
+                store.minionDragStore.setMinionDragged(state);
+            }}
+            onDragEnd={() => {
+                store.minionDragStore.setMinionDragged(null);
+            }}
         >
             <div>
                 <div className="cost">{state.originalCard.cost}</div>

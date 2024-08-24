@@ -1,4 +1,11 @@
-import type { GamePlayer, PlayerCard } from "#api_types/game.types";
+import {
+    type BoardState,
+    type GamePlayer,
+    MINION_SPOT_IDS,
+    type MinionPosition,
+    type PlayerCard,
+    type SpotOwner,
+} from "#api_types/game.types";
 import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
@@ -36,18 +43,20 @@ export const getGameActionInfos = async (socketId: string) => {
 export const whichPlayerAmI = (
     game: Game,
     userId: number,
-): { player: GamePlayer; playerType: "PLAYER_ONE" | "PLAYER_TWO" } => {
+): { player: GamePlayer; opponent: GamePlayer; playerType: "PLAYER_ONE" | "PLAYER_TWO" } => {
     const p1 = game.data.playerOne;
     const p2 = game.data.playerTwo;
 
     if (p1.userId === userId)
         return {
             player: p1,
+            opponent: p2,
             playerType: "PLAYER_ONE",
         };
 
     return {
         player: p2,
+        opponent: p1,
         playerType: "PLAYER_TWO",
     };
 };
@@ -89,4 +98,40 @@ export const ensureCardFoundInHand = (hand: PlayerCard[], cardId: string, socket
     }
 
     return card;
+};
+
+export const findMinionInBoard = (
+    board: BoardState,
+    minionId: string,
+    owner: SpotOwner,
+): MinionPosition | null => {
+    for (const spotId of MINION_SPOT_IDS) {
+        const minion = board[spotId];
+        if (minion?.uuid === minionId)
+            return {
+                position: { spotId, owner },
+                minion,
+            };
+    }
+
+    return null;
+};
+
+export const ensureMinionFoundInBoard = (
+    board: BoardState,
+    minionId: string,
+    owner: SpotOwner,
+    socketId: string,
+) => {
+    const minion = findMinionInBoard(board, minionId, owner);
+
+    if (!minion) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Ce serviteur n'est pas sur le plateau (gros con)" },
+            socketId,
+        );
+    }
+
+    return minion;
 };

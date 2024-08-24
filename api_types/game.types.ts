@@ -47,7 +47,18 @@ export interface MinionState {
     health: number;
     attack: number;
     placedAtRound: number;
+    lastActionAtRound: number;
     originalCard: PlayerCard;
+}
+
+export interface MinionPosition {
+    position: BoardTargetPosition;
+    minion: MinionState;
+}
+
+export interface BoardTargetPosition {
+    spotId: MinionSpotId;
+    owner: SpotOwner;
 }
 
 export const SPOT_OWNERS = ["PLAYER", "OPPONENT"] as const;

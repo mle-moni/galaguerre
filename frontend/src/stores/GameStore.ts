@@ -1,12 +1,14 @@
 import type { ApiUser } from "#api_types/auth.types";
-import type { ApiGame, GamePlayer } from "#api_types/game.types";
+import type { ApiGame, GamePlayer, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
 import { _assert } from "~/helpers/assertions";
 import { CardDragStore } from "./CardDragStore.js";
+import { MinionDragStore } from "./MinionDragStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
 
 export class GameStore {
     cardDragStore = new CardDragStore(this);
+    minionDragStore = new MinionDragStore(this);
     playerInfosStore = new PlayerInfosStore(this);
 
     private _game: ApiGame | null = null;
@@ -81,5 +83,34 @@ export class GameStore {
         }
 
         return false;
+    }
+
+    handleDrop(spotId: MinionSpotId, spotOwner: SpotOwner) {
+        if (this.cardDragStore.cardDragged) {
+            return this.cardDragStore.handleDrop(this.cardDragStore.cardDragged, spotId, spotOwner);
+        }
+        if (this.minionDragStore.minionDragged) {
+            return this.minionDragStore.handleDrop(
+                this.minionDragStore.minionDragged,
+                spotId,
+                spotOwner,
+            );
+        }
+    }
+
+    getMinionSpotBackgroundColor(spotId: MinionSpotId, spotOwner: SpotOwner) {
+        if (this.cardDragStore.cardDragged) {
+            if (spotOwner === "OPPONENT")
+                return this.cardDragStore.opponentSlotsBorderColor[spotId];
+            return this.cardDragStore.mySlotsBorderColor[spotId];
+        }
+
+        if (this.minionDragStore.minionDragged) {
+            if (spotOwner === "OPPONENT")
+                return this.minionDragStore.opponentSlotsBorderColor[spotId];
+            return this.minionDragStore.mySlotsBorderColor[spotId];
+        }
+
+        return "black";
     }
 }

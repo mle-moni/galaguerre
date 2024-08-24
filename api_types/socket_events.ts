@@ -13,6 +13,7 @@ export type SocketEventKey = keyof SocketEventByKey;
 
 export interface ClientSocketEventByKey {
     "game:play_card": { cardId: string; spotId: MinionSpotId; owner: SpotOwner };
+    "game:minion_action": { minionId: string; spotId: MinionSpotId; owner: SpotOwner };
 }
 
 export type ClientSocketEventKey = keyof ClientSocketEventByKey;

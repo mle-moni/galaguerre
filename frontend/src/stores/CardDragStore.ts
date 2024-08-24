@@ -1,13 +1,15 @@
 import type { MinionSpotId, PlayerCard, SpotOwner } from "#api_types/game.types";
 
 import { makeAutoObservable } from "mobx";
+import { notifyError } from "~/services/toasts";
+import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
 
-type SlotsBorderColor = {
+export type SlotsBorderColor = {
     [K in MinionSpotId]: string;
 };
 
-const spotsToSameColor = (color: string) => ({
+export const spotsToSameColor = (color: string) => ({
     SPOT_1: color,
     SPOT_2: color,
     SPOT_3: color,
@@ -62,5 +64,20 @@ export class CardDragStore {
         if (card.type === "MINION") return this.canPlayMinionOnSpot(spotId, spotOwner);
 
         return false;
+    }
+
+    handleDrop(card: PlayerCard, spotId: MinionSpotId, spotOwner: SpotOwner) {
+        const canPlayCard = this.canPlayCard(spotId, card, spotOwner);
+
+        if (!canPlayCard) {
+            notifyError("Vous ne pouvez pas jouer cette carte ici");
+            return;
+        }
+
+        emitSocketEventToServer("game:play_card", {
+            cardId: card.uuid,
+            spotId,
+            owner: spotOwner,
+        });
     }
 }
