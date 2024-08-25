@@ -13,7 +13,7 @@ export interface MinionActionOptions {
     socketId: string;
 }
 
-export const startMinionAction = async ({
+export const minionToMinionAction = async ({
     minionInfos,
     opponent,
     spotId,
@@ -39,28 +39,6 @@ export const startMinionAction = async ({
             "notify_error",
             {
                 error: "J'aurai pu te laisser attaquer ton propre serviteur mais j'ai décidé d'être clément...",
-            },
-            socketId,
-        );
-        return;
-    }
-
-    if (minionInfos.minion.placedAtRound === game.data.currentRound) {
-        emitSocketEvent(
-            "notify_error",
-            {
-                error: "Ce serviteur n'est pas encore prêt à attaquer",
-            },
-            socketId,
-        );
-        return;
-    }
-
-    if (minionInfos.minion.lastActionAtRound === game.data.currentRound) {
-        emitSocketEvent(
-            "notify_error",
-            {
-                error: "Ce serviteur a déjà attaqué ce tour",
             },
             socketId,
         );

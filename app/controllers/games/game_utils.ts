@@ -4,6 +4,7 @@ import {
     MINION_SPOT_IDS,
     type MinionPosition,
     type PlayerCard,
+    type PlayerNumber,
     type SpotOwner,
 } from "#api_types/game.types";
 import Game from "#models/game";
@@ -43,7 +44,7 @@ export const getGameActionInfos = async (socketId: string) => {
 export const whichPlayerAmI = (
     game: Game,
     userId: number,
-): { player: GamePlayer; opponent: GamePlayer; playerType: "PLAYER_ONE" | "PLAYER_TWO" } => {
+): { player: GamePlayer; opponent: GamePlayer; playerType: PlayerNumber } => {
     const p1 = game.data.playerOne;
     const p2 = game.data.playerTwo;
 

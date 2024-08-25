@@ -1,11 +1,13 @@
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
+import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
     ensureIsMyTurn,
     ensureMinionFoundInBoard,
     getGameActionInfos,
     whichPlayerAmI,
 } from "../game_utils.js";
-import { startMinionAction } from "./start_minion_action.js";
+import { minionToHeroAction } from "./minion_to_hero_action.js";
+import { minionToMinionAction } from "./minion_to_minion_action.js";
 
 export const gameMinionAction = async (
     socketId: string,
@@ -23,7 +25,40 @@ export const gameMinionAction = async (
     const minionInfos = ensureMinionFoundInBoard(player.board, minionId, "PLAYER", socketId);
     if (!minionInfos) return;
 
-    return startMinionAction({
+    if (minionInfos.minion.placedAtRound === currentGame.data.currentRound) {
+        emitSocketEvent(
+            "notify_error",
+            {
+                error: "Ce serviteur n'est pas encore prêt à attaquer",
+            },
+            socketId,
+        );
+        return;
+    }
+
+    if (minionInfos.minion.lastActionAtRound === currentGame.data.currentRound) {
+        emitSocketEvent(
+            "notify_error",
+            {
+                error: "Ce serviteur a déjà attaqué ce tour",
+            },
+            socketId,
+        );
+        return;
+    }
+
+    if (spotId === null) {
+        return minionToHeroAction({
+            minionInfos,
+            game: currentGame,
+            player,
+            opponent,
+            owner,
+            socketId,
+        });
+    }
+
+    return minionToMinionAction({
         minionInfos,
         game: currentGame,
         player,

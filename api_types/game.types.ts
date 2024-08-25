@@ -102,3 +102,7 @@ export interface ApiGame {
     createdAt: string;
     updatedAt: string;
 }
+
+export const PLAYER_NUMBERS = ["PLAYER_ONE", "PLAYER_TWO"] as const;
+
+export type PlayerNumber = (typeof PLAYER_NUMBERS)[number];
