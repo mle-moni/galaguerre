@@ -48,13 +48,18 @@ export class MinionDragStore {
         return board[spotId] !== null;
     }
 
-    canPlayMinion(spotId: MinionSpotId, _minion: MinionState, spotOwner: SpotOwner): boolean {
+    canPlayMinion(
+        spotId: MinionSpotId | null,
+        _minion: MinionState,
+        spotOwner: SpotOwner,
+    ): boolean {
         if (!this.gameStore.isMyTurn) return false;
         if (spotOwner === "PLAYER") return false;
+        if (spotId === null) return true;
         return this.canPlayMinionOnSpot(spotId, spotOwner);
     }
 
-    handleDrop(minion: MinionState, spotId: MinionSpotId, spotOwner: SpotOwner) {
+    handleDrop(minion: MinionState, spotId: MinionSpotId | null, spotOwner: SpotOwner) {
         const canPlayMinion = this.canPlayMinion(spotId, minion, spotOwner);
 
         if (!canPlayMinion) {
@@ -67,5 +72,14 @@ export class MinionDragStore {
             spotId,
             owner: spotOwner,
         });
+    }
+
+    getPlayerBorderColor(isOpponent: boolean) {
+        const transparent = "RGBa(0, 0, 0, 0)";
+
+        if (!this.gameStore.isMyTurn || this.minionDragged === null) return transparent;
+        if (!isOpponent) return transparent;
+
+        return "green";
     }
 }

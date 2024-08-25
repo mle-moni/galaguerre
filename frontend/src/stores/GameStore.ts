@@ -85,8 +85,8 @@ export class GameStore {
         return false;
     }
 
-    handleDrop(spotId: MinionSpotId, spotOwner: SpotOwner) {
-        if (this.cardDragStore.cardDragged) {
+    handleDrop(spotId: MinionSpotId | null, spotOwner: SpotOwner) {
+        if (this.cardDragStore.cardDragged && spotId !== null) {
             return this.cardDragStore.handleDrop(this.cardDragStore.cardDragged, spotId, spotOwner);
         }
         if (this.minionDragStore.minionDragged) {

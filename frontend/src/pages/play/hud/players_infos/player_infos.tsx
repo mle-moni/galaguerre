@@ -36,14 +36,38 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
         isOpponent,
     });
 
+    const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
+
+    const handleDrop = () => {
+        store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        const minion = store.minionDragStore.minionDragged;
+
+        if (!minion) return;
+
+        // authorize card drop
+        e.preventDefault();
+    };
+
     return (
         <div
-            className="rounded-full border-2 border-solid p-4 w-full mx-2"
+            className="border-2 border-dashed w-full mx-2"
             style={{
-                borderColor,
+                borderColor: minionAttackBorderColor,
             }}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
         >
-            {elements}
+            <div
+                className="rounded-full border-2 border-solid w-full p-4"
+                style={{
+                    borderColor,
+                }}
+            >
+                {elements}
+            </div>
         </div>
     );
 });
