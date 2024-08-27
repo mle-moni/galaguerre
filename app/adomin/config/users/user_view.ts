@@ -11,6 +11,10 @@ export const USER_VIEW = createModelViewConfig(() => User, {
             type: "string",
             label: "Email",
         },
+        password: {
+            type: "string",
+            label: "Mot de passe",
+        },
         isSuperAdmin: {
             type: "boolean",
             label: "Super Admin",
