@@ -1,0 +1,8 @@
+{
+    "files": [
+        {
+            "input": ".env.prod",
+            "output": ".env.prod.galacrypt"
+        }
+    ]
+}

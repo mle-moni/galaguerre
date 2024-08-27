@@ -1053,6 +1053,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@galadrim/galacrypt@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@galadrim/galacrypt@npm:2.0.0"
+  bin:
+    galacrypt: bin/index.js
+  checksum: 10c0/4e7bb2771360e495896d7f78e90f7e99b035834ef43381f4e80508e2c3651b0a58919bd5fa366b518f0bf751ad1b7a3329c69578bd8d1365de7d5458393e5bf6
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -4168,6 +4177,7 @@ __metadata:
     "@adonisjs/validator": "npm:^13.0.2"
     "@adonisjs/vite": "npm:^3.0.0"
     "@biomejs/biome": "npm:1.8.3"
+    "@galadrim/galacrypt": "npm:^2.0.0"
     "@japa/api-client": "npm:^2.0.3"
     "@japa/assert": "npm:^3.0.0"
     "@japa/plugin-adonisjs": "npm:^3.0.1"
