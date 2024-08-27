@@ -1,3 +1,4 @@
+import { PASSWORD_SERIALIZED_FORM } from "#adomin/create_model_view_config";
 import { DbAccessTokensProvider } from "@adonisjs/auth/access_tokens";
 import { withAuthFinder } from "@adonisjs/auth/mixins/lucid";
 import { compose } from "@adonisjs/core/helpers";
@@ -22,7 +23,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
     @column()
     declare email: string;
 
-    @column({ serializeAs: null })
+    @column({ serialize: () => PASSWORD_SERIALIZED_FORM })
     declare password: string;
 
     @column()
