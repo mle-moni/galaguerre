@@ -40,7 +40,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         source: "./deploy.zip"
-        target: "/home/ubuntu/galaguerre/deploy.zip"
+        target: "/home/ubuntu/galaguerre/"
     
     - name: deploy
       uses: appleboy/ssh-action@v1.0.3
@@ -57,3 +57,4 @@ jobs:
           cd ~/galaguerre && (mv current old || echo "no old version")
           cd ~/galaguerre && mv build current
           cd ~/galaguerre/current && node ace migration:run --force && pm2 start bin/server.js --name $PM2_NAME && pm2 save
+          rm -rf ~/galaguerre/old
