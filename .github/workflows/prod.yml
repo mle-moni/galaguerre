@@ -48,13 +48,12 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
+        script_stop: true
         script: |
-          cd ~/galaguerre
-          mv old $(mktemp -du old_XXXXXXX) || echo "no very old version"
-          mv build $(mktemp -du old_build_XXXXXXX) || echo "no old build version"
-          unzip deploy.zip
+          cd ~/galaguerre && (mv old $(mktemp -du old_XXXXXXX) || echo "no very old version")
+          cd ~/galaguerre && (mv build $(mktemp -du old_build_XXXXXXX) || echo "no old build version")
+          cd ~/galaguerre && unzip deploy.zip
           pm2 stop galaguerre || echo "galaguerre is not running"
-          mv current old || echo "no old version"
-          mv build current
-          cd current
-          node ace migration:run --force && pm2 start bin/server.js --name $PM2_NAME && pm2 save
+          cd ~/galaguerre && (mv current old || echo "no old version")
+          cd ~/galaguerre && mv build current
+          cd ~/galaguerre/current && node ace migration:run --force && pm2 start bin/server.js --name $PM2_NAME && pm2 save
