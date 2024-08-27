@@ -14,6 +14,7 @@ export const USER_VIEW = createModelViewConfig(() => User, {
         password: {
             type: "string",
             label: "Mot de passe",
+            isPassword: true,
         },
         isSuperAdmin: {
             type: "boolean",
