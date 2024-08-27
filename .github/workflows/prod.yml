@@ -27,7 +27,7 @@ jobs:
       run: yarn galacrypt use ${{ secrets.GALACRYPT_KEY }} && yarn galacrypt decrypt
     
     - name: Set up backend .env
-      run: cp env.prod .env
+      run: cp .env.prod .env
 
     - name: Build backend
       run: yarn build
