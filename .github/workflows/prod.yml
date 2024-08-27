@@ -56,5 +56,5 @@ jobs:
           pm2 stop galaguerre || echo "galaguerre is not running"
           cd ~/galaguerre && (mv current old || echo "no old version")
           cd ~/galaguerre && mv build current
-          cd ~/galaguerre/current && node ace migration:run --force && NODE_ENV=production pm2 start bin/server.js --name $PM2_NAME && pm2 save
+          cd ~/galaguerre/current && node ace migration:run --force && pm2 start bin/server.js --name $PM2_NAME && pm2 save
           rm -rf ~/galaguerre/old
