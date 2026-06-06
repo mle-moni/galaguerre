@@ -286,8 +286,8 @@ test.group("game:play_card", (group) => {
         });
     });
 
-    test("rejects unsupported weapon card type", async ({ assert }) => {
-        const weapon = createWeaponCard({ cost: 1 });
+    test("equips a weapon from hand", async ({ assert }) => {
+        const weapon = createWeaponCard({ cost: 2, damage: 3, durability: 2 });
 
         const result = await runPlayCard({
             data: createGameData({
@@ -299,17 +299,62 @@ test.group("game:play_card", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.weapon,
-                spotId: "SPOT_1",
+                spotId: null,
                 owner: "PLAYER",
             },
-            expect: {
-                error: "Card type 'WEAPON' not supported",
-            },
+            expect: { error: null },
         });
 
-        assertPlayCardScenario(assert, result, {
-            error: "Card type 'WEAPON' not supported",
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.mana, 8);
+        assert.equal(result.game.data.playerOne.hand.length, 0);
+        assert.isNotNull(result.game.data.playerOne.weaponState);
+        assert.equal(result.game.data.playerOne.weaponState!.damage, 3);
+        assert.equal(result.game.data.playerOne.weaponState!.durability, 2);
+    });
+
+    test("replaces equipped weapon when playing a new one", async ({ assert }) => {
+        const oldWeapon = createWeaponCard({
+            uuid: "card-old-weapon",
+            cost: 2,
+            damage: 1,
+            durability: 1,
         });
+        const newWeapon = createWeaponCard({
+            uuid: "card-new-weapon",
+            cost: 3,
+            damage: 4,
+            durability: 3,
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [newWeapon],
+                    weaponState: {
+                        uuid: oldWeapon.uuid,
+                        weaponId: oldWeapon.cardId,
+                        damage: oldWeapon.damage,
+                        durability: oldWeapon.durability,
+                        attacksThisRound: 0,
+                        lastActionAtRound: 0,
+                        originalCard: oldWeapon,
+                    },
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: "card-new-weapon",
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.weaponState!.damage, 4);
+        assert.equal(result.game.data.playerOne.weaponState!.durability, 3);
     });
 
     test("rejects play when it is not the player turn", async ({ assert }) => {

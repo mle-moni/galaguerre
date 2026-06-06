@@ -1,5 +1,6 @@
 import { MINION_SPOT_IDS, SPOT_OWNERS } from "#api_types/game.types";
 import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
+import { gameWeaponAction } from "#controllers/games/weapon_action/game_weapon_action";
 import { passGameTurn } from "#controllers/games/pass_game_turn";
 import { gamePlayCard } from "#controllers/games/play_card/game_play_card";
 import { subscribeToClientSocketEvent } from "#services/sockets/emit_socket_event";
@@ -37,6 +38,16 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         (data) => gameMinionAction(socket.id, data),
         vine.object({
             minionId: vine.string(),
+            spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+            owner: vine.enum(SPOT_OWNERS),
+        }),
+    );
+
+    subscribeToClientSocketEvent(
+        socket,
+        "game:weapon_action",
+        (data) => gameWeaponAction(socket.id, data),
+        vine.object({
             spotId: vine.enum(MINION_SPOT_IDS).nullable(),
             owner: vine.enum(SPOT_OWNERS),
         }),

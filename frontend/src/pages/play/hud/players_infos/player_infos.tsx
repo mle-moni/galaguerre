@@ -18,11 +18,16 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
     });
 
     const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
+    const weaponAttackBorderColor = store.weaponDragStore.getOpponentHeroBorderColor(isOpponent);
     const targetSelectionBorderColor = store.targetSelectionStore.getHeroBorderColor(isOpponent);
     const dropZoneBorderColor =
         targetSelectionBorderColor !== "RGBa(0, 0, 0, 0)"
             ? targetSelectionBorderColor
-            : minionAttackBorderColor;
+            : weaponAttackBorderColor !== "RGBa(0, 0, 0, 0)"
+              ? weaponAttackBorderColor
+              : minionAttackBorderColor;
+
+    const canDragWeapon = !isOpponent && store.weaponDragStore.canDragWeapon;
 
     const handleDrop = () => {
         store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
@@ -36,10 +41,20 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         const minion = store.minionDragStore.minionDragged;
         const isSelectingTarget = store.targetSelectionStore.isSelectingTarget;
+        const isWeaponDragging = store.weaponDragStore.isDragging;
 
-        if (!minion && !isSelectingTarget) return;
+        if (!minion && !isSelectingTarget && !isWeaponDragging) return;
 
         e.preventDefault();
+    };
+
+    const handleWeaponDragStart = () => {
+        if (!canDragWeapon) return;
+        store.weaponDragStore.setWeaponDragging(true);
+    };
+
+    const handleWeaponDragEnd = () => {
+        store.weaponDragStore.setWeaponDragging(false);
     };
 
     return (
@@ -54,10 +69,13 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             onDrop={handleDrop}
         >
             <div
-                className="hero-panel"
+                className={`hero-panel${canDragWeapon ? " hero-panel--weapon-draggable" : ""}`}
                 style={{
                     borderColor: playerBorderColor,
                 }}
+                draggable={canDragWeapon}
+                onDragStart={handleWeaponDragStart}
+                onDragEnd={handleWeaponDragEnd}
             >
                 <Text className="hero-panel__pseudo" size="lg" ta="center" fw={700}>
                     {player.pseudo}
@@ -84,6 +102,23 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
                                 +{player.spellPower}
                             </span>
                             <span className="hero-panel__stat-label">dégâts de sort</span>
+                        </div>
+                    )}
+                    {player.weaponState && (
+                        <div
+                            className="hero-panel__stat"
+                            title={
+                                player.weaponState.originalCard.label ??
+                                `Arme ${player.weaponState.damage}/${player.weaponState.durability}`
+                            }
+                        >
+                            <span className="hero-panel__stat-badge hero-panel__stat-badge--weapon-damage">
+                                {player.weaponState.damage}
+                            </span>
+                            <span className="hero-panel__stat-badge hero-panel__stat-badge--weapon-durability">
+                                {player.weaponState.durability}
+                            </span>
+                            <span className="hero-panel__stat-label">arme</span>
                         </div>
                     )}
                 </div>

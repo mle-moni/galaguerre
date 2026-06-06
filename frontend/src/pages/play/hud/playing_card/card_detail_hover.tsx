@@ -14,6 +14,9 @@ const getCardDescription = (card: PlayerCard): string => {
     if (card.type === "SPELL") {
         return card.description || card.label;
     }
+    if (card.type === "WEAPON") {
+        return card.description || `Arme ${card.damage}/${card.durability}.`;
+    }
     return card.label;
 };
 

@@ -32,14 +32,26 @@ export const controllers = {
         },
         PassGameTurn: () => import("#controllers/games/pass_game_turn"),
         playCard: {
+            BreakWeapon: () => import("#controllers/games/play_card/break_weapon"),
             GamePlayCard: () => import("#controllers/games/play_card/game_play_card"),
             InstantiateMinion: () => import("#controllers/games/play_card/instantiate_minion"),
+            InstantiateWeapon: () => import("#controllers/games/play_card/instantiate_weapon"),
             PlayMinion: () => import("#controllers/games/play_card/play_minion"),
             PlaySpell: () => import("#controllers/games/play_card/play_spell"),
+            PlayWeapon: () => import("#controllers/games/play_card/play_weapon"),
         },
         SendGameUpdate: () => import("#controllers/games/send_game_update"),
         SetupNextGameTurn: () => import("#controllers/games/setup_next_game_turn"),
         ShowGame: () => import("#controllers/games/show_game"),
         TerminateGame: () => import("#controllers/games/terminate_game"),
+        weaponAction: {
+            GameWeaponAction: () => import("#controllers/games/weapon_action/game_weapon_action"),
+            ReduceWeaponDurability: () =>
+                import("#controllers/games/weapon_action/reduce_weapon_durability"),
+            WeaponToHeroAction: () =>
+                import("#controllers/games/weapon_action/weapon_to_hero_action"),
+            WeaponToMinionAction: () =>
+                import("#controllers/games/weapon_action/weapon_to_minion_action"),
+        },
     },
 };

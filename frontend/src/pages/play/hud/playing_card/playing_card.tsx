@@ -11,6 +11,7 @@ import { emitSocketEventToServer } from "~/services/ws_client";
 import { CardDetailHover } from "./card_detail_hover.jsx";
 import { MinionCardFace } from "./minion_card_face.jsx";
 import { SpellCardFace } from "./spell_card_face.jsx";
+import { WeaponCardFace } from "./weapon_card_face.jsx";
 
 interface CardProps {
     card: PlayerCard;
@@ -20,8 +21,6 @@ interface CardProps {
 
 export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => {
     const { store } = useGameContext();
-
-    if (card.type === "WEAPON") return <p>Card type {card.type} not supported</p>;
 
     if (isOpponent) {
         return (
@@ -48,7 +47,7 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
             return;
         }
 
-        if (card.type === "SPELL") {
+        if (card.type === "SPELL" || card.type === "WEAPON") {
             emitSocketEventToServer("game:play_card", {
                 cardId: card.uuid,
                 spotId: null,
@@ -56,6 +55,18 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
             });
         }
     };
+
+    if (card.type === "WEAPON") {
+        return (
+            <WeaponCardFace
+                card={card}
+                style={style}
+                className={cardClassName}
+                onClick={handleSpellClick}
+                wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+            />
+        );
+    }
 
     if (card.type === "SPELL") {
         return (

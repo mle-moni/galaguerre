@@ -14,6 +14,7 @@ import {
     type SpellCard,
     type TargetSnapshot,
     type WeaponCard,
+    type WeaponState,
 } from "#api_types/game.types";
 
 export const MINION_IDS = {
@@ -222,6 +223,24 @@ export const createWeaponCard = (
     cost: 3,
     tagIds: [],
     type: "WEAPON",
+    damage: 3,
+    durability: 2,
+    description: "Arme 3/2.",
+    deathrattleActions: [],
+    ...overrides,
+});
+
+export const createWeaponState = (
+    card: WeaponCard,
+    overrides: Partial<WeaponState> = {},
+): WeaponState => ({
+    uuid: card.uuid,
+    weaponId: card.cardId,
+    damage: card.damage,
+    durability: card.durability,
+    attacksThisRound: 0,
+    lastActionAtRound: 0,
+    originalCard: { ...card },
     ...overrides,
 });
 

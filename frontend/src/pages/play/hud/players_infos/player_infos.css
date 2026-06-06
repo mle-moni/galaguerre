@@ -51,6 +51,22 @@
 	color: #fff;
 }
 
+.hero-panel__stat-badge--weapon-damage {
+	background-color: #e32a2a;
+}
+
+.hero-panel__stat-badge--weapon-durability {
+	background-color: #c0c0c0;
+}
+
+.hero-panel--weapon-draggable {
+	cursor: grab;
+}
+
+.hero-panel--weapon-draggable:active {
+	cursor: grabbing;
+}
+
 .hero-panel__stat-label {
 	font-size: 12px;
 	line-height: 1;

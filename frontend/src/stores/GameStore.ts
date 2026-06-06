@@ -6,10 +6,12 @@ import { CardDragStore } from "./CardDragStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
 import { TargetSelectionStore } from "./TargetSelectionStore.js";
+import { WeaponDragStore } from "./WeaponDragStore.js";
 
 export class GameStore {
     cardDragStore = new CardDragStore(this);
     minionDragStore = new MinionDragStore(this);
+    weaponDragStore = new WeaponDragStore(this);
     playerInfosStore = new PlayerInfosStore(this);
     targetSelectionStore = new TargetSelectionStore(this);
 
@@ -102,6 +104,9 @@ export class GameStore {
                 spotOwner,
             );
         }
+        if (this.weaponDragStore.isDragging) {
+            return this.weaponDragStore.handleDrop(spotId, spotOwner);
+        }
     }
 
     getMinionSpotBackgroundColor(spotId: MinionSpotId, spotOwner: SpotOwner) {
@@ -122,6 +127,12 @@ export class GameStore {
             if (spotOwner === "OPPONENT")
                 return this.minionDragStore.opponentSlotsBorderColor[spotId];
             return this.minionDragStore.mySlotsBorderColor[spotId];
+        }
+
+        if (this.weaponDragStore.isDragging) {
+            if (spotOwner === "OPPONENT")
+                return this.weaponDragStore.opponentSlotsBorderColor[spotId];
+            return "black";
         }
 
         return "black";

@@ -16,6 +16,7 @@ import {
 } from "../game_utils.js";
 import { playMinion } from "./play_minion.js";
 import { playSpell } from "./play_spell.js";
+import { playWeapon } from "./play_weapon.js";
 
 export const gamePlayCard = async (
     socketId: string,
@@ -70,10 +71,5 @@ const playCard = async (opts: PlayCardOptions) => {
         return playMinion({ ...opts, card, spotId: opts.spotId });
     }
     if (card.type === "SPELL") return playSpell({ ...opts, card });
-
-    emitSocketEvent(
-        "notify_error",
-        { error: `Card type '${card.type}' not supported` },
-        opts.socketId,
-    );
+    if (card.type === "WEAPON") return playWeapon({ ...opts, card });
 };

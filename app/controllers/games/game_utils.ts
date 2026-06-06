@@ -8,6 +8,7 @@ import {
     type PlayerCard,
     type PlayerNumber,
     type SpotOwner,
+    type WeaponState,
 } from "#api_types/game.types";
 import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
@@ -189,6 +190,27 @@ export const boardHasTaunt = (board: BoardState): boolean => {
         const minion = board[spotId];
         return minion !== null && getMinionHasTaunt(minion);
     });
+};
+
+export const getWeaponAttacksThisRound = (
+    weaponState: WeaponState,
+    currentRound: number,
+): number => {
+    if (weaponState.lastActionAtRound !== currentRound) return 0;
+    return weaponState.attacksThisRound ?? 1;
+};
+
+export const recordWeaponAttack = (weaponState: WeaponState, currentRound: number): void => {
+    if (weaponState.lastActionAtRound !== currentRound) {
+        weaponState.attacksThisRound = 1;
+    } else {
+        weaponState.attacksThisRound = (weaponState.attacksThisRound ?? 1) + 1;
+    }
+    weaponState.lastActionAtRound = currentRound;
+};
+
+export const canWeaponAttack = (weaponState: WeaponState, currentRound: number): boolean => {
+    return getWeaponAttacksThisRound(weaponState, currentRound) < 1;
 };
 
 export const ensureValidTauntTarget = (

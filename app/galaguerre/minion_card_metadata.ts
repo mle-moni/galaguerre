@@ -32,6 +32,20 @@ export const getDeathrattleDescription = (actions: CardActionSnapshot[]): string
         .filter((description): description is string => description !== null);
 };
 
+export const getWeaponCardDescription = (
+    damage: number,
+    durability: number,
+    deathrattleLines: string[] = [],
+): string => {
+    const parts: string[] = [`Arme ${damage}/${durability}.`];
+
+    if (deathrattleLines.length > 0) {
+        parts.push(deathrattleLines.join(" "));
+    }
+
+    return parts.join(" ");
+};
+
 export const getMinionCardDescription = (
     attack: number,
     health: number,

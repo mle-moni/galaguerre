@@ -100,7 +100,10 @@ export type SpellCard = PlayerCardBase & {
 
 export type WeaponCard = PlayerCardBase & {
     type: "WEAPON";
-    // TODO
+    damage: number;
+    durability: number;
+    description: string;
+    deathrattleActions: CardActionSnapshot[];
 };
 
 export interface GameAction {
@@ -118,8 +121,11 @@ export interface GameRound {
 export interface WeaponState {
     uuid: string;
     weaponId: number;
-    durability: number;
     damage: number;
+    durability: number;
+    attacksThisRound: number;
+    lastActionAtRound: number;
+    originalCard: WeaponCard;
 }
 
 export interface MinionState {

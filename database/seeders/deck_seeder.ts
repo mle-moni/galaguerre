@@ -50,10 +50,10 @@ export default class extends BaseSeeder {
         const spellMassDamageCard = await Card.query()
             .where("label", "Spell 2 Mass Minion Damage")
             .firstOrFail();
-        const beastFillerCard = await Card.query()
-            .where("label", "Monster 1-1 Beast")
+        const weaponSimpleCard = await Card.query().where("label", "Weapon 2 - 3/2").firstOrFail();
+        const weaponDeathrattleCard = await Card.query()
+            .where("label", "Weapon 3 - 2/3 Deathrattle Draw")
             .firstOrFail();
-        const genericFillerCard = await Card.query().where("label", "Monster 2-1").firstOrFail();
 
         const guaranteedLabels = [
             "Monster 1-2",
@@ -69,8 +69,8 @@ export default class extends BaseSeeder {
             "Spell 3 Targeted Damage",
             "Spell 1 Draw",
             "Spell 2 Mass Minion Damage",
-            "Monster 1-1 Beast",
-            "Monster 2-1",
+            "Weapon 2 - 3/2",
+            "Weapon 3 - 2/3 Deathrattle Draw",
         ];
         const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
 
@@ -91,8 +91,8 @@ export default class extends BaseSeeder {
                 targetedMinionDamageCard.id,
                 heroSpellPowerBoostCard.id,
                 deathrattleDamageCard.id,
-                beastFillerCard.id,
-                genericFillerCard.id,
+                weaponSimpleCard.id,
+                weaponDeathrattleCard.id,
                 ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellHeroDamageCard.id),
                 ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellTargetedDamageCard.id),
                 ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellDrawCard.id),

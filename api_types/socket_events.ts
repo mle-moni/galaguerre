@@ -19,6 +19,7 @@ export interface ClientSocketEventByKey {
         actionTarget?: ActionTarget | null;
     };
     "game:minion_action": { minionId: string; spotId: MinionSpotId | null; owner: SpotOwner };
+    "game:weapon_action": { spotId: MinionSpotId | null; owner: SpotOwner };
 }
 
 export type ClientSocketEventKey = keyof ClientSocketEventByKey;

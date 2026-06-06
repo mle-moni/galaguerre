@@ -12,6 +12,8 @@ import Spell from "#models/spell";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import User from "#models/user";
+import Weapon from "#models/weapon";
+import WeaponDeathrattleAction from "#models/weapon_deathrattle_action";
 import {
     DeckValidationError,
     validateDeck,
@@ -48,7 +50,12 @@ const loadDeckRelations = async (deck: Deck) => {
                         q.preload("action", preloadActionRelations).orderBy("id", "asc"),
                     ),
             )
-            .preload("spell", (sq) => sq.preload("action", preloadActionRelations)),
+            .preload("spell", (sq) => sq.preload("action", preloadActionRelations))
+            .preload("weapon", (wq) =>
+                wq.preload("deathrattleActions", (q) =>
+                    q.preload("action", preloadActionRelations).orderBy("id", "asc"),
+                ),
+            ),
     );
 };
 
@@ -634,6 +641,92 @@ test.group("validation:validateDeck", (group) => {
 
         assert.isTrue(result.valid);
         assert.equal(result.errors.length, 0);
+    });
+
+    test("accepts WEAPON card with valid deathrattle", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-weapon-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Valid weapon deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const drawAction = await Action.create({
+            internalLabel: `weapon-dr-draw-action-${unique}`,
+            type: "DRAW",
+            isTargeted: false,
+            ...nullActionFields,
+            drawCount: 1,
+        });
+
+        const weapon = await Weapon.create({
+            internalLabel: `weapon-${unique}`,
+            damage: 2,
+            durability: 3,
+        });
+
+        await WeaponDeathrattleAction.create({
+            weaponId: weapon.id,
+            actionId: drawAction.id,
+        });
+
+        const card = await Card.create({
+            label: `weapon-card-${unique}`,
+            imageUrl: "https://example.com/weapon.png",
+            cost: 3,
+            type: "WEAPON",
+            cardMode: "BETA",
+            minionId: null,
+            spellId: null,
+            weaponId: weapon.id,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await loadDeckRelations(deck);
+
+        const result = validateDeck(deck);
+
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
+    });
+
+    test("rejects WEAPON card without weapon entity", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-weapon-missing-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Invalid weapon deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const card = await Card.create({
+            label: `weapon-card-${unique}`,
+            imageUrl: "https://example.com/weapon.png",
+            cost: 3,
+            type: "WEAPON",
+            cardMode: "BETA",
+            minionId: null,
+            spellId: null,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await loadDeckRelations(deck);
+
+        const result = validateDeck(deck);
+
+        assert.isFalse(result.valid);
+        assert.equal(result.errors.length, 1);
+        assert.include(result.errors[0]!.reason, "weapon not found");
     });
 
     test("rejects SPELL card without spell entity", async ({ assert }) => {

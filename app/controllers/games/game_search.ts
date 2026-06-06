@@ -34,7 +34,8 @@ const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) 
                 .preload("battlecryActions", preloadMinionActionRelations)
                 .preload("deathrattleActions", preloadMinionActionRelations),
         )
-        .preload("spell", (sq) => sq.preload("action", preloadActionRelations));
+        .preload("spell", (sq) => sq.preload("action", preloadActionRelations))
+        .preload("weapon", (wq) => wq.preload("deathrattleActions", preloadMinionActionRelations));
 };
 
 export const gameSearch = async ({ auth, response }: HttpContext) => {

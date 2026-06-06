@@ -6,6 +6,7 @@ import {
     getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
+    getWeaponCardDescription,
 } from "../../galaguerre/minion_card_metadata.js";
 import type Deck from "#models/deck";
 import { randomUUID } from "node:crypto";
@@ -22,7 +23,27 @@ export const generatePlayerCards = (deck: Deck) => {
             tagIds: (card.tags ?? []).map((tag) => tag.id),
         };
 
-        if (card.type === "WEAPON") throw new Error("card type not supported");
+        if (card.type === "WEAPON") {
+            if (!card.weapon) throw new Error("card.weapon not found");
+
+            const deathrattleActions = (card.weapon.deathrattleActions ?? []).map((dra) =>
+                serializeAction(dra.action),
+            );
+            const deathrattleLines = getDeathrattleDescription(deathrattleActions);
+
+            return {
+                ...base,
+                type: "WEAPON",
+                damage: card.weapon.damage,
+                durability: card.weapon.durability,
+                deathrattleActions,
+                description: getWeaponCardDescription(
+                    card.weapon.damage,
+                    card.weapon.durability,
+                    deathrattleLines,
+                ),
+            };
+        }
 
         if (card.type === "SPELL") {
             if (!card.spell) throw new Error("card.spell not found");

@@ -7,11 +7,28 @@ export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
     const errors: DeckValidationErrorDetail[] = [];
 
     if (card.type === "WEAPON") {
-        errors.push({
-            cardId: card.id,
-            cardLabel: card.label,
-            reason: `type ${card.type} not supported`,
-        });
+        if (!card.weapon) {
+            errors.push({
+                cardId: card.id,
+                cardLabel: card.label,
+                reason: "weapon not found",
+            });
+            return errors;
+        }
+
+        for (const deathrattleAction of card.weapon.deathrattleActions ?? []) {
+            const actionError = validateDeathrattleAction(deathrattleAction.action);
+            if (!actionError) continue;
+
+            errors.push({
+                cardId: card.id,
+                cardLabel: card.label,
+                actionId: actionError.actionId,
+                actionInternalLabel: actionError.internalLabel,
+                reason: actionError.reason,
+            });
+        }
+
         return errors;
     }
 
