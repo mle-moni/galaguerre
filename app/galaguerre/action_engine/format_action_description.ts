@@ -59,49 +59,60 @@ const formatMassMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string =>
     return targetTeam === "PLAYER" ? "vos serviteurs" : "les serviteurs adverses";
 };
 
-export const formatActionDescription = (action: CardActionSnapshot): string | null => {
+export const formatActionDescription = (
+    action: CardActionSnapshot,
+    prefix = "Cri de guerre",
+): string | null => {
     switch (action.type) {
         case "DAMAGE": {
             if (action.damage === null || action.damage <= 0) return null;
 
             if (action.isTargeted && action.target?.type === "MINION") {
-                return `Cri de guerre : Inflige ${action.damage} dégâts à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${action.damage} dégâts à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
-                return `Cri de guerre : Inflige ${action.damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return `${prefix} : Inflige ${action.damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            if (action.target?.type === "MINION") {
+                return `${prefix} : Inflige ${action.damage} dégâts à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
-                return `Cri de guerre : Inflige ${action.damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return `${prefix} : Inflige ${action.damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
             }
-            return `Cri de guerre : Inflige ${action.damage} dégâts au héros adverse.`;
+            return `${prefix} : Inflige ${action.damage} dégâts au héros adverse.`;
         }
         case "HEAL": {
             if (action.heal === null || action.heal <= 0) return null;
 
             if (action.isTargeted && action.target?.type === "MINION") {
-                return `Cri de guerre : Rend ${action.heal} PV à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
-                return `Cri de guerre : Rend ${action.heal} PV au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return `${prefix} : Rend ${action.heal} PV au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            if (action.target?.type === "MINION") {
+                return `${prefix} : Rend ${action.heal} PV à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
-                return `Cri de guerre : Rend ${action.heal} PV au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return `${prefix} : Rend ${action.heal} PV au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
             }
-            return `Cri de guerre : Rend ${action.heal} PV au héros allié.`;
+            return `${prefix} : Rend ${action.heal} PV au héros allié.`;
         }
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) return null;
             const suffix = action.drawCount === 1 ? "carte" : "cartes";
-            return `Cri de guerre : Pioche ${action.drawCount} ${suffix}.`;
+            return `${prefix} : Pioche ${action.drawCount} ${suffix}.`;
         }
         case "ENEMY_DRAW": {
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
             const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
-            return `Cri de guerre : L'adversaire pioche ${action.enemyDrawCount} ${suffix}.`;
+            return `${prefix} : L'adversaire pioche ${action.enemyDrawCount} ${suffix}.`;
         }
         case "BOOST": {
             if (!action.boost) return null;
@@ -110,22 +121,22 @@ export const formatActionDescription = (action: CardActionSnapshot): string | nu
             if (!effectText) return null;
 
             if (action.isTargeted && action.target?.type === "MINION") {
-                return `Cri de guerre : Donne ${effectText} à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
-                return `Cri de guerre : Donne ${effectText} au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return `${prefix} : Donne ${effectText} au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
             }
 
             if (action.target?.type === "MINION") {
-                return `Cri de guerre : Donne ${effectText} à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
-                return `Cri de guerre : Donne ${effectText} au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return `${prefix} : Donne ${effectText} au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
             }
 
-            return `Cri de guerre : Donne ${effectText}.`;
+            return `${prefix} : Donne ${effectText}.`;
         }
         default:
             return null;

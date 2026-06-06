@@ -7,10 +7,22 @@ const EFFECT_SYMBOLS: Record<string, string> = {
     Toxique: "🐍",
 };
 
+const EFFECT_SYMBOLS_EXTENDED: Record<string, string> = {
+    ...EFFECT_SYMBOLS,
+    "Dernier souffle": "💀",
+};
+
 const getCardEffects = (card: MinionCard): string[] => {
-    if (card.effects?.length) return card.effects;
-    if (card.hasTaunt) return ["Provocation"];
-    return [];
+    const effects: string[] = [];
+    if (card.effects?.length) {
+        effects.push(...card.effects);
+    } else if (card.hasTaunt) {
+        effects.push("Provocation");
+    }
+    if (card.deathrattleActions?.length) {
+        effects.push("Dernier souffle");
+    }
+    return effects;
 };
 
 export const CardEffectSymbols = ({ card }: { card: MinionCard }) => {
@@ -25,7 +37,7 @@ export const CardEffectSymbols = ({ card }: { card: MinionCard }) => {
                 <div className="card-effects">
                     {effects.map((effect) => (
                         <div key={effect} className="card-symbol" title={effect}>
-                            {EFFECT_SYMBOLS[effect] ?? "❓"}
+                            {EFFECT_SYMBOLS_EXTENDED[effect] ?? "❓"}
                         </div>
                     ))}
                 </div>

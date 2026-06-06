@@ -4,23 +4,28 @@ import {
     type CardActionSnapshot,
     type GamePlayer,
 } from "#api_types/game.types";
+import type Game from "#models/game";
 import { drawCards } from "../draw_cards.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
+import { killMinion } from "./kill_minion.js";
 import { resolveHeroTarget } from "./resolve_hero_target.js";
 import { resolveSelectedTarget } from "./resolve_selected_target.js";
 
-const removeMinionIfDead = (board: GamePlayer["board"], spotId: ActionTarget["spotId"]): void => {
-    if (spotId === null) return;
-    if (board[spotId] && board[spotId]!.health <= 0) {
-        board[spotId] = null;
-    }
+const getMinionOwner = (
+    board: GamePlayer["board"],
+    spotId: NonNullable<ActionTarget["spotId"]>,
+    player: GamePlayer,
+    opponent: GamePlayer,
+): GamePlayer => {
+    return board === player.board ? player : opponent;
 };
 
 export const executeAction = (
     action: CardActionSnapshot,
+    game: Game,
     player: GamePlayer,
     opponent: GamePlayer,
     selectedTarget?: ActionTarget,
@@ -37,7 +42,15 @@ export const executeAction = (
                     resolved.player.health -= action.damage!;
                 } else {
                     resolved.minion.health -= action.damage!;
-                    removeMinionIfDead(resolved.board, resolved.spotId);
+                    if (resolved.minion.health <= 0) {
+                        const owner = getMinionOwner(
+                            resolved.board,
+                            resolved.spotId,
+                            player,
+                            opponent,
+                        );
+                        killMinion(game, owner, resolved.spotId);
+                    }
                 }
                 break;
             }

@@ -9,21 +9,24 @@ import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relat
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
 import { createGame } from "./create_game.js";
 
+const preloadMinionActionRelations = (q: {
+    preload: (relation: string, callback?: (sq: any) => void) => void;
+}) => {
+    q.preload("action", (aq: any) =>
+        aq
+            .preload("boost", (bq: any) => bq.preload("minionPower"))
+            .preload("toolToTargets", (tq: any) =>
+                tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
+            ),
+    ).orderBy("id", "asc");
+};
+
 const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
     q.preload("tags").preload("minion", (q) =>
         q
             .preload("minionPower")
-            .preload("battlecryActions", (q) =>
-                q
-                    .preload("action", (aq) =>
-                        aq
-                            .preload("boost", (bq) => bq.preload("minionPower"))
-                            .preload("toolToTargets", (tq) =>
-                                tq.preload("target", (targetQ) => targetQ.preload("comparison")),
-                            ),
-                    )
-                    .orderBy("id", "asc"),
-            ),
+            .preload("battlecryActions", preloadMinionActionRelations)
+            .preload("deathrattleActions", preloadMinionActionRelations),
     );
 };
 

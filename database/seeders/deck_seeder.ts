@@ -67,6 +67,21 @@ export default class extends BaseSeeder {
         const targetedEnemyBoostCard = await Card.query()
             .where("label", "Monster 2-1 Targeted Enemy Boost")
             .firstOrFail();
+        const deathrattleDamageCard = await Card.query()
+            .where("label", "Monster 2-1 Deathrattle Damage")
+            .firstOrFail();
+        const deathrattleHealCard = await Card.query()
+            .where("label", "Monster 2-1 Deathrattle Heal")
+            .firstOrFail();
+        const deathrattleDrawCard = await Card.query()
+            .where("label", "Monster 2-1 Deathrattle Draw")
+            .firstOrFail();
+        const deathrattleEnemyDrawCard = await Card.query()
+            .where("label", "Monster 2-1 Deathrattle Enemy Draw")
+            .firstOrFail();
+        const deathrattleMassDamageCard = await Card.query()
+            .where("label", "Monster 2-1 Deathrattle Mass Damage")
+            .firstOrFail();
 
         const guaranteedLabels = [
             "Monster 1-2",
@@ -87,6 +102,11 @@ export default class extends BaseSeeder {
             "Monster 2-2 Hero Spell Power Boost",
             "Monster 2-2 Grant Taunt Boost",
             "Monster 2-1 Targeted Enemy Boost",
+            "Monster 2-1 Deathrattle Damage",
+            "Monster 2-1 Deathrattle Heal",
+            "Monster 2-1 Deathrattle Draw",
+            "Monster 2-1 Deathrattle Enemy Draw",
+            "Monster 2-1 Deathrattle Mass Damage",
         ];
         const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
 
@@ -95,7 +115,8 @@ export default class extends BaseSeeder {
         const BATTLECRY_COPIES_PER_DECK = 1;
         const TARGETED_BATTLECRY_COPIES_PER_DECK = 1;
         const BOOST_COPIES_PER_DECK = 1;
-        const DECK_SIZE = 20;
+        const DEATHRATTLE_COPIES_PER_DECK = 1;
+        const DECK_SIZE = 25;
 
         for (const deck of decks) {
             const shuffledOthers = shuffleArray(otherCards);
@@ -105,7 +126,8 @@ export default class extends BaseSeeder {
                 CHARGE_COPIES_PER_DECK -
                 BATTLECRY_COPIES_PER_DECK * 4 -
                 TARGETED_BATTLECRY_COPIES_PER_DECK * 7 -
-                BOOST_COPIES_PER_DECK * 5;
+                BOOST_COPIES_PER_DECK * 5 -
+                DEATHRATTLE_COPIES_PER_DECK * 5;
 
             const deckCardIds = [
                 ...Array.from({ length: TAUNT_COPIES_PER_DECK }, () => tauntCard.id),
@@ -126,6 +148,11 @@ export default class extends BaseSeeder {
                 heroSpellPowerBoostCard.id,
                 grantTauntBoostCard.id,
                 targetedEnemyBoostCard.id,
+                deathrattleDamageCard.id,
+                deathrattleHealCard.id,
+                deathrattleDrawCard.id,
+                deathrattleEnemyDrawCard.id,
+                deathrattleMassDamageCard.id,
                 ...shuffledOthers.slice(0, fillerCount).map((card) => card.id),
             ];
 

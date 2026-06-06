@@ -81,6 +81,7 @@ export type MinionCard = PlayerCardBase & {
     tags: CardTagSnapshot[];
     description: string;
     battlecryActions: CardActionSnapshot[];
+    deathrattleActions: CardActionSnapshot[];
 };
 
 export type SpellCard = PlayerCardBase & {

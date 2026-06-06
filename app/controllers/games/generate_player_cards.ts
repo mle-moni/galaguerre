@@ -2,6 +2,7 @@ import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
 import { serializeAction } from "../../galaguerre/action_engine/serialize_action.js";
 import {
     getBattlecryDescription,
+    getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
 } from "../../galaguerre/minion_card_metadata.js";
@@ -29,7 +30,11 @@ export const generatePlayerCards = (deck: Deck) => {
         const battlecryActions = (card.minion.battlecryActions ?? []).map((bca) =>
             serializeAction(bca.action),
         );
+        const deathrattleActions = (card.minion.deathrattleActions ?? []).map((dra) =>
+            serializeAction(dra.action),
+        );
         const battlecryLines = getBattlecryDescription(battlecryActions);
+        const deathrattleLines = getDeathrattleDescription(deathrattleActions);
 
         return {
             ...base,
@@ -50,8 +55,10 @@ export const generatePlayerCards = (deck: Deck) => {
                 card.minion.health,
                 effects,
                 battlecryLines,
+                deathrattleLines,
             ),
             battlecryActions,
+            deathrattleActions,
         };
     });
 

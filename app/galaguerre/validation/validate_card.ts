@@ -1,5 +1,6 @@
 import type Card from "#models/card";
 import { validateAction } from "./validate_action.js";
+import { validateDeathrattleAction } from "./validate_deathrattle_action.js";
 import type { DeckValidationErrorDetail } from "./validate_deck.js";
 
 export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
@@ -25,6 +26,19 @@ export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
 
     for (const battlecryAction of card.minion.battlecryActions ?? []) {
         const actionError = validateAction(battlecryAction.action);
+        if (!actionError) continue;
+
+        errors.push({
+            cardId: card.id,
+            cardLabel: card.label,
+            actionId: actionError.actionId,
+            actionInternalLabel: actionError.internalLabel,
+            reason: actionError.reason,
+        });
+    }
+
+    for (const deathrattleAction of card.minion.deathrattleActions ?? []) {
+        const actionError = validateDeathrattleAction(deathrattleAction.action);
         if (!actionError) continue;
 
         errors.push({

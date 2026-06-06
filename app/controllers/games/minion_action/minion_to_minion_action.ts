@@ -1,8 +1,10 @@
 import type { GamePlayer, MinionPosition, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { killMinion } from "../../../galaguerre/action_engine/kill_minion.js";
 import { ensureValidTauntTarget, getMinionIsPoisonous, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
+import { terminateGame } from "../terminate_game.js";
 
 export interface MinionActionOptions {
     minionInfos: MinionPosition;
@@ -68,11 +70,22 @@ export const minionToMinionAction = async ({
     }
     recordMinionAttack(minionInfos.minion, game.data.currentRound);
 
+    const initiatorOwner = minionInfos.position.owner === "PLAYER" ? player : opponent;
+    const targetOwner = owner === "PLAYER" ? player : opponent;
+
     if (minionInfos.minion.health <= 0) {
-        initiatorBoard[minionInfos.position.spotId] = null;
+        const { gameEnded } = killMinion(game, initiatorOwner, minionInfos.position.spotId);
+        if (gameEnded) {
+            await terminateGame(game);
+            return;
+        }
     }
     if (targetMinion.health <= 0) {
-        targetBoard[spotId] = null;
+        const { gameEnded } = killMinion(game, targetOwner, spotId);
+        if (gameEnded) {
+            await terminateGame(game);
+            return;
+        }
     }
 
     await game.save();

@@ -111,6 +111,7 @@ export const createMinionCard = (
     tags: [],
     description: "",
     battlecryActions: [],
+    deathrattleActions: [],
     ...overrides,
 });
 

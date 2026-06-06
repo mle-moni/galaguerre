@@ -22,7 +22,13 @@ export const getMinionPowerEffects = (power: MinionPower | null | undefined): st
 
 export const getBattlecryDescription = (actions: CardActionSnapshot[]): string[] => {
     return actions
-        .map((action) => formatActionDescription(action))
+        .map((action) => formatActionDescription(action, "Cri de guerre"))
+        .filter((description): description is string => description !== null);
+};
+
+export const getDeathrattleDescription = (actions: CardActionSnapshot[]): string[] => {
+    return actions
+        .map((action) => formatActionDescription(action, "Dernier souffle"))
         .filter((description): description is string => description !== null);
 };
 
@@ -31,6 +37,7 @@ export const getMinionCardDescription = (
     health: number,
     effects: string[],
     battlecryLines: string[] = [],
+    deathrattleLines: string[] = [],
 ): string => {
     const base = `Serviteur ${attack}/${health}.`;
     const parts: string[] = [base];
@@ -42,6 +49,10 @@ export const getMinionCardDescription = (
 
     if (battlecryLines.length > 0) {
         parts.push(battlecryLines.join(" "));
+    }
+
+    if (deathrattleLines.length > 0) {
+        parts.push(deathrattleLines.join(" "));
     }
 
     return parts.join(" ");
