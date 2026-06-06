@@ -56,7 +56,11 @@ export const minionToMinionAction = async ({
     if (!isValidTarget) return;
 
     // minionInfos.minion attacks targetMinion
-    minionInfos.minion.health -= targetMinion.attack;
+    if (getMinionIsPoisonous(targetMinion)) {
+        minionInfos.minion.health = 0;
+    } else {
+        minionInfos.minion.health -= targetMinion.attack;
+    }
     if (getMinionIsPoisonous(minionInfos.minion)) {
         targetMinion.health = 0;
     } else {

@@ -29,7 +29,11 @@ export const createOutsiderUser = async () => {
     });
 };
 
-export const bindUserIds = (data: GameData, playerOneId: number, playerTwoId: number): GameData => ({
+export const bindUserIds = (
+    data: GameData,
+    playerOneId: number,
+    playerTwoId: number,
+): GameData => ({
     ...data,
     playerOne: { ...data.playerOne, userId: playerOneId },
     playerTwo: { ...data.playerTwo, userId: playerTwoId },
@@ -53,8 +57,5 @@ export const createTestGame = async (data: GameData, options: CreateTestGameOpti
     return { game, playerOne, playerTwo };
 };
 
-export const getActorUserId = (
-    playerOne: User,
-    playerTwo: User,
-    actor: PlayerKey,
-): number => (actor === "playerOne" ? playerOne.id : playerTwo.id);
+export const getActorUserId = (playerOne: User, playerTwo: User, actor: PlayerKey): number =>
+    actor === "playerOne" ? playerOne.id : playerTwo.id;

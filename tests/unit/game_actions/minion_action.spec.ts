@@ -842,6 +842,53 @@ test.group("game:minion_action", (group) => {
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
     });
 
+    test("attacker dies from poisonous counter damage regardless of remaining health", async ({
+        assert,
+    }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 5,
+            health: 10,
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 1,
+            isPoisonous: true,
+            effects: ["Toxique"],
+        });
+
+        const result = await runMinionAction({
+            data: createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                minionId: MINION_IDS.attacker,
+                spotId: "SPOT_1",
+                owner: "OPPONENT",
+            },
+            expect: { error: null },
+        });
+
+        assertMinionActionScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", null);
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
+    });
+
     test("rejects a second attack without windfury", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,
@@ -1151,11 +1198,6 @@ test.group("game:minion_action", (group) => {
         });
 
         assertBothPlayersUpdated(assert);
-        assertOpponentHandHidden(
-            assert,
-            result.actorUserId,
-            result.game.data.playerTwo.userId,
-            1,
-        );
+        assertOpponentHandHidden(assert, result.actorUserId, result.game.data.playerTwo.userId, 1);
     });
 });

@@ -78,9 +78,7 @@ export const assertOpponentHandHidden = (
 
     const game = (viewerUpdate!.data as SocketEventByKey["game:update"]).game;
     const opponent =
-        game.data.playerOne.userId === opponentUserId
-            ? game.data.playerOne
-            : game.data.playerTwo;
+        game.data.playerOne.userId === opponentUserId ? game.data.playerOne : game.data.playerTwo;
 
     assert.equal(opponent.hand.length, opponentHandSize);
     for (const card of opponent.hand) {

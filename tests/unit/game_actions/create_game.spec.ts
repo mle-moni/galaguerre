@@ -44,7 +44,9 @@ test.group("game:create", (group) => {
             });
         }
 
-        await deck.load("cards", (query) => query.preload("minion", (q) => q.preload("minionPower")));
+        await deck.load("cards", (query) =>
+            query.preload("minion", (q) => q.preload("minionPower")),
+        );
 
         return deck;
     };
