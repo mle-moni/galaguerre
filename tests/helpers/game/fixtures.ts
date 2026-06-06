@@ -98,6 +98,7 @@ export const createMinionCard = (
     hasWindfury: false,
     isPoisonous: false,
     effects: [],
+    tags: [],
     description: "",
     battlecryActions: [],
     ...overrides,

@@ -153,6 +153,8 @@ export default class extends BaseSeeder {
             targetedMinionHealAction,
             targetedStrongMinionDamageAction,
             targetedBeastDamageAction,
+            targetedLowHealthDamageAction,
+            targetedExpensiveMinionDamageAction,
         ] = await Action.createMany([
             {
                 internalLabel: "Battlecry ciblé - 3 dégâts au héros adverse",
@@ -189,6 +191,20 @@ export default class extends BaseSeeder {
                 ...nullActionFields,
                 damage: 2,
             },
+            {
+                internalLabel: "Battlecry ciblé - 3 dégâts serviteur adverse pv < 4",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 3,
+            },
+            {
+                internalLabel: "Battlecry ciblé - 3 dégâts serviteur adverse coût = 4",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 3,
+            },
         ]);
 
         const strongMinionComparison = await Comparison.create({
@@ -200,8 +216,27 @@ export default class extends BaseSeeder {
             health: null,
         });
 
+        const lowHealthComparison = await Comparison.create({
+            costComparison: null,
+            cost: null,
+            attackComparison: null,
+            attack: null,
+            healthComparison: "<",
+            health: 4,
+        });
+
+        const expensiveMinionComparison = await Comparison.create({
+            costComparison: "=",
+            cost: 4,
+            attackComparison: null,
+            attack: null,
+            healthComparison: null,
+            health: null,
+        });
+
         const beastTag = await Tag.create({
             name: "beast",
+            symbol: "🦁",
             label: "Bête",
         });
 
@@ -211,6 +246,8 @@ export default class extends BaseSeeder {
             targetedMinionHealMinion,
             targetedStrongMinionDamageMinion,
             targetedBeastDamageMinion,
+            targetedLowHealthDamageMinion,
+            targetedExpensiveMinionDamageMinion,
         ] = await Minion.createMany([
             {
                 internalLabel: "Monstre 2-2 BC Ciblé Héros",
@@ -236,6 +273,16 @@ export default class extends BaseSeeder {
                 internalLabel: "Monstre 2-2 BC Ciblé Bête",
                 attack: 2,
                 health: 2,
+            },
+            {
+                internalLabel: "Monstre 2-3 BC Ciblé Faible",
+                attack: 2,
+                health: 3,
+            },
+            {
+                internalLabel: "Monstre 3-1 BC Ciblé Cher",
+                attack: 3,
+                health: 1,
             },
         ]);
 
@@ -290,6 +337,26 @@ export default class extends BaseSeeder {
                 spellId: null,
                 weaponId: null,
             },
+            {
+                label: "Monster 2-3 Targeted Low Health",
+                imageUrl: "https://picsum.photos/seed/monster_targeted_low_health/200/300",
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: targetedLowHealthDamageMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 3-1 Targeted Expensive",
+                imageUrl: "https://picsum.photos/seed/monster_targeted_expensive/200/300",
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: targetedExpensiveMinionDamageMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
         ]);
 
         const [
@@ -298,6 +365,8 @@ export default class extends BaseSeeder {
             targetedAllyMinionTarget,
             targetedStrongEnemyMinionTarget,
             targetedBeastEnemyMinionTarget,
+            targetedLowHealthEnemyMinionTarget,
+            targetedExpensiveEnemyMinionTarget,
         ] = await Target.createMany([
             {
                 internalLabel: "Héros adverse (ciblé)",
@@ -334,6 +403,20 @@ export default class extends BaseSeeder {
                 comparisonId: null,
                 tagId: beastTag.id,
             },
+            {
+                internalLabel: "Serviteur adverse pv < 4 (ciblé)",
+                type: "MINION",
+                targetTeam: "OPPONENT",
+                comparisonId: lowHealthComparison.id,
+                tagId: null,
+            },
+            {
+                internalLabel: "Serviteur adverse coût = 4 (ciblé)",
+                type: "MINION",
+                targetTeam: "OPPONENT",
+                comparisonId: expensiveMinionComparison.id,
+                tagId: null,
+            },
         ]);
 
         await ToolToTarget.createMany([
@@ -362,6 +445,16 @@ export default class extends BaseSeeder {
                 actionId: targetedBeastDamageAction.id,
                 boostId: null,
             },
+            {
+                targetId: targetedLowHealthEnemyMinionTarget.id,
+                actionId: targetedLowHealthDamageAction.id,
+                boostId: null,
+            },
+            {
+                targetId: targetedExpensiveEnemyMinionTarget.id,
+                actionId: targetedExpensiveMinionDamageAction.id,
+                boostId: null,
+            },
         ]);
 
         await MinionBattlecryAction.createMany([
@@ -373,6 +466,14 @@ export default class extends BaseSeeder {
                 actionId: targetedStrongMinionDamageAction.id,
             },
             { minionId: targetedBeastDamageMinion.id, actionId: targetedBeastDamageAction.id },
+            {
+                minionId: targetedLowHealthDamageMinion.id,
+                actionId: targetedLowHealthDamageAction.id,
+            },
+            {
+                minionId: targetedExpensiveMinionDamageMinion.id,
+                actionId: targetedExpensiveMinionDamageAction.id,
+            },
         ]);
 
         const tauntCard = await Card.query().where("label", "Monster 1-2").first();

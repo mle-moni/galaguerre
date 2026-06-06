@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import Action from "#models/action";
 import Card from "#models/card";
+import Comparison from "#models/comparison";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import Minion from "#models/minion";
@@ -713,6 +714,200 @@ test.group("game:play_card battlecries", (group) => {
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 2 });
     });
 
+    test("rejects targeted minion when current attack fails comparison despite printed attack", async ({
+        assert,
+    }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 3,
+        });
+        const targetMinion = createMinionState(targetCard, { attack: 1 });
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            attackComparison: ">",
+                            attack: 2,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: "Cible invalide pour cette carte" },
+        });
+
+        assertPlayCardScenario(assert, result, {
+            error: "Cible invalide pour cette carte",
+        });
+    });
+
+    test("targeted DAMAGE accepts buffed minion matching current attack comparison", async ({
+        assert,
+    }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 1,
+        });
+        const targetMinion = createMinionState(targetCard, { attack: 5 });
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            attackComparison: ">",
+                            attack: 2,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 2 });
+    });
+
+    test("targeted DAMAGE with cost comparison filter hits valid minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            cost: 4,
+            health: 3,
+            attack: 2,
+        });
+        const targetMinion = createMinionState(targetCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            costComparison: "=",
+                            cost: 4,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 1 });
+    });
+
+    test("targeted DAMAGE with health comparison filter hits valid minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 6,
+            attack: 2,
+        });
+        const targetMinion = createMinionState(targetCard, { health: 2 });
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 1,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            healthComparison: "<",
+                            health: 5,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 1 });
+    });
+
     test("targeted DAMAGE with tag filter hits matching minion", async ({ assert }) => {
         const targetCard = createMinionCard({
             uuid: MINION_IDS.target,
@@ -940,5 +1135,124 @@ test.group("game:play_card battlecries", (group) => {
             tagId: null,
         });
         assert.include(generated.description, "Cri de guerre : Inflige 4 dégâts au héros adverse.");
+    });
+
+    test("generatePlayerCards embeds comparison from database", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `bc-comp-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Battlecry comparison deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const minion = await Minion.create({
+            internalLabel: `bc-comp-minion-${unique}`,
+            attack: 2,
+            health: 2,
+        });
+
+        const comparison = await Comparison.create({
+            costComparison: null,
+            cost: null,
+            attackComparison: ">",
+            attack: 2,
+            healthComparison: null,
+            health: null,
+        });
+
+        const damageAction = await Action.create({
+            internalLabel: `bc-comp-damage-${unique}`,
+            type: "DAMAGE",
+            isTargeted: true,
+            damage: 3,
+            heal: null,
+            drawCount: null,
+            enemyDrawCount: null,
+            boostId: null,
+            drawCardFilterId: null,
+            enemyDrawCardFilterId: null,
+        });
+
+        const enemyMinionTarget = await Target.create({
+            internalLabel: `bc-comp-enemy-minion-${unique}`,
+            type: "MINION",
+            targetTeam: "OPPONENT",
+            comparisonId: comparison.id,
+            tagId: null,
+        });
+
+        await ToolToTarget.create({
+            targetId: enemyMinionTarget.id,
+            actionId: damageAction.id,
+            boostId: null,
+        });
+
+        await MinionBattlecryAction.create({
+            minionId: minion.id,
+            actionId: damageAction.id,
+        });
+
+        const card = await Card.create({
+            label: `bc-comp-card-${unique}`,
+            imageUrl: "https://example.com/card.png",
+            cost: 3,
+            type: "MINION",
+            cardMode: "BETA",
+            minionId: minion.id,
+            spellId: null,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+
+        await deck.load("cards", (query) =>
+            query.preload("minion", (q) =>
+                q
+                    .preload("minionPower")
+                    .preload("battlecryActions", (q) =>
+                        q
+                            .preload("action", (aq) =>
+                                aq.preload("toolToTargets", (tq) =>
+                                    tq.preload("target", (targetQ) =>
+                                        targetQ.preload("comparison"),
+                                    ),
+                                ),
+                            )
+                            .orderBy("id", "asc"),
+                    ),
+            ),
+        );
+
+        const playerCards = generatePlayerCards(deck);
+        const generated = playerCards.find((c) => c.cardId === card.id);
+
+        assert.isDefined(generated);
+        assert.equal(generated?.type, "MINION");
+        if (!generated || generated.type !== "MINION") return;
+
+        assert.equal(generated.battlecryActions.length, 1);
+        assert.equal(generated.battlecryActions[0]!.isTargeted, true);
+        assert.deepEqual(generated.battlecryActions[0]!.target, {
+            type: "MINION",
+            targetTeam: "OPPONENT",
+            comparison: {
+                costComparison: null,
+                cost: null,
+                attackComparison: ">",
+                attack: 2,
+                healthComparison: null,
+                health: null,
+            },
+            tagId: null,
+        });
+        assert.include(
+            generated.description,
+            "Cri de guerre : Inflige 3 dégâts à un serviteur adverse (attaque > 2).",
+        );
     });
 });

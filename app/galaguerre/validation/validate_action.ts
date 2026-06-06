@@ -1,5 +1,6 @@
 import { V1_ACTION_TYPES } from "../action_engine/v1_action_types.js";
 import type Action from "#models/action";
+import { validateComparison } from "./validate_comparison.js";
 
 export type ActionValidationError = {
     actionId: number;
@@ -56,6 +57,25 @@ const validateTargetedAction = (action: Action): ActionValidationError | null =>
                 actionId: action.id,
                 internalLabel: action.internalLabel,
                 reason: "comparison and tag filters require a MINION target type",
+            };
+        }
+    }
+
+    if (target.comparisonId !== null) {
+        if (!target.comparison) {
+            return {
+                actionId: action.id,
+                internalLabel: action.internalLabel,
+                reason: "target comparison must be preloaded for validation",
+            };
+        }
+
+        const comparisonError = validateComparison(target.comparison);
+        if (comparisonError) {
+            return {
+                actionId: action.id,
+                internalLabel: action.internalLabel,
+                reason: comparisonError.reason,
             };
         }
     }

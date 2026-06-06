@@ -41,6 +41,10 @@ export const generatePlayerCards = (deck: Deck) => {
             hasWindfury: card.minion.minionPower?.hasWindfury ?? false,
             isPoisonous: card.minion.minionPower?.isPoisonous ?? false,
             effects,
+            tags: (card.tags ?? []).map((tag) => ({
+                label: tag.label,
+                symbol: tag.symbol,
+            })),
             description: getMinionCardDescription(
                 card.minion.attack,
                 card.minion.health,

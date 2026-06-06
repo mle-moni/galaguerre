@@ -11,6 +11,17 @@ export interface ComparisonSnapshot {
     health: number | null;
 }
 
+export interface ComparableStats {
+    cost: number;
+    attack: number;
+    health: number;
+}
+
+export interface CardTagSnapshot {
+    label: string;
+    symbol: string;
+}
+
 export interface PlayerCardBase {
     uuid: string;
     cardId: number;
@@ -52,6 +63,7 @@ export type MinionCard = PlayerCardBase & {
     hasWindfury: boolean;
     isPoisonous: boolean;
     effects: string[];
+    tags: CardTagSnapshot[];
     description: string;
     battlecryActions: CardActionSnapshot[];
 };

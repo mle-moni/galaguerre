@@ -2,44 +2,13 @@ import type {
     ActionTarget,
     BoardState,
     CardActionSnapshot,
-    ComparisonOperator,
-    ComparisonSnapshot,
     MinionCard,
     MinionState,
     TargetSnapshot,
 } from "./game.types.js";
+import { getBoardMinionStats, matchesComparison } from "./comparison_matching.js";
 
-const compareValue = (value: number, operator: ComparisonOperator, target: number): boolean => {
-    switch (operator) {
-        case "<":
-            return value < target;
-        case ">":
-            return value > target;
-        case "=":
-            return value === target;
-    }
-};
-
-export const matchesComparison = (
-    stats: { cost: number; attack: number; health: number },
-    comparison: ComparisonSnapshot | null,
-): boolean => {
-    if (!comparison) return true;
-
-    if (comparison.costComparison !== null && comparison.cost !== null) {
-        if (!compareValue(stats.cost, comparison.costComparison, comparison.cost)) return false;
-    }
-    if (comparison.attackComparison !== null && comparison.attack !== null) {
-        if (!compareValue(stats.attack, comparison.attackComparison, comparison.attack))
-            return false;
-    }
-    if (comparison.healthComparison !== null && comparison.health !== null) {
-        if (!compareValue(stats.health, comparison.healthComparison, comparison.health))
-            return false;
-    }
-
-    return true;
-};
+export { matchesComparison } from "./comparison_matching.js";
 
 export const heroMatchesTarget = (target: TargetSnapshot, isOpponentHero: boolean): boolean => {
     if (target.type !== "HERO") return false;
@@ -61,12 +30,7 @@ export const minionMatchesTarget = (
     const card = minion.originalCard;
     if (card.type !== "MINION") return false;
 
-    if (
-        !matchesComparison(
-            { cost: card.cost, attack: card.attack, health: card.health },
-            target.comparison,
-        )
-    ) {
+    if (!matchesComparison(getBoardMinionStats(minion), target.comparison)) {
         return false;
     }
 

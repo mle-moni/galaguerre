@@ -9,6 +9,9 @@ export default class Tag extends BaseModel {
     declare name: string;
 
     @column()
+    declare symbol: string;
+
+    @column()
     declare label: string;
 
     @column.dateTime({ autoCreate: true })

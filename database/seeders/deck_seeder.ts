@@ -46,6 +46,12 @@ export default class extends BaseSeeder {
         const targetedBeastDamageCard = await Card.query()
             .where("label", "Monster 2-2 Targeted Beast Damage")
             .firstOrFail();
+        const targetedLowHealthCard = await Card.query()
+            .where("label", "Monster 2-3 Targeted Low Health")
+            .firstOrFail();
+        const targetedExpensiveCard = await Card.query()
+            .where("label", "Monster 3-1 Targeted Expensive")
+            .firstOrFail();
 
         const guaranteedLabels = [
             "Monster 1-2",
@@ -59,6 +65,8 @@ export default class extends BaseSeeder {
             "Monster 1-3 Targeted Minion Heal",
             "Monster 3-2 Targeted Strong Minion",
             "Monster 2-2 Targeted Beast Damage",
+            "Monster 2-3 Targeted Low Health",
+            "Monster 3-1 Targeted Expensive",
         ];
         const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
 
@@ -75,7 +83,7 @@ export default class extends BaseSeeder {
                 TAUNT_COPIES_PER_DECK -
                 CHARGE_COPIES_PER_DECK -
                 BATTLECRY_COPIES_PER_DECK * 4 -
-                TARGETED_BATTLECRY_COPIES_PER_DECK * 5;
+                TARGETED_BATTLECRY_COPIES_PER_DECK * 7;
 
             const deckCardIds = [
                 ...Array.from({ length: TAUNT_COPIES_PER_DECK }, () => tauntCard.id),
@@ -89,6 +97,8 @@ export default class extends BaseSeeder {
                 targetedMinionHealCard.id,
                 targetedStrongMinionCard.id,
                 targetedBeastDamageCard.id,
+                targetedLowHealthCard.id,
+                targetedExpensiveCard.id,
                 ...shuffledOthers.slice(0, fillerCount).map((card) => card.id),
             ];
 
