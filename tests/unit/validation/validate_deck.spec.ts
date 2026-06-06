@@ -271,7 +271,7 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 1);
         assert.include(
             result.errors[0]!.reason,
-            "DAMAGE action requires a HERO target via tool_to_target",
+            "DAMAGE action requires a HERO or MINION target via tool_to_target",
         );
     });
 
@@ -306,11 +306,11 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 1);
         assert.include(
             result.errors[0]!.reason,
-            "HEAL action requires a HERO target via tool_to_target",
+            "HEAL action requires a HERO or MINION target via tool_to_target",
         );
     });
 
-    test("rejects DAMAGE action with MINION target", async ({ assert }) => {
+    test("accepts DAMAGE action with MINION target", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
             email: `vd-minion-target-${unique}@test.fr`,
@@ -318,7 +318,7 @@ test.group("validation:validateDeck", (group) => {
         });
 
         const deck = await Deck.create({
-            name: `Invalid minion target deck ${unique}`,
+            name: `Valid minion target deck ${unique}`,
             userId: user.id,
             selected: true,
         });
@@ -326,9 +326,9 @@ test.group("validation:validateDeck", (group) => {
         await createMinionCardInDeck({
             deck,
             unique,
-            label: `invalid-minion-target-${unique}`,
+            label: `valid-minion-target-${unique}`,
             action: {
-                internalLabel: `invalid-minion-target-action-${unique}`,
+                internalLabel: `valid-minion-target-action-${unique}`,
                 type: "DAMAGE",
                 damage: 2,
             },
@@ -338,12 +338,8 @@ test.group("validation:validateDeck", (group) => {
         await loadDeckRelations(deck);
         const result = validateDeck(deck);
 
-        assert.isFalse(result.valid);
-        assert.equal(result.errors.length, 1);
-        assert.include(
-            result.errors[0]!.reason,
-            "DAMAGE action requires a HERO target via tool_to_target",
-        );
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
     });
 
     test("rejects BOOST action without boostId", async ({ assert }) => {
@@ -580,6 +576,66 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 0);
     });
 
+    test("accepts SPELL card with mass minion damage", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-spell-mass-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Valid mass spell deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const damageAction = await Action.create({
+            internalLabel: `spell-mass-damage-action-${unique}`,
+            type: "DAMAGE",
+            isTargeted: false,
+            ...nullActionFields,
+            damage: 1,
+        });
+
+        const enemyMinionsTarget = await Target.create({
+            internalLabel: `spell-enemy-minions-${unique}`,
+            type: "MINION",
+            targetTeam: "OPPONENT",
+            comparisonId: null,
+            tagId: null,
+        });
+
+        await ToolToTarget.create({
+            targetId: enemyMinionsTarget.id,
+            actionId: damageAction.id,
+            boostId: null,
+        });
+
+        const spell = await Spell.create({
+            internalLabel: `spell-mass-${unique}`,
+            actionId: damageAction.id,
+        });
+
+        const card = await Card.create({
+            label: `spell-mass-card-${unique}`,
+            imageUrl: "https://example.com/spell.png",
+            cost: 2,
+            type: "SPELL",
+            cardMode: "BETA",
+            minionId: null,
+            spellId: spell.id,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await loadDeckRelations(deck);
+
+        const result = validateDeck(deck);
+
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
+    });
+
     test("rejects SPELL card without spell entity", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
@@ -666,7 +722,7 @@ test.group("validation:validateDeck", (group) => {
             assert.isAbove(error.errors.length, 0);
             assert.include(
                 error.errors[0]!.reason,
-                "DAMAGE action requires a HERO target via tool_to_target",
+                "DAMAGE action requires a HERO or MINION target via tool_to_target",
             );
         }
     });

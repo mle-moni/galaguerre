@@ -220,15 +220,22 @@ export const validateAction = (action: Action): ActionValidationError | null => 
                 };
             }
 
-            if (!findHeroTarget(action)) {
-                return {
-                    actionId: action.id,
-                    internalLabel: action.internalLabel,
-                    reason: "DAMAGE action requires a HERO target via tool_to_target",
-                };
+            const minionTarget = findMinionTarget(action);
+            const heroTarget = findHeroTarget(action);
+
+            if (minionTarget?.target) {
+                return validateTargetFilters(action, minionTarget.target);
             }
 
-            return null;
+            if (heroTarget?.target) {
+                return null;
+            }
+
+            return {
+                actionId: action.id,
+                internalLabel: action.internalLabel,
+                reason: "DAMAGE action requires a HERO or MINION target via tool_to_target",
+            };
         }
         case "HEAL": {
             if (action.heal === null || action.heal <= 0) {
@@ -239,15 +246,22 @@ export const validateAction = (action: Action): ActionValidationError | null => 
                 };
             }
 
-            if (!findHeroTarget(action)) {
-                return {
-                    actionId: action.id,
-                    internalLabel: action.internalLabel,
-                    reason: "HEAL action requires a HERO target via tool_to_target",
-                };
+            const minionTarget = findMinionTarget(action);
+            const heroTarget = findHeroTarget(action);
+
+            if (minionTarget?.target) {
+                return validateTargetFilters(action, minionTarget.target);
             }
 
-            return null;
+            if (heroTarget?.target) {
+                return null;
+            }
+
+            return {
+                actionId: action.id,
+                internalLabel: action.internalLabel,
+                reason: "HEAL action requires a HERO or MINION target via tool_to_target",
+            };
         }
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) {
