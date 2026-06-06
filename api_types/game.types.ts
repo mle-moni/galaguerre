@@ -1,3 +1,5 @@
+export const DEFAULT_HERO_HEALTH = 15;
+
 export type ComparisonOperator = "<" | ">" | "=";
 
 export interface ComparisonSnapshot {

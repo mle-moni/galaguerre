@@ -1,5 +1,11 @@
-import type { ActionTarget, CardActionSnapshot, GamePlayer } from "#api_types/game.types";
+import {
+    DEFAULT_HERO_HEALTH,
+    type ActionTarget,
+    type CardActionSnapshot,
+    type GamePlayer,
+} from "#api_types/game.types";
 import { drawCards } from "../draw_cards.js";
+import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
 import { resolveHeroTarget } from "./resolve_hero_target.js";
@@ -36,9 +42,17 @@ export const executeAction = (
             }
             case "HEAL": {
                 if (resolved.type === "HERO") {
-                    resolved.player.health += action.heal!;
+                    resolved.player.health = applyHeal(
+                        resolved.player.health,
+                        action.heal!,
+                        DEFAULT_HERO_HEALTH,
+                    );
                 } else {
-                    resolved.minion.health += action.heal!;
+                    resolved.minion.health = applyHeal(
+                        resolved.minion.health,
+                        action.heal!,
+                        getMinionMaxHealth(resolved.minion),
+                    );
                 }
                 break;
             }
@@ -64,7 +78,7 @@ export const executeAction = (
                     ? resolveHeroTarget(action.target, player, opponent)
                     : player;
             if (!target) return;
-            target.health += action.heal!;
+            target.health = applyHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
             break;
         }
         case "DRAW":

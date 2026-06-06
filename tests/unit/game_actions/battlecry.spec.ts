@@ -126,6 +126,66 @@ test.group("game:play_card battlecries", (group) => {
         assertPlayerHealth(assert, result.game, "playerOne", 14);
     });
 
+    test("HEAL battlecry caps hero health at max PDV", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "HEAL",
+                    heal: 10,
+                    target: createHeroTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, health: 12, hand: [handCard] },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertPlayerHealth(assert, result.game, "playerOne", 15);
+    });
+
+    test("HEAL battlecry does not overheal hero already at max PDV", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "HEAL",
+                    heal: 5,
+                    target: createHeroTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, health: 15, hand: [handCard] },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertPlayerHealth(assert, result.game, "playerOne", 15);
+    });
+
     test("DAMAGE battlecry resolves target team from snapshot", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
@@ -436,6 +496,92 @@ test.group("game:play_card battlecries", (group) => {
             attack: 2,
         });
         const allyMinion = createMinionState(allyCard, { health: 1 });
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "HEAL",
+                    heal: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "PLAYER" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { health: 3 });
+    });
+
+    test("targeted HEAL caps minion health at original card max", async ({ assert }) => {
+        const allyCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion = createMinionState(allyCard, { health: 1 });
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "HEAL",
+                    heal: 5,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "PLAYER" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { health: 3 });
+    });
+
+    test("targeted HEAL does not overheal minion already at max PDV", async ({ assert }) => {
+        const allyCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion = createMinionState(allyCard, { health: 3 });
 
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,

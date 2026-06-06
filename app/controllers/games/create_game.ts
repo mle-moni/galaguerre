@@ -1,4 +1,4 @@
-import type { GameData } from "#api_types/game.types";
+import { DEFAULT_HERO_HEALTH, type GameData } from "#api_types/game.types";
 import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
 import type Deck from "#models/deck";
 import Game from "#models/game";
@@ -36,7 +36,6 @@ export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) =>
 };
 
 const DEFAULT_HAND_SIZE = 3;
-const DEFAULT_HEALTH = 15;
 
 export const getDefaultGameData = async ({
     playerOne,
@@ -65,7 +64,7 @@ export const getDefaultGameData = async ({
                 SPOT_4: null,
                 SPOT_5: null,
             },
-            health: DEFAULT_HEALTH,
+            health: DEFAULT_HERO_HEALTH,
             mana: 0,
             maxFatigueDamageTaken: 0,
             weaponState: null,
@@ -82,7 +81,7 @@ export const getDefaultGameData = async ({
                 SPOT_4: null,
                 SPOT_5: null,
             },
-            health: DEFAULT_HEALTH,
+            health: DEFAULT_HERO_HEALTH,
             mana: 0,
             maxFatigueDamageTaken: 0,
             weaponState: null,

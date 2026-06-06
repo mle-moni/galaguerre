@@ -1,7 +1,7 @@
 import type { GameData } from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import { gamePlayCard } from "#controllers/games/play_card/game_play_card";
-import Game from "#models/game";
+import type Game from "#models/game";
 import { addSocketData, removeSocketData } from "#services/sockets/sockets_data";
 import type { Assert } from "@japa/assert";
 import {

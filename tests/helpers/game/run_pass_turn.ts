@@ -1,7 +1,7 @@
 import type { GameData } from "#api_types/game.types";
 import { passGameTurn } from "#controllers/games/pass_game_turn";
 import { setupNextGameTurn } from "#controllers/games/setup_next_game_turn";
-import Game from "#models/game";
+import type Game from "#models/game";
 import { addSocketData, removeSocketData } from "#services/sockets/sockets_data";
 import type { Assert } from "@japa/assert";
 import {
