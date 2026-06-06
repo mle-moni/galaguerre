@@ -10,13 +10,15 @@ import { DeckValidationError } from "../../galaguerre/validation/validate_deck.j
 import { createGame } from "./create_game.js";
 
 const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
-    q.preload("minion", (q) =>
+    q.preload("tags").preload("minion", (q) =>
         q
             .preload("minionPower")
             .preload("battlecryActions", (q) =>
                 q
                     .preload("action", (aq) =>
-                        aq.preload("toolToTargets", (tq) => tq.preload("target")),
+                        aq.preload("toolToTargets", (tq) =>
+                            tq.preload("target", (targetQ) => targetQ.preload("comparison")),
+                        ),
                     )
                     .orderBy("id", "asc"),
             ),

@@ -32,38 +32,50 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
         return jsxArray;
     }, [player, isOpponent]);
 
-    const borderColor = store.playerInfosStore.getBorderColor({
+    const playerBorderColor = store.playerInfosStore.getBorderColor({
         isOpponent,
     });
 
     const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
+    const targetSelectionBorderColor = store.targetSelectionStore.getHeroBorderColor(isOpponent);
+    const dropZoneBorderColor =
+        targetSelectionBorderColor !== "RGBa(0, 0, 0, 0)"
+            ? targetSelectionBorderColor
+            : minionAttackBorderColor;
 
     const handleDrop = () => {
         store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
     };
 
+    const handleClick = () => {
+        if (!store.targetSelectionStore.isSelectingTarget) return;
+        store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
+    };
+
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         const minion = store.minionDragStore.minionDragged;
+        const isSelectingTarget = store.targetSelectionStore.isSelectingTarget;
 
-        if (!minion) return;
+        if (!minion && !isSelectingTarget) return;
 
-        // authorize card drop
         e.preventDefault();
     };
 
     return (
         <div
+            data-target-zone
             className="border-2 border-dashed w-full mx-2"
             style={{
-                borderColor: minionAttackBorderColor,
+                borderColor: dropZoneBorderColor,
             }}
+            onClick={handleClick}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
             <div
                 className="rounded-full border-2 border-solid w-full p-4"
                 style={{
-                    borderColor,
+                    borderColor: playerBorderColor,
                 }}
             >
                 {elements}

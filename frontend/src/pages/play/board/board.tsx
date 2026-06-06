@@ -44,17 +44,24 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
         store.handleDrop(spotId, spotOwner);
     };
 
+    const handleClick = () => {
+        if (!store.targetSelectionStore.isSelectingTarget) return;
+        store.handleDrop(spotId, spotOwner);
+    };
+
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         const card = store.cardDragStore.cardDragged || store.minionDragStore.minionDragged;
+        const isSelectingTarget = store.targetSelectionStore.isSelectingTarget;
 
-        if (!card) return;
+        if (!card && !isSelectingTarget) return;
 
-        // authorize card drop
         e.preventDefault();
     };
 
     return (
         <div
+            data-target-zone
+            onClick={handleClick}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             className={clsx("minion-spot", "w-[126px] h-[156px] bg-red-100 border-dashed m-4")}

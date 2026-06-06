@@ -1,4 +1,10 @@
-import type { GamePlayer, MinionSpotId, PlayerCard, SpotOwner } from "#api_types/game.types";
+import type {
+    ActionTarget,
+    GamePlayer,
+    MinionSpotId,
+    PlayerCard,
+    SpotOwner,
+} from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
@@ -12,7 +18,7 @@ import { playMinion } from "./play_minion.js";
 
 export const gamePlayCard = async (
     socketId: string,
-    { cardId, owner, spotId }: ClientSocketEventByKey["game:play_card"],
+    { cardId, owner, spotId, actionTarget }: ClientSocketEventByKey["game:play_card"],
 ) => {
     const gameInfos = await getGameActionInfos(socketId);
     if (!gameInfos) return;
@@ -26,7 +32,7 @@ export const gamePlayCard = async (
     const card = ensureCardFoundInHand(player.hand, cardId, socketId);
     if (!card) return;
 
-    return playCard({ card, game: currentGame, player, owner, spotId, socketId });
+    return playCard({ card, game: currentGame, player, owner, spotId, socketId, actionTarget });
 };
 
 export interface PlayCardOptions {
@@ -36,6 +42,7 @@ export interface PlayCardOptions {
     owner: SpotOwner;
     spotId: MinionSpotId;
     socketId: string;
+    actionTarget?: ActionTarget | null;
 }
 
 const playCard = async (opts: PlayCardOptions) => {

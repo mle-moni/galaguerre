@@ -1,15 +1,34 @@
+export type ComparisonOperator = "<" | ">" | "=";
+
+export interface ComparisonSnapshot {
+    costComparison: ComparisonOperator | null;
+    cost: number | null;
+    attackComparison: ComparisonOperator | null;
+    attack: number | null;
+    healthComparison: ComparisonOperator | null;
+    health: number | null;
+}
+
 export interface PlayerCardBase {
     uuid: string;
     cardId: number;
     label: string;
     imageUrl: string;
     cost: number;
+    tagIds: number[];
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 
 export interface TargetSnapshot {
     type: "HERO" | "MINION" | "ALL";
     targetTeam: "PLAYER" | "OPPONENT";
+    comparison: ComparisonSnapshot | null;
+    tagId: number | null;
+}
+
+export interface ActionTarget {
+    spotId: MinionSpotId | null;
+    owner: SpotOwner;
 }
 
 export interface CardActionSnapshot {

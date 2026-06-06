@@ -94,5 +94,11 @@ export const playCardVineSchema = vine.compile(
         cardId: vine.string(),
         spotId: vine.enum(MINION_SPOT_IDS),
         owner: vine.enum(SPOT_OWNERS),
+        actionTarget: vine
+            .object({
+                spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+                owner: vine.enum(SPOT_OWNERS),
+            })
+            .optional(),
     }),
 );

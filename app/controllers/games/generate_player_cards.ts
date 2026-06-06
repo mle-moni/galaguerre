@@ -17,6 +17,7 @@ export const generatePlayerCards = (deck: Deck) => {
             label: card.label,
             imageUrl: card.imageUrl,
             cost: card.cost,
+            tagIds: (card.tags ?? []).map((tag) => tag.id),
         };
 
         if (card.type === "SPELL") throw new Error("card type not supported");

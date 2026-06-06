@@ -5,11 +5,13 @@ import { _assert } from "~/helpers/assertions";
 import { CardDragStore } from "./CardDragStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
+import { TargetSelectionStore } from "./TargetSelectionStore.js";
 
 export class GameStore {
     cardDragStore = new CardDragStore(this);
     minionDragStore = new MinionDragStore(this);
     playerInfosStore = new PlayerInfosStore(this);
+    targetSelectionStore = new TargetSelectionStore(this);
 
     private _game: ApiGame | null = null;
     private _user: ApiUser | null = null;
@@ -86,6 +88,10 @@ export class GameStore {
     }
 
     handleDrop(spotId: MinionSpotId | null, spotOwner: SpotOwner) {
+        if (this.targetSelectionStore.isSelectingTarget) {
+            return this.targetSelectionStore.confirmTarget({ spotId, owner: spotOwner });
+        }
+
         if (this.cardDragStore.cardDragged && spotId !== null) {
             return this.cardDragStore.handleDrop(this.cardDragStore.cardDragged, spotId, spotOwner);
         }
@@ -99,6 +105,13 @@ export class GameStore {
     }
 
     getMinionSpotBackgroundColor(spotId: MinionSpotId, spotOwner: SpotOwner) {
+        if (this.targetSelectionStore.isSelectingTarget) {
+            return this.targetSelectionStore.getMinionSpotBorderColor(
+                spotId,
+                spotOwner === "OPPONENT",
+            );
+        }
+
         if (this.cardDragStore.cardDragged) {
             if (spotOwner === "OPPONENT")
                 return this.cardDragStore.opponentSlotsBorderColor[spotId];

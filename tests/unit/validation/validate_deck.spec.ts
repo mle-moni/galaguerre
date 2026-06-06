@@ -33,7 +33,9 @@ const loadDeckRelations = async (deck: Deck) => {
                 .preload("battlecryActions", (q) =>
                     q
                         .preload("action", (aq) =>
-                            aq.preload("toolToTargets", (tq) => tq.preload("target")),
+                            aq.preload("toolToTargets", (tq) =>
+                                tq.preload("target", (targetQ) => targetQ.preload("comparison")),
+                            ),
                         )
                         .orderBy("id", "asc"),
                 ),
@@ -347,7 +349,7 @@ test.group("validation:validateDeck", (group) => {
         assert.include(result.errors[0]!.reason, "Action type BOOST is not supported");
     });
 
-    test("rejects isTargeted action", async ({ assert }) => {
+    test("accepts valid isTargeted DAMAGE action", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
             email: `vd-targeted-${unique}@test.fr`,
@@ -355,7 +357,7 @@ test.group("validation:validateDeck", (group) => {
         });
 
         const deck = await Deck.create({
-            name: `Invalid targeted deck ${unique}`,
+            name: `Valid targeted deck ${unique}`,
             userId: user.id,
             selected: true,
         });
@@ -363,9 +365,9 @@ test.group("validation:validateDeck", (group) => {
         await createMinionCardInDeck({
             deck,
             unique,
-            label: `invalid-targeted-${unique}`,
+            label: `valid-targeted-${unique}`,
             action: {
-                internalLabel: `invalid-targeted-action-${unique}`,
+                internalLabel: `valid-targeted-action-${unique}`,
                 type: "DAMAGE",
                 isTargeted: true,
                 damage: 2,
@@ -376,9 +378,78 @@ test.group("validation:validateDeck", (group) => {
         await loadDeckRelations(deck);
         const result = validateDeck(deck);
 
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
+    });
+
+    test("rejects isTargeted DRAW action", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-targeted-draw-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Invalid targeted draw deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `invalid-targeted-draw-${unique}`,
+            action: {
+                internalLabel: `invalid-targeted-draw-action-${unique}`,
+                type: "DRAW",
+                isTargeted: true,
+                drawCount: 1,
+            },
+            target: { type: "HERO", targetTeam: "OPPONENT" },
+        });
+
+        await loadDeckRelations(deck);
+        const result = validateDeck(deck);
+
         assert.isFalse(result.valid);
         assert.equal(result.errors.length, 1);
-        assert.include(result.errors[0]!.reason, "isTargeted actions are not supported");
+        assert.include(result.errors[0]!.reason, "Targeted action type DRAW is not supported");
+    });
+
+    test("rejects isTargeted action without target", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-targeted-notarget-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Invalid targeted no target deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `invalid-targeted-notarget-${unique}`,
+            action: {
+                internalLabel: `invalid-targeted-notarget-action-${unique}`,
+                type: "DAMAGE",
+                isTargeted: true,
+                damage: 2,
+            },
+        });
+
+        await loadDeckRelations(deck);
+        const result = validateDeck(deck);
+
+        assert.isFalse(result.valid);
+        assert.equal(result.errors.length, 1);
+        assert.include(
+            result.errors[0]!.reason,
+            "Targeted action requires a HERO or MINION target via tool_to_target",
+        );
     });
 
     test("rejects SPELL card in deck", async ({ assert }) => {

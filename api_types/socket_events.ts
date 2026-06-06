@@ -1,4 +1,4 @@
-import type { ApiGame, MinionSpotId, SpotOwner } from "./game.types.js";
+import type { ActionTarget, ApiGame, MinionSpotId, SpotOwner } from "./game.types.js";
 
 export interface SocketEventByKey {
     notify_error: { error: string };
@@ -12,7 +12,12 @@ export interface SocketEventByKey {
 export type SocketEventKey = keyof SocketEventByKey;
 
 export interface ClientSocketEventByKey {
-    "game:play_card": { cardId: string; spotId: MinionSpotId; owner: SpotOwner };
+    "game:play_card": {
+        cardId: string;
+        spotId: MinionSpotId;
+        owner: SpotOwner;
+        actionTarget?: ActionTarget | null;
+    };
     "game:minion_action": { minionId: string; spotId: MinionSpotId | null; owner: SpotOwner };
 }
 

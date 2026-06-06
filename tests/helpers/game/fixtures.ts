@@ -1,6 +1,7 @@
 import type {
     BoardState,
     CardActionSnapshot,
+    ComparisonSnapshot,
     GameData,
     GamePlayer,
     MinionCard,
@@ -8,6 +9,7 @@ import type {
     MinionState,
     PlayerCard,
     SpellCard,
+    TargetSnapshot,
     WeaponCard,
 } from "#api_types/game.types";
 
@@ -31,11 +33,38 @@ export const createEmptyBoard = (): BoardState => ({
     SPOT_5: null,
 });
 
+export const createComparisonSnapshot = (
+    overrides: Partial<ComparisonSnapshot> = {},
+): ComparisonSnapshot => ({
+    costComparison: null,
+    cost: null,
+    attackComparison: null,
+    attack: null,
+    healthComparison: null,
+    health: null,
+    ...overrides,
+});
+
 export const createHeroTargetSnapshot = (
     targetTeam: "PLAYER" | "OPPONENT",
-): CardActionSnapshot["target"] => ({
+    overrides: Partial<TargetSnapshot> = {},
+): TargetSnapshot => ({
     type: "HERO",
     targetTeam,
+    comparison: null,
+    tagId: null,
+    ...overrides,
+});
+
+export const createMinionTargetSnapshot = (
+    targetTeam: "PLAYER" | "OPPONENT",
+    overrides: Partial<TargetSnapshot> = {},
+): TargetSnapshot => ({
+    type: "MINION",
+    targetTeam,
+    comparison: null,
+    tagId: null,
+    ...overrides,
 });
 
 export const createCardActionSnapshot = (
@@ -59,6 +88,7 @@ export const createMinionCard = (
     label: "Test Minion",
     imageUrl: "https://example.com/card.png",
     cost: 1,
+    tagIds: [],
     type: "MINION",
     attack: 1,
     health: 1,
@@ -137,6 +167,7 @@ export const createSpellCard = (
     label: "Test Spell",
     imageUrl: "https://example.com/spell.png",
     cost: 2,
+    tagIds: [],
     type: "SPELL",
     ...overrides,
 });
@@ -149,6 +180,7 @@ export const createWeaponCard = (
     label: "Test Weapon",
     imageUrl: "https://example.com/weapon.png",
     cost: 3,
+    tagIds: [],
     type: "WEAPON",
     ...overrides,
 });

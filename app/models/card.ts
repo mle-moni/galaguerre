@@ -1,9 +1,11 @@
-import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
-import type { BelongsTo } from "@adonisjs/lucid/types/relations";
+import { BaseModel, belongsTo, column, manyToMany } from "@adonisjs/lucid/orm";
+import type { BelongsTo, ManyToMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import type { GalaguerreCardMode, GalaguerreCardType } from "../galaguerre/galaguerre.types.js";
+import type CardTag from "./card_tag.js";
 import Minion from "./minion.js";
 import Spell from "./spell.js";
+import Tag from "./tag.js";
 import Weapon from "./weapon.js";
 
 export default class Card extends BaseModel {
@@ -42,6 +44,9 @@ export default class Card extends BaseModel {
 
     @belongsTo(() => Weapon)
     declare weapon: BelongsTo<typeof Weapon>;
+
+    @manyToMany(() => Tag, { pivotTable: "card_tags" })
+    declare tags: ManyToMany<typeof Tag, typeof CardTag>;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

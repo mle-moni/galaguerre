@@ -11,6 +11,7 @@ import ToolToTarget from "#models/tool_to_target";
 import User from "#models/user";
 import { generatePlayerCards } from "#controllers/games/generate_player_cards";
 import {
+    assertBoardSpot,
     assertGameState,
     assertIsFinished,
     assertPlayerHealth,
@@ -18,9 +19,14 @@ import {
 import {
     CARD_IDS,
     createCardActionSnapshot,
+    createComparisonSnapshot,
     createGameData,
     createHeroTargetSnapshot,
     createMinionCard,
+    createMinionState,
+    createMinionTargetSnapshot,
+    MINION_IDS,
+    placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { assertPlayCardScenario, runPlayCard } from "#tests/helpers/game/run_play_card";
 
@@ -272,12 +278,17 @@ test.group("game:play_card battlecries", (group) => {
         assertGameState(assert, result.game, "FINISHED");
     });
 
-    test("targeted action is ignored without error", async ({ assert }) => {
+    test("rejects targeted action without actionTarget", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 2,
             battlecryActions: [
-                createCardActionSnapshot({ type: "DAMAGE", damage: 5, isTargeted: true }),
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 5,
+                    isTargeted: true,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
             ],
         });
 
@@ -292,11 +303,311 @@ test.group("game:play_card battlecries", (group) => {
                 spotId: "SPOT_1",
                 owner: "PLAYER",
             },
+            expect: { error: "Vous devez choisir une cible pour cette carte" },
+        });
+
+        assertPlayCardScenario(assert, result, {
+            error: "Vous devez choisir une cible pour cette carte",
+        });
+        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+    });
+
+    test("targeted DAMAGE deals damage to opponent hero", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 5,
+                    isTargeted: true,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: { health: 15 },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: null, owner: "OPPONENT" },
+            },
             expect: { error: null },
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerTwo", 10);
+    });
+
+    test("targeted DAMAGE deals damage to opponent minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 2,
+        });
+        const targetMinion = createMinionState(targetCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 3,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 1 });
+    });
+
+    test("targeted DAMAGE kills opponent minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 2,
+            attack: 1,
+        });
+        const targetMinion = createMinionState(targetCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 5,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_3", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_3", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_3", null);
+    });
+
+    test("targeted HEAL heals ally minion", async ({ assert }) => {
+        const allyCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion = createMinionState(allyCard, { health: 1 });
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "HEAL",
+                    heal: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "PLAYER" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { health: 3 });
+    });
+
+    test("rejects invalid targeted minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 1,
+        });
+        const targetMinion = createMinionState(targetCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 3,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            attackComparison: ">",
+                            attack: 2,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: "Cible invalide pour cette carte" },
+        });
+
+        assertPlayCardScenario(assert, result, {
+            error: "Cible invalide pour cette carte",
+        });
+    });
+
+    test("targeted DAMAGE with comparison filter hits valid minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 3,
+        });
+        const targetMinion = createMinionState(targetCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            attackComparison: ">",
+                            attack: 2,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 2 });
+    });
+
+    test("targeted DAMAGE with tag filter hits matching minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 2,
+            tagIds: [42],
+        });
+        const targetMinion = createMinionState(targetCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", { tagId: 42 }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 2 });
     });
 
     test("BOOST action is ignored without error", async ({ assert }) => {
@@ -454,7 +765,11 @@ test.group("game:play_card battlecries", (group) => {
                     .preload("battlecryActions", (q) =>
                         q
                             .preload("action", (aq) =>
-                                aq.preload("toolToTargets", (tq) => tq.preload("target")),
+                                aq.preload("toolToTargets", (tq) =>
+                                    tq.preload("target", (targetQ) =>
+                                        targetQ.preload("comparison"),
+                                    ),
+                                ),
                             )
                             .orderBy("id", "asc"),
                     ),
@@ -475,6 +790,8 @@ test.group("game:play_card battlecries", (group) => {
         assert.deepEqual(generated.battlecryActions[0]!.target, {
             type: "HERO",
             targetTeam: "OPPONENT",
+            comparison: null,
+            tagId: null,
         });
         assert.include(generated.description, "Cri de guerre : Inflige 4 dégâts au héros adverse.");
     });

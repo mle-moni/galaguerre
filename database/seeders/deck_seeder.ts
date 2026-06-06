@@ -31,6 +31,21 @@ export default class extends BaseSeeder {
         const battlecryEnemyDrawCard = await Card.query()
             .where("label", "Monster 2-1 Battlecry Enemy Draw")
             .firstOrFail();
+        const targetedHeroDamageCard = await Card.query()
+            .where("label", "Monster 2-2 Targeted Hero Damage")
+            .firstOrFail();
+        const targetedMinionDamageCard = await Card.query()
+            .where("label", "Monster 2-2 Targeted Minion Damage")
+            .firstOrFail();
+        const targetedMinionHealCard = await Card.query()
+            .where("label", "Monster 1-3 Targeted Minion Heal")
+            .firstOrFail();
+        const targetedStrongMinionCard = await Card.query()
+            .where("label", "Monster 3-2 Targeted Strong Minion")
+            .firstOrFail();
+        const targetedBeastDamageCard = await Card.query()
+            .where("label", "Monster 2-2 Targeted Beast Damage")
+            .firstOrFail();
 
         const guaranteedLabels = [
             "Monster 1-2",
@@ -39,13 +54,19 @@ export default class extends BaseSeeder {
             "Monster 2-1 Battlecry Heal",
             "Monster 2-1 Battlecry Draw",
             "Monster 2-1 Battlecry Enemy Draw",
+            "Monster 2-2 Targeted Hero Damage",
+            "Monster 2-2 Targeted Minion Damage",
+            "Monster 1-3 Targeted Minion Heal",
+            "Monster 3-2 Targeted Strong Minion",
+            "Monster 2-2 Targeted Beast Damage",
         ];
         const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
 
         const TAUNT_COPIES_PER_DECK = 2;
         const CHARGE_COPIES_PER_DECK = 2;
         const BATTLECRY_COPIES_PER_DECK = 1;
-        const DECK_SIZE = 10;
+        const TARGETED_BATTLECRY_COPIES_PER_DECK = 1;
+        const DECK_SIZE = 15;
 
         for (const deck of decks) {
             const shuffledOthers = shuffleArray(otherCards);
@@ -53,7 +74,8 @@ export default class extends BaseSeeder {
                 DECK_SIZE -
                 TAUNT_COPIES_PER_DECK -
                 CHARGE_COPIES_PER_DECK -
-                BATTLECRY_COPIES_PER_DECK * 4;
+                BATTLECRY_COPIES_PER_DECK * 4 -
+                TARGETED_BATTLECRY_COPIES_PER_DECK * 5;
 
             const deckCardIds = [
                 ...Array.from({ length: TAUNT_COPIES_PER_DECK }, () => tauntCard.id),
@@ -62,6 +84,11 @@ export default class extends BaseSeeder {
                 battlecryHealCard.id,
                 battlecryDrawCard.id,
                 battlecryEnemyDrawCard.id,
+                targetedHeroDamageCard.id,
+                targetedMinionDamageCard.id,
+                targetedMinionHealCard.id,
+                targetedStrongMinionCard.id,
+                targetedBeastDamageCard.id,
                 ...shuffledOthers.slice(0, fillerCount).map((card) => card.id),
             ];
 

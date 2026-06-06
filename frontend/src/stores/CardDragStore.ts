@@ -74,6 +74,11 @@ export class CardDragStore {
             return;
         }
 
+        if (card.type === "MINION" && this.gameStore.targetSelectionStore.requiresTarget(card)) {
+            this.gameStore.targetSelectionStore.startTargetSelection(card, spotId, spotOwner);
+            return;
+        }
+
         emitSocketEventToServer("game:play_card", {
             cardId: card.uuid,
             spotId,

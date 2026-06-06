@@ -1,5 +1,7 @@
-import type { MinionCard } from "#api_types/game.types";
+import type { ActionTarget, MinionCard } from "#api_types/game.types";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
+import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
+import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -8,7 +10,25 @@ import { instantiateMinion } from "./instantiate_minion.js";
 
 interface PlayMinionOptions extends Omit<PlayCardOptions, "card"> {
     card: MinionCard;
+    actionTarget?: ActionTarget | null;
 }
+
+const getOpponent = (game: PlayCardOptions["game"], player: PlayCardOptions["player"]) => {
+    return player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
+};
+
+const validateActionTargetForCard = (
+    card: MinionCard,
+    actionTarget: ActionTarget,
+    player: PlayCardOptions["player"],
+    opponent: PlayCardOptions["player"],
+): boolean => {
+    const targetedActions = (card.battlecryActions ?? []).filter((action) => action.isTargeted);
+
+    return targetedActions.every((action) =>
+        validateSelectedTargetForAction(actionTarget, action, player, opponent),
+    );
+};
 
 export const playMinion = async ({
     card,
@@ -17,6 +37,7 @@ export const playMinion = async ({
     player,
     game,
     socketId,
+    actionTarget,
 }: PlayMinionOptions) => {
     const spotIsEmpty = player.board[spotId] === null;
     if (owner === "OPPONENT" || !spotIsEmpty) {
@@ -28,11 +49,37 @@ export const playMinion = async ({
         return;
     }
 
+    const requiresTarget = cardRequiresActionTarget(card);
+    const opponent = getOpponent(game, player);
+
+    if (requiresTarget && !actionTarget) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous devez choisir une cible pour cette carte" },
+            socketId,
+        );
+        return;
+    }
+
+    if (!requiresTarget && actionTarget) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Cette carte ne nécessite pas de cible" },
+            socketId,
+        );
+        return;
+    }
+
+    if (actionTarget && !validateActionTargetForCard(card, actionTarget, player, opponent)) {
+        emitSocketEvent("notify_error", { error: "Cible invalide pour cette carte" }, socketId);
+        return;
+    }
+
     player.board[spotId] = instantiateMinion(card, game.data.currentRound);
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
     player.mana -= card.cost;
 
-    const { gameEnded } = executeBattlecries(game, player, card);
+    const { gameEnded } = executeBattlecries(game, player, card, actionTarget ?? undefined);
 
     if (gameEnded) {
         await terminateGame(game);

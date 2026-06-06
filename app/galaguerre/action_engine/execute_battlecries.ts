@@ -1,6 +1,7 @@
-import type { GamePlayer, MinionCard } from "#api_types/game.types";
+import type { ActionTarget, GamePlayer, MinionCard } from "#api_types/game.types";
 import type Game from "#models/game";
 import { executeAction } from "./execute_action.js";
+import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
 
 const getOpponent = (game: Game, player: GamePlayer): GamePlayer => {
@@ -15,13 +16,14 @@ export const executeBattlecries = (
     game: Game,
     player: GamePlayer,
     card: MinionCard,
+    selectedTarget?: ActionTarget,
 ): { gameEnded: boolean } => {
     const opponent = getOpponent(game, player);
 
     for (const action of card.battlecryActions ?? []) {
-        if (!isV1Action(action)) continue;
+        if (!isV1Action(action) && !isTargetedV1Action(action)) continue;
 
-        executeAction(action, player, opponent);
+        executeAction(action, player, opponent, selectedTarget);
 
         if (isGameOver(game)) {
             return { gameEnded: true };
