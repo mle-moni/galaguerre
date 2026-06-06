@@ -20,10 +20,29 @@ export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): v
 
     if (boost.minionPower && minion.originalCard.type === "MINION") {
         const card = minion.originalCard;
-        if (boost.minionPower.hasTaunt) card.hasTaunt = true;
-        if (boost.minionPower.hasCharge) card.hasCharge = true;
-        if (boost.minionPower.hasWindfury) card.hasWindfury = true;
-        if (boost.minionPower.isPoisonous) card.isPoisonous = true;
+        minion.permanentKeywords ??= {
+            hasTaunt: false,
+            hasCharge: false,
+            hasWindfury: false,
+            isPoisonous: false,
+        };
+
+        if (boost.minionPower.hasTaunt) {
+            card.hasTaunt = true;
+            minion.permanentKeywords.hasTaunt = true;
+        }
+        if (boost.minionPower.hasCharge) {
+            card.hasCharge = true;
+            minion.permanentKeywords.hasCharge = true;
+        }
+        if (boost.minionPower.hasWindfury) {
+            card.hasWindfury = true;
+            minion.permanentKeywords.hasWindfury = true;
+        }
+        if (boost.minionPower.isPoisonous) {
+            card.isPoisonous = true;
+            minion.permanentKeywords.isPoisonous = true;
+        }
 
         const effects: string[] = [];
         if (card.hasTaunt) effects.push("Provocation");

@@ -3,6 +3,7 @@ import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import MinionBattlecryAction from "./minion_battlecry_action.js";
 import MinionDeathrattleAction from "./minion_deathrattle_action.js";
+import MinionPassive from "./minon_passive.js";
 import MinionPower from "./minion_power.js";
 
 // @dbml-group Minions
@@ -31,6 +32,9 @@ export default class Minion extends BaseModel {
 
     @hasMany(() => MinionDeathrattleAction)
     declare deathrattleActions: HasMany<typeof MinionDeathrattleAction>;
+
+    @hasMany(() => MinionPassive)
+    declare passives: HasMany<typeof MinionPassive>;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

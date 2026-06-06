@@ -1,5 +1,6 @@
 import type { ActionTarget, MinionCard, MinionSpotId } from "#api_types/game.types";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
+import { refreshAurasAfterMinionPlayed } from "../../../galaguerre/passive_engine/refresh_passive_auras.js";
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
@@ -79,6 +80,8 @@ export const playMinion = async ({
     player.board[spotId] = instantiateMinion(card, game.data.currentRound);
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
     player.mana -= card.cost;
+
+    refreshAurasAfterMinionPlayed(game, player, spotId);
 
     const { gameEnded } = executeBattlecries(game, player, card, actionTarget ?? undefined);
 

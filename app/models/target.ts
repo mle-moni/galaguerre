@@ -30,6 +30,13 @@ export default class Target extends BaseModel {
     @belongsTo(() => Tag)
     declare tag: BelongsTo<typeof Tag>;
 
+    /**
+     * When true, a BOOST passive aura skips the minion that emits it ("your other minions").
+     * Only supported for MINION targets on passive auras; ignored by battlecries, spells, etc.
+     */
+    @column()
+    declare excludeSelf: boolean;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

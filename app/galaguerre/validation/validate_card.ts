@@ -1,6 +1,7 @@
 import type Card from "#models/card";
 import { validateAction } from "./validate_action.js";
 import { validateDeathrattleAction } from "./validate_deathrattle_action.js";
+import { validatePassive } from "./validate_passive.js";
 import type { DeckValidationErrorDetail } from "./validate_deck.js";
 
 export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
@@ -97,6 +98,17 @@ export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
             actionId: actionError.actionId,
             actionInternalLabel: actionError.internalLabel,
             reason: actionError.reason,
+        });
+    }
+
+    for (const minionPassive of card.minion.passives ?? []) {
+        const passiveError = validatePassive(minionPassive.passive);
+        if (!passiveError) continue;
+
+        errors.push({
+            cardId: card.id,
+            cardLabel: card.label,
+            reason: passiveError.reason,
         });
     }
 

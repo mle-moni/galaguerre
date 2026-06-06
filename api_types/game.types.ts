@@ -37,6 +37,7 @@ export interface TargetSnapshot {
     targetTeam: "PLAYER" | "OPPONENT" | "ALL";
     comparison: ComparisonSnapshot | null;
     tagId: number | null;
+    excludeSelf: boolean;
 }
 
 export interface CardFilterSnapshot {
@@ -77,6 +78,25 @@ export interface CardActionSnapshot {
     target: TargetSnapshot | null;
 }
 
+export type PassiveTriggersOn = "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL";
+
+export interface PassiveBoostSnapshot {
+    boost: BoostSnapshot;
+    target: TargetSnapshot | null;
+}
+
+export interface PassiveSnapshot {
+    type: "ACTION" | "BOOST";
+    triggersOn: PassiveTriggersOn | null;
+    action: CardActionSnapshot | null;
+    passiveBoost: PassiveBoostSnapshot | null;
+}
+
+export interface AuraAppliedTarget {
+    owner: SpotOwner;
+    spotId: MinionSpotId;
+}
+
 export type MinionCard = PlayerCardBase & {
     type: "MINION";
     health: number;
@@ -90,6 +110,7 @@ export type MinionCard = PlayerCardBase & {
     description: string;
     battlecryActions: CardActionSnapshot[];
     deathrattleActions: CardActionSnapshot[];
+    passives: PassiveSnapshot[];
 };
 
 export type SpellCard = PlayerCardBase & {
@@ -126,6 +147,13 @@ export interface WeaponState {
     originalCard: WeaponCard;
 }
 
+export interface MinionKeywordFlags {
+    hasTaunt: boolean;
+    hasCharge: boolean;
+    hasWindfury: boolean;
+    isPoisonous: boolean;
+}
+
 export interface MinionState {
     uuid: string;
     health: number;
@@ -135,6 +163,10 @@ export interface MinionState {
     lastActionAtRound: number;
     attacksThisRound: number;
     originalCard: PlayerCard;
+    initialKeywords?: MinionKeywordFlags;
+    permanentKeywords?: MinionKeywordFlags;
+    auraAppliedTo?: AuraAppliedTarget[];
+    auraHeroSpellPowerAppliedTo?: "PLAYER" | "OPPONENT" | "ALL" | null;
 }
 
 export interface MinionPosition {

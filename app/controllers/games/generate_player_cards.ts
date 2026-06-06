@@ -1,11 +1,13 @@
 import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
 import { formatActionDescription } from "../../galaguerre/action_engine/format_action_description.js";
 import { serializeAction } from "../../galaguerre/action_engine/serialize_action.js";
+import { serializePassive } from "../../galaguerre/action_engine/serialize_passive.js";
 import {
     getBattlecryDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
+    getPassiveDescription,
     getWeaponCardDescription,
 } from "../../galaguerre/minion_card_metadata.js";
 import type Deck from "#models/deck";
@@ -67,8 +69,10 @@ export const generatePlayerCards = (deck: Deck) => {
         const deathrattleActions = (card.minion.deathrattleActions ?? []).map((dra) =>
             serializeAction(dra.action),
         );
+        const passives = (card.minion.passives ?? []).map((mp) => serializePassive(mp.passive));
         const battlecryLines = getBattlecryDescription(battlecryActions);
         const deathrattleLines = getDeathrattleDescription(deathrattleActions);
+        const passiveLines = getPassiveDescription(passives);
 
         return {
             ...base,
@@ -90,9 +94,11 @@ export const generatePlayerCards = (deck: Deck) => {
                 effects,
                 battlecryLines,
                 deathrattleLines,
+                passiveLines,
             ),
             battlecryActions,
             deathrattleActions,
+            passives,
         };
     });
 

@@ -1,5 +1,9 @@
 import { test } from "@japa/runner";
-import { heroMatchesTarget, minionMatchesTarget } from "#api_types/target_matching";
+import {
+    heroMatchesTarget,
+    isAuraSourceExcluded,
+    minionMatchesTarget,
+} from "#api_types/target_matching";
 import {
     createComparisonSnapshot,
     createHeroTargetSnapshot,
@@ -87,5 +91,17 @@ test.group("target_matching", () => {
         assert.isTrue(minionMatchesTarget(matchingMinion, target, true));
         assert.isFalse(minionMatchesTarget(otherMinion, target, false));
         assert.isFalse(minionMatchesTarget(otherMinion, target, true));
+    });
+
+    test("isAuraSourceExcluded skips only the aura source minion", ({ assert }) => {
+        const source = createMinionState(createMinionCard({ uuid: "aura-source" }));
+        const ally = createMinionState(createMinionCard({ uuid: "ally" }));
+        const target = createMinionTargetSnapshot("PLAYER", { excludeSelf: true });
+
+        assert.isTrue(isAuraSourceExcluded(target, source, source));
+        assert.isFalse(isAuraSourceExcluded(target, source, ally));
+        assert.isFalse(
+            isAuraSourceExcluded(createMinionTargetSnapshot("PLAYER"), source, source),
+        );
     });
 });

@@ -1,27 +1,8 @@
-import type {
-    CardActionSnapshot,
-    CardFilterSnapshot,
-    ComparisonSnapshot,
-} from "#api_types/game.types";
+import type { CardActionSnapshot, CardFilterSnapshot } from "#api_types/game.types";
 import type Action from "#models/action";
 import type CardFilter from "#models/card_filter";
-import type Comparison from "#models/comparison";
 import { serializeBoost } from "./boost_utils.js";
-
-const serializeComparison = (
-    comparison: Comparison | null | undefined,
-): ComparisonSnapshot | null => {
-    if (!comparison) return null;
-
-    return {
-        costComparison: comparison.costComparison,
-        cost: comparison.cost,
-        attackComparison: comparison.attackComparison,
-        attack: comparison.attack,
-        healthComparison: comparison.healthComparison,
-        health: comparison.health,
-    };
-};
+import { serializeComparison, serializeTarget } from "./serialize_target.js";
 
 const serializeCardFilter = (
     cardFilter: CardFilter | null | undefined,
@@ -49,13 +30,6 @@ export const serializeAction = (action: Action): CardActionSnapshot => {
         drawCardFilter: serializeCardFilter(action.drawCardFilter),
         enemyDrawCardFilter: serializeCardFilter(action.enemyDrawCardFilter),
         boost: serializeBoost(action.boost),
-        target: target
-            ? {
-                  type: target.type,
-                  targetTeam: target.targetTeam,
-                  comparison: serializeComparison(target.comparison),
-                  tagId: target.tagId,
-              }
-            : null,
+        target: serializeTarget(target),
     };
 };

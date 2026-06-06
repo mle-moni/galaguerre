@@ -64,9 +64,17 @@ const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
     return parts.join(", ");
 };
 
-const formatMassMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
-    if (targetTeam === "ALL") return "tous les serviteurs";
-    return targetTeam === "PLAYER" ? "vos serviteurs" : "les serviteurs adverses";
+const formatMassMinionTeamLabel = (
+    targetTeam: "PLAYER" | "OPPONENT" | "ALL",
+    excludeSelf = false,
+): string => {
+    if (targetTeam === "ALL") {
+        return excludeSelf ? "tous les autres serviteurs" : "tous les serviteurs";
+    }
+    if (targetTeam === "PLAYER") {
+        return excludeSelf ? "vos autres serviteurs" : "vos serviteurs";
+    }
+    return excludeSelf ? "les autres serviteurs adverses" : "les serviteurs adverses";
 };
 
 const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
@@ -110,7 +118,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Inflige ${damage} dégâts à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${damage} dégâts à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -130,7 +138,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Rend ${action.heal} PV à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -163,7 +171,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Donne ${effectText} à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {

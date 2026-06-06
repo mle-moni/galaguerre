@@ -1,5 +1,6 @@
 import type Game from "#models/game";
 import { drawOneCard } from "../../galaguerre/draw_cards.js";
+import { triggerPassives } from "../../galaguerre/passive_engine/trigger_passives.js";
 import { sendGameUpdate } from "./send_game_update.js";
 import { terminateGame } from "./terminate_game.js";
 
@@ -22,7 +23,13 @@ export const setupNextGameTurn = async (game: Game) => {
     player.mana = game.data.currentRound;
     if (player.mana > MAX_MANA) player.mana = MAX_MANA;
 
-    drawOneCard(player);
+    const { gameEnded: turnBeginGameEnded } = triggerPassives(game, "TURN_BEGIN", player);
+    if (turnBeginGameEnded) {
+        await terminateGame(game);
+        return;
+    }
+
+    drawOneCard(player, null, game);
 
     if (p1.health <= 0 || p2.health <= 0) {
         await terminateGame(game);

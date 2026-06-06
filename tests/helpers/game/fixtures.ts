@@ -10,6 +10,7 @@ import {
     type MinionCard,
     type MinionSpotId,
     type MinionState,
+    type PassiveSnapshot,
     type PlayerCard,
     type SpellCard,
     type TargetSnapshot,
@@ -57,6 +58,7 @@ export const createHeroTargetSnapshot = (
     targetTeam,
     comparison: null,
     tagId: null,
+    excludeSelf: false,
     ...overrides,
 });
 
@@ -68,6 +70,7 @@ export const createMinionTargetSnapshot = (
     targetTeam,
     comparison: null,
     tagId: null,
+    excludeSelf: false,
     ...overrides,
 });
 
@@ -125,6 +128,17 @@ export const createMinionCard = (
     description: "",
     battlecryActions: [],
     deathrattleActions: [],
+    passives: [],
+    ...overrides,
+});
+
+export const createPassiveSnapshot = (
+    overrides: Partial<PassiveSnapshot> = {},
+): PassiveSnapshot => ({
+    type: "ACTION",
+    triggersOn: "TURN_END",
+    action: null,
+    passiveBoost: null,
     ...overrides,
 });
 
@@ -139,6 +153,18 @@ export const createMinionState = (
     placedAtRound: 0,
     lastActionAtRound: 0,
     attacksThisRound: 0,
+    initialKeywords: {
+        hasTaunt: card.hasTaunt,
+        hasCharge: card.hasCharge,
+        hasWindfury: card.hasWindfury,
+        isPoisonous: card.isPoisonous,
+    },
+    permanentKeywords: {
+        hasTaunt: false,
+        hasCharge: false,
+        hasWindfury: false,
+        isPoisonous: false,
+    },
     originalCard: { ...card },
     ...overrides,
 });

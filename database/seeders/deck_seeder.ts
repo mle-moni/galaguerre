@@ -5,6 +5,28 @@ import User from "#models/user";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
 import { shuffleArray } from "../../app/utils/array.js";
 
+const PASSIVE_CARD_LABELS = [
+    "Monster 2-3 Passive Turn End Damage",
+    "Monster 3-2 Passive Turn End Mass Damage",
+    "Monster 2-4 Passive Turn Begin Heal",
+    "Monster 2-3 Passive Draw",
+    "Monster 2-2 Passive Heal Reactive",
+    "Monster 1-4 Passive Aura +1/+1",
+    "Monster 2-3 Passive Aura Spell Power",
+] as const;
+
+const CORE_CARD_LABELS = [
+    "Monster 1-2",
+    "Monster 2-1 Charge",
+    "Monster 2-1 Battlecry Heal",
+    "Monster 2-1 Battlecry Damage",
+    "Spell 2 Hero Damage",
+    "Spell 1 Draw",
+    "Weapon 2 - 3/2",
+] as const;
+
+const GUARANTEED_LABELS = [...CORE_CARD_LABELS, ...PASSIVE_CARD_LABELS];
+
 export default class extends BaseSeeder {
     async run() {
         const users = await User.all();
@@ -17,86 +39,57 @@ export default class extends BaseSeeder {
             })),
         );
 
-        const tauntCard = await Card.query().where("label", "Monster 1-2").firstOrFail();
-        const chargeCard = await Card.query().where("label", "Monster 2-1 Charge").firstOrFail();
-        const battlecryDamageCard = await Card.query()
-            .where("label", "Monster 2-1 Battlecry Damage")
-            .firstOrFail();
-        const battlecryHealCard = await Card.query()
-            .where("label", "Monster 2-1 Battlecry Heal")
-            .firstOrFail();
-        const battlecryDrawCard = await Card.query()
-            .where("label", "Monster 2-1 Battlecry Draw")
-            .firstOrFail();
-        const targetedHeroDamageCard = await Card.query()
-            .where("label", "Monster 2-2 Targeted Hero Damage")
-            .firstOrFail();
-        const targetedMinionDamageCard = await Card.query()
-            .where("label", "Monster 2-2 Targeted Minion Damage")
-            .firstOrFail();
-        const heroSpellPowerBoostCard = await Card.query()
-            .where("label", "Monster 2-2 Hero Spell Power Boost")
-            .firstOrFail();
-        const deathrattleDamageCard = await Card.query()
-            .where("label", "Monster 2-1 Deathrattle Damage")
-            .firstOrFail();
-        const spellHeroDamageCard = await Card.query()
-            .where("label", "Spell 2 Hero Damage")
-            .firstOrFail();
-        const spellTargetedDamageCard = await Card.query()
-            .where("label", "Spell 3 Targeted Damage")
-            .firstOrFail();
-        const spellDrawCard = await Card.query().where("label", "Spell 1 Draw").firstOrFail();
-        const spellMassDamageCard = await Card.query()
-            .where("label", "Spell 2 Mass Minion Damage")
-            .firstOrFail();
-        const weaponSimpleCard = await Card.query().where("label", "Weapon 2 - 3/2").firstOrFail();
-        const weaponDeathrattleCard = await Card.query()
-            .where("label", "Weapon 3 - 2/3 Deathrattle Draw")
-            .firstOrFail();
+        const cardByLabel = async (label: string) => Card.query().where("label", label).firstOrFail();
 
-        const guaranteedLabels = [
-            "Monster 1-2",
-            "Monster 2-1 Charge",
-            "Monster 2-1 Battlecry Damage",
-            "Monster 2-1 Battlecry Heal",
-            "Monster 2-1 Battlecry Draw",
-            "Monster 2-2 Targeted Hero Damage",
-            "Monster 2-2 Targeted Minion Damage",
-            "Monster 2-2 Hero Spell Power Boost",
-            "Monster 2-1 Deathrattle Damage",
-            "Spell 2 Hero Damage",
-            "Spell 3 Targeted Damage",
-            "Spell 1 Draw",
-            "Spell 2 Mass Minion Damage",
-            "Weapon 2 - 3/2",
-            "Weapon 3 - 2/3 Deathrattle Draw",
-        ];
-        const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
+        const tauntCard = await cardByLabel("Monster 1-2");
+        const chargeCard = await cardByLabel("Monster 2-1 Charge");
+        const battlecryHealCard = await cardByLabel("Monster 2-1 Battlecry Heal");
+        const battlecryDamageCard = await cardByLabel("Monster 2-1 Battlecry Damage");
+        const spellHeroDamageCard = await cardByLabel("Spell 2 Hero Damage");
+        const spellDrawCard = await cardByLabel("Spell 1 Draw");
+        const weaponSimpleCard = await cardByLabel("Weapon 2 - 3/2");
+
+        const passiveCards = await Promise.all(PASSIVE_CARD_LABELS.map((label) => cardByLabel(label)));
+        const [
+            passiveTurnEndDamageCard,
+            passiveTurnEndMassCard,
+            passiveTurnBeginHealCard,
+            passiveDrawCard,
+            passiveHealReactiveCard,
+            passiveAuraPlusOneCard,
+            passiveAuraSpellPowerCard,
+        ] = passiveCards;
+
+        const otherCards = await Card.query().whereNotIn("label", [...GUARANTEED_LABELS]);
 
         const DECK_SIZE = 20;
-        const SPELL_COPIES_PER_DECK = 2;
+        const PASSIVE_AURA_COPIES = 2;
 
         for (const deck of decks) {
             const shuffledOthers = shuffleArray(otherCards);
-            const fillerCount = DECK_SIZE - 11 - SPELL_COPIES_PER_DECK * 4;
+            const guaranteedCount =
+                CORE_CARD_LABELS.length +
+                PASSIVE_CARD_LABELS.length +
+                PASSIVE_AURA_COPIES -
+                1;
+            const fillerCount = DECK_SIZE - guaranteedCount;
 
             const deckCardIds = [
                 tauntCard.id,
                 chargeCard.id,
-                battlecryDamageCard.id,
                 battlecryHealCard.id,
-                battlecryDrawCard.id,
-                targetedHeroDamageCard.id,
-                targetedMinionDamageCard.id,
-                heroSpellPowerBoostCard.id,
-                deathrattleDamageCard.id,
+                battlecryDamageCard.id,
+                spellHeroDamageCard.id,
+                spellDrawCard.id,
                 weaponSimpleCard.id,
-                weaponDeathrattleCard.id,
-                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellHeroDamageCard.id),
-                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellTargetedDamageCard.id),
-                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellDrawCard.id),
-                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellMassDamageCard.id),
+                passiveTurnEndDamageCard.id,
+                passiveTurnEndMassCard.id,
+                passiveTurnBeginHealCard.id,
+                passiveDrawCard.id,
+                passiveHealReactiveCard.id,
+                passiveAuraPlusOneCard.id,
+                passiveAuraSpellPowerCard.id,
+                ...Array.from({ length: PASSIVE_AURA_COPIES }, () => passiveAuraPlusOneCard.id),
                 ...shuffledOthers.slice(0, Math.max(0, fillerCount)).map((card) => card.id),
             ];
 

@@ -6,6 +6,7 @@ import {
 } from "#api_types/game.types";
 import { minionMatchesTarget } from "#api_types/target_matching";
 import type Game from "#models/game";
+import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { killMinion } from "./kill_minion.js";
 
@@ -57,11 +58,12 @@ export const applyDamageToAllMinions = (
 };
 
 export const applyHealToAllMinions = (
+    game: Game,
     player: GamePlayer,
     opponent: GamePlayer,
     target: TargetSnapshot,
     heal: number,
-): void => {
+): { gameEnded: boolean } => {
     for (const { board, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
         for (const spotId of MINION_SPOT_IDS) {
             const minion = board[spotId];
@@ -71,4 +73,6 @@ export const applyHealToAllMinions = (
             minion.health = applyHeal(minion.health, heal, getMinionMaxHealth(minion));
         }
     }
+
+    return triggerHealPassives(game);
 };

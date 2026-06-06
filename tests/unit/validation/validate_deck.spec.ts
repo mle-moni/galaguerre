@@ -8,6 +8,8 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import Minion from "#models/minion";
 import MinionBattlecryAction from "#models/minion_battlecry_action";
+import MinionPassive from "#models/minon_passive";
+import Passive from "#models/passive";
 import Spell from "#models/spell";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
@@ -29,10 +31,18 @@ const nullActionFields = {
     boostId: null,
 };
 
+const preloadBoostRelations = (bq: {
+    preload: (relation: string, callback?: (sq: any) => void) => void;
+}) => {
+    bq.preload("minionPower").preload("toolToTargets", (tq: any) =>
+        tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
+    );
+};
+
 const preloadActionRelations = (aq: {
     preload: (relation: string, callback?: (sq: any) => void) => void;
 }) => {
-    aq.preload("boost", (bq: any) => bq.preload("minionPower"));
+    aq.preload("boost", preloadBoostRelations);
     aq.preload("drawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
     aq.preload("enemyDrawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
     aq.preload("toolToTargets", (tq: any) =>
@@ -48,6 +58,13 @@ const loadDeckRelations = async (deck: Deck) => {
                     .preload("minionPower")
                     .preload("battlecryActions", (q) =>
                         q.preload("action", preloadActionRelations).orderBy("id", "asc"),
+                    )
+                    .preload("passives", (pq) =>
+                        pq.preload("passive", (passiveQ) =>
+                            passiveQ
+                                .preload("action", preloadActionRelations)
+                                .preload("boost", preloadBoostRelations),
+                        ),
                     ),
             )
             .preload("spell", (sq) => sq.preload("action", preloadActionRelations))
@@ -818,5 +835,118 @@ test.group("validation:validateDeck", (group) => {
                 "DAMAGE action requires a HERO or MINION target via tool_to_target",
             );
         }
+    });
+
+    test("rejects ACTION passive without triggersOn", async ({ assert }) => {
+        const user = await User.create({
+            email: `passive-no-trigger-${Date.now()}@test.com`,
+            password: "password",
+        });
+        const deck = await Deck.create({
+            name: "Passive deck",
+            userId: user.id,
+            selected: true,
+        });
+
+        const minion = await Minion.create({
+            internalLabel: "passive-minion",
+            attack: 1,
+            health: 1,
+        });
+
+        const action = await Action.create({
+            internalLabel: "passive-action",
+            type: "DAMAGE",
+            isTargeted: false,
+            ...nullActionFields,
+            damage: 1,
+        });
+
+        const passive = await Passive.create({
+            internalLabel: "passive-no-trigger",
+            type: "ACTION",
+            triggersOn: null,
+            actionId: action.id,
+            boostId: null,
+        });
+
+        await MinionPassive.create({
+            minionId: minion.id,
+            passiveId: passive.id,
+        });
+
+        const card = await Card.create({
+            label: "Passive Card",
+            imageUrl: "https://example.com/card.png",
+            cost: 1,
+            type: "MINION",
+            cardMode: "BETA",
+            minionId: minion.id,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await loadDeckRelations(deck);
+
+        const result = validateDeck(deck);
+        assert.isFalse(result.valid);
+        assert.include(result.errors[0]!.reason, "ACTION passive requires triggersOn");
+    });
+
+    test("rejects BOOST passive without tool_to_target", async ({ assert }) => {
+        const user = await User.create({
+            email: `passive-no-target-${Date.now()}@test.com`,
+            password: "password",
+        });
+        const deck = await Deck.create({
+            name: "Passive boost deck",
+            userId: user.id,
+            selected: true,
+        });
+
+        const minion = await Minion.create({
+            internalLabel: "passive-boost-minion",
+            attack: 1,
+            health: 1,
+        });
+
+        const boost = await Boost.create({
+            internalLabel: "passive-boost",
+            attack: 1,
+            health: 1,
+            spellPower: null,
+            minionPowerId: null,
+        });
+
+        const passive = await Passive.create({
+            internalLabel: "passive-boost-no-target",
+            type: "BOOST",
+            triggersOn: null,
+            actionId: null,
+            boostId: boost.id,
+        });
+
+        await MinionPassive.create({
+            minionId: minion.id,
+            passiveId: passive.id,
+        });
+
+        const card = await Card.create({
+            label: "Passive Boost Card",
+            imageUrl: "https://example.com/card.png",
+            cost: 1,
+            type: "MINION",
+            cardMode: "BETA",
+            minionId: minion.id,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await loadDeckRelations(deck);
+
+        const result = validateDeck(deck);
+        assert.isFalse(result.valid);
+        assert.include(
+            result.errors[0]!.reason,
+            "BOOST passive requires a HERO or MINION target via tool_to_target",
+        );
     });
 });

@@ -7,6 +7,7 @@ import {
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
 import { drawCards } from "../draw_cards.js";
+import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
@@ -19,6 +20,11 @@ import {
 } from "./apply_mass_minion_effects.js";
 import { resolveHeroTargets } from "./resolve_hero_target.js";
 import { resolveSelectedTarget } from "./resolve_selected_target.js";
+
+const triggerHealIfNeeded = (game: Game): boolean => {
+    const { gameEnded } = triggerHealPassives(game);
+    return gameEnded;
+};
 
 const getMinionOwner = (
     board: GamePlayer["board"],
@@ -76,6 +82,7 @@ export const executeAction = (
                         getMinionMaxHealth(resolved.minion),
                     );
                 }
+                if (triggerHealIfNeeded(game)) return;
                 break;
             }
             case "BOOST": {
@@ -112,7 +119,8 @@ export const executeAction = (
         }
         case "HEAL": {
             if (action.target?.type === "MINION") {
-                applyHealToAllMinions(player, opponent, action.target, action.heal!);
+                applyHealToAllMinions(game, player, opponent, action.target, action.heal!);
+                if (triggerHealIfNeeded(game)) return;
                 break;
             }
 
@@ -123,13 +131,14 @@ export const executeAction = (
             for (const target of targets) {
                 target.health = applyHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
             }
+            if (triggerHealIfNeeded(game)) return;
             break;
         }
         case "DRAW":
-            drawCards(player, action.drawCount!, action.drawCardFilter);
+            drawCards(player, action.drawCount!, action.drawCardFilter, game);
             break;
         case "ENEMY_DRAW":
-            drawCards(opponent, action.enemyDrawCount!, action.enemyDrawCardFilter);
+            drawCards(opponent, action.enemyDrawCount!, action.enemyDrawCardFilter, game);
             break;
         case "BOOST": {
             if (!action.boost || !action.target) break;

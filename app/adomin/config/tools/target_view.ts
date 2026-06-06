@@ -35,6 +35,10 @@ export const TARGET_VIEW = createModelViewConfig(() => Target, {
             label: "Tag",
             nullable: true,
         },
+        excludeSelf: {
+            type: "boolean",
+            label: "Exclure le porteur (autres serviteurs)",
+        },
         createdAt: {
             type: "date",
             subType: "datetime",

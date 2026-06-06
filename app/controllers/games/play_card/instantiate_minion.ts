@@ -9,6 +9,18 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
         placedAtRound: roundNumber,
         lastActionAtRound: 0,
         attacksThisRound: 0,
+        initialKeywords: {
+            hasTaunt: card.hasTaunt,
+            hasCharge: card.hasCharge,
+            hasWindfury: card.hasWindfury,
+            isPoisonous: card.isPoisonous,
+        },
+        permanentKeywords: {
+            hasTaunt: false,
+            hasCharge: false,
+            hasWindfury: false,
+            isPoisonous: false,
+        },
         originalCard: {
             ...card,
         },
