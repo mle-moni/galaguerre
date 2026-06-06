@@ -17,14 +17,23 @@ export default class extends BaseSeeder {
             })),
         );
 
-        const cards = await Card.all();
+        const tauntCard = await Card.query().where("label", "Monster 1-2").firstOrFail();
+        const otherCards = await Card.query().whereNot("label", "Monster 1-2");
+        const TAUNT_COPIES_PER_DECK = 2;
+        const DECK_SIZE = 10;
 
         for (const deck of decks) {
-            const shuffledCards = shuffleArray(cards);
+            const shuffledOthers = shuffleArray(otherCards);
+            const fillerCount = DECK_SIZE - TAUNT_COPIES_PER_DECK;
+
+            const deckCardIds = [
+                ...Array.from({ length: TAUNT_COPIES_PER_DECK }, () => tauntCard.id),
+                ...shuffledOthers.slice(0, fillerCount).map((card) => card.id),
+            ];
 
             await DeckCard.createMany(
-                shuffledCards.slice(0, 10).map((card) => ({
-                    cardId: card.id,
+                deckCardIds.map((cardId) => ({
+                    cardId,
                     deckId: deck.id,
                 })),
             );

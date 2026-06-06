@@ -1,3 +1,4 @@
+import { ensureValidTauntTarget } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import type { MinionActionOptions } from "./minion_to_minion_action.js";
@@ -8,7 +9,11 @@ export const minionToHeroAction = async ({
     opponent,
     game,
     owner,
+    socketId,
 }: Omit<MinionActionOptions, "spotId">) => {
+    const isValidTarget = ensureValidTauntTarget(opponent.board, null, owner, null, socketId);
+    if (!isValidTarget) return;
+
     const playerTarget = owner === "OPPONENT" ? opponent : player;
 
     // minionInfos.minion attacks playerTarget (usually the opponent)

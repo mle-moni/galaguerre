@@ -11,6 +11,9 @@ export type MinionCard = PlayerCardBase & {
     type: "MINION";
     health: number;
     attack: number;
+    hasTaunt: boolean;
+    effects: string[];
+    description: string;
 };
 
 export type SpellCard = PlayerCardBase & {

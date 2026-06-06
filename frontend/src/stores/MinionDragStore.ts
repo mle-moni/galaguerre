@@ -1,10 +1,23 @@
-import type { MinionSpotId, MinionState, SpotOwner } from "#api_types/game.types";
+import type { BoardState, MinionSpotId, MinionState, SpotOwner } from "#api_types/game.types";
+import { MINION_SPOT_IDS } from "#api_types/game.types";
 
 import { makeAutoObservable } from "mobx";
 import { notifyError } from "~/services/toasts";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { type SlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
+
+const getMinionHasTaunt = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.hasTaunt ?? false;
+};
+
+const boardHasTaunt = (board: BoardState): boolean => {
+    return MINION_SPOT_IDS.some((spotId) => {
+        const minion = board[spotId];
+        return minion !== null && getMinionHasTaunt(minion);
+    });
+};
 
 export class MinionDragStore {
     public minionDragged: MinionState | null = null;
@@ -55,8 +68,18 @@ export class MinionDragStore {
     ): boolean {
         if (!this.gameStore.isMyTurn) return false;
         if (spotOwner === "PLAYER") return false;
-        if (spotId === null) return true;
-        return this.canPlayMinionOnSpot(spotId, spotOwner);
+
+        const opponentBoard = this.gameStore.opponent.board;
+        const hasTaunt = boardHasTaunt(opponentBoard);
+
+        if (spotId === null) return !hasTaunt;
+
+        if (!this.canPlayMinionOnSpot(spotId, spotOwner)) return false;
+
+        if (!hasTaunt) return true;
+
+        const targetMinion = opponentBoard[spotId];
+        return targetMinion !== null && getMinionHasTaunt(targetMinion);
     }
 
     handleDrop(minion: MinionState, spotId: MinionSpotId | null, spotOwner: SpotOwner) {
@@ -79,6 +102,8 @@ export class MinionDragStore {
 
         if (!this.gameStore.isMyTurn || this.minionDragged === null) return transparent;
         if (!isOpponent) return transparent;
+
+        if (boardHasTaunt(this.gameStore.opponent.board)) return "red";
 
         return "green";
     }

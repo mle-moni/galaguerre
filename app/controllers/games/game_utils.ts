@@ -3,6 +3,8 @@ import {
     type GamePlayer,
     MINION_SPOT_IDS,
     type MinionPosition,
+    type MinionSpotId,
+    type MinionState,
     type PlayerCard,
     type PlayerNumber,
     type SpotOwner,
@@ -135,4 +137,46 @@ export const ensureMinionFoundInBoard = (
     }
 
     return minion;
+};
+
+export const getMinionHasTaunt = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.hasTaunt ?? false;
+};
+
+export const boardHasTaunt = (board: BoardState): boolean => {
+    return MINION_SPOT_IDS.some((spotId) => {
+        const minion = board[spotId];
+        return minion !== null && getMinionHasTaunt(minion);
+    });
+};
+
+export const ensureValidTauntTarget = (
+    opponentBoard: BoardState,
+    spotId: MinionSpotId | null,
+    owner: SpotOwner,
+    targetMinion: MinionState | null,
+    socketId: string,
+): boolean => {
+    if (!boardHasTaunt(opponentBoard)) return true;
+
+    if (spotId === null || owner !== "OPPONENT") {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+            socketId,
+        );
+        return false;
+    }
+
+    if (!targetMinion || !getMinionHasTaunt(targetMinion)) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+            socketId,
+        );
+        return false;
+    }
+
+    return true;
 };

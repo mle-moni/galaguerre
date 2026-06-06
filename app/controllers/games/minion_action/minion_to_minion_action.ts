@@ -1,6 +1,7 @@
 import type { GamePlayer, MinionPosition, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { ensureValidTauntTarget } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 
 export interface MinionActionOptions {
@@ -44,6 +45,15 @@ export const minionToMinionAction = async ({
         );
         return;
     }
+
+    const isValidTarget = ensureValidTauntTarget(
+        opponent.board,
+        spotId,
+        owner,
+        targetMinion,
+        socketId,
+    );
+    if (!isValidTarget) return;
 
     // minionInfos.minion attacks targetMinion
     minionInfos.minion.health -= targetMinion.attack;

@@ -1,9 +1,17 @@
 import Card from "#models/card";
 import Minion from "#models/minion";
+import MinionPower from "#models/minion_power";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
 
 export default class extends BaseSeeder {
     async run() {
+        const tauntPower = await MinionPower.create({
+            hasTaunt: true,
+            hasCharge: false,
+            hasWindfury: false,
+            isPoisonous: false,
+        });
+
         const [
             monsterOneOne,
             monsterTwoOne,
@@ -38,6 +46,7 @@ export default class extends BaseSeeder {
                 internalLabel: "Monstre 1-2",
                 attack: 1,
                 health: 2,
+                minionPowerId: tauntPower.id,
             },
             {
                 internalLabel: "Monstre 2-2",

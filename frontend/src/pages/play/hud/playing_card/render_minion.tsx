@@ -1,48 +1,36 @@
-import type { MinionState } from "#api_types/game.types";
-import { Image } from "@mantine/core";
-import clsx from "clsx";
+import type { MinionCard, MinionState } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
 import { useGameContext } from "~/hooks/use_game_state";
+import { CardDetailHover } from "./card_detail_hover.jsx";
+import { MinionCardFace } from "./minion_card_face.jsx";
 
 interface MinionToRenderProps {
     state: MinionState;
     style?: CSSProperties;
 }
 
+const asMinionCard = (state: MinionState): MinionCard | null => {
+    if (state.originalCard.type !== "MINION") return null;
+    return state.originalCard;
+};
+
 export const RenderMinion = observer(({ state, style }: MinionToRenderProps) => {
     const { store } = useGameContext();
+    const card = asMinionCard(state);
+    if (!card) return null;
 
     return (
-        <div
-            key={state.uuid}
+        <MinionCardFace
+            card={card}
+            attack={state.attack}
+            health={state.health}
             style={style}
-            className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f] cursor-pointer")}
+            className="cursor-pointer"
             draggable={store.isMyTurn}
-            onDragStart={() => {
-                store.minionDragStore.setMinionDragged(state);
-            }}
-            onDragEnd={() => {
-                store.minionDragStore.setMinionDragged(null);
-            }}
-        >
-            <div>
-                <div className="cost">{state.originalCard.cost}</div>
-                <Image
-                    className="rounded-t"
-                    src={state.originalCard.imageUrl}
-                    height={75}
-                    alt="Galaguerre card"
-                    draggable={false}
-                />
-            </div>
-            <div className="flex flex-col h-[75px] justify-around">
-                <p className="text-center text-white m-0">{state.originalCard.label}</p>
-                <div className="flex justify-between mx-1">
-                    <div className="attack">{state.attack}</div>
-                    <div className="health">{state.health}</div>
-                </div>
-            </div>
-        </div>
+            onDragStart={() => store.minionDragStore.setMinionDragged(state)}
+            onDragEnd={() => store.minionDragStore.setMinionDragged(null)}
+            wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+        />
     );
 });
