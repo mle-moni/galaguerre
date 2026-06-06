@@ -5,7 +5,7 @@ export const resolveHeroTargets = (
     player: GamePlayer,
     opponent: GamePlayer,
 ): GamePlayer[] => {
-    if (target.type !== "HERO") return [];
+    if (target.type !== "HERO" && target.type !== "ALL") return [];
 
     if (target.targetTeam === "ALL") return [player, opponent];
 

@@ -22,7 +22,8 @@ export const executePassiveActions = (
         if (!isV1Action(action) && !isTargetedV1Action(action)) continue;
 
         const opponent = getOpponent(game, entry.owner);
-        executeAction(action, game, entry.owner, opponent);
+        const sourceMinion = entry.owner.board[entry.sourceSpotId] ?? undefined;
+        executeAction(action, game, entry.owner, opponent, undefined, 0, sourceMinion);
 
         if (isGameOver(game)) {
             return { gameEnded: true };

@@ -3,6 +3,7 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import {
     CARD_IDS,
+    createAllTargetSnapshot,
     createCardActionSnapshot,
     createGameData,
     createHeroTargetSnapshot,
@@ -152,5 +153,103 @@ test.group("game:play_spell", (group) => {
         assertPlayCardScenario(assert, result, { error: null });
         assert.equal(result.game.data.playerTwo.health, -10);
         assert.isTrue(result.game.isFinished);
+    });
+
+    test("mass ALL damage spell hits heroes and minions on both teams", async ({ assert }) => {
+        const allyMinion = createMinionCard({ uuid: "ally-minion", health: 5 });
+        const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 5 });
+        const spell = createSpellCard({
+            cost: 3,
+            action: createCardActionSnapshot({
+                type: "DAMAGE",
+                isTargeted: false,
+                damage: 2,
+                target: createAllTargetSnapshot("ALL"),
+            }),
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(allyMinion),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(enemyMinion),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.spell,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.health, DEFAULT_HERO_HEALTH - 2);
+        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
+        assert.equal(result.game.data.playerOne.board.SPOT_1!.health, 3);
+        assert.equal(result.game.data.playerTwo.board.SPOT_1!.health, 3);
+    });
+
+    test("mass ALL damage spell with OPPONENT team only hits opponent characters", async ({
+        assert,
+    }) => {
+        const allyMinion = createMinionCard({ uuid: "ally-minion", health: 5 });
+        const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 5 });
+        const spell = createSpellCard({
+            cost: 3,
+            action: createCardActionSnapshot({
+                type: "DAMAGE",
+                isTargeted: false,
+                damage: 2,
+                target: createAllTargetSnapshot("OPPONENT"),
+            }),
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(allyMinion),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(enemyMinion),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.spell,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.health, DEFAULT_HERO_HEALTH);
+        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
+        assert.equal(result.game.data.playerOne.board.SPOT_1!.health, 5);
+        assert.equal(result.game.data.playerTwo.board.SPOT_1!.health, 3);
     });
 });

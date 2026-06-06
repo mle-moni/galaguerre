@@ -5,6 +5,7 @@ import {
     shouldExcludeSourceMinion,
 } from "#api_types/target_matching";
 import {
+    createAllTargetSnapshot,
     createComparisonSnapshot,
     createHeroTargetSnapshot,
     createMinionCard,
@@ -31,6 +32,20 @@ test.group("target_matching", () => {
         const target = createHeroTargetSnapshot("ALL");
 
         assert.isTrue(heroMatchesTarget(target, false));
+        assert.isTrue(heroMatchesTarget(target, true));
+    });
+
+    test("heroMatchesTarget matches both heroes when target type is ALL", ({ assert }) => {
+        const target = createAllTargetSnapshot("ALL");
+
+        assert.isTrue(heroMatchesTarget(target, false));
+        assert.isTrue(heroMatchesTarget(target, true));
+    });
+
+    test("heroMatchesTarget with ALL type respects targetTeam OPPONENT", ({ assert }) => {
+        const target = createAllTargetSnapshot("OPPONENT");
+
+        assert.isFalse(heroMatchesTarget(target, false));
         assert.isTrue(heroMatchesTarget(target, true));
     });
 
@@ -90,6 +105,36 @@ test.group("target_matching", () => {
         assert.isTrue(minionMatchesTarget(matchingMinion, target, false));
         assert.isTrue(minionMatchesTarget(matchingMinion, target, true));
         assert.isFalse(minionMatchesTarget(otherMinion, target, false));
+        assert.isFalse(minionMatchesTarget(otherMinion, target, true));
+    });
+
+    test("minionMatchesTarget matches minions on both teams when target type is ALL", ({
+        assert,
+    }) => {
+        const target = createAllTargetSnapshot("ALL");
+        const minion = createMinionState(createMinionCard());
+
+        assert.isTrue(minionMatchesTarget(minion, target, false));
+        assert.isTrue(minionMatchesTarget(minion, target, true));
+    });
+
+    test("minionMatchesTarget with ALL type still applies comparison filter", ({ assert }) => {
+        const target = createAllTargetSnapshot("ALL", {
+            comparison: createComparisonSnapshot({ attackComparison: ">", attack: 2 }),
+        });
+        const weakMinion = createMinionState(createMinionCard({ attack: 1 }));
+        const strongMinion = createMinionState(createMinionCard({ attack: 3 }));
+
+        assert.isFalse(minionMatchesTarget(weakMinion, target, false));
+        assert.isTrue(minionMatchesTarget(strongMinion, target, true));
+    });
+
+    test("minionMatchesTarget with ALL type still applies tag filter", ({ assert }) => {
+        const target = createAllTargetSnapshot("ALL", { tagId: 42 });
+        const matchingMinion = createMinionState(createMinionCard({ tagIds: [42] }));
+        const otherMinion = createMinionState(createMinionCard({ tagIds: [1] }));
+
+        assert.isTrue(minionMatchesTarget(matchingMinion, target, false));
         assert.isFalse(minionMatchesTarget(otherMinion, target, true));
     });
 

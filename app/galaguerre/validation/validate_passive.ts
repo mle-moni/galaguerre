@@ -17,6 +17,10 @@ export type PassiveValidationError = {
     reason: string;
 };
 
+const findAllTarget = (boost: Boost) => {
+    return boost.toolToTargets?.find((toolToTarget) => toolToTarget.target?.type === "ALL");
+};
+
 const findHeroTarget = (boost: Boost) => {
     return boost.toolToTargets?.find((toolToTarget) => toolToTarget.target?.type === "HERO");
 };
@@ -58,6 +62,10 @@ const validateBoostTargetCompatibility = (
         return null;
     }
 
+    if (target.type === "ALL") {
+        return null;
+    }
+
     return null;
 };
 
@@ -75,11 +83,11 @@ const validateMinionTargetFilters = (
     }
 
     if (target.comparisonId !== null || target.tagId !== null) {
-        if (target.type !== "MINION") {
+        if (target.type !== "MINION" && target.type !== "ALL") {
             return {
                 passiveId: passive.id,
                 internalLabel: passive.internalLabel,
-                reason: "comparison and tag filters require a MINION target type",
+                reason: "comparison and tag filters require a MINION or ALL target type",
             };
         }
     }
@@ -131,8 +139,13 @@ const validatePassiveBoost = (passive: Passive): PassiveValidationError | null =
         };
     }
 
+    const allTarget = findAllTarget(passive.boost);
     const minionTarget = findMinionTarget(passive.boost);
     const heroTarget = findHeroTarget(passive.boost);
+
+    if (allTarget?.target) {
+        return validateMinionTargetFilters(passive, allTarget.target);
+    }
 
     if (minionTarget?.target) {
         const compatibilityError = validateBoostTargetCompatibility(
@@ -166,7 +179,7 @@ const validatePassiveBoost = (passive: Passive): PassiveValidationError | null =
     return {
         passiveId: passive.id,
         internalLabel: passive.internalLabel,
-        reason: "BOOST passive requires a HERO or MINION target via tool_to_target",
+        reason: "BOOST passive requires a HERO, MINION, or ALL target via tool_to_target",
     };
 };
 

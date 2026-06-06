@@ -74,6 +74,18 @@ export const createMinionTargetSnapshot = (
     ...overrides,
 });
 
+export const createAllTargetSnapshot = (
+    targetTeam: "PLAYER" | "OPPONENT" | "ALL",
+    overrides: Partial<TargetSnapshot> = {},
+): TargetSnapshot => ({
+    type: "ALL",
+    targetTeam,
+    comparison: null,
+    tagId: null,
+    excludeSelf: false,
+    ...overrides,
+});
+
 export const createBoostSnapshot = (overrides: Partial<BoostSnapshot> = {}): BoostSnapshot => ({
     attack: null,
     health: null,

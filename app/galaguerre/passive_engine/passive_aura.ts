@@ -158,6 +158,34 @@ const applyPassiveBoostAura = (
 
     const opponent = getOpponent(game, sourceOwner);
 
+    if (target.type === "ALL") {
+        if (boost.spellPower !== null) {
+            for (const hero of resolveHeroTargets(target, sourceOwner, opponent)) {
+                applyBoostToHero(hero, boost);
+            }
+            sourceMinion.auraHeroSpellPowerAppliedTo = target.targetTeam;
+        }
+
+        for (const { board, isOpponent } of getTargetBoardEntries(target, sourceOwner, opponent)) {
+            const boardOwner = isOpponent ? opponent : sourceOwner;
+
+            for (const spotId of MINION_SPOT_IDS) {
+                const minion = board[spotId];
+                if (!minion) continue;
+                if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
+                if (!minionMatchesTarget(minion, target, isOpponent)) continue;
+
+                applyAuraBoostToMinion(minion, passiveBoost);
+                recalculateMinionKeywords(game, minion);
+                trackAuraTarget(sourceMinion, {
+                    owner: getSpotOwner(game, boardOwner),
+                    spotId,
+                });
+            }
+        }
+        return;
+    }
+
     if (target.type === "MINION") {
         for (const { board, isOpponent } of getTargetBoardEntries(target, sourceOwner, opponent)) {
             const boardOwner = isOpponent ? opponent : sourceOwner;

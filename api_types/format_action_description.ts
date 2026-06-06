@@ -17,6 +17,19 @@ const formatMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): strin
     return targetTeam === "PLAYER" ? "allié" : "adverse";
 };
 
+const formatAllTeamLabel = (
+    targetTeam: "PLAYER" | "OPPONENT" | "ALL",
+    excludeSelf = false,
+): string => {
+    if (targetTeam === "ALL") {
+        return excludeSelf ? "tous les autres personnages" : "tous les personnages";
+    }
+    if (targetTeam === "PLAYER") {
+        return excludeSelf ? "tous vos autres personnages" : "tous vos personnages";
+    }
+    return excludeSelf ? "tous les autres personnages adverses" : "tous les personnages adverses";
+};
+
 const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
     if (!action.target) return "";
 
@@ -121,6 +134,10 @@ export const formatActionDescription = (
                 return `${prefix} : Inflige ${damage} dégâts à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
+            if (action.target?.type === "ALL") {
+                return `${prefix} : Inflige ${damage} dégâts à ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+            }
+
             if (action.target?.type === "HERO") {
                 return `${prefix} : Inflige ${damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
             }
@@ -139,6 +156,10 @@ export const formatActionDescription = (
 
             if (action.target?.type === "MINION") {
                 return `${prefix} : Rend ${action.heal} PV à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "ALL") {
+                return `${prefix} : Rend ${action.heal} PV à ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -172,6 +193,10 @@ export const formatActionDescription = (
 
             if (action.target?.type === "MINION") {
                 return `${prefix} : Donne ${effectText} à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "ALL") {
+                return `${prefix} : Donne ${effectText} à ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {

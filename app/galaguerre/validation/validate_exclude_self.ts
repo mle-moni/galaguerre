@@ -3,7 +3,7 @@ import type Target from "#models/target";
 export const validateTargetExcludeSelf = (target: Target): string | null => {
     if (!target.excludeSelf) return null;
 
-    if (target.type !== "MINION") {
+    if (target.type !== "MINION" && target.type !== "ALL") {
         return "excludeSelf is only supported for MINION targets";
     }
 

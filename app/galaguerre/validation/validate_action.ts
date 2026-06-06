@@ -18,6 +18,10 @@ export type ActionValidationError = {
 
 const TARGETED_V1_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST"] as const;
 
+const findAllTarget = (action: Action) => {
+    return action.toolToTargets?.find((toolToTarget) => toolToTarget.target?.type === "ALL");
+};
+
 const findHeroTarget = (action: Action) => {
     return action.toolToTargets?.find((toolToTarget) => toolToTarget.target?.type === "HERO");
 };
@@ -94,6 +98,10 @@ const validateBoostTargetCompatibility = (
         return null;
     }
 
+    if (target.type === "ALL") {
+        return null;
+    }
+
     return null;
 };
 
@@ -107,7 +115,7 @@ const validateTargetFilters = (action: Action, target: Target): ActionValidation
         };
     }
 
-    if (target.type === "ALL") {
+    if (action.isTargeted && target.type === "ALL") {
         return {
             actionId: action.id,
             internalLabel: action.internalLabel,
@@ -116,11 +124,11 @@ const validateTargetFilters = (action: Action, target: Target): ActionValidation
     }
 
     if (target.comparisonId !== null || target.tagId !== null) {
-        if (target.type !== "MINION") {
+        if (target.type !== "MINION" && target.type !== "ALL") {
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "comparison and tag filters require a MINION target type",
+                reason: "comparison and tag filters require a MINION or ALL target type",
             };
         }
     }
@@ -230,8 +238,13 @@ export const validateAction = (action: Action): ActionValidationError | null => 
                 };
             }
 
+            const allTarget = findAllTarget(action);
             const minionTarget = findMinionTarget(action);
             const heroTarget = findHeroTarget(action);
+
+            if (allTarget?.target) {
+                return validateTargetFilters(action, allTarget.target);
+            }
 
             if (minionTarget?.target) {
                 return validateTargetFilters(action, minionTarget.target);
@@ -244,7 +257,7 @@ export const validateAction = (action: Action): ActionValidationError | null => 
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "DAMAGE action requires a HERO or MINION target via tool_to_target",
+                reason: "DAMAGE action requires a HERO, MINION, or ALL target via tool_to_target",
             };
         }
         case "HEAL": {
@@ -256,8 +269,13 @@ export const validateAction = (action: Action): ActionValidationError | null => 
                 };
             }
 
+            const allTarget = findAllTarget(action);
             const minionTarget = findMinionTarget(action);
             const heroTarget = findHeroTarget(action);
+
+            if (allTarget?.target) {
+                return validateTargetFilters(action, allTarget.target);
+            }
 
             if (minionTarget?.target) {
                 return validateTargetFilters(action, minionTarget.target);
@@ -270,7 +288,7 @@ export const validateAction = (action: Action): ActionValidationError | null => 
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "HEAL action requires a HERO or MINION target via tool_to_target",
+                reason: "HEAL action requires a HERO, MINION, or ALL target via tool_to_target",
             };
         }
         case "DRAW": {
@@ -299,8 +317,13 @@ export const validateAction = (action: Action): ActionValidationError | null => 
             const boostError = validateBoostContent(action);
             if (boostError) return boostError;
 
+            const allTarget = findAllTarget(action);
             const minionTarget = findMinionTarget(action);
             const heroTarget = findHeroTarget(action);
+
+            if (allTarget?.target) {
+                return validateTargetFilters(action, allTarget.target);
+            }
 
             if (minionTarget?.target) {
                 const compatibilityError = validateBoostTargetCompatibility(
@@ -325,7 +348,7 @@ export const validateAction = (action: Action): ActionValidationError | null => 
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "BOOST action requires a HERO or MINION target via tool_to_target",
+                reason: "BOOST action requires a HERO, MINION, or ALL target via tool_to_target",
             };
         }
         default:

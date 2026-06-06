@@ -11,6 +11,10 @@ import type { ActionValidationError } from "./validate_action.js";
 import { validateComparison } from "./validate_comparison.js";
 import { validateTargetExcludeSelf } from "./validate_exclude_self.js";
 
+const findAllTarget = (action: Action) => {
+    return action.toolToTargets?.find((toolToTarget) => toolToTarget.target?.type === "ALL");
+};
+
 const findHeroTarget = (action: Action) => {
     return action.toolToTargets?.find((toolToTarget) => toolToTarget.target?.type === "HERO");
 };
@@ -80,6 +84,10 @@ const validateBoostTargetCompatibility = (
         return null;
     }
 
+    if (target.type === "ALL") {
+        return null;
+    }
+
     return null;
 };
 
@@ -97,11 +105,11 @@ const validateMinionTargetFilters = (
     }
 
     if (target.comparisonId !== null || target.tagId !== null) {
-        if (target.type !== "MINION") {
+        if (target.type !== "MINION" && target.type !== "ALL") {
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "comparison and tag filters require a MINION target type",
+                reason: "comparison and tag filters require a MINION or ALL target type",
             };
         }
     }
@@ -155,8 +163,13 @@ export const validateDeathrattleAction = (action: Action): ActionValidationError
                 };
             }
 
+            const allTarget = findAllTarget(action);
             const minionTarget = findMinionTarget(action);
             const heroTarget = findHeroTarget(action);
+
+            if (allTarget?.target) {
+                return validateMinionTargetFilters(action, allTarget.target);
+            }
 
             if (minionTarget?.target) {
                 return validateMinionTargetFilters(action, minionTarget.target);
@@ -169,7 +182,7 @@ export const validateDeathrattleAction = (action: Action): ActionValidationError
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "DAMAGE deathrattle requires a HERO or MINION target via tool_to_target",
+                reason: "DAMAGE deathrattle requires a HERO, MINION, or ALL target via tool_to_target",
             };
         }
         case "HEAL": {
@@ -181,8 +194,13 @@ export const validateDeathrattleAction = (action: Action): ActionValidationError
                 };
             }
 
+            const allTarget = findAllTarget(action);
             const minionTarget = findMinionTarget(action);
             const heroTarget = findHeroTarget(action);
+
+            if (allTarget?.target) {
+                return validateMinionTargetFilters(action, allTarget.target);
+            }
 
             if (minionTarget?.target) {
                 return validateMinionTargetFilters(action, minionTarget.target);
@@ -195,7 +213,7 @@ export const validateDeathrattleAction = (action: Action): ActionValidationError
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "HEAL deathrattle requires a HERO or MINION target via tool_to_target",
+                reason: "HEAL deathrattle requires a HERO, MINION, or ALL target via tool_to_target",
             };
         }
         case "DRAW": {
@@ -224,8 +242,13 @@ export const validateDeathrattleAction = (action: Action): ActionValidationError
             const boostError = validateBoostContent(action);
             if (boostError) return boostError;
 
+            const allTarget = findAllTarget(action);
             const minionTarget = findMinionTarget(action);
             const heroTarget = findHeroTarget(action);
+
+            if (allTarget?.target) {
+                return validateMinionTargetFilters(action, allTarget.target);
+            }
 
             if (minionTarget?.target) {
                 const compatibilityError = validateBoostTargetCompatibility(
@@ -250,7 +273,7 @@ export const validateDeathrattleAction = (action: Action): ActionValidationError
             return {
                 actionId: action.id,
                 internalLabel: action.internalLabel,
-                reason: "BOOST action requires a HERO or MINION target via tool_to_target",
+                reason: "BOOST action requires a HERO, MINION, or ALL target via tool_to_target",
             };
         }
         default:

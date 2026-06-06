@@ -56,6 +56,7 @@ export default class extends BaseSeeder {
         const [
             turnEndHeroDamageAction,
             turnEndMassMinionDamageAction,
+            turnEndOtherAllyMinionDamageAction,
             turnBeginHeroHealAction,
             drawPassiveAction,
             healReactiveDamageAction,
@@ -69,6 +70,13 @@ export default class extends BaseSeeder {
             },
             {
                 internalLabel: "Passif fin de tour - 1 dégât aux serviteurs adverses",
+                type: "DAMAGE",
+                isTargeted: false,
+                ...nullActionFields,
+                damage: 1,
+            },
+            {
+                internalLabel: "Passif fin de tour - 1 dégât à vos autres serviteurs",
                 type: "DAMAGE",
                 isTargeted: false,
                 ...nullActionFields,
@@ -106,6 +114,11 @@ export default class extends BaseSeeder {
             {
                 targetId: enemyMinionsTarget.id,
                 actionId: turnEndMassMinionDamageAction.id,
+                boostId: null,
+            },
+            {
+                targetId: allyMinionsTarget.id,
+                actionId: turnEndOtherAllyMinionDamageAction.id,
                 boostId: null,
             },
             {
@@ -153,6 +166,7 @@ export default class extends BaseSeeder {
         const [
             turnEndHeroDamagePassive,
             turnEndMassMinionDamagePassive,
+            turnEndOtherAllyMinionDamagePassive,
             turnBeginHeroHealPassive,
             drawPassive,
             healReactiveDamagePassive,
@@ -171,6 +185,13 @@ export default class extends BaseSeeder {
                 type: "ACTION",
                 triggersOn: "TURN_END",
                 actionId: turnEndMassMinionDamageAction.id,
+                boostId: null,
+            },
+            {
+                internalLabel: "Passif fin de tour - dégâts autres alliés",
+                type: "ACTION",
+                triggersOn: "TURN_END",
+                actionId: turnEndOtherAllyMinionDamageAction.id,
                 boostId: null,
             },
             {
@@ -213,6 +234,7 @@ export default class extends BaseSeeder {
         const [
             turnEndHeroDamageMinion,
             turnEndMassMinionDamageMinion,
+            turnEndOtherAllyMinionDamageMinion,
             turnBeginHeroHealMinion,
             drawPassiveMinion,
             healReactiveDamageMinion,
@@ -228,6 +250,11 @@ export default class extends BaseSeeder {
                 internalLabel: "Monstre 3-2 Passif fin de tour masse",
                 attack: 3,
                 health: 2,
+            },
+            {
+                internalLabel: "Monstre 2-3 Passif fin de tour dégâts autres alliés",
+                attack: 2,
+                health: 3,
             },
             {
                 internalLabel: "Monstre 2-4 Passif début de tour soins",
@@ -262,6 +289,10 @@ export default class extends BaseSeeder {
                 minionId: turnEndMassMinionDamageMinion.id,
                 passiveId: turnEndMassMinionDamagePassive.id,
             },
+            {
+                minionId: turnEndOtherAllyMinionDamageMinion.id,
+                passiveId: turnEndOtherAllyMinionDamagePassive.id,
+            },
             { minionId: turnBeginHeroHealMinion.id, passiveId: turnBeginHeroHealPassive.id },
             { minionId: drawPassiveMinion.id, passiveId: drawPassive.id },
             { minionId: healReactiveDamageMinion.id, passiveId: healReactiveDamagePassive.id },
@@ -287,6 +318,16 @@ export default class extends BaseSeeder {
                 type: "MINION",
                 cardMode: "BETA",
                 minionId: turnEndMassMinionDamageMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-3 Passive Turn End Other Ally Damage",
+                imageUrl: "https://picsum.photos/seed/passive_turn_end_other_allies/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: turnEndOtherAllyMinionDamageMinion.id,
                 spellId: null,
                 weaponId: null,
             },

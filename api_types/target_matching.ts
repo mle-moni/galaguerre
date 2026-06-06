@@ -12,7 +12,7 @@ import { getBoardMinionStats, matchesComparison } from "./comparison_matching.js
 export { matchesComparison } from "./comparison_matching.js";
 
 export const heroMatchesTarget = (target: TargetSnapshot, isOpponentHero: boolean): boolean => {
-    if (target.type !== "HERO") return false;
+    if (target.type !== "HERO" && target.type !== "ALL") return false;
 
     if (target.targetTeam === "ALL") return true;
 
@@ -34,7 +34,7 @@ export const minionMatchesTarget = (
     target: TargetSnapshot,
     isOpponentMinion: boolean,
 ): boolean => {
-    if (target.type !== "MINION") return false;
+    if (target.type !== "MINION" && target.type !== "ALL") return false;
 
     if (target.targetTeam !== "ALL") {
         const targetIsOpponent = target.targetTeam === "OPPONENT";

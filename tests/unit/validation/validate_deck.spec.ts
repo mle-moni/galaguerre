@@ -296,7 +296,7 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 1);
         assert.include(
             result.errors[0]!.reason,
-            "DAMAGE action requires a HERO or MINION target via tool_to_target",
+            "DAMAGE action requires a HERO, MINION, or ALL target via tool_to_target",
         );
     });
 
@@ -331,7 +331,7 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 1);
         assert.include(
             result.errors[0]!.reason,
-            "HEAL action requires a HERO or MINION target via tool_to_target",
+            "HEAL action requires a HERO, MINION, or ALL target via tool_to_target",
         );
     });
 
@@ -661,6 +661,66 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 0);
     });
 
+    test("accepts SPELL card with ALL target damage", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-spell-all-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Valid ALL spell deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const damageAction = await Action.create({
+            internalLabel: `spell-all-damage-action-${unique}`,
+            type: "DAMAGE",
+            isTargeted: false,
+            ...nullActionFields,
+            damage: 2,
+        });
+
+        const allTarget = await Target.create({
+            internalLabel: `spell-all-target-${unique}`,
+            type: "ALL",
+            targetTeam: "ALL",
+            comparisonId: null,
+            tagId: null,
+        });
+
+        await ToolToTarget.create({
+            targetId: allTarget.id,
+            actionId: damageAction.id,
+            boostId: null,
+        });
+
+        const spell = await Spell.create({
+            internalLabel: `spell-all-${unique}`,
+            actionId: damageAction.id,
+        });
+
+        const card = await Card.create({
+            label: `spell-all-card-${unique}`,
+            imageUrl: "https://example.com/spell.png",
+            cost: 2,
+            type: "SPELL",
+            cardMode: "BETA",
+            minionId: null,
+            spellId: spell.id,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await loadDeckRelations(deck);
+
+        const result = validateDeck(deck);
+
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
+    });
+
     test("accepts WEAPON card with valid deathrattle", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
@@ -833,7 +893,7 @@ test.group("validation:validateDeck", (group) => {
             assert.isAbove(error.errors.length, 0);
             assert.include(
                 error.errors[0]!.reason,
-                "DAMAGE action requires a HERO or MINION target via tool_to_target",
+                "DAMAGE action requires a HERO, MINION, or ALL target via tool_to_target",
             );
         }
     });
@@ -947,7 +1007,7 @@ test.group("validation:validateDeck", (group) => {
         assert.isFalse(result.valid);
         assert.include(
             result.errors[0]!.reason,
-            "BOOST passive requires a HERO or MINION target via tool_to_target",
+            "BOOST passive requires a HERO, MINION, or ALL target via tool_to_target",
         );
     });
 });

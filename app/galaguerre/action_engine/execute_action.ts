@@ -105,6 +105,21 @@ export const executeAction = (
     switch (action.type) {
         case "DAMAGE": {
             const damage = getEffectiveDamage(action, damageBonus);
+            if (action.target?.type === "ALL") {
+                for (const target of resolveHeroTargets(action.target, player, opponent)) {
+                    target.health -= damage;
+                }
+                applyDamageToAllMinions(
+                    game,
+                    player,
+                    opponent,
+                    action.target,
+                    damage,
+                    sourceMinion,
+                );
+                break;
+            }
+
             if (action.target?.type === "MINION") {
                 applyDamageToAllMinions(
                     game,
@@ -127,6 +142,22 @@ export const executeAction = (
             break;
         }
         case "HEAL": {
+            if (action.target?.type === "ALL") {
+                for (const target of resolveHeroTargets(action.target, player, opponent)) {
+                    target.health = applyHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
+                }
+                applyHealToAllMinions(
+                    game,
+                    player,
+                    opponent,
+                    action.target,
+                    action.heal!,
+                    sourceMinion,
+                );
+                if (triggerHealIfNeeded(game)) return;
+                break;
+            }
+
             if (action.target?.type === "MINION") {
                 applyHealToAllMinions(
                     game,
@@ -159,7 +190,24 @@ export const executeAction = (
         case "BOOST": {
             if (!action.boost || !action.target) break;
 
-            if (action.target.type === "MINION") {
+            if (action.target.type === "ALL") {
+                for (const target of resolveHeroTargets(action.target, player, opponent)) {
+                    applyBoostToHero(target, action.boost);
+                }
+                for (const { board, isOpponent } of getTargetBoardEntries(
+                    action.target,
+                    player,
+                    opponent,
+                )) {
+                    applyBoostToAllMinions(
+                        board,
+                        action.target,
+                        action.boost,
+                        isOpponent,
+                        sourceMinion,
+                    );
+                }
+            } else if (action.target.type === "MINION") {
                 for (const { board, isOpponent } of getTargetBoardEntries(
                     action.target,
                     player,
