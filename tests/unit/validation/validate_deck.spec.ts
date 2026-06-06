@@ -29,27 +29,23 @@ const nullActionFields = {
 const loadDeckRelations = async (deck: Deck) => {
     await deck.load("cards", (query) =>
         query.preload("minion", (q) =>
-            q
-                .preload("minionPower")
-                .preload("battlecryActions", (q) =>
-                    q
-                        .preload("action", (aq) =>
-                            aq
-                                .preload("boost", (bq) => bq.preload("minionPower"))
-                                .preload("drawCardFilter", (cfq) =>
-                                    cfq.preload("comparison").preload("tags"),
-                                )
-                                .preload("enemyDrawCardFilter", (cfq) =>
-                                    cfq.preload("comparison").preload("tags"),
-                                )
-                                .preload("toolToTargets", (tq) =>
-                                    tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
-                                    ),
-                                ),
-                        )
-                        .orderBy("id", "asc"),
-                ),
+            q.preload("minionPower").preload("battlecryActions", (q) =>
+                q
+                    .preload("action", (aq) =>
+                        aq
+                            .preload("boost", (bq) => bq.preload("minionPower"))
+                            .preload("drawCardFilter", (cfq) =>
+                                cfq.preload("comparison").preload("tags"),
+                            )
+                            .preload("enemyDrawCardFilter", (cfq) =>
+                                cfq.preload("comparison").preload("tags"),
+                            )
+                            .preload("toolToTargets", (tq) =>
+                                tq.preload("target", (targetQ) => targetQ.preload("comparison")),
+                            ),
+                    )
+                    .orderBy("id", "asc"),
+            ),
         ),
     );
 };

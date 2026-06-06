@@ -1229,6 +1229,59 @@ test.group("game:play_card battlecries", (group) => {
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { attack: 3, health: 4 });
     });
 
+    test("mass DAMAGE battlecry kills all matching enemy minions", async ({ assert }) => {
+        const victimOne = createMinionCard({ uuid: "victim-1", attack: 1, health: 1 });
+        const victimTwo = createMinionCard({ uuid: "victim-2", attack: 1, health: 1 });
+        const allyMinion = createMinionState(
+            createMinionCard({ uuid: MINION_IDS.attacker, attack: 2, health: 3 }),
+        );
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 1,
+                    target: createMinionTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        placeMinion(
+                            createGameData().playerTwo.board,
+                            "SPOT_1",
+                            createMinionState(victimOne),
+                        ),
+                        "SPOT_2",
+                        createMinionState(victimTwo),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", null);
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { health: 3 });
+    });
+
     test("targeted DAMAGE with ALL can damage opponent minion", async ({ assert }) => {
         const targetCard = createMinionCard({
             uuid: MINION_IDS.target,
@@ -1556,27 +1609,25 @@ test.group("game:play_card battlecries", (group) => {
 
         await deck.load("cards", (query) =>
             query.preload("minion", (q) =>
-                q
-                    .preload("minionPower")
-                    .preload("battlecryActions", (q) =>
-                        q
-                            .preload("action", (aq) =>
-                                aq
-                                    .preload("boost", (bq) => bq.preload("minionPower"))
-                                    .preload("drawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("enemyDrawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("toolToTargets", (tq) =>
-                                        tq.preload("target", (targetQ) =>
-                                            targetQ.preload("comparison"),
-                                        ),
+                q.preload("minionPower").preload("battlecryActions", (q) =>
+                    q
+                        .preload("action", (aq) =>
+                            aq
+                                .preload("boost", (bq) => bq.preload("minionPower"))
+                                .preload("drawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("enemyDrawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("toolToTargets", (tq) =>
+                                    tq.preload("target", (targetQ) =>
+                                        targetQ.preload("comparison"),
                                     ),
-                            )
-                            .orderBy("id", "asc"),
-                    ),
+                                ),
+                        )
+                        .orderBy("id", "asc"),
+                ),
             ),
         );
 
@@ -1675,27 +1726,25 @@ test.group("game:play_card battlecries", (group) => {
 
         await deck.load("cards", (query) =>
             query.preload("minion", (q) =>
-                q
-                    .preload("minionPower")
-                    .preload("battlecryActions", (q) =>
-                        q
-                            .preload("action", (aq) =>
-                                aq
-                                    .preload("boost", (bq) => bq.preload("minionPower"))
-                                    .preload("drawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("enemyDrawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("toolToTargets", (tq) =>
-                                        tq.preload("target", (targetQ) =>
-                                            targetQ.preload("comparison"),
-                                        ),
+                q.preload("minionPower").preload("battlecryActions", (q) =>
+                    q
+                        .preload("action", (aq) =>
+                            aq
+                                .preload("boost", (bq) => bq.preload("minionPower"))
+                                .preload("drawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("enemyDrawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("toolToTargets", (tq) =>
+                                    tq.preload("target", (targetQ) =>
+                                        targetQ.preload("comparison"),
                                     ),
-                            )
-                            .orderBy("id", "asc"),
-                    ),
+                                ),
+                        )
+                        .orderBy("id", "asc"),
+                ),
             ),
         );
 
@@ -1801,27 +1850,25 @@ test.group("game:play_card battlecries", (group) => {
 
         await deck.load("cards", (query) =>
             query.preload("minion", (q) =>
-                q
-                    .preload("minionPower")
-                    .preload("battlecryActions", (q) =>
-                        q
-                            .preload("action", (aq) =>
-                                aq
-                                    .preload("boost", (bq) => bq.preload("minionPower"))
-                                    .preload("drawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("enemyDrawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("toolToTargets", (tq) =>
-                                        tq.preload("target", (targetQ) =>
-                                            targetQ.preload("comparison"),
-                                        ),
+                q.preload("minionPower").preload("battlecryActions", (q) =>
+                    q
+                        .preload("action", (aq) =>
+                            aq
+                                .preload("boost", (bq) => bq.preload("minionPower"))
+                                .preload("drawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("enemyDrawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("toolToTargets", (tq) =>
+                                    tq.preload("target", (targetQ) =>
+                                        targetQ.preload("comparison"),
                                     ),
-                            )
-                            .orderBy("id", "asc"),
-                    ),
+                                ),
+                        )
+                        .orderBy("id", "asc"),
+                ),
             ),
         );
 
@@ -1910,27 +1957,25 @@ test.group("game:play_card battlecries", (group) => {
 
         await deck.load("cards", (query) =>
             query.preload("minion", (q) =>
-                q
-                    .preload("minionPower")
-                    .preload("battlecryActions", (q) =>
-                        q
-                            .preload("action", (aq) =>
-                                aq
-                                    .preload("boost", (bq) => bq.preload("minionPower"))
-                                    .preload("drawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("enemyDrawCardFilter", (cfq) =>
-                                        cfq.preload("comparison").preload("tags"),
-                                    )
-                                    .preload("toolToTargets", (tq) =>
-                                        tq.preload("target", (targetQ) =>
-                                            targetQ.preload("comparison"),
-                                        ),
+                q.preload("minionPower").preload("battlecryActions", (q) =>
+                    q
+                        .preload("action", (aq) =>
+                            aq
+                                .preload("boost", (bq) => bq.preload("minionPower"))
+                                .preload("drawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("enemyDrawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("toolToTargets", (tq) =>
+                                    tq.preload("target", (targetQ) =>
+                                        targetQ.preload("comparison"),
                                     ),
-                            )
-                            .orderBy("id", "asc"),
-                    ),
+                                ),
+                        )
+                        .orderBy("id", "asc"),
+                ),
             ),
         );
 

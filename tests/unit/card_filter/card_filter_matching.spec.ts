@@ -41,10 +41,7 @@ test.group("card_filter_matching", () => {
         const card = createMinionCard({ tagIds: [1, 2] });
 
         assert.isTrue(
-            deckCardMatchesFilter(
-                card,
-                createCardFilterSnapshot({ type: "MINION", tagIds: [1] }),
-            ),
+            deckCardMatchesFilter(card, createCardFilterSnapshot({ type: "MINION", tagIds: [1] })),
         );
         assert.isTrue(
             deckCardMatchesFilter(

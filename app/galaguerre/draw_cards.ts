@@ -3,10 +3,7 @@ import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 
 export const getFatigueDamage = (player: GamePlayer) => player.maxFatigueDamageTaken + 1;
 
-export const drawOneCard = (
-    player: GamePlayer,
-    filter?: CardFilterSnapshot | null,
-): void => {
+export const drawOneCard = (player: GamePlayer, filter?: CardFilterSnapshot | null): void => {
     if (!filter) {
         const card = player.deckCards.shift();
         if (!card) {

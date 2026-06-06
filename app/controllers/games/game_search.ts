@@ -15,12 +15,8 @@ const preloadMinionActionRelations = (q: {
     q.preload("action", (aq: any) =>
         aq
             .preload("boost", (bq: any) => bq.preload("minionPower"))
-            .preload("drawCardFilter", (cfq: any) =>
-                cfq.preload("comparison").preload("tags"),
-            )
-            .preload("enemyDrawCardFilter", (cfq: any) =>
-                cfq.preload("comparison").preload("tags"),
-            )
+            .preload("drawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"))
+            .preload("enemyDrawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"))
             .preload("toolToTargets", (tq: any) =>
                 tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
             )

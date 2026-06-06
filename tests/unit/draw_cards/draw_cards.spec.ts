@@ -59,10 +59,7 @@ test.group("draw_cards", () => {
         const tagged = createMinionCard({ uuid: "tagged", tagIds: [42] });
         const player = createGamePlayer(1, { deckCards: [noTag, tagged], hand: [] });
 
-        drawOneCard(
-            player,
-            createCardFilterSnapshot({ type: "MINION", tagIds: [42] }),
-        );
+        drawOneCard(player, createCardFilterSnapshot({ type: "MINION", tagIds: [42] }));
 
         assert.equal(player.hand.length, 1);
         assert.equal(player.hand[0]!.uuid, "tagged");

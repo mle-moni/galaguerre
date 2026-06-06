@@ -11,7 +11,11 @@ import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
 import { killMinion } from "./kill_minion.js";
-import { getTargetBoardEntries } from "./apply_mass_minion_effects.js";
+import {
+    applyDamageToAllMinions,
+    applyHealToAllMinions,
+    getTargetBoardEntries,
+} from "./apply_mass_minion_effects.js";
 import { resolveHeroTargets } from "./resolve_hero_target.js";
 import { resolveSelectedTarget } from "./resolve_selected_target.js";
 
@@ -88,6 +92,11 @@ export const executeAction = (
 
     switch (action.type) {
         case "DAMAGE": {
+            if (action.target?.type === "MINION") {
+                applyDamageToAllMinions(game, player, opponent, action.target, action.damage!);
+                break;
+            }
+
             const targets =
                 action.target !== null
                     ? resolveHeroTargets(action.target, player, opponent)
@@ -98,6 +107,11 @@ export const executeAction = (
             break;
         }
         case "HEAL": {
+            if (action.target?.type === "MINION") {
+                applyHealToAllMinions(player, opponent, action.target, action.heal!);
+                break;
+            }
+
             const targets =
                 action.target !== null
                     ? resolveHeroTargets(action.target, player, opponent)

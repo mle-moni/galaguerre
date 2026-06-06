@@ -45,7 +45,9 @@ test.group("target_matching", () => {
         assert.isFalse(minionMatchesTarget(minion, target, true));
     });
 
-    test("minionMatchesTarget matches opponent minion when targetTeam is OPPONENT", ({ assert }) => {
+    test("minionMatchesTarget matches opponent minion when targetTeam is OPPONENT", ({
+        assert,
+    }) => {
         const target = createMinionTargetSnapshot("OPPONENT");
         const minion = createMinionState(createMinionCard());
 

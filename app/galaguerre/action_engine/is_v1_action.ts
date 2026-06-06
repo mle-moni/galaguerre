@@ -9,11 +9,15 @@ export const isV1Action = (action: CardActionSnapshot): boolean => {
     switch (action.type) {
         case "DAMAGE":
             if (action.damage === null || action.damage <= 0) return false;
-            if (action.target !== null) return action.target.type === "HERO";
+            if (action.target !== null) {
+                return action.target.type === "HERO" || action.target.type === "MINION";
+            }
             return true;
         case "HEAL":
             if (action.heal === null || action.heal <= 0) return false;
-            if (action.target !== null) return action.target.type === "HERO";
+            if (action.target !== null) {
+                return action.target.type === "HERO" || action.target.type === "MINION";
+            }
             return true;
         case "DRAW":
             return action.drawCount !== null && action.drawCount > 0;

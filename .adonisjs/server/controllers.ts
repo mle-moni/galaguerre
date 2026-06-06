@@ -4,39 +4,41 @@
  */
 
 export const controllers = {
-  auth: {
-    AdominLogin: () => import('#controllers/auth/adomin_login'),
-    AdominLogout: () => import('#controllers/auth/adomin_logout'),
-    Auth: () => import('#controllers/auth/auth_controller'),
-    Me: () => import('#controllers/auth/me'),
-    Register: () => import('#controllers/auth/register'),
-    socket: {
-      AuthRestrictedEvents: () => import('#controllers/auth/socket/auth_restricted_events'),
-      Index: () => import('#controllers/auth/socket/index'),
-      SocketAuth: () => import('#controllers/auth/socket/socket_auth'),
-      SocketLogout: () => import('#controllers/auth/socket/socket_logout'),
+    auth: {
+        AdominLogin: () => import("#controllers/auth/adomin_login"),
+        AdominLogout: () => import("#controllers/auth/adomin_logout"),
+        Auth: () => import("#controllers/auth/auth_controller"),
+        Me: () => import("#controllers/auth/me"),
+        Register: () => import("#controllers/auth/register"),
+        socket: {
+            AuthRestrictedEvents: () => import("#controllers/auth/socket/auth_restricted_events"),
+            Index: () => import("#controllers/auth/socket/index"),
+            SocketAuth: () => import("#controllers/auth/socket/socket_auth"),
+            SocketLogout: () => import("#controllers/auth/socket/socket_logout"),
+        },
     },
-  },
-  games: {
-    CreateGame: () => import('#controllers/games/create_game'),
-    GameSearch: () => import('#controllers/games/game_search'),
-    GameUtils: () => import('#controllers/games/game_utils'),
-    Games: () => import('#controllers/games/games_controller'),
-    GeneratePlayerCards: () => import('#controllers/games/generate_player_cards'),
-    minionAction: {
-      GameMinionAction: () => import('#controllers/games/minion_action/game_minion_action'),
-      MinionToHeroAction: () => import('#controllers/games/minion_action/minion_to_hero_action'),
-      MinionToMinionAction: () => import('#controllers/games/minion_action/minion_to_minion_action'),
+    games: {
+        CreateGame: () => import("#controllers/games/create_game"),
+        GameSearch: () => import("#controllers/games/game_search"),
+        GameUtils: () => import("#controllers/games/game_utils"),
+        Games: () => import("#controllers/games/games_controller"),
+        GeneratePlayerCards: () => import("#controllers/games/generate_player_cards"),
+        minionAction: {
+            GameMinionAction: () => import("#controllers/games/minion_action/game_minion_action"),
+            MinionToHeroAction: () =>
+                import("#controllers/games/minion_action/minion_to_hero_action"),
+            MinionToMinionAction: () =>
+                import("#controllers/games/minion_action/minion_to_minion_action"),
+        },
+        PassGameTurn: () => import("#controllers/games/pass_game_turn"),
+        playCard: {
+            GamePlayCard: () => import("#controllers/games/play_card/game_play_card"),
+            InstantiateMinion: () => import("#controllers/games/play_card/instantiate_minion"),
+            PlayMinion: () => import("#controllers/games/play_card/play_minion"),
+        },
+        SendGameUpdate: () => import("#controllers/games/send_game_update"),
+        SetupNextGameTurn: () => import("#controllers/games/setup_next_game_turn"),
+        ShowGame: () => import("#controllers/games/show_game"),
+        TerminateGame: () => import("#controllers/games/terminate_game"),
     },
-    PassGameTurn: () => import('#controllers/games/pass_game_turn'),
-    playCard: {
-      GamePlayCard: () => import('#controllers/games/play_card/game_play_card'),
-      InstantiateMinion: () => import('#controllers/games/play_card/instantiate_minion'),
-      PlayMinion: () => import('#controllers/games/play_card/play_minion'),
-    },
-    SendGameUpdate: () => import('#controllers/games/send_game_update'),
-    SetupNextGameTurn: () => import('#controllers/games/setup_next_game_turn'),
-    ShowGame: () => import('#controllers/games/show_game'),
-    TerminateGame: () => import('#controllers/games/terminate_game'),
-  },
-}
+};
