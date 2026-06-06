@@ -13,6 +13,8 @@ export { matchesComparison } from "./comparison_matching.js";
 export const heroMatchesTarget = (target: TargetSnapshot, isOpponentHero: boolean): boolean => {
     if (target.type !== "HERO") return false;
 
+    if (target.targetTeam === "ALL") return true;
+
     const targetIsOpponent = target.targetTeam === "OPPONENT";
     return targetIsOpponent === isOpponentHero;
 };
@@ -24,8 +26,10 @@ export const minionMatchesTarget = (
 ): boolean => {
     if (target.type !== "MINION") return false;
 
-    const targetIsOpponent = target.targetTeam === "OPPONENT";
-    if (targetIsOpponent !== isOpponentMinion) return false;
+    if (target.targetTeam !== "ALL") {
+        const targetIsOpponent = target.targetTeam === "OPPONENT";
+        if (targetIsOpponent !== isOpponentMinion) return false;
+    }
 
     const card = minion.originalCard;
     if (card.type !== "MINION") return false;

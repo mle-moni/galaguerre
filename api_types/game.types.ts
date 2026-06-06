@@ -34,7 +34,7 @@ export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 
 export interface TargetSnapshot {
     type: "HERO" | "MINION" | "ALL";
-    targetTeam: "PLAYER" | "OPPONENT";
+    targetTeam: "PLAYER" | "OPPONENT" | "ALL";
     comparison: ComparisonSnapshot | null;
     tagId: number | null;
 }

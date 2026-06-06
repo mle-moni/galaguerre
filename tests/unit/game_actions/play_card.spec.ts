@@ -5,6 +5,7 @@ import {
     CARD_IDS,
     createGameData,
     createMinionCard,
+    createMinionState,
     createSpellCard,
     createWeaponCard,
     placeMinion,
@@ -141,15 +142,11 @@ test.group("game:play_card", (group) => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_1", {
-                        uuid: existing.uuid,
-                        health: existing.health,
-                        attack: existing.attack,
-                        placedAtRound: 0,
-                        lastActionAtRound: 0,
-                        attacksThisRound: 0,
-                        originalCard: existing,
-                    }),
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(existing),
+                    ),
                 },
             }),
             actor: "playerOne",

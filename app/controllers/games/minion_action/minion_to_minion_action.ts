@@ -26,7 +26,6 @@ export const minionToMinionAction = async ({
     socketId,
 }: MinionActionOptions) => {
     const targetBoard = owner === "PLAYER" ? player.board : opponent.board;
-    const initiatorBoard = minionInfos.position.owner === "PLAYER" ? player.board : opponent.board;
     const targetMinion = targetBoard[spotId];
     if (!targetMinion) {
         emitSocketEvent(
@@ -71,7 +70,7 @@ export const minionToMinionAction = async ({
     recordMinionAttack(minionInfos.minion, game.data.currentRound);
 
     const initiatorOwner = minionInfos.position.owner === "PLAYER" ? player : opponent;
-    const targetOwner = owner === "PLAYER" ? player : opponent;
+    const targetOwner = opponent;
 
     if (minionInfos.minion.health <= 0) {
         const { gameEnded } = killMinion(game, initiatorOwner, minionInfos.position.spotId);

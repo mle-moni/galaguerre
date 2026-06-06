@@ -49,7 +49,7 @@ export const createComparisonSnapshot = (
 });
 
 export const createHeroTargetSnapshot = (
-    targetTeam: "PLAYER" | "OPPONENT",
+    targetTeam: "PLAYER" | "OPPONENT" | "ALL",
     overrides: Partial<TargetSnapshot> = {},
 ): TargetSnapshot => ({
     type: "HERO",
@@ -60,7 +60,7 @@ export const createHeroTargetSnapshot = (
 });
 
 export const createMinionTargetSnapshot = (
-    targetTeam: "PLAYER" | "OPPONENT",
+    targetTeam: "PLAYER" | "OPPONENT" | "ALL",
     overrides: Partial<TargetSnapshot> = {},
 ): TargetSnapshot => ({
     type: "MINION",

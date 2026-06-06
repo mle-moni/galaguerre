@@ -11,7 +11,6 @@ import {
 } from "#tests/helpers/game/fixtures";
 import {
     assertMinionActionScenario,
-    runMinionAction,
     runMinionActionOnGame,
 } from "#tests/helpers/game/run_minion_action";
 import { assertPlayCardScenario, runPlayCardOnGame } from "#tests/helpers/game/run_play_card";
@@ -178,7 +177,7 @@ test.group("game:integration", (group) => {
             effects: ["Provocation"],
         });
 
-        const { game, playerOne, playerTwo } = await createTestGame(
+        const { game, playerOne } = await createTestGame(
             createGameData({
                 currentRound: 4,
                 playerOne: {

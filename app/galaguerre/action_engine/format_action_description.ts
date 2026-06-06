@@ -1,11 +1,13 @@
 import type { BoostSnapshot, CardActionSnapshot, CardFilterSnapshot } from "#api_types/game.types";
 import { GALAGUERRE_CARD_TYPES_LABEL_OBJ } from "../galaguerre.types.js";
 
-const formatHeroTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string => {
+const formatHeroTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    if (targetTeam === "ALL") return "tous les héros";
     return targetTeam === "PLAYER" ? "allié" : "adverse";
 };
 
-const formatMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string => {
+const formatMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    if (targetTeam === "ALL") return "tous les serviteurs";
     return targetTeam === "PLAYER" ? "allié" : "adverse";
 };
 
@@ -56,7 +58,8 @@ const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
     return parts.join(", ");
 };
 
-const formatMassMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string => {
+const formatMassMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    if (targetTeam === "ALL") return "tous les serviteurs";
     return targetTeam === "PLAYER" ? "vos serviteurs" : "les serviteurs adverses";
 };
 

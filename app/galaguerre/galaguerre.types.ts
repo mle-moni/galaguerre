@@ -93,12 +93,13 @@ export const GALAGUERRE_TARGET_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_TARGET_TYPES_LABEL_OBJ,
 );
 
-export const GALAGUERRE_TARGET_TEAMS = ["PLAYER", "OPPONENT"] as const;
+export const GALAGUERRE_TARGET_TEAMS = ["PLAYER", "OPPONENT", 'ALL'] as const;
 export type GalaguerreTargetTeam = GenerateTypeFromEnum<typeof GALAGUERRE_TARGET_TEAMS>;
 export const GALAGUERRE_TARGET_TEAMS_OBJ = generateTypeObjectFromEnum(GALAGUERRE_TARGET_TEAMS);
 export const GALAGUERRE_TARGET_TEAMS_LABEL_OBJ: LabelObjectType<GalaguerreTargetTeam> = {
     PLAYER: "Player",
     OPPONENT: "Opponent",
+    ALL: "All",
 };
 export const GALAGUERRE_TARGET_TEAMS_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_TARGET_TEAMS_LABEL_OBJ,

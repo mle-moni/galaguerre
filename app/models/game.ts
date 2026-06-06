@@ -78,6 +78,7 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     tags: [],
     description: "",
     battlecryActions: [],
+    deathrattleActions: [],
     cost: 0,
     tagIds: [],
     label: "dummy card",

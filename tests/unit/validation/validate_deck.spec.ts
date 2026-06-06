@@ -80,7 +80,7 @@ const createMinionCardInDeck = async ({
     };
     target?: {
         type: "HERO" | "MINION" | "ALL";
-        targetTeam: "PLAYER" | "OPPONENT";
+        targetTeam: "PLAYER" | "OPPONENT" | "ALL";
     };
 }) => {
     const minion = await Minion.create({

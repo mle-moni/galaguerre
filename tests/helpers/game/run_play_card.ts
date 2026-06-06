@@ -113,7 +113,7 @@ export const runPlayCardOnGame = async (
 
 export const assertPlayCardScenario = (
     assert: Assert,
-    result: PlayCardResult,
+    _result: PlayCardResult,
     expect: PlayCardExpectation,
 ): void => {
     if (expect.error) {

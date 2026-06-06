@@ -1177,6 +1177,143 @@ test.group("game:play_card battlecries", (group) => {
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_3", { attack: 3, health: 4 });
     });
 
+    test("mass BOOST gives +1/+1 to all minions on both teams", async ({ assert }) => {
+        const allyCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 2,
+            attack: 1,
+        });
+        const enemyCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion = createMinionState(allyCard);
+        const enemyMinion = createMinionState(enemyCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    boost: createBoostSnapshot({ attack: 1, health: 1 }),
+                    target: createMinionTargetSnapshot("ALL"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", enemyMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", { attack: 2, health: 2 });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { attack: 2, health: 3 });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { attack: 3, health: 4 });
+    });
+
+    test("targeted DAMAGE with ALL can damage opponent minion", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 2,
+        });
+        const targetMinion = createMinionState(targetCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 3,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("ALL"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 1 });
+    });
+
+    test("targeted DAMAGE with ALL can damage ally minion", async ({ assert }) => {
+        const allyCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 4,
+            attack: 2,
+        });
+        const allyMinion = createMinionState(allyCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 3,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("ALL"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "PLAYER" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { health: 1 });
+    });
+
     test("targeted BOOST grants taunt to ally minion", async ({ assert }) => {
         const allyCard = createMinionCard({
             uuid: MINION_IDS.attacker,
@@ -1225,8 +1362,11 @@ test.group("game:play_card battlecries", (group) => {
 
         assertPlayCardScenario(assert, result, { error: null });
         const boosted = result.game.data.playerOne.board.SPOT_2;
-        assert.isTrue(boosted?.originalCard.type === "MINION" && boosted.originalCard.hasTaunt);
-        assert.include(boosted?.originalCard.effects ?? [], "Provocation");
+        const boostedCard = boosted?.originalCard;
+        assert.isTrue(boostedCard?.type === "MINION" && boostedCard.hasTaunt);
+        if (boostedCard?.type === "MINION") {
+            assert.include(boostedCard.effects, "Provocation");
+        }
     });
 
     test("BOOST spellPower increases hero spell power", async ({ assert }) => {

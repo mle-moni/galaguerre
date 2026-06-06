@@ -23,8 +23,9 @@ const preloadMinionActionRelations = (q: {
             )
             .preload("toolToTargets", (tq: any) =>
                 tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
-            ),
-    ).orderBy("id", "asc");
+            )
+            .orderBy("id", "asc"),
+    );
 };
 
 const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
