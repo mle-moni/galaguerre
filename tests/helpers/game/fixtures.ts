@@ -1,5 +1,6 @@
 import type {
     BoardState,
+    CardActionSnapshot,
     GameData,
     GamePlayer,
     MinionCard,
@@ -30,6 +31,18 @@ export const createEmptyBoard = (): BoardState => ({
     SPOT_5: null,
 });
 
+export const createCardActionSnapshot = (
+    overrides: Partial<CardActionSnapshot> = {},
+): CardActionSnapshot => ({
+    type: "DAMAGE",
+    isTargeted: false,
+    damage: null,
+    heal: null,
+    drawCount: null,
+    enemyDrawCount: null,
+    ...overrides,
+});
+
 export const createMinionCard = (
     overrides: Partial<MinionCard> & { uuid?: string } = {},
 ): MinionCard => ({
@@ -47,6 +60,7 @@ export const createMinionCard = (
     isPoisonous: false,
     effects: [],
     description: "",
+    battlecryActions: [],
     ...overrides,
 });
 

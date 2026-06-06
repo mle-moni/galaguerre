@@ -1,4 +1,5 @@
 import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
+import { serializeAction } from "../../galaguerre/action_engine/serialize_action.js";
 import {
     getMinionCardDescription,
     getMinionPowerEffects,
@@ -35,6 +36,9 @@ export const generatePlayerCards = (deck: Deck) => {
             isPoisonous: card.minion.minionPower?.isPoisonous ?? false,
             effects,
             description: getMinionCardDescription(card.minion.attack, card.minion.health, effects),
+            battlecryActions: (card.minion.battlecryActions ?? []).map((bca) =>
+                serializeAction(bca.action),
+            ),
         };
     });
 

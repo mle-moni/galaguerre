@@ -1,6 +1,8 @@
 import type { MinionCard } from "#api_types/game.types";
+import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { sendGameUpdate } from "../send_game_update.js";
+import { terminateGame } from "../terminate_game.js";
 import type { PlayCardOptions } from "./game_play_card.js";
 import { instantiateMinion } from "./instantiate_minion.js";
 
@@ -29,6 +31,13 @@ export const playMinion = async ({
     player.board[spotId] = instantiateMinion(card, game.data.currentRound);
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
     player.mana -= card.cost;
+
+    const { gameEnded } = executeBattlecries(game, player, card);
+
+    if (gameEnded) {
+        await terminateGame(game);
+        return;
+    }
 
     await game.save();
 

@@ -9,7 +9,11 @@ import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relat
 import { createGame } from "./create_game.js";
 
 const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
-    q.preload("minion", (q) => q.preload("minionPower"));
+    q.preload("minion", (q) =>
+        q
+            .preload("minionPower")
+            .preload("battlecryActions", (q) => q.preload("action").orderBy("id", "asc")),
+    );
 };
 
 export const gameSearch = async ({ auth, response }: HttpContext) => {

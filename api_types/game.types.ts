@@ -7,6 +7,15 @@ export interface PlayerCardBase {
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 
+export interface CardActionSnapshot {
+    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "MINION_POWERS";
+    isTargeted: boolean;
+    damage: number | null;
+    heal: number | null;
+    drawCount: number | null;
+    enemyDrawCount: number | null;
+}
+
 export type MinionCard = PlayerCardBase & {
     type: "MINION";
     health: number;
@@ -17,6 +26,7 @@ export type MinionCard = PlayerCardBase & {
     isPoisonous: boolean;
     effects: string[];
     description: string;
+    battlecryActions: CardActionSnapshot[];
 };
 
 export type SpellCard = PlayerCardBase & {

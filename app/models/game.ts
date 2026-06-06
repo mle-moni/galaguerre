@@ -76,6 +76,7 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     isPoisonous: false,
     effects: [],
     description: "",
+    battlecryActions: [],
     cost: 0,
     label: "dummy card",
     imageUrl: "https://picsum.photos/seed/dummy_card/200/300",

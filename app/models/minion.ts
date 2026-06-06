@@ -1,6 +1,7 @@
-import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
-import type { BelongsTo } from "@adonisjs/lucid/types/relations";
+import { BaseModel, belongsTo, column, hasMany } from "@adonisjs/lucid/orm";
+import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
+import MinionBattlecryAction from "./minion_battlecry_action.js";
 import MinionPower from "./minion_power.js";
 
 // @dbml-group Minions
@@ -23,6 +24,9 @@ export default class Minion extends BaseModel {
 
     @belongsTo(() => MinionPower)
     declare minionPower: BelongsTo<typeof MinionPower>;
+
+    @hasMany(() => MinionBattlecryAction)
+    declare battlecryActions: HasMany<typeof MinionBattlecryAction>;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
