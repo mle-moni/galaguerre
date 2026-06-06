@@ -18,7 +18,6 @@ import { assertPlayerHealth } from "#tests/helpers/game/assertions";
 const createGame = (data: ReturnType<typeof createGameData>) => ({ data }) as Game;
 
 test.group("passive ACTION triggers", () => {
-
     test("TURN_END passive deals damage to opponent hero", ({ assert }) => {
         const passiveMinion = createMinionCard({
             uuid: "passive-minion",

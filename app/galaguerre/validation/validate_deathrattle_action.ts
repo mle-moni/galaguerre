@@ -9,6 +9,7 @@ import type Boost from "#models/boost";
 import type Target from "#models/target";
 import type { ActionValidationError } from "./validate_action.js";
 import { validateComparison } from "./validate_comparison.js";
+import { validateTargetExcludeSelf } from "./validate_exclude_self.js";
 
 const findHeroTarget = (action: Action) => {
     return action.toolToTargets?.find((toolToTarget) => toolToTarget.target?.type === "HERO");
@@ -86,6 +87,15 @@ const validateMinionTargetFilters = (
     action: Action,
     target: Target,
 ): ActionValidationError | null => {
+    const excludeSelfReason = validateTargetExcludeSelf(target);
+    if (excludeSelfReason) {
+        return {
+            actionId: action.id,
+            internalLabel: action.internalLabel,
+            reason: excludeSelfReason,
+        };
+    }
+
     if (target.comparisonId !== null || target.tagId !== null) {
         if (target.type !== "MINION") {
             return {

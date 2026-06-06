@@ -107,6 +107,10 @@ export class WeaponDragStore {
         const weaponState = this.gameStore.me.weaponState;
         if (!weaponState) return false;
 
-        return canWeaponAttack(this.gameStore.me, weaponState, this.gameStore.game.data.currentRound);
+        return canWeaponAttack(
+            this.gameStore.me,
+            weaponState,
+            this.gameStore.game.data.currentRound,
+        );
     }
 }

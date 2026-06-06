@@ -2,9 +2,10 @@ import {
     MINION_SPOT_IDS,
     type BoardState,
     type GamePlayer,
+    type MinionState,
     type TargetSnapshot,
 } from "#api_types/game.types";
-import { minionMatchesTarget } from "#api_types/target_matching";
+import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
 import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
@@ -39,11 +40,13 @@ export const applyDamageToAllMinions = (
     opponent: GamePlayer,
     target: TargetSnapshot,
     damage: number,
+    sourceMinion?: MinionState,
 ): { gameEnded: boolean } => {
     for (const { board, owner, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
         for (const spotId of MINION_SPOT_IDS) {
             const minion = board[spotId];
             if (!minion) continue;
+            if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
             minion.health -= damage;
@@ -63,11 +66,13 @@ export const applyHealToAllMinions = (
     opponent: GamePlayer,
     target: TargetSnapshot,
     heal: number,
+    sourceMinion?: MinionState,
 ): { gameEnded: boolean } => {
     for (const { board, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
         for (const spotId of MINION_SPOT_IDS) {
             const minion = board[spotId];
             if (!minion) continue;
+            if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
             minion.health = applyHeal(minion.health, heal, getMinionMaxHealth(minion));

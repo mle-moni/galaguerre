@@ -11,7 +11,11 @@ import {
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertWeaponActionScenario, runWeaponAction, runWeaponActionOnGame } from "#tests/helpers/game/run_weapon_action";
+import {
+    assertWeaponActionScenario,
+    runWeaponAction,
+    runWeaponActionOnGame,
+} from "#tests/helpers/game/run_weapon_action";
 import { runPlayCardOnGame } from "#tests/helpers/game/run_play_card";
 
 test.group("game:weapon_action", (group) => {
@@ -167,10 +171,14 @@ test.group("game:weapon_action", (group) => {
 
         assert.isNotNull(firstAttack.game.data.playerOne.weaponState);
 
-        const secondAttack = await runWeaponActionOnGame(firstAttack.game, firstAttack.actorUserId, {
-            spotId: null,
-            owner: "OPPONENT",
-        });
+        const secondAttack = await runWeaponActionOnGame(
+            firstAttack.game,
+            firstAttack.actorUserId,
+            {
+                spotId: null,
+                owner: "OPPONENT",
+            },
+        );
 
         assertWeaponActionScenario(assert, secondAttack, {
             error: "Vous avez déjà attaqué avec votre arme ce tour",

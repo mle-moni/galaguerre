@@ -34,7 +34,8 @@ const nullActionFields = {
 const preloadBoostRelations = (bq: {
     preload: (relation: string, callback?: (sq: any) => void) => void;
 }) => {
-    bq.preload("minionPower").preload("toolToTargets", (tq: any) =>
+    bq.preload("minionPower");
+    bq.preload("toolToTargets", (tq: any) =>
         tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
     );
 };

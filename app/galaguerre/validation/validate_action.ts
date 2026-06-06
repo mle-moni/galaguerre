@@ -8,6 +8,7 @@ import type Action from "#models/action";
 import type Boost from "#models/boost";
 import type Target from "#models/target";
 import { validateComparison } from "./validate_comparison.js";
+import { validateTargetExcludeSelf } from "./validate_exclude_self.js";
 
 export type ActionValidationError = {
     actionId: number;
@@ -97,6 +98,15 @@ const validateBoostTargetCompatibility = (
 };
 
 const validateTargetFilters = (action: Action, target: Target): ActionValidationError | null => {
+    const excludeSelfReason = validateTargetExcludeSelf(target);
+    if (excludeSelfReason) {
+        return {
+            actionId: action.id,
+            internalLabel: action.internalLabel,
+            reason: excludeSelfReason,
+        };
+    }
+
     if (target.type === "ALL") {
         return {
             actionId: action.id,

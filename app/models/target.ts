@@ -31,8 +31,8 @@ export default class Target extends BaseModel {
     declare tag: BelongsTo<typeof Tag>;
 
     /**
-     * When true, a BOOST passive aura skips the minion that emits it ("your other minions").
-     * Only supported for MINION targets on passive auras; ignored by battlecries, spells, etc.
+     * When true, mass MINION effects skip the minion that triggers them ("your other minions").
+     * Used by BOOST passive auras and mass battlecries/deathrattles when a source minion is known.
      */
     @column()
     declare excludeSelf: boolean;

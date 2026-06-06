@@ -9,6 +9,7 @@ import type Target from "#models/target";
 import type { ActionValidationError } from "./validate_action.js";
 import { validateComparison } from "./validate_comparison.js";
 import { validateDeathrattleAction } from "./validate_deathrattle_action.js";
+import { validateTargetExcludeSelf } from "./validate_exclude_self.js";
 
 export type PassiveValidationError = {
     passiveId: number;
@@ -60,26 +61,18 @@ const validateBoostTargetCompatibility = (
     return null;
 };
 
-const validateExcludeSelf = (passive: Passive, target: Target): PassiveValidationError | null => {
-    if (!target.excludeSelf) return null;
-
-    if (target.type !== "MINION") {
-        return {
-            passiveId: passive.id,
-            internalLabel: passive.internalLabel,
-            reason: "excludeSelf is only supported for MINION targets",
-        };
-    }
-
-    return null;
-};
-
 const validateMinionTargetFilters = (
     passive: Passive,
     target: Target,
 ): PassiveValidationError | null => {
-    const excludeSelfError = validateExcludeSelf(passive, target);
-    if (excludeSelfError) return excludeSelfError;
+    const excludeSelfReason = validateTargetExcludeSelf(target);
+    if (excludeSelfReason) {
+        return {
+            passiveId: passive.id,
+            internalLabel: passive.internalLabel,
+            reason: excludeSelfReason,
+        };
+    }
 
     if (target.comparisonId !== null || target.tagId !== null) {
         if (target.type !== "MINION") {
@@ -152,8 +145,14 @@ const validatePassiveBoost = (passive: Passive): PassiveValidationError | null =
     }
 
     if (heroTarget?.target) {
-        const excludeSelfError = validateExcludeSelf(passive, heroTarget.target);
-        if (excludeSelfError) return excludeSelfError;
+        const excludeSelfReason = validateTargetExcludeSelf(heroTarget.target);
+        if (excludeSelfReason) {
+            return {
+                passiveId: passive.id,
+                internalLabel: passive.internalLabel,
+                reason: excludeSelfReason,
+            };
+        }
 
         const compatibilityError = validateBoostTargetCompatibility(
             passive,

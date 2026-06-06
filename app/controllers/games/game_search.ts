@@ -38,11 +38,13 @@ const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) 
                         passiveQ
                             .preload("action", preloadActionRelations)
                             .preload("boost", (bq) =>
-                                bq.preload("minionPower").preload("toolToTargets", (tq) =>
-                                    tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
+                                bq
+                                    .preload("minionPower")
+                                    .preload("toolToTargets", (tq) =>
+                                        tq.preload("target", (targetQ) =>
+                                            targetQ.preload("comparison"),
+                                        ),
                                     ),
-                                ),
                             ),
                     ),
                 ),

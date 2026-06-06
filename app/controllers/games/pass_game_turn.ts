@@ -17,11 +17,7 @@ export const passGameTurn = async (socketId: string) => {
             ? currentGame.data.playerOne
             : currentGame.data.playerTwo;
 
-    const { gameEnded: turnEndGameEnded } = triggerPassives(
-        currentGame,
-        "TURN_END",
-        activePlayer,
-    );
+    const { gameEnded: turnEndGameEnded } = triggerPassives(currentGame, "TURN_END", activePlayer);
 
     if (turnEndGameEnded) {
         await terminateGame(currentGame);

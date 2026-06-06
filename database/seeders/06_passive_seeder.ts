@@ -20,42 +20,38 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
-        const [
-            enemyHeroTarget,
-            allyHeroTarget,
-            enemyMinionsTarget,
-            allyMinionsTarget,
-        ] = await Target.createMany([
-            {
-                internalLabel: "Passif - Héros adverse",
-                type: "HERO",
-                targetTeam: "OPPONENT",
-                comparisonId: null,
-                tagId: null,
-            },
-            {
-                internalLabel: "Passif - Héros allié",
-                type: "HERO",
-                targetTeam: "PLAYER",
-                comparisonId: null,
-                tagId: null,
-            },
-            {
-                internalLabel: "Passif - Serviteurs adverses",
-                type: "MINION",
-                targetTeam: "OPPONENT",
-                comparisonId: null,
-                tagId: null,
-            },
-            {
-                internalLabel: "Passif - Autres serviteurs alliés",
-                type: "MINION",
-                targetTeam: "PLAYER",
-                comparisonId: null,
-                tagId: null,
-                excludeSelf: true,
-            },
-        ]);
+        const [enemyHeroTarget, allyHeroTarget, enemyMinionsTarget, allyMinionsTarget] =
+            await Target.createMany([
+                {
+                    internalLabel: "Passif - Héros adverse",
+                    type: "HERO",
+                    targetTeam: "OPPONENT",
+                    comparisonId: null,
+                    tagId: null,
+                },
+                {
+                    internalLabel: "Passif - Héros allié",
+                    type: "HERO",
+                    targetTeam: "PLAYER",
+                    comparisonId: null,
+                    tagId: null,
+                },
+                {
+                    internalLabel: "Passif - Serviteurs adverses",
+                    type: "MINION",
+                    targetTeam: "OPPONENT",
+                    comparisonId: null,
+                    tagId: null,
+                },
+                {
+                    internalLabel: "Passif - Autres serviteurs alliés",
+                    type: "MINION",
+                    targetTeam: "PLAYER",
+                    comparisonId: null,
+                    tagId: null,
+                    excludeSelf: true,
+                },
+            ]);
 
         const [
             turnEndHeroDamageAction,

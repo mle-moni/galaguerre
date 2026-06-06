@@ -39,7 +39,8 @@ export default class extends BaseSeeder {
             })),
         );
 
-        const cardByLabel = async (label: string) => Card.query().where("label", label).firstOrFail();
+        const cardByLabel = async (label: string) =>
+            Card.query().where("label", label).firstOrFail();
 
         const tauntCard = await cardByLabel("Monster 1-2");
         const chargeCard = await cardByLabel("Monster 2-1 Charge");
@@ -49,7 +50,9 @@ export default class extends BaseSeeder {
         const spellDrawCard = await cardByLabel("Spell 1 Draw");
         const weaponSimpleCard = await cardByLabel("Weapon 2 - 3/2");
 
-        const passiveCards = await Promise.all(PASSIVE_CARD_LABELS.map((label) => cardByLabel(label)));
+        const passiveCards = await Promise.all(
+            PASSIVE_CARD_LABELS.map((label) => cardByLabel(label)),
+        );
         const [
             passiveTurnEndDamageCard,
             passiveTurnEndMassCard,
@@ -68,10 +71,7 @@ export default class extends BaseSeeder {
         for (const deck of decks) {
             const shuffledOthers = shuffleArray(otherCards);
             const guaranteedCount =
-                CORE_CARD_LABELS.length +
-                PASSIVE_CARD_LABELS.length +
-                PASSIVE_AURA_COPIES -
-                1;
+                CORE_CARD_LABELS.length + PASSIVE_CARD_LABELS.length + PASSIVE_AURA_COPIES - 1;
             const fillerCount = DECK_SIZE - guaranteedCount;
 
             const deckCardIds = [

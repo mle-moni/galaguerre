@@ -20,12 +20,13 @@ export const heroMatchesTarget = (target: TargetSnapshot, isOpponentHero: boolea
     return targetIsOpponent === isOpponentHero;
 };
 
-export const isAuraSourceExcluded = (
+export const shouldExcludeSourceMinion = (
     target: TargetSnapshot,
-    sourceMinion: MinionState,
+    sourceMinion: MinionState | undefined,
     candidateMinion: MinionState,
 ): boolean => {
-    return target.excludeSelf && sourceMinion.uuid === candidateMinion.uuid;
+    if (!sourceMinion || !target.excludeSelf) return false;
+    return sourceMinion.uuid === candidateMinion.uuid;
 };
 
 export const minionMatchesTarget = (

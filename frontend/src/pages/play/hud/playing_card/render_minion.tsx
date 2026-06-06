@@ -1,10 +1,7 @@
 import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
-import {
-    getMinionAttackStatus,
-    getMinionRemainingAttacks,
-} from "~/helpers/minion_combat";
+import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { CardDetailHover } from "./card_detail_hover.jsx";
 import { MinionCardFace } from "./minion_card_face.jsx";
@@ -27,11 +24,7 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
 
     const isOwnMinion = spotOwner === "PLAYER";
     const currentRound = store.game.data.currentRound;
-    const attackStatus = getMinionAttackStatus(
-        state,
-        currentRound,
-        isOwnMinion && store.isMyTurn,
-    );
+    const attackStatus = getMinionAttackStatus(state, currentRound, isOwnMinion && store.isMyTurn);
     const canAttack = attackStatus === "ready";
     const remainingAttacks = isOwnMinion
         ? getMinionRemainingAttacks(state, currentRound)

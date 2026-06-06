@@ -6,7 +6,7 @@ import {
     type MinionState,
     type TargetSnapshot,
 } from "#api_types/game.types";
-import { minionMatchesTarget } from "#api_types/target_matching";
+import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 
 export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): void => {
     if (boost.attack !== null) {
@@ -64,10 +64,12 @@ export const applyBoostToAllMinions = (
     target: TargetSnapshot,
     boost: BoostSnapshot,
     isOpponentMinion: boolean,
+    sourceMinion?: MinionState,
 ): void => {
     for (const spotId of MINION_SPOT_IDS) {
         const minion = board[spotId];
         if (!minion) continue;
+        if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
         if (!minionMatchesTarget(minion, target, isOpponentMinion)) continue;
         applyBoostToMinion(minion, boost);
     }

@@ -44,10 +44,7 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
         .map((passive) => {
             if (passive.type === "ACTION" && passive.action && passive.triggersOn) {
                 const triggerLabel = PASSIVE_TRIGGER_LABELS[passive.triggersOn];
-                return formatActionDescription(
-                    passive.action,
-                    `Passif (${triggerLabel})`,
-                );
+                return formatActionDescription(passive.action, `Passif (${triggerLabel})`);
             }
 
             if (passive.type === "BOOST" && passive.passiveBoost) {

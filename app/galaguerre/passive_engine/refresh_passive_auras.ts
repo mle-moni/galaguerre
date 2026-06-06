@@ -1,9 +1,6 @@
 import type { GamePlayer, MinionSpotId } from "#api_types/game.types";
 import type Game from "#models/game";
-import {
-    applyExistingAurasToMinion,
-    applyPassiveAurasForSource,
-} from "./passive_aura.js";
+import { applyExistingAurasToMinion, applyPassiveAurasForSource } from "./passive_aura.js";
 
 export const refreshAurasAfterMinionPlayed = (
     game: Game,

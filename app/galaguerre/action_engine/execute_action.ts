@@ -3,6 +3,7 @@ import {
     type ActionTarget,
     type CardActionSnapshot,
     type GamePlayer,
+    type MinionState,
 } from "#api_types/game.types";
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
@@ -42,6 +43,7 @@ export const executeAction = (
     opponent: GamePlayer,
     selectedTarget?: ActionTarget,
     damageBonus = 0,
+    sourceMinion?: MinionState,
 ): void => {
     if (isTargetedV1Action(action)) {
         if (!selectedTarget) return;
@@ -104,7 +106,14 @@ export const executeAction = (
         case "DAMAGE": {
             const damage = getEffectiveDamage(action, damageBonus);
             if (action.target?.type === "MINION") {
-                applyDamageToAllMinions(game, player, opponent, action.target, damage);
+                applyDamageToAllMinions(
+                    game,
+                    player,
+                    opponent,
+                    action.target,
+                    damage,
+                    sourceMinion,
+                );
                 break;
             }
 
@@ -119,7 +128,14 @@ export const executeAction = (
         }
         case "HEAL": {
             if (action.target?.type === "MINION") {
-                applyHealToAllMinions(game, player, opponent, action.target, action.heal!);
+                applyHealToAllMinions(
+                    game,
+                    player,
+                    opponent,
+                    action.target,
+                    action.heal!,
+                    sourceMinion,
+                );
                 if (triggerHealIfNeeded(game)) return;
                 break;
             }
@@ -149,7 +165,13 @@ export const executeAction = (
                     player,
                     opponent,
                 )) {
-                    applyBoostToAllMinions(board, action.target, action.boost, isOpponent);
+                    applyBoostToAllMinions(
+                        board,
+                        action.target,
+                        action.boost,
+                        isOpponent,
+                        sourceMinion,
+                    );
                 }
             } else if (action.target.type === "HERO") {
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {

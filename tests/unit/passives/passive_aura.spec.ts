@@ -17,7 +17,6 @@ import {
 const createGame = (data: ReturnType<typeof createGameData>) => ({ data }) as Game;
 
 test.group("passive BOOST auras", () => {
-
     test("aura with excludeSelf does not buff the source minion", ({ assert }) => {
         const auraSource = createMinionCard({
             uuid: "aura-source",

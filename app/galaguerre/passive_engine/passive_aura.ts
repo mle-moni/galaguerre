@@ -8,7 +8,7 @@ import {
     type PassiveBoostSnapshot,
     type SpotOwner,
 } from "#api_types/game.types";
-import { isAuraSourceExcluded, minionMatchesTarget } from "#api_types/target_matching";
+import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
 import { getTargetBoardEntries } from "../action_engine/apply_mass_minion_effects.js";
 import { applyBoostToHero } from "../action_engine/apply_boost.js";
@@ -101,7 +101,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
 
                     const boardMinion = board[spotId];
                     if (!boardMinion) continue;
-                    if (isAuraSourceExcluded(target, sourceMinion, boardMinion)) continue;
+                    if (shouldExcludeSourceMinion(target, sourceMinion, boardMinion)) continue;
                     if (!minionMatchesTarget(boardMinion, target, isOpponent)) continue;
 
                     if (boost.minionPower.hasTaunt) keywords.hasTaunt = true;
@@ -137,10 +137,7 @@ const getBoardOwnerForMinion = (game: Game, minion: MinionState): GamePlayer | n
     return null;
 };
 
-const trackAuraTarget = (
-    sourceMinion: MinionState,
-    appliedTarget: AuraAppliedTarget,
-): void => {
+const trackAuraTarget = (sourceMinion: MinionState, appliedTarget: AuraAppliedTarget): void => {
     sourceMinion.auraAppliedTo ??= [];
     const alreadyTracked = sourceMinion.auraAppliedTo.some(
         (entry) => entry.owner === appliedTarget.owner && entry.spotId === appliedTarget.spotId,
@@ -168,7 +165,7 @@ const applyPassiveBoostAura = (
             for (const spotId of MINION_SPOT_IDS) {
                 const minion = board[spotId];
                 if (!minion) continue;
-                if (isAuraSourceExcluded(target, sourceMinion, minion)) continue;
+                if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
                 if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
                 applyAuraBoostToMinion(minion, passiveBoost);
@@ -238,7 +235,7 @@ export const applyExistingAurasToMinion = (
 
                     const minion = board[targetSpotId];
                     if (!minion) continue;
-                    if (isAuraSourceExcluded(target, sourceMinion, minion)) continue;
+                    if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
                     if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
                     applyAuraBoostToMinion(minion, passiveBoost);

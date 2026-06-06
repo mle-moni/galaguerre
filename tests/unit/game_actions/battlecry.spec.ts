@@ -1177,6 +1177,61 @@ test.group("game:play_card battlecries", (group) => {
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_3", { attack: 3, health: 4 });
     });
 
+    test("mass BOOST with excludeSelf skips the battlecry minion", async ({ assert }) => {
+        const allyCard1 = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 2,
+            attack: 1,
+        });
+        const allyCard2 = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion1 = createMinionState(allyCard1);
+        const allyMinion2 = createMinionState(allyCard2);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            attack: 1,
+            health: 1,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    boost: createBoostSnapshot({ attack: 1, health: 1 }),
+                    target: createMinionTargetSnapshot("PLAYER", { excludeSelf: true }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(
+                        placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion1),
+                        "SPOT_3",
+                        allyMinion2,
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", { attack: 1, health: 1 });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { attack: 2, health: 3 });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_3", { attack: 3, health: 4 });
+    });
+
     test("mass BOOST gives +1/+1 to all minions on both teams", async ({ assert }) => {
         const allyCard = createMinionCard({
             uuid: MINION_IDS.attacker,
@@ -1647,6 +1702,7 @@ test.group("game:play_card battlecries", (group) => {
             targetTeam: "OPPONENT",
             comparison: null,
             tagId: null,
+            excludeSelf: false,
         });
         assert.include(generated.description, "Cri de guerre : Inflige 4 dégâts au héros adverse.");
     });
@@ -1769,6 +1825,7 @@ test.group("game:play_card battlecries", (group) => {
                 health: null,
             },
             tagId: null,
+            excludeSelf: false,
         });
         assert.include(
             generated.description,
