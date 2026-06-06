@@ -93,6 +93,17 @@ export const GALAGUERRE_TARGET_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_TARGET_TYPES_LABEL_OBJ,
 );
 
+export const GALAGUERRE_TARGET_TEAMS = ["PLAYER", "OPPONENT"] as const;
+export type GalaguerreTargetTeam = GenerateTypeFromEnum<typeof GALAGUERRE_TARGET_TEAMS>;
+export const GALAGUERRE_TARGET_TEAMS_OBJ = generateTypeObjectFromEnum(GALAGUERRE_TARGET_TEAMS);
+export const GALAGUERRE_TARGET_TEAMS_LABEL_OBJ: LabelObjectType<GalaguerreTargetTeam> = {
+    PLAYER: "Player",
+    OPPONENT: "Opponent",
+};
+export const GALAGUERRE_TARGET_TEAMS_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_TARGET_TEAMS_LABEL_OBJ,
+);
+
 export const GALAGUERRE_CARD_MODES = ["CREATION", "BETA", "PROD"] as const;
 export type GalaguerreCardMode = GenerateTypeFromEnum<typeof GALAGUERRE_CARD_MODES>;
 export const GALAGUERRE_CARD_MODES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_CARD_MODES);

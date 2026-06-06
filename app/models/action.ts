@@ -1,9 +1,10 @@
-import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
-import type { BelongsTo } from "@adonisjs/lucid/types/relations";
+import { BaseModel, belongsTo, column, hasMany } from "@adonisjs/lucid/orm";
+import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import type { GalaguerreActionType } from "../galaguerre/galaguerre.types.js";
 import Boost from "./boost.js";
 import CardFilter from "./card_filter.js";
+import ToolToTarget from "./tool_to_target.js";
 
 export default class Action extends BaseModel {
     @column({ isPrimary: true })
@@ -47,6 +48,9 @@ export default class Action extends BaseModel {
 
     @belongsTo(() => Boost)
     declare boost: BelongsTo<typeof Boost>;
+
+    @hasMany(() => ToolToTarget)
+    declare toolToTargets: HasMany<typeof ToolToTarget>;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

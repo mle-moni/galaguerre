@@ -7,6 +7,11 @@ export interface PlayerCardBase {
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 
+export interface TargetSnapshot {
+    type: "HERO" | "MINION" | "ALL";
+    targetTeam: "PLAYER" | "OPPONENT";
+}
+
 export interface CardActionSnapshot {
     type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "MINION_POWERS";
     isTargeted: boolean;
@@ -14,6 +19,7 @@ export interface CardActionSnapshot {
     heal: number | null;
     drawCount: number | null;
     enemyDrawCount: number | null;
+    target: TargetSnapshot | null;
 }
 
 export type MinionCard = PlayerCardBase & {

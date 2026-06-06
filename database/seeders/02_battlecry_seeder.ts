@@ -2,6 +2,8 @@ import Action from "#models/action";
 import Card from "#models/card";
 import Minion from "#models/minion";
 import MinionBattlecryAction from "#models/minion_battlecry_action";
+import Target from "#models/target";
+import ToolToTarget from "#models/tool_to_target";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
 
 const nullActionFields = {
@@ -111,6 +113,28 @@ export default class extends BaseSeeder {
                 spellId: null,
                 weaponId: null,
             },
+        ]);
+
+        const [enemyHeroTarget, allyHeroTarget] = await Target.createMany([
+            {
+                internalLabel: "Héros adverse",
+                type: "HERO",
+                targetTeam: "OPPONENT",
+                comparisonId: null,
+                tagId: null,
+            },
+            {
+                internalLabel: "Héros allié",
+                type: "HERO",
+                targetTeam: "PLAYER",
+                comparisonId: null,
+                tagId: null,
+            },
+        ]);
+
+        await ToolToTarget.createMany([
+            { targetId: enemyHeroTarget.id, actionId: damageAction.id, boostId: null },
+            { targetId: allyHeroTarget.id, actionId: healAction.id, boostId: null },
         ]);
 
         await MinionBattlecryAction.createMany([

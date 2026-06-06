@@ -1,6 +1,7 @@
 import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
 import { serializeAction } from "../../galaguerre/action_engine/serialize_action.js";
 import {
+    getBattlecryDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
 } from "../../galaguerre/minion_card_metadata.js";
@@ -24,6 +25,10 @@ export const generatePlayerCards = (deck: Deck) => {
         if (!card.minion) throw new Error("card.minion not found");
 
         const effects = getMinionPowerEffects(card.minion.minionPower);
+        const battlecryActions = (card.minion.battlecryActions ?? []).map((bca) =>
+            serializeAction(bca.action),
+        );
+        const battlecryLines = getBattlecryDescription(battlecryActions);
 
         return {
             ...base,
@@ -35,10 +40,13 @@ export const generatePlayerCards = (deck: Deck) => {
             hasWindfury: card.minion.minionPower?.hasWindfury ?? false,
             isPoisonous: card.minion.minionPower?.isPoisonous ?? false,
             effects,
-            description: getMinionCardDescription(card.minion.attack, card.minion.health, effects),
-            battlecryActions: (card.minion.battlecryActions ?? []).map((bca) =>
-                serializeAction(bca.action),
+            description: getMinionCardDescription(
+                card.minion.attack,
+                card.minion.health,
+                effects,
+                battlecryLines,
             ),
+            battlecryActions,
         };
     });
 

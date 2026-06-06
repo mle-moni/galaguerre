@@ -31,6 +31,13 @@ export const createEmptyBoard = (): BoardState => ({
     SPOT_5: null,
 });
 
+export const createHeroTargetSnapshot = (
+    targetTeam: "PLAYER" | "OPPONENT",
+): CardActionSnapshot["target"] => ({
+    type: "HERO",
+    targetTeam,
+});
+
 export const createCardActionSnapshot = (
     overrides: Partial<CardActionSnapshot> = {},
 ): CardActionSnapshot => ({
@@ -40,6 +47,7 @@ export const createCardActionSnapshot = (
     heal: null,
     drawCount: null,
     enemyDrawCount: null,
+    target: null,
     ...overrides,
 });
 

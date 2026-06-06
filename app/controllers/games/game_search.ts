@@ -6,13 +6,20 @@ import { MATCHMAKING_QUEUE, addMatchmakingQueueItem } from "#services/sockets/ma
 import { WsRooms } from "#services/sockets/ws_rooms";
 import type { HttpContext } from "@adonisjs/core/http";
 import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relations";
+import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
 import { createGame } from "./create_game.js";
 
 const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
     q.preload("minion", (q) =>
         q
             .preload("minionPower")
-            .preload("battlecryActions", (q) => q.preload("action").orderBy("id", "asc")),
+            .preload("battlecryActions", (q) =>
+                q
+                    .preload("action", (aq) =>
+                        aq.preload("toolToTargets", (tq) => tq.preload("target")),
+                    )
+                    .orderBy("id", "asc"),
+            ),
     );
 };
 
@@ -52,7 +59,19 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         deck,
     };
 
-    const game = await createGame({ playerOne, playerTwo });
+    let game;
+    try {
+        game = await createGame({ playerOne, playerTwo });
+    } catch (error) {
+        if (error instanceof DeckValidationError) {
+            return response.badRequest({
+                error: "Invalid cards in deck",
+                details: error.errors,
+            });
+        }
+
+        throw error;
+    }
 
     const rooms = [
         WsRooms.personalSocketRoom(opponent.userId),

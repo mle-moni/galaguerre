@@ -475,6 +475,7 @@ export class TargetSchema extends BaseModel {
         "id",
         "internalLabel",
         "tagId",
+        "targetTeam",
         "type",
         "updatedAt",
     ] as const;
@@ -489,6 +490,8 @@ export class TargetSchema extends BaseModel {
     declare internalLabel: string;
     @column()
     declare tagId: number | null;
+    @column()
+    declare targetTeam: string;
     @column()
     declare type: string;
     @column.dateTime({ autoCreate: true, autoUpdate: true })

@@ -1,6 +1,5 @@
 import type { CardActionSnapshot } from "#api_types/game.types";
-
-const V1_ACTION_TYPES = ["DAMAGE", "HEAL", "DRAW", "ENEMY_DRAW"] as const;
+import { V1_ACTION_TYPES } from "./v1_action_types.js";
 
 export const isV1Action = (action: CardActionSnapshot): boolean => {
     if (action.isTargeted) return false;
@@ -8,9 +7,13 @@ export const isV1Action = (action: CardActionSnapshot): boolean => {
 
     switch (action.type) {
         case "DAMAGE":
-            return action.damage !== null && action.damage > 0;
+            if (action.damage === null || action.damage <= 0) return false;
+            if (action.target !== null) return action.target.type === "HERO";
+            return true;
         case "HEAL":
-            return action.heal !== null && action.heal > 0;
+            if (action.heal === null || action.heal <= 0) return false;
+            if (action.target !== null) return action.target.type === "HERO";
+            return true;
         case "DRAW":
             return action.drawCount !== null && action.drawCount > 0;
         case "ENEMY_DRAW":

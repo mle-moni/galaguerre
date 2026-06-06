@@ -6,6 +6,8 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import Minion from "#models/minion";
 import MinionBattlecryAction from "#models/minion_battlecry_action";
+import Target from "#models/target";
+import ToolToTarget from "#models/tool_to_target";
 import User from "#models/user";
 import { generatePlayerCards } from "#controllers/games/generate_player_cards";
 import {
@@ -17,6 +19,7 @@ import {
     CARD_IDS,
     createCardActionSnapshot,
     createGameData,
+    createHeroTargetSnapshot,
     createMinionCard,
 } from "#tests/helpers/game/fixtures";
 import { assertPlayCardScenario, runPlayCard } from "#tests/helpers/game/run_play_card";
@@ -60,7 +63,13 @@ test.group("game:play_card battlecries", (group) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 2,
-            battlecryActions: [createCardActionSnapshot({ type: "DAMAGE", damage: 3 })],
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 3,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
         });
 
         const result = await runPlayCard({
@@ -85,7 +94,13 @@ test.group("game:play_card battlecries", (group) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 2,
-            battlecryActions: [createCardActionSnapshot({ type: "HEAL", heal: 4 })],
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "HEAL",
+                    heal: 4,
+                    target: createHeroTargetSnapshot("PLAYER"),
+                }),
+            ],
         });
 
         const result = await runPlayCard({
@@ -103,6 +118,38 @@ test.group("game:play_card battlecries", (group) => {
 
         assertPlayCardScenario(assert, result, { error: null });
         assertPlayerHealth(assert, result.game, "playerOne", 14);
+    });
+
+    test("DAMAGE battlecry resolves target team from snapshot", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 3,
+                    target: createHeroTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, health: 15, hand: [handCard] },
+                playerTwo: { health: 15 },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertPlayerHealth(assert, result.game, "playerOne", 12);
+        assertPlayerHealth(assert, result.game, "playerTwo", 15);
     });
 
     test("DRAW battlecry draws cards from deck", async ({ assert }) => {
@@ -368,6 +415,20 @@ test.group("game:play_card battlecries", (group) => {
             enemyDrawCardFilterId: null,
         });
 
+        const enemyHeroTarget = await Target.create({
+            internalLabel: `bc-enemy-hero-${unique}`,
+            type: "HERO",
+            targetTeam: "OPPONENT",
+            comparisonId: null,
+            tagId: null,
+        });
+
+        await ToolToTarget.create({
+            targetId: enemyHeroTarget.id,
+            actionId: damageAction.id,
+            boostId: null,
+        });
+
         await MinionBattlecryAction.create({
             minionId: minion.id,
             actionId: damageAction.id,
@@ -390,7 +451,13 @@ test.group("game:play_card battlecries", (group) => {
             query.preload("minion", (q) =>
                 q
                     .preload("minionPower")
-                    .preload("battlecryActions", (q) => q.preload("action").orderBy("id", "asc")),
+                    .preload("battlecryActions", (q) =>
+                        q
+                            .preload("action", (aq) =>
+                                aq.preload("toolToTargets", (tq) => tq.preload("target")),
+                            )
+                            .orderBy("id", "asc"),
+                    ),
             ),
         );
 
@@ -405,5 +472,10 @@ test.group("game:play_card battlecries", (group) => {
         assert.equal(generated.battlecryActions[0]!.type, "DAMAGE");
         assert.equal(generated.battlecryActions[0]!.damage, 4);
         assert.equal(generated.battlecryActions[0]!.isTargeted, false);
+        assert.deepEqual(generated.battlecryActions[0]!.target, {
+            type: "HERO",
+            targetTeam: "OPPONENT",
+        });
+        assert.include(generated.description, "Cri de guerre : Inflige 4 dégâts au héros adverse.");
     });
 });

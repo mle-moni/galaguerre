@@ -1,4 +1,5 @@
 import type { GameData } from "#api_types/game.types";
+import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
 import type Deck from "#models/deck";
 import Game from "#models/game";
 import { generatePlayerCards } from "./generate_player_cards.js";
@@ -16,6 +17,9 @@ interface CreateGameOptions {
 }
 
 export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) => {
+    assertDeckValid(playerOne.deck);
+    assertDeckValid(playerTwo.deck);
+
     const gameData: GameData = await getDefaultGameData({ playerOne, playerTwo });
 
     const game = await Game.create({

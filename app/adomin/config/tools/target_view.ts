@@ -1,6 +1,9 @@
 import { createModelViewConfig } from "#adomin/create_model_view_config";
 import Target from "#models/target";
-import { GALAGUERRE_TARGET_TYPES_OPTIONS } from "../../../galaguerre/galaguerre.types.js";
+import {
+    GALAGUERRE_TARGET_TEAMS_OPTIONS,
+    GALAGUERRE_TARGET_TYPES_OPTIONS,
+} from "../../../galaguerre/galaguerre.types.js";
 
 export const TARGET_VIEW = createModelViewConfig(() => Target, {
     columns: {
@@ -8,6 +11,11 @@ export const TARGET_VIEW = createModelViewConfig(() => Target, {
             type: "enum",
             options: GALAGUERRE_TARGET_TYPES_OPTIONS,
             label: "Type",
+        },
+        targetTeam: {
+            type: "enum",
+            options: GALAGUERRE_TARGET_TEAMS_OPTIONS,
+            label: "Équipe",
         },
         comparison: {
             type: "belongsToRelation",
