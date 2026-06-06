@@ -337,8 +337,6 @@ test.group("game:play_card", (group) => {
                         weaponId: oldWeapon.cardId,
                         damage: oldWeapon.damage,
                         durability: oldWeapon.durability,
-                        attacksThisRound: 0,
-                        lastActionAtRound: 0,
                         originalCard: oldWeapon,
                     },
                 },

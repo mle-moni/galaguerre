@@ -69,6 +69,8 @@ export const getDefaultGameData = async ({
             mana: 0,
             maxFatigueDamageTaken: 0,
             weaponState: null,
+            heroAttacksThisRound: 0,
+            heroLastAttackAtRound: 0,
         },
         playerTwo: {
             userId: playerTwo.userId,
@@ -87,6 +89,8 @@ export const getDefaultGameData = async ({
             mana: 0,
             maxFatigueDamageTaken: 0,
             weaponState: null,
+            heroAttacksThisRound: 0,
+            heroLastAttackAtRound: 0,
         },
         gameRounds: [],
     };

@@ -153,6 +153,8 @@ export const createGamePlayer = (
     hand: [],
     board: createEmptyBoard(),
     weaponState: null,
+    heroAttacksThisRound: 0,
+    heroLastAttackAtRound: 0,
     health: DEFAULT_HERO_HEALTH,
     spellPower: 0,
     mana: 10,
@@ -238,8 +240,6 @@ export const createWeaponState = (
     weaponId: card.cardId,
     damage: card.damage,
     durability: card.durability,
-    attacksThisRound: 0,
-    lastActionAtRound: 0,
     originalCard: { ...card },
     ...overrides,
 });

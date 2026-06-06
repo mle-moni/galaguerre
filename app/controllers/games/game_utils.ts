@@ -192,25 +192,31 @@ export const boardHasTaunt = (board: BoardState): boolean => {
     });
 };
 
-export const getWeaponAttacksThisRound = (
-    weaponState: WeaponState,
-    currentRound: number,
-): number => {
-    if (weaponState.lastActionAtRound !== currentRound) return 0;
-    return weaponState.attacksThisRound ?? 1;
+export const getHeroAttacksThisRound = (player: GamePlayer, currentRound: number): number => {
+    if (player.heroLastAttackAtRound !== currentRound) return 0;
+    return player.heroAttacksThisRound ?? 1;
 };
 
-export const recordWeaponAttack = (weaponState: WeaponState, currentRound: number): void => {
-    if (weaponState.lastActionAtRound !== currentRound) {
-        weaponState.attacksThisRound = 1;
+export const recordHeroAttack = (player: GamePlayer, currentRound: number): void => {
+    if (player.heroLastAttackAtRound !== currentRound) {
+        player.heroAttacksThisRound = 1;
     } else {
-        weaponState.attacksThisRound = (weaponState.attacksThisRound ?? 1) + 1;
+        player.heroAttacksThisRound = (player.heroAttacksThisRound ?? 1) + 1;
     }
-    weaponState.lastActionAtRound = currentRound;
+    player.heroLastAttackAtRound = currentRound;
 };
 
-export const canWeaponAttack = (weaponState: WeaponState, currentRound: number): boolean => {
-    return getWeaponAttacksThisRound(weaponState, currentRound) < 1;
+export const canHeroAttack = (player: GamePlayer, currentRound: number): boolean => {
+    return getHeroAttacksThisRound(player, currentRound) < 1;
+};
+
+export const canWeaponAttack = (
+    player: GamePlayer,
+    weaponState: WeaponState | null,
+    currentRound: number,
+): boolean => {
+    if (!weaponState) return false;
+    return canHeroAttack(player, currentRound);
 };
 
 export const ensureValidTauntTarget = (

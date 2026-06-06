@@ -2,6 +2,11 @@ import type { MinionCard } from "#api_types/game.types";
 import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
+import {
+    getMinionAttackStatusLabel,
+    getMinionCardMaxAttacks,
+    type MinionAttackStatus,
+} from "~/helpers/minion_combat";
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
 
 interface MinionCardFaceProps {
@@ -10,6 +15,8 @@ interface MinionCardFaceProps {
     health: number;
     className?: string;
     style?: CSSProperties;
+    attackStatus?: MinionAttackStatus;
+    remainingAttacks?: number;
     draggable?: boolean;
     onDragStart?: () => void;
     onDragEnd?: () => void;
@@ -22,20 +29,42 @@ export const MinionCardFace = ({
     health,
     className,
     style,
+    attackStatus,
+    remainingAttacks,
     draggable,
     onDragStart,
     onDragEnd,
     wrapper = (content) => content,
 }: MinionCardFaceProps) => {
+    const maxAttacks = getMinionCardMaxAttacks(card);
+    const showWindfuryBadge =
+        attackStatus !== undefined &&
+        attackStatus !== "idle" &&
+        card.hasWindfury &&
+        remainingAttacks !== undefined;
+    const statusLabel = attackStatus
+        ? getMinionAttackStatusLabel(attackStatus, maxAttacks)
+        : undefined;
+
     const content = (
         <div
             style={style}
-            className={clsx("relative w-[120px] h-[150px] rounded bg-[#1e3a5f]", className)}
+            className={clsx(
+                "minion-card-face relative w-[120px] h-[150px] rounded bg-[#1e3a5f]",
+                attackStatus && `minion-card-face--${attackStatus}`,
+                className,
+            )}
+            title={statusLabel}
             draggable={draggable}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
         >
             <CardEffectSymbols card={card} />
+            {attackStatus === "sleeping" && (
+                <span className="minion-card-face__sleep-icon" aria-hidden>
+                    💤
+                </span>
+            )}
             <div className="relative">
                 <div className="cost">{card.cost}</div>
                 <Image
@@ -49,7 +78,14 @@ export const MinionCardFace = ({
             <div className="flex flex-col h-[75px] justify-around">
                 <p className="text-center text-white m-0 text-xs px-1">{card.label}</p>
                 <div className="flex justify-between mx-1">
-                    <div className="attack">{attack}</div>
+                    <div className="relative">
+                        <div className="attack">{attack}</div>
+                        {showWindfuryBadge && (
+                            <span className="minion-card-face__attacks-remaining">
+                                {remainingAttacks}/{maxAttacks}
+                            </span>
+                        )}
+                    </div>
                     <div className="health">{health}</div>
                 </div>
             </div>

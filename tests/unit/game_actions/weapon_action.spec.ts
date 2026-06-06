@@ -11,7 +11,8 @@ import {
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertWeaponActionScenario, runWeaponAction } from "#tests/helpers/game/run_weapon_action";
+import { assertWeaponActionScenario, runWeaponAction, runWeaponActionOnGame } from "#tests/helpers/game/run_weapon_action";
+import { runPlayCardOnGame } from "#tests/helpers/game/run_play_card";
 
 test.group("game:weapon_action", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
@@ -36,7 +37,8 @@ test.group("game:weapon_action", (group) => {
         assertWeaponActionScenario(assert, result, { error: null });
         assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
         assert.equal(result.game.data.playerOne.weaponState!.durability, 1);
-        assert.equal(result.game.data.playerOne.weaponState!.attacksThisRound, 1);
+        assert.equal(result.game.data.playerOne.heroAttacksThisRound, 1);
+        assert.equal(result.game.data.playerOne.heroLastAttackAtRound, 1);
     });
 
     test("weapon attacks minion and takes retaliation damage", async ({ assert }) => {
@@ -93,20 +95,21 @@ test.group("game:weapon_action", (group) => {
 
         assertWeaponActionScenario(assert, result, { error: null });
         assert.isNull(result.game.data.playerOne.weaponState);
+        assert.equal(result.game.data.playerOne.heroAttacksThisRound, 1);
+        assert.equal(result.game.data.playerOne.heroLastAttackAtRound, 1);
     });
 
     test("rejects second weapon attack in the same turn", async ({ assert }) => {
         const weaponCard = createWeaponCard({ damage: 1, durability: 3 });
-        const weaponState = createWeaponState(weaponCard, {
-            attacksThisRound: 1,
-            lastActionAtRound: 1,
-        });
+        const weaponState = createWeaponState(weaponCard);
 
         const result = await runWeaponAction({
             data: createGameData({
                 currentRound: 1,
                 playerOne: {
                     weaponState,
+                    heroAttacksThisRound: 1,
+                    heroLastAttackAtRound: 1,
                 },
             }),
             actor: "playerOne",
@@ -120,6 +123,56 @@ test.group("game:weapon_action", (group) => {
         });
 
         assertWeaponActionScenario(assert, result, {
+            error: "Vous avez déjà attaqué avec votre arme ce tour",
+        });
+    });
+
+    test("rejects weapon attack after breaking weapon and re-equipping in the same turn", async ({
+        assert,
+    }) => {
+        const breakingWeapon = createWeaponCard({ damage: 5, durability: 1 });
+        const newWeapon = createWeaponCard({
+            uuid: "card-new-weapon",
+            cost: 3,
+            damage: 3,
+            durability: 2,
+        });
+
+        const firstAttack = await runWeaponAction({
+            data: createGameData({
+                currentRound: 1,
+                playerOne: {
+                    mana: 10,
+                    hand: [newWeapon],
+                    weaponState: createWeaponState(breakingWeapon),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                spotId: null,
+                owner: "OPPONENT",
+            },
+            expect: { error: null },
+        });
+
+        assertWeaponActionScenario(assert, firstAttack, { error: null });
+        assert.isNull(firstAttack.game.data.playerOne.weaponState);
+        assert.equal(firstAttack.game.data.playerOne.heroAttacksThisRound, 1);
+
+        await runPlayCardOnGame(firstAttack.game, firstAttack.actorUserId, {
+            cardId: newWeapon.uuid,
+            spotId: null,
+            owner: "PLAYER",
+        });
+
+        assert.isNotNull(firstAttack.game.data.playerOne.weaponState);
+
+        const secondAttack = await runWeaponActionOnGame(firstAttack.game, firstAttack.actorUserId, {
+            spotId: null,
+            owner: "OPPONENT",
+        });
+
+        assertWeaponActionScenario(assert, secondAttack, {
             error: "Vous avez déjà attaqué avec votre arme ce tour",
         });
     });

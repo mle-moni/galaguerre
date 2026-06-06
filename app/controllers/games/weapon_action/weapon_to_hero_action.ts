@@ -1,5 +1,5 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { ensureValidTauntTarget, recordWeaponAttack } from "../game_utils.js";
+import { ensureValidTauntTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import type { WeaponActionOptions } from "./weapon_to_minion_action.js";
@@ -28,7 +28,7 @@ export const weaponToHeroAction = async ({
     if (!isValidTarget) return;
 
     opponent.health -= weaponState.damage;
-    recordWeaponAttack(weaponState, game.data.currentRound);
+    recordHeroAttack(player, game.data.currentRound);
 
     const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
     if (durabilityGameEnded || player.health <= 0 || opponent.health <= 0) {

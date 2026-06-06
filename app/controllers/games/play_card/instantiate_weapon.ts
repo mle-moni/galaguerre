@@ -6,8 +6,6 @@ export const instantiateWeapon = (card: WeaponCard): WeaponState => {
         weaponId: card.cardId,
         damage: card.damage,
         durability: card.durability,
-        attacksThisRound: 0,
-        lastActionAtRound: 0,
         originalCard: {
             ...card,
         },

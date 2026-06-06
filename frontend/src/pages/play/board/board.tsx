@@ -70,7 +70,7 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
                 borderColor: store.getMinionSpotBackgroundColor(spotId, spotOwner),
             }}
         >
-            {minionToRender && <RenderMinion state={minionToRender} />}
+            {minionToRender && <RenderMinion state={minionToRender} spotOwner={spotOwner} />}
         </div>
     );
 });

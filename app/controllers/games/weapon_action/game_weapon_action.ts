@@ -4,7 +4,7 @@ import {
     canWeaponAttack,
     ensureIsMyTurn,
     getGameActionInfos,
-    getWeaponAttacksThisRound,
+    getHeroAttacksThisRound,
     whichPlayerAmI,
 } from "../game_utils.js";
 import { weaponToHeroAction } from "./weapon_to_hero_action.js";
@@ -31,9 +31,9 @@ export const gameWeaponAction = async (
 
     const currentRound = currentGame.data.currentRound;
 
-    if (!canWeaponAttack(weaponState, currentRound)) {
+    if (!canWeaponAttack(player, weaponState, currentRound)) {
         const error =
-            getWeaponAttacksThisRound(weaponState, currentRound) >= 1
+            getHeroAttacksThisRound(player, currentRound) >= 1
                 ? "Vous avez déjà attaqué avec votre arme ce tour"
                 : "Votre arme n'est pas prête à attaquer";
 

@@ -2,7 +2,7 @@ import type { GamePlayer, MinionSpotId, SpotOwner, WeaponState } from "#api_type
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { killMinion } from "../../../galaguerre/action_engine/kill_minion.js";
-import { ensureValidTauntTarget, recordWeaponAttack } from "../game_utils.js";
+import { ensureValidTauntTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import { reduceWeaponDurability } from "./reduce_weapon_durability.js";
@@ -59,7 +59,7 @@ export const weaponToMinionAction = async ({
 
     targetMinion.health -= weaponState.damage;
     player.health -= targetMinion.attack;
-    recordWeaponAttack(weaponState, game.data.currentRound);
+    recordHeroAttack(player, game.data.currentRound);
 
     if (targetMinion.health <= 0) {
         const { gameEnded } = killMinion(game, opponent, spotId);

@@ -1,13 +1,15 @@
-import type { WeaponState } from "#api_types/game.types";
+import type { GamePlayer, WeaponState } from "#api_types/game.types";
 
-export const getWeaponAttacksThisRound = (
-    weaponState: WeaponState,
-    currentRound: number,
-): number => {
-    if (weaponState.lastActionAtRound !== currentRound) return 0;
-    return weaponState.attacksThisRound ?? 1;
+export const getHeroAttacksThisRound = (player: GamePlayer, currentRound: number): number => {
+    if (player.heroLastAttackAtRound !== currentRound) return 0;
+    return player.heroAttacksThisRound ?? 1;
 };
 
-export const canWeaponAttack = (weaponState: WeaponState, currentRound: number): boolean => {
-    return getWeaponAttacksThisRound(weaponState, currentRound) < 1;
+export const canWeaponAttack = (
+    player: GamePlayer,
+    weaponState: WeaponState | null,
+    currentRound: number,
+): boolean => {
+    if (!weaponState) return false;
+    return getHeroAttacksThisRound(player, currentRound) < 1;
 };

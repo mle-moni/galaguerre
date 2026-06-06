@@ -123,8 +123,6 @@ export interface WeaponState {
     weaponId: number;
     damage: number;
     durability: number;
-    attacksThisRound: number;
-    lastActionAtRound: number;
     originalCard: WeaponCard;
 }
 
@@ -168,6 +166,8 @@ export interface GamePlayer {
     hand: PlayerCard[];
     board: BoardState;
     weaponState: WeaponState | null;
+    heroAttacksThisRound: number;
+    heroLastAttackAtRound: number;
     health: number;
     spellPower: number;
     mana: number;

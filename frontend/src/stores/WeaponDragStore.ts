@@ -55,7 +55,8 @@ export class WeaponDragStore {
 
         const weaponState = this.gameStore.me.weaponState;
         if (!weaponState) return false;
-        if (!canWeaponAttack(weaponState, this.gameStore.game.data.currentRound)) return false;
+        if (!canWeaponAttack(this.gameStore.me, weaponState, this.gameStore.game.data.currentRound))
+            return false;
 
         if (spotOwner === "PLAYER") return false;
 
@@ -92,7 +93,7 @@ export class WeaponDragStore {
 
         const weaponState = this.gameStore.me.weaponState;
         if (!weaponState) return transparent;
-        if (!canWeaponAttack(weaponState, this.gameStore.game.data.currentRound))
+        if (!canWeaponAttack(this.gameStore.me, weaponState, this.gameStore.game.data.currentRound))
             return transparent;
 
         if (boardHasTaunt(this.gameStore.opponent.board)) return "red";
@@ -106,6 +107,6 @@ export class WeaponDragStore {
         const weaponState = this.gameStore.me.weaponState;
         if (!weaponState) return false;
 
-        return canWeaponAttack(weaponState, this.gameStore.game.data.currentRound);
+        return canWeaponAttack(this.gameStore.me, weaponState, this.gameStore.game.data.currentRound);
     }
 }

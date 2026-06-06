@@ -4,6 +4,7 @@ import {
     type CardActionSnapshot,
     type GamePlayer,
 } from "#api_types/game.types";
+import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
 import { drawCards } from "../draw_cards.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
@@ -26,10 +27,6 @@ const getMinionOwner = (
     opponent: GamePlayer,
 ): GamePlayer => {
     return board === player.board ? player : opponent;
-};
-
-const getEffectiveDamage = (action: CardActionSnapshot, damageBonus: number): number => {
-    return (action.damage ?? 0) + damageBonus;
 };
 
 export const executeAction = (
