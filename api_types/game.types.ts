@@ -38,6 +38,8 @@ export interface TargetSnapshot {
     comparison: ComparisonSnapshot | null;
     tagId: number | null;
     excludeSelf: boolean;
+    maxTargets: number | null;
+    targetSelectionMode: "RANDOM" | null;
 }
 
 export interface CardFilterSnapshot {

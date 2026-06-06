@@ -9,6 +9,7 @@ import type Boost from "#models/boost";
 import type Target from "#models/target";
 import { validateComparison } from "./validate_comparison.js";
 import { validateTargetExcludeSelf } from "./validate_exclude_self.js";
+import { validateTargetSelection } from "./validate_target_selection.js";
 
 export type ActionValidationError = {
     actionId: number;
@@ -112,6 +113,15 @@ const validateTargetFilters = (action: Action, target: Target): ActionValidation
             actionId: action.id,
             internalLabel: action.internalLabel,
             reason: excludeSelfReason,
+        };
+    }
+
+    const selectionReason = validateTargetSelection(target, action.isTargeted);
+    if (selectionReason) {
+        return {
+            actionId: action.id,
+            internalLabel: action.internalLabel,
+            reason: selectionReason,
         };
     }
 

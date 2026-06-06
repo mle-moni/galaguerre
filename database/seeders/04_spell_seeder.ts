@@ -17,61 +17,83 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
-        const [heroDamageAction, targetedDamageAction, drawAction, massMinionDamageAction] =
-            await Action.createMany([
-                {
-                    internalLabel: "Sort - 3 dégâts au héros adverse",
-                    type: "DAMAGE",
-                    isTargeted: false,
-                    ...nullActionFields,
-                    damage: 3,
-                },
-                {
-                    internalLabel: "Sort - 4 dégâts ciblés à un serviteur adverse",
-                    type: "DAMAGE",
-                    isTargeted: true,
-                    ...nullActionFields,
-                    damage: 4,
-                },
-                {
-                    internalLabel: "Sort - Pioche 1 carte",
-                    type: "DRAW",
-                    isTargeted: false,
-                    ...nullActionFields,
-                    drawCount: 1,
-                },
-                {
-                    internalLabel: "Sort - 1 dégât à tous les serviteurs adverses",
-                    type: "DAMAGE",
-                    isTargeted: false,
-                    ...nullActionFields,
-                    damage: 1,
-                },
-            ]);
-
-        const [enemyHeroTarget, enemyMinionTarget, enemyMinionsTarget] = await Target.createMany([
+        const [
+            heroDamageAction,
+            targetedDamageAction,
+            drawAction,
+            massMinionDamageAction,
+            randomMinionDamageAction,
+        ] = await Action.createMany([
             {
-                internalLabel: "Héros adverse",
-                type: "HERO",
-                targetTeam: "OPPONENT",
-                comparisonId: null,
-                tagId: null,
+                internalLabel: "Sort - 3 dégâts au héros adverse",
+                type: "DAMAGE",
+                isTargeted: false,
+                ...nullActionFields,
+                damage: 3,
             },
             {
-                internalLabel: "Serviteur adverse (ciblé)",
-                type: "MINION",
-                targetTeam: "OPPONENT",
-                comparisonId: null,
-                tagId: null,
+                internalLabel: "Sort - 4 dégâts ciblés à un serviteur adverse",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 4,
             },
             {
-                internalLabel: "Tous les serviteurs adverses",
-                type: "MINION",
-                targetTeam: "OPPONENT",
-                comparisonId: null,
-                tagId: null,
+                internalLabel: "Sort - Pioche 1 carte",
+                type: "DRAW",
+                isTargeted: false,
+                ...nullActionFields,
+                drawCount: 1,
+            },
+            {
+                internalLabel: "Sort - 1 dégât à tous les serviteurs adverses",
+                type: "DAMAGE",
+                isTargeted: false,
+                ...nullActionFields,
+                damage: 1,
+            },
+            {
+                internalLabel: "Sort - 1 dégât à un serviteur adverse aléatoire",
+                type: "DAMAGE",
+                isTargeted: false,
+                ...nullActionFields,
+                damage: 1,
             },
         ]);
+
+        const [enemyHeroTarget, enemyMinionTarget, enemyMinionsTarget, randomEnemyMinionTarget] =
+            await Target.createMany([
+                {
+                    internalLabel: "Héros adverse",
+                    type: "HERO",
+                    targetTeam: "OPPONENT",
+                    comparisonId: null,
+                    tagId: null,
+                },
+                {
+                    internalLabel: "Serviteur adverse (ciblé)",
+                    type: "MINION",
+                    targetTeam: "OPPONENT",
+                    comparisonId: null,
+                    tagId: null,
+                },
+                {
+                    internalLabel: "Tous les serviteurs adverses",
+                    type: "MINION",
+                    targetTeam: "OPPONENT",
+                    comparisonId: null,
+                    tagId: null,
+                },
+                {
+                    internalLabel: "Un serviteur adverse aléatoire",
+                    type: "MINION",
+                    targetTeam: "OPPONENT",
+                    comparisonId: null,
+                    tagId: null,
+                    maxTargets: 1,
+                    targetSelectionMode: "RANDOM",
+                },
+            ]);
 
         await ToolToTarget.createMany([
             { targetId: enemyHeroTarget.id, actionId: heroDamageAction.id, boostId: null },
@@ -81,27 +103,41 @@ export default class extends BaseSeeder {
                 actionId: massMinionDamageAction.id,
                 boostId: null,
             },
+            {
+                targetId: randomEnemyMinionTarget.id,
+                actionId: randomMinionDamageAction.id,
+                boostId: null,
+            },
         ]);
 
-        const [heroDamageSpell, targetedDamageSpell, drawSpell, massMinionDamageSpell] =
-            await Spell.createMany([
-                {
-                    internalLabel: "Sort - Dégâts au héros",
-                    actionId: heroDamageAction.id,
-                },
-                {
-                    internalLabel: "Sort - Dégâts ciblés",
-                    actionId: targetedDamageAction.id,
-                },
-                {
-                    internalLabel: "Sort - Pioche",
-                    actionId: drawAction.id,
-                },
-                {
-                    internalLabel: "Sort - Dégâts de zone",
-                    actionId: massMinionDamageAction.id,
-                },
-            ]);
+        const [
+            heroDamageSpell,
+            targetedDamageSpell,
+            drawSpell,
+            massMinionDamageSpell,
+            randomMinionDamageSpell,
+        ] = await Spell.createMany([
+            {
+                internalLabel: "Sort - Dégâts au héros",
+                actionId: heroDamageAction.id,
+            },
+            {
+                internalLabel: "Sort - Dégâts ciblés",
+                actionId: targetedDamageAction.id,
+            },
+            {
+                internalLabel: "Sort - Pioche",
+                actionId: drawAction.id,
+            },
+            {
+                internalLabel: "Sort - Dégâts de zone",
+                actionId: massMinionDamageAction.id,
+            },
+            {
+                internalLabel: "Sort - Dégâts aléatoires",
+                actionId: randomMinionDamageAction.id,
+            },
+        ]);
 
         await Card.createMany([
             {
@@ -142,6 +178,16 @@ export default class extends BaseSeeder {
                 cardMode: "BETA",
                 minionId: null,
                 spellId: massMinionDamageSpell.id,
+                weaponId: null,
+            },
+            {
+                label: "Spell 1 Random Minion Damage",
+                imageUrl: "https://picsum.photos/seed/spell_random_damage/200/300",
+                cost: 1,
+                type: "SPELL",
+                cardMode: "BETA",
+                minionId: null,
+                spellId: randomMinionDamageSpell.id,
                 weaponId: null,
             },
         ]);

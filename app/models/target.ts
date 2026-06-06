@@ -1,7 +1,11 @@
 import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
-import type { GalaguerreTargetTeam, GalaguerreTargetType } from "../galaguerre/galaguerre.types.js";
+import type {
+    GalaguerreTargetSelectionMode,
+    GalaguerreTargetTeam,
+    GalaguerreTargetType,
+} from "../galaguerre/galaguerre.types.js";
 import Comparison from "./comparison.js";
 import Tag from "./tag.js";
 
@@ -36,6 +40,12 @@ export default class Target extends BaseModel {
      */
     @column()
     declare excludeSelf: boolean;
+
+    @column()
+    declare maxTargets: number | null;
+
+    @column()
+    declare targetSelectionMode: GalaguerreTargetSelectionMode | null;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

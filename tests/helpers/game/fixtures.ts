@@ -59,6 +59,8 @@ export const createHeroTargetSnapshot = (
     comparison: null,
     tagId: null,
     excludeSelf: false,
+    maxTargets: null,
+    targetSelectionMode: null,
     ...overrides,
 });
 
@@ -71,6 +73,8 @@ export const createMinionTargetSnapshot = (
     comparison: null,
     tagId: null,
     excludeSelf: false,
+    maxTargets: null,
+    targetSelectionMode: null,
     ...overrides,
 });
 
@@ -83,6 +87,8 @@ export const createAllTargetSnapshot = (
     comparison: null,
     tagId: null,
     excludeSelf: false,
+    maxTargets: null,
+    targetSelectionMode: null,
     ...overrides,
 });
 

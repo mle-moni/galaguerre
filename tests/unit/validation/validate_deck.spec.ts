@@ -104,6 +104,8 @@ const createMinionCardInDeck = async ({
     target?: {
         type: "HERO" | "MINION" | "ALL";
         targetTeam: "PLAYER" | "OPPONENT" | "ALL";
+        maxTargets?: number | null;
+        targetSelectionMode?: "RANDOM" | null;
     };
 }) => {
     const minion = await Minion.create({
@@ -145,6 +147,8 @@ const createMinionCardInDeck = async ({
                 targetTeam: target.targetTeam,
                 comparisonId: null,
                 tagId: null,
+                maxTargets: target.maxTargets ?? null,
+                targetSelectionMode: target.targetSelectionMode ?? null,
             });
 
             await ToolToTarget.create({
@@ -469,6 +473,122 @@ test.group("validation:validateDeck", (group) => {
 
         assert.isTrue(result.valid);
         assert.equal(result.errors.length, 0);
+    });
+
+    test("accepts valid random limited DAMAGE action", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-random-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Valid random deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `valid-random-${unique}`,
+            action: {
+                internalLabel: `valid-random-action-${unique}`,
+                type: "DAMAGE",
+                isTargeted: false,
+                damage: 1,
+            },
+            target: {
+                type: "MINION",
+                targetTeam: "OPPONENT",
+                maxTargets: 1,
+                targetSelectionMode: "RANDOM",
+            },
+        });
+
+        await loadDeckRelations(deck);
+        const result = validateDeck(deck);
+
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
+    });
+
+    test("rejects isTargeted action with random target selection", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-targeted-random-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Invalid targeted random deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `invalid-targeted-random-${unique}`,
+            action: {
+                internalLabel: `invalid-targeted-random-action-${unique}`,
+                type: "DAMAGE",
+                isTargeted: true,
+                damage: 2,
+            },
+            target: {
+                type: "MINION",
+                targetTeam: "OPPONENT",
+                maxTargets: 1,
+                targetSelectionMode: "RANDOM",
+            },
+        });
+
+        await loadDeckRelations(deck);
+        const result = validateDeck(deck);
+
+        assert.isFalse(result.valid);
+        assert.equal(result.errors.length, 1);
+        assert.include(result.errors[0]!.reason, "incompatible with isTargeted");
+    });
+
+    test("rejects maxTargets without targetSelectionMode", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-max-no-mode-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Invalid max no mode deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `invalid-max-no-mode-${unique}`,
+            action: {
+                internalLabel: `invalid-max-no-mode-action-${unique}`,
+                type: "DAMAGE",
+                isTargeted: false,
+                damage: 1,
+            },
+            target: {
+                type: "MINION",
+                targetTeam: "OPPONENT",
+                maxTargets: 1,
+                targetSelectionMode: null,
+            },
+        });
+
+        await loadDeckRelations(deck);
+        const result = validateDeck(deck);
+
+        assert.isFalse(result.valid);
+        assert.equal(result.errors.length, 1);
+        assert.include(result.errors[0]!.reason, "maxTargets and targetSelectionMode");
     });
 
     test("rejects isTargeted DRAW action", async ({ assert }) => {

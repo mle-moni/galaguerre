@@ -1,7 +1,7 @@
 import { test } from "@japa/runner";
 import { formatActionDescription } from "#api_types/format_action_description";
 import { getDisplayedDamage, getEffectiveDamage } from "#api_types/get_effective_damage";
-import { createCardActionSnapshot } from "#tests/helpers/game/fixtures";
+import { createCardActionSnapshot, createMinionTargetSnapshot } from "#tests/helpers/game/fixtures";
 
 test.group("get_effective_damage", () => {
     test("returns base damage when spell power is zero", ({ assert }) => {
@@ -49,6 +49,23 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Effet"),
             "Effet : Inflige 3 dégâts au héros adverse.",
+        );
+    });
+
+    test("formats random limited minion damage", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: false,
+            damage: 1,
+            target: createMinionTargetSnapshot("OPPONENT", {
+                maxTargets: 1,
+                targetSelectionMode: "RANDOM",
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Inflige 1 dégâts à un serviteur adverse aléatoire.",
         );
     });
 });

@@ -11,6 +11,16 @@ import { getBoardMinionStats, matchesComparison } from "./comparison_matching.js
 
 export { matchesComparison } from "./comparison_matching.js";
 
+export const hasRandomLimitedTarget = (target: TargetSnapshot | null | undefined): boolean => {
+    return (
+        target !== null &&
+        target !== undefined &&
+        target.maxTargets !== null &&
+        target.maxTargets >= 1 &&
+        target.targetSelectionMode === "RANDOM"
+    );
+};
+
 export const heroMatchesTarget = (target: TargetSnapshot, isOpponentHero: boolean): boolean => {
     if (target.type !== "HERO" && target.type !== "ALL") return false;
 

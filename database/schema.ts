@@ -474,9 +474,12 @@ export class TargetSchema extends BaseModel {
     static $columns = [
         "comparisonId",
         "createdAt",
+        "excludeSelf",
         "id",
         "internalLabel",
+        "maxTargets",
         "tagId",
+        "targetSelectionMode",
         "targetTeam",
         "type",
         "updatedAt",
@@ -486,12 +489,18 @@ export class TargetSchema extends BaseModel {
     declare comparisonId: number | null;
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime | null;
+    @column()
+    declare excludeSelf: boolean;
     @column({ isPrimary: true })
     declare id: number;
     @column()
     declare internalLabel: string;
     @column()
+    declare maxTargets: number | null;
+    @column()
     declare tagId: number | null;
+    @column()
+    declare targetSelectionMode: string | null;
     @column()
     declare targetTeam: string;
     @column()

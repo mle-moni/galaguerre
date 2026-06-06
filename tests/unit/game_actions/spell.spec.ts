@@ -252,4 +252,92 @@ test.group("game:play_spell", (group) => {
         assert.equal(result.game.data.playerOne.board.SPOT_1!.health, 5);
         assert.equal(result.game.data.playerTwo.board.SPOT_1!.health, 3);
     });
+
+    test("random damage spell hits one enemy minion", async ({ assert }) => {
+        const enemyMinion1 = createMinionCard({ uuid: "enemy-minion-1", health: 5 });
+        const enemyMinion2 = createMinionCard({ uuid: "enemy-minion-2", health: 5 });
+        const spell = createSpellCard({
+            cost: 2,
+            action: createCardActionSnapshot({
+                type: "DAMAGE",
+                isTargeted: false,
+                damage: 1,
+                target: createMinionTargetSnapshot("OPPONENT", {
+                    maxTargets: 1,
+                    targetSelectionMode: "RANDOM",
+                }),
+            }),
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        placeMinion(
+                            createGameData().playerTwo.board,
+                            "SPOT_1",
+                            createMinionState(enemyMinion1),
+                        ),
+                        "SPOT_2",
+                        createMinionState(enemyMinion2),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.spell,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        const board = result.game.data.playerTwo.board;
+        const damagedCount = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"].filter(
+            (spotId) => board[spotId as keyof typeof board]?.health === 4,
+        ).length;
+        assert.equal(damagedCount, 1);
+        assert.equal(result.game.data.playerOne.mana, 8);
+    });
+
+    test("random damage spell fizzles when no eligible minion exists", async ({ assert }) => {
+        const spell = createSpellCard({
+            cost: 2,
+            action: createCardActionSnapshot({
+                type: "DAMAGE",
+                isTargeted: false,
+                damage: 1,
+                target: createMinionTargetSnapshot("OPPONENT", {
+                    maxTargets: 1,
+                    targetSelectionMode: "RANDOM",
+                }),
+            }),
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.spell,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.mana, 8);
+        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH);
+        assert.equal(result.game.data.playerOne.hand.length, 0);
+    });
 });

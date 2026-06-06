@@ -96,6 +96,21 @@ export const GALAGUERRE_TARGET_TEAMS_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_TARGET_TEAMS_LABEL_OBJ,
 );
 
+export const GALAGUERRE_TARGET_SELECTION_MODES = ["RANDOM"] as const;
+export type GalaguerreTargetSelectionMode = GenerateTypeFromEnum<
+    typeof GALAGUERRE_TARGET_SELECTION_MODES
+>;
+export const GALAGUERRE_TARGET_SELECTION_MODES_OBJ = generateTypeObjectFromEnum(
+    GALAGUERRE_TARGET_SELECTION_MODES,
+);
+export const GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ: LabelObjectType<GalaguerreTargetSelectionMode> =
+    {
+        RANDOM: "Random",
+    };
+export const GALAGUERRE_TARGET_SELECTION_MODES_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ,
+);
+
 export const GALAGUERRE_CARD_MODES = ["CREATION", "BETA", "PROD"] as const;
 export type GalaguerreCardMode = GenerateTypeFromEnum<typeof GALAGUERRE_CARD_MODES>;
 export const GALAGUERRE_CARD_MODES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_CARD_MODES);

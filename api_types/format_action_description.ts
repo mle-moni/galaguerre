@@ -1,5 +1,11 @@
-import type { BoostSnapshot, CardActionSnapshot, CardFilterSnapshot } from "./game.types.js";
+import type {
+    BoostSnapshot,
+    CardActionSnapshot,
+    CardFilterSnapshot,
+    TargetSnapshot,
+} from "./game.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
+import { hasRandomLimitedTarget } from "./target_matching.js";
 
 const CARD_TYPE_LABELS: Record<CardFilterSnapshot["type"], string> = {
     MINION: "Monstre",
@@ -90,6 +96,71 @@ const formatMassMinionTeamLabel = (
     return excludeSelf ? "les autres serviteurs adverses" : "les serviteurs adverses";
 };
 
+const formatRandomMinionLabel = (
+    targetTeam: TargetSnapshot["targetTeam"],
+    maxTargets: number,
+): string => {
+    if (maxTargets === 1) {
+        return `un serviteur ${formatMinionTeamLabel(targetTeam)} aléatoire`;
+    }
+    if (targetTeam === "ALL") {
+        return `${maxTargets} serviteurs aléatoires`;
+    }
+    if (targetTeam === "PLAYER") {
+        return `${maxTargets} de vos serviteurs aléatoires`;
+    }
+    return `${maxTargets} serviteurs adverses aléatoires`;
+};
+
+const formatRandomHeroLabel = (
+    targetTeam: TargetSnapshot["targetTeam"],
+    maxTargets: number,
+): string => {
+    if (maxTargets === 1) {
+        return `au héros ${formatHeroTeamLabel(targetTeam)} aléatoire`;
+    }
+    if (targetTeam === "ALL") {
+        return `à ${maxTargets} héros aléatoires`;
+    }
+    if (targetTeam === "PLAYER") {
+        return `à ${maxTargets} de vos héros aléatoires`;
+    }
+    return `à ${maxTargets} héros adverses aléatoires`;
+};
+
+const formatRandomAllLabel = (
+    targetTeam: TargetSnapshot["targetTeam"],
+    maxTargets: number,
+    excludeSelf: boolean,
+): string => {
+    if (maxTargets === 1) {
+        if (targetTeam === "ALL") {
+            return excludeSelf ? "un autre personnage aléatoire" : "un personnage aléatoire";
+        }
+        if (targetTeam === "PLAYER") {
+            return excludeSelf
+                ? "un de vos autres personnages aléatoire"
+                : "un de vos personnages aléatoire";
+        }
+        return excludeSelf
+            ? "un autre personnage adverse aléatoire"
+            : "un personnage adverse aléatoire";
+    }
+    if (targetTeam === "ALL") {
+        return excludeSelf
+            ? `${maxTargets} autres personnages aléatoires`
+            : `${maxTargets} personnages aléatoires`;
+    }
+    if (targetTeam === "PLAYER") {
+        return excludeSelf
+            ? `${maxTargets} de vos autres personnages aléatoires`
+            : `${maxTargets} de vos personnages aléatoires`;
+    }
+    return excludeSelf
+        ? `${maxTargets} autres personnages adverses aléatoires`
+        : `${maxTargets} personnages adverses aléatoires`;
+};
+
 const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     if (!filter) return "";
 
@@ -122,6 +193,17 @@ export const formatActionDescription = (
             const damage = getDisplayedDamage(action, spellPower);
             if (damage === null) return null;
 
+            if (action.target && hasRandomLimitedTarget(action.target)) {
+                const { target } = action;
+                if (target.type === "MINION") {
+                    return `${prefix} : Inflige ${damage} dégâts à ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
+                }
+                if (target.type === "HERO") {
+                    return `${prefix} : Inflige ${damage} dégâts ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`;
+                }
+                return `${prefix} : Inflige ${damage} dégâts à ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+            }
+
             if (action.isTargeted && action.target?.type === "MINION") {
                 return `${prefix} : Inflige ${damage} dégâts à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
@@ -145,6 +227,17 @@ export const formatActionDescription = (
         }
         case "HEAL": {
             if (action.heal === null || action.heal <= 0) return null;
+
+            if (action.target && hasRandomLimitedTarget(action.target)) {
+                const { target } = action;
+                if (target.type === "MINION") {
+                    return `${prefix} : Rend ${action.heal} PV à ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
+                }
+                if (target.type === "HERO") {
+                    return `${prefix} : Rend ${action.heal} PV ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`;
+                }
+                return `${prefix} : Rend ${action.heal} PV à ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+            }
 
             if (action.isTargeted && action.target?.type === "MINION") {
                 return `${prefix} : Rend ${action.heal} PV à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
@@ -182,6 +275,17 @@ export const formatActionDescription = (
 
             const effectText = formatBoostStatSuffix(action.boost);
             if (!effectText) return null;
+
+            if (action.target && hasRandomLimitedTarget(action.target)) {
+                const { target } = action;
+                if (target.type === "MINION") {
+                    return `${prefix} : Donne ${effectText} à ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
+                }
+                if (target.type === "HERO") {
+                    return `${prefix} : Donne ${effectText} ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`;
+                }
+                return `${prefix} : Donne ${effectText} à ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+            }
 
             if (action.isTargeted && action.target?.type === "MINION") {
                 return `${prefix} : Donne ${effectText} à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;

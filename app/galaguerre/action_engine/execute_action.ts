@@ -19,8 +19,9 @@ import {
     applyHealToAllMinions,
     getTargetBoardEntries,
 } from "./apply_mass_minion_effects.js";
+import { hasRandomLimitedTarget, pickRandomLimitedTargets } from "./pick_random_targets.js";
 import { resolveHeroTargets } from "./resolve_hero_target.js";
-import { resolveSelectedTarget } from "./resolve_selected_target.js";
+import { resolveSelectedTarget, type ResolvedTarget } from "./resolve_selected_target.js";
 
 const triggerHealIfNeeded = (game: Game): boolean => {
     const { gameEnded } = triggerHealPassives(game);
@@ -34,6 +35,58 @@ const getMinionOwner = (
     opponent: GamePlayer,
 ): GamePlayer => {
     return board === player.board ? player : opponent;
+};
+
+const applyEffectToResolvedTarget = (
+    resolved: ResolvedTarget,
+    action: CardActionSnapshot,
+    game: Game,
+    player: GamePlayer,
+    opponent: GamePlayer,
+    damageBonus: number,
+): boolean => {
+    switch (action.type) {
+        case "DAMAGE": {
+            const damage = getEffectiveDamage(action, damageBonus);
+            if (resolved.type === "HERO") {
+                resolved.player.health -= damage;
+            } else {
+                resolved.minion.health -= damage;
+                if (resolved.minion.health <= 0) {
+                    const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+                    killMinion(game, owner, resolved.spotId);
+                }
+            }
+            return false;
+        }
+        case "HEAL": {
+            if (resolved.type === "HERO") {
+                resolved.player.health = applyHeal(
+                    resolved.player.health,
+                    action.heal!,
+                    DEFAULT_HERO_HEALTH,
+                );
+            } else {
+                resolved.minion.health = applyHeal(
+                    resolved.minion.health,
+                    action.heal!,
+                    getMinionMaxHealth(resolved.minion),
+                );
+            }
+            return triggerHealIfNeeded(game);
+        }
+        case "BOOST": {
+            if (!action.boost) return false;
+            if (resolved.type === "HERO") {
+                applyBoostToHero(resolved.player, action.boost);
+            } else {
+                applyBoostToMinion(resolved.minion, action.boost);
+            }
+            return false;
+        }
+        default:
+            return false;
+    }
 };
 
 export const executeAction = (
@@ -51,51 +104,25 @@ export const executeAction = (
         const resolved = resolveSelectedTarget(selectedTarget, player, opponent);
         if (!resolved) return;
 
-        switch (action.type) {
-            case "DAMAGE": {
-                const damage = getEffectiveDamage(action, damageBonus);
-                if (resolved.type === "HERO") {
-                    resolved.player.health -= damage;
-                } else {
-                    resolved.minion.health -= damage;
-                    if (resolved.minion.health <= 0) {
-                        const owner = getMinionOwner(
-                            resolved.board,
-                            resolved.spotId,
-                            player,
-                            opponent,
-                        );
-                        killMinion(game, owner, resolved.spotId);
-                    }
-                }
-                break;
-            }
-            case "HEAL": {
-                if (resolved.type === "HERO") {
-                    resolved.player.health = applyHeal(
-                        resolved.player.health,
-                        action.heal!,
-                        DEFAULT_HERO_HEALTH,
-                    );
-                } else {
-                    resolved.minion.health = applyHeal(
-                        resolved.minion.health,
-                        action.heal!,
-                        getMinionMaxHealth(resolved.minion),
-                    );
-                }
-                if (triggerHealIfNeeded(game)) return;
-                break;
-            }
-            case "BOOST": {
-                if (!action.boost) break;
-                if (resolved.type === "HERO") {
-                    applyBoostToHero(resolved.player, action.boost);
-                } else {
-                    applyBoostToMinion(resolved.minion, action.boost);
-                }
-                break;
-            }
+        applyEffectToResolvedTarget(resolved, action, game, player, opponent, damageBonus);
+        return;
+    }
+
+    if (action.target && hasRandomLimitedTarget(action.target)) {
+        const picks = pickRandomLimitedTargets(action.target, player, opponent, sourceMinion);
+        for (const pick of picks) {
+            const resolved = resolveSelectedTarget(pick, player, opponent);
+            if (!resolved) continue;
+
+            const shouldStop = applyEffectToResolvedTarget(
+                resolved,
+                action,
+                game,
+                player,
+                opponent,
+                damageBonus,
+            );
+            if (shouldStop) return;
         }
         return;
     }

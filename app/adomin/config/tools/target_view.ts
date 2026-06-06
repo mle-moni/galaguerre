@@ -1,6 +1,7 @@
 import { createModelViewConfig } from "#adomin/create_model_view_config";
 import Target from "#models/target";
 import {
+    GALAGUERRE_TARGET_SELECTION_MODES_OPTIONS,
     GALAGUERRE_TARGET_TEAMS_OPTIONS,
     GALAGUERRE_TARGET_TYPES_OPTIONS,
 } from "../../../galaguerre/galaguerre.types.js";
@@ -38,6 +39,17 @@ export const TARGET_VIEW = createModelViewConfig(() => Target, {
         excludeSelf: {
             type: "boolean",
             label: "Exclure le porteur (autres serviteurs)",
+        },
+        maxTargets: {
+            type: "number",
+            label: "Nombre max de cibles",
+            nullable: true,
+        },
+        targetSelectionMode: {
+            type: "enum",
+            options: GALAGUERRE_TARGET_SELECTION_MODES_OPTIONS,
+            label: "Mode de sélection",
+            nullable: true,
         },
         createdAt: {
             type: "date",

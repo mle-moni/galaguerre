@@ -1703,6 +1703,8 @@ test.group("game:play_card battlecries", (group) => {
             comparison: null,
             tagId: null,
             excludeSelf: false,
+            maxTargets: null,
+            targetSelectionMode: null,
         });
         assert.include(generated.description, "Cri de guerre : Inflige 4 dégâts au héros adverse.");
     });
@@ -1826,6 +1828,8 @@ test.group("game:play_card battlecries", (group) => {
             },
             tagId: null,
             excludeSelf: false,
+            maxTargets: null,
+            targetSelectionMode: null,
         });
         assert.include(
             generated.description,

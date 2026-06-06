@@ -26,5 +26,7 @@ export const serializeTarget = (target: Target | null | undefined): TargetSnapsh
         comparison: serializeComparison(target.comparison),
         tagId: target.tagId,
         excludeSelf: target.excludeSelf ?? false,
+        maxTargets: target.maxTargets,
+        targetSelectionMode: target.targetSelectionMode,
     };
 };

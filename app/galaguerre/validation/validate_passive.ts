@@ -10,6 +10,7 @@ import type { ActionValidationError } from "./validate_action.js";
 import { validateComparison } from "./validate_comparison.js";
 import { validateDeathrattleAction } from "./validate_deathrattle_action.js";
 import { validateTargetExcludeSelf } from "./validate_exclude_self.js";
+import { validateTargetSelection } from "./validate_target_selection.js";
 
 export type PassiveValidationError = {
     passiveId: number;
@@ -79,6 +80,15 @@ const validateMinionTargetFilters = (
             passiveId: passive.id,
             internalLabel: passive.internalLabel,
             reason: excludeSelfReason,
+        };
+    }
+
+    const selectionReason = validateTargetSelection(target, false);
+    if (selectionReason) {
+        return {
+            passiveId: passive.id,
+            internalLabel: passive.internalLabel,
+            reason: selectionReason,
         };
     }
 
