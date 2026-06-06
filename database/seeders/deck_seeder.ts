@@ -52,6 +52,21 @@ export default class extends BaseSeeder {
         const targetedExpensiveCard = await Card.query()
             .where("label", "Monster 3-1 Targeted Expensive")
             .firstOrFail();
+        const targetedAllyBoostCard = await Card.query()
+            .where("label", "Monster 3-2 Targeted Ally Boost")
+            .firstOrFail();
+        const massAllyBoostCard = await Card.query()
+            .where("label", "Monster 2-3 Mass Ally Boost")
+            .firstOrFail();
+        const heroSpellPowerBoostCard = await Card.query()
+            .where("label", "Monster 2-2 Hero Spell Power Boost")
+            .firstOrFail();
+        const grantTauntBoostCard = await Card.query()
+            .where("label", "Monster 2-2 Grant Taunt Boost")
+            .firstOrFail();
+        const targetedEnemyBoostCard = await Card.query()
+            .where("label", "Monster 2-1 Targeted Enemy Boost")
+            .firstOrFail();
 
         const guaranteedLabels = [
             "Monster 1-2",
@@ -67,6 +82,11 @@ export default class extends BaseSeeder {
             "Monster 2-2 Targeted Beast Damage",
             "Monster 2-3 Targeted Low Health",
             "Monster 3-1 Targeted Expensive",
+            "Monster 3-2 Targeted Ally Boost",
+            "Monster 2-3 Mass Ally Boost",
+            "Monster 2-2 Hero Spell Power Boost",
+            "Monster 2-2 Grant Taunt Boost",
+            "Monster 2-1 Targeted Enemy Boost",
         ];
         const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
 
@@ -74,7 +94,8 @@ export default class extends BaseSeeder {
         const CHARGE_COPIES_PER_DECK = 2;
         const BATTLECRY_COPIES_PER_DECK = 1;
         const TARGETED_BATTLECRY_COPIES_PER_DECK = 1;
-        const DECK_SIZE = 15;
+        const BOOST_COPIES_PER_DECK = 1;
+        const DECK_SIZE = 20;
 
         for (const deck of decks) {
             const shuffledOthers = shuffleArray(otherCards);
@@ -83,7 +104,8 @@ export default class extends BaseSeeder {
                 TAUNT_COPIES_PER_DECK -
                 CHARGE_COPIES_PER_DECK -
                 BATTLECRY_COPIES_PER_DECK * 4 -
-                TARGETED_BATTLECRY_COPIES_PER_DECK * 7;
+                TARGETED_BATTLECRY_COPIES_PER_DECK * 7 -
+                BOOST_COPIES_PER_DECK * 5;
 
             const deckCardIds = [
                 ...Array.from({ length: TAUNT_COPIES_PER_DECK }, () => tauntCard.id),
@@ -99,6 +121,11 @@ export default class extends BaseSeeder {
                 targetedBeastDamageCard.id,
                 targetedLowHealthCard.id,
                 targetedExpensiveCard.id,
+                targetedAllyBoostCard.id,
+                massAllyBoostCard.id,
+                heroSpellPowerBoostCard.id,
+                grantTauntBoostCard.id,
+                targetedEnemyBoostCard.id,
                 ...shuffledOthers.slice(0, fillerCount).map((card) => card.id),
             ];
 

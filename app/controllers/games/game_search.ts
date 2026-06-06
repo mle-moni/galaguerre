@@ -16,9 +16,11 @@ const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) 
             .preload("battlecryActions", (q) =>
                 q
                     .preload("action", (aq) =>
-                        aq.preload("toolToTargets", (tq) =>
-                            tq.preload("target", (targetQ) => targetQ.preload("comparison")),
-                        ),
+                        aq
+                            .preload("boost", (bq) => bq.preload("minionPower"))
+                            .preload("toolToTargets", (tq) =>
+                                tq.preload("target", (targetQ) => targetQ.preload("comparison")),
+                            ),
                     )
                     .orderBy("id", "asc"),
             ),

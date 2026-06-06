@@ -1,4 +1,4 @@
-import type { CardActionSnapshot } from "#api_types/game.types";
+import type { BoostSnapshot, CardActionSnapshot } from "#api_types/game.types";
 
 const formatHeroTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string => {
     return targetTeam === "PLAYER" ? "allié" : "adverse";
@@ -29,6 +29,34 @@ const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
 
     if (parts.length === 0) return "";
     return ` (${parts.join(", ")})`;
+};
+
+const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
+    const parts: string[] = [];
+
+    if (boost.attack !== null && boost.health !== null) {
+        parts.push(`+${boost.attack}/+${boost.health}`);
+    } else {
+        if (boost.attack !== null) parts.push(`+${boost.attack} attaque`);
+        if (boost.health !== null) parts.push(`+${boost.health} PV`);
+    }
+
+    if (boost.spellPower !== null) {
+        parts.push(`+${boost.spellPower} dégâts de sort`);
+    }
+
+    if (boost.minionPower) {
+        if (boost.minionPower.hasTaunt) parts.push("Provocation");
+        if (boost.minionPower.hasCharge) parts.push("Charge");
+        if (boost.minionPower.hasWindfury) parts.push("Furie des vents");
+        if (boost.minionPower.isPoisonous) parts.push("Toxique");
+    }
+
+    return parts.join(", ");
+};
+
+const formatMassMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string => {
+    return targetTeam === "PLAYER" ? "vos serviteurs" : "les serviteurs adverses";
 };
 
 export const formatActionDescription = (action: CardActionSnapshot): string | null => {
@@ -74,6 +102,30 @@ export const formatActionDescription = (action: CardActionSnapshot): string | nu
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
             const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
             return `Cri de guerre : L'adversaire pioche ${action.enemyDrawCount} ${suffix}.`;
+        }
+        case "BOOST": {
+            if (!action.boost) return null;
+
+            const effectText = formatBoostStatSuffix(action.boost);
+            if (!effectText) return null;
+
+            if (action.isTargeted && action.target?.type === "MINION") {
+                return `Cri de guerre : Donne ${effectText} à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.isTargeted && action.target?.type === "HERO") {
+                return `Cri de guerre : Donne ${effectText} au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            if (action.target?.type === "MINION") {
+                return `Cri de guerre : Donne ${effectText} à ${formatMassMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "HERO") {
+                return `Cri de guerre : Donne ${effectText} au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            return `Cri de guerre : Donne ${effectText}.`;
         }
         default:
             return null;

@@ -1,6 +1,7 @@
 import {
     DEFAULT_HERO_HEALTH,
     type BoardState,
+    type BoostSnapshot,
     type CardActionSnapshot,
     type ComparisonSnapshot,
     type GameData,
@@ -68,6 +69,14 @@ export const createMinionTargetSnapshot = (
     ...overrides,
 });
 
+export const createBoostSnapshot = (overrides: Partial<BoostSnapshot> = {}): BoostSnapshot => ({
+    attack: null,
+    health: null,
+    spellPower: null,
+    minionPower: null,
+    ...overrides,
+});
+
 export const createCardActionSnapshot = (
     overrides: Partial<CardActionSnapshot> = {},
 ): CardActionSnapshot => ({
@@ -77,6 +86,7 @@ export const createCardActionSnapshot = (
     heal: null,
     drawCount: null,
     enemyDrawCount: null,
+    boost: null,
     target: null,
     ...overrides,
 });
@@ -111,6 +121,7 @@ export const createMinionState = (
     uuid: card.uuid,
     health: card.health,
     attack: card.attack,
+    maxHealth: card.health,
     placedAtRound: 0,
     lastActionAtRound: 0,
     attacksThisRound: 0,
@@ -129,6 +140,7 @@ export const createGamePlayer = (
     board: createEmptyBoard(),
     weaponState: null,
     health: DEFAULT_HERO_HEALTH,
+    spellPower: 0,
     mana: 10,
     maxFatigueDamageTaken: 0,
     ...overrides,

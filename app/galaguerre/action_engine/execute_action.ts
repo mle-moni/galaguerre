@@ -5,6 +5,7 @@ import {
     type GamePlayer,
 } from "#api_types/game.types";
 import { drawCards } from "../draw_cards.js";
+import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
@@ -56,6 +57,15 @@ export const executeAction = (
                 }
                 break;
             }
+            case "BOOST": {
+                if (!action.boost) break;
+                if (resolved.type === "HERO") {
+                    applyBoostToHero(resolved.player, action.boost);
+                } else {
+                    applyBoostToMinion(resolved.minion, action.boost);
+                }
+                break;
+            }
         }
         return;
     }
@@ -87,5 +97,18 @@ export const executeAction = (
         case "ENEMY_DRAW":
             drawCards(opponent, action.enemyDrawCount!);
             break;
+        case "BOOST": {
+            if (!action.boost || !action.target) break;
+
+            if (action.target.type === "MINION") {
+                const board = action.target.targetTeam === "PLAYER" ? player.board : opponent.board;
+                const isOpponent = action.target.targetTeam === "OPPONENT";
+                applyBoostToAllMinions(board, action.target, action.boost, isOpponent);
+            } else if (action.target.type === "HERO") {
+                const target = resolveHeroTarget(action.target, player, opponent);
+                if (target) applyBoostToHero(target, action.boost);
+            }
+            break;
+        }
     }
 };

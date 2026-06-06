@@ -1,4 +1,5 @@
 import type { CardActionSnapshot } from "#api_types/game.types";
+import { hasBoostEffect } from "./boost_utils.js";
 import { V1_ACTION_TYPES } from "./v1_action_types.js";
 
 export const isV1Action = (action: CardActionSnapshot): boolean => {
@@ -18,6 +19,12 @@ export const isV1Action = (action: CardActionSnapshot): boolean => {
             return action.drawCount !== null && action.drawCount > 0;
         case "ENEMY_DRAW":
             return action.enemyDrawCount !== null && action.enemyDrawCount > 0;
+        case "BOOST":
+            if (!action.boost || !hasBoostEffect(action.boost)) return false;
+            if (action.target !== null) {
+                return action.target.type === "HERO" || action.target.type === "MINION";
+            }
+            return false;
         default:
             return false;
     }

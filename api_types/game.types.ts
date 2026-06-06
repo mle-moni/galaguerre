@@ -44,6 +44,20 @@ export interface ActionTarget {
     owner: SpotOwner;
 }
 
+export interface BoostMinionPowerSnapshot {
+    hasTaunt: boolean;
+    hasCharge: boolean;
+    hasWindfury: boolean;
+    isPoisonous: boolean;
+}
+
+export interface BoostSnapshot {
+    attack: number | null;
+    health: number | null;
+    spellPower: number | null;
+    minionPower: BoostMinionPowerSnapshot | null;
+}
+
 export interface CardActionSnapshot {
     type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "MINION_POWERS";
     isTargeted: boolean;
@@ -51,6 +65,7 @@ export interface CardActionSnapshot {
     heal: number | null;
     drawCount: number | null;
     enemyDrawCount: number | null;
+    boost: BoostSnapshot | null;
     target: TargetSnapshot | null;
 }
 
@@ -101,6 +116,7 @@ export interface MinionState {
     uuid: string;
     health: number;
     attack: number;
+    maxHealth: number;
     placedAtRound: number;
     lastActionAtRound: number;
     attacksThisRound: number;
@@ -137,6 +153,7 @@ export interface GamePlayer {
     board: BoardState;
     weaponState: WeaponState | null;
     health: number;
+    spellPower: number;
     mana: number;
     maxFatigueDamageTaken: number;
 }

@@ -1,9 +1,11 @@
 import Action from "#models/action";
+import Boost from "#models/boost";
 import Card from "#models/card";
 import CardTag from "#models/card_tag";
 import Comparison from "#models/comparison";
 import Minion from "#models/minion";
 import MinionBattlecryAction from "#models/minion_battlecry_action";
+import MinionPower from "#models/minion_power";
 import Tag from "#models/tag";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
@@ -485,5 +487,213 @@ export default class extends BaseSeeder {
         if (strongCard) {
             await CardTag.create({ cardId: strongCard.id, tagId: beastTag.id });
         }
+
+        const tauntPower = await MinionPower.query().where("hasTaunt", true).firstOrFail();
+
+        const [boostPlusTwo, boostPlusOne, boostSpellPower, boostTaunt] = await Boost.createMany([
+            {
+                internalLabel: "Battlecry - +2/+2",
+                attack: 2,
+                health: 2,
+                spellPower: null,
+                minionPowerId: null,
+            },
+            {
+                internalLabel: "Battlecry - +1/+1",
+                attack: 1,
+                health: 1,
+                spellPower: null,
+                minionPowerId: null,
+            },
+            {
+                internalLabel: "Battlecry - +2 dégâts de sort",
+                attack: null,
+                health: null,
+                spellPower: 2,
+                minionPowerId: null,
+            },
+            {
+                internalLabel: "Battlecry - Provocation",
+                attack: null,
+                health: null,
+                spellPower: null,
+                minionPowerId: tauntPower.id,
+            },
+        ]);
+
+        const allyMinionsTarget = await Target.create({
+            internalLabel: "Serviteurs alliés (masse)",
+            type: "MINION",
+            targetTeam: "PLAYER",
+            comparisonId: null,
+            tagId: null,
+        });
+
+        const [
+            targetedAllyBoostAction,
+            massAllyBoostAction,
+            heroSpellPowerBoostAction,
+            targetedTauntBoostAction,
+            targetedEnemyBoostAction,
+        ] = await Action.createMany([
+            {
+                internalLabel: "Battlecry - +2/+2 à un serviteur allié",
+                type: "BOOST",
+                isTargeted: true,
+                ...nullActionFields,
+                boostId: boostPlusTwo.id,
+            },
+            {
+                internalLabel: "Battlecry - +1/+1 à vos serviteurs",
+                type: "BOOST",
+                isTargeted: false,
+                ...nullActionFields,
+                boostId: boostPlusOne.id,
+            },
+            {
+                internalLabel: "Battlecry - +2 dégâts de sort au héros allié",
+                type: "BOOST",
+                isTargeted: false,
+                ...nullActionFields,
+                boostId: boostSpellPower.id,
+            },
+            {
+                internalLabel: "Battlecry - Provocation à un serviteur allié",
+                type: "BOOST",
+                isTargeted: true,
+                ...nullActionFields,
+                boostId: boostTaunt.id,
+            },
+            {
+                internalLabel: "Battlecry - +1/+1 à un serviteur adverse",
+                type: "BOOST",
+                isTargeted: true,
+                ...nullActionFields,
+                boostId: boostPlusOne.id,
+            },
+        ]);
+
+        const [
+            targetedAllyBoostMinion,
+            massAllyBoostMinion,
+            heroSpellPowerBoostMinion,
+            targetedTauntBoostMinion,
+            targetedEnemyBoostMinion,
+        ] = await Minion.createMany([
+            {
+                internalLabel: "Monstre 3-2 BC Boost allié ciblé",
+                attack: 3,
+                health: 2,
+            },
+            {
+                internalLabel: "Monstre 2-3 BC Boost masse allié",
+                attack: 2,
+                health: 3,
+            },
+            {
+                internalLabel: "Monstre 2-2 BC Boost spell power",
+                attack: 2,
+                health: 2,
+            },
+            {
+                internalLabel: "Monstre 2-2 BC Boost provocation",
+                attack: 2,
+                health: 2,
+            },
+            {
+                internalLabel: "Monstre 2-1 BC Boost adverse ciblé",
+                attack: 2,
+                health: 1,
+            },
+        ]);
+
+        await Card.createMany([
+            {
+                label: "Monster 3-2 Targeted Ally Boost",
+                imageUrl: "https://picsum.photos/seed/monster_targeted_ally_boost/200/300",
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: targetedAllyBoostMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-3 Mass Ally Boost",
+                imageUrl: "https://picsum.photos/seed/monster_mass_ally_boost/200/300",
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: massAllyBoostMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-2 Hero Spell Power Boost",
+                imageUrl: "https://picsum.photos/seed/monster_hero_spell_power_boost/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: heroSpellPowerBoostMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-2 Grant Taunt Boost",
+                imageUrl: "https://picsum.photos/seed/monster_grant_taunt_boost/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: targetedTauntBoostMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-1 Targeted Enemy Boost",
+                imageUrl: "https://picsum.photos/seed/monster_targeted_enemy_boost/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: targetedEnemyBoostMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+        ]);
+
+        await ToolToTarget.createMany([
+            {
+                targetId: targetedAllyMinionTarget.id,
+                actionId: targetedAllyBoostAction.id,
+                boostId: null,
+            },
+            {
+                targetId: allyMinionsTarget.id,
+                actionId: massAllyBoostAction.id,
+                boostId: null,
+            },
+            {
+                targetId: allyHeroTarget.id,
+                actionId: heroSpellPowerBoostAction.id,
+                boostId: null,
+            },
+            {
+                targetId: targetedAllyMinionTarget.id,
+                actionId: targetedTauntBoostAction.id,
+                boostId: null,
+            },
+            {
+                targetId: targetedEnemyMinionTarget.id,
+                actionId: targetedEnemyBoostAction.id,
+                boostId: null,
+            },
+        ]);
+
+        await MinionBattlecryAction.createMany([
+            { minionId: targetedAllyBoostMinion.id, actionId: targetedAllyBoostAction.id },
+            { minionId: massAllyBoostMinion.id, actionId: massAllyBoostAction.id },
+            { minionId: heroSpellPowerBoostMinion.id, actionId: heroSpellPowerBoostAction.id },
+            { minionId: targetedTauntBoostMinion.id, actionId: targetedTauntBoostAction.id },
+            { minionId: targetedEnemyBoostMinion.id, actionId: targetedEnemyBoostAction.id },
+        ]);
     }
 }

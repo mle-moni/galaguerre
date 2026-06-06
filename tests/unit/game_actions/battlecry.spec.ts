@@ -1,6 +1,7 @@
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import Action from "#models/action";
+import Boost from "#models/boost";
 import Card from "#models/card";
 import Comparison from "#models/comparison";
 import Deck from "#models/deck";
@@ -19,6 +20,7 @@ import {
 } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
+    createBoostSnapshot,
     createCardActionSnapshot,
     createComparisonSnapshot,
     createGameData,
@@ -951,17 +953,86 @@ test.group("game:play_card battlecries", (group) => {
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 2 });
     });
 
-    test("BOOST action is ignored without error", async ({ assert }) => {
+    test("targeted BOOST gives +2/+2 to ally minion", async ({ assert }) => {
+        const allyCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion = createMinionState(allyCard);
+
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 2,
-            battlecryActions: [createCardActionSnapshot({ type: "BOOST" })],
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    isTargeted: true,
+                    boost: createBoostSnapshot({ attack: 2, health: 2 }),
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
         });
 
         const result = await runPlayCard({
             data: createGameData({
-                playerOne: { mana: 10, hand: [handCard] },
-                playerTwo: { health: 15 },
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "PLAYER" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { attack: 4, health: 5 });
+    });
+
+    test("mass BOOST gives +1/+1 to all ally minions", async ({ assert }) => {
+        const allyCard1 = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 2,
+            attack: 1,
+        });
+        const allyCard2 = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion1 = createMinionState(allyCard1);
+        const allyMinion2 = createMinionState(allyCard2);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    boost: createBoostSnapshot({ attack: 1, health: 1 }),
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(
+                        placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion1),
+                        "SPOT_3",
+                        allyMinion2,
+                    ),
+                },
             }),
             actor: "playerOne",
             action: {
@@ -973,7 +1044,123 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", { attack: 2, health: 2 });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { attack: 2, health: 3 });
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_3", { attack: 3, health: 4 });
+    });
+
+    test("targeted BOOST grants taunt to ally minion", async ({ assert }) => {
+        const allyCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            health: 3,
+            attack: 2,
+        });
+        const allyMinion = createMinionState(allyCard);
+
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    isTargeted: true,
+                    boost: createBoostSnapshot({
+                        minionPower: {
+                            hasTaunt: true,
+                            hasCharge: false,
+                            hasWindfury: false,
+                            isPoisonous: false,
+                        },
+                    }),
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "PLAYER" },
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        const boosted = result.game.data.playerOne.board.SPOT_2;
+        assert.isTrue(boosted?.originalCard.type === "MINION" && boosted.originalCard.hasTaunt);
+        assert.include(boosted?.originalCard.effects ?? [], "Provocation");
+    });
+
+    test("BOOST spellPower increases hero spell power", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    boost: createBoostSnapshot({ spellPower: 2 }),
+                    target: createHeroTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard], spellPower: 1 },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.spellPower, 3);
+    });
+
+    test("rejects targeted BOOST without actionTarget", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    isTargeted: true,
+                    boost: createBoostSnapshot({ attack: 2, health: 2 }),
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: "Vous devez choisir une cible pour cette carte" },
+        });
+
+        assertPlayCardScenario(assert, result, {
+            error: "Vous devez choisir une cible pour cette carte",
+        });
     });
 
     test("multiple battlecries execute in order", async ({ assert }) => {
@@ -1106,11 +1293,13 @@ test.group("game:play_card battlecries", (group) => {
                     .preload("battlecryActions", (q) =>
                         q
                             .preload("action", (aq) =>
-                                aq.preload("toolToTargets", (tq) =>
-                                    tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
+                                aq
+                                    .preload("boost", (bq) => bq.preload("minionPower"))
+                                    .preload("toolToTargets", (tq) =>
+                                        tq.preload("target", (targetQ) =>
+                                            targetQ.preload("comparison"),
+                                        ),
                                     ),
-                                ),
                             )
                             .orderBy("id", "asc"),
                     ),
@@ -1217,11 +1406,13 @@ test.group("game:play_card battlecries", (group) => {
                     .preload("battlecryActions", (q) =>
                         q
                             .preload("action", (aq) =>
-                                aq.preload("toolToTargets", (tq) =>
-                                    tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
+                                aq
+                                    .preload("boost", (bq) => bq.preload("minionPower"))
+                                    .preload("toolToTargets", (tq) =>
+                                        tq.preload("target", (targetQ) =>
+                                            targetQ.preload("comparison"),
+                                        ),
                                     ),
-                                ),
                             )
                             .orderBy("id", "asc"),
                     ),
@@ -1254,5 +1445,115 @@ test.group("game:play_card battlecries", (group) => {
             generated.description,
             "Cri de guerre : Inflige 3 dégâts à un serviteur adverse (attaque > 2).",
         );
+    });
+
+    test("generatePlayerCards embeds boost from database", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `bc-boost-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Battlecry boost deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const minion = await Minion.create({
+            internalLabel: `bc-boost-minion-${unique}`,
+            attack: 2,
+            health: 2,
+        });
+
+        const boost = await Boost.create({
+            internalLabel: `bc-boost-${unique}`,
+            attack: 2,
+            health: 2,
+            spellPower: null,
+            minionPowerId: null,
+        });
+
+        const boostAction = await Action.create({
+            internalLabel: `bc-boost-action-${unique}`,
+            type: "BOOST",
+            isTargeted: true,
+            damage: null,
+            heal: null,
+            drawCount: null,
+            enemyDrawCount: null,
+            boostId: boost.id,
+            drawCardFilterId: null,
+            enemyDrawCardFilterId: null,
+        });
+
+        const allyMinionTarget = await Target.create({
+            internalLabel: `bc-boost-target-${unique}`,
+            type: "MINION",
+            targetTeam: "PLAYER",
+            comparisonId: null,
+            tagId: null,
+        });
+
+        await ToolToTarget.create({
+            targetId: allyMinionTarget.id,
+            actionId: boostAction.id,
+            boostId: null,
+        });
+
+        await MinionBattlecryAction.create({
+            minionId: minion.id,
+            actionId: boostAction.id,
+        });
+
+        const card = await Card.create({
+            label: `bc-boost-card-${unique}`,
+            imageUrl: "https://example.com/card.png",
+            cost: 3,
+            type: "MINION",
+            cardMode: "BETA",
+            minionId: minion.id,
+            spellId: null,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+
+        await deck.load("cards", (query) =>
+            query.preload("minion", (q) =>
+                q
+                    .preload("minionPower")
+                    .preload("battlecryActions", (q) =>
+                        q
+                            .preload("action", (aq) =>
+                                aq
+                                    .preload("boost", (bq) => bq.preload("minionPower"))
+                                    .preload("toolToTargets", (tq) =>
+                                        tq.preload("target", (targetQ) =>
+                                            targetQ.preload("comparison"),
+                                        ),
+                                    ),
+                            )
+                            .orderBy("id", "asc"),
+                    ),
+            ),
+        );
+
+        const playerCards = generatePlayerCards(deck);
+        const generated = playerCards.find((c) => c.cardId === card.id);
+
+        assert.isDefined(generated);
+        assert.equal(generated?.type, "MINION");
+        if (!generated || generated.type !== "MINION") return;
+
+        assert.equal(generated.battlecryActions.length, 1);
+        assert.equal(generated.battlecryActions[0]!.type, "BOOST");
+        assert.deepEqual(generated.battlecryActions[0]!.boost, {
+            attack: 2,
+            health: 2,
+            spellPower: null,
+            minionPower: null,
+        });
+        assert.include(generated.description, "Cri de guerre : Donne +2/+2 à un serviteur allié.");
     });
 });

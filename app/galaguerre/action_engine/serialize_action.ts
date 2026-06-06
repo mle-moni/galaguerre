@@ -1,6 +1,7 @@
 import type { CardActionSnapshot, ComparisonSnapshot } from "#api_types/game.types";
 import type Action from "#models/action";
 import type Comparison from "#models/comparison";
+import { serializeBoost } from "./boost_utils.js";
 
 const serializeComparison = (
     comparison: Comparison | null | undefined,
@@ -28,6 +29,7 @@ export const serializeAction = (action: Action): CardActionSnapshot => {
         heal: action.heal,
         drawCount: action.drawCount,
         enemyDrawCount: action.enemyDrawCount,
+        boost: serializeBoost(action.boost),
         target: target
             ? {
                   type: target.type,

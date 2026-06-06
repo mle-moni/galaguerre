@@ -5,6 +5,7 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
         uuid: card.uuid,
         health: card.health,
         attack: card.attack,
+        maxHealth: card.health,
         placedAtRound: roundNumber,
         lastActionAtRound: 0,
         attacksThisRound: 0,

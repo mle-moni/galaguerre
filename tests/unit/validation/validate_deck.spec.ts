@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { createGame } from "#controllers/games/create_game";
 import Action from "#models/action";
+import Boost from "#models/boost";
 import Card from "#models/card";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
@@ -33,9 +34,13 @@ const loadDeckRelations = async (deck: Deck) => {
                 .preload("battlecryActions", (q) =>
                     q
                         .preload("action", (aq) =>
-                            aq.preload("toolToTargets", (tq) =>
-                                tq.preload("target", (targetQ) => targetQ.preload("comparison")),
-                            ),
+                            aq
+                                .preload("boost", (bq) => bq.preload("minionPower"))
+                                .preload("toolToTargets", (tq) =>
+                                    tq.preload("target", (targetQ) =>
+                                        targetQ.preload("comparison"),
+                                    ),
+                                ),
                         )
                         .orderBy("id", "asc"),
                 ),
@@ -61,6 +66,11 @@ const createMinionCardInDeck = async ({
         heal?: number | null;
         drawCount?: number | null;
         enemyDrawCount?: number | null;
+        boost?: {
+            attack?: number | null;
+            health?: number | null;
+            spellPower?: number | null;
+        };
     };
     target?: {
         type: "HERO" | "MINION" | "ALL";
@@ -74,6 +84,19 @@ const createMinionCardInDeck = async ({
     });
 
     if (action) {
+        let boostId: number | null = null;
+
+        if (action.boost) {
+            const boost = await Boost.create({
+                internalLabel: `${label}-boost-${unique}`,
+                attack: action.boost.attack ?? null,
+                health: action.boost.health ?? null,
+                spellPower: action.boost.spellPower ?? null,
+                minionPowerId: null,
+            });
+            boostId = boost.id;
+        }
+
         const createdAction = await Action.create({
             internalLabel: action.internalLabel,
             type: action.type,
@@ -83,6 +106,7 @@ const createMinionCardInDeck = async ({
             heal: action.heal ?? null,
             drawCount: action.drawCount ?? null,
             enemyDrawCount: action.enemyDrawCount ?? null,
+            boostId,
         });
 
         if (target) {
@@ -318,7 +342,7 @@ test.group("validation:validateDeck", (group) => {
         );
     });
 
-    test("rejects BOOST action", async ({ assert }) => {
+    test("rejects BOOST action without boostId", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
             email: `vd-boost-${unique}@test.fr`,
@@ -339,6 +363,10 @@ test.group("validation:validateDeck", (group) => {
                 internalLabel: `invalid-boost-action-${unique}`,
                 type: "BOOST",
             },
+            target: {
+                type: "MINION",
+                targetTeam: "PLAYER",
+            },
         });
 
         await loadDeckRelations(deck);
@@ -346,7 +374,43 @@ test.group("validation:validateDeck", (group) => {
 
         assert.isFalse(result.valid);
         assert.equal(result.errors.length, 1);
-        assert.include(result.errors[0]!.reason, "Action type BOOST is not supported");
+        assert.include(result.errors[0]!.reason, "BOOST action requires boostId");
+    });
+
+    test("accepts valid BOOST action", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-valid-boost-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Valid boost deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `valid-boost-${unique}`,
+            action: {
+                internalLabel: `valid-boost-action-${unique}`,
+                type: "BOOST",
+                isTargeted: true,
+                boost: { attack: 2, health: 2 },
+            },
+            target: {
+                type: "MINION",
+                targetTeam: "PLAYER",
+            },
+        });
+
+        await loadDeckRelations(deck);
+        const result = validateDeck(deck);
+
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
     });
 
     test("accepts valid isTargeted DAMAGE action", async ({ assert }) => {

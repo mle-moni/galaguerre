@@ -12,9 +12,12 @@ test.group("minion_card_metadata", () => {
     });
 
     test("getMinionCardDescription includes battlecry lines", ({ assert }) => {
-        const description = getMinionCardDescription(2, 2, [], [
-            "Cri de guerre : Inflige 2 dégâts au héros adverse.",
-        ]);
+        const description = getMinionCardDescription(
+            2,
+            2,
+            [],
+            ["Cri de guerre : Inflige 2 dégâts au héros adverse."],
+        );
 
         assert.equal(
             description,
