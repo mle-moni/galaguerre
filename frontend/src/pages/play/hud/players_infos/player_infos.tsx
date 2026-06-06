@@ -2,8 +2,8 @@ import type { GamePlayer } from "#api_types/game.types";
 
 import { Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
 import { useGameContext } from "~/hooks/use_game_state";
+import "./player_infos.css";
 
 interface PlayerInfosProps {
     player: GamePlayer;
@@ -12,25 +12,6 @@ interface PlayerInfosProps {
 
 export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = false }) => {
     const { store } = useGameContext();
-    const elements = useMemo(() => {
-        const jsxArray = [
-            <Text key="PSEUDO" size="xl" ta="center">
-                {player.pseudo}
-            </Text>,
-            <Text key="HEALTH" size="lg" ta="center">
-                {player.health} pdv
-            </Text>,
-            <Text key="MANA" size="sm" ta="center">
-                {player.mana} mana
-            </Text>,
-        ];
-
-        if (isOpponent) {
-            return jsxArray.reverse();
-        }
-
-        return jsxArray;
-    }, [player, isOpponent]);
 
     const playerBorderColor = store.playerInfosStore.getBorderColor({
         isOpponent,
@@ -73,12 +54,39 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             onDrop={handleDrop}
         >
             <div
-                className="rounded-full border-2 border-solid w-full p-4"
+                className="hero-panel"
                 style={{
                     borderColor: playerBorderColor,
                 }}
             >
-                {elements}
+                <Text className="hero-panel__pseudo" size="lg" ta="center" fw={700}>
+                    {player.pseudo}
+                </Text>
+                <div className="hero-panel__stats">
+                    <div className="hero-panel__stat">
+                        <span className="hero-panel__stat-badge hero-panel__stat-badge--health">
+                            {player.health}
+                        </span>
+                        <span className="hero-panel__stat-label">pdv</span>
+                    </div>
+                    <div className="hero-panel__stat">
+                        <span className="hero-panel__stat-badge hero-panel__stat-badge--mana">
+                            {player.mana}
+                        </span>
+                        <span className="hero-panel__stat-label">mana</span>
+                    </div>
+                    {player.spellPower > 0 && (
+                        <div
+                            className="hero-panel__stat"
+                            title={`+${player.spellPower} dégâts de sort`}
+                        >
+                            <span className="hero-panel__stat-badge hero-panel__stat-badge--spell-power">
+                                +{player.spellPower}
+                            </span>
+                            <span className="hero-panel__stat-label">dégâts de sort</span>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

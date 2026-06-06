@@ -32,10 +32,14 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
         );
     }
 
+    const canPlay = store.isMyTurn && card.cost <= store.me.mana;
+    const cardClassName = clsx(canPlay ? "cursor-pointer" : "cursor-not-allowed opacity-60");
+
     const handleSpellClick = () => {
-        if (!store.isMyTurn) return;
-        if (card.cost > store.me.mana) {
-            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+        if (!canPlay) {
+            if (card.cost > store.me.mana) {
+                notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            }
             return;
         }
 
@@ -54,13 +58,11 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
     };
 
     if (card.type === "SPELL") {
-        const canPlay = store.isMyTurn && card.cost <= store.me.mana;
-
         return (
             <SpellCardFace
                 card={card}
                 style={style}
-                className={clsx(canPlay ? "cursor-pointer" : "cursor-not-allowed opacity-60")}
+                className={cardClassName}
                 onClick={handleSpellClick}
                 wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
             />
@@ -73,8 +75,8 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
             attack={card.attack}
             health={card.health}
             style={style}
-            className="cursor-pointer"
-            draggable={store.isMyTurn}
+            className={cardClassName}
+            draggable={canPlay}
             onDragStart={() => store.cardDragStore.setCardDragged(card)}
             onDragEnd={() => store.cardDragStore.setCardDragged(null)}
             wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}

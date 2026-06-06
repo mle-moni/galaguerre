@@ -61,12 +61,18 @@ export class CardDragStore {
 
     canPlayCard(spotId: MinionSpotId, card: PlayerCard, spotOwner: SpotOwner): boolean {
         if (!this.gameStore.isMyTurn) return false;
+        if (card.cost > this.gameStore.me.mana) return false;
         if (card.type === "MINION") return this.canPlayMinionOnSpot(spotId, spotOwner);
 
         return false;
     }
 
     handleDrop(card: PlayerCard, spotId: MinionSpotId, spotOwner: SpotOwner) {
+        if (card.cost > this.gameStore.me.mana) {
+            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            return;
+        }
+
         const canPlayCard = this.canPlayCard(spotId, card, spotOwner);
 
         if (!canPlayCard) {
