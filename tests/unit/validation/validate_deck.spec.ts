@@ -89,7 +89,7 @@ const createMinionCardInDeck = async ({
     label: string;
     action?: {
         internalLabel: string;
-        type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "MINION_POWERS";
+        type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST";
         isTargeted?: boolean;
         damage?: number | null;
         heal?: number | null;

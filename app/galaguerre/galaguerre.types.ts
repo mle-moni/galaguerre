@@ -31,10 +31,8 @@ export const GALAGUERRE_CARD_TYPES_OPTIONS = generateOptionsFromLabelObj(
 
 export const GALAGUERRE_ACTIONS_TYPES = [
     "DAMAGE",
-    "DAMAGE",
     "HEAL",
     "BOOST",
-    "MINION_POWERS",
     "DRAW",
     "ENEMY_DRAW",
 ] as const;
@@ -46,7 +44,6 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     DRAW: "Draw",
     ENEMY_DRAW: "Enemy Draw",
     HEAL: "Heal",
-    MINION_POWERS: "Minion Powers",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,

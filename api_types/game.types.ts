@@ -66,7 +66,7 @@ export interface BoostSnapshot {
 }
 
 export interface CardActionSnapshot {
-    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "MINION_POWERS";
+    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST";
     isTargeted: boolean;
     damage: number | null;
     heal: number | null;
