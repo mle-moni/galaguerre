@@ -1,6 +1,6 @@
 import type { GameData } from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
-import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
+import { gamePlayCard } from "#controllers/games/play_card/game_play_card";
 import Game from "#models/game";
 import { addSocketData, removeSocketData } from "#services/sockets/sockets_data";
 import type { Assert } from "@japa/assert";
@@ -24,42 +24,36 @@ import {
 
 const TEST_SOCKET_ID = "test-socket";
 
-export type { PlayerKey };
-
-export interface MinionActionExpectation {
+export interface PlayCardExpectation {
     error?: string | null;
-    isFinished?: boolean;
 }
 
-export interface MinionActionRunOptions {
-    /** When false, no socket data is registered (unauthenticated socket). */
+export interface PlayCardRunOptions {
     authenticated?: boolean;
-    /** Use a third user who is not part of the game. */
     outsider?: boolean;
 }
 
-export interface MinionActionScenario {
+export interface PlayCardScenario {
     data: GameData;
     actor: PlayerKey;
-    action: ClientSocketEventByKey["game:minion_action"];
-    expect: MinionActionExpectation;
-    isFinished?: boolean;
-    options?: MinionActionRunOptions;
+    action: ClientSocketEventByKey["game:play_card"];
+    expect: PlayCardExpectation;
+    options?: PlayCardRunOptions;
 }
 
-export interface MinionActionResult {
+export interface PlayCardResult {
     game: Game;
     events: EmittedEvent[];
     errors: string[];
     updates: ReturnType<typeof getGameUpdates>;
 }
 
-const executeMinionAction = async (
+const executePlayCard = async (
     game: Game,
     actorUserId: number | null,
-    action: ClientSocketEventByKey["game:minion_action"],
+    action: ClientSocketEventByKey["game:play_card"],
     authenticated = true,
-): Promise<MinionActionResult> => {
+): Promise<PlayCardResult> => {
     if (authenticated && actorUserId !== null) {
         addSocketData(TEST_SOCKET_ID, actorUserId);
     }
@@ -67,7 +61,7 @@ const executeMinionAction = async (
     installSocketCollector();
 
     try {
-        await gameMinionAction(TEST_SOCKET_ID, action);
+        await gamePlayCard(TEST_SOCKET_ID, action);
     } finally {
         removeSocketData(TEST_SOCKET_ID);
         restoreSocketCollector();
@@ -83,12 +77,10 @@ const executeMinionAction = async (
     };
 };
 
-export const runMinionAction = async (
-    scenario: MinionActionScenario,
-): Promise<MinionActionResult & { actorUserId: number }> => {
-    const { game, playerOne, playerTwo } = await createTestGame(scenario.data, {
-        isFinished: scenario.isFinished,
-    });
+export const runPlayCard = async (
+    scenario: PlayCardScenario,
+): Promise<PlayCardResult & { actorUserId: number }> => {
+    const { game, playerOne, playerTwo } = await createTestGame(scenario.data);
 
     const options = scenario.options ?? {};
     const authenticated = options.authenticated ?? true;
@@ -101,7 +93,7 @@ export const runMinionAction = async (
         actorUserId = getActorUserId(playerOne, playerTwo, scenario.actor);
     }
 
-    const result = await executeMinionAction(
+    const result = await executePlayCard(
         game,
         authenticated ? actorUserId : null,
         scenario.action,
@@ -111,30 +103,23 @@ export const runMinionAction = async (
     return { ...result, actorUserId };
 };
 
-export const runMinionActionOnGame = async (
+export const runPlayCardOnGame = async (
     game: Game,
     actorUserId: number,
-    action: ClientSocketEventByKey["game:minion_action"],
-): Promise<MinionActionResult> => {
-    return executeMinionAction(game, actorUserId, action);
+    action: ClientSocketEventByKey["game:play_card"],
+): Promise<PlayCardResult> => {
+    return executePlayCard(game, actorUserId, action);
 };
 
-export const assertMinionActionScenario = (
+export const assertPlayCardScenario = (
     assert: Assert,
-    result: MinionActionResult,
-    expect: MinionActionExpectation,
+    result: PlayCardResult,
+    expect: PlayCardExpectation,
 ): void => {
     if (expect.error) {
         assertError(assert, expect.error);
     } else if (expect.error === null) {
         assertNoError(assert);
         assertGameUpdated(assert);
-    }
-
-    if (expect.isFinished !== undefined) {
-        assert.equal(result.game.isFinished, expect.isFinished);
-        if (expect.isFinished) {
-            assert.equal(result.game.data.state, "FINISHED");
-        }
     }
 };

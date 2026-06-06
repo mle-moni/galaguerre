@@ -1,3 +1,4 @@
+import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { ensureValidTauntTarget, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -11,6 +12,17 @@ export const minionToHeroAction = async ({
     owner,
     socketId,
 }: Omit<MinionActionOptions, "spotId">) => {
+    if (owner !== "OPPONENT") {
+        emitSocketEvent(
+            "notify_error",
+            {
+                error: "J'aurai pu te laisser attaquer ton propre héros mais j'ai décidé d'être clément...",
+            },
+            socketId,
+        );
+        return;
+    }
+
     const isValidTarget = ensureValidTauntTarget(opponent.board, null, owner, null, socketId);
     if (!isValidTarget) return;
 

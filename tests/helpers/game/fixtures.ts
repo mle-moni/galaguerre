@@ -5,12 +5,21 @@ import type {
     MinionCard,
     MinionSpotId,
     MinionState,
+    PlayerCard,
+    SpellCard,
+    WeaponCard,
 } from "#api_types/game.types";
 
 export const MINION_IDS = {
     attacker: "minion-attacker",
     target: "minion-target",
     taunt: "minion-taunt",
+} as const;
+
+export const CARD_IDS = {
+    handMinion: "card-hand-minion",
+    spell: "card-spell",
+    weapon: "card-weapon",
 } as const;
 
 export const createEmptyBoard = (): BoardState => ({
@@ -97,3 +106,29 @@ export const placeMinion = (
     ...board,
     [spotId]: minion,
 });
+
+export const createSpellCard = (
+    overrides: Partial<SpellCard> & { uuid?: string } = {},
+): SpellCard => ({
+    uuid: overrides.uuid ?? CARD_IDS.spell,
+    cardId: 2,
+    label: "Test Spell",
+    imageUrl: "https://example.com/spell.png",
+    cost: 2,
+    type: "SPELL",
+    ...overrides,
+});
+
+export const createWeaponCard = (
+    overrides: Partial<WeaponCard> & { uuid?: string } = {},
+): WeaponCard => ({
+    uuid: overrides.uuid ?? CARD_IDS.weapon,
+    cardId: 3,
+    label: "Test Weapon",
+    imageUrl: "https://example.com/weapon.png",
+    cost: 3,
+    type: "WEAPON",
+    ...overrides,
+});
+
+export const withHand = (hand: PlayerCard[]): Partial<GamePlayer> => ({ hand });

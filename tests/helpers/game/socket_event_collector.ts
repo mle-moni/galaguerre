@@ -60,3 +60,30 @@ export const assertGameUpdated = (assert: Assert): void => {
     const updates = getGameUpdates();
     assert.isAbove(updates.length, 0, "Expected at least one game:update event");
 };
+
+export const assertBothPlayersUpdated = (assert: Assert): void => {
+    const updateEvents = emittedEvents.filter((e) => e.event === "game:update");
+    assert.equal(updateEvents.length, 2, "Expected exactly two game:update events");
+};
+
+export const assertOpponentHandHidden = (
+    assert: Assert,
+    viewerUserId: number,
+    opponentUserId: number,
+    opponentHandSize: number,
+): void => {
+    const updateEvents = emittedEvents.filter((e) => e.event === "game:update");
+    const viewerUpdate = updateEvents.find((e) => e.rooms === `users:${viewerUserId}`);
+    assert.isDefined(viewerUpdate, "Expected game:update for viewer");
+
+    const game = (viewerUpdate!.data as SocketEventByKey["game:update"]).game;
+    const opponent =
+        game.data.playerOne.userId === opponentUserId
+            ? game.data.playerOne
+            : game.data.playerTwo;
+
+    assert.equal(opponent.hand.length, opponentHandSize);
+    for (const card of opponent.hand) {
+        assert.equal(card.label, "dummy card");
+    }
+};

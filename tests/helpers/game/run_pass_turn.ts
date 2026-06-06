@@ -1,6 +1,6 @@
 import type { GameData } from "#api_types/game.types";
-import type { ClientSocketEventByKey } from "#api_types/socket_events";
-import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
+import { passGameTurn } from "#controllers/games/pass_game_turn";
+import { setupNextGameTurn } from "#controllers/games/setup_next_game_turn";
 import Game from "#models/game";
 import { addSocketData, removeSocketData } from "#services/sockets/sockets_data";
 import type { Assert } from "@japa/assert";
@@ -24,42 +24,35 @@ import {
 
 const TEST_SOCKET_ID = "test-socket";
 
-export type { PlayerKey };
-
-export interface MinionActionExpectation {
+export interface PassTurnExpectation {
     error?: string | null;
     isFinished?: boolean;
 }
 
-export interface MinionActionRunOptions {
-    /** When false, no socket data is registered (unauthenticated socket). */
+export interface PassTurnRunOptions {
     authenticated?: boolean;
-    /** Use a third user who is not part of the game. */
     outsider?: boolean;
 }
 
-export interface MinionActionScenario {
+export interface PassTurnScenario {
     data: GameData;
     actor: PlayerKey;
-    action: ClientSocketEventByKey["game:minion_action"];
-    expect: MinionActionExpectation;
-    isFinished?: boolean;
-    options?: MinionActionRunOptions;
+    expect: PassTurnExpectation;
+    options?: PassTurnRunOptions;
 }
 
-export interface MinionActionResult {
+export interface PassTurnResult {
     game: Game;
     events: EmittedEvent[];
     errors: string[];
     updates: ReturnType<typeof getGameUpdates>;
 }
 
-const executeMinionAction = async (
+const executePassTurn = async (
     game: Game,
     actorUserId: number | null,
-    action: ClientSocketEventByKey["game:minion_action"],
     authenticated = true,
-): Promise<MinionActionResult> => {
+): Promise<PassTurnResult> => {
     if (authenticated && actorUserId !== null) {
         addSocketData(TEST_SOCKET_ID, actorUserId);
     }
@@ -67,7 +60,7 @@ const executeMinionAction = async (
     installSocketCollector();
 
     try {
-        await gameMinionAction(TEST_SOCKET_ID, action);
+        await passGameTurn(TEST_SOCKET_ID);
     } finally {
         removeSocketData(TEST_SOCKET_ID);
         restoreSocketCollector();
@@ -83,12 +76,10 @@ const executeMinionAction = async (
     };
 };
 
-export const runMinionAction = async (
-    scenario: MinionActionScenario,
-): Promise<MinionActionResult & { actorUserId: number }> => {
-    const { game, playerOne, playerTwo } = await createTestGame(scenario.data, {
-        isFinished: scenario.isFinished,
-    });
+export const runPassTurn = async (
+    scenario: PassTurnScenario,
+): Promise<PassTurnResult & { actorUserId: number }> => {
+    const { game, playerOne, playerTwo } = await createTestGame(scenario.data);
 
     const options = scenario.options ?? {};
     const authenticated = options.authenticated ?? true;
@@ -101,28 +92,41 @@ export const runMinionAction = async (
         actorUserId = getActorUserId(playerOne, playerTwo, scenario.actor);
     }
 
-    const result = await executeMinionAction(
-        game,
-        authenticated ? actorUserId : null,
-        scenario.action,
-        authenticated,
-    );
+    const result = await executePassTurn(game, authenticated ? actorUserId : null, authenticated);
 
     return { ...result, actorUserId };
 };
 
-export const runMinionActionOnGame = async (
+export const runPassTurnOnGame = async (
     game: Game,
     actorUserId: number,
-    action: ClientSocketEventByKey["game:minion_action"],
-): Promise<MinionActionResult> => {
-    return executeMinionAction(game, actorUserId, action);
+): Promise<PassTurnResult> => {
+    return executePassTurn(game, actorUserId);
 };
 
-export const assertMinionActionScenario = (
+export const runSetupNextTurnOnGame = async (game: Game): Promise<PassTurnResult> => {
+    installSocketCollector();
+
+    try {
+        await setupNextGameTurn(game);
+    } finally {
+        restoreSocketCollector();
+    }
+
+    await game.refresh();
+
+    return {
+        game,
+        events: getEmittedEvents(),
+        errors: getErrors(),
+        updates: getGameUpdates(),
+    };
+};
+
+export const assertPassTurnScenario = (
     assert: Assert,
-    result: MinionActionResult,
-    expect: MinionActionExpectation,
+    result: PassTurnResult,
+    expect: PassTurnExpectation,
 ): void => {
     if (expect.error) {
         assertError(assert, expect.error);
