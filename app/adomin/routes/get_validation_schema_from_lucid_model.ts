@@ -58,14 +58,12 @@ const getValidationSchemaFromFieldConfig = (
     }
 
     if (config.type === "hasManyRelation") {
-        const memberSchema =
-            config.localKeyType === "string" ? vine.string() : vine.number();
+        const memberSchema = config.localKeyType === "string" ? vine.string() : vine.number();
         return vine.array(memberSchema).optional();
     }
 
     if (config.type === "manyToManyRelation") {
-        const memberSchema =
-            config.relatedKeyType === "string" ? vine.string() : vine.number();
+        const memberSchema = config.relatedKeyType === "string" ? vine.string() : vine.number();
         return vine.array(memberSchema).optional();
     }
 

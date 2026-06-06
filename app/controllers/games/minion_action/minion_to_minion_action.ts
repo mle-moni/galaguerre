@@ -1,7 +1,7 @@
 import type { GamePlayer, MinionPosition, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { ensureValidTauntTarget } from "../game_utils.js";
+import { ensureValidTauntTarget, getMinionIsPoisonous, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 
 export interface MinionActionOptions {
@@ -57,8 +57,12 @@ export const minionToMinionAction = async ({
 
     // minionInfos.minion attacks targetMinion
     minionInfos.minion.health -= targetMinion.attack;
-    targetMinion.health -= minionInfos.minion.attack;
-    minionInfos.minion.lastActionAtRound = game.data.currentRound;
+    if (getMinionIsPoisonous(minionInfos.minion)) {
+        targetMinion.health = 0;
+    } else {
+        targetMinion.health -= minionInfos.minion.attack;
+    }
+    recordMinionAttack(minionInfos.minion, game.data.currentRound);
 
     if (minionInfos.minion.health <= 0) {
         initiatorBoard[minionInfos.position.spotId] = null;

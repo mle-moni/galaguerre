@@ -5,6 +5,9 @@ import {
     ensureIsMyTurn,
     ensureMinionFoundInBoard,
     getGameActionInfos,
+    getMinionAttacksThisRound,
+    getMinionHasCharge,
+    getMinionMaxAttacks,
     whichPlayerAmI,
 } from "../game_utils.js";
 import { minionToHeroAction } from "./minion_to_hero_action.js";
@@ -31,9 +34,11 @@ export const gameMinionAction = async (
 
     if (!canMinionAttack(minion, currentRound)) {
         const error =
-            minion.lastActionAtRound === currentRound
-                ? "Ce serviteur a déjà attaqué ce tour"
-                : "Ce serviteur n'est pas encore prêt à attaquer";
+            minion.placedAtRound === currentRound && !getMinionHasCharge(minion)
+                ? "Ce serviteur n'est pas encore prêt à attaquer"
+                : getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion)
+                  ? "Ce serviteur a déjà attaqué ce tour"
+                  : "Ce serviteur n'est pas encore prêt à attaquer";
 
         emitSocketEvent("notify_error", { error }, socketId);
         return;

@@ -19,10 +19,26 @@ export default class extends BaseSeeder {
             isPoisonous: false,
         });
 
+        const windfuryPower = await MinionPower.create({
+            hasTaunt: false,
+            hasCharge: false,
+            hasWindfury: true,
+            isPoisonous: false,
+        });
+
+        const poisonousPower = await MinionPower.create({
+            hasTaunt: false,
+            hasCharge: false,
+            hasWindfury: false,
+            isPoisonous: true,
+        });
+
         const [
             monsterOneOne,
+            monsterOneOnePoisonous,
             monsterTwoOne,
             monsterTwoOneCharge,
+            monsterTwoOneWindfury,
             monsterOneTwo,
             monsterTwoTwo,
             monsterThreeOne,
@@ -46,6 +62,12 @@ export default class extends BaseSeeder {
                 health: 1,
             },
             {
+                internalLabel: "Monstre 1-1 Toxique",
+                attack: 1,
+                health: 1,
+                minionPowerId: poisonousPower.id,
+            },
+            {
                 internalLabel: "Monstre 2-1",
                 attack: 2,
                 health: 1,
@@ -55,6 +77,12 @@ export default class extends BaseSeeder {
                 attack: 2,
                 health: 1,
                 minionPowerId: chargePower.id,
+            },
+            {
+                internalLabel: "Monstre 2-1 Windfury",
+                attack: 2,
+                health: 1,
+                minionPowerId: windfuryPower.id,
             },
             {
                 internalLabel: "Monstre 1-2",
@@ -151,6 +179,16 @@ export default class extends BaseSeeder {
                 weaponId: null,
             },
             {
+                label: "Monster 1-1 Poisonous",
+                imageUrl: "https://picsum.photos/seed/monster_1-1_poisonous/200/300",
+                cost: 1,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: monsterOneOnePoisonous.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
                 label: "Monster 2-1",
                 imageUrl: "https://picsum.photos/seed/monster_2-1/200/300",
                 cost: 2,
@@ -167,6 +205,16 @@ export default class extends BaseSeeder {
                 type: "MINION",
                 cardMode: "BETA",
                 minionId: monsterTwoOneCharge.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-1 Windfury",
+                imageUrl: "https://picsum.photos/seed/monster_2-1_windfury/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: monsterTwoOneWindfury.id,
                 spellId: null,
                 weaponId: null,
             },

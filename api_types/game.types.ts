@@ -13,6 +13,8 @@ export type MinionCard = PlayerCardBase & {
     attack: number;
     hasTaunt: boolean;
     hasCharge: boolean;
+    hasWindfury: boolean;
+    isPoisonous: boolean;
     effects: string[];
     description: string;
 };
@@ -52,6 +54,7 @@ export interface MinionState {
     attack: number;
     placedAtRound: number;
     lastActionAtRound: number;
+    attacksThisRound: number;
     originalCard: PlayerCard;
 }
 

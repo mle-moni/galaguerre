@@ -42,10 +42,7 @@ export type AdominValidation = {
 // biome-ignore lint/suspicious/noExplicitAny: runtime check for compiled vine validators
 export const isVineValidator = (input: unknown): input is VineValidator<any, any> => {
     return (
-        typeof input === "object" &&
-        input !== null &&
-        "validate" in input &&
-        "validateRaw" in input
+        typeof input === "object" && input !== null && "validate" in input && "validateRaw" in input
     );
 };
 

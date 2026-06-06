@@ -62,11 +62,7 @@ export class MinionDragStore {
         return board[spotId] !== null;
     }
 
-    canPlayMinion(
-        spotId: MinionSpotId | null,
-        minion: MinionState,
-        spotOwner: SpotOwner,
-    ): boolean {
+    canPlayMinion(spotId: MinionSpotId | null, minion: MinionState, spotOwner: SpotOwner): boolean {
         if (!this.gameStore.isMyTurn) return false;
         if (spotOwner === "PLAYER") return false;
         if (!canMinionAttack(minion, this.gameStore.game.data.currentRound)) return false;

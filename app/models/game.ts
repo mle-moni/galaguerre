@@ -72,6 +72,8 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     health: 0,
     hasTaunt: false,
     hasCharge: false,
+    hasWindfury: false,
+    isPoisonous: false,
     effects: [],
     description: "",
     cost: 0,

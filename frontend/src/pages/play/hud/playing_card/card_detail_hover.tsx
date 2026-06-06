@@ -9,8 +9,7 @@ interface CardDetailHoverProps {
 
 export const CardDetailHover = ({ card, children }: CardDetailHoverProps) => {
     const effects = card.effects ?? [];
-    const description =
-        card.description || `Serviteur ${card.attack}/${card.health}.`;
+    const description = card.description || `Serviteur ${card.attack}/${card.health}.`;
 
     return (
         <HoverCard width={280} shadow="md" openDelay={200} position="top">
