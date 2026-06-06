@@ -3,6 +3,7 @@ import {
     type BoardState,
     type BoostSnapshot,
     type CardActionSnapshot,
+    type CardFilterSnapshot,
     type ComparisonSnapshot,
     type GameData,
     type GamePlayer,
@@ -77,6 +78,15 @@ export const createBoostSnapshot = (overrides: Partial<BoostSnapshot> = {}): Boo
     ...overrides,
 });
 
+export const createCardFilterSnapshot = (
+    overrides: Partial<CardFilterSnapshot> = {},
+): CardFilterSnapshot => ({
+    type: "MINION",
+    comparison: null,
+    tagIds: [],
+    ...overrides,
+});
+
 export const createCardActionSnapshot = (
     overrides: Partial<CardActionSnapshot> = {},
 ): CardActionSnapshot => ({
@@ -86,6 +96,8 @@ export const createCardActionSnapshot = (
     heal: null,
     drawCount: null,
     enemyDrawCount: null,
+    drawCardFilter: null,
+    enemyDrawCardFilter: null,
     boost: null,
     target: null,
     ...overrides,

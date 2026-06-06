@@ -1,6 +1,7 @@
 import Action from "#models/action";
 import Boost from "#models/boost";
 import Card from "#models/card";
+import CardFilter from "#models/card_filter";
 import CardTag from "#models/card_tag";
 import Comparison from "#models/comparison";
 import Minion from "#models/minion";
@@ -694,6 +695,143 @@ export default class extends BaseSeeder {
             { minionId: heroSpellPowerBoostMinion.id, actionId: heroSpellPowerBoostAction.id },
             { minionId: targetedTauntBoostMinion.id, actionId: targetedTauntBoostAction.id },
             { minionId: targetedEnemyBoostMinion.id, actionId: targetedEnemyBoostAction.id },
+        ]);
+
+        const costOneComparison = await Comparison.create({
+            costComparison: "=",
+            cost: 1,
+            attackComparison: null,
+            attack: null,
+            healthComparison: null,
+            health: null,
+        });
+
+        const [costOneDrawFilter, beastDrawFilter, enemyCostOneDrawFilter] =
+            await CardFilter.createMany([
+                {
+                    internalLabel: "Pioche un monstre coût 1",
+                    type: "MINION",
+                    comparisonId: costOneComparison.id,
+                },
+                {
+                    internalLabel: "Pioche une bête",
+                    type: "MINION",
+                    comparisonId: null,
+                },
+                {
+                    internalLabel: "Pioche adverse un monstre coût 1",
+                    type: "MINION",
+                    comparisonId: costOneComparison.id,
+                },
+            ]);
+
+        await beastDrawFilter.related("tags").attach([beastTag.id]);
+
+        const [filteredDrawAction, filteredBeastDrawAction, filteredEnemyDrawAction] =
+            await Action.createMany([
+                {
+                    internalLabel: "Battlecry - Pioche un monstre coût 1",
+                    type: "DRAW",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    drawCount: 1,
+                    drawCardFilterId: costOneDrawFilter.id,
+                },
+                {
+                    internalLabel: "Battlecry - Pioche une bête",
+                    type: "DRAW",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    drawCount: 1,
+                    drawCardFilterId: beastDrawFilter.id,
+                },
+                {
+                    internalLabel: "Battlecry - L'adversaire pioche un monstre coût 1",
+                    type: "ENEMY_DRAW",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    enemyDrawCount: 1,
+                    enemyDrawCardFilterId: enemyCostOneDrawFilter.id,
+                },
+            ]);
+
+        const [
+            filteredDrawMinion,
+            filteredBeastDrawMinion,
+            filteredEnemyDrawMinion,
+            beastFillerMinion,
+        ] = await Minion.createMany([
+            {
+                internalLabel: "Monstre 2-2 BC Pioche filtrée coût 1",
+                attack: 2,
+                health: 2,
+            },
+            {
+                internalLabel: "Monstre 2-2 BC Pioche filtrée bête",
+                attack: 2,
+                health: 2,
+            },
+            {
+                internalLabel: "Monstre 2-2 BC Pioche adverse filtrée coût 1",
+                attack: 2,
+                health: 2,
+            },
+            {
+                internalLabel: "Monstre 1-1 Bête",
+                attack: 1,
+                health: 1,
+            },
+        ]);
+
+        const [, , , beastFillerCard] = await Card.createMany([
+            {
+                label: "Monster 2-2 Battlecry Filtered Draw (Cost 1)",
+                imageUrl: "https://picsum.photos/seed/monster_bc_filtered_draw_cost1/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: filteredDrawMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-2 Battlecry Filtered Draw (Beast)",
+                imageUrl: "https://picsum.photos/seed/monster_bc_filtered_draw_beast/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: filteredBeastDrawMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-2 Battlecry Filtered Enemy Draw (Cost 1)",
+                imageUrl: "https://picsum.photos/seed/monster_bc_filtered_enemy_draw/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: filteredEnemyDrawMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 1-1 Beast",
+                imageUrl: "https://picsum.photos/seed/monster_1_1_beast/200/300",
+                cost: 1,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: beastFillerMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+        ]);
+
+        await CardTag.create({ cardId: beastFillerCard.id, tagId: beastTag.id });
+
+        await MinionBattlecryAction.createMany([
+            { minionId: filteredDrawMinion.id, actionId: filteredDrawAction.id },
+            { minionId: filteredBeastDrawMinion.id, actionId: filteredBeastDrawAction.id },
+            { minionId: filteredEnemyDrawMinion.id, actionId: filteredEnemyDrawAction.id },
         ]);
     }
 }

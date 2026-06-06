@@ -180,6 +180,64 @@ test.group("game:deathrattle", (group) => {
         assertPlayerHealth(assert, result.game, "playerOne", 12);
     });
 
+    test("chained mass DAMAGE deathrattles do not recurse infinitely", async ({ assert }) => {
+        const massDamageDeathrattle = [
+            createCardActionSnapshot({
+                type: "DAMAGE",
+                damage: 1,
+                target: createMinionTargetSnapshot("OPPONENT"),
+            }),
+        ];
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 3,
+        });
+        const dyingCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 1,
+            deathrattleActions: massDamageDeathrattle,
+        });
+        const mirrorCard = createMinionCard({
+            uuid: "mirror-deathrattle",
+            attack: 1,
+            health: 1,
+            deathrattleActions: massDamageDeathrattle,
+        });
+
+        const result = await runMinionAction({
+            data: createGameData({
+                playerOne: {
+                    board: {
+                        ...createGameData().playerOne.board,
+                        SPOT_1: createMinionState(attackerCard),
+                        SPOT_2: createMinionState(mirrorCard),
+                    },
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(dyingCard),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                minionId: MINION_IDS.attacker,
+                spotId: "SPOT_1",
+                owner: "OPPONENT",
+            },
+            expect: { error: null },
+        });
+
+        assertMinionActionScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", null);
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", { health: 1 });
+    });
+
     test("mass DAMAGE deathrattle kills all matching enemy minions", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,

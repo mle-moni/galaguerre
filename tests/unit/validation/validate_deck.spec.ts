@@ -36,6 +36,12 @@ const loadDeckRelations = async (deck: Deck) => {
                         .preload("action", (aq) =>
                             aq
                                 .preload("boost", (bq) => bq.preload("minionPower"))
+                                .preload("drawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
+                                .preload("enemyDrawCardFilter", (cfq) =>
+                                    cfq.preload("comparison").preload("tags"),
+                                )
                                 .preload("toolToTargets", (tq) =>
                                     tq.preload("target", (targetQ) =>
                                         targetQ.preload("comparison"),

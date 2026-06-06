@@ -1,4 +1,5 @@
-import type { BoostSnapshot, CardActionSnapshot } from "#api_types/game.types";
+import type { BoostSnapshot, CardActionSnapshot, CardFilterSnapshot } from "#api_types/game.types";
+import { GALAGUERRE_CARD_TYPES_LABEL_OBJ } from "../galaguerre.types.js";
 
 const formatHeroTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string => {
     return targetTeam === "PLAYER" ? "allié" : "adverse";
@@ -59,6 +60,28 @@ const formatMassMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT"): string =>
     return targetTeam === "PLAYER" ? "vos serviteurs" : "les serviteurs adverses";
 };
 
+const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
+    if (!filter) return "";
+
+    const parts: string[] = [GALAGUERRE_CARD_TYPES_LABEL_OBJ[filter.type]];
+    const comparison = filter.comparison;
+
+    if (comparison?.attackComparison && comparison.attack !== null) {
+        parts.push(`attaque ${comparison.attackComparison} ${comparison.attack}`);
+    }
+    if (comparison?.healthComparison && comparison.health !== null) {
+        parts.push(`pv ${comparison.healthComparison} ${comparison.health}`);
+    }
+    if (comparison?.costComparison && comparison.cost !== null) {
+        parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
+    }
+    if (filter.tagIds.length > 0) {
+        parts.push("avec le tag requis");
+    }
+
+    return ` (${parts.join(", ")})`;
+};
+
 export const formatActionDescription = (
     action: CardActionSnapshot,
     prefix = "Cri de guerre",
@@ -107,12 +130,12 @@ export const formatActionDescription = (
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) return null;
             const suffix = action.drawCount === 1 ? "carte" : "cartes";
-            return `${prefix} : Pioche ${action.drawCount} ${suffix}.`;
+            return `${prefix} : Pioche ${action.drawCount} ${suffix}${formatCardFilterSuffix(action.drawCardFilter)}.`;
         }
         case "ENEMY_DRAW": {
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
             const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
-            return `${prefix} : L'adversaire pioche ${action.enemyDrawCount} ${suffix}.`;
+            return `${prefix} : L'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}.`;
         }
         case "BOOST": {
             if (!action.boost) return null;

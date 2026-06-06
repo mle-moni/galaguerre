@@ -105,10 +105,10 @@ export const executeAction = (
             break;
         }
         case "DRAW":
-            drawCards(player, action.drawCount!);
+            drawCards(player, action.drawCount!, action.drawCardFilter);
             break;
         case "ENEMY_DRAW":
-            drawCards(opponent, action.enemyDrawCount!);
+            drawCards(opponent, action.enemyDrawCount!, action.enemyDrawCardFilter);
             break;
         case "BOOST": {
             if (!action.boost || !action.target) break;

@@ -82,6 +82,18 @@ export default class extends BaseSeeder {
         const deathrattleMassDamageCard = await Card.query()
             .where("label", "Monster 2-1 Deathrattle Mass Damage")
             .firstOrFail();
+        const filteredDrawCost1Card = await Card.query()
+            .where("label", "Monster 2-2 Battlecry Filtered Draw (Cost 1)")
+            .firstOrFail();
+        const filteredDrawBeastCard = await Card.query()
+            .where("label", "Monster 2-2 Battlecry Filtered Draw (Beast)")
+            .firstOrFail();
+        const filteredEnemyDrawCost1Card = await Card.query()
+            .where("label", "Monster 2-2 Battlecry Filtered Enemy Draw (Cost 1)")
+            .firstOrFail();
+        const beastFillerCard = await Card.query()
+            .where("label", "Monster 1-1 Beast")
+            .firstOrFail();
 
         const guaranteedLabels = [
             "Monster 1-2",
@@ -107,6 +119,10 @@ export default class extends BaseSeeder {
             "Monster 2-1 Deathrattle Draw",
             "Monster 2-1 Deathrattle Enemy Draw",
             "Monster 2-1 Deathrattle Mass Damage",
+            "Monster 2-2 Battlecry Filtered Draw (Cost 1)",
+            "Monster 2-2 Battlecry Filtered Draw (Beast)",
+            "Monster 2-2 Battlecry Filtered Enemy Draw (Cost 1)",
+            "Monster 1-1 Beast",
         ];
         const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
 
@@ -116,7 +132,9 @@ export default class extends BaseSeeder {
         const TARGETED_BATTLECRY_COPIES_PER_DECK = 1;
         const BOOST_COPIES_PER_DECK = 1;
         const DEATHRATTLE_COPIES_PER_DECK = 1;
-        const DECK_SIZE = 25;
+        const FILTERED_DRAW_COPIES_PER_DECK = 1;
+        const BEAST_FILLER_COPIES_PER_DECK = 2;
+        const DECK_SIZE = 30;
 
         for (const deck of decks) {
             const shuffledOthers = shuffleArray(otherCards);
@@ -127,7 +145,9 @@ export default class extends BaseSeeder {
                 BATTLECRY_COPIES_PER_DECK * 4 -
                 TARGETED_BATTLECRY_COPIES_PER_DECK * 7 -
                 BOOST_COPIES_PER_DECK * 5 -
-                DEATHRATTLE_COPIES_PER_DECK * 5;
+                DEATHRATTLE_COPIES_PER_DECK * 5 -
+                FILTERED_DRAW_COPIES_PER_DECK * 3 -
+                BEAST_FILLER_COPIES_PER_DECK;
 
             const deckCardIds = [
                 ...Array.from({ length: TAUNT_COPIES_PER_DECK }, () => tauntCard.id),
@@ -153,6 +173,10 @@ export default class extends BaseSeeder {
                 deathrattleDrawCard.id,
                 deathrattleEnemyDrawCard.id,
                 deathrattleMassDamageCard.id,
+                filteredDrawCost1Card.id,
+                filteredDrawBeastCard.id,
+                filteredEnemyDrawCost1Card.id,
+                ...Array.from({ length: BEAST_FILLER_COPIES_PER_DECK }, () => beastFillerCard.id),
                 ...shuffledOthers.slice(0, fillerCount).map((card) => card.id),
             ];
 

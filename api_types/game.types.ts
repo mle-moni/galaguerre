@@ -39,6 +39,12 @@ export interface TargetSnapshot {
     tagId: number | null;
 }
 
+export interface CardFilterSnapshot {
+    type: "MINION" | "SPELL" | "WEAPON";
+    comparison: ComparisonSnapshot | null;
+    tagIds: number[];
+}
+
 export interface ActionTarget {
     spotId: MinionSpotId | null;
     owner: SpotOwner;
@@ -65,6 +71,8 @@ export interface CardActionSnapshot {
     heal: number | null;
     drawCount: number | null;
     enemyDrawCount: number | null;
+    drawCardFilter: CardFilterSnapshot | null;
+    enemyDrawCardFilter: CardFilterSnapshot | null;
     boost: BoostSnapshot | null;
     target: TargetSnapshot | null;
 }

@@ -19,8 +19,10 @@ export const killMinion = (
         return { gameEnded: false };
     }
 
-    const { gameEnded } = executeDeathrattles(game, owner, minion.originalCard);
+    const card = minion.originalCard;
     owner.board[spotId] = null;
+
+    const { gameEnded } = executeDeathrattles(game, owner, card);
 
     return { gameEnded: gameEnded || isGameOver(game) };
 };

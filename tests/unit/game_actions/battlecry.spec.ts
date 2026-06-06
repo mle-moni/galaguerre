@@ -3,6 +3,7 @@ import testUtils from "@adonisjs/core/services/test_utils";
 import Action from "#models/action";
 import Boost from "#models/boost";
 import Card from "#models/card";
+import CardFilter from "#models/card_filter";
 import Comparison from "#models/comparison";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
@@ -22,12 +23,14 @@ import {
     CARD_IDS,
     createBoostSnapshot,
     createCardActionSnapshot,
+    createCardFilterSnapshot,
     createComparisonSnapshot,
     createGameData,
     createHeroTargetSnapshot,
     createMinionCard,
     createMinionState,
     createMinionTargetSnapshot,
+    createSpellCard,
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
@@ -312,6 +315,131 @@ test.group("game:play_card battlecries", (group) => {
         assertPlayerHealth(assert, result.game, "playerOne", 10);
         assert.equal(result.game.data.playerOne.maxFatigueDamageTaken, 3);
         assert.equal(result.game.data.playerOne.hand.length, 0);
+    });
+
+    test("DRAW battlecry with filter draws first matching card from deck", async ({ assert }) => {
+        const spellOnTop = createSpellCard({ uuid: "deck-spell" });
+        const matchingMinion = createMinionCard({ uuid: "deck-minion", cost: 2 });
+        const expensiveMinion = createMinionCard({ uuid: "deck-expensive", cost: 6 });
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DRAW",
+                    drawCount: 1,
+                    drawCardFilter: createCardFilterSnapshot({
+                        type: "MINION",
+                        comparison: createComparisonSnapshot({
+                            costComparison: "=",
+                            cost: 2,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    deckCards: [spellOnTop, matchingMinion, expensiveMinion],
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.hand.length, 1);
+        assert.equal(result.game.data.playerOne.hand[0]!.uuid, "deck-minion");
+        assert.equal(result.game.data.playerOne.deckCards.length, 2);
+        assert.equal(result.game.data.playerOne.deckCards[0]!.uuid, "deck-spell");
+        assert.equal(result.game.data.playerOne.deckCards[1]!.uuid, "deck-expensive");
+    });
+
+    test("DRAW battlecry with filter and no match draws nothing", async ({ assert }) => {
+        const spell = createSpellCard({ uuid: "deck-spell-only" });
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DRAW",
+                    drawCount: 1,
+                    drawCardFilter: createCardFilterSnapshot({ type: "MINION" }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    health: 15,
+                    hand: [handCard],
+                    deckCards: [spell],
+                    maxFatigueDamageTaken: 0,
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.hand.length, 0);
+        assert.equal(result.game.data.playerOne.deckCards.length, 1);
+        assertPlayerHealth(assert, result.game, "playerOne", 15);
+        assert.equal(result.game.data.playerOne.maxFatigueDamageTaken, 0);
+    });
+
+    test("ENEMY_DRAW battlecry with filter draws matching card for opponent", async ({
+        assert,
+    }) => {
+        const spell = createSpellCard({ uuid: "enemy-deck-spell" });
+        const minion = createMinionCard({ uuid: "enemy-deck-minion" });
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "ENEMY_DRAW",
+                    enemyDrawCount: 1,
+                    enemyDrawCardFilter: createCardFilterSnapshot({ type: "MINION" }),
+                }),
+            ],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: { deckCards: [spell, minion], hand: [] },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerTwo.hand.length, 1);
+        assert.equal(result.game.data.playerTwo.hand[0]!.uuid, "enemy-deck-minion");
+        assert.equal(result.game.data.playerTwo.deckCards.length, 1);
+        assert.equal(result.game.data.playerTwo.deckCards[0]!.uuid, "enemy-deck-spell");
     });
 
     test("lethal DAMAGE battlecry ends the game", async ({ assert }) => {
@@ -1295,6 +1423,12 @@ test.group("game:play_card battlecries", (group) => {
                             .preload("action", (aq) =>
                                 aq
                                     .preload("boost", (bq) => bq.preload("minionPower"))
+                                    .preload("drawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
+                                    .preload("enemyDrawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
                                     .preload("toolToTargets", (tq) =>
                                         tq.preload("target", (targetQ) =>
                                             targetQ.preload("comparison"),
@@ -1408,6 +1542,12 @@ test.group("game:play_card battlecries", (group) => {
                             .preload("action", (aq) =>
                                 aq
                                     .preload("boost", (bq) => bq.preload("minionPower"))
+                                    .preload("drawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
+                                    .preload("enemyDrawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
                                     .preload("toolToTargets", (tq) =>
                                         tq.preload("target", (targetQ) =>
                                             targetQ.preload("comparison"),
@@ -1528,6 +1668,12 @@ test.group("game:play_card battlecries", (group) => {
                             .preload("action", (aq) =>
                                 aq
                                     .preload("boost", (bq) => bq.preload("minionPower"))
+                                    .preload("drawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
+                                    .preload("enemyDrawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
                                     .preload("toolToTargets", (tq) =>
                                         tq.preload("target", (targetQ) =>
                                             targetQ.preload("comparison"),
@@ -1555,5 +1701,124 @@ test.group("game:play_card battlecries", (group) => {
             minionPower: null,
         });
         assert.include(generated.description, "Cri de guerre : Donne +2/+2 à un serviteur allié.");
+    });
+
+    test("generatePlayerCards embeds draw card filter from database", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `bc-draw-filter-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Battlecry draw filter deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const minion = await Minion.create({
+            internalLabel: `bc-draw-filter-minion-${unique}`,
+            attack: 1,
+            health: 1,
+        });
+
+        const comparison = await Comparison.create({
+            costComparison: "=",
+            cost: 2,
+            attackComparison: null,
+            attack: null,
+            healthComparison: null,
+            health: null,
+        });
+
+        const cardFilter = await CardFilter.create({
+            internalLabel: `bc-draw-filter-${unique}`,
+            type: "MINION",
+            comparisonId: comparison.id,
+        });
+
+        const drawAction = await Action.create({
+            internalLabel: `bc-draw-filter-action-${unique}`,
+            type: "DRAW",
+            isTargeted: false,
+            damage: null,
+            heal: null,
+            drawCount: 1,
+            enemyDrawCount: null,
+            boostId: null,
+            drawCardFilterId: cardFilter.id,
+            enemyDrawCardFilterId: null,
+        });
+
+        await MinionBattlecryAction.create({
+            minionId: minion.id,
+            actionId: drawAction.id,
+        });
+
+        const card = await Card.create({
+            label: `bc-draw-filter-card-${unique}`,
+            imageUrl: "https://example.com/card.png",
+            cost: 2,
+            type: "MINION",
+            cardMode: "BETA",
+            minionId: minion.id,
+            spellId: null,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+
+        await deck.load("cards", (query) =>
+            query.preload("minion", (q) =>
+                q
+                    .preload("minionPower")
+                    .preload("battlecryActions", (q) =>
+                        q
+                            .preload("action", (aq) =>
+                                aq
+                                    .preload("boost", (bq) => bq.preload("minionPower"))
+                                    .preload("drawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
+                                    .preload("enemyDrawCardFilter", (cfq) =>
+                                        cfq.preload("comparison").preload("tags"),
+                                    )
+                                    .preload("toolToTargets", (tq) =>
+                                        tq.preload("target", (targetQ) =>
+                                            targetQ.preload("comparison"),
+                                        ),
+                                    ),
+                            )
+                            .orderBy("id", "asc"),
+                    ),
+            ),
+        );
+
+        const playerCards = generatePlayerCards(deck);
+        const generated = playerCards.find((c) => c.cardId === card.id);
+
+        assert.isDefined(generated);
+        assert.equal(generated?.type, "MINION");
+        if (!generated || generated.type !== "MINION") return;
+
+        assert.equal(generated.battlecryActions.length, 1);
+        assert.equal(generated.battlecryActions[0]!.type, "DRAW");
+        assert.equal(generated.battlecryActions[0]!.drawCount, 1);
+        assert.deepEqual(generated.battlecryActions[0]!.drawCardFilter, {
+            type: "MINION",
+            comparison: {
+                costComparison: "=",
+                cost: 2,
+                attackComparison: null,
+                attack: null,
+                healthComparison: null,
+                health: null,
+            },
+            tagIds: [],
+        });
+        assert.include(
+            generated.description,
+            "Cri de guerre : Pioche 1 carte (Monstre, coût = 2).",
+        );
     });
 });
