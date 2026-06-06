@@ -144,6 +144,17 @@ export const getMinionHasTaunt = (minion: MinionState): boolean => {
     return minion.originalCard.hasTaunt ?? false;
 };
 
+export const getMinionHasCharge = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.hasCharge ?? false;
+};
+
+export const canMinionAttack = (minion: MinionState, currentRound: number): boolean => {
+    if (minion.lastActionAtRound === currentRound) return false;
+    if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) return false;
+    return true;
+};
+
 export const boardHasTaunt = (board: BoardState): boolean => {
     return MINION_SPOT_IDS.some((spotId) => {
         const minion = board[spotId];

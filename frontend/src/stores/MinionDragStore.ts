@@ -2,6 +2,7 @@ import type { BoardState, MinionSpotId, MinionState, SpotOwner } from "#api_type
 import { MINION_SPOT_IDS } from "#api_types/game.types";
 
 import { makeAutoObservable } from "mobx";
+import { canMinionAttack } from "~/helpers/minion_combat";
 import { notifyError } from "~/services/toasts";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { type SlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
@@ -63,11 +64,12 @@ export class MinionDragStore {
 
     canPlayMinion(
         spotId: MinionSpotId | null,
-        _minion: MinionState,
+        minion: MinionState,
         spotOwner: SpotOwner,
     ): boolean {
         if (!this.gameStore.isMyTurn) return false;
         if (spotOwner === "PLAYER") return false;
+        if (!canMinionAttack(minion, this.gameStore.game.data.currentRound)) return false;
 
         const opponentBoard = this.gameStore.opponent.board;
         const hasTaunt = boardHasTaunt(opponentBoard);
@@ -102,6 +104,8 @@ export class MinionDragStore {
 
         if (!this.gameStore.isMyTurn || this.minionDragged === null) return transparent;
         if (!isOpponent) return transparent;
+        if (!canMinionAttack(this.minionDragged, this.gameStore.game.data.currentRound))
+            return transparent;
 
         if (boardHasTaunt(this.gameStore.opponent.board)) return "red";
 

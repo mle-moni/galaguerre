@@ -12,6 +12,7 @@ export type MinionCard = PlayerCardBase & {
     health: number;
     attack: number;
     hasTaunt: boolean;
+    hasCharge: boolean;
     effects: string[];
     description: string;
 };

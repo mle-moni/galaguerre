@@ -1,6 +1,7 @@
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
+    canMinionAttack,
     ensureIsMyTurn,
     ensureMinionFoundInBoard,
     getGameActionInfos,
@@ -25,25 +26,16 @@ export const gameMinionAction = async (
     const minionInfos = ensureMinionFoundInBoard(player.board, minionId, "PLAYER", socketId);
     if (!minionInfos) return;
 
-    if (minionInfos.minion.placedAtRound === currentGame.data.currentRound) {
-        emitSocketEvent(
-            "notify_error",
-            {
-                error: "Ce serviteur n'est pas encore prêt à attaquer",
-            },
-            socketId,
-        );
-        return;
-    }
+    const currentRound = currentGame.data.currentRound;
+    const minion = minionInfos.minion;
 
-    if (minionInfos.minion.lastActionAtRound === currentGame.data.currentRound) {
-        emitSocketEvent(
-            "notify_error",
-            {
-                error: "Ce serviteur a déjà attaqué ce tour",
-            },
-            socketId,
-        );
+    if (!canMinionAttack(minion, currentRound)) {
+        const error =
+            minion.lastActionAtRound === currentRound
+                ? "Ce serviteur a déjà attaqué ce tour"
+                : "Ce serviteur n'est pas encore prêt à attaquer";
+
+        emitSocketEvent("notify_error", { error }, socketId);
         return;
     }
 

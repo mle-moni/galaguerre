@@ -12,9 +12,17 @@ export default class extends BaseSeeder {
             isPoisonous: false,
         });
 
+        const chargePower = await MinionPower.create({
+            hasTaunt: false,
+            hasCharge: true,
+            hasWindfury: false,
+            isPoisonous: false,
+        });
+
         const [
             monsterOneOne,
             monsterTwoOne,
+            monsterTwoOneCharge,
             monsterOneTwo,
             monsterTwoTwo,
             monsterThreeOne,
@@ -41,6 +49,12 @@ export default class extends BaseSeeder {
                 internalLabel: "Monstre 2-1",
                 attack: 2,
                 health: 1,
+            },
+            {
+                internalLabel: "Monstre 2-1 Charge",
+                attack: 2,
+                health: 1,
+                minionPowerId: chargePower.id,
             },
             {
                 internalLabel: "Monstre 1-2",
@@ -143,6 +157,16 @@ export default class extends BaseSeeder {
                 type: "MINION",
                 cardMode: "BETA",
                 minionId: monsterTwoOne.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Monster 2-1 Charge",
+                imageUrl: "https://picsum.photos/seed/monster_2-1_charge/200/300",
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: monsterTwoOneCharge.id,
                 spellId: null,
                 weaponId: null,
             },

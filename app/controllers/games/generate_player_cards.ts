@@ -30,6 +30,7 @@ export const generatePlayerCards = (deck: Deck) => {
             health: card.minion.health,
             attack: card.minion.attack,
             hasTaunt: card.minion.minionPower?.hasTaunt ?? false,
+            hasCharge: card.minion.minionPower?.hasCharge ?? false,
             effects,
             description: getMinionCardDescription(card.minion.attack, card.minion.health, effects),
         };

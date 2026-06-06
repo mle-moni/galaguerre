@@ -1,6 +1,7 @@
 import type { MinionCard, MinionState } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
+import { canMinionAttack } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { CardDetailHover } from "./card_detail_hover.jsx";
 import { MinionCardFace } from "./minion_card_face.jsx";
@@ -27,7 +28,7 @@ export const RenderMinion = observer(({ state, style }: MinionToRenderProps) => 
             health={state.health}
             style={style}
             className="cursor-pointer"
-            draggable={store.isMyTurn}
+            draggable={store.isMyTurn && canMinionAttack(state, store.game.data.currentRound)}
             onDragStart={() => store.minionDragStore.setMinionDragged(state)}
             onDragEnd={() => store.minionDragStore.setMinionDragged(null)}
             wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
