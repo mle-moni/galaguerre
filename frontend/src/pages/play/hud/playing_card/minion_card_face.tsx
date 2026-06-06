@@ -2,6 +2,7 @@ import type { MinionCard } from "#api_types/game.types";
 import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
+import { CardEffectSymbols } from "./card_effect_symbols.jsx";
 
 interface MinionCardFaceProps {
     card: MinionCard;
@@ -34,6 +35,7 @@ export const MinionCardFace = ({
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
         >
+            <CardEffectSymbols card={card} />
             <div className="relative">
                 <div className="cost">{card.cost}</div>
                 <Image
@@ -43,11 +45,6 @@ export const MinionCardFace = ({
                     alt="Galaguerre card"
                     draggable={false}
                 />
-                {card.hasTaunt && (
-                    <div className="provocation" title="Provocation">
-                        P
-                    </div>
-                )}
             </div>
             <div className="flex flex-col h-[75px] justify-around">
                 <p className="text-center text-white m-0 text-xs px-1">{card.label}</p>
