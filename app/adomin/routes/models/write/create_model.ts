@@ -1,6 +1,6 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import { validateOrThrow } from "../../../validation/adomin_validation_helpers.js";
-import { getGenericMessages } from "../../../validation/validation_messages.js";
+import { getGenericMessagesProvider } from "../../../validation/validation_messages.js";
 import { computeRightsCheck } from "../../adomin_routes_overrides_and_rights.js";
 import { getValidationSchemaFromConfig } from "../../get_validation_schema_from_lucid_model.js";
 import { getModelData } from "../get_model_data.js";
@@ -37,8 +37,10 @@ export const createModel = async (ctx: HttpContext) => {
 
     const fields = modelConfig.fields;
 
-    const schema = getValidationSchemaFromConfig(modelConfig, "create");
-    const parsedData = await request.validate({ schema, messages: getGenericMessages(Model) });
+    const validator = getValidationSchemaFromConfig(modelConfig, "create");
+    const parsedData = await request.validateUsing(validator, {
+        messagesProvider: getGenericMessagesProvider(Model),
+    });
 
     const createdInstance = new Model();
 

@@ -1,12 +1,12 @@
 import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
 import type Deck from "#models/deck";
-import { cuid } from "@adonisjs/core/helpers";
+import { randomUUID } from "node:crypto";
 import { shuffleArray } from "../../utils/array.js";
 
 export const generatePlayerCards = (deck: Deck) => {
     const cards: PlayerCard[] = deck.cards.map((card) => {
         const base: PlayerCardBase = {
-            uuid: cuid(),
+            uuid: randomUUID(),
             cardId: card.id,
             label: card.label,
             imageUrl: card.imageUrl,

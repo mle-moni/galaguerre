@@ -1,5 +1,5 @@
 import type { HttpContext } from "@adonisjs/core/http";
-import type { ParsedTypedSchema, TypedSchema } from "@adonisjs/validator/types";
+import type { SimpleMessagesProvider, VineValidator } from "@vinejs/vine";
 
 export interface ValidationFunctionResult {
     valid: boolean;
@@ -23,8 +23,9 @@ export type AdominCustomFunctionValidation = (
 ) => Promise<ValidationFunctionResult>;
 
 export type AdominValidationWithSchema = {
-    schema: ParsedTypedSchema<TypedSchema>;
-    messages?: { [key: string]: string };
+    // biome-ignore lint/suspicious/noExplicitAny: dynamic vine validators from model config
+    schema: VineValidator<any, any>;
+    messagesProvider?: SimpleMessagesProvider;
 };
 
 export type AdominValidationAtom = AdominValidationWithSchema | AdominCustomFunctionValidation;
@@ -38,8 +39,14 @@ export type AdominValidation = {
     update?: AdominValidationAtom;
 };
 
-export const isAdonisSchema = (input: unknown): input is ParsedTypedSchema<TypedSchema> => {
-    return typeof input === "object" && input !== null && "props" in input && "tree" in input;
+// biome-ignore lint/suspicious/noExplicitAny: runtime check for compiled vine validators
+export const isVineValidator = (input: unknown): input is VineValidator<any, any> => {
+    return (
+        typeof input === "object" &&
+        input !== null &&
+        "validate" in input &&
+        "validateRaw" in input
+    );
 };
 
 const validateAtom = async (ctx: HttpContext, atom: AdominValidationAtom) => {
@@ -54,7 +61,9 @@ const validateAtom = async (ctx: HttpContext, atom: AdominValidationAtom) => {
         return false;
     }
 
-    await ctx.request.validate({ schema: atom.schema, messages: atom.messages });
+    await ctx.request.validateUsing(atom.schema, {
+        messagesProvider: atom.messagesProvider,
+    });
 
     return true;
 };
