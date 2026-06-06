@@ -35,6 +35,7 @@ export const controllers = {
             GamePlayCard: () => import("#controllers/games/play_card/game_play_card"),
             InstantiateMinion: () => import("#controllers/games/play_card/instantiate_minion"),
             PlayMinion: () => import("#controllers/games/play_card/play_minion"),
+            PlaySpell: () => import("#controllers/games/play_card/play_spell"),
         },
         SendGameUpdate: () => import("#controllers/games/send_game_update"),
         SetupNextGameTurn: () => import("#controllers/games/setup_next_game_turn"),

@@ -94,7 +94,8 @@ export type MinionCard = PlayerCardBase & {
 
 export type SpellCard = PlayerCardBase & {
     type: "SPELL";
-    // TODO
+    description: string;
+    action: CardActionSnapshot;
 };
 
 export type WeaponCard = PlayerCardBase & {

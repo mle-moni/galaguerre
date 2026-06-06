@@ -4,6 +4,7 @@ import type {
     CardActionSnapshot,
     MinionCard,
     MinionState,
+    SpellCard,
     TargetSnapshot,
 } from "./game.types.js";
 import { getBoardMinionStats, matchesComparison } from "./comparison_matching.js";
@@ -45,7 +46,8 @@ export const minionMatchesTarget = (
     return true;
 };
 
-export const actionRequiresTarget = (card: MinionCard): boolean => {
+export const actionRequiresTarget = (card: MinionCard | SpellCard): boolean => {
+    if (card.type === "SPELL") return card.action.isTargeted;
     return card.battlecryActions?.some((action) => action.isTargeted) ?? false;
 };
 

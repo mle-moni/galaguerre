@@ -28,72 +28,32 @@ export default class extends BaseSeeder {
         const battlecryDrawCard = await Card.query()
             .where("label", "Monster 2-1 Battlecry Draw")
             .firstOrFail();
-        const battlecryEnemyDrawCard = await Card.query()
-            .where("label", "Monster 2-1 Battlecry Enemy Draw")
-            .firstOrFail();
         const targetedHeroDamageCard = await Card.query()
             .where("label", "Monster 2-2 Targeted Hero Damage")
             .firstOrFail();
         const targetedMinionDamageCard = await Card.query()
             .where("label", "Monster 2-2 Targeted Minion Damage")
             .firstOrFail();
-        const targetedMinionHealCard = await Card.query()
-            .where("label", "Monster 1-3 Targeted Minion Heal")
-            .firstOrFail();
-        const targetedStrongMinionCard = await Card.query()
-            .where("label", "Monster 3-2 Targeted Strong Minion")
-            .firstOrFail();
-        const targetedBeastDamageCard = await Card.query()
-            .where("label", "Monster 2-2 Targeted Beast Damage")
-            .firstOrFail();
-        const targetedLowHealthCard = await Card.query()
-            .where("label", "Monster 2-3 Targeted Low Health")
-            .firstOrFail();
-        const targetedExpensiveCard = await Card.query()
-            .where("label", "Monster 3-1 Targeted Expensive")
-            .firstOrFail();
-        const targetedAllyBoostCard = await Card.query()
-            .where("label", "Monster 3-2 Targeted Ally Boost")
-            .firstOrFail();
-        const massAllyBoostCard = await Card.query()
-            .where("label", "Monster 2-3 Mass Ally Boost")
-            .firstOrFail();
         const heroSpellPowerBoostCard = await Card.query()
             .where("label", "Monster 2-2 Hero Spell Power Boost")
-            .firstOrFail();
-        const grantTauntBoostCard = await Card.query()
-            .where("label", "Monster 2-2 Grant Taunt Boost")
-            .firstOrFail();
-        const targetedEnemyBoostCard = await Card.query()
-            .where("label", "Monster 2-1 Targeted Enemy Boost")
             .firstOrFail();
         const deathrattleDamageCard = await Card.query()
             .where("label", "Monster 2-1 Deathrattle Damage")
             .firstOrFail();
-        const deathrattleHealCard = await Card.query()
-            .where("label", "Monster 2-1 Deathrattle Heal")
+        const spellHeroDamageCard = await Card.query()
+            .where("label", "Spell 2 Hero Damage")
             .firstOrFail();
-        const deathrattleDrawCard = await Card.query()
-            .where("label", "Monster 2-1 Deathrattle Draw")
+        const spellTargetedDamageCard = await Card.query()
+            .where("label", "Spell 3 Targeted Damage")
             .firstOrFail();
-        const deathrattleEnemyDrawCard = await Card.query()
-            .where("label", "Monster 2-1 Deathrattle Enemy Draw")
-            .firstOrFail();
-        const deathrattleMassDamageCard = await Card.query()
-            .where("label", "Monster 2-1 Deathrattle Mass Damage")
-            .firstOrFail();
-        const filteredDrawCost1Card = await Card.query()
-            .where("label", "Monster 2-2 Battlecry Filtered Draw (Cost 1)")
-            .firstOrFail();
-        const filteredDrawBeastCard = await Card.query()
-            .where("label", "Monster 2-2 Battlecry Filtered Draw (Beast)")
-            .firstOrFail();
-        const filteredEnemyDrawCost1Card = await Card.query()
-            .where("label", "Monster 2-2 Battlecry Filtered Enemy Draw (Cost 1)")
+        const spellDrawCard = await Card.query().where("label", "Spell 1 Draw").firstOrFail();
+        const spellMassDamageCard = await Card.query()
+            .where("label", "Spell 2 Mass Minion Damage")
             .firstOrFail();
         const beastFillerCard = await Card.query()
             .where("label", "Monster 1-1 Beast")
             .firstOrFail();
+        const genericFillerCard = await Card.query().where("label", "Monster 2-1").firstOrFail();
 
         const guaranteedLabels = [
             "Monster 1-2",
@@ -101,83 +61,43 @@ export default class extends BaseSeeder {
             "Monster 2-1 Battlecry Damage",
             "Monster 2-1 Battlecry Heal",
             "Monster 2-1 Battlecry Draw",
-            "Monster 2-1 Battlecry Enemy Draw",
             "Monster 2-2 Targeted Hero Damage",
             "Monster 2-2 Targeted Minion Damage",
-            "Monster 1-3 Targeted Minion Heal",
-            "Monster 3-2 Targeted Strong Minion",
-            "Monster 2-2 Targeted Beast Damage",
-            "Monster 2-3 Targeted Low Health",
-            "Monster 3-1 Targeted Expensive",
-            "Monster 3-2 Targeted Ally Boost",
-            "Monster 2-3 Mass Ally Boost",
             "Monster 2-2 Hero Spell Power Boost",
-            "Monster 2-2 Grant Taunt Boost",
-            "Monster 2-1 Targeted Enemy Boost",
             "Monster 2-1 Deathrattle Damage",
-            "Monster 2-1 Deathrattle Heal",
-            "Monster 2-1 Deathrattle Draw",
-            "Monster 2-1 Deathrattle Enemy Draw",
-            "Monster 2-1 Deathrattle Mass Damage",
-            "Monster 2-2 Battlecry Filtered Draw (Cost 1)",
-            "Monster 2-2 Battlecry Filtered Draw (Beast)",
-            "Monster 2-2 Battlecry Filtered Enemy Draw (Cost 1)",
+            "Spell 2 Hero Damage",
+            "Spell 3 Targeted Damage",
+            "Spell 1 Draw",
+            "Spell 2 Mass Minion Damage",
             "Monster 1-1 Beast",
+            "Monster 2-1",
         ];
         const otherCards = await Card.query().whereNotIn("label", guaranteedLabels);
 
-        const TAUNT_COPIES_PER_DECK = 2;
-        const CHARGE_COPIES_PER_DECK = 2;
-        const BATTLECRY_COPIES_PER_DECK = 1;
-        const TARGETED_BATTLECRY_COPIES_PER_DECK = 1;
-        const BOOST_COPIES_PER_DECK = 1;
-        const DEATHRATTLE_COPIES_PER_DECK = 1;
-        const FILTERED_DRAW_COPIES_PER_DECK = 1;
-        const BEAST_FILLER_COPIES_PER_DECK = 2;
-        const DECK_SIZE = 30;
+        const DECK_SIZE = 20;
+        const SPELL_COPIES_PER_DECK = 2;
 
         for (const deck of decks) {
             const shuffledOthers = shuffleArray(otherCards);
-            const fillerCount =
-                DECK_SIZE -
-                TAUNT_COPIES_PER_DECK -
-                CHARGE_COPIES_PER_DECK -
-                BATTLECRY_COPIES_PER_DECK * 4 -
-                TARGETED_BATTLECRY_COPIES_PER_DECK * 7 -
-                BOOST_COPIES_PER_DECK * 5 -
-                DEATHRATTLE_COPIES_PER_DECK * 5 -
-                FILTERED_DRAW_COPIES_PER_DECK * 3 -
-                BEAST_FILLER_COPIES_PER_DECK;
+            const fillerCount = DECK_SIZE - 11 - SPELL_COPIES_PER_DECK * 4;
 
             const deckCardIds = [
-                ...Array.from({ length: TAUNT_COPIES_PER_DECK }, () => tauntCard.id),
-                ...Array.from({ length: CHARGE_COPIES_PER_DECK }, () => chargeCard.id),
+                tauntCard.id,
+                chargeCard.id,
                 battlecryDamageCard.id,
                 battlecryHealCard.id,
                 battlecryDrawCard.id,
-                battlecryEnemyDrawCard.id,
                 targetedHeroDamageCard.id,
                 targetedMinionDamageCard.id,
-                targetedMinionHealCard.id,
-                targetedStrongMinionCard.id,
-                targetedBeastDamageCard.id,
-                targetedLowHealthCard.id,
-                targetedExpensiveCard.id,
-                targetedAllyBoostCard.id,
-                massAllyBoostCard.id,
                 heroSpellPowerBoostCard.id,
-                grantTauntBoostCard.id,
-                targetedEnemyBoostCard.id,
                 deathrattleDamageCard.id,
-                deathrattleHealCard.id,
-                deathrattleDrawCard.id,
-                deathrattleEnemyDrawCard.id,
-                deathrattleMassDamageCard.id,
-                filteredDrawCost1Card.id,
-                filteredDrawBeastCard.id,
-                filteredEnemyDrawCost1Card.id,
-                ...Array.from({ length: BEAST_FILLER_COPIES_PER_DECK }, () => beastFillerCard.id),
-                ...shuffledOthers.slice(0, fillerCount).map((card) => card.id),
+                beastFillerCard.id,
+                genericFillerCard.id,
+                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellHeroDamageCard.id),
+                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellTargetedDamageCard.id),
+                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellDrawCard.id),
+                ...Array.from({ length: SPELL_COPIES_PER_DECK }, () => spellMassDamageCard.id),
+                ...shuffledOthers.slice(0, Math.max(0, fillerCount)).map((card) => card.id),
             ];
 
             await DeckCard.createMany(

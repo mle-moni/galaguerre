@@ -1,6 +1,6 @@
-import type { MinionCard } from "#api_types/game.types";
+import type { MinionCard, SpellCard } from "#api_types/game.types";
 import { actionRequiresTarget } from "#api_types/target_matching";
 
-export const cardRequiresActionTarget = (card: MinionCard): boolean => {
+export const cardRequiresActionTarget = (card: MinionCard | SpellCard): boolean => {
     return actionRequiresTarget(card);
 };

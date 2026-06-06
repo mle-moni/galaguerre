@@ -188,16 +188,29 @@ export const placeMinion = (
 
 export const createSpellCard = (
     overrides: Partial<SpellCard> & { uuid?: string } = {},
-): SpellCard => ({
-    uuid: overrides.uuid ?? CARD_IDS.spell,
-    cardId: 2,
-    label: "Test Spell",
-    imageUrl: "https://example.com/spell.png",
-    cost: 2,
-    tagIds: [],
-    type: "SPELL",
-    ...overrides,
-});
+): SpellCard => {
+    const action =
+        overrides.action ??
+        createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: false,
+            damage: 3,
+            target: createHeroTargetSnapshot("OPPONENT"),
+        });
+
+    return {
+        uuid: overrides.uuid ?? CARD_IDS.spell,
+        cardId: 2,
+        label: "Test Spell",
+        imageUrl: "https://example.com/spell.png",
+        cost: 2,
+        tagIds: [],
+        type: "SPELL",
+        description: "Effet : Inflige 3 dégâts au héros adverse.",
+        action,
+        ...overrides,
+    };
+};
 
 export const createWeaponCard = (
     overrides: Partial<WeaponCard> & { uuid?: string } = {},

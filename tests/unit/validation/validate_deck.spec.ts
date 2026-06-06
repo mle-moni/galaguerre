@@ -8,6 +8,7 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import Minion from "#models/minion";
 import MinionBattlecryAction from "#models/minion_battlecry_action";
+import Spell from "#models/spell";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import User from "#models/user";
@@ -26,27 +27,28 @@ const nullActionFields = {
     boostId: null,
 };
 
+const preloadActionRelations = (aq: {
+    preload: (relation: string, callback?: (sq: any) => void) => void;
+}) => {
+    aq.preload("boost", (bq: any) => bq.preload("minionPower"));
+    aq.preload("drawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
+    aq.preload("enemyDrawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
+    aq.preload("toolToTargets", (tq: any) =>
+        tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
+    );
+};
+
 const loadDeckRelations = async (deck: Deck) => {
     await deck.load("cards", (query) =>
-        query.preload("minion", (q) =>
-            q.preload("minionPower").preload("battlecryActions", (q) =>
+        query
+            .preload("minion", (q) =>
                 q
-                    .preload("action", (aq) =>
-                        aq
-                            .preload("boost", (bq) => bq.preload("minionPower"))
-                            .preload("drawCardFilter", (cfq) =>
-                                cfq.preload("comparison").preload("tags"),
-                            )
-                            .preload("enemyDrawCardFilter", (cfq) =>
-                                cfq.preload("comparison").preload("tags"),
-                            )
-                            .preload("toolToTargets", (tq) =>
-                                tq.preload("target", (targetQ) => targetQ.preload("comparison")),
-                            ),
-                    )
-                    .orderBy("id", "asc"),
-            ),
-        ),
+                    .preload("minionPower")
+                    .preload("battlecryActions", (q) =>
+                        q.preload("action", preloadActionRelations).orderBy("id", "asc"),
+                    ),
+            )
+            .preload("spell", (sq) => sq.preload("action", preloadActionRelations)),
     );
 };
 
@@ -518,10 +520,70 @@ test.group("validation:validateDeck", (group) => {
         );
     });
 
-    test("rejects SPELL card in deck", async ({ assert }) => {
+    test("accepts valid SPELL card in deck", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
             email: `vd-spell-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Valid spell deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const damageAction = await Action.create({
+            internalLabel: `spell-damage-action-${unique}`,
+            type: "DAMAGE",
+            isTargeted: false,
+            ...nullActionFields,
+            damage: 3,
+        });
+
+        const enemyHeroTarget = await Target.create({
+            internalLabel: `spell-enemy-hero-${unique}`,
+            type: "HERO",
+            targetTeam: "OPPONENT",
+            comparisonId: null,
+            tagId: null,
+        });
+
+        await ToolToTarget.create({
+            targetId: enemyHeroTarget.id,
+            actionId: damageAction.id,
+            boostId: null,
+        });
+
+        const spell = await Spell.create({
+            internalLabel: `spell-${unique}`,
+            actionId: damageAction.id,
+        });
+
+        const card = await Card.create({
+            label: `spell-card-${unique}`,
+            imageUrl: "https://example.com/spell.png",
+            cost: 2,
+            type: "SPELL",
+            cardMode: "BETA",
+            minionId: null,
+            spellId: spell.id,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await loadDeckRelations(deck);
+
+        const result = validateDeck(deck);
+
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
+    });
+
+    test("rejects SPELL card without spell entity", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-spell-missing-${unique}@test.fr`,
             password: "test",
         });
 
@@ -549,7 +611,7 @@ test.group("validation:validateDeck", (group) => {
 
         assert.isFalse(result.valid);
         assert.equal(result.errors.length, 1);
-        assert.include(result.errors[0]!.reason, "type SPELL not supported");
+        assert.include(result.errors[0]!.reason, "spell not found");
     });
 
     test("createGame rejects deck with invalid cards", async ({ assert }) => {

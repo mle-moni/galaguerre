@@ -1,4 +1,11 @@
-import type { ActionTarget, MinionCard, MinionSpotId, SpotOwner } from "#api_types/game.types";
+import type {
+    ActionTarget,
+    CardActionSnapshot,
+    MinionCard,
+    MinionSpotId,
+    SpellCard,
+    SpotOwner,
+} from "#api_types/game.types";
 import {
     actionRequiresTarget,
     heroMatchesTarget,
@@ -9,11 +16,9 @@ import { makeAutoObservable } from "mobx";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
 
-export type PendingPlay = {
-    card: MinionCard;
-    spotId: MinionSpotId;
-    owner: SpotOwner;
-};
+export type PendingPlay =
+    | { kind: "MINION"; card: MinionCard; spotId: MinionSpotId; owner: SpotOwner }
+    | { kind: "SPELL"; card: SpellCard };
 
 export class TargetSelectionStore {
     public pendingPlay: PendingPlay | null = null;
@@ -26,21 +31,30 @@ export class TargetSelectionStore {
         return this.pendingPlay !== null;
     }
 
-    requiresTarget(card: MinionCard): boolean {
+    requiresTarget(card: MinionCard | SpellCard): boolean {
         return actionRequiresTarget(card);
     }
 
     startTargetSelection(card: MinionCard, spotId: MinionSpotId, owner: SpotOwner) {
-        this.pendingPlay = { card, spotId, owner };
+        this.pendingPlay = { kind: "MINION", card, spotId, owner };
         this.gameStore.cardDragStore.setCardDragged(null);
+    }
+
+    startSpellTargetSelection(card: SpellCard) {
+        this.pendingPlay = { kind: "SPELL", card };
     }
 
     cancelTargetSelection() {
         this.pendingPlay = null;
     }
 
-    private getTargetedActions() {
+    private getTargetedActions(): CardActionSnapshot[] {
         if (!this.pendingPlay) return [];
+
+        if (this.pendingPlay.kind === "SPELL") {
+            return this.pendingPlay.card.action.isTargeted ? [this.pendingPlay.card.action] : [];
+        }
+
         return this.pendingPlay.card.battlecryActions.filter((action) => action.isTargeted);
     }
 
@@ -84,14 +98,23 @@ export class TargetSelectionStore {
             return;
         }
 
-        const { card, spotId, owner } = this.pendingPlay;
+        if (this.pendingPlay.kind === "SPELL") {
+            emitSocketEventToServer("game:play_card", {
+                cardId: this.pendingPlay.card.uuid,
+                spotId: null,
+                owner: "PLAYER",
+                actionTarget,
+            });
+        } else {
+            const { card, spotId, owner } = this.pendingPlay;
 
-        emitSocketEventToServer("game:play_card", {
-            cardId: card.uuid,
-            spotId,
-            owner,
-            actionTarget,
-        });
+            emitSocketEventToServer("game:play_card", {
+                cardId: card.uuid,
+                spotId,
+                owner,
+                actionTarget,
+            });
+        }
 
         this.pendingPlay = null;
     }

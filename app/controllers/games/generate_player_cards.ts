@@ -1,4 +1,5 @@
 import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
+import { formatActionDescription } from "../../galaguerre/action_engine/format_action_description.js";
 import { serializeAction } from "../../galaguerre/action_engine/serialize_action.js";
 import {
     getBattlecryDescription,
@@ -21,8 +22,20 @@ export const generatePlayerCards = (deck: Deck) => {
             tagIds: (card.tags ?? []).map((tag) => tag.id),
         };
 
-        if (card.type === "SPELL") throw new Error("card type not supported");
         if (card.type === "WEAPON") throw new Error("card type not supported");
+
+        if (card.type === "SPELL") {
+            if (!card.spell) throw new Error("card.spell not found");
+
+            const action = serializeAction(card.spell.action);
+
+            return {
+                ...base,
+                type: "SPELL",
+                description: formatActionDescription(action, "Effet") ?? card.label,
+                action,
+            };
+        }
 
         if (!card.minion) throw new Error("card.minion not found");
 

@@ -6,6 +6,39 @@ import type { DeckValidationErrorDetail } from "./validate_deck.js";
 export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
     const errors: DeckValidationErrorDetail[] = [];
 
+    if (card.type === "WEAPON") {
+        errors.push({
+            cardId: card.id,
+            cardLabel: card.label,
+            reason: `type ${card.type} not supported`,
+        });
+        return errors;
+    }
+
+    if (card.type === "SPELL") {
+        if (!card.spell) {
+            errors.push({
+                cardId: card.id,
+                cardLabel: card.label,
+                reason: "spell not found",
+            });
+            return errors;
+        }
+
+        const actionError = validateAction(card.spell.action);
+        if (actionError) {
+            errors.push({
+                cardId: card.id,
+                cardLabel: card.label,
+                actionId: actionError.actionId,
+                actionInternalLabel: actionError.internalLabel,
+                reason: actionError.reason,
+            });
+        }
+
+        return errors;
+    }
+
     if (card.type !== "MINION") {
         errors.push({
             cardId: card.id,

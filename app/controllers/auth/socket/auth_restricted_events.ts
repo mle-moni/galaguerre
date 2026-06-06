@@ -20,7 +20,7 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         (data) => gamePlayCard(socket.id, data),
         vine.object({
             cardId: vine.string(),
-            spotId: vine.enum(MINION_SPOT_IDS),
+            spotId: vine.enum(MINION_SPOT_IDS).nullable(),
             owner: vine.enum(SPOT_OWNERS),
             actionTarget: vine
                 .object({

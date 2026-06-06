@@ -15,6 +15,7 @@ import {
     whichPlayerAmI,
 } from "../game_utils.js";
 import { playMinion } from "./play_minion.js";
+import { playSpell } from "./play_spell.js";
 
 export const gamePlayCard = async (
     socketId: string,
@@ -40,7 +41,7 @@ export interface PlayCardOptions {
     game: Game;
     player: GamePlayer;
     owner: SpotOwner;
-    spotId: MinionSpotId;
+    spotId: MinionSpotId | null;
     socketId: string;
     actionTarget?: ActionTarget | null;
 }
@@ -57,7 +58,18 @@ const playCard = async (opts: PlayCardOptions) => {
         return;
     }
 
-    if (card.type === "MINION") return playMinion({ ...opts, card });
+    if (card.type === "MINION") {
+        if (!opts.spotId) {
+            emitSocketEvent(
+                "notify_error",
+                { error: "Vous ne pouvez pas jouer cette carte ici" },
+                opts.socketId,
+            );
+            return;
+        }
+        return playMinion({ ...opts, card, spotId: opts.spotId });
+    }
+    if (card.type === "SPELL") return playSpell({ ...opts, card });
 
     emitSocketEvent(
         "notify_error",

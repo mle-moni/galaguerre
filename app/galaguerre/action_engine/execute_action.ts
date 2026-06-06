@@ -28,12 +28,17 @@ const getMinionOwner = (
     return board === player.board ? player : opponent;
 };
 
+const getEffectiveDamage = (action: CardActionSnapshot, damageBonus: number): number => {
+    return (action.damage ?? 0) + damageBonus;
+};
+
 export const executeAction = (
     action: CardActionSnapshot,
     game: Game,
     player: GamePlayer,
     opponent: GamePlayer,
     selectedTarget?: ActionTarget,
+    damageBonus = 0,
 ): void => {
     if (isTargetedV1Action(action)) {
         if (!selectedTarget) return;
@@ -43,10 +48,11 @@ export const executeAction = (
 
         switch (action.type) {
             case "DAMAGE": {
+                const damage = getEffectiveDamage(action, damageBonus);
                 if (resolved.type === "HERO") {
-                    resolved.player.health -= action.damage!;
+                    resolved.player.health -= damage;
                 } else {
-                    resolved.minion.health -= action.damage!;
+                    resolved.minion.health -= damage;
                     if (resolved.minion.health <= 0) {
                         const owner = getMinionOwner(
                             resolved.board,
@@ -92,8 +98,9 @@ export const executeAction = (
 
     switch (action.type) {
         case "DAMAGE": {
+            const damage = getEffectiveDamage(action, damageBonus);
             if (action.target?.type === "MINION") {
-                applyDamageToAllMinions(game, player, opponent, action.target, action.damage!);
+                applyDamageToAllMinions(game, player, opponent, action.target, damage);
                 break;
             }
 
@@ -102,7 +109,7 @@ export const executeAction = (
                     ? resolveHeroTargets(action.target, player, opponent)
                     : [opponent];
             for (const target of targets) {
-                target.health -= action.damage!;
+                target.health -= damage;
             }
             break;
         }

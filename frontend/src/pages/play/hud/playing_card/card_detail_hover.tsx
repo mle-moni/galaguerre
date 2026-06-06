@@ -1,17 +1,31 @@
-import type { MinionCard } from "#api_types/game.types";
+import type { PlayerCard } from "#api_types/game.types";
 import { HoverCard, Text } from "@mantine/core";
 import type { ReactNode } from "react";
 
 interface CardDetailHoverProps {
-    card: MinionCard;
+    card: PlayerCard;
     children: ReactNode;
 }
 
+const getCardDescription = (card: PlayerCard): string => {
+    if (card.type === "MINION") {
+        return card.description || `Serviteur ${card.attack}/${card.health}.`;
+    }
+    if (card.type === "SPELL") {
+        return card.description || card.label;
+    }
+    return card.label;
+};
+
+const getCardChips = (card: PlayerCard) => {
+    if (card.type !== "MINION") return { effects: [], tags: [] };
+    return { effects: card.effects ?? [], tags: card.tags ?? [] };
+};
+
 export const CardDetailHover = ({ card, children }: CardDetailHoverProps) => {
-    const effects = card.effects ?? [];
-    const tags = card.tags ?? [];
+    const { effects, tags } = getCardChips(card);
     const hasChips = effects.length > 0 || tags.length > 0;
-    const description = card.description || `Serviteur ${card.attack}/${card.health}.`;
+    const description = getCardDescription(card);
 
     return (
         <HoverCard width={280} shadow="md" openDelay={200} position="top">

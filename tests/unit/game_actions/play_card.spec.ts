@@ -1,11 +1,14 @@
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { assertBoardSpot } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
+    createCardActionSnapshot,
     createGameData,
     createMinionCard,
     createMinionState,
+    createMinionTargetSnapshot,
     createSpellCard,
     createWeaponCard,
     placeMinion,
@@ -194,8 +197,71 @@ test.group("game:play_card", (group) => {
         });
     });
 
-    test("rejects unsupported spell card type", async ({ assert }) => {
-        const spell = createSpellCard({ cost: 1 });
+    test("plays a valid spell card from hand", async ({ assert }) => {
+        const spell = createSpellCard({ cost: 2 });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    health: DEFAULT_HERO_HEALTH,
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.spell,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.mana, 8);
+        assert.equal(result.game.data.playerOne.hand.length, 0);
+        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 3);
+    });
+
+    test("rejects spell play when mana is insufficient", async ({ assert }) => {
+        const spell = createSpellCard({ cost: 5 });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 2,
+                    hand: [spell],
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.spell,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: {
+                error: "Vous n'avez pas assez de mana pour jouer cette carte",
+            },
+        });
+
+        assertPlayCardScenario(assert, result, {
+            error: "Vous n'avez pas assez de mana pour jouer cette carte",
+        });
+        assert.equal(result.game.data.playerOne.hand.length, 1);
+    });
+
+    test("rejects targeted spell without action target", async ({ assert }) => {
+        const spell = createSpellCard({
+            cost: 3,
+            action: createCardActionSnapshot({
+                type: "DAMAGE",
+                isTargeted: true,
+                damage: 4,
+                target: createMinionTargetSnapshot("OPPONENT"),
+            }),
+        });
 
         const result = await runPlayCard({
             data: createGameData({
@@ -207,16 +273,16 @@ test.group("game:play_card", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.spell,
-                spotId: "SPOT_1",
+                spotId: null,
                 owner: "PLAYER",
             },
             expect: {
-                error: "Card type 'SPELL' not supported",
+                error: "Vous devez choisir une cible pour cette carte",
             },
         });
 
         assertPlayCardScenario(assert, result, {
-            error: "Card type 'SPELL' not supported",
+            error: "Vous devez choisir une cible pour cette carte",
         });
     });
 

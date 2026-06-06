@@ -1,16 +1,14 @@
-import type { ActionTarget, MinionCard, MinionSpotId } from "#api_types/game.types";
-import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
+import type { ActionTarget, SpellCard } from "#api_types/game.types";
+import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import type { PlayCardOptions } from "./game_play_card.js";
-import { instantiateMinion } from "./instantiate_minion.js";
 
-interface PlayMinionOptions extends Omit<PlayCardOptions, "card" | "spotId"> {
-    card: MinionCard;
-    spotId: MinionSpotId;
+interface PlaySpellOptions extends Omit<PlayCardOptions, "card"> {
+    card: SpellCard;
     actionTarget?: ActionTarget | null;
 }
 
@@ -18,38 +16,13 @@ const getOpponent = (game: PlayCardOptions["game"], player: PlayCardOptions["pla
     return player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
 };
 
-const validateActionTargetForCard = (
-    card: MinionCard,
-    actionTarget: ActionTarget,
-    player: PlayCardOptions["player"],
-    opponent: PlayCardOptions["player"],
-): boolean => {
-    const targetedActions = (card.battlecryActions ?? []).filter((action) => action.isTargeted);
-
-    return targetedActions.every((action) =>
-        validateSelectedTargetForAction(actionTarget, action, player, opponent),
-    );
-};
-
-export const playMinion = async ({
+export const playSpell = async ({
     card,
-    spotId,
-    owner,
     player,
     game,
     socketId,
     actionTarget,
-}: PlayMinionOptions) => {
-    const spotIsEmpty = player.board[spotId] === null;
-    if (owner === "OPPONENT" || !spotIsEmpty) {
-        emitSocketEvent(
-            "notify_error",
-            { error: "Vous ne pouvez pas jouer cette carte ici" },
-            socketId,
-        );
-        return;
-    }
-
+}: PlaySpellOptions) => {
     const requiresTarget = cardRequiresActionTarget(card);
     const opponent = getOpponent(game, player);
 
@@ -71,16 +44,18 @@ export const playMinion = async ({
         return;
     }
 
-    if (actionTarget && !validateActionTargetForCard(card, actionTarget, player, opponent)) {
+    if (
+        actionTarget &&
+        !validateSelectedTargetForAction(actionTarget, card.action, player, opponent)
+    ) {
         emitSocketEvent("notify_error", { error: "Cible invalide pour cette carte" }, socketId);
         return;
     }
 
-    player.board[spotId] = instantiateMinion(card, game.data.currentRound);
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
     player.mana -= card.cost;
 
-    const { gameEnded } = executeBattlecries(game, player, card, actionTarget ?? undefined);
+    const { gameEnded } = executeSpellEffect(game, player, card, actionTarget ?? undefined);
 
     if (gameEnded) {
         await terminateGame(game);

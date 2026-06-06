@@ -9,28 +9,32 @@ import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relat
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
 import { createGame } from "./create_game.js";
 
-const preloadMinionActionRelations = (q: {
+const preloadActionRelations = (aq: {
     preload: (relation: string, callback?: (sq: any) => void) => void;
 }) => {
-    q.preload("action", (aq: any) =>
-        aq
-            .preload("boost", (bq: any) => bq.preload("minionPower"))
-            .preload("drawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"))
-            .preload("enemyDrawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"))
-            .preload("toolToTargets", (tq: any) =>
-                tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
-            )
-            .orderBy("id", "asc"),
+    aq.preload("boost", (bq: any) => bq.preload("minionPower"));
+    aq.preload("drawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
+    aq.preload("enemyDrawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
+    aq.preload("toolToTargets", (tq: any) =>
+        tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
     );
 };
 
+const preloadMinionActionRelations = (q: {
+    preload: (relation: string, callback?: (sq: any) => void) => void;
+}) => {
+    q.preload("action", preloadActionRelations);
+};
+
 const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
-    q.preload("tags").preload("minion", (q) =>
-        q
-            .preload("minionPower")
-            .preload("battlecryActions", preloadMinionActionRelations)
-            .preload("deathrattleActions", preloadMinionActionRelations),
-    );
+    q.preload("tags")
+        .preload("minion", (q) =>
+            q
+                .preload("minionPower")
+                .preload("battlecryActions", preloadMinionActionRelations)
+                .preload("deathrattleActions", preloadMinionActionRelations),
+        )
+        .preload("spell", (sq) => sq.preload("action", preloadActionRelations));
 };
 
 export const gameSearch = async ({ auth, response }: HttpContext) => {

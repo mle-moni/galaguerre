@@ -14,7 +14,7 @@ export type SocketEventKey = keyof SocketEventByKey;
 export interface ClientSocketEventByKey {
     "game:play_card": {
         cardId: string;
-        spotId: MinionSpotId;
+        spotId: MinionSpotId | null;
         owner: SpotOwner;
         actionTarget?: ActionTarget | null;
     };
