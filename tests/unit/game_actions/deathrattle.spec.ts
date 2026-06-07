@@ -417,6 +417,74 @@ test.group("game:deathrattle", (group) => {
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 1 });
     });
 
+    test("ALL DAMAGE deathrattle (Abomination) does not modify player hand", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 5,
+            health: 5,
+        });
+        const abominationCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 4,
+            health: 4,
+            hasTaunt: true,
+            deathrattleActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    target: createAllTargetSnapshot("ALL"),
+                }),
+            ],
+        });
+        const handCards = [
+            createMinionCard({ uuid: "hand-card-1", label: "Main 1", cost: 2 }),
+            createMinionCard({ uuid: "hand-card-2", label: "Main 2", cost: 3 }),
+            createMinionCard({ uuid: "hand-card-3", label: "Main 3", cost: 4 }),
+        ];
+        const boardMinion = createMinionCard({ uuid: "board-minion", attack: 1, health: 3 });
+
+        const result = await runMinionAction({
+            data: createGameData({
+                playerOne: {
+                    hand: handCards,
+                    board: {
+                        ...placeMinion(
+                            createGameData().playerOne.board,
+                            "SPOT_1",
+                            createMinionState(attackerCard),
+                        ),
+                        SPOT_2: createMinionState(boardMinion),
+                    },
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(abominationCard),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                minionId: MINION_IDS.attacker,
+                spotId: "SPOT_1",
+                owner: "OPPONENT",
+            },
+            expect: { error: null },
+        });
+
+        assertMinionActionScenario(assert, result, { error: null });
+        assert.equal(result.game.data.playerOne.hand.length, 3);
+        assert.deepEqual(
+            result.game.data.playerOne.hand.map((card) => card.uuid),
+            ["hand-card-1", "hand-card-2", "hand-card-3"],
+        );
+        assert.deepEqual(
+            result.game.data.playerOne.hand.map((card) => card.label),
+            ["Main 1", "Main 2", "Main 3"],
+        );
+    });
+
     test("HERO DAMAGE deathrattle with ALL damages both heroes", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,
