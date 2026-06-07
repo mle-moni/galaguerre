@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { CardDetailHover } from "./card_detail_hover.jsx";
-import { MinionCardFace } from "./minion_card_face.jsx";
+import { MinionCardFace } from "~/components/cards/minion_card_face";
 
 interface MinionToRenderProps {
     state: MinionState;

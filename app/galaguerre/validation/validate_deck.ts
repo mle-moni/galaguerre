@@ -1,13 +1,8 @@
+import type { DeckValidationErrorDetail } from "#api_types/deck.types";
 import type Deck from "#models/deck";
 import { validateCard } from "./validate_card.js";
 
-export type DeckValidationErrorDetail = {
-    cardId: number;
-    cardLabel: string;
-    actionId?: number;
-    actionInternalLabel?: string;
-    reason: string;
-};
+export type { DeckValidationErrorDetail };
 
 export type DeckValidationResult = {
     valid: boolean;

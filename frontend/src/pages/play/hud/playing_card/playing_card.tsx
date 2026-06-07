@@ -1,17 +1,15 @@
-import "./playing_card.css";
-
 import type { PlayerCard } from "#api_types/game.types";
 
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
+import { MinionCardFace } from "~/components/cards/minion_card_face";
+import { SpellCardFace } from "~/components/cards/spell_card_face";
+import { WeaponCardFace } from "~/components/cards/weapon_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { notifyError } from "~/services/toasts";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { CardDetailHover } from "./card_detail_hover.jsx";
-import { MinionCardFace } from "./minion_card_face.jsx";
-import { SpellCardFace } from "./spell_card_face.jsx";
-import { WeaponCardFace } from "./weapon_card_face.jsx";
 
 interface CardProps {
     card: PlayerCard;

@@ -1,5 +1,45 @@
 import { createTheme } from "@mantine/core";
 
 export const mantineTheme = createTheme({
-    fontFamily: "Roboto",
+    fontFamily: "Roboto, sans-serif",
+    primaryColor: "gold",
+    colors: {
+        navy: [
+            "#e8edf3",
+            "#c5d0e0",
+            "#a2b3cd",
+            "#7f96ba",
+            "#5c79a7",
+            "#1e3a5f",
+            "#1a3251",
+            "#162a43",
+            "#122235",
+            "#0e1a27",
+        ],
+        gold: [
+            "#fdf8e8",
+            "#f9edc4",
+            "#f5e2a0",
+            "#f1d77c",
+            "#edcc58",
+            "#c9a227",
+            "#a88620",
+            "#876519",
+            "#664412",
+            "#45230b",
+        ],
+        amber: [
+            "#fdf3e7",
+            "#f9dfc0",
+            "#f5cb99",
+            "#f1b772",
+            "#eda34b",
+            "#da9854",
+            "#b87d45",
+            "#966236",
+            "#744727",
+            "#522c18",
+        ],
+    },
+    defaultRadius: "md",
 });

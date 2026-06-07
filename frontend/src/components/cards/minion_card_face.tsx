@@ -7,7 +7,9 @@ import {
     getMinionCardMaxAttacks,
     type MinionAttackStatus,
 } from "~/helpers/minion_combat";
-import { CardEffectSymbols } from "./card_effect_symbols.jsx";
+import "./card_faces.css";
+
+import { CardEffectSymbols } from "./card_effect_symbols";
 
 interface MinionCardFaceProps {
     card: MinionCard;

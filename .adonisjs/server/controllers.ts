@@ -17,6 +17,15 @@ export const controllers = {
             SocketLogout: () => import("#controllers/auth/socket/socket_logout"),
         },
     },
+    cards: {
+        Cards: () => import("#controllers/cards/cards_controller"),
+        ListCards: () => import("#controllers/cards/list_cards"),
+    },
+    decks: {
+        DeckUtils: () => import("#controllers/decks/deck_utils"),
+        Decks: () => import("#controllers/decks/decks_controller"),
+        SerializeDeck: () => import("#controllers/decks/serialize_deck"),
+    },
     games: {
         CreateGame: () => import("#controllers/games/create_game"),
         GameSearch: () => import("#controllers/games/game_search"),
