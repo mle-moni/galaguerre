@@ -22,6 +22,9 @@ export const HomePage = observer(() => {
                         Bienvenue, {user.pseudo ?? user.email.split("@")[0]}
                     </h1>
                     <p className="text-gg-navy/70 mt-2 mb-0">Que souhaitez-vous faire ?</p>
+                    <p className="text-gg-navy/60 text-sm mt-1 mb-0">
+                        Elo : {user.elo} — {user.wins}V / {user.losses}D
+                    </p>
                 </div>
 
                 <div className="flex flex-wrap gap-6 justify-center">
@@ -52,6 +55,14 @@ export const HomePage = observer(() => {
                         <h2 className="gg-mode-tile__title">Mes decks</h2>
                         <p className="gg-mode-tile__subtitle">
                             Créer et modifier vos decks de combat
+                        </p>
+                    </Link>
+
+                    <Link to="/leaderboard" className="gg-mode-tile">
+                        <span className="gg-mode-tile__icon">🏆</span>
+                        <h2 className="gg-mode-tile__title">Classement</h2>
+                        <p className="gg-mode-tile__subtitle">
+                            Consultez le classement Elo des joueurs
                         </p>
                     </Link>
                 </div>

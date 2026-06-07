@@ -26,6 +26,12 @@ export default class Game extends BaseModel {
     @column()
     declare isFinished: boolean;
 
+    @column()
+    declare winnerId: number | null;
+
+    @belongsTo(() => User, { foreignKey: "winnerId" })
+    declare winner: BelongsTo<typeof User>;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

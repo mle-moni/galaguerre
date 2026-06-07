@@ -32,6 +32,15 @@ export default class User extends compose(BaseModel, AuthFinder) {
     @column()
     declare isSuperAdmin: boolean;
 
+    @column()
+    declare elo: number;
+
+    @column()
+    declare wins: number;
+
+    @column()
+    declare losses: number;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

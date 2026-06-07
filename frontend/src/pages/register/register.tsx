@@ -49,6 +49,10 @@ export const RegisterPage = observer(() => {
                     <Link to="/login" className="text-gg-gold font-semibold">
                         Se connecter
                     </Link>
+                    <br />
+                    <Link to="/leaderboard" className="text-gg-gold font-semibold">
+                        Voir le classement
+                    </Link>
                 </>
             }
         >

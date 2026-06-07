@@ -1,5 +1,8 @@
 import type { WeaponCard } from "#api_types/game.types";
-import { recordManaSpent, recordWeaponPlayed } from "../../../galaguerre/game_stats/record_player_stats.js";
+import {
+    recordManaSpent,
+    recordWeaponPlayed,
+} from "../../../galaguerre/game_stats/record_player_stats.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import type { PlayCardOptions } from "./game_play_card.js";

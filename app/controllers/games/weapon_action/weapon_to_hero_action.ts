@@ -1,5 +1,8 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { getActualDamage, recordDamageDealt } from "../../../galaguerre/game_stats/record_player_stats.js";
+import {
+    getActualDamage,
+    recordDamageDealt,
+} from "../../../galaguerre/game_stats/record_player_stats.js";
 import { ensureValidTauntTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";

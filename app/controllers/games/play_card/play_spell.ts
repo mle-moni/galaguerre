@@ -1,6 +1,9 @@
 import type { ActionTarget, SpellCard } from "#api_types/game.types";
 import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
-import { recordManaSpent, recordSpellCast } from "../../../galaguerre/game_stats/record_player_stats.js";
+import {
+    recordManaSpent,
+    recordSpellCast,
+} from "../../../galaguerre/game_stats/record_player_stats.js";
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";

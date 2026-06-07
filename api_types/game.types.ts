@@ -233,12 +233,24 @@ export interface GamePlayer {
     stats: GamePlayerStats;
 }
 
+export interface GameRatingPlayerResult {
+    eloBefore: number;
+    eloAfter: number;
+    delta: number;
+}
+
+export interface GameRatingResult {
+    playerOne: GameRatingPlayerResult;
+    playerTwo: GameRatingPlayerResult;
+}
+
 export interface GameData {
     state: "INIT" | "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" | "FINISHED";
     currentRound: number;
     playerOne: GamePlayer;
     playerTwo: GamePlayer;
     gameRounds: GameRound[];
+    ratingResult?: GameRatingResult;
 }
 
 export interface ApiGame {

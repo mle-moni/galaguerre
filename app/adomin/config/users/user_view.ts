@@ -20,6 +20,24 @@ export const USER_VIEW = createModelViewConfig(() => User, {
             type: "boolean",
             label: "Super Admin",
         },
+        elo: {
+            type: "number",
+            label: "Elo",
+            creatable: false,
+            editable: false,
+        },
+        wins: {
+            type: "number",
+            label: "Victoires",
+            creatable: false,
+            editable: false,
+        },
+        losses: {
+            type: "number",
+            label: "Défaites",
+            creatable: false,
+            editable: false,
+        },
         createdAt: {
             type: "date",
             subType: "datetime",

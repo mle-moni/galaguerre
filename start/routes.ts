@@ -16,6 +16,7 @@ import AuthController from "#controllers/auth/auth_controller";
 import CardsController from "#controllers/cards/cards_controller";
 import DecksController from "#controllers/decks/decks_controller";
 import GamesController from "#controllers/games/games_controller";
+import LeaderboardController from "#controllers/leaderboard/leaderboard_controller";
 import { registerUploadRoute } from "../app/utils/files.js";
 import { middleware } from "./kernel.js";
 
@@ -28,6 +29,7 @@ router
         router.post("/auth/login", [AuthController, "login"]);
         router.post("/auth/register", [AuthController, "register"]);
         router.post("/auth/logout", [AuthController, "logout"]);
+        router.get("/leaderboard", [LeaderboardController, "index"]);
     })
     .prefix("/api");
 

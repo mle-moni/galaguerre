@@ -1,15 +1,24 @@
 import { Button, Modal, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
+import { LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { queryClient } from "~/services/query_client";
 import { GameFinalStatsTable } from "./game_final_stats_table";
+
+const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`);
 
 export const GameFinalScreen = observer(() => {
     const { store } = useGameContext();
     const handleClose = () => {
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY });
     };
+
+    const ratingResult = store.game.data.ratingResult;
+    const isDraw = store.p1.health <= 0 && store.p2.health <= 0;
+    const userRating =
+        store.me.userId === store.p1.userId ? ratingResult?.playerOne : ratingResult?.playerTwo;
 
     return (
         <Modal
@@ -20,13 +29,30 @@ export const GameFinalScreen = observer(() => {
             size="lg"
         >
             <Stack gap="sm">
-                <Text size="lg">{store.winner.pseudo} remporte la partie !</Text>
+                {isDraw ? (
+                    <Text size="lg">Match nul !</Text>
+                ) : (
+                    <Text size="lg">{store.winner.pseudo} remporte la partie !</Text>
+                )}
 
                 <Text size="lg">
-                    {store.isUserWinner
-                        ? "Félicitations pour votre victoire 🎉"
-                        : "Bon allez ça se passera mieux la prochaine fois 😬"}
+                    {isDraw
+                        ? "Les deux héros sont tombés en même temps."
+                        : store.isUserWinner
+                          ? "Félicitations pour votre victoire 🎉"
+                          : "Bon allez ça se passera mieux la prochaine fois 😬"}
                 </Text>
+
+                {isDraw ? (
+                    <Text size="sm" c="dimmed">
+                        Match nul — Elo inchangé
+                    </Text>
+                ) : userRating ? (
+                    <Text size="sm" c="dimmed">
+                        {formatEloDelta(userRating.delta)} Elo — vous êtes maintenant à{" "}
+                        {userRating.eloAfter}
+                    </Text>
+                ) : null}
 
                 <Text size="sm" c="dimmed">
                     Partie terminée au tour {store.game.data.currentRound}

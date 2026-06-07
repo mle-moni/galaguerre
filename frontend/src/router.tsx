@@ -8,6 +8,7 @@ import { HomePage } from "./pages/home/home_page.jsx";
 import { LoginPage } from "./pages/login/login_page.jsx";
 import { MatchmakingPage } from "./pages/matchmaking/match_making_page.jsx";
 import { PlayPage } from "./pages/play/play_page.jsx";
+import { LeaderboardPage } from "./pages/leaderboard/leaderboard_page.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 
 const router = createBrowserRouter([
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
     {
         path: "/matchmaking",
         element: <MatchmakingPage />,
+    },
+    {
+        path: "/leaderboard",
+        element: <LeaderboardPage />,
     },
     {
         path: "/login",

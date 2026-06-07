@@ -24,5 +24,8 @@ export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | voi
         email: user.email,
         socketToken: user.socketToken,
         currentGameId: currentGame?.id ?? null,
+        elo: user.elo,
+        wins: user.wins,
+        losses: user.losses,
     };
 };

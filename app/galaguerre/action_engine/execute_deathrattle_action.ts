@@ -30,14 +30,7 @@ export const executeDeathrattleAction = (
     }
 
     if (action.type === "HEAL" && action.target?.type === "MINION") {
-        return applyHealToAllMinions(
-            game,
-            player,
-            opponent,
-            action.target,
-            action.heal!,
-            player,
-        );
+        return applyHealToAllMinions(game, player, opponent, action.target, action.heal!, player);
     }
 
     executeAction(action, game, player, opponent);

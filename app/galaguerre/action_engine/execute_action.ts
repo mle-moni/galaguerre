@@ -192,7 +192,11 @@ export const executeAction = (
         case "HEAL": {
             if (action.target?.type === "ALL") {
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
-                    const actualHeal = getActualHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
+                    const actualHeal = getActualHeal(
+                        target.health,
+                        action.heal!,
+                        DEFAULT_HERO_HEALTH,
+                    );
                     target.health = applyHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
                     recordHealingDone(player, actualHeal);
                 }

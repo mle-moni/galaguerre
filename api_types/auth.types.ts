@@ -4,4 +4,7 @@ export interface ApiUser {
     email: string;
     socketToken: string;
     currentGameId: number | null;
+    elo: number;
+    wins: number;
+    losses: number;
 }

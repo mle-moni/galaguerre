@@ -1,7 +1,10 @@
 import type { GamePlayer, MinionPosition, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { getActualDamage, recordDamageDealt } from "../../../galaguerre/game_stats/record_player_stats.js";
+import {
+    getActualDamage,
+    recordDamageDealt,
+} from "../../../galaguerre/game_stats/record_player_stats.js";
 import { killMinion } from "../../../galaguerre/action_engine/kill_minion.js";
 import { ensureValidTauntTarget, getMinionIsPoisonous, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";

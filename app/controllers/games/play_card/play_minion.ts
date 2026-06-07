@@ -1,7 +1,10 @@
 import type { ActionTarget, MinionCard, MinionSpotId } from "#api_types/game.types";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
 import { refreshAurasAfterMinionPlayed } from "../../../galaguerre/passive_engine/refresh_passive_auras.js";
-import { recordManaSpent, recordMinionPlayed } from "../../../galaguerre/game_stats/record_player_stats.js";
+import {
+    recordManaSpent,
+    recordMinionPlayed,
+} from "../../../galaguerre/game_stats/record_player_stats.js";
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";

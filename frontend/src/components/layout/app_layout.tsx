@@ -39,20 +39,22 @@ export const AppLayout = observer(
                     </div>
                     <div className="flex items-center gap-3">
                         {user && (
-                            <span className="text-white/80 text-sm hidden sm:inline">
-                                {user.pseudo ?? user.email}
-                            </span>
+                            <>
+                                <span className="text-white/80 text-sm hidden sm:inline">
+                                    {user.pseudo ?? user.email}
+                                </span>
+                                <Button
+                                    variant="subtle"
+                                    color="gold"
+                                    size="xs"
+                                    leftSection={<IconLogout size={14} />}
+                                    loading={logoutMutation.isPending}
+                                    onClick={() => logoutMutation.mutate()}
+                                >
+                                    Déconnexion
+                                </Button>
+                            </>
                         )}
-                        <Button
-                            variant="subtle"
-                            color="gold"
-                            size="xs"
-                            leftSection={<IconLogout size={14} />}
-                            loading={logoutMutation.isPending}
-                            onClick={() => logoutMutation.mutate()}
-                        >
-                            Déconnexion
-                        </Button>
                     </div>
                 </header>
                 <main className="flex-1 p-4 md:p-6">{children}</main>

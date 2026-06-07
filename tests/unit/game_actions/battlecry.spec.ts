@@ -2159,9 +2159,6 @@ test.group("game:play_card battlecries", (group) => {
             tagIds: [],
             tags: [],
         });
-        assert.include(
-            generated.description,
-            "Cri de guerre : Pioche 1 carte Monstre + coût = 2.",
-        );
+        assert.include(generated.description, "Cri de guerre : Pioche 1 carte Monstre + coût = 2.");
     });
 });
