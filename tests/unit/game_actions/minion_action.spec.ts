@@ -432,6 +432,43 @@ test.group("game:minion_action", (group) => {
         assertPlayerHealth(assert, result.game, "playerTwo", 15);
     });
 
+    test("rejects attack when minion has zero attack", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 0,
+            health: 4,
+            hasTaunt: true,
+            effects: ["Provocation"],
+        });
+
+        const result = await runMinionAction({
+            data: createGameData({
+                currentRound: 3,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard, { placedAtRound: 1 }),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                minionId: MINION_IDS.attacker,
+                spotId: null,
+                owner: "OPPONENT",
+            },
+            expect: {
+                error: "Ce serviteur ne peut pas attaquer sans points d'attaque",
+            },
+        });
+
+        assertMinionActionScenario(assert, result, {
+            error: "Ce serviteur ne peut pas attaquer sans points d'attaque",
+        });
+        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+    });
+
     test("rejects attack when taunt minion is ignored", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,

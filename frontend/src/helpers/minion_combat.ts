@@ -20,6 +20,7 @@ export const getMinionAttacksThisRound = (minion: MinionState, currentRound: num
 };
 
 export const canMinionAttack = (minion: MinionState, currentRound: number): boolean => {
+    if (minion.attack <= 0) return false;
     if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion))
         return false;
     if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) return false;
@@ -34,6 +35,7 @@ export const getMinionAttackStatus = (
     isMyTurn: boolean,
 ): MinionAttackStatus => {
     if (!isMyTurn) return "idle";
+    if (minion.attack <= 0) return "idle";
     if (canMinionAttack(minion, currentRound)) return "ready";
     if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) return "sleeping";
     return "exhausted";

@@ -179,6 +179,7 @@ export const recordMinionAttack = (minion: MinionState, currentRound: number): v
 };
 
 export const canMinionAttack = (minion: MinionState, currentRound: number): boolean => {
+    if (minion.attack <= 0) return false;
     if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion))
         return false;
     if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) return false;

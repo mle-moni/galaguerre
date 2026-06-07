@@ -1,3 +1,4 @@
+import { MinionState } from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
@@ -33,12 +34,7 @@ export const gameMinionAction = async (
     const minion = minionInfos.minion;
 
     if (!canMinionAttack(minion, currentRound)) {
-        const error =
-            minion.placedAtRound === currentRound && !getMinionHasCharge(minion)
-                ? "Ce serviteur n'est pas encore prêt à attaquer"
-                : getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion)
-                  ? "Ce serviteur a déjà attaqué ce tour"
-                  : "Ce serviteur n'est pas encore prêt à attaquer";
+        const error = getMinionAttackError(minion, currentRound);
 
         emitSocketEvent("notify_error", { error }, socketId);
         return;
@@ -65,3 +61,16 @@ export const gameMinionAction = async (
         socketId,
     });
 };
+
+function getMinionAttackError(minion: MinionState, currentRound: number): string {
+    if (minion.attack <= 0) {
+        return "Ce serviteur ne peut pas attaquer sans points d'attaque";
+    }
+    if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) {
+        return "Ce serviteur n'est pas encore prêt à attaquer";
+    }
+    if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion)) {
+        return "Ce serviteur a déjà attaqué ce tour";
+    }
+    return "Ce serviteur n'est pas encore prêt à attaquer";
+}
