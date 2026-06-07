@@ -1,6 +1,6 @@
 import type { ApiDeckCardEntry } from "#api_types/deck.types";
 import Card from "#models/card";
-import type Deck from "#models/deck";
+import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
 

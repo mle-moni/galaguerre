@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
+import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardsQuery } from "~/hooks/use_cards";
@@ -118,6 +119,10 @@ export const DeckBuilderPage = observer(() => {
         return a.cost - b.cost || a.label.localeCompare(b.label);
     });
 
+    const handleCostClick = (cost: number | null) => {
+        setCostFilter(cost === null || costFilter === String(cost) ? null : String(cost));
+    };
+
     const costOptions = [
         { value: "", label: "Tous les coûts" },
         ...Array.from(new Set(catalog.map((c) => c.cost)))
@@ -127,8 +132,8 @@ export const DeckBuilderPage = observer(() => {
 
     return (
         <AppLayout title="Éditeur de deck" backTo="/decks" backLabel="Mes decks">
-            <div className="max-w-7xl mx-auto flex flex-col gap-4">
-                <div className="flex flex-wrap gap-3 items-end justify-between">
+            <div className="max-w-7xl mx-auto flex flex-col gap-4 lg:h-[calc(100dvh-10rem)]">
+                <div className="flex flex-wrap gap-3 items-end justify-between shrink-0">
                     <TextInput
                         label="Nom du deck"
                         value={currentName}
@@ -153,11 +158,11 @@ export const DeckBuilderPage = observer(() => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className="lg:col-span-2 gg-panel">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch min-h-0 lg:flex-1">
+                    <div className="lg:col-span-2 gg-panel flex flex-col min-h-0 lg:h-full lg:overflow-hidden">
                         <div className="gg-panel-header">Catalogue</div>
-                        <div className="gg-panel-body">
-                            <div className="flex flex-wrap gap-3 mb-4">
+                        <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
+                            <div className="flex flex-wrap gap-3 mb-4 shrink-0">
                                 <TextInput
                                     placeholder="Rechercher une carte..."
                                     value={search}
@@ -202,7 +207,7 @@ export const DeckBuilderPage = observer(() => {
                         </div>
                     </div>
 
-                    <div className="gg-panel">
+                    <div className="gg-panel flex flex-col min-h-0 lg:h-full lg:overflow-hidden">
                         <div className="gg-panel-header flex justify-between items-center">
                             <span>Composition</span>
                             <span
@@ -211,13 +216,21 @@ export const DeckBuilderPage = observer(() => {
                                 {totalCards}/{DECK_MAX_CARDS} (min. {DECK_MIN_CARDS})
                             </span>
                         </div>
-                        <div className="gg-panel-body">
+                        <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
+                            <div className="shrink-0">
+                                <ManaCurveChart
+                                    composition={currentComposition}
+                                    catalogById={catalogById}
+                                    selectedCost={costFilter !== null ? Number(costFilter) : null}
+                                    onCostClick={handleCostClick}
+                                />
+                            </div>
                             {compositionEntries.length === 0 ? (
                                 <p className="text-white/60 text-sm m-0">
                                     Cliquez sur des cartes du catalogue pour les ajouter.
                                 </p>
                             ) : (
-                                <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
+                                <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
                                     {compositionEntries.map(([cardId, count]) => {
                                         const card = catalogById.get(cardId);
                                         if (!card) return null;

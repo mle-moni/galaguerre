@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
+import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardsQuery } from "~/hooks/use_cards";
@@ -35,14 +35,9 @@ export const MatchmakingPage = observer(() => {
     const selectedDeck = decksQuery.data?.find((d) => d.selected);
     const catalogById = new Map((cardsQuery.data ?? []).map((c) => [c.id, c]));
 
-    const previewCards = (selectedDeck?.cards ?? [])
-        .slice(0, 4)
-        .flatMap(({ cardId, count }) => {
-            const card = catalogById.get(cardId);
-            if (!card) return [];
-            return Array.from({ length: Math.min(count, 1) }, () => card);
-        })
-        .slice(0, 4);
+    const deckComposition = new Map(
+        (selectedDeck?.cards ?? []).map(({ cardId, count }) => [cardId, count] as const),
+    );
 
     const canSearch = selectedDeck?.valid ?? false;
 
@@ -64,13 +59,14 @@ export const MatchmakingPage = observer(() => {
                                     </Text>
                                 </div>
 
-                                {previewCards.length > 0 && (
-                                    <div className="flex gap-2 flex-wrap">
-                                        {previewCards.map((card, i) => (
-                                            <div key={`${card.id}-${i}`} className="scale-90">
-                                                <CatalogCardDisplay card={card} />
-                                            </div>
-                                        ))}
+                                {selectedDeck.cardCount > 0 && (
+                                    <div className="pointer-events-none">
+                                        <ManaCurveChart
+                                            composition={deckComposition}
+                                            catalogById={catalogById}
+                                            selectedCost={null}
+                                            onCostClick={() => {}}
+                                        />
                                     </div>
                                 )}
 
