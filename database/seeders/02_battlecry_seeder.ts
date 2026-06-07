@@ -166,15 +166,6 @@ export default class extends BaseSeeder {
             health: null,
         });
 
-        const kodoComparison = await Comparison.create({
-            costComparison: null,
-            cost: null,
-            attackComparison: "<",
-            attack: 3,
-            healthComparison: null,
-            health: null,
-        });
-
         const lowHealthComparison = await Comparison.create({
             costComparison: null,
             cost: null,

@@ -19,8 +19,8 @@ export { hasRandomLimitedTarget };
 
 const collectHeroActionTargets = (
     target: TargetSnapshot,
-    player: GamePlayer,
-    opponent: GamePlayer,
+    _player: GamePlayer,
+    _opponent: GamePlayer,
 ): ActionTarget[] => {
     const results: ActionTarget[] = [];
 
