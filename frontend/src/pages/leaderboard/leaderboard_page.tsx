@@ -28,7 +28,9 @@ export const LeaderboardPage = observer(() => {
                     <div className="gg-panel overflow-hidden">
                         <Table
                             striped
+                            stripedColor="rgba(255, 255, 255, 0.06)"
                             highlightOnHover
+                            highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
                             withTableBorder={false}
                             styles={{
                                 th: { color: "rgba(255,255,255,0.7)", fontWeight: 600 },
