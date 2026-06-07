@@ -1,5 +1,6 @@
 import {
     DEFAULT_HERO_HEALTH,
+    DEFAULT_PLAYER_STATS,
     type BoardState,
     type BoostSnapshot,
     type CardActionSnapshot,
@@ -207,6 +208,7 @@ export const createGamePlayer = (
     spellPower: 0,
     mana: 10,
     maxFatigueDamageTaken: 0,
+    stats: { ...DEFAULT_PLAYER_STATS },
     ...overrides,
 });
 

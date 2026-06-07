@@ -195,6 +195,28 @@ export type BoardState = {
     [K in MinionSpotId]: MinionState | null;
 };
 
+export interface GamePlayerStats {
+    manaSpent: number;
+    minionsPlayed: number;
+    spellsCast: number;
+    weaponsPlayed: number;
+    damageDealt: number;
+    healingDone: number;
+    cardsDrawn: number;
+    heroAttacks: number;
+}
+
+export const DEFAULT_PLAYER_STATS: GamePlayerStats = {
+    manaSpent: 0,
+    minionsPlayed: 0,
+    spellsCast: 0,
+    weaponsPlayed: 0,
+    damageDealt: 0,
+    healingDone: 0,
+    cardsDrawn: 0,
+    heroAttacks: 0,
+};
+
 export interface GamePlayer {
     userId: number;
     pseudo: string;
@@ -208,6 +230,7 @@ export interface GamePlayer {
     spellPower: number;
     mana: number;
     maxFatigueDamageTaken: number;
+    stats: GamePlayerStats;
 }
 
 export interface GameData {

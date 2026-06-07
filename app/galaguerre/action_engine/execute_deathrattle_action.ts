@@ -19,11 +19,25 @@ export const executeDeathrattleAction = (
     }
 
     if (action.type === "DAMAGE" && action.target?.type === "MINION") {
-        return applyDamageToAllMinions(game, player, opponent, action.target, action.damage!);
+        return applyDamageToAllMinions(
+            game,
+            player,
+            opponent,
+            action.target,
+            action.damage!,
+            player,
+        );
     }
 
     if (action.type === "HEAL" && action.target?.type === "MINION") {
-        return applyHealToAllMinions(game, player, opponent, action.target, action.heal!);
+        return applyHealToAllMinions(
+            game,
+            player,
+            opponent,
+            action.target,
+            action.heal!,
+            player,
+        );
     }
 
     executeAction(action, game, player, opponent);

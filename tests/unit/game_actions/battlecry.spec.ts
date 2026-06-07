@@ -1929,7 +1929,7 @@ test.group("game:play_card battlecries", (group) => {
         });
         assert.include(
             generated.description,
-            "Cri de guerre : Inflige 3 dégâts à un serviteur adverse (attaque > 2).",
+            "Cri de guerre : Inflige 3 dégâts à un serviteur adverse attaque > 2.",
         );
     });
 
@@ -2161,7 +2161,7 @@ test.group("game:play_card battlecries", (group) => {
         });
         assert.include(
             generated.description,
-            "Cri de guerre : Pioche 1 carte (Monstre, coût = 2).",
+            "Cri de guerre : Pioche 1 carte Monstre + coût = 2.",
         );
     });
 });

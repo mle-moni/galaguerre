@@ -12,6 +12,7 @@ import {
 } from "#api_types/game.types";
 import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { recordHeroAttack as recordHeroAttackStat } from "../../galaguerre/game_stats/record_player_stats.js";
 import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
 
 export const getGameActionInfos = async (socketId: string) => {
@@ -205,6 +206,7 @@ export const recordHeroAttack = (player: GamePlayer, currentRound: number): void
         player.heroAttacksThisRound = (player.heroAttacksThisRound ?? 1) + 1;
     }
     player.heroLastAttackAtRound = currentRound;
+    recordHeroAttackStat(player);
 };
 
 export const canHeroAttack = (player: GamePlayer, currentRound: number): boolean => {

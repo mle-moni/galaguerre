@@ -1,4 +1,4 @@
-import { DEFAULT_HERO_HEALTH, type GameData } from "#api_types/game.types";
+import { DEFAULT_HERO_HEALTH, DEFAULT_PLAYER_STATS, type GameData } from "#api_types/game.types";
 import { deckCardsToEntries } from "#controllers/decks/deck_utils";
 import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
 import { validateDeckComposition } from "../../galaguerre/validation/validate_deck_composition.js";
@@ -82,6 +82,7 @@ export const getDefaultGameData = async ({
             weaponState: null,
             heroAttacksThisRound: 0,
             heroLastAttackAtRound: 0,
+            stats: { ...DEFAULT_PLAYER_STATS },
         },
         playerTwo: {
             userId: playerTwo.userId,
@@ -102,6 +103,7 @@ export const getDefaultGameData = async ({
             weaponState: null,
             heroAttacksThisRound: 0,
             heroLastAttackAtRound: 0,
+            stats: { ...DEFAULT_PLAYER_STATS },
         },
         gameRounds: [],
     };

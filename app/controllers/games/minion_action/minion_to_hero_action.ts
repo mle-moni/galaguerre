@@ -1,4 +1,5 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { getActualDamage, recordDamageDealt } from "../../../galaguerre/game_stats/record_player_stats.js";
 import { ensureValidTauntTarget, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -28,7 +29,8 @@ export const minionToHeroAction = async ({
 
     const playerTarget = owner === "OPPONENT" ? opponent : player;
 
-    // minionInfos.minion attacks playerTarget (usually the opponent)
+    const damage = getActualDamage(playerTarget.health, minionInfos.minion.attack);
+    recordDamageDealt(player, damage);
     playerTarget.health -= minionInfos.minion.attack;
     recordMinionAttack(minionInfos.minion, game.data.currentRound);
 

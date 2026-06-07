@@ -1,6 +1,7 @@
 import type { GamePlayer, MinionPosition, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { getActualDamage, recordDamageDealt } from "../../../galaguerre/game_stats/record_player_stats.js";
 import { killMinion } from "../../../galaguerre/action_engine/kill_minion.js";
 import { ensureValidTauntTarget, getMinionIsPoisonous, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
@@ -56,16 +57,25 @@ export const minionToMinionAction = async ({
     );
     if (!isValidTarget) return;
 
-    // minionInfos.minion attacks targetMinion
-    if (getMinionIsPoisonous(targetMinion)) {
-        minionInfos.minion.health = 0;
+    const attacker = minionInfos.minion;
+    const targetIsPoisonous = getMinionIsPoisonous(targetMinion);
+    const attackerIsPoisonous = getMinionIsPoisonous(attacker);
+
+    if (targetIsPoisonous) {
+        recordDamageDealt(opponent, attacker.health);
+        attacker.health = 0;
     } else {
-        minionInfos.minion.health -= targetMinion.attack;
+        const retaliationDamage = getActualDamage(attacker.health, targetMinion.attack);
+        attacker.health -= targetMinion.attack;
+        recordDamageDealt(opponent, retaliationDamage);
     }
-    if (getMinionIsPoisonous(minionInfos.minion)) {
+    if (attackerIsPoisonous) {
+        recordDamageDealt(player, targetMinion.health);
         targetMinion.health = 0;
     } else {
-        targetMinion.health -= minionInfos.minion.attack;
+        const attackDamage = getActualDamage(targetMinion.health, attacker.attack);
+        targetMinion.health -= attacker.attack;
+        recordDamageDealt(player, attackDamage);
     }
     recordMinionAttack(minionInfos.minion, game.data.currentRound);
 

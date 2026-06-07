@@ -1,4 +1,5 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { getActualDamage, recordDamageDealt } from "../../../galaguerre/game_stats/record_player_stats.js";
 import { ensureValidTauntTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -27,7 +28,9 @@ export const weaponToHeroAction = async ({
     const isValidTarget = ensureValidTauntTarget(opponent.board, null, owner, null, socketId);
     if (!isValidTarget) return;
 
+    const damage = getActualDamage(opponent.health, weaponState.damage);
     opponent.health -= weaponState.damage;
+    recordDamageDealt(player, damage);
     recordHeroAttack(player, game.data.currentRound);
 
     const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
