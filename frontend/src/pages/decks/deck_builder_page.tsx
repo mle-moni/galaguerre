@@ -34,6 +34,18 @@ const mapToEntries = (map: Map<number, number>): ApiDeckCardEntry[] =>
 const getTotalCards = (map: Map<number, number>) =>
     [...map.values()].reduce((sum, count) => sum + count, 0);
 
+const normalizeForSearch = (value: string) =>
+    value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "");
+
+const cardMatchesSearch = (card: ApiCatalogCard, query: string) => {
+    const normalizedQuery = normalizeForSearch(query);
+    if (normalizeForSearch(card.label).includes(normalizedQuery)) return true;
+    return card.tags.some((tag) => normalizeForSearch(tag.label).includes(normalizedQuery));
+};
+
 export const DeckBuilderPage = observer(() => {
     const user = useUser();
     const navigate = useNavigate();
@@ -78,7 +90,7 @@ export const DeckBuilderPage = observer(() => {
 
     const filteredCatalog = catalog.filter((card) => {
         if (selectedSetId !== null && card.cardSetId !== Number(selectedSetId)) return false;
-        if (search && !card.label.toLowerCase().includes(search.toLowerCase())) return false;
+        if (search && !cardMatchesSearch(card, search)) return false;
         if (typeFilter !== "ALL" && card.type !== typeFilter) return false;
         if (costFilter !== null && card.cost !== Number(costFilter)) return false;
         return true;
@@ -181,7 +193,7 @@ export const DeckBuilderPage = observer(() => {
                     <div className="lg:col-span-2 gg-panel flex flex-col min-h-0 lg:h-full lg:overflow-hidden">
                         <div className="gg-panel-header">Catalogue</div>
                         <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
-                            <div className="flex flex-wrap gap-3 mb-4 shrink-0">
+                            <div className="flex flex-wrap gap-3 items-end mb-4 shrink-0">
                                 <Select
                                     label="Set de cartes"
                                     value={selectedSetId ?? ""}

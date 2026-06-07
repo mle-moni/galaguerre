@@ -20,6 +20,10 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
         cost: card.cost,
         cardSetId: card.cardSetId,
         tagIds: (card.tags ?? []).map((tag) => tag.id),
+        tags: (card.tags ?? []).map((tag) => ({
+            label: tag.label,
+            symbol: tag.symbol,
+        })),
     };
 
     if (card.type === "WEAPON") {
@@ -81,10 +85,6 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
         hasWindfury: card.minion.minionPower?.hasWindfury ?? false,
         isPoisonous: card.minion.minionPower?.isPoisonous ?? false,
         effects,
-        tags: (card.tags ?? []).map((tag) => ({
-            label: tag.label,
-            symbol: tag.symbol,
-        })),
         description: getMinionCardDescription(
             card.minion.attack,
             card.minion.health,

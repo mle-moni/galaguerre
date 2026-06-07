@@ -20,6 +20,7 @@ export interface ApiCatalogCardBase {
     cost: number;
     cardSetId: number;
     tagIds: number[];
+    tags: CardTagSnapshot[];
     description: string;
 }
 
@@ -32,7 +33,6 @@ export type ApiCatalogMinionCard = ApiCatalogCardBase & {
     hasWindfury: boolean;
     isPoisonous: boolean;
     effects: string[];
-    tags: CardTagSnapshot[];
     battlecryActions: CardActionSnapshot[];
     deathrattleActions: CardActionSnapshot[];
     passives: PassiveSnapshot[];
