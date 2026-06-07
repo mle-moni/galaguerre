@@ -2,21 +2,31 @@ import { DEFAULT_HERO_HEALTH, DEFAULT_PLAYER_STATS, type GameData } from "#api_t
 import { deckCardsToEntries } from "#controllers/decks/deck_utils";
 import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
 import { validateDeckComposition } from "../../galaguerre/validation/validate_deck_composition.js";
+import type Card from "#models/card";
 import type Deck from "#models/deck";
 import Game from "#models/game";
 import { generatePlayerCards } from "./generate_player_cards.js";
 import { setupNextGameTurn } from "./setup_next_game_turn.js";
 
-interface Player {
+interface HumanPlayer {
     userId: number;
     pseudo: string;
     deck: Deck;
 }
 
-interface CreateGameOptions {
-    playerOne: Player;
-    playerTwo: Player;
+interface AiPlayer {
+    userId: number;
+    pseudo: string;
+    cards: Card[];
 }
+
+interface CreateGameOptions {
+    playerOne: HumanPlayer;
+    playerTwo: HumanPlayer | AiPlayer;
+    isTraining?: boolean;
+}
+
+const isAiPlayer = (player: HumanPlayer | AiPlayer): player is AiPlayer => "cards" in player;
 
 const assertDeckPlayable = (deck: Deck) => {
     const composition = validateDeckComposition(deckCardsToEntries(deck));
@@ -27,15 +37,17 @@ const assertDeckPlayable = (deck: Deck) => {
     assertDeckValid(deck);
 };
 
-export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) => {
+export const createGame = async ({ playerOne, playerTwo, isTraining }: CreateGameOptions) => {
     assertDeckPlayable(playerOne.deck);
-    assertDeckPlayable(playerTwo.deck);
+    if (!isAiPlayer(playerTwo)) {
+        assertDeckPlayable(playerTwo.deck);
+    }
 
-    const gameData: GameData = await getDefaultGameData({ playerOne, playerTwo });
+    const gameData: GameData = getDefaultGameData({ playerOne, playerTwo, isTraining });
 
     const game = await Game.create({
         playerOneId: playerOne.userId,
-        playerTwoId: playerTwo.userId,
+        playerTwoId: isAiPlayer(playerTwo) ? null : playerTwo.userId,
         data: gameData,
     });
     // wait 3s then make player one draw and start the game
@@ -48,15 +60,17 @@ export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) =>
 
 const DEFAULT_HAND_SIZE = 3;
 
-export const getDefaultGameData = async ({
+export const getDefaultGameData = ({
     playerOne,
     playerTwo,
-}: CreateGameOptions): Promise<GameData> => {
+    isTraining,
+}: CreateGameOptions): GameData => {
     const p1Deck = generatePlayerCards(playerOne.deck);
     const p1Hand = p1Deck.slice(0, DEFAULT_HAND_SIZE);
     const p1DeckCards = p1Deck.slice(DEFAULT_HAND_SIZE);
 
-    const p2Deck = generatePlayerCards(playerTwo.deck);
+    const p2Source = isAiPlayer(playerTwo) ? playerTwo.cards : playerTwo.deck;
+    const p2Deck = generatePlayerCards(p2Source);
     const p2Hand = p2Deck.slice(0, DEFAULT_HAND_SIZE);
     const p2DeckCards = p2Deck.slice(DEFAULT_HAND_SIZE);
 
@@ -106,5 +120,6 @@ export const getDefaultGameData = async ({
             stats: { ...DEFAULT_PLAYER_STATS },
         },
         actionLog: [],
+        ...(isTraining ? { isTraining: true } : {}),
     };
 };

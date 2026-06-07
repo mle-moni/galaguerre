@@ -45,6 +45,7 @@ router
         router.get("/card-sets", [CardSetsController, "index"]);
         router.post("/decks/:id/select", [DecksController, "select"]);
         router.resource("decks", DecksController).apiOnly();
+        router.post("/games/training", [GamesController, "training"]);
         router.resource("games", GamesController).apiOnly();
     })
     .use(middleware.auth())

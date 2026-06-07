@@ -22,7 +22,7 @@ const tokenRequestSetup = (axiosConfig: InternalAxiosRequestConfig) => {
 privateAxios.interceptors.request.use(tokenRequestSetup);
 
 privateAxios.interceptors.response.use(undefined, (error) => {
-    if (isAxiosError(error)) {
+    if (isAxiosError(error) && error.response?.status !== 401) {
         notifyApiError(error.response?.data);
     }
     throw error;

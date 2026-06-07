@@ -22,6 +22,7 @@ export interface ApiGameHistoryEntry {
     eloDelta: number | null;
     roundCount: number;
     finishedAt: string;
+    isTraining: boolean;
 }
 
 export interface ApiGameHistoryList {

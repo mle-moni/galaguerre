@@ -48,6 +48,17 @@ export const HomePage = observer(() => {
                         )}
                     </Link>
 
+                    <Link to={user.currentGameId ? "/play" : "/training"} className="gg-mode-tile">
+                        <span className="gg-mode-tile__icon">🤖</span>
+                        <h2 className="gg-mode-tile__title">Entraînement</h2>
+                        <p className="gg-mode-tile__subtitle">
+                            {user.currentGameId
+                                ? "Reprendre votre partie en cours"
+                                : "S'entraîner contre l'IA"}
+                        </p>
+                        <p className="gg-mode-tile__subtitle">IA à deck fixe — sans impact Elo</p>
+                    </Link>
+
                     <Link to="/decks" className="gg-mode-tile">
                         <span className="gg-mode-tile__icon">🃏</span>
                         <h2 className="gg-mode-tile__title">Mes decks</h2>

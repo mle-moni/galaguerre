@@ -1,27 +1,33 @@
 import type { ApiDeck, UpdateDeckPayload } from "#api_types/deck.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "~/services/axios";
+import { useUser } from "./use_user";
 
 export const DECKS_QUERY_KEY = ["decks"];
 
 export const useDecksQuery = () => {
+    const user = useUser();
+
     return useQuery({
         queryKey: DECKS_QUERY_KEY,
         queryFn: async () => {
             const response = await privateAxios.get<ApiDeck[]>("/api/decks");
             return response.data;
         },
+        enabled: !!user,
     });
 };
 
 export const useDeckQuery = (deckId: number) => {
+    const user = useUser();
+
     return useQuery({
         queryKey: [...DECKS_QUERY_KEY, deckId],
         queryFn: async () => {
             const response = await privateAxios.get<ApiDeck>(`/api/decks/${deckId}`);
             return response.data;
         },
-        enabled: deckId > 0,
+        enabled: !!user && deckId > 0,
     });
 };
 

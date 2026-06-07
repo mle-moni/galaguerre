@@ -266,12 +266,13 @@ export interface GameData {
     playerTwo: GamePlayer;
     actionLog: GameLogEntry[];
     ratingResult?: GameRatingResult;
+    isTraining?: boolean;
 }
 
 export interface ApiGame {
     id: number;
     playerOneId: number;
-    playerTwoId: number;
+    playerTwoId: number | null;
     data: GameData;
     isFinished: boolean;
     createdAt: string;

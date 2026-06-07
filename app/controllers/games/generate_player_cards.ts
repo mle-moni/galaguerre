@@ -11,11 +11,17 @@ import {
     getWeaponCardDescription,
 } from "../../galaguerre/minion_card_metadata.js";
 import type Deck from "#models/deck";
+import type Card from "#models/card";
 import { randomUUID } from "node:crypto";
 import { shuffleArray } from "../../utils/array.js";
 
-export const generatePlayerCards = (deck: Deck) => {
-    const cards: PlayerCard[] = deck.cards.map((card) => {
+type CardSource = Deck | Card[];
+
+const getSourceCards = (source: CardSource): Card[] =>
+    Array.isArray(source) ? source : source.cards;
+
+export const generatePlayerCards = (source: CardSource) => {
+    const cards: PlayerCard[] = getSourceCards(source).map((card) => {
         const base: PlayerCardBase = {
             uuid: randomUUID(),
             cardId: card.id,

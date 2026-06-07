@@ -50,12 +50,14 @@ const GameHistoryRow = ({
     <Table.Tr style={{ cursor: "pointer" }} onClick={() => onSelect(entry.gameId)}>
         <Table.Td>{formatDate(entry.finishedAt)}</Table.Td>
         <Table.Td>
-            <PlayerNameLink
-                pseudo={entry.opponentPseudo}
-                userId={entry.opponentUserId}
-                className="text-white no-underline hover:underline"
-                stopPropagation
-            />
+            <span className="inline-flex items-center gap-2">
+                <PlayerNameLink
+                    pseudo={entry.opponentPseudo}
+                    userId={entry.opponentUserId}
+                    className="text-white no-underline hover:underline"
+                    stopPropagation
+                />
+            </span>
         </Table.Td>
         <Table.Td>
             <ResultBadge result={entry.result} />

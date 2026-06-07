@@ -79,6 +79,7 @@ export const serializeGameHistoryEntry = (
         eloDelta: getEloDelta(game, userId),
         roundCount: game.data.currentRound,
         finishedAt: game.updatedAt.toISO()!,
+        isTraining: game.data.isTraining ?? false,
     };
 };
 

@@ -1,5 +1,6 @@
 import { Button, Modal, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router-dom";
 import { useGameContext } from "~/hooks/use_game_state";
 import { LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
@@ -10,9 +11,13 @@ const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`)
 
 export const GameFinalScreen = observer(() => {
     const { store } = useGameContext();
+    const navigate = useNavigate();
+    const isTraining = store.game.data.isTraining ?? false;
+
     const handleClose = () => {
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
         queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY });
+        navigate(isTraining ? "/" : "/matchmaking");
     };
 
     const ratingResult = store.game.data.ratingResult;
@@ -29,7 +34,11 @@ export const GameFinalScreen = observer(() => {
             size="lg"
         >
             <Stack gap="sm">
-                {isDraw ? (
+                {isTraining ? (
+                    <Text size="sm" c="dimmed">
+                        Partie d'entraînement — Elo inchangé
+                    </Text>
+                ) : isDraw ? (
                     <Text size="sm" c="dimmed">
                         Match nul — Elo inchangé
                     </Text>
@@ -51,7 +60,7 @@ export const GameFinalScreen = observer(() => {
                 />
 
                 <Button onClick={handleClose} mt="sm">
-                    Retour au matchmaking
+                    {isTraining ? "Retour à l'accueil" : "Retour au matchmaking"}
                 </Button>
             </Stack>
         </Modal>

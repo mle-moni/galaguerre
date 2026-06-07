@@ -1,5 +1,10 @@
 import type Card from "#models/card";
+import type { ModelQueryBuilderContract } from "@adonisjs/lucid/types/model";
 import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relations";
+
+type CardPreloadQuery = {
+    preload: (relation: string, callback?: (sq: any) => void) => void;
+};
 
 const preloadActionRelations = (aq: {
     preload: (relation: string, callback?: (sq: any) => void) => void;
@@ -18,7 +23,7 @@ const preloadMinionActionRelations = (q: {
     q.preload("action", preloadActionRelations);
 };
 
-export const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
+const applyCardPreloads = (q: CardPreloadQuery) => {
     q.preload("cardSet")
         .preload("tags")
         .preload("minion", (mq) =>
@@ -44,4 +49,12 @@ export const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card,
         )
         .preload("spell", (sq) => sq.preload("action", preloadActionRelations))
         .preload("weapon", (wq) => wq.preload("deathrattleActions", preloadMinionActionRelations));
+};
+
+export const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
+    applyCardPreloads(q);
+};
+
+export const preloadCardQuery = (q: ModelQueryBuilderContract<typeof Card>) => {
+    applyCardPreloads(q);
 };

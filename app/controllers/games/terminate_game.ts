@@ -1,5 +1,5 @@
 import type Game from "#models/game";
-import { applyGameResult } from "#services/elo";
+import { applyGameResult, getWinnerUserId } from "#services/elo";
 import { sendGameUpdate } from "./send_game_update.js";
 
 export const terminateGame = async (game: Game) => {
@@ -7,6 +7,14 @@ export const terminateGame = async (game: Game) => {
 
     game.data.state = "FINISHED";
     game.isFinished = true;
+
+    if (game.data.isTraining) {
+        const winnerUserId = getWinnerUserId(game);
+        game.winnerId = winnerUserId === game.playerOneId ? winnerUserId : null;
+        await game.save();
+        sendGameUpdate(game);
+        return;
+    }
 
     await applyGameResult(game);
     await game.save();

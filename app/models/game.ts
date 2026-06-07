@@ -15,7 +15,7 @@ export default class Game extends BaseModel {
     declare playerOne: BelongsTo<typeof User>;
 
     @column()
-    declare playerTwoId: number;
+    declare playerTwoId: number | null;
 
     @belongsTo(() => User, { foreignKey: "playerTwoId" })
     declare playerTwo: BelongsTo<typeof User>;

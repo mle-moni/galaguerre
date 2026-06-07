@@ -1,4 +1,5 @@
 import type Game from "#models/game";
+import { scheduleAiTurnIfNeeded } from "../../galaguerre/ai/schedule_ai_turn.js";
 import { drawOneCard } from "../../galaguerre/draw_cards.js";
 import { triggerPassives } from "../../galaguerre/passive_engine/trigger_passives.js";
 import { sendGameUpdate } from "./send_game_update.js";
@@ -39,6 +40,8 @@ export const setupNextGameTurn = async (game: Game) => {
     await game.save();
 
     sendGameUpdate(game);
+
+    scheduleAiTurnIfNeeded(game);
 };
 
 const getWhoIsNext = (game: Game): "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" => {

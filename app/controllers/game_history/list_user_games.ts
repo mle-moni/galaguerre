@@ -30,6 +30,7 @@ export const listUserGames = async ({
 
     const games = await Game.query()
         .where("isFinished", true)
+        .whereRaw("(data->>'isTraining')::boolean IS NOT TRUE")
         .where((query) => {
             query.where("playerOneId", userId).orWhere("playerTwoId", userId);
         })

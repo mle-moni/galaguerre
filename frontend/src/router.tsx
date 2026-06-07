@@ -8,6 +8,7 @@ import { HomePage } from "./pages/home/home_page.jsx";
 import { LoginPage } from "./pages/login/login_page.jsx";
 import { MatchmakingPage } from "./pages/matchmaking/match_making_page.jsx";
 import { PlayPage } from "./pages/play/play_page.jsx";
+import { TrainingPage } from "./pages/training/training_page.jsx";
 import { GameHistoryDetailPage } from "./pages/game_history/game_history_detail_page.jsx";
 import { GameHistoryListPage } from "./pages/game_history/game_history_list_page.jsx";
 import { LeaderboardPage } from "./pages/leaderboard/leaderboard_page.jsx";
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
     {
         path: "/matchmaking",
         element: <MatchmakingPage />,
+    },
+    {
+        path: "/training",
+        element: <TrainingPage />,
     },
     {
         path: "/leaderboard",

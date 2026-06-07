@@ -12,8 +12,9 @@ import {
 } from "#api_types/game.types";
 import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { recordHeroAttack as recordHeroAttackStat } from "../../galaguerre/game_stats/record_player_stats.js";
 import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
+import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
+import { recordHeroAttack as recordHeroAttackStat } from "../../galaguerre/game_stats/record_player_stats.js";
 
 export const getGameActionInfos = async (socketId: string) => {
     const socketData = getSocketDataFromSocketId(socketId);
@@ -27,12 +28,23 @@ export const getGameActionInfos = async (socketId: string) => {
         return null;
     }
 
-    const { userId } = socketData;
+    const { userId, gameId } = socketData;
 
-    const currentGame = await Game.query()
-        .where((q) => q.where("playerOneId", userId).orWhere("playerTwoId", userId))
-        .andWhere("isFinished", false)
-        .first();
+    let currentGame: Game | null = null;
+
+    if (userId === TRAINING_AI_USER_ID && gameId !== undefined) {
+        currentGame = await Game.query().where("id", gameId).andWhere("isFinished", false).first();
+
+        if (currentGame && !currentGame.data.isTraining) {
+            currentGame = null;
+        }
+    } else {
+        currentGame = await Game.query()
+            .where((q) => q.where("playerOneId", userId).orWhere("playerTwoId", userId))
+            .andWhere("isFinished", false)
+            .if(gameId !== undefined, (query) => query.where("id", gameId!))
+            .first();
+    }
 
     if (!currentGame) {
         emitSocketEvent("notify_error", { error: "Vous n'êtes pas en jeu" }, socketId);
