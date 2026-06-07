@@ -4,7 +4,7 @@ import { useGameContext } from "~/hooks/use_game_state";
 import { LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { queryClient } from "~/services/query_client";
-import { GameFinalStatsTable } from "./game_final_stats_table";
+import { GameFinalStatsTable } from "./game_final_stats_table.tsx";
 
 const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`);
 
@@ -25,24 +25,10 @@ export const GameFinalScreen = observer(() => {
             centered
             opened={store.isFinished}
             onClose={handleClose}
-            title="Partie terminée"
+            title={`Partie terminée - ${store.isUserWinner ? "Victoire" : "Défaite"}`}
             size="lg"
         >
             <Stack gap="sm">
-                {isDraw ? (
-                    <Text size="lg">Match nul !</Text>
-                ) : (
-                    <Text size="lg">{store.winner.pseudo} remporte la partie !</Text>
-                )}
-
-                <Text size="lg">
-                    {isDraw
-                        ? "Les deux héros sont tombés en même temps."
-                        : store.isUserWinner
-                          ? "Félicitations pour votre victoire 🎉"
-                          : "Bon allez ça se passera mieux la prochaine fois 😬"}
-                </Text>
-
                 {isDraw ? (
                     <Text size="sm" c="dimmed">
                         Match nul — Elo inchangé
