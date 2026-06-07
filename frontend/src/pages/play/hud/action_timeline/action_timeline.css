@@ -1,0 +1,56 @@
+.action-timeline {
+	position: absolute;
+	bottom: 200px;
+	left: 8px;
+	z-index: 10;
+	width: 280px;
+	padding: 8px 10px;
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(4px);
+}
+
+.action-timeline__entry {
+	font-size: 12px;
+	line-height: 1.4;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.action-timeline__entry--me {
+	color: #a8e6cf;
+}
+
+.action-timeline__entry--opponent {
+	color: #ffd3b6;
+}
+
+.action-timeline__card-link {
+	cursor: help;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	text-underline-offset: 2px;
+}
+
+.action-timeline__more {
+	margin-top: 6px;
+	padding: 0;
+	border: none;
+	background: none;
+	color: rgba(255, 255, 255, 0.65);
+	font-size: 11px;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.action-timeline__more:hover {
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.action-timeline-modal__entry {
+	padding: 6px 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.action-timeline-modal__entry:last-child {
+	border-bottom: none;
+}

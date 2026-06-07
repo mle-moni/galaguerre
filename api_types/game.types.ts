@@ -131,16 +131,15 @@ export type WeaponCard = PlayerCardBase & {
     deathrattleActions: CardActionSnapshot[];
 };
 
-export interface GameAction {
-    uuid: string;
-    cardId: number;
-    playedForCost: number;
-}
+export type GameLogEntryType = "PLAY_CARD" | "PASS_TURN" | "FATIGUE_DAMAGE";
 
-export interface GameRound {
+export interface GameLogEntry {
+    id: string;
     roundNumber: number;
-    playerOneActions: GameAction[];
-    playerTwoActions: GameAction[];
+    playerId: number;
+    type: GameLogEntryType;
+    card?: PlayerCard;
+    fatigueDamage?: number;
 }
 
 export interface WeaponState {
@@ -249,7 +248,7 @@ export interface GameData {
     currentRound: number;
     playerOne: GamePlayer;
     playerTwo: GamePlayer;
-    gameRounds: GameRound[];
+    actionLog: GameLogEntry[];
     ratingResult?: GameRatingResult;
 }
 

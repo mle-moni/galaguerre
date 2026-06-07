@@ -1,6 +1,7 @@
 import type { CardFilterSnapshot, GamePlayer } from "#api_types/game.types";
 import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import type Game from "#models/game";
+import { recordFatigueDamage } from "./game_log/record_game_log.js";
 import { recordCardDrawn } from "./game_stats/record_player_stats.js";
 import { triggerPassives } from "./passive_engine/trigger_passives.js";
 
@@ -22,6 +23,7 @@ export const drawOneCard = (
             const fatigueDamage = getFatigueDamage(player);
             player.health -= fatigueDamage;
             player.maxFatigueDamageTaken = fatigueDamage;
+            if (game) recordFatigueDamage(game, player, fatigueDamage);
         } else {
             player.hand.push(card);
             recordCardDrawn(player);
@@ -34,6 +36,7 @@ export const drawOneCard = (
         const fatigueDamage = getFatigueDamage(player);
         player.health -= fatigueDamage;
         player.maxFatigueDamageTaken = fatigueDamage;
+        if (game) recordFatigueDamage(game, player, fatigueDamage);
         return;
     }
 

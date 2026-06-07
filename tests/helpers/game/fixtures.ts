@@ -223,7 +223,7 @@ export const createGameData = (
     return {
         state: "PLAYER_ONE_TURN",
         currentRound: 1,
-        gameRounds: [],
+        actionLog: [],
         playerOne: createGamePlayer(1, p1Overrides),
         playerTwo: createGamePlayer(2, p2Overrides),
         ...rest,

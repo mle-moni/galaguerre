@@ -1,4 +1,5 @@
 import type { WeaponCard } from "#api_types/game.types";
+import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
     recordWeaponPlayed,
@@ -24,6 +25,7 @@ export const playWeapon = async ({ card, player, game }: PlayWeaponOptions) => {
 
     player.weaponState = instantiateWeapon(card);
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
+    recordPlayCard(game, player, card);
     player.mana -= card.cost;
     recordManaSpent(player, card.cost);
     recordWeaponPlayed(player);

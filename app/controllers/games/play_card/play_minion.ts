@@ -1,6 +1,7 @@
 import type { ActionTarget, MinionCard, MinionSpotId } from "#api_types/game.types";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
 import { refreshAurasAfterMinionPlayed } from "../../../galaguerre/passive_engine/refresh_passive_auras.js";
+import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
     recordMinionPlayed,
@@ -83,6 +84,7 @@ export const playMinion = async ({
 
     player.board[spotId] = instantiateMinion(card, game.data.currentRound);
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
+    recordPlayCard(game, player, card);
     player.mana -= card.cost;
     recordManaSpent(player, card.cost);
     recordMinionPlayed(player);

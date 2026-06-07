@@ -1,3 +1,4 @@
+import { recordPassTurn } from "../../galaguerre/game_log/record_game_log.js";
 import { triggerPassives } from "../../galaguerre/passive_engine/trigger_passives.js";
 import { ensureIsMyTurn, getGameActionInfos } from "./game_utils.js";
 import { sendGameUpdate } from "./send_game_update.js";
@@ -16,6 +17,8 @@ export const passGameTurn = async (socketId: string) => {
         currentGame.data.state === "PLAYER_ONE_TURN"
             ? currentGame.data.playerOne
             : currentGame.data.playerTwo;
+
+    recordPassTurn(currentGame, activePlayer);
 
     const { gameEnded: turnEndGameEnded } = triggerPassives(currentGame, "TURN_END", activePlayer);
 

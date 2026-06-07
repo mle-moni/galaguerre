@@ -105,6 +105,6 @@ export const getDefaultGameData = async ({
             heroLastAttackAtRound: 0,
             stats: { ...DEFAULT_PLAYER_STATS },
         },
-        gameRounds: [],
+        actionLog: [],
     };
 };

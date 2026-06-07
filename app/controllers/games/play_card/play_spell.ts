@@ -1,5 +1,6 @@
 import type { ActionTarget, SpellCard } from "#api_types/game.types";
 import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
+import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
     recordSpellCast,
@@ -57,6 +58,7 @@ export const playSpell = async ({
     }
 
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
+    recordPlayCard(game, player, card);
     player.mana -= card.cost;
     recordManaSpent(player, card.cost);
     recordSpellCast(player);
