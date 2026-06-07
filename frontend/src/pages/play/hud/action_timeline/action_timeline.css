@@ -1,13 +1,63 @@
 .action-timeline {
 	position: absolute;
-	bottom: 200px;
-	left: 8px;
 	z-index: 10;
 	width: 280px;
-	padding: 8px 10px;
+	padding: 0 10px 8px;
 	border-radius: 6px;
 	background: rgba(0, 0, 0, 0.55);
 	backdrop-filter: blur(4px);
+	opacity: 0;
+	pointer-events: none;
+}
+
+.action-timeline--positioned {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.action-timeline--dragging {
+	user-select: none;
+}
+
+.action-timeline__drag-handle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 -10px 6px;
+	padding: 6px 10px;
+	border-radius: 6px 6px 0 0;
+	cursor: grab;
+	touch-action: none;
+}
+
+.action-timeline__drag-handle:active {
+	cursor: grabbing;
+}
+
+.action-timeline__drag-grip {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 2px;
+	width: 10px;
+	opacity: 0.55;
+}
+
+.action-timeline__drag-grip::before,
+.action-timeline__drag-grip::after {
+	content: "";
+	display: block;
+	height: 2px;
+	border-radius: 1px;
+	background: rgba(255, 255, 255, 0.85);
+	box-shadow: 0 4px 0 rgba(255, 255, 255, 0.85);
+}
+
+.action-timeline__drag-label {
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.55);
 }
 
 .action-timeline__entry {
