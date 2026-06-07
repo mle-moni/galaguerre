@@ -5,7 +5,7 @@ import type { HttpContext } from "@adonisjs/core/http";
 import vine, { SimpleMessagesProvider } from "@vinejs/vine";
 import { DEFAULT_MESSAGE_PROVIDER_CONFIG } from "#adomin/validation/default_validator";
 import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
-import { validateDeckComposition } from "../../galaguerre/validation/validate_deck_composition.js";
+import { validateDeckCompositionForSave } from "../../galaguerre/validation/validate_deck_composition.js";
 import { serializeDeck } from "./serialize_deck.js";
 import {
     findUserDeck,
@@ -73,7 +73,7 @@ export default class DecksController {
             messagesProvider,
         })) as UpdateDeckPayload;
 
-        const composition = validateDeckComposition(payload.cards);
+        const composition = validateDeckCompositionForSave(payload.cards);
         if (!composition.valid) {
             return response.badRequest({
                 error: "Composition de deck invalide",
@@ -138,6 +138,14 @@ export default class DecksController {
         const deck = await findUserDeck(auth.user!.id, Number(params.id));
 
         if (!deck) return response.notFound({ error: "Deck introuvable" });
+
+        const serialized = serializeDeck(deck);
+        if (!serialized.valid) {
+            return response.badRequest({
+                error: "Ce deck est invalide et ne peut pas être sélectionné",
+                details: serialized.compositionErrors,
+            });
+        }
 
         await Deck.query().where("userId", auth.user!.id).update({ selected: false });
 

@@ -187,11 +187,13 @@ const createDeckForUser = async (userId: number, unique: string) => {
         selected: true,
     });
 
-    await createMinionCardInDeck({
-        deck,
-        unique,
-        label: `valid-card-${unique}`,
-    });
+    for (let i = 0; i < 15; i++) {
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `valid-card-${unique}-${i}`,
+        });
+    }
 
     await loadDeckRelations(deck);
     return deck;
@@ -1012,6 +1014,14 @@ test.group("validation:validateDeck", (group) => {
             userId: playerTwo.id,
             selected: true,
         });
+
+        for (let i = 0; i < 14; i++) {
+            await createMinionCardInDeck({
+                deck: invalidDeck,
+                unique,
+                label: `valid-filler-${unique}-${i}`,
+            });
+        }
 
         await createMinionCardInDeck({
             deck: invalidDeck,

@@ -1,8 +1,18 @@
 import type { ApiDeckCardEntry } from "#api_types/deck.types";
 import Card from "#models/card";
-import Deck from "#models/deck";
+import type Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
+
+export const deckCardsToEntries = (deck: Deck): ApiDeckCardEntry[] => {
+    const counts = new Map<number, number>();
+
+    for (const card of deck.cards) {
+        counts.set(card.id, (counts.get(card.id) ?? 0) + 1);
+    }
+
+    return [...counts.entries()].map(([cardId, count]) => ({ cardId, count }));
+};
 
 export const findUserDeck = async (userId: number, deckId: number) => {
     return Deck.query()

@@ -37,7 +37,8 @@ export const HomePage = observer(() => {
                             <CenteredLoader />
                         ) : selectedDeck ? (
                             <p className="gg-mode-tile__subtitle">
-                                Deck actif : {selectedDeck.name} ({selectedDeck.cardCount}/20)
+                                Deck actif : {selectedDeck.name} ({selectedDeck.cardCount}/20, min.
+                                15)
                             </p>
                         ) : (
                             <p className="gg-mode-tile__subtitle text-red-300">

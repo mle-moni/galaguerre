@@ -1,5 +1,7 @@
 import { DEFAULT_HERO_HEALTH, type GameData } from "#api_types/game.types";
+import { deckCardsToEntries } from "#controllers/decks/deck_utils";
 import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
+import { validateDeckComposition } from "../../galaguerre/validation/validate_deck_composition.js";
 import type Deck from "#models/deck";
 import Game from "#models/game";
 import { generatePlayerCards } from "./generate_player_cards.js";
@@ -16,9 +18,18 @@ interface CreateGameOptions {
     playerTwo: Player;
 }
 
+const assertDeckPlayable = (deck: Deck) => {
+    const composition = validateDeckComposition(deckCardsToEntries(deck));
+    if (!composition.valid) {
+        throw new Error(composition.errors[0]?.reason ?? "Deck invalide");
+    }
+
+    assertDeckValid(deck);
+};
+
 export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) => {
-    assertDeckValid(playerOne.deck);
-    assertDeckValid(playerTwo.deck);
+    assertDeckPlayable(playerOne.deck);
+    assertDeckPlayable(playerTwo.deck);
 
     const gameData: GameData = await getDefaultGameData({ playerOne, playerTwo });
 

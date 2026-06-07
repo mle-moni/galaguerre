@@ -44,7 +44,7 @@ export const MatchmakingPage = observer(() => {
         })
         .slice(0, 4);
 
-    const canSearch = selectedDeck?.valid && selectedDeck.cardCount > 0;
+    const canSearch = selectedDeck?.valid ?? false;
 
     return (
         <AppLayout title="Matchmaking" backTo="/" backLabel="Accueil">
@@ -59,7 +59,7 @@ export const MatchmakingPage = observer(() => {
                                         Deck sélectionné : {selectedDeck.name}
                                     </Text>
                                     <Text size="sm" className="text-white/60">
-                                        {selectedDeck.cardCount}/20 cartes
+                                        {selectedDeck.cardCount}/20 cartes (15 minimum)
                                         {!selectedDeck.valid && " — deck invalide"}
                                     </Text>
                                 </div>
@@ -93,7 +93,7 @@ export const MatchmakingPage = observer(() => {
 
                         {!canSearch && selectedDeck && (
                             <Text size="sm" className="text-red-300">
-                                Votre deck doit être valide et contenir au moins une carte.
+                                Votre deck doit être valide et contenir entre 15 et 20 cartes.
                             </Text>
                         )}
 

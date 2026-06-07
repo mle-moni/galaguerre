@@ -53,7 +53,8 @@ test.group("decks api", (group) => {
 
         assert.equal(serialized.cardCount, 2);
         assert.deepEqual(serialized.cards, [{ cardId: card.id, count: 2 }]);
-        assert.isTrue(serialized.valid);
+        assert.isFalse(serialized.valid);
+        assert.isNotEmpty(serialized.compositionErrors);
     });
 
     test("selecting a deck deselects other decks for the same user", async ({ assert }) => {

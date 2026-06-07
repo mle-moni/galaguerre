@@ -12,6 +12,7 @@ import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
 
+const DECK_MIN_CARDS = 15;
 const DECK_MAX_CARDS = 20;
 const DECK_MAX_COPIES = 2;
 
@@ -205,9 +206,9 @@ export const DeckBuilderPage = observer(() => {
                         <div className="gg-panel-header flex justify-between items-center">
                             <span>Composition</span>
                             <span
-                                className={`text-sm font-normal ${totalCards > DECK_MAX_CARDS ? "text-red-400" : "text-white/70"}`}
+                                className={`text-sm font-normal ${totalCards > DECK_MAX_CARDS || totalCards < DECK_MIN_CARDS ? "text-red-400" : "text-white/70"}`}
                             >
-                                {totalCards}/{DECK_MAX_CARDS}
+                                {totalCards}/{DECK_MAX_CARDS} (min. {DECK_MIN_CARDS})
                             </span>
                         </div>
                         <div className="gg-panel-body">

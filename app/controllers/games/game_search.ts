@@ -4,6 +4,7 @@ import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { MATCHMAKING_QUEUE, addMatchmakingQueueItem } from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import type { HttpContext } from "@adonisjs/core/http";
+import { serializeDeck } from "#controllers/decks/serialize_deck";
 import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
 import { createGame } from "./create_game.js";
@@ -17,6 +18,14 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         .first();
 
     if (!deck) return response.badRequest({ error: "You have no deck selected" });
+
+    const serializedDeck = serializeDeck(deck);
+    if (!serializedDeck.valid) {
+        return response.badRequest({
+            error: "Votre deck est invalide et ne peut pas être utilisé pour lancer une partie",
+            details: serializedDeck.compositionErrors,
+        });
+    }
 
     if (MATCHMAKING_QUEUE.length === 0) {
         addMatchmakingQueueItem(user.id);

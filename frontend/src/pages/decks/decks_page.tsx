@@ -13,6 +13,7 @@ import {
 } from "~/hooks/use_decks";
 import { useUser } from "~/hooks/use_user";
 
+const DECK_MIN_CARDS = 15;
 const DECK_MAX_CARDS = 20;
 
 export const DecksPage = observer(() => {
@@ -84,7 +85,8 @@ export const DecksPage = observer(() => {
                                         </span>
                                     </div>
                                     <p className="text-white/60 text-sm m-0 mt-1">
-                                        {deck.cardCount}/{DECK_MAX_CARDS} cartes
+                                        {deck.cardCount} cartes ({DECK_MIN_CARDS}–{DECK_MAX_CARDS}{" "}
+                                        requis)
                                     </p>
                                     {!deck.valid && deck.compositionErrors.length > 0 && (
                                         <p className="text-red-300 text-xs m-0 mt-1">
@@ -98,6 +100,7 @@ export const DecksPage = observer(() => {
                                             size="xs"
                                             className="gg-btn-primary"
                                             loading={selectMutation.isPending}
+                                            disabled={!deck.valid}
                                             onClick={() => selectMutation.mutate(deck.id)}
                                         >
                                             Sélectionner
