@@ -15,16 +15,17 @@ interface CardProps {
     card: PlayerCard;
     isOpponent?: boolean;
     style?: CSSProperties;
+    showDetailButton?: boolean;
 }
 
-export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => {
+export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton }: CardProps) => {
     const { store } = useGameContext();
 
     if (isOpponent) {
         return (
             <div
                 style={style}
-                className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f] cursor-pointer")}
+                className={clsx("playing-card-face rounded bg-[#1e3a5f] cursor-pointer")}
             />
         );
     }
@@ -97,7 +98,11 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
                 style={style}
                 className={cardClassName}
                 onClick={handlePlayableCardClick}
-                wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+                wrapper={(content) => (
+                    <CardDetailHover card={card} showDetailButton={showDetailButton}>
+                        {content}
+                    </CardDetailHover>
+                )}
             />
         );
     }
@@ -112,7 +117,11 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
                 className={cardClassName}
                 onClick={handlePlayableCardClick}
                 onPointerDown={isTargeted && isArmed ? handleTargetedSpellPointerDown : undefined}
-                wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+                wrapper={(content) => (
+                    <CardDetailHover card={card} showDetailButton={showDetailButton}>
+                        {content}
+                    </CardDetailHover>
+                )}
             />
         );
     }
@@ -128,7 +137,11 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
             onClick={handleMinionClick}
             onDragStart={() => store.cardDragStore.setCardDragged(card)}
             onDragEnd={() => store.cardDragStore.setCardDragged(null)}
-            wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+            wrapper={(content) => (
+                <CardDetailHover card={card} showDetailButton={showDetailButton}>
+                    {content}
+                </CardDetailHover>
+            )}
         />
     );
 });

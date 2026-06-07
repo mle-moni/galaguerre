@@ -30,6 +30,17 @@ export class CardDragStore {
         return this.minionPlayHintCardId !== null;
     }
 
+    get pendingMinionCard(): PlayerCard | null {
+        if (!this.minionPlayHintCardId) return null;
+        return (
+            this.gameStore.me.hand.find((card) => card.uuid === this.minionPlayHintCardId) ?? null
+        );
+    }
+
+    get activeMinionCard(): PlayerCard | null {
+        return this.cardDragged ?? this.pendingMinionCard;
+    }
+
     showMinionPlayHint(cardId: string) {
         this.minionPlayHintCardId = cardId;
         this.gameStore.targetSelectionStore.disarm();
@@ -49,26 +60,28 @@ export class CardDragStore {
     }
 
     get opponentSlotsBorderColor(): SlotsBorderColor {
-        if (!this.cardDragged) return spotsToSameColor("black");
+        const card = this.activeMinionCard;
+        if (!card) return spotsToSameColor("black");
 
         return {
-            SPOT_1: this.canPlayCard("SPOT_1", this.cardDragged, "OPPONENT") ? "green" : "red",
-            SPOT_2: this.canPlayCard("SPOT_2", this.cardDragged, "OPPONENT") ? "green" : "red",
-            SPOT_3: this.canPlayCard("SPOT_3", this.cardDragged, "OPPONENT") ? "green" : "red",
-            SPOT_4: this.canPlayCard("SPOT_4", this.cardDragged, "OPPONENT") ? "green" : "red",
-            SPOT_5: this.canPlayCard("SPOT_5", this.cardDragged, "OPPONENT") ? "green" : "red",
+            SPOT_1: this.canPlayCard("SPOT_1", card, "OPPONENT") ? "green" : "red",
+            SPOT_2: this.canPlayCard("SPOT_2", card, "OPPONENT") ? "green" : "red",
+            SPOT_3: this.canPlayCard("SPOT_3", card, "OPPONENT") ? "green" : "red",
+            SPOT_4: this.canPlayCard("SPOT_4", card, "OPPONENT") ? "green" : "red",
+            SPOT_5: this.canPlayCard("SPOT_5", card, "OPPONENT") ? "green" : "red",
         };
     }
 
     get mySlotsBorderColor(): SlotsBorderColor {
-        if (!this.cardDragged) return spotsToSameColor("black");
+        const card = this.activeMinionCard;
+        if (!card) return spotsToSameColor("black");
 
         return {
-            SPOT_1: this.canPlayCard("SPOT_1", this.cardDragged, "PLAYER") ? "green" : "red",
-            SPOT_2: this.canPlayCard("SPOT_2", this.cardDragged, "PLAYER") ? "green" : "red",
-            SPOT_3: this.canPlayCard("SPOT_3", this.cardDragged, "PLAYER") ? "green" : "red",
-            SPOT_4: this.canPlayCard("SPOT_4", this.cardDragged, "PLAYER") ? "green" : "red",
-            SPOT_5: this.canPlayCard("SPOT_5", this.cardDragged, "PLAYER") ? "green" : "red",
+            SPOT_1: this.canPlayCard("SPOT_1", card, "PLAYER") ? "green" : "red",
+            SPOT_2: this.canPlayCard("SPOT_2", card, "PLAYER") ? "green" : "red",
+            SPOT_3: this.canPlayCard("SPOT_3", card, "PLAYER") ? "green" : "red",
+            SPOT_4: this.canPlayCard("SPOT_4", card, "PLAYER") ? "green" : "red",
+            SPOT_5: this.canPlayCard("SPOT_5", card, "PLAYER") ? "green" : "red",
         };
     }
 
@@ -106,6 +119,7 @@ export class CardDragStore {
         }
 
         if (card.type === "MINION" && this.gameStore.targetSelectionStore.requiresTarget(card)) {
+            this.clearMinionPlayHint();
             this.gameStore.targetSelectionStore.startTargetSelection(card, spotId, spotOwner);
 
             const spotElement = getMinionSpotElement(spotId, spotOwner);
@@ -124,5 +138,7 @@ export class CardDragStore {
             spotId,
             owner: spotOwner,
         });
+
+        this.clearMinionPlayHint();
     }
 }

@@ -4,23 +4,26 @@ import { observer } from "mobx-react-lite";
 import { TargetingArrowOverlay } from "~/components/targeting/targeting_arrow_overlay";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useArmedCardInteraction } from "~/hooks/use_armed_card_interaction";
+import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 
 import { ArmedCardHint } from "./hud/armed_card_hint/armed_card_hint.jsx";
 import { ActionTimeline } from "./hud/action_timeline/action_timeline.jsx";
+import { MobileGameLayout } from "./hud/mobile/mobile_game_layout.jsx";
 import { Board } from "./board/board.jsx";
 import { DecksInfos } from "./hud/decks_infos/decks_infos.jsx";
 import { GameFinalScreen } from "./hud/game_final_screen/game_final_screen.jsx";
 import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
 import { PlayersInfos } from "./hud/players_infos/players_infos.jsx";
+import "./game_layout.css";
 
 interface GameRendererProps {
     game: ApiGame;
     user: ApiUser;
 }
 
-export const GameRenderer = observer<GameRendererProps>(({ game, user }) => {
+const DesktopGameLayout = observer<GameRendererProps>(({ game, user }) => {
     const { store } = useGameContext();
     useTargetSelectionCancel(store);
     useArmedCardInteraction(store);
@@ -52,4 +55,14 @@ export const GameRenderer = observer<GameRendererProps>(({ game, user }) => {
             <TargetingArrowOverlay />
         </div>
     );
+});
+
+export const GameRenderer = observer<GameRendererProps>(({ game, user }) => {
+    const isMobilePortrait = useIsMobilePortrait();
+
+    if (isMobilePortrait) {
+        return <MobileGameLayout game={game} user={user} />;
+    }
+
+    return <DesktopGameLayout game={game} user={user} />;
 });

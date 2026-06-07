@@ -1,0 +1,60 @@
+:root {
+	--card-w: 120px;
+	--card-h: 150px;
+	--spot-w: 126px;
+	--spot-h: 156px;
+	--stat-badge: 25px;
+	--hand-gap: 20px;
+	--hand-height: 170px;
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+	:root {
+		--card-w: clamp(64px, 19vw, 80px);
+		--card-h: calc(var(--card-w) * 1.25);
+		--stat-badge: clamp(15px, 4vw, 18px);
+		--board-minion-w: clamp(52px, 15vw, 66px);
+		--board-minion-h: calc(var(--board-minion-w) * 1.12);
+		--board-stat-badge: clamp(16px, 4.5vw, 20px);
+		--spot-w: calc(var(--board-minion-w) + 6px);
+		--spot-h: calc(var(--board-minion-h) + 6px);
+		--hand-gap: -10px;
+		--hand-height: calc(var(--card-h) + 32px);
+	}
+}
+
+.card-hand .playing-card-face .cost,
+.card-hand .playing-card-face .attack,
+.card-hand .playing-card-face .health,
+.card-hand .playing-card-face .durability {
+	width: var(--stat-badge);
+	height: var(--stat-badge);
+	font-size: calc(var(--stat-badge) * 0.5);
+	border-width: 1px;
+}
+
+.playing-card-face {
+	width: var(--card-w);
+	height: var(--card-h);
+	touch-action: manipulation;
+}
+
+.playing-card-face__image-area {
+	height: calc(var(--card-h) * 0.5);
+}
+
+.playing-card-face__body {
+	height: calc(var(--card-h) * 0.5);
+}
+
+.minion-spot {
+	width: var(--spot-w);
+	height: var(--spot-h);
+	touch-action: manipulation;
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+	.minion-spot:not(.minion-spot--compact) {
+		margin: 0.25rem;
+	}
+}

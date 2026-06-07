@@ -8,24 +8,32 @@ import { PlayingCard } from "../playing_card/playing_card.jsx";
 interface PlayerHandProps {
     player: GamePlayer;
     isOpponent?: boolean;
+    isMobile?: boolean;
 }
 
-export const PlayerHand = observer<PlayerHandProps>(({ player, isOpponent }) => {
-    const className = isOpponent ? "opponent-hand" : "player-hand";
+export const PlayerHand = observer<PlayerHandProps>(({ player, isOpponent, isMobile }) => {
+    const className = isMobile
+        ? "card-hand card-hand--mobile"
+        : isOpponent
+          ? "opponent-hand card-hand"
+          : "player-hand card-hand";
+
+    const rotationFactor = isMobile ? 1.5 : 2;
+    const translationFactor = isMobile ? 2 : 4;
 
     return (
-        <div className={`${className} card-hand`}>
+        <div className={className}>
             {player.hand.map((card, index) => {
                 const isLastCard = index === player.hand.length - 1;
                 const isFirstCard = index === 0;
                 const totalCards = player.hand.length;
-                let rotation = (index - (totalCards - 1) / 2) * 2;
-                let translationY = Math.abs(index - (totalCards - 1) / 2) * 4;
+                let rotation = (index - (totalCards - 1) / 2) * rotationFactor;
+                let translationY = Math.abs(index - (totalCards - 1) / 2) * translationFactor;
 
                 if (isFirstCard || isLastCard) {
-                    translationY += 10;
+                    translationY += isMobile ? 4 : 10;
                     if (totalCards > 8) {
-                        translationY += 10;
+                        translationY += isMobile ? 4 : 10;
                     }
                 }
 
@@ -35,15 +43,17 @@ export const PlayerHand = observer<PlayerHandProps>(({ player, isOpponent }) => 
                 }
 
                 return (
-                    <PlayingCard
-                        style={{
-                            rotate: `${rotation}deg`,
-                            transform: `translate(0px, ${translationY}px)`,
-                        }}
-                        key={card.uuid}
-                        card={card}
-                        isOpponent={isOpponent}
-                    />
+                    <div key={card.uuid} className="card-hand__card">
+                        <PlayingCard
+                            style={{
+                                rotate: `${rotation}deg`,
+                                transform: `translate(0px, ${translationY}px)`,
+                            }}
+                            card={card}
+                            isOpponent={isOpponent}
+                            showDetailButton={isMobile && !isOpponent}
+                        />
+                    </div>
                 );
             })}
         </div>

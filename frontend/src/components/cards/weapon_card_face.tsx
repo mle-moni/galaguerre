@@ -25,20 +25,19 @@ export const WeaponCardFace = ({
             data-playing-card
             data-playing-card-id={card.uuid}
             style={style}
-            className={clsx("relative w-[120px] h-[150px] rounded bg-[#5f3a1e]", className)}
+            className={clsx("playing-card-face relative rounded bg-[#5f3a1e]", className)}
             onClick={onClick}
         >
-            <div className="relative">
+            <div className="relative playing-card-face__image-area">
                 <div className="cost">{card.cost}</div>
                 <Image
-                    className="rounded-t"
+                    className="rounded-t h-full w-full object-cover"
                     src={card.imageUrl}
-                    height={75}
                     alt="Galaguerre weapon"
                     draggable={false}
                 />
             </div>
-            <div className="flex flex-col h-[75px] justify-around">
+            <div className="flex flex-col playing-card-face__body justify-around">
                 <p className="text-center text-white m-0 text-xs px-1">{card.label}</p>
                 <div className="flex justify-between mx-1">
                     <div className="attack">{card.damage}</div>

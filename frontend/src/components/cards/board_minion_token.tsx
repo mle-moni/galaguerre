@@ -7,11 +7,10 @@ import {
     getMinionCardMaxAttacks,
     type MinionAttackStatus,
 } from "~/helpers/minion_combat";
-import "./card_faces.css";
-
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
+import "./board_minion_token.css";
 
-interface MinionCardFaceProps {
+interface BoardMinionTokenProps {
     card: MinionCard;
     attack: number;
     health: number;
@@ -19,15 +18,12 @@ interface MinionCardFaceProps {
     style?: CSSProperties;
     attackStatus?: MinionAttackStatus;
     remainingAttacks?: number;
-    draggable?: boolean;
-    onDragStart?: () => void;
-    onDragEnd?: () => void;
-    onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
 }
 
-export const MinionCardFace = ({
+export const BoardMinionToken = ({
     card,
     attack,
     health,
@@ -35,13 +31,10 @@ export const MinionCardFace = ({
     style,
     attackStatus,
     remainingAttacks,
-    draggable,
-    onDragStart,
-    onDragEnd,
-    onClick,
     onPointerDown,
+    onClick,
     wrapper = (content) => content,
-}: MinionCardFaceProps) => {
+}: BoardMinionTokenProps) => {
     const maxAttacks = getMinionCardMaxAttacks(card);
     const showWindfuryBadge =
         attackStatus !== undefined &&
@@ -58,45 +51,42 @@ export const MinionCardFace = ({
             data-playing-card-id={card.uuid}
             style={style}
             className={clsx(
-                "minion-card-face playing-card-face relative rounded bg-[#1e3a5f]",
+                "board-minion-token",
                 attackStatus && `minion-card-face--${attackStatus}`,
                 className,
             )}
-            title={statusLabel}
-            draggable={draggable}
-            onClick={onClick}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
+            title={statusLabel ?? card.label}
             onPointerDown={onPointerDown}
+            onClick={onClick}
         >
             <CardEffectSymbols card={card} />
             {attackStatus === "sleeping" && (
-                <span className="minion-card-face__sleep-icon" aria-hidden>
+                <span className="board-minion-token__sleep-icon" aria-hidden>
                     💤
                 </span>
             )}
-            <div className="relative playing-card-face__image-area">
-                <div className="cost">{card.cost}</div>
+            <div className="board-minion-token__art">
                 <Image
-                    className="rounded-t h-full w-full object-cover"
+                    className="board-minion-token__image"
                     src={card.imageUrl}
-                    alt="Galaguerre card"
+                    alt={card.label}
                     draggable={false}
                 />
             </div>
-            <div className="flex flex-col playing-card-face__body justify-around">
-                <p className="text-center text-white m-0 text-xs px-1">{card.label}</p>
-                <div className="flex justify-between mx-1">
-                    <div className="relative">
-                        <div className="attack">{attack}</div>
-                        {showWindfuryBadge && (
-                            <span className="minion-card-face__attacks-remaining">
-                                {remainingAttacks}/{maxAttacks}
-                            </span>
-                        )}
-                    </div>
-                    <div className="health">{health}</div>
+            <div className="board-minion-token__stats">
+                <div className="relative">
+                    <span className="board-minion-token__stat board-minion-token__stat--attack">
+                        {attack}
+                    </span>
+                    {showWindfuryBadge && (
+                        <span className="board-minion-token__attacks-remaining">
+                            {remainingAttacks}/{maxAttacks}
+                        </span>
+                    )}
                 </div>
+                <span className="board-minion-token__stat board-minion-token__stat--health">
+                    {health}
+                </span>
             </div>
         </div>
     );

@@ -1,0 +1,105 @@
+.board-minion-token {
+	position: relative;
+	width: var(--board-minion-w);
+	height: var(--board-minion-h);
+	border-radius: 6px;
+	background-color: #1e3a5f;
+	overflow: hidden;
+	touch-action: manipulation;
+}
+
+.board-minion-token__art {
+	height: calc(var(--board-minion-h) * 0.62);
+	overflow: hidden;
+}
+
+.board-minion-token__image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.board-minion-token__stats {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 2px 2px;
+	height: calc(var(--board-minion-h) * 0.38);
+}
+
+.board-minion-token__stat {
+	width: var(--board-stat-badge);
+	height: var(--board-stat-badge);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: calc(var(--board-stat-badge) * 0.5);
+	font-weight: bold;
+	border: 1px solid #000;
+	flex-shrink: 0;
+}
+
+.board-minion-token__stat--attack {
+	background-color: #e32a2a;
+	color: #000;
+}
+
+.board-minion-token__stat--health {
+	background-color: #2ae32a;
+	color: #000;
+}
+
+.board-minion-token__sleep-icon {
+	position: absolute;
+	top: -14px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 14px;
+	z-index: 2;
+	pointer-events: none;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+}
+
+.board-minion-token__attacks-remaining {
+	position: absolute;
+	top: -5px;
+	right: -6px;
+	font-size: 7px;
+	font-weight: bold;
+	color: #fff;
+	background-color: #1e3a5f;
+	border: 1px solid #000;
+	border-radius: 3px;
+	padding: 0 2px;
+	line-height: 1.2;
+}
+
+.board-minion-token .card-symbol-stack {
+	top: 1px;
+	right: 1px;
+}
+
+.board-minion-token .card-symbol {
+	width: 14px;
+	height: 14px;
+	font-size: 8px;
+	border-width: 1px;
+}
+
+.board-minion-token.minion-card-face--ready {
+	box-shadow: 0 0 6px 1px rgba(46, 227, 42, 0.7);
+	border: 2px solid #2ae32a;
+	cursor: grab;
+}
+
+.board-minion-token.minion-card-face--sleeping {
+	filter: brightness(0.75);
+	border: 2px solid #64748b;
+}
+
+.board-minion-token.minion-card-face--exhausted {
+	filter: grayscale(60%);
+	opacity: 0.7;
+}

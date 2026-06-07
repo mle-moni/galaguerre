@@ -2,6 +2,7 @@ import { Button, Modal, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import { useGameContext } from "~/hooks/use_game_state";
+import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { queryClient } from "~/services/query_client";
@@ -12,6 +13,7 @@ const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`)
 export const GameFinalScreen = observer(() => {
     const { store } = useGameContext();
     const navigate = useNavigate();
+    const isMobilePortrait = useIsMobilePortrait();
     const isTraining = store.game.data.isTraining ?? false;
 
     const handleClose = () => {
@@ -27,7 +29,8 @@ export const GameFinalScreen = observer(() => {
 
     return (
         <Modal
-            centered
+            centered={!isMobilePortrait}
+            fullScreen={isMobilePortrait}
             opened={store.isFinished}
             onClose={handleClose}
             title={`Partie terminée - ${store.isUserWinner ? "Victoire" : "Défaite"}`}

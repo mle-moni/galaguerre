@@ -100,6 +100,20 @@ export class GameStore {
             return this.targetSelectionStore.confirmTarget({ spotId, owner: spotOwner });
         }
 
+        if (this.minionDragStore.isAttacking) {
+            return this.minionDragStore.confirmTarget({ spotId, owner: spotOwner });
+        }
+
+        if (this.weaponDragStore.isAttacking) {
+            return this.weaponDragStore.confirmTarget({ spotId, owner: spotOwner });
+        }
+
+        const pendingMinion = this.cardDragStore.pendingMinionCard;
+        if (pendingMinion && spotId !== null) {
+            this.cardDragStore.handleDrop(pendingMinion, spotId, spotOwner);
+            return;
+        }
+
         if (this.cardDragStore.cardDragged && spotId !== null) {
             return this.cardDragStore.handleDrop(this.cardDragStore.cardDragged, spotId, spotOwner);
         }
@@ -113,7 +127,7 @@ export class GameStore {
             );
         }
 
-        if (this.cardDragStore.cardDragged) {
+        if (this.cardDragStore.activeMinionCard) {
             if (spotOwner === "OPPONENT")
                 return this.cardDragStore.opponentSlotsBorderColor[spotId];
             return this.cardDragStore.mySlotsBorderColor[spotId];

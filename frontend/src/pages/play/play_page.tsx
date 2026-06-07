@@ -1,11 +1,11 @@
 import "./play_page.css";
+import "./game_layout.css";
 
 import type { ApiUser } from "#api_types/auth.types";
 
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
-import { useDimensions } from "~/hooks/use_dimensions";
 import { GameStateContext, useGameState } from "~/hooks/use_game_state";
 import { useUser } from "~/hooks/use_user";
 import { GAME_STORE } from "~/stores/store_singletons";
@@ -37,20 +37,13 @@ const Game = ({ gameId, user }: GameProps) => {
 };
 
 export const PlayPage = () => {
-    const dimensions = useDimensions();
     const user = useUser();
 
     if (!user) return <Navigate to="/login" />;
     if (!user.currentGameId) return <Navigate to="/matchmaking" />;
 
     return (
-        <div
-            style={{
-                width: dimensions.width,
-                height: dimensions.height,
-                backgroundColor: "#da9854",
-            }}
-        >
+        <div className="play-page">
             <Game user={user} gameId={user.currentGameId} />
         </div>
     );
