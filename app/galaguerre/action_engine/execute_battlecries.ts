@@ -1,5 +1,6 @@
 import type { ActionTarget, GamePlayer, MinionCard } from "#api_types/game.types";
 import type Game from "#models/game";
+import { recordBattlecry } from "../game_log/record_game_log.js";
 import { executeAction } from "./execute_action.js";
 import { findMinionOnPlayerBoard } from "./find_minion_on_board.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
@@ -21,6 +22,13 @@ export const executeBattlecries = (
 ): { gameEnded: boolean } => {
     const opponent = getOpponent(game, player);
     const sourceMinion = findMinionOnPlayerBoard(player, card.uuid);
+
+    const hasValidBattlecry = (card.battlecryActions ?? []).some(
+        (action) => isV1Action(action) || isTargetedV1Action(action),
+    );
+    if (hasValidBattlecry) {
+        recordBattlecry(game, player, card);
+    }
 
     for (const action of card.battlecryActions ?? []) {
         if (!isV1Action(action) && !isTargetedV1Action(action)) continue;

@@ -1,6 +1,7 @@
 import type { GamePlayer, MinionSpotId, SpotOwner, WeaponState } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     getActualDamage,
     recordDamageDealt,
@@ -60,6 +61,11 @@ export const weaponToMinionAction = async ({
         socketId,
     );
     if (!isValidTarget) return;
+
+    recordAttack(game, player, weaponState.originalCard, {
+        type: "MINION",
+        card: targetMinion.originalCard,
+    });
 
     const weaponDamage = getActualDamage(targetMinion.health, weaponState.damage);
     targetMinion.health -= weaponState.damage;

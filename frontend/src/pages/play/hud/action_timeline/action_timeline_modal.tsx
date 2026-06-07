@@ -26,7 +26,7 @@ export const ActionTimelineModal = ({
                 </Text>
             ) : (
                 <ScrollArea.Autosize mah={400}>
-                    {entries.map((entry) => (
+                    {[...entries].reverse().map((entry) => (
                         <div key={entry.id} className="action-timeline-modal__entry">
                             <Text size="xs" c="dimmed" mb={2}>
                                 Tour {entry.roundNumber}

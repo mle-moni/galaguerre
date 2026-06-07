@@ -1,4 +1,5 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     getActualDamage,
     recordDamageDealt,
@@ -30,6 +31,11 @@ export const weaponToHeroAction = async ({
 
     const isValidTarget = ensureValidTauntTarget(opponent.board, null, owner, null, socketId);
     if (!isValidTarget) return;
+
+    recordAttack(game, player, weaponState.originalCard, {
+        type: "HERO",
+        playerId: opponent.userId,
+    });
 
     const damage = getActualDamage(opponent.health, weaponState.damage);
     opponent.health -= weaponState.damage;

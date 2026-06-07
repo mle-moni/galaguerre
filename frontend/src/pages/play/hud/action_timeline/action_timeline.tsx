@@ -16,7 +16,7 @@ export const ActionTimeline = observer(() => {
     if (!user) return null;
 
     const actionLog = game.data.actionLog ?? [];
-    const recentEntries = actionLog.slice(-COMPACT_ENTRY_COUNT);
+    const recentEntries = actionLog.slice(-COMPACT_ENTRY_COUNT).reverse();
     const hasMore = actionLog.length > COMPACT_ENTRY_COUNT;
 
     if (actionLog.length === 0) return null;

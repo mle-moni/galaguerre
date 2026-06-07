@@ -131,7 +131,19 @@ export type WeaponCard = PlayerCardBase & {
     deathrattleActions: CardActionSnapshot[];
 };
 
-export type GameLogEntryType = "PLAY_CARD" | "PASS_TURN" | "FATIGUE_DAMAGE";
+export type GameLogEntryType =
+    | "PLAY_CARD"
+    | "PASS_TURN"
+    | "FATIGUE_DAMAGE"
+    | "ATTACK"
+    | "BATTLECRY"
+    | "DEATHRATTLE";
+
+export interface GameLogAttackTarget {
+    type: "MINION" | "HERO";
+    card?: PlayerCard;
+    playerId?: number;
+}
 
 export interface GameLogEntry {
     id: string;
@@ -140,6 +152,8 @@ export interface GameLogEntry {
     type: GameLogEntryType;
     card?: PlayerCard;
     fatigueDamage?: number;
+    attackerCard?: PlayerCard;
+    attackTarget?: GameLogAttackTarget;
 }
 
 export interface WeaponState {

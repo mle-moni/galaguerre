@@ -1,5 +1,6 @@
 import type { GamePlayer, WeaponCard } from "#api_types/game.types";
 import type Game from "#models/game";
+import { recordDeathrattle } from "../game_log/record_game_log.js";
 import { executeDeathrattleAction } from "./execute_deathrattle_action.js";
 
 const getOpponent = (game: Game, player: GamePlayer): GamePlayer => {
@@ -16,6 +17,10 @@ export const executeWeaponDeathrattles = (
     card: WeaponCard,
 ): { gameEnded: boolean } => {
     const opponent = getOpponent(game, player);
+
+    if ((card.deathrattleActions ?? []).length > 0) {
+        recordDeathrattle(game, player, card);
+    }
 
     for (const action of card.deathrattleActions ?? []) {
         const result = executeDeathrattleAction(game, player, opponent, action);

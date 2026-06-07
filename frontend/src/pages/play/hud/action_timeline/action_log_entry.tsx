@@ -1,4 +1,4 @@
-import type { ApiGame, GameLogEntry } from "#api_types/game.types";
+import type { ApiGame, GameLogEntry, PlayerCard } from "#api_types/game.types";
 import { Text } from "@mantine/core";
 import { CardDetailPopover } from "~/components/cards/card_detail_popover";
 import "./action_timeline.css";
@@ -16,6 +16,17 @@ const getPlayerInfo = (game: ApiGame, playerId: number) => {
     return { pseudo: player.pseudo, spellPower: player.spellPower };
 };
 
+interface CardLinkProps {
+    card: PlayerCard;
+    spellPower: number;
+}
+
+const CardLink = ({ card, spellPower }: CardLinkProps) => (
+    <CardDetailPopover card={card} spellPower={spellPower}>
+        <span className="action-timeline__card-link">{card.label}</span>
+    </CardDetailPopover>
+);
+
 export const ActionLogEntry = ({ entry, game, currentUserId, className }: ActionLogEntryProps) => {
     const { pseudo, spellPower } = getPlayerInfo(game, entry.playerId);
     const isMe = entry.playerId === currentUserId;
@@ -30,10 +41,7 @@ export const ActionLogEntry = ({ entry, game, currentUserId, className }: Action
     if (entry.type === "PLAY_CARD" && entry.card) {
         return (
             <Text className={entryClass} component="div">
-                {pseudo} joue{" "}
-                <CardDetailPopover card={entry.card} spellPower={spellPower}>
-                    <span className="action-timeline__card-link">{entry.card.label}</span>
-                </CardDetailPopover>
+                {pseudo} joue <CardLink card={entry.card} spellPower={spellPower} />
             </Text>
         );
     }
@@ -50,6 +58,42 @@ export const ActionLogEntry = ({ entry, game, currentUserId, className }: Action
         return (
             <Text className={entryClass} component="div">
                 {pseudo} subit {entry.fatigueDamage} dégâts de fatigue
+            </Text>
+        );
+    }
+
+    if (entry.type === "ATTACK" && entry.attackerCard && entry.attackTarget) {
+        const target =
+            entry.attackTarget.type === "MINION" && entry.attackTarget.card ? (
+                <CardLink card={entry.attackTarget.card} spellPower={spellPower} />
+            ) : entry.attackTarget.playerId !== undefined ? (
+                getPlayerInfo(game, entry.attackTarget.playerId).pseudo
+            ) : (
+                "?"
+            );
+
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} : <CardLink card={entry.attackerCard} spellPower={spellPower} /> attaque{" "}
+                {target}
+            </Text>
+        );
+    }
+
+    if (entry.type === "BATTLECRY" && entry.card) {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} : <CardLink card={entry.card} spellPower={spellPower} /> lance son cri de
+                guerre
+            </Text>
+        );
+    }
+
+    if (entry.type === "DEATHRATTLE" && entry.card) {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} : <CardLink card={entry.card} spellPower={spellPower} /> déclenche son
+                dernier souffle
             </Text>
         );
     }

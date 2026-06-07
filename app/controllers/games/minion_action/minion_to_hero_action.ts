@@ -1,4 +1,5 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     getActualDamage,
     recordDamageDealt,
@@ -29,6 +30,11 @@ export const minionToHeroAction = async ({
 
     const isValidTarget = ensureValidTauntTarget(opponent.board, null, owner, null, socketId);
     if (!isValidTarget) return;
+
+    recordAttack(game, player, minionInfos.minion.originalCard, {
+        type: "HERO",
+        playerId: opponent.userId,
+    });
 
     const playerTarget = owner === "OPPONENT" ? opponent : player;
 

@@ -1,6 +1,7 @@
 import type { GamePlayer, MinionPosition, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     getActualDamage,
     recordDamageDealt,
@@ -61,6 +62,12 @@ export const minionToMinionAction = async ({
     if (!isValidTarget) return;
 
     const attacker = minionInfos.minion;
+
+    recordAttack(game, player, attacker.originalCard, {
+        type: "MINION",
+        card: targetMinion.originalCard,
+    });
+
     const targetIsPoisonous = getMinionIsPoisonous(targetMinion);
     const attackerIsPoisonous = getMinionIsPoisonous(attacker);
 

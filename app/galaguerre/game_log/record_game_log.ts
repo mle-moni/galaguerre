@@ -1,4 +1,9 @@
-import type { GameLogEntry, GamePlayer, PlayerCard } from "#api_types/game.types";
+import type {
+    GameLogAttackTarget,
+    GameLogEntry,
+    GamePlayer,
+    PlayerCard,
+} from "#api_types/game.types";
 import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
 
@@ -29,5 +34,42 @@ export const recordFatigueDamage = (game: Game, player: GamePlayer, damage: numb
         playerId: player.userId,
         type: "FATIGUE_DAMAGE",
         fatigueDamage: damage,
+    });
+};
+
+export const recordAttack = (
+    game: Game,
+    player: GamePlayer,
+    attackerCard: PlayerCard,
+    attackTarget: GameLogAttackTarget,
+): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "ATTACK",
+        attackerCard: structuredClone(attackerCard),
+        attackTarget: {
+            type: attackTarget.type,
+            card: attackTarget.card ? structuredClone(attackTarget.card) : undefined,
+            playerId: attackTarget.playerId,
+        },
+    });
+};
+
+export const recordBattlecry = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "BATTLECRY",
+        card: structuredClone(card),
+    });
+};
+
+export const recordDeathrattle = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "DEATHRATTLE",
+        card: structuredClone(card),
     });
 };
