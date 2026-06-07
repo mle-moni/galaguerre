@@ -6,6 +6,7 @@ import Card from "#models/card";
 import Deck from "#models/deck";
 import Minion from "#models/minion";
 import User from "#models/user";
+import { getActiveCardSetId } from "#tests/helpers/card_set";
 
 test.group("decks api", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
@@ -29,7 +30,7 @@ test.group("decks api", (group) => {
             imageUrl: "https://example.com/card.png",
             cost: 1,
             type: "MINION",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: minion.id,
             spellId: null,
             weaponId: null,
@@ -47,7 +48,9 @@ test.group("decks api", (group) => {
         const card = await createMinionCard("Lutin");
         await syncDeckCards(deck.id, [{ cardId: card.id, count: 2 }]);
 
-        await deck.load("cards", (q) => q.preload("minion", (mq) => mq.preload("minionPower")));
+        await deck.load("cards", (q) =>
+            q.preload("cardSet").preload("minion", (mq) => mq.preload("minionPower")),
+        );
 
         const serialized = serializeDeck(deck);
 

@@ -1,6 +1,7 @@
 import Action from "#models/action";
 import Boost from "#models/boost";
 import Card from "#models/card";
+import CardSet from "#models/card_set";
 import Minion from "#models/minion";
 import MinionDeathrattleAction from "#models/minion_deathrattle_action";
 import MinionPassive from "#models/minon_passive";
@@ -9,6 +10,7 @@ import Passive from "#models/passive";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
+import { HEARTHSTONE_CARD_SET_NAME } from "../seed_data/card_set_names.js";
 import { getClassicCardImage } from "../seed_data/classic_card_images.js";
 
 const nullActionFields = {
@@ -23,6 +25,8 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
+        const hearthstoneSet = await CardSet.findByOrFail("name", HEARTHSTONE_CARD_SET_NAME);
+
         const tauntPower = await MinionPower.query().where("hasTaunt", true).firstOrFail();
 
         const [
@@ -163,7 +167,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Gnome lépreux"),
                 cost: 1,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: gnomeLepreux.id,
                 spellId: null,
                 weaponId: null,
@@ -173,7 +177,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Glaneur de butin"),
                 cost: 2,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: glaneurButin.id,
                 spellId: null,
                 weaponId: null,
@@ -183,7 +187,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Abomination"),
                 cost: 5,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: abomination.id,
                 spellId: null,
                 weaponId: null,
@@ -193,7 +197,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Mage de sang Thalnos"),
                 cost: 2,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: mageSangThalnos.id,
                 spellId: null,
                 weaponId: null,
@@ -203,7 +207,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Spectre apaisant"),
                 cost: 2,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: spectreApaisant.id,
                 spellId: null,
                 weaponId: null,

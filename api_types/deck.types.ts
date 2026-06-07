@@ -8,11 +8,17 @@ export type DeckValidationErrorDetail = {
     reason: string;
 };
 
+export interface ApiCardSet {
+    id: number;
+    name: string;
+}
+
 export interface ApiCatalogCardBase {
     id: number;
     label: string;
     imageUrl: string;
     cost: number;
+    cardSetId: number;
     tagIds: number[];
     description: string;
 }

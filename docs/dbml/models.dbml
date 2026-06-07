@@ -50,13 +50,21 @@ Table CardTag [headercolor: #d35400] {
     updatedAt DateTime [not null]
 }
 
+Table CardSet [headercolor: #d35400] {
+    id number [primary key, not null]
+    name string [not null]
+    isActive boolean [not null]
+    createdAt DateTime [not null]
+    updatedAt DateTime [not null]
+}
+
 Table Card [headercolor: #d35400] {
     id number [primary key, not null]
     label string [not null]
     imageUrl string [not null]
     cost number [not null]
     type GalaguerreCardType [not null]
-    cardMode GalaguerreCardMode [not null]
+    cardSetId number [not null]
     minionId number 
     spellId number 
     weaponId number 

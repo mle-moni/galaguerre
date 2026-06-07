@@ -89,7 +89,8 @@ export const MatchmakingPage = observer(() => {
 
                         {!canSearch && selectedDeck && (
                             <Text size="sm" className="text-red-300">
-                                Votre deck doit être valide et contenir entre 15 et 20 cartes.
+                                {selectedDeck.compositionErrors[0] ??
+                                    "Votre deck doit être valide et contenir entre 15 et 20 cartes."}
                             </Text>
                         )}
 

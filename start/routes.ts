@@ -14,6 +14,7 @@ import "../app/dbml/dbml_router.js";
 
 import AuthController from "#controllers/auth/auth_controller";
 import CardsController from "#controllers/cards/cards_controller";
+import CardSetsController from "#controllers/card_sets/card_sets_controller";
 import DecksController from "#controllers/decks/decks_controller";
 import GameHistoryController from "#controllers/game_history/game_history_controller";
 import GamesController from "#controllers/games/games_controller";
@@ -41,6 +42,7 @@ router
     .group(() => {
         router.get("/auth/me", [AuthController, "me"]);
         router.get("/cards", [CardsController, "index"]);
+        router.get("/card-sets", [CardSetsController, "index"]);
         router.post("/decks/:id/select", [DecksController, "select"]);
         router.resource("decks", DecksController).apiOnly();
         router.resource("games", GamesController).apiOnly();

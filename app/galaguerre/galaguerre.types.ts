@@ -110,15 +110,3 @@ export const GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ: LabelObjectType<Galagu
 export const GALAGUERRE_TARGET_SELECTION_MODES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ,
 );
-
-export const GALAGUERRE_CARD_MODES = ["CREATION", "BETA", "PROD"] as const;
-export type GalaguerreCardMode = GenerateTypeFromEnum<typeof GALAGUERRE_CARD_MODES>;
-export const GALAGUERRE_CARD_MODES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_CARD_MODES);
-export const GALAGUERRE_CARD_MODES_LABEL_OBJ: LabelObjectType<GalaguerreCardMode> = {
-    CREATION: "Creation",
-    BETA: "Beta",
-    PROD: "Production",
-};
-export const GALAGUERRE_CARD_MODES_OPTIONS = generateOptionsFromLabelObj(
-    GALAGUERRE_CARD_MODES_LABEL_OBJ,
-);

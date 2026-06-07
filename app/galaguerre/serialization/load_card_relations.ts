@@ -19,7 +19,8 @@ const preloadMinionActionRelations = (q: {
 };
 
 export const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) => {
-    q.preload("tags")
+    q.preload("cardSet")
+        .preload("tags")
         .preload("minion", (mq) =>
             mq
                 .preload("minionPower")

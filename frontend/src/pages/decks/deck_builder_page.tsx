@@ -2,12 +2,13 @@ import type { ApiCatalogCard, ApiDeckCardEntry } from "#api_types/deck.types";
 import { Button, NumberInput, Select, TextInput } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
+import { useCardSetsQuery } from "~/hooks/use_card_sets";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useUser } from "~/hooks/use_user";
@@ -41,6 +42,7 @@ export const DeckBuilderPage = observer(() => {
 
     const deckQuery = useDeckQuery(deckId);
     const cardsQuery = useCardsQuery();
+    const cardSetsQuery = useCardSetsQuery();
     const updateMutation = useUpdateDeckMutation();
 
     const [deckName, setDeckName] = useState<string | null>(null);
@@ -48,15 +50,26 @@ export const DeckBuilderPage = observer(() => {
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState<CardTypeFilter>("ALL");
     const [costFilter, setCostFilter] = useState<string | null>(null);
+    const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
 
     const catalog = cardsQuery.data ?? [];
+    const cardSets = cardSetsQuery.data ?? [];
     const deck = deckQuery.data;
 
     const catalogById = useMemo(() => new Map(catalog.map((card) => [card.id, card])), [catalog]);
+    const activeSetIds = useMemo(() => new Set(cardSets.map((set) => set.id)), [cardSets]);
+
+    useEffect(() => {
+        if (selectedSetId === null && cardSets[0]) {
+            setSelectedSetId(String(cardSets[0].id));
+        }
+    }, [cardSets, selectedSetId]);
 
     if (!user) return <Navigate to="/login" />;
     if (!deckId || Number.isNaN(deckId)) return <Navigate to="/decks" />;
-    if (deckQuery.isLoading || cardsQuery.isLoading) return <CenteredLoader absolute />;
+    if (deckQuery.isLoading || cardsQuery.isLoading || cardSetsQuery.isLoading) {
+        return <CenteredLoader absolute />;
+    }
     if (!deck) return <Navigate to="/decks" />;
 
     const currentName = deckName ?? deck.name;
@@ -64,6 +77,7 @@ export const DeckBuilderPage = observer(() => {
     const totalCards = getTotalCards(currentComposition);
 
     const filteredCatalog = catalog.filter((card) => {
+        if (selectedSetId !== null && card.cardSetId !== Number(selectedSetId)) return false;
         if (search && !card.label.toLowerCase().includes(search.toLowerCase())) return false;
         if (typeFilter !== "ALL" && card.type !== typeFilter) return false;
         if (costFilter !== null && card.cost !== Number(costFilter)) return false;
@@ -130,6 +144,11 @@ export const DeckBuilderPage = observer(() => {
             .map((cost) => ({ value: String(cost), label: `${cost} mana` })),
     ];
 
+    const cardSetOptions = cardSets.map((set) => ({
+        value: String(set.id),
+        label: set.name,
+    }));
+
     return (
         <AppLayout title="Éditeur de deck" backTo="/decks" backLabel="Mes decks">
             <div className="max-w-7xl mx-auto flex flex-col gap-4 lg:h-[calc(100dvh-10rem)]">
@@ -163,6 +182,15 @@ export const DeckBuilderPage = observer(() => {
                         <div className="gg-panel-header">Catalogue</div>
                         <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
                             <div className="flex flex-wrap gap-3 mb-4 shrink-0">
+                                <Select
+                                    label="Set de cartes"
+                                    value={selectedSetId ?? ""}
+                                    onChange={(value) => setSelectedSetId(value || null)}
+                                    data={cardSetOptions}
+                                    className="w-[180px]"
+                                    styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
+                                    disabled={cardSetOptions.length === 0}
+                                />
                                 <TextInput
                                     placeholder="Rechercher une carte..."
                                     value={search}
@@ -234,6 +262,7 @@ export const DeckBuilderPage = observer(() => {
                                     {compositionEntries.map(([cardId, count]) => {
                                         const card = catalogById.get(cardId);
                                         if (!card) return null;
+                                        const isInactiveSet = !activeSetIds.has(card.cardSetId);
                                         return (
                                             <div key={cardId} className="gg-composition-row">
                                                 <div className="gg-composition-row__thumb">
@@ -248,6 +277,12 @@ export const DeckBuilderPage = observer(() => {
                                                     </p>
                                                     <p className="text-white/50 text-xs m-0">
                                                         {card.cost} mana
+                                                        {isInactiveSet && (
+                                                            <span className="text-red-300">
+                                                                {" "}
+                                                                — set inactif
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-1">

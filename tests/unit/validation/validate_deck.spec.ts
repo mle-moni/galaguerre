@@ -20,6 +20,8 @@ import {
     DeckValidationError,
     validateDeck,
 } from "../../../app/galaguerre/validation/validate_deck.js";
+import { validateDeckCardSets } from "../../../app/galaguerre/validation/validate_deck_card_sets.js";
+import { createInactiveCardSet, getActiveCardSetId } from "../../helpers/card_set.js";
 
 const nullActionFields = {
     drawCount: null,
@@ -54,6 +56,7 @@ const preloadActionRelations = (aq: {
 const loadDeckRelations = async (deck: Deck) => {
     await deck.load("cards", (query) =>
         query
+            .preload("cardSet")
             .preload("minion", (q) =>
                 q
                     .preload("minionPower")
@@ -164,12 +167,14 @@ const createMinionCardInDeck = async ({
         });
     }
 
+    const cardSetId = await getActiveCardSetId();
+
     const card = await Card.create({
         label,
         imageUrl: "https://example.com/card.png",
         cost: 1,
         type: "MINION",
-        cardMode: "BETA",
+        cardSetId,
         minionId: minion.id,
         spellId: null,
         weaponId: null,
@@ -741,7 +746,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/spell.png",
             cost: 2,
             type: "SPELL",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: null,
             spellId: spell.id,
             weaponId: null,
@@ -801,7 +806,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/spell.png",
             cost: 2,
             type: "SPELL",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: null,
             spellId: spell.id,
             weaponId: null,
@@ -861,7 +866,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/spell.png",
             cost: 2,
             type: "SPELL",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: null,
             spellId: spell.id,
             weaponId: null,
@@ -913,7 +918,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/weapon.png",
             cost: 3,
             type: "WEAPON",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: null,
             spellId: null,
             weaponId: weapon.id,
@@ -946,7 +951,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/weapon.png",
             cost: 3,
             type: "WEAPON",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: null,
             spellId: null,
             weaponId: null,
@@ -980,7 +985,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/spell.png",
             cost: 2,
             type: "SPELL",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: null,
             spellId: null,
             weaponId: null,
@@ -1104,7 +1109,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/card.png",
             cost: 1,
             type: "MINION",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: minion.id,
         });
 
@@ -1159,7 +1164,7 @@ test.group("validation:validateDeck", (group) => {
             imageUrl: "https://example.com/card.png",
             cost: 1,
             type: "MINION",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: minion.id,
         });
 
@@ -1172,5 +1177,45 @@ test.group("validation:validateDeck", (group) => {
             result.errors[0]!.reason,
             "BOOST passive requires a HERO, MINION, or ALL target via tool_to_target",
         );
+    });
+
+    test("validateDeckCardSets rejects cards from inactive sets", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `deck-set-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Inactive set deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        const inactiveSet = await createInactiveCardSet(`Inactive-${unique}`);
+        const minion = await Minion.create({
+            internalLabel: `inactive-minion-${unique}`,
+            attack: 1,
+            health: 1,
+        });
+
+        const card = await Card.create({
+            label: `inactive-set-card-${unique}`,
+            imageUrl: "https://example.com/card.png",
+            cost: 1,
+            type: "MINION",
+            cardSetId: inactiveSet.id,
+            minionId: minion.id,
+            spellId: null,
+            weaponId: null,
+        });
+
+        await DeckCard.create({ deckId: deck.id, cardId: card.id });
+        await card.load("cardSet");
+        await loadDeckRelations(deck);
+
+        const result = validateDeckCardSets(deck.cards);
+        assert.isFalse(result.valid);
+        assert.include(result.errors[0]!.reason, "n'est pas actif");
     });
 });

@@ -1,9 +1,6 @@
 import { createModelViewConfig } from "#adomin/create_model_view_config";
 import Card from "#models/card";
-import {
-    GALAGUERRE_CARD_MODES_OPTIONS,
-    GALAGUERRE_CARD_TYPES_OPTIONS,
-} from "../../galaguerre/galaguerre.types.js";
+import { GALAGUERRE_CARD_TYPES_OPTIONS } from "../../galaguerre/galaguerre.types.js";
 import { createFile, deleteFile } from "../../utils/files.js";
 
 export const CARD_VIEW = createModelViewConfig(() => Card, {
@@ -50,10 +47,11 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
             deleteFile,
             label: "Image",
         },
-        cardMode: {
-            type: "enum",
-            options: GALAGUERRE_CARD_MODES_OPTIONS,
-            label: "Mode",
+        cardSet: {
+            type: "belongsToRelation",
+            modelName: "CardSet",
+            labelFields: ["name"],
+            label: "Set",
         },
         createdAt: {
             type: "date",

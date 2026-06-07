@@ -18,6 +18,7 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
         label: card.label,
         imageUrl: card.imageUrl,
         cost: card.cost,
+        cardSetId: card.cardSetId,
         tagIds: (card.tags ?? []).map((tag) => tag.id),
     };
 

@@ -12,6 +12,7 @@ import MinionBattlecryAction from "#models/minion_battlecry_action";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import User from "#models/user";
+import { getActiveCardSetId } from "#tests/helpers/card_set";
 import { generatePlayerCards } from "#controllers/games/generate_player_cards";
 import {
     assertBoardSpot,
@@ -1748,7 +1749,7 @@ test.group("game:play_card battlecries", (group) => {
             imageUrl: "https://example.com/card.png",
             cost: 1,
             type: "MINION",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: minion.id,
             spellId: null,
             weaponId: null,
@@ -1869,7 +1870,7 @@ test.group("game:play_card battlecries", (group) => {
             imageUrl: "https://example.com/card.png",
             cost: 3,
             type: "MINION",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: minion.id,
             spellId: null,
             weaponId: null,
@@ -1997,7 +1998,7 @@ test.group("game:play_card battlecries", (group) => {
             imageUrl: "https://example.com/card.png",
             cost: 3,
             type: "MINION",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: minion.id,
             spellId: null,
             weaponId: null,
@@ -2104,7 +2105,7 @@ test.group("game:play_card battlecries", (group) => {
             imageUrl: "https://example.com/card.png",
             cost: 2,
             type: "MINION",
-            cardMode: "BETA",
+            cardSetId: await getActiveCardSetId(),
             minionId: minion.id,
             spellId: null,
             weaponId: null,

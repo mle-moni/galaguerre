@@ -1,6 +1,7 @@
 import Action from "#models/action";
 import Boost from "#models/boost";
 import Card from "#models/card";
+import CardSet from "#models/card_set";
 import CardFilter from "#models/card_filter";
 import CardTag from "#models/card_tag";
 import Comparison from "#models/comparison";
@@ -11,6 +12,7 @@ import Tag from "#models/tag";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
+import { HEARTHSTONE_CARD_SET_NAME } from "../seed_data/card_set_names.js";
 import { getClassicCardImage } from "../seed_data/classic_card_images.js";
 
 const nullActionFields = {
@@ -25,6 +27,8 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
+        const hearthstoneSet = await CardSet.findByOrFail("name", HEARTHSTONE_CARD_SET_NAME);
+
         const beastTag = await Tag.query().where("name", "beast").firstOrFail();
 
         const [murlocTag] = await Tag.createMany([
@@ -117,7 +121,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Oracle luminescent"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: oracleLuminescent.id,
                 spellId: null,
                 weaponId: null,
@@ -127,7 +131,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Mousquetaire de Forgefer"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: mousquetaireForgefer.id,
                 spellId: null,
                 weaponId: null,
@@ -137,7 +141,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Farseer du Cercle terrestre"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: farseerCercleTerrestre.id,
                 spellId: null,
                 weaponId: null,
@@ -147,7 +151,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Prêtresse d'Elune"),
                 cost: 6,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: pretresseElune.id,
                 spellId: null,
                 weaponId: null,
@@ -372,7 +376,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Chasseur de gros gibier"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: chasseurGrosGibier.id,
                 spellId: null,
                 weaponId: null,
@@ -382,7 +386,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Tueur de kodo"),
                 cost: 5,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: tueurKodo.id,
                 spellId: null,
                 weaponId: null,
@@ -392,7 +396,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Chasseur de bêtes"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: chasseurBete.id,
                 spellId: null,
                 weaponId: null,
@@ -402,7 +406,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Guérisseur de terrain"),
                 cost: 2,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: soinsCibles.id,
                 spellId: null,
                 weaponId: null,
@@ -412,7 +416,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Tireur d'élite"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: chasseurMinion.id,
                 spellId: null,
                 weaponId: null,
@@ -422,7 +426,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Tireur de précision"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: chasseurHero.id,
                 spellId: null,
                 weaponId: null,
@@ -432,7 +436,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Exécuteur de Quel'Thalas"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: chasseurCher.id,
                 spellId: null,
                 weaponId: null,
@@ -607,7 +611,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Voyant luminescent"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: voyantLuminescent.id,
                 spellId: null,
                 weaponId: null,
@@ -617,7 +621,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Défenseur d'Argus"),
                 cost: 4,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: defenseurArgus.id,
                 spellId: null,
                 weaponId: null,
@@ -627,7 +631,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Nain de Sombrefer"),
                 cost: 4,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: nainSombrefer.id,
                 spellId: null,
                 weaponId: null,
@@ -637,7 +641,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Mage ancien"),
                 cost: 4,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: mageAncient.id,
                 spellId: null,
                 weaponId: null,
@@ -647,7 +651,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Sergent abusif"),
                 cost: 1,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: sergentAbusif.id,
                 spellId: null,
                 weaponId: null,
@@ -728,7 +732,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Drake du Crépuscule"),
                 cost: 4,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: drakeCrepuscule.id,
                 spellId: null,
                 weaponId: null,
@@ -738,7 +742,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Maître-naturaliste"),
                 cost: 2,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: maitreNaturaliste.id,
                 spellId: null,
                 weaponId: null,
@@ -748,7 +752,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Espion luminescent"),
                 cost: 2,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: espionLuminescent.id,
                 spellId: null,
                 weaponId: null,
@@ -758,7 +762,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Tigre de Strangleronce"),
                 cost: 5,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: tigreStrangleronce.id,
                 spellId: null,
                 weaponId: null,

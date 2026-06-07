@@ -1,6 +1,7 @@
 import Action from "#models/action";
 import Boost from "#models/boost";
 import Card from "#models/card";
+import CardSet from "#models/card_set";
 import CardTag from "#models/card_tag";
 import Minion from "#models/minion";
 import MinionPassive from "#models/minon_passive";
@@ -9,6 +10,7 @@ import Tag from "#models/tag";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
+import { HEARTHSTONE_CARD_SET_NAME } from "../seed_data/card_set_names.js";
 import { getClassicCardImage } from "../seed_data/classic_card_images.js";
 
 const nullActionFields = {
@@ -23,6 +25,8 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
+        const hearthstoneSet = await CardSet.findByOrFail("name", HEARTHSTONE_CARD_SET_NAME);
+
         const murlocTag = await Tag.query().where("name", "murloc").firstOrFail();
         const pirateTag = await Tag.query().where("name", "pirate").firstOrFail();
 
@@ -288,7 +292,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Baron Geddon"),
                 cost: 7,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: baronGeddon.id,
                 spellId: null,
                 weaponId: null,
@@ -298,7 +302,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Ragnaros le Seigneur du Feu"),
                 cost: 8,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: ragnaros.id,
                 spellId: null,
                 weaponId: null,
@@ -308,7 +312,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Gardien de la Lumière"),
                 cost: 1,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: gardienLumiere.id,
                 spellId: null,
                 weaponId: null,
@@ -318,7 +322,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Démolisseur"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: demolisseur.id,
                 spellId: null,
                 weaponId: null,
@@ -328,7 +332,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Commissaire-priseur de Gadgetzan"),
                 cost: 6,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: commissairePriseur.id,
                 spellId: null,
                 weaponId: null,
@@ -338,7 +342,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Chef de guerre murloc"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: chefGuerreMurloc.id,
                 spellId: null,
                 weaponId: null,
@@ -348,7 +352,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Capitaine des mers du Sud"),
                 cost: 3,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: capitaineMersSud.id,
                 spellId: null,
                 weaponId: null,
@@ -358,7 +362,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Malygos"),
                 cost: 9,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: malygos.id,
                 spellId: null,
                 weaponId: null,

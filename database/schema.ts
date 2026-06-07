@@ -157,6 +157,21 @@ export class CardFilterSchema extends BaseModel {
     declare updatedAt: DateTime | null;
 }
 
+export class CardSetSchema extends BaseModel {
+    static $columns = ["createdAt", "id", "isActive", "name", "updatedAt"] as const;
+    $columns = CardSetSchema.$columns;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime | null;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column()
+    declare isActive: boolean;
+    @column()
+    declare name: string;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime | null;
+}
+
 export class CardTagSchema extends BaseModel {
     static $columns = ["cardId", "createdAt", "id", "tagId", "updatedAt"] as const;
     $columns = CardTagSchema.$columns;
@@ -174,7 +189,7 @@ export class CardTagSchema extends BaseModel {
 
 export class CardSchema extends BaseModel {
     static $columns = [
-        "cardMode",
+        "cardSetId",
         "cost",
         "createdAt",
         "id",
@@ -188,7 +203,7 @@ export class CardSchema extends BaseModel {
     ] as const;
     $columns = CardSchema.$columns;
     @column()
-    declare cardMode: string;
+    declare cardSetId: number;
     @column()
     declare cost: number;
     @column.dateTime({ autoCreate: true })

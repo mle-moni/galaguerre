@@ -1,10 +1,12 @@
 import Action from "#models/action";
 import Boost from "#models/boost";
 import Card from "#models/card";
+import CardSet from "#models/card_set";
 import Spell from "#models/spell";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
+import { HEARTHSTONE_CARD_SET_NAME } from "../seed_data/card_set_names.js";
 import { getClassicCardImage } from "../seed_data/classic_card_images.js";
 
 const nullActionFields = {
@@ -19,6 +21,8 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
+        const hearthstoneSet = await CardSet.findByOrFail("name", HEARTHSTONE_CARD_SET_NAME);
+
         const [barrelDamageAction, stompDamageAction, hoggerDamageAction, salveDamageAction] =
             await Action.createMany([
                 {
@@ -124,7 +128,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Lance-tonneau"),
                 cost: 1,
                 type: "SPELL",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: null,
                 spellId: lanceTonneauSpell.id,
                 weaponId: null,
@@ -134,7 +138,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Piétinement"),
                 cost: 2,
                 type: "SPELL",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: null,
                 spellId: pietinementSpell.id,
                 weaponId: null,
@@ -144,7 +148,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Hogger Frappe !"),
                 cost: 4,
                 type: "SPELL",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: null,
                 spellId: hoggerSpell.id,
                 weaponId: null,
@@ -154,7 +158,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Héritage de l'Empereur"),
                 cost: 3,
                 type: "SPELL",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: null,
                 spellId: heritageSpell.id,
                 weaponId: null,
@@ -164,7 +168,7 @@ export default class extends BaseSeeder {
                 imageUrl: getClassicCardImage("Salve ardente"),
                 cost: 3,
                 type: "SPELL",
-                cardMode: "BETA",
+                cardSetId: hearthstoneSet.id,
                 minionId: null,
                 spellId: salveArdenteSpell.id,
                 weaponId: null,

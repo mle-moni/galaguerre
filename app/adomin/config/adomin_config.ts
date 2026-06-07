@@ -2,6 +2,7 @@ import type { AdominConfig } from "#adomin/adomin_config.types";
 import { MINION_VIEW } from "./card_types/minion_view.js";
 import { SPELL_VIEW } from "./card_types/spell_view.js";
 import { WEAPON_VIEW } from "./card_types/weapon_view.js";
+import { CARD_SET_VIEW } from "./card_set_view.js";
 import { CARD_VIEW } from "./card_view.js";
 import { MINION_FOLDER } from "./minion_tools/minion_tools_folder.js";
 import { TOOLS_FOLDER } from "./tools/tools_folder.js";
@@ -26,6 +27,7 @@ import { USER_FOLDER } from "./users/user_folder.js";
 export const ADOMIN_CONFIG: AdominConfig = {
     title: "Galaguerre",
     views: [
+        CARD_SET_VIEW,
         CARD_VIEW,
         SPELL_VIEW,
         WEAPON_VIEW,

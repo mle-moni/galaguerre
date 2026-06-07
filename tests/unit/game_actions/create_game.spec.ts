@@ -7,6 +7,7 @@ import DeckCard from "#models/deck_card";
 import Minion from "#models/minion";
 import User from "#models/user";
 import { createOutsiderUser } from "#tests/helpers/game/game_factory";
+import { getActiveCardSetId } from "#tests/helpers/card_set";
 import Game from "#models/game";
 import { runSetupNextTurnOnGame } from "#tests/helpers/game/run_pass_turn";
 
@@ -32,7 +33,7 @@ test.group("game:create", (group) => {
                 imageUrl: "https://example.com/card.png",
                 cost: 1,
                 type: "MINION",
-                cardMode: "BETA",
+                cardSetId: await getActiveCardSetId(),
                 minionId: minion.id,
                 spellId: null,
                 weaponId: null,

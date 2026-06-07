@@ -1,7 +1,8 @@
 import { BaseModel, belongsTo, column, manyToMany } from "@adonisjs/lucid/orm";
 import type { BelongsTo, ManyToMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
-import type { GalaguerreCardMode, GalaguerreCardType } from "../galaguerre/galaguerre.types.js";
+import type { GalaguerreCardType } from "../galaguerre/galaguerre.types.js";
+import CardSet from "./card_set.js";
 import type CardTag from "./card_tag.js";
 import Minion from "./minion.js";
 import Spell from "./spell.js";
@@ -25,7 +26,10 @@ export default class Card extends BaseModel {
     declare type: GalaguerreCardType;
 
     @column()
-    declare cardMode: GalaguerreCardMode;
+    declare cardSetId: number;
+
+    @belongsTo(() => CardSet)
+    declare cardSet: BelongsTo<typeof CardSet>;
 
     @column()
     declare minionId: number | null;
