@@ -1,20 +1,24 @@
-import { useMutation } from "@tanstack/react-query";
+import { Button, PasswordInput, TextInput } from "@mantine/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { AuthLayout } from "~/components/layout/auth_layout";
+import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { useUser } from "~/hooks/use_user";
 import { privateAxios, setToken } from "~/services/axios";
 
 export const LoginPage = observer(() => {
     const user = useUser();
+    const queryClient = useQueryClient();
+
     const loginMutation = useMutation({
         mutationFn: async (data: FormData) => {
             const response = await privateAxios.post("/api/auth/login", data);
-
             return response.data;
         },
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             setToken(data.token);
-            location.reload();
+            await queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
         },
     });
 
@@ -27,12 +31,45 @@ export const LoginPage = observer(() => {
     if (user) return <Navigate to="/" />;
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input type="email" name="email" />
-            <input type="password" name="password" />
-            <button disabled={loginMutation.isPending} type="submit">
-                Login
-            </button>
-        </form>
+        <AuthLayout
+            title="Connexion"
+            subtitle="Connectez-vous pour jouer"
+            footer={
+                <>
+                    Pas encore de compte ?{" "}
+                    <Link to="/register" className="text-gg-gold font-semibold">
+                        Créer un compte
+                    </Link>
+                    <br />
+                    <Link to="/leaderboard" className="text-gg-gold font-semibold">
+                        Voir le classement
+                    </Link>
+                </>
+            }
+        >
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <TextInput
+                    label="Email"
+                    name="email"
+                    type="email"
+                    required
+                    styles={{ label: { color: "rgba(255,255,255,0.8)" } }}
+                />
+                <PasswordInput
+                    label="Mot de passe"
+                    name="password"
+                    required
+                    styles={{ label: { color: "rgba(255,255,255,0.8)" } }}
+                />
+                <Button
+                    type="submit"
+                    className="gg-btn-primary mt-2"
+                    loading={loginMutation.isPending}
+                    fullWidth
+                >
+                    Se connecter
+                </Button>
+            </form>
+        </AuthLayout>
     );
 });

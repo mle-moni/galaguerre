@@ -1,36 +1,19 @@
 import { computeColumnConfigFields } from "#adomin/routes/models/get_model_config";
-import { rules, schema } from "@adonisjs/validator";
+import vine from "@vinejs/vine";
 import type { ModelConfig } from "../create_model_view_config.js";
 import type { AdominFieldConfig } from "../fields.types.js";
 import type { AdominValidationMode } from "../validation/adomin_validation_helpers.js";
 
-export const getValidationSchemaFromConfig = (
-    modelConfig: ModelConfig,
-    validationMode: AdominValidationMode,
+type VineObjectMembers = Parameters<typeof vine.object>[0];
+
+const applyModifiers = (
+    // biome-ignore lint/suspicious/noExplicitAny: vine field schemas share nullable/optional API
+    fieldSchema: any,
+    suffix: "nullable" | "optional" | null,
 ) => {
-    const foundConfig = modelConfig;
-    const fields = computeColumnConfigFields(foundConfig.fields);
-    const results = fields.map(({ adomin, name: columnName }) => {
-        const notCreatable = adomin.creatable === false;
-        const notEditable = adomin.editable === false;
-
-        if (validationMode === "create" && notCreatable) return null;
-        if (validationMode === "update" && notEditable) return null;
-
-        return {
-            columnName,
-            schema: getValidationSchemaFromFieldConfig(adomin, validationMode),
-        };
-    });
-
-    const schemaObj: any = {};
-
-    for (const result of results) {
-        if (!result) continue;
-        schemaObj[result.columnName] = result.schema;
-    }
-
-    return schema.create(schemaObj);
+    if (suffix === "nullable") return fieldSchema.nullable();
+    if (suffix === "optional") return fieldSchema.optional();
+    return fieldSchema;
 };
 
 const getSuffix = (config: AdominFieldConfig) => {
@@ -43,13 +26,18 @@ const getSuffix = (config: AdominFieldConfig) => {
 const getFileSchema = (
     validationMode: AdominValidationMode,
     suffix: "nullable" | "optional" | null,
+    config: Extract<AdominFieldConfig, { type: "file" }>,
 ) => {
-    // on update, null = delete file, undefined = keep file, file = update file
-    if (validationMode === "update") return schema.file.nullableAndOptional;
+    const fileSchema = vine.file({
+        size: config.maxFileSize,
+        extnames: config.extnames,
+    });
 
-    if (!suffix) return schema.file;
+    if (validationMode === "update") {
+        return fileSchema.nullable().optional();
+    }
 
-    return schema.file[suffix];
+    return applyModifiers(fileSchema, suffix);
 };
 
 const getValidationSchemaFromFieldConfig = (
@@ -60,37 +48,32 @@ const getValidationSchemaFromFieldConfig = (
 
     if (config.type === "enum") {
         const options = config.options.map((option) => option.value);
-        if (suffix) return schema.enum[suffix](options);
-        return schema.enum(options);
+        return applyModifiers(vine.enum(options), suffix);
     }
     if (config.type === "array") {
-        return schema.array.optional().members(schema.string());
+        return vine.array(vine.string()).optional();
     }
     if (config.type === "string" && config.isEmail) {
-        if (suffix) return schema.string[suffix]([rules.email()]);
-        return schema.string([rules.email()]);
+        return applyModifiers(vine.string().email(), suffix);
     }
 
     if (config.type === "hasManyRelation") {
-        return schema.array.optional().members(schema[config.localKeyType ?? "number"]());
+        const memberSchema = config.localKeyType === "string" ? vine.string() : vine.number();
+        return vine.array(memberSchema).optional();
     }
 
     if (config.type === "manyToManyRelation") {
-        return schema.array.optional().members(schema[config.relatedKeyType ?? "number"]());
+        const memberSchema = config.relatedKeyType === "string" ? vine.string() : vine.number();
+        return vine.array(memberSchema).optional();
     }
 
     if (config.type === "file") {
-        const specialSchema = getFileSchema(validationMode, suffix);
-
-        return specialSchema({
-            size: config.maxFileSize,
-            extnames: config.extnames,
-        });
+        return getFileSchema(validationMode, suffix, config);
     }
 
     const fieldSchema = getBaseSchema(config);
 
-    return fieldSchema([]);
+    return applyModifiers(fieldSchema, suffix);
 };
 
 const getType = (config: AdominFieldConfig) => {
@@ -108,10 +91,38 @@ const getType = (config: AdominFieldConfig) => {
 };
 
 const getBaseSchema = (config: AdominFieldConfig) => {
-    const suffix = getSuffix(config);
     const type = getType(config);
 
-    if (suffix) return schema[type][suffix];
+    switch (type) {
+        case "string":
+            return vine.string();
+        case "number":
+            return vine.number();
+        case "boolean":
+            return vine.boolean();
+        case "date":
+            return vine.date();
+        default:
+            return vine.string();
+    }
+};
 
-    return schema[type];
+export const getValidationSchemaFromConfig = (
+    modelConfig: ModelConfig,
+    validationMode: AdominValidationMode,
+) => {
+    const fields = computeColumnConfigFields(modelConfig.fields);
+    const schemaObj: VineObjectMembers = {};
+
+    for (const { adomin, name: columnName } of fields) {
+        const notCreatable = adomin.creatable === false;
+        const notEditable = adomin.editable === false;
+
+        if (validationMode === "create" && notCreatable) continue;
+        if (validationMode === "update" && notEditable) continue;
+
+        schemaObj[columnName] = getValidationSchemaFromFieldConfig(adomin, validationMode);
+    }
+
+    return vine.compile(vine.object(schemaObj));
 };

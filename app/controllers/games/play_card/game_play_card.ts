@@ -1,4 +1,10 @@
-import type { GamePlayer, MinionSpotId, PlayerCard, SpotOwner } from "#api_types/game.types";
+import type {
+    ActionTarget,
+    GamePlayer,
+    MinionSpotId,
+    PlayerCard,
+    SpotOwner,
+} from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
@@ -9,10 +15,12 @@ import {
     whichPlayerAmI,
 } from "../game_utils.js";
 import { playMinion } from "./play_minion.js";
+import { playSpell } from "./play_spell.js";
+import { playWeapon } from "./play_weapon.js";
 
 export const gamePlayCard = async (
     socketId: string,
-    { cardId, owner, spotId }: ClientSocketEventByKey["game:play_card"],
+    { cardId, owner, spotId, actionTarget }: ClientSocketEventByKey["game:play_card"],
 ) => {
     const gameInfos = await getGameActionInfos(socketId);
     if (!gameInfos) return;
@@ -26,7 +34,7 @@ export const gamePlayCard = async (
     const card = ensureCardFoundInHand(player.hand, cardId, socketId);
     if (!card) return;
 
-    return playCard({ card, game: currentGame, player, owner, spotId, socketId });
+    return playCard({ card, game: currentGame, player, owner, spotId, socketId, actionTarget });
 };
 
 export interface PlayCardOptions {
@@ -34,8 +42,9 @@ export interface PlayCardOptions {
     game: Game;
     player: GamePlayer;
     owner: SpotOwner;
-    spotId: MinionSpotId;
+    spotId: MinionSpotId | null;
     socketId: string;
+    actionTarget?: ActionTarget | null;
 }
 
 const playCard = async (opts: PlayCardOptions) => {
@@ -50,11 +59,17 @@ const playCard = async (opts: PlayCardOptions) => {
         return;
     }
 
-    if (card.type === "MINION") return playMinion({ ...opts, card });
-
-    emitSocketEvent(
-        "notify_error",
-        { error: `Card type '${card.type}' not supported` },
-        opts.socketId,
-    );
+    if (card.type === "MINION") {
+        if (!opts.spotId) {
+            emitSocketEvent(
+                "notify_error",
+                { error: "Vous ne pouvez pas jouer cette carte ici" },
+                opts.socketId,
+            );
+            return;
+        }
+        return playMinion({ ...opts, card, spotId: opts.spotId });
+    }
+    if (card.type === "SPELL") return playSpell({ ...opts, card });
+    if (card.type === "WEAPON") return playWeapon({ ...opts, card });
 };

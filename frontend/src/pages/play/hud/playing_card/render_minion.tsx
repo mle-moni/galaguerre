@@ -1,48 +1,61 @@
-import type { MinionState } from "#api_types/game.types";
-import { Image } from "@mantine/core";
-import clsx from "clsx";
+import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
-import type { CSSProperties } from "react";
+import type { CSSProperties, PointerEvent } from "react";
+import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
+import { CardDetailHover } from "./card_detail_hover.jsx";
+import { MinionCardFace } from "~/components/cards/minion_card_face";
 
 interface MinionToRenderProps {
     state: MinionState;
+    spotOwner: SpotOwner;
     style?: CSSProperties;
 }
 
-export const RenderMinion = observer(({ state, style }: MinionToRenderProps) => {
+const asMinionCard = (state: MinionState): MinionCard | null => {
+    if (state.originalCard.type !== "MINION") return null;
+    return state.originalCard;
+};
+
+export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRenderProps) => {
     const { store } = useGameContext();
+    const card = asMinionCard(state);
+    if (!card) return null;
+
+    const isOwnMinion = spotOwner === "PLAYER";
+    const currentRound = store.game.data.currentRound;
+    const attackStatus = getMinionAttackStatus(state, currentRound, isOwnMinion && store.isMyTurn);
+    const canAttack = attackStatus === "ready";
+    const remainingAttacks = isOwnMinion
+        ? getMinionRemainingAttacks(state, currentRound)
+        : undefined;
+
+    const handleAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+        if (!canAttack) return;
+
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const origin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        store.minionDragStore.startAttack(state);
+        store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
+    };
 
     return (
-        <div
-            key={state.uuid}
+        <MinionCardFace
+            card={card}
+            attack={state.attack}
+            health={state.health}
             style={style}
-            className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f] cursor-pointer")}
-            draggable={store.isMyTurn}
-            onDragStart={() => {
-                store.minionDragStore.setMinionDragged(state);
-            }}
-            onDragEnd={() => {
-                store.minionDragStore.setMinionDragged(null);
-            }}
-        >
-            <div>
-                <div className="cost">{state.originalCard.cost}</div>
-                <Image
-                    className="rounded-t"
-                    src={state.originalCard.imageUrl}
-                    height={75}
-                    alt="Galaguerre card"
-                    draggable={false}
-                />
-            </div>
-            <div className="flex flex-col h-[75px] justify-around">
-                <p className="text-center text-white m-0">{state.originalCard.label}</p>
-                <div className="flex justify-between mx-1">
-                    <div className="attack">{state.attack}</div>
-                    <div className="health">{state.health}</div>
-                </div>
-            </div>
-        </div>
+            attackStatus={isOwnMinion ? attackStatus : undefined}
+            remainingAttacks={remainingAttacks}
+            onPointerDown={canAttack ? handleAttackPointerDown : undefined}
+            wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+        />
     );
 });

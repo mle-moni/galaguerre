@@ -29,15 +29,7 @@ export const GALAGUERRE_CARD_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_CARD_TYPES_LABEL_OBJ,
 );
 
-export const GALAGUERRE_ACTIONS_TYPES = [
-    "DAMAGE",
-    "DAMAGE",
-    "HEAL",
-    "BOOST",
-    "MINION_POWERS",
-    "DRAW",
-    "ENEMY_DRAW",
-] as const;
+export const GALAGUERRE_ACTIONS_TYPES = ["DAMAGE", "HEAL", "BOOST", "DRAW", "ENEMY_DRAW"] as const;
 export type GalaguerreActionType = GenerateTypeFromEnum<typeof GALAGUERRE_ACTIONS_TYPES>;
 export const GALAGUERRE_ACTIONS_TYPES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_ACTIONS_TYPES);
 export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActionType> = {
@@ -46,7 +38,6 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     DRAW: "Draw",
     ENEMY_DRAW: "Enemy Draw",
     HEAL: "Heal",
-    MINION_POWERS: "Minion Powers",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,
@@ -91,6 +82,33 @@ export const GALAGUERRE_TARGET_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreTarget
 };
 export const GALAGUERRE_TARGET_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_TARGET_TYPES_LABEL_OBJ,
+);
+
+export const GALAGUERRE_TARGET_TEAMS = ["PLAYER", "OPPONENT", "ALL"] as const;
+export type GalaguerreTargetTeam = GenerateTypeFromEnum<typeof GALAGUERRE_TARGET_TEAMS>;
+export const GALAGUERRE_TARGET_TEAMS_OBJ = generateTypeObjectFromEnum(GALAGUERRE_TARGET_TEAMS);
+export const GALAGUERRE_TARGET_TEAMS_LABEL_OBJ: LabelObjectType<GalaguerreTargetTeam> = {
+    PLAYER: "Player",
+    OPPONENT: "Opponent",
+    ALL: "All",
+};
+export const GALAGUERRE_TARGET_TEAMS_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_TARGET_TEAMS_LABEL_OBJ,
+);
+
+export const GALAGUERRE_TARGET_SELECTION_MODES = ["RANDOM"] as const;
+export type GalaguerreTargetSelectionMode = GenerateTypeFromEnum<
+    typeof GALAGUERRE_TARGET_SELECTION_MODES
+>;
+export const GALAGUERRE_TARGET_SELECTION_MODES_OBJ = generateTypeObjectFromEnum(
+    GALAGUERRE_TARGET_SELECTION_MODES,
+);
+export const GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ: LabelObjectType<GalaguerreTargetSelectionMode> =
+    {
+        RANDOM: "Random",
+    };
+export const GALAGUERRE_TARGET_SELECTION_MODES_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ,
 );
 
 export const GALAGUERRE_CARD_MODES = ["CREATION", "BETA", "PROD"] as const;

@@ -3,3 +3,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html,
+    body {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    input,
+    textarea,
+    select,
+    [contenteditable='true'] {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+}

@@ -1,5 +1,6 @@
-import type { GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
+import { drawOneCard } from "../../galaguerre/draw_cards.js";
+import { triggerPassives } from "../../galaguerre/passive_engine/trigger_passives.js";
 import { sendGameUpdate } from "./send_game_update.js";
 import { terminateGame } from "./terminate_game.js";
 
@@ -22,15 +23,13 @@ export const setupNextGameTurn = async (game: Game) => {
     player.mana = game.data.currentRound;
     if (player.mana > MAX_MANA) player.mana = MAX_MANA;
 
-    const newCardToDraw = player.deckCards.shift();
-    if (!newCardToDraw) {
-        // fatigue damage
-        const fatigueDamage = getFatigueDamage(player);
-        player.health -= fatigueDamage;
-        player.maxFatigueDamageTaken = fatigueDamage;
-    } else {
-        player.hand.push(newCardToDraw);
+    const { gameEnded: turnBeginGameEnded } = triggerPassives(game, "TURN_BEGIN", player);
+    if (turnBeginGameEnded) {
+        await terminateGame(game);
+        return;
     }
+
+    drawOneCard(player, null, game);
 
     if (p1.health <= 0 || p2.health <= 0) {
         await terminateGame(game);
@@ -47,8 +46,4 @@ const getWhoIsNext = (game: Game): "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" => {
     if (game.data.state === "PLAYER_ONE_TURN") return "PLAYER_TWO_TURN";
 
     return "PLAYER_ONE_TURN";
-};
-
-const getFatigueDamage = (player: GamePlayer) => {
-    return player.maxFatigueDamageTaken + 1;
 };

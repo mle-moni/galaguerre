@@ -1,4 +1,7 @@
-import type { GameData } from "#api_types/game.types";
+import { DEFAULT_HERO_HEALTH, DEFAULT_PLAYER_STATS, type GameData } from "#api_types/game.types";
+import { deckCardsToEntries } from "#controllers/decks/deck_utils";
+import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
+import { validateDeckComposition } from "../../galaguerre/validation/validate_deck_composition.js";
 import type Deck from "#models/deck";
 import Game from "#models/game";
 import { generatePlayerCards } from "./generate_player_cards.js";
@@ -15,7 +18,19 @@ interface CreateGameOptions {
     playerTwo: Player;
 }
 
+const assertDeckPlayable = (deck: Deck) => {
+    const composition = validateDeckComposition(deckCardsToEntries(deck));
+    if (!composition.valid) {
+        throw new Error(composition.errors[0]?.reason ?? "Deck invalide");
+    }
+
+    assertDeckValid(deck);
+};
+
 export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) => {
+    assertDeckPlayable(playerOne.deck);
+    assertDeckPlayable(playerTwo.deck);
+
     const gameData: GameData = await getDefaultGameData({ playerOne, playerTwo });
 
     const game = await Game.create({
@@ -32,7 +47,6 @@ export const createGame = async ({ playerOne, playerTwo }: CreateGameOptions) =>
 };
 
 const DEFAULT_HAND_SIZE = 3;
-const DEFAULT_HEALTH = 15;
 
 export const getDefaultGameData = async ({
     playerOne,
@@ -61,10 +75,14 @@ export const getDefaultGameData = async ({
                 SPOT_4: null,
                 SPOT_5: null,
             },
-            health: DEFAULT_HEALTH,
+            health: DEFAULT_HERO_HEALTH,
+            spellPower: 0,
             mana: 0,
             maxFatigueDamageTaken: 0,
             weaponState: null,
+            heroAttacksThisRound: 0,
+            heroLastAttackAtRound: 0,
+            stats: { ...DEFAULT_PLAYER_STATS },
         },
         playerTwo: {
             userId: playerTwo.userId,
@@ -78,11 +96,15 @@ export const getDefaultGameData = async ({
                 SPOT_4: null,
                 SPOT_5: null,
             },
-            health: DEFAULT_HEALTH,
+            health: DEFAULT_HERO_HEALTH,
+            spellPower: 0,
             mana: 0,
             maxFatigueDamageTaken: 0,
             weaponState: null,
+            heroAttacksThisRound: 0,
+            heroLastAttackAtRound: 0,
+            stats: { ...DEFAULT_PLAYER_STATS },
         },
-        gameRounds: [],
+        actionLog: [],
     };
 };

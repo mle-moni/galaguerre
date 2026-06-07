@@ -1,6 +1,6 @@
 import env from "#start/env";
 import type { MultipartFile } from "@adonisjs/core/bodyparser";
-import { cuid } from "@adonisjs/core/helpers";
+import { randomUUID } from "node:crypto";
 import app from "@adonisjs/core/services/app";
 import router from "@adonisjs/core/services/router";
 import { rmSync } from "node:fs";
@@ -24,7 +24,7 @@ export const registerUploadRoute = () => {
 
 export const createFile = async (file: MultipartFile) => {
     const folder = "uploads";
-    const name = `${cuid()}.${file.extname}`;
+    const name = `${randomUUID()}.${file.extname}`;
 
     await file.move(app.makePath(folder), {
         name,

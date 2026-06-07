@@ -2,10 +2,15 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { CenteredLoader } from "./components/centered_loader.jsx";
 import { UserContext, useUserQuery } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/error_404_page.jsx";
+import { DeckBuilderPage } from "./pages/decks/deck_builder_page.jsx";
+import { DecksPage } from "./pages/decks/decks_page.jsx";
 import { HomePage } from "./pages/home/home_page.jsx";
 import { LoginPage } from "./pages/login/login_page.jsx";
 import { MatchmakingPage } from "./pages/matchmaking/match_making_page.jsx";
 import { PlayPage } from "./pages/play/play_page.jsx";
+import { GameHistoryDetailPage } from "./pages/game_history/game_history_detail_page.jsx";
+import { GameHistoryListPage } from "./pages/game_history/game_history_list_page.jsx";
+import { LeaderboardPage } from "./pages/leaderboard/leaderboard_page.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 
 const router = createBrowserRouter([
@@ -18,8 +23,28 @@ const router = createBrowserRouter([
         element: <PlayPage />,
     },
     {
+        path: "/decks",
+        element: <DecksPage />,
+    },
+    {
+        path: "/decks/:id",
+        element: <DeckBuilderPage />,
+    },
+    {
         path: "/matchmaking",
         element: <MatchmakingPage />,
+    },
+    {
+        path: "/leaderboard",
+        element: <LeaderboardPage />,
+    },
+    {
+        path: "/game-history/:userId",
+        element: <GameHistoryListPage />,
+    },
+    {
+        path: "/game-history/:userId/:gameId",
+        element: <GameHistoryDetailPage />,
     },
     {
         path: "/login",

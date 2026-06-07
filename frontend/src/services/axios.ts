@@ -33,3 +33,7 @@ export const privateAxiosWithoutToasts = axios.create({
 });
 
 privateAxiosWithoutToasts.interceptors.request.use(tokenRequestSetup);
+
+export const publicAxios = axios.create({
+    baseURL: "/",
+});

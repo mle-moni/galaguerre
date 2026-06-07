@@ -1,7 +1,11 @@
 import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
-import type { GalaguerreTargetType } from "../galaguerre/galaguerre.types.js";
+import type {
+    GalaguerreTargetSelectionMode,
+    GalaguerreTargetTeam,
+    GalaguerreTargetType,
+} from "../galaguerre/galaguerre.types.js";
 import Comparison from "./comparison.js";
 import Tag from "./tag.js";
 
@@ -16,6 +20,9 @@ export default class Target extends BaseModel {
     declare type: GalaguerreTargetType;
 
     @column()
+    declare targetTeam: GalaguerreTargetTeam;
+
+    @column()
     declare comparisonId: number | null;
 
     @belongsTo(() => Comparison)
@@ -26,6 +33,19 @@ export default class Target extends BaseModel {
 
     @belongsTo(() => Tag)
     declare tag: BelongsTo<typeof Tag>;
+
+    /**
+     * When true, mass MINION effects skip the minion that triggers them ("your other minions").
+     * Used by BOOST passive auras and mass battlecries/deathrattles when a source minion is known.
+     */
+    @column()
+    declare excludeSelf: boolean;
+
+    @column()
+    declare maxTargets: number | null;
+
+    @column()
+    declare targetSelectionMode: GalaguerreTargetSelectionMode | null;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

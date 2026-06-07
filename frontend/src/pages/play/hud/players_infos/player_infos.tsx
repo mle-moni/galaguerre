@@ -2,8 +2,9 @@ import type { GamePlayer } from "#api_types/game.types";
 
 import { Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
+import type { PointerEvent } from "react";
 import { useGameContext } from "~/hooks/use_game_state";
+import "./player_infos.css";
 
 interface PlayerInfosProps {
     player: GamePlayer;
@@ -12,61 +13,118 @@ interface PlayerInfosProps {
 
 export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = false }) => {
     const { store } = useGameContext();
-    const elements = useMemo(() => {
-        const jsxArray = [
-            <Text key="PSEUDO" size="xl" ta="center">
-                {player.pseudo}
-            </Text>,
-            <Text key="HEALTH" size="lg" ta="center">
-                {player.health} pdv
-            </Text>,
-            <Text key="MANA" size="sm" ta="center">
-                {player.mana} mana
-            </Text>,
-        ];
 
-        if (isOpponent) {
-            return jsxArray.reverse();
-        }
-
-        return jsxArray;
-    }, [player, isOpponent]);
-
-    const borderColor = store.playerInfosStore.getBorderColor({
+    const playerBorderColor = store.playerInfosStore.getBorderColor({
         isOpponent,
     });
 
     const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
+    const weaponAttackBorderColor = store.weaponDragStore.getOpponentHeroBorderColor(isOpponent);
+    const targetSelectionBorderColor = store.targetSelectionStore.getHeroBorderColor(isOpponent);
+    const dropZoneBorderColor =
+        targetSelectionBorderColor !== "RGBa(0, 0, 0, 0)"
+            ? targetSelectionBorderColor
+            : weaponAttackBorderColor !== "RGBa(0, 0, 0, 0)"
+              ? weaponAttackBorderColor
+              : minionAttackBorderColor;
+
+    const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
+
+    const handleClick = () => {
+        handleDrop();
+    };
 
     const handleDrop = () => {
         store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        const minion = store.minionDragStore.minionDragged;
+        if (!store.targetSelectionStore.isHighlightingTargets) return;
 
-        if (!minion) return;
-
-        // authorize card drop
         e.preventDefault();
+    };
+
+    const handleWeaponAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+        if (!canAttackWithWeapon) return;
+
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const origin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        store.weaponDragStore.startAttack();
+        store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
 
     return (
         <div
+            data-target-zone
+            data-spot-id="hero"
+            data-spot-owner={isOpponent ? "OPPONENT" : "PLAYER"}
             className="border-2 border-dashed w-full mx-2"
             style={{
-                borderColor: minionAttackBorderColor,
+                borderColor: dropZoneBorderColor,
             }}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
+            onClick={handleClick}
         >
             <div
-                className="rounded-full border-2 border-solid w-full p-4"
+                className={`hero-panel${canAttackWithWeapon ? " hero-panel--weapon-draggable" : ""}`}
                 style={{
-                    borderColor,
+                    borderColor: playerBorderColor,
                 }}
+                onPointerDown={canAttackWithWeapon ? handleWeaponAttackPointerDown : undefined}
             >
-                {elements}
+                <Text className="hero-panel__pseudo" size="lg" ta="center" fw={700}>
+                    {player.pseudo}
+                </Text>
+                <div className="hero-panel__stats">
+                    <div className="hero-panel__stat">
+                        <span className="hero-panel__stat-badge hero-panel__stat-badge--health">
+                            {player.health}
+                        </span>
+                        <span className="hero-panel__stat-label">pdv</span>
+                    </div>
+                    <div className="hero-panel__stat">
+                        <span className="hero-panel__stat-badge hero-panel__stat-badge--mana">
+                            {player.mana}
+                        </span>
+                        <span className="hero-panel__stat-label">mana</span>
+                    </div>
+                    {player.spellPower > 0 && (
+                        <div
+                            className="hero-panel__stat"
+                            title={`+${player.spellPower} dégâts de sort`}
+                        >
+                            <span className="hero-panel__stat-badge hero-panel__stat-badge--spell-power">
+                                +{player.spellPower}
+                            </span>
+                            <span className="hero-panel__stat-label">dégâts de sort</span>
+                        </div>
+                    )}
+                    {player.weaponState && (
+                        <div
+                            className="hero-panel__stat"
+                            title={
+                                player.weaponState.originalCard.label ??
+                                `Arme ${player.weaponState.damage}/${player.weaponState.durability}`
+                            }
+                        >
+                            <span className="hero-panel__stat-badge hero-panel__stat-badge--weapon-damage">
+                                {player.weaponState.damage}
+                            </span>
+                            <span className="hero-panel__stat-badge hero-panel__stat-badge--weapon-durability">
+                                {player.weaponState.durability}
+                            </span>
+                            <span className="hero-panel__stat-label">arme</span>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -1,12 +1,15 @@
-import "./playing_card.css";
-
 import type { PlayerCard } from "#api_types/game.types";
 
-import { Image } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
+import { MinionCardFace } from "~/components/cards/minion_card_face";
+import { SpellCardFace } from "~/components/cards/spell_card_face";
+import { WeaponCardFace } from "~/components/cards/weapon_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
+import { notifyError } from "~/services/toasts";
+import { CardDetailHover } from "./card_detail_hover.jsx";
+import "./playing_card.css";
 
 interface CardProps {
     card: PlayerCard;
@@ -16,42 +19,116 @@ interface CardProps {
 
 export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => {
     const { store } = useGameContext();
-    if (card.type !== "MINION") return <p>Card type {card.type} not supported</p>;
+
+    if (isOpponent) {
+        return (
+            <div
+                style={style}
+                className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f] cursor-pointer")}
+            />
+        );
+    }
+
+    const canPlay = store.isMyTurn && card.cost <= store.me.mana;
+    const isArmed =
+        (card.type === "SPELL" || card.type === "WEAPON") &&
+        store.targetSelectionStore.isCardArmed(card);
+    const isMinionHinted =
+        card.type === "MINION" && store.cardDragStore.minionPlayHintCardId === card.uuid;
+    const cardClassName = clsx(
+        canPlay ? "cursor-pointer" : "cursor-not-allowed opacity-60",
+        (isArmed || isMinionHinted) && "playing-card--armed",
+    );
+
+    const handleInsufficientMana = () => {
+        if (card.cost > store.me.mana) {
+            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+        }
+    };
+
+    const handlePlayableCardClick = () => {
+        if (!canPlay) {
+            handleInsufficientMana();
+            return;
+        }
+
+        if (card.type !== "SPELL" && card.type !== "WEAPON") return;
+
+        store.targetSelectionStore.handlePlayableCardClick(card);
+    };
+
+    const handleMinionClick = () => {
+        if (!canPlay) {
+            handleInsufficientMana();
+            return;
+        }
+
+        store.cardDragStore.showMinionPlayHint(card.uuid);
+    };
+
+    const handleTargetedSpellPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!canPlay) {
+            handleInsufficientMana();
+            return;
+        }
+
+        if (card.type !== "SPELL" || !store.targetSelectionStore.requiresTarget(card)) return;
+        if (!store.targetSelectionStore.isCardArmed(card)) return;
+
+        event.preventDefault();
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const arrowOrigin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        store.targetSelectionStore.beginPendingSpellDrag(
+            card,
+            { x: event.clientX, y: event.clientY },
+            arrowOrigin,
+        );
+    };
+
+    if (card.type === "WEAPON") {
+        return (
+            <WeaponCardFace
+                card={card}
+                style={style}
+                className={cardClassName}
+                onClick={handlePlayableCardClick}
+                wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+            />
+        );
+    }
+
+    if (card.type === "SPELL") {
+        const isTargeted = store.targetSelectionStore.requiresTarget(card);
+
+        return (
+            <SpellCardFace
+                card={card}
+                style={style}
+                className={cardClassName}
+                onClick={handlePlayableCardClick}
+                onPointerDown={isTargeted && isArmed ? handleTargetedSpellPointerDown : undefined}
+                wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+            />
+        );
+    }
 
     return (
-        <div
-            key={card.uuid}
+        <MinionCardFace
+            card={card}
+            attack={card.attack}
+            health={card.health}
             style={style}
-            className={clsx("w-[120px] h-[150px] rounded bg-[#1e3a5f] cursor-pointer")}
-            draggable={store.isMyTurn}
-            onDragStart={() => {
-                store.cardDragStore.setCardDragged(card);
-            }}
-            onDragEnd={() => {
-                store.cardDragStore.setCardDragged(null);
-            }}
-        >
-            {!isOpponent && (
-                <>
-                    <div>
-                        <div className="cost">{card.cost}</div>
-                        <Image
-                            className="rounded-t"
-                            src={card.imageUrl}
-                            height={75}
-                            alt="Galaguerre card"
-                            draggable={false}
-                        />
-                    </div>
-                    <div className="flex flex-col h-[75px] justify-around">
-                        <p className="text-center text-white m-0">{card.label}</p>
-                        <div className="flex justify-between mx-1">
-                            <div className="attack">{card.attack}</div>
-                            <div className="health">{card.health}</div>
-                        </div>
-                    </div>
-                </>
-            )}
-        </div>
+            className={cardClassName}
+            draggable={canPlay}
+            onClick={handleMinionClick}
+            onDragStart={() => store.cardDragStore.setCardDragged(card)}
+            onDragEnd={() => store.cardDragStore.setCardDragged(null)}
+            wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
+        />
     );
 });

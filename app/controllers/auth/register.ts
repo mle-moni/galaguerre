@@ -38,5 +38,7 @@ export const register = async ({ request, response }: HttpContext) => {
         password,
     });
 
-    return createdUser;
+    const token = await User.accessTokens.create(createdUser);
+
+    return token;
 };

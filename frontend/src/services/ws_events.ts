@@ -43,6 +43,9 @@ export const setupEvents = (socket: Socket) => {
     subscribeToSocketEvent("game:update", ({ game }) => {
         queryClient.setQueryData<ApiGame>(getGameStateQueryKey(game.id), (old) => {
             if (!old) return old;
+            if (new Date(game.updatedAt).getTime() < new Date(old.updatedAt).getTime()) {
+                return old;
+            }
 
             return game;
         });

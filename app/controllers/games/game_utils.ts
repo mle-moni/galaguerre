@@ -3,12 +3,16 @@ import {
     type GamePlayer,
     MINION_SPOT_IDS,
     type MinionPosition,
+    type MinionSpotId,
+    type MinionState,
     type PlayerCard,
     type PlayerNumber,
     type SpotOwner,
+    type WeaponState,
 } from "#api_types/game.types";
 import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { recordHeroAttack as recordHeroAttackStat } from "../../galaguerre/game_stats/record_player_stats.js";
 import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
 
 export const getGameActionInfos = async (socketId: string) => {
@@ -135,4 +139,115 @@ export const ensureMinionFoundInBoard = (
     }
 
     return minion;
+};
+
+export const getMinionHasTaunt = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.hasTaunt ?? false;
+};
+
+export const getMinionHasCharge = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.hasCharge ?? false;
+};
+
+export const getMinionHasWindfury = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.hasWindfury ?? false;
+};
+
+export const getMinionIsPoisonous = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.isPoisonous ?? false;
+};
+
+export const getMinionMaxAttacks = (minion: MinionState): number => {
+    return getMinionHasWindfury(minion) ? 2 : 1;
+};
+
+export const getMinionAttacksThisRound = (minion: MinionState, currentRound: number): number => {
+    if (minion.lastActionAtRound !== currentRound) return 0;
+    return minion.attacksThisRound ?? 1;
+};
+
+export const recordMinionAttack = (minion: MinionState, currentRound: number): void => {
+    if (minion.lastActionAtRound !== currentRound) {
+        minion.attacksThisRound = 1;
+    } else {
+        minion.attacksThisRound = (minion.attacksThisRound ?? 1) + 1;
+    }
+    minion.lastActionAtRound = currentRound;
+};
+
+export const canMinionAttack = (minion: MinionState, currentRound: number): boolean => {
+    if (minion.attack <= 0) return false;
+    if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion))
+        return false;
+    if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) return false;
+    return true;
+};
+
+export const boardHasTaunt = (board: BoardState): boolean => {
+    return MINION_SPOT_IDS.some((spotId) => {
+        const minion = board[spotId];
+        return minion !== null && getMinionHasTaunt(minion);
+    });
+};
+
+export const getHeroAttacksThisRound = (player: GamePlayer, currentRound: number): number => {
+    if (player.heroLastAttackAtRound !== currentRound) return 0;
+    return player.heroAttacksThisRound ?? 1;
+};
+
+export const recordHeroAttack = (player: GamePlayer, currentRound: number): void => {
+    if (player.heroLastAttackAtRound !== currentRound) {
+        player.heroAttacksThisRound = 1;
+    } else {
+        player.heroAttacksThisRound = (player.heroAttacksThisRound ?? 1) + 1;
+    }
+    player.heroLastAttackAtRound = currentRound;
+    recordHeroAttackStat(player);
+};
+
+export const canHeroAttack = (player: GamePlayer, currentRound: number): boolean => {
+    return getHeroAttacksThisRound(player, currentRound) < 1;
+};
+
+export const canWeaponAttack = (
+    player: GamePlayer,
+    weaponState: WeaponState | null,
+    currentRound: number,
+): boolean => {
+    if (!weaponState) return false;
+    return canHeroAttack(player, currentRound);
+};
+
+export const ensureValidTauntTarget = (
+    opponentBoard: BoardState,
+    spotId: MinionSpotId | null,
+    owner: SpotOwner,
+    targetMinion: MinionState | null,
+    socketId: string,
+): boolean => {
+    if (!boardHasTaunt(opponentBoard)) return true;
+
+    if (spotId === null || owner !== "OPPONENT") {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+            socketId,
+        );
+        return false;
+    }
+
+    if (!targetMinion || !getMinionHasTaunt(targetMinion)) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+            socketId,
+        );
+        return false;
+    }
+
+    return true;
 };

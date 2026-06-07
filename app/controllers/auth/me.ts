@@ -1,6 +1,6 @@
 import type { ApiUser } from "#api_types/auth.types";
 import Game from "#models/game";
-import { cuid } from "@adonisjs/core/helpers";
+import { randomUUID } from "node:crypto";
 import type { HttpContext } from "@adonisjs/core/http";
 
 // biome-ignore lint/suspicious/noConfusingVoidType:
@@ -14,7 +14,7 @@ export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | voi
         .andWhere("isFinished", false)
         .first();
 
-    user.socketToken = cuid();
+    user.socketToken = randomUUID();
 
     await user.save();
 
@@ -24,5 +24,8 @@ export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | voi
         email: user.email,
         socketToken: user.socketToken,
         currentGameId: currentGame?.id ?? null,
+        elo: user.elo,
+        wins: user.wins,
+        losses: user.losses,
     };
 };

@@ -1,10 +1,9 @@
 import type { HttpContext } from "@adonisjs/core/http";
-import { validator } from "@adonisjs/validator";
 import { computeRightsCheck } from "../../adomin_routes_overrides_and_rights.js";
 import { getValidatedModelConfig } from "../validate_model_name.js";
 import { downloadExportFile } from "./download_export_file.js";
 import { getModelList } from "./get_data_list.js";
-import { paginationSchema } from "./model_query_helpers.js";
+import { paginationValidator } from "./model_query_helpers.js";
 
 const prepareQsObject = (input?: string) => {
     if (!input) return [];
@@ -39,13 +38,10 @@ export const modelList = async (ctx: HttpContext) => {
     const filters = prepareQsObject(qs.filters);
     const sorting = prepareQsObject(qs.sorting);
 
-    const paginationSettings = await validator.validate({
-        schema: paginationSchema,
-        data: {
-            ...qs,
-            filters,
-            sorting,
-        },
+    const paginationSettings = await paginationValidator.validate({
+        ...qs,
+        filters,
+        sorting,
     });
 
     const paginatedData = await getModelList({ paginationSettings, modelConfig });
@@ -58,9 +54,6 @@ export const modelList = async (ctx: HttpContext) => {
             modelConfig,
         });
     }
-
-    // ? until attchmentLite ships to v6, we can't use it yet
-    // await loadFilesForInstances(modelConfig.fields, data)
 
     return paginatedData;
 };

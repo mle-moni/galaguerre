@@ -1,9 +1,14 @@
+import { MinionState } from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
+    canMinionAttack,
     ensureIsMyTurn,
     ensureMinionFoundInBoard,
     getGameActionInfos,
+    getMinionAttacksThisRound,
+    getMinionHasCharge,
+    getMinionMaxAttacks,
     whichPlayerAmI,
 } from "../game_utils.js";
 import { minionToHeroAction } from "./minion_to_hero_action.js";
@@ -25,25 +30,13 @@ export const gameMinionAction = async (
     const minionInfos = ensureMinionFoundInBoard(player.board, minionId, "PLAYER", socketId);
     if (!minionInfos) return;
 
-    if (minionInfos.minion.placedAtRound === currentGame.data.currentRound) {
-        emitSocketEvent(
-            "notify_error",
-            {
-                error: "Ce serviteur n'est pas encore prêt à attaquer",
-            },
-            socketId,
-        );
-        return;
-    }
+    const currentRound = currentGame.data.currentRound;
+    const minion = minionInfos.minion;
 
-    if (minionInfos.minion.lastActionAtRound === currentGame.data.currentRound) {
-        emitSocketEvent(
-            "notify_error",
-            {
-                error: "Ce serviteur a déjà attaqué ce tour",
-            },
-            socketId,
-        );
+    if (!canMinionAttack(minion, currentRound)) {
+        const error = getMinionAttackError(minion, currentRound);
+
+        emitSocketEvent("notify_error", { error }, socketId);
         return;
     }
 
@@ -68,3 +61,16 @@ export const gameMinionAction = async (
         socketId,
     });
 };
+
+function getMinionAttackError(minion: MinionState, currentRound: number): string {
+    if (minion.attack <= 0) {
+        return "Ce serviteur ne peut pas attaquer sans points d'attaque";
+    }
+    if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) {
+        return "Ce serviteur n'est pas encore prêt à attaquer";
+    }
+    if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion)) {
+        return "Ce serviteur a déjà attaqué ce tour";
+    }
+    return "Ce serviteur n'est pas encore prêt à attaquer";
+}

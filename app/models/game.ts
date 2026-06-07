@@ -26,6 +26,12 @@ export default class Game extends BaseModel {
     @column()
     declare isFinished: boolean;
 
+    @column()
+    declare winnerId: number | null;
+
+    @belongsTo(() => User, { foreignKey: "winnerId" })
+    declare winner: BelongsTo<typeof User>;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 
@@ -70,7 +76,18 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     type: "MINION",
     attack: 0,
     health: 0,
+    hasTaunt: false,
+    hasCharge: false,
+    hasWindfury: false,
+    isPoisonous: false,
+    effects: [],
+    tags: [],
+    description: "",
+    battlecryActions: [],
+    deathrattleActions: [],
+    passives: [],
     cost: 0,
+    tagIds: [],
     label: "dummy card",
     imageUrl: "https://picsum.photos/seed/dummy_card/200/300",
     uuid: card.uuid,

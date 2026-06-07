@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./style/app.css";
+import "./style/design_tokens.css";
 
 import { MantineProvider } from "@mantine/core";
 import { QueryClientProvider } from "@tanstack/react-query";

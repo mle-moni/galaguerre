@@ -3,28 +3,58 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import User from "#models/user";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
-import { shuffleArray } from "../../app/utils/array.js";
+import {
+    BALANCED_DECKS_BY_EMAIL,
+    buildDeckCardIds,
+    DECK_SIZE,
+    recipeTotalCards,
+} from "../seed_data/balanced_decks.js";
 
 export default class extends BaseSeeder {
     async run() {
         const users = await User.all();
+        const allLabels = [
+            ...new Set(
+                Object.values(BALANCED_DECKS_BY_EMAIL).flatMap(({ recipe }) =>
+                    recipe.map(({ label }) => label),
+                ),
+            ),
+        ];
 
-        const decks = await Deck.createMany(
-            users.map((user) => ({
-                name: `Deck for ${user.email}`,
+        const cards = await Card.query().whereIn("label", allLabels);
+        const cardByLabel = new Map(cards.map((card) => [card.label, card]));
+
+        for (const user of users) {
+            const deckConfig = BALANCED_DECKS_BY_EMAIL[user.email];
+            if (!deckConfig) {
+                throw new Error(`No balanced deck recipe configured for user: ${user.email}`);
+            }
+
+            const { name, recipe } = deckConfig;
+
+            if (recipeTotalCards(recipe) !== DECK_SIZE) {
+                throw new Error(
+                    `Deck recipe "${name}" for ${user.email} has ${recipeTotalCards(recipe)} cards, expected ${DECK_SIZE}`,
+                );
+            }
+
+            const deck = await Deck.create({
+                name,
                 userId: user.id,
                 selected: true,
-            })),
-        );
+            });
 
-        const cards = await Card.all();
+            const deckCardIds = buildDeckCardIds(recipe, cardByLabel);
 
-        for (const deck of decks) {
-            const shuffledCards = shuffleArray(cards);
+            if (deckCardIds.length !== DECK_SIZE) {
+                throw new Error(
+                    `Built deck "${name}" for ${user.email} has ${deckCardIds.length} cards, expected ${DECK_SIZE}`,
+                );
+            }
 
             await DeckCard.createMany(
-                shuffledCards.slice(0, 10).map((card) => ({
-                    cardId: card.id,
+                deckCardIds.map((cardId) => ({
+                    cardId,
                     deckId: deck.id,
                 })),
             );

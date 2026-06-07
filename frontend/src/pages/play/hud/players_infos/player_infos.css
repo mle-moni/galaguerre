@@ -1,0 +1,74 @@
+.hero-panel {
+	border: 2px solid white;
+	border-radius: 8px;
+	width: 100%;
+	padding: 8px;
+	background-color: rgba(30, 58, 95, 0.85);
+}
+
+.hero-panel__pseudo {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	margin-bottom: 8px;
+}
+
+.hero-panel__stats {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.hero-panel__stat {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.hero-panel__stat-badge {
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: bold;
+	border: 2px solid #000;
+	flex-shrink: 0;
+}
+
+.hero-panel__stat-badge--health {
+	background-color: #2ae32a;
+}
+
+.hero-panel__stat-badge--mana {
+	background-color: #e3b42a;
+}
+
+.hero-panel__stat-badge--spell-power {
+	background-color: #7c3aed;
+	color: #fff;
+}
+
+.hero-panel__stat-badge--weapon-damage {
+	background-color: #e32a2a;
+}
+
+.hero-panel__stat-badge--weapon-durability {
+	background-color: #c0c0c0;
+}
+
+.hero-panel--weapon-draggable {
+	cursor: grab;
+}
+
+.hero-panel--weapon-draggable:active {
+	cursor: grabbing;
+}
+
+.hero-panel__stat-label {
+	font-size: 12px;
+	line-height: 1;
+	color: #fff;
+}

@@ -1,32 +1,39 @@
 import type { LucidModel, LucidRow, ModelQueryBuilderContract } from "@adonisjs/lucid/types/model";
-import { schema } from "@adonisjs/validator";
+import vine from "@vinejs/vine";
+import type { Infer } from "@vinejs/vine/types";
 import type { ColumnConfig } from "../../../create_model_view_config.js";
 import type { AdominFieldConfig } from "../../../fields.types.js";
 import { getSqlColumnToUse } from "../get_model_config.js";
 import { EXPORT_TYPES } from "./download_export_file.js";
 import { whereClause } from "./where_clause.js";
 
-export const paginationSchema = schema.create({
-    pageIndex: schema.number(),
-    pageSize: schema.number(),
-    globalFilter: schema.string.optional(),
-    filters: schema.array.optional().members(
-        schema.object().members({
-            id: schema.string(),
-            value: schema.string.nullable(),
-        }),
-    ),
-    filtersMode: schema.enum.optional(["and", "or"] as const),
-    sorting: schema.array.optional().members(
-        schema.object().members({
-            id: schema.string(),
-            desc: schema.boolean(),
-        }),
-    ),
-    exportType: schema.enum.optional(EXPORT_TYPES),
-});
+export const paginationValidator = vine.compile(
+    vine.object({
+        pageIndex: vine.number(),
+        pageSize: vine.number(),
+        globalFilter: vine.string().optional(),
+        filters: vine
+            .array(
+                vine.object({
+                    id: vine.string(),
+                    value: vine.string().nullable(),
+                }),
+            )
+            .optional(),
+        filtersMode: vine.enum(["and", "or"]).optional(),
+        sorting: vine
+            .array(
+                vine.object({
+                    id: vine.string(),
+                    desc: vine.boolean(),
+                }),
+            )
+            .optional(),
+        exportType: vine.enum(EXPORT_TYPES).optional(),
+    }),
+);
 
-export type PaginationSettings = (typeof paginationSchema)["props"];
+export type PaginationSettings = Infer<typeof paginationValidator>;
 
 const ADOMIN_EXACT_FIELD_LIST: AdominFieldConfig["type"][] = [
     "enum",
