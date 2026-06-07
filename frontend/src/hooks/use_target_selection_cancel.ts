@@ -1,17 +1,20 @@
 import { useEffect } from "react";
+import { cancelArrowTargeting } from "~/helpers/arrow_target_validity";
 import type { GameStore } from "~/stores/GameStore";
 
 export const useTargetSelectionCancel = (store: GameStore) => {
-    const isSelectingTarget = store.targetSelectionStore.isSelectingTarget;
+    const isArrowTargetingActive =
+        store.targetSelectionStore.isSelectingTarget ||
+        store.minionDragStore.isAttacking ||
+        store.weaponDragStore.isAttacking;
 
     useEffect(() => {
-        if (!isSelectingTarget) return;
+        if (!isArrowTargetingActive) return;
 
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key !== "Escape") return;
-            if (!store.targetSelectionStore.isSelectingTarget) return;
 
-            store.targetSelectionStore.cancelTargetSelection();
+            cancelArrowTargeting(store);
         };
 
         document.addEventListener("keydown", handleKeyDown);
@@ -19,5 +22,5 @@ export const useTargetSelectionCancel = (store: GameStore) => {
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [isSelectingTarget, store]);
+    }, [isArrowTargetingActive, store]);
 };

@@ -1,6 +1,6 @@
 import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
-import type { CSSProperties } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { CardDetailHover } from "./card_detail_hover.jsx";
@@ -30,6 +30,22 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
         ? getMinionRemainingAttacks(state, currentRound)
         : undefined;
 
+    const handleAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+        if (!canAttack) return;
+
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const origin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        store.minionDragStore.startAttack(state);
+        store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
+    };
+
     return (
         <MinionCardFace
             card={card}
@@ -38,9 +54,7 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
             style={style}
             attackStatus={isOwnMinion ? attackStatus : undefined}
             remainingAttacks={remainingAttacks}
-            draggable={canAttack}
-            onDragStart={() => store.minionDragStore.setMinionDragged(state)}
-            onDragEnd={() => store.minionDragStore.setMinionDragged(null)}
+            onPointerDown={canAttack ? handleAttackPointerDown : undefined}
             wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
         />
     );

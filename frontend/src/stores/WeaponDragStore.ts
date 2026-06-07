@@ -1,12 +1,19 @@
-import type { BoardState, MinionSpotId, MinionState, SpotOwner } from "#api_types/game.types";
+import type {
+    ActionTarget,
+    BoardState,
+    MinionSpotId,
+    MinionState,
+    SpotOwner,
+} from "#api_types/game.types";
 import { MINION_SPOT_IDS } from "#api_types/game.types";
 
 import { makeAutoObservable } from "mobx";
 import { canWeaponAttack } from "~/helpers/weapon_combat";
-import { notifyError } from "~/services/toasts";
+import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { type SlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
+import type { TargetValidity } from "./TargetSelectionStore.js";
 
 const getMinionHasTaunt = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
@@ -21,18 +28,23 @@ const boardHasTaunt = (board: BoardState): boolean => {
 };
 
 export class WeaponDragStore {
-    public isDragging = false;
+    public isAttacking = false;
 
     constructor(protected gameStore: GameStore) {
         makeAutoObservable(this);
     }
 
-    setWeaponDragging(isDragging: boolean) {
-        this.isDragging = isDragging;
+    startAttack() {
+        this.isAttacking = true;
+    }
+
+    cancelAttack() {
+        this.isAttacking = false;
+        this.gameStore.targetingArrowStore.endDrag();
     }
 
     get opponentSlotsBorderColor(): SlotsBorderColor {
-        if (!this.isDragging) return spotsToSameColor("black");
+        if (!this.isAttacking) return spotsToSameColor("black");
 
         return {
             SPOT_1: this.canAttack("SPOT_1", "OPPONENT") ? "green" : "red",
@@ -51,7 +63,7 @@ export class WeaponDragStore {
 
     canAttack(spotId: MinionSpotId | null, spotOwner: SpotOwner): boolean {
         if (!this.gameStore.isMyTurn) return false;
-        if (!this.isDragging) return false;
+        if (!this.isAttacking) return false;
 
         const weaponState = this.gameStore.me.weaponState;
         if (!weaponState) return false;
@@ -73,22 +85,42 @@ export class WeaponDragStore {
         return targetMinion !== null && getMinionHasTaunt(targetMinion);
     }
 
-    handleDrop(spotId: MinionSpotId | null, spotOwner: SpotOwner) {
-        if (!this.canAttack(spotId, spotOwner)) {
-            notifyError("Vous ne pouvez pas attaquer cette cible");
+    canSelectTarget(actionTarget: ActionTarget): boolean {
+        if (!this.isAttacking) return false;
+
+        return this.canAttack(actionTarget.spotId, actionTarget.owner);
+    }
+
+    getTargetValidityAtPoint(x: number, y: number): TargetValidity {
+        if (!this.isAttacking) return "none";
+
+        const actionTarget = resolveTargetFromPoint(x, y);
+        if (!actionTarget) return "none";
+
+        return this.canSelectTarget(actionTarget) ? "valid" : "invalid";
+    }
+
+    confirmTarget(actionTarget: ActionTarget) {
+        if (!this.isAttacking) return;
+
+        if (!this.canSelectTarget(actionTarget)) {
+            this.cancelAttack();
             return;
         }
 
         emitSocketEventToServer("game:weapon_action", {
-            spotId,
-            owner: spotOwner,
+            spotId: actionTarget.spotId,
+            owner: actionTarget.owner,
         });
+
+        this.isAttacking = false;
+        this.gameStore.targetingArrowStore.endDrag();
     }
 
     getOpponentHeroBorderColor(isOpponent: boolean) {
         const transparent = "RGBa(0, 0, 0, 0)";
 
-        if (!this.gameStore.isMyTurn || !this.isDragging) return transparent;
+        if (!this.gameStore.isMyTurn || !this.isAttacking) return transparent;
         if (!isOpponent) return transparent;
 
         const weaponState = this.gameStore.me.weaponState;
@@ -101,7 +133,7 @@ export class WeaponDragStore {
         return "green";
     }
 
-    get canDragWeapon(): boolean {
+    get canAttackWithWeapon(): boolean {
         if (!this.gameStore.isMyTurn) return false;
 
         const weaponState = this.gameStore.me.weaponState;

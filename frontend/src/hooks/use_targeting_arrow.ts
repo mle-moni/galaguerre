@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react";
-import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
+import { resolveAndConfirmArrowTarget } from "~/helpers/arrow_target_validity";
 import type { GameStore } from "~/stores/GameStore";
 
 export const useTargetingArrow = (store: GameStore) => {
@@ -13,15 +13,7 @@ export const useTargetingArrow = (store: GameStore) => {
         };
 
         const handlePointerUp = (event: PointerEvent) => {
-            const actionTarget = resolveTargetFromPoint(event.clientX, event.clientY);
-
-            if (actionTarget && store.targetSelectionStore.canSelectTarget(actionTarget)) {
-                store.targetSelectionStore.confirmTarget(actionTarget);
-            } else {
-                store.targetSelectionStore.cancelTargetSelection();
-            }
-
-            store.targetingArrowStore.endDrag();
+            resolveAndConfirmArrowTarget(store, event.clientX, event.clientY);
         };
 
         document.addEventListener("pointermove", handlePointerMove);

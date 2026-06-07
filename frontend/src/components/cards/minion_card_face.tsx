@@ -22,6 +22,7 @@ interface MinionCardFaceProps {
     draggable?: boolean;
     onDragStart?: () => void;
     onDragEnd?: () => void;
+    onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
 }
 
@@ -36,6 +37,7 @@ export const MinionCardFace = ({
     draggable,
     onDragStart,
     onDragEnd,
+    onPointerDown,
     wrapper = (content) => content,
 }: MinionCardFaceProps) => {
     const maxAttacks = getMinionCardMaxAttacks(card);
@@ -60,6 +62,7 @@ export const MinionCardFace = ({
             draggable={draggable}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
+            onPointerDown={onPointerDown}
         >
             <CardEffectSymbols card={card} />
             {attackStatus === "sleeping" && (

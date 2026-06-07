@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
+import { getArrowTargetValidity } from "~/helpers/arrow_target_validity";
 import { useGameContext } from "~/hooks/use_game_state";
 import type { TargetValidity } from "~/stores/TargetSelectionStore";
 
@@ -22,7 +23,8 @@ export const TargetingArrowOverlay = observer(() => {
     const { store } = useGameContext();
     const arrowStore = store.targetingArrowStore;
 
-    const validity = store.targetSelectionStore.getTargetValidityAtPoint(
+    const validity = getArrowTargetValidity(
+        store,
         arrowStore.cursor?.x ?? 0,
         arrowStore.cursor?.y ?? 0,
     );

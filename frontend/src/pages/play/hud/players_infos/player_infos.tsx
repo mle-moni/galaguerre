@@ -2,6 +2,7 @@ import type { GamePlayer } from "#api_types/game.types";
 
 import { Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
+import type { PointerEvent } from "react";
 import { useGameContext } from "~/hooks/use_game_state";
 import "./player_infos.css";
 
@@ -27,29 +28,32 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
               ? weaponAttackBorderColor
               : minionAttackBorderColor;
 
-    const canDragWeapon = !isOpponent && store.weaponDragStore.canDragWeapon;
+    const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
 
     const handleDrop = () => {
         store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        const minion = store.minionDragStore.minionDragged;
-        const isSelectingTarget = store.targetSelectionStore.isSelectingTarget;
-        const isWeaponDragging = store.weaponDragStore.isDragging;
-
-        if (!minion && !isSelectingTarget && !isWeaponDragging) return;
+        if (!store.targetSelectionStore.isSelectingTarget) return;
 
         e.preventDefault();
     };
 
-    const handleWeaponDragStart = () => {
-        if (!canDragWeapon) return;
-        store.weaponDragStore.setWeaponDragging(true);
-    };
+    const handleWeaponAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+        if (!canAttackWithWeapon) return;
 
-    const handleWeaponDragEnd = () => {
-        store.weaponDragStore.setWeaponDragging(false);
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const origin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        store.weaponDragStore.startAttack();
+        store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
 
     return (
@@ -65,13 +69,11 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             onDrop={handleDrop}
         >
             <div
-                className={`hero-panel${canDragWeapon ? " hero-panel--weapon-draggable" : ""}`}
+                className={`hero-panel${canAttackWithWeapon ? " hero-panel--weapon-draggable" : ""}`}
                 style={{
                     borderColor: playerBorderColor,
                 }}
-                draggable={canDragWeapon}
-                onDragStart={handleWeaponDragStart}
-                onDragEnd={handleWeaponDragEnd}
+                onPointerDown={canAttackWithWeapon ? handleWeaponAttackPointerDown : undefined}
             >
                 <Text className="hero-panel__pseudo" size="lg" ta="center" fw={700}>
                     {player.pseudo}

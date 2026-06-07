@@ -99,16 +99,6 @@ export class GameStore {
         if (this.cardDragStore.cardDragged && spotId !== null) {
             return this.cardDragStore.handleDrop(this.cardDragStore.cardDragged, spotId, spotOwner);
         }
-        if (this.minionDragStore.minionDragged) {
-            return this.minionDragStore.handleDrop(
-                this.minionDragStore.minionDragged,
-                spotId,
-                spotOwner,
-            );
-        }
-        if (this.weaponDragStore.isDragging) {
-            return this.weaponDragStore.handleDrop(spotId, spotOwner);
-        }
     }
 
     getMinionSpotBackgroundColor(spotId: MinionSpotId, spotOwner: SpotOwner) {
@@ -125,13 +115,13 @@ export class GameStore {
             return this.cardDragStore.mySlotsBorderColor[spotId];
         }
 
-        if (this.minionDragStore.minionDragged) {
+        if (this.minionDragStore.isAttacking) {
             if (spotOwner === "OPPONENT")
                 return this.minionDragStore.opponentSlotsBorderColor[spotId];
             return this.minionDragStore.mySlotsBorderColor[spotId];
         }
 
-        if (this.weaponDragStore.isDragging) {
+        if (this.weaponDragStore.isAttacking) {
             if (spotOwner === "OPPONENT")
                 return this.weaponDragStore.opponentSlotsBorderColor[spotId];
             return "black";

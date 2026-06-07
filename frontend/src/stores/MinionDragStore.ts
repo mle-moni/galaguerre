@@ -1,12 +1,19 @@
-import type { BoardState, MinionSpotId, MinionState, SpotOwner } from "#api_types/game.types";
+import type {
+    ActionTarget,
+    BoardState,
+    MinionSpotId,
+    MinionState,
+    SpotOwner,
+} from "#api_types/game.types";
 import { MINION_SPOT_IDS } from "#api_types/game.types";
 
 import { makeAutoObservable } from "mobx";
 import { canMinionAttack } from "~/helpers/minion_combat";
-import { notifyError } from "~/services/toasts";
+import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { type SlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
+import type { TargetValidity } from "./TargetSelectionStore.js";
 
 const getMinionHasTaunt = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
@@ -21,44 +28,62 @@ const boardHasTaunt = (board: BoardState): boolean => {
 };
 
 export class MinionDragStore {
-    public minionDragged: MinionState | null = null;
+    public attackingMinion: MinionState | null = null;
 
     constructor(protected gameStore: GameStore) {
         makeAutoObservable(this);
     }
 
-    setMinionDragged(card: MinionState | null) {
-        this.minionDragged = card;
+    get isAttacking(): boolean {
+        return this.attackingMinion !== null;
+    }
+
+    startAttack(minion: MinionState) {
+        this.attackingMinion = minion;
+    }
+
+    cancelAttack() {
+        this.attackingMinion = null;
+        this.gameStore.targetingArrowStore.endDrag();
     }
 
     get opponentSlotsBorderColor(): SlotsBorderColor {
-        if (!this.minionDragged) return spotsToSameColor("black");
+        if (!this.attackingMinion) return spotsToSameColor("black");
 
         return {
-            SPOT_1: this.canPlayMinion("SPOT_1", this.minionDragged, "OPPONENT") ? "green" : "red",
-            SPOT_2: this.canPlayMinion("SPOT_2", this.minionDragged, "OPPONENT") ? "green" : "red",
-            SPOT_3: this.canPlayMinion("SPOT_3", this.minionDragged, "OPPONENT") ? "green" : "red",
-            SPOT_4: this.canPlayMinion("SPOT_4", this.minionDragged, "OPPONENT") ? "green" : "red",
-            SPOT_5: this.canPlayMinion("SPOT_5", this.minionDragged, "OPPONENT") ? "green" : "red",
+            SPOT_1: this.canPlayMinion("SPOT_1", this.attackingMinion, "OPPONENT")
+                ? "green"
+                : "red",
+            SPOT_2: this.canPlayMinion("SPOT_2", this.attackingMinion, "OPPONENT")
+                ? "green"
+                : "red",
+            SPOT_3: this.canPlayMinion("SPOT_3", this.attackingMinion, "OPPONENT")
+                ? "green"
+                : "red",
+            SPOT_4: this.canPlayMinion("SPOT_4", this.attackingMinion, "OPPONENT")
+                ? "green"
+                : "red",
+            SPOT_5: this.canPlayMinion("SPOT_5", this.attackingMinion, "OPPONENT")
+                ? "green"
+                : "red",
         };
     }
 
     get mySlotsBorderColor(): SlotsBorderColor {
-        if (!this.minionDragged) return spotsToSameColor("black");
+        if (!this.attackingMinion) return spotsToSameColor("black");
 
         return {
-            SPOT_1: this.canPlayMinion("SPOT_1", this.minionDragged, "PLAYER") ? "green" : "red",
-            SPOT_2: this.canPlayMinion("SPOT_2", this.minionDragged, "PLAYER") ? "green" : "red",
-            SPOT_3: this.canPlayMinion("SPOT_3", this.minionDragged, "PLAYER") ? "green" : "red",
-            SPOT_4: this.canPlayMinion("SPOT_4", this.minionDragged, "PLAYER") ? "green" : "red",
-            SPOT_5: this.canPlayMinion("SPOT_5", this.minionDragged, "PLAYER") ? "green" : "red",
+            SPOT_1: this.canPlayMinion("SPOT_1", this.attackingMinion, "PLAYER") ? "green" : "red",
+            SPOT_2: this.canPlayMinion("SPOT_2", this.attackingMinion, "PLAYER") ? "green" : "red",
+            SPOT_3: this.canPlayMinion("SPOT_3", this.attackingMinion, "PLAYER") ? "green" : "red",
+            SPOT_4: this.canPlayMinion("SPOT_4", this.attackingMinion, "PLAYER") ? "green" : "red",
+            SPOT_5: this.canPlayMinion("SPOT_5", this.attackingMinion, "PLAYER") ? "green" : "red",
         };
     }
 
     canPlayMinionOnSpot(spotId: MinionSpotId, spotOwner: SpotOwner) {
         const board =
             spotOwner === "PLAYER" ? this.gameStore.me.board : this.gameStore.opponent.board;
-        // allow to play a minion on a spot if it's not empty
         return board[spotId] !== null;
     }
 
@@ -80,27 +105,45 @@ export class MinionDragStore {
         return targetMinion !== null && getMinionHasTaunt(targetMinion);
     }
 
-    handleDrop(minion: MinionState, spotId: MinionSpotId | null, spotOwner: SpotOwner) {
-        const canPlayMinion = this.canPlayMinion(spotId, minion, spotOwner);
+    canSelectTarget(actionTarget: ActionTarget): boolean {
+        if (!this.attackingMinion) return false;
 
-        if (!canPlayMinion) {
-            notifyError("Vous ne pouvez pas jouer ce serviteur ici");
+        return this.canPlayMinion(actionTarget.spotId, this.attackingMinion, actionTarget.owner);
+    }
+
+    getTargetValidityAtPoint(x: number, y: number): TargetValidity {
+        if (!this.isAttacking) return "none";
+
+        const actionTarget = resolveTargetFromPoint(x, y);
+        if (!actionTarget) return "none";
+
+        return this.canSelectTarget(actionTarget) ? "valid" : "invalid";
+    }
+
+    confirmTarget(actionTarget: ActionTarget) {
+        if (!this.attackingMinion) return;
+
+        if (!this.canSelectTarget(actionTarget)) {
+            this.cancelAttack();
             return;
         }
 
         emitSocketEventToServer("game:minion_action", {
-            minionId: minion.uuid,
-            spotId,
-            owner: spotOwner,
+            minionId: this.attackingMinion.uuid,
+            spotId: actionTarget.spotId,
+            owner: actionTarget.owner,
         });
+
+        this.attackingMinion = null;
+        this.gameStore.targetingArrowStore.endDrag();
     }
 
     getPlayerBorderColor(isOpponent: boolean) {
         const transparent = "RGBa(0, 0, 0, 0)";
 
-        if (!this.gameStore.isMyTurn || this.minionDragged === null) return transparent;
+        if (!this.gameStore.isMyTurn || this.attackingMinion === null) return transparent;
         if (!isOpponent) return transparent;
-        if (!canMinionAttack(this.minionDragged, this.gameStore.game.data.currentRound))
+        if (!canMinionAttack(this.attackingMinion, this.gameStore.game.data.currentRound))
             return transparent;
 
         if (boardHasTaunt(this.gameStore.opponent.board)) return "red";

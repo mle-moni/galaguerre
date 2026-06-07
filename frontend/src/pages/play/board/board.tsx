@@ -56,11 +56,10 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        const card = store.cardDragStore.cardDragged || store.minionDragStore.minionDragged;
+        const card = store.cardDragStore.cardDragged;
         const isSelectingTarget = store.targetSelectionStore.isSelectingTarget;
-        const isWeaponDragging = store.weaponDragStore.isDragging;
 
-        if (!card && !isSelectingTarget && !isWeaponDragging) return;
+        if (!card && !isSelectingTarget) return;
 
         e.preventDefault();
     };
