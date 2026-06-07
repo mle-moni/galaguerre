@@ -34,7 +34,9 @@ const findMinionTarget = (action: Action) => {
 const findTargetableTarget = (action: Action) => {
     return action.toolToTargets?.find(
         (toolToTarget) =>
-            toolToTarget.target?.type === "HERO" || toolToTarget.target?.type === "MINION",
+            toolToTarget.target?.type === "HERO" ||
+            toolToTarget.target?.type === "MINION" ||
+            toolToTarget.target?.type === "ALL",
     );
 };
 
@@ -125,14 +127,6 @@ const validateTargetFilters = (action: Action, target: Target): ActionValidation
         };
     }
 
-    if (action.isTargeted && target.type === "ALL") {
-        return {
-            actionId: action.id,
-            internalLabel: action.internalLabel,
-            reason: "Targeted action cannot use ALL target type",
-        };
-    }
-
     if (target.comparisonId !== null || target.tagId !== null) {
         if (target.type !== "MINION" && target.type !== "ALL") {
             return {
@@ -183,7 +177,7 @@ const validateTargetedAction = (action: Action): ActionValidationError | null =>
         return {
             actionId: action.id,
             internalLabel: action.internalLabel,
-            reason: "Targeted action requires a HERO or MINION target via tool_to_target",
+            reason: "Targeted action requires a HERO, MINION, or ALL target via tool_to_target",
         };
     }
 

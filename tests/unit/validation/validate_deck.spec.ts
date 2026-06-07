@@ -475,6 +475,39 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 0);
     });
 
+    test("accepts valid isTargeted DAMAGE action with ALL target", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const user = await User.create({
+            email: `vd-targeted-all-${unique}@test.fr`,
+            password: "test",
+        });
+
+        const deck = await Deck.create({
+            name: `Valid targeted ALL deck ${unique}`,
+            userId: user.id,
+            selected: true,
+        });
+
+        await createMinionCardInDeck({
+            deck,
+            unique,
+            label: `valid-targeted-all-${unique}`,
+            action: {
+                internalLabel: `valid-targeted-all-action-${unique}`,
+                type: "DAMAGE",
+                isTargeted: true,
+                damage: 1,
+            },
+            target: { type: "ALL", targetTeam: "ALL" },
+        });
+
+        await loadDeckRelations(deck);
+        const result = validateDeck(deck);
+
+        assert.isTrue(result.valid);
+        assert.equal(result.errors.length, 0);
+    });
+
     test("accepts valid random limited DAMAGE action", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
@@ -657,7 +690,7 @@ test.group("validation:validateDeck", (group) => {
         assert.equal(result.errors.length, 1);
         assert.include(
             result.errors[0]!.reason,
-            "Targeted action requires a HERO or MINION target via tool_to_target",
+            "Targeted action requires a HERO, MINION, or ALL target via tool_to_target",
         );
     });
 
