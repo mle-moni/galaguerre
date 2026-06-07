@@ -2,10 +2,9 @@ import { Table } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
+import { PlayerNameLink } from "~/components/player_name_link";
 import { useLeaderboardQuery } from "~/hooks/use_leaderboard";
 import { useUser } from "~/hooks/use_user";
-
-const formatPlayerName = (pseudo: string | null, userId: number) => pseudo ?? `Joueur #${userId}`;
 
 export const LeaderboardPage = observer(() => {
     const user = useUser();
@@ -63,7 +62,11 @@ export const LeaderboardPage = observer(() => {
                                         >
                                             <Table.Td>#{entry.rank}</Table.Td>
                                             <Table.Td>
-                                                {formatPlayerName(entry.pseudo, entry.userId)}
+                                                <PlayerNameLink
+                                                    pseudo={entry.pseudo}
+                                                    userId={entry.userId}
+                                                    className="text-white no-underline hover:underline"
+                                                />
                                                 {isCurrentUser && (
                                                     <span className="text-gg-gold text-xs ml-2">
                                                         (vous)

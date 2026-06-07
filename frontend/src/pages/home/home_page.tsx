@@ -21,7 +21,6 @@ export const HomePage = observer(() => {
                     <h1 className="text-3xl font-bold text-gg-navy m-0">
                         Bienvenue, {user.pseudo ?? user.email.split("@")[0]}
                     </h1>
-                    <p className="text-gg-navy/70 mt-2 mb-0">Que souhaitez-vous faire ?</p>
                     <p className="text-gg-navy/60 text-sm mt-1 mb-0">
                         Elo : {user.elo} — {user.wins}V / {user.losses}D
                     </p>
@@ -63,6 +62,14 @@ export const HomePage = observer(() => {
                         <h2 className="gg-mode-tile__title">Classement</h2>
                         <p className="gg-mode-tile__subtitle">
                             Consultez le classement Elo des joueurs
+                        </p>
+                    </Link>
+
+                    <Link to={`/game-history/${user.id}`} className="gg-mode-tile">
+                        <span className="gg-mode-tile__icon">📜</span>
+                        <h2 className="gg-mode-tile__title">Mon historique</h2>
+                        <p className="gg-mode-tile__subtitle">
+                            Consultez vos dernières parties et statistiques
                         </p>
                     </Link>
                 </div>

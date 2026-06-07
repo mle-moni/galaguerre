@@ -26,6 +26,12 @@ export const controllers = {
         Decks: () => import("#controllers/decks/decks_controller"),
         SerializeDeck: () => import("#controllers/decks/serialize_deck"),
     },
+    gameHistory: {
+        GameHistory: () => import("#controllers/game_history/game_history_controller"),
+        ListUserGames: () => import("#controllers/game_history/list_user_games"),
+        SerializeGameHistory: () => import("#controllers/game_history/serialize_game_history"),
+        ShowUserGame: () => import("#controllers/game_history/show_user_game"),
+    },
     games: {
         CreateGame: () => import("#controllers/games/create_game"),
         GameSearch: () => import("#controllers/games/game_search"),

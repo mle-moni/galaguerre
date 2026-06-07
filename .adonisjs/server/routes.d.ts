@@ -8,6 +8,11 @@ export type ScannedRoutes = {
         "auth.register": { paramsTuple?: []; params?: {} };
         "auth.logout": { paramsTuple?: []; params?: {} };
         "leaderboard.index": { paramsTuple?: []; params?: {} };
+        "game_history.index": { paramsTuple: [ParamValue]; params: { userId: ParamValue } };
+        "game_history.show": {
+            paramsTuple: [ParamValue, ParamValue];
+            params: { userId: ParamValue; gameId: ParamValue };
+        };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
@@ -24,6 +29,11 @@ export type ScannedRoutes = {
     };
     GET: {
         "leaderboard.index": { paramsTuple?: []; params?: {} };
+        "game_history.index": { paramsTuple: [ParamValue]; params: { userId: ParamValue } };
+        "game_history.show": {
+            paramsTuple: [ParamValue, ParamValue];
+            params: { userId: ParamValue; gameId: ParamValue };
+        };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
@@ -33,6 +43,11 @@ export type ScannedRoutes = {
     };
     HEAD: {
         "leaderboard.index": { paramsTuple?: []; params?: {} };
+        "game_history.index": { paramsTuple: [ParamValue]; params: { userId: ParamValue } };
+        "game_history.show": {
+            paramsTuple: [ParamValue, ParamValue];
+            params: { userId: ParamValue; gameId: ParamValue };
+        };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
