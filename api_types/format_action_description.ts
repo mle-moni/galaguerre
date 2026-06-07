@@ -2,6 +2,7 @@ import type {
     BoostSnapshot,
     CardActionSnapshot,
     CardFilterSnapshot,
+    CardTagSnapshot,
     TargetSnapshot,
 } from "./game.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
@@ -12,6 +13,10 @@ const CARD_TYPE_LABELS: Record<CardFilterSnapshot["type"], string> = {
     SPELL: "Sort",
     WEAPON: "Arme",
 };
+
+const formatTagChip = (tag: CardTagSnapshot): string => `${tag.symbol} ${tag.label}`;
+
+const formatTagList = (tags: CardTagSnapshot[]): string => tags.map(formatTagChip).join(", ");
 
 const formatHeroTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
     if (targetTeam === "ALL") return "tous les héros";
@@ -56,12 +61,14 @@ const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
     if (comparison?.costComparison && comparison.cost !== null) {
         parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
     }
-    if (action.target.tagId !== null) {
+    if (action.target.tag) {
+        parts.push(formatTagChip(action.target.tag));
+    } else if (action.target.tagId !== null) {
         parts.push("avec le tag requis");
     }
 
     if (parts.length === 0) return "";
-    return ` (${parts.join(", ")})`;
+    return ` ${parts.join(" + ")}`;
 };
 
 const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
@@ -181,11 +188,13 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     if (comparison?.costComparison && comparison.cost !== null) {
         parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
     }
-    if (filter.tagIds.length > 0) {
+    if (filter.tags.length > 0) {
+        parts.push(formatTagList(filter.tags));
+    } else if (filter.tagIds.length > 0) {
         parts.push("avec le tag requis");
     }
 
-    return ` (${parts.join(", ")})`;
+    return ` ${parts.join(" + ")}`;
 };
 
 export const formatActionDescription = (

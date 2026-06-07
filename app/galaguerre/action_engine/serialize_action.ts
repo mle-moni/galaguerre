@@ -13,6 +13,10 @@ const serializeCardFilter = (
         type: cardFilter.type,
         comparison: serializeComparison(cardFilter.comparison),
         tagIds: (cardFilter.tags ?? []).map((tag) => tag.id),
+        tags: (cardFilter.tags ?? []).map((tag) => ({
+            label: tag.label,
+            symbol: tag.symbol,
+        })),
     };
 };
 

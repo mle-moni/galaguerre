@@ -58,6 +58,7 @@ export const createHeroTargetSnapshot = (
     targetTeam,
     comparison: null,
     tagId: null,
+    tag: null,
     excludeSelf: false,
     maxTargets: null,
     targetSelectionMode: null,
@@ -72,6 +73,7 @@ export const createMinionTargetSnapshot = (
     targetTeam,
     comparison: null,
     tagId: null,
+    tag: null,
     excludeSelf: false,
     maxTargets: null,
     targetSelectionMode: null,
@@ -86,6 +88,7 @@ export const createAllTargetSnapshot = (
     targetTeam,
     comparison: null,
     tagId: null,
+    tag: null,
     excludeSelf: false,
     maxTargets: null,
     targetSelectionMode: null,
@@ -106,6 +109,7 @@ export const createCardFilterSnapshot = (
     type: "MINION",
     comparison: null,
     tagIds: [],
+    tags: [],
     ...overrides,
 });
 

@@ -37,6 +37,7 @@ export interface TargetSnapshot {
     targetTeam: "PLAYER" | "OPPONENT" | "ALL";
     comparison: ComparisonSnapshot | null;
     tagId: number | null;
+    tag: CardTagSnapshot | null;
     excludeSelf: boolean;
     maxTargets: number | null;
     targetSelectionMode: "RANDOM" | null;
@@ -46,6 +47,7 @@ export interface CardFilterSnapshot {
     type: "MINION" | "SPELL" | "WEAPON";
     comparison: ComparisonSnapshot | null;
     tagIds: number[];
+    tags: CardTagSnapshot[];
 }
 
 export interface ActionTarget {

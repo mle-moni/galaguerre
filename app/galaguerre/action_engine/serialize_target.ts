@@ -25,6 +25,7 @@ export const serializeTarget = (target: Target | null | undefined): TargetSnapsh
         targetTeam: target.targetTeam,
         comparison: serializeComparison(target.comparison),
         tagId: target.tagId,
+        tag: target.tag ? { label: target.tag.label, symbol: target.tag.symbol } : null,
         excludeSelf: target.excludeSelf ?? false,
         maxTargets: target.maxTargets,
         targetSelectionMode: target.targetSelectionMode,

@@ -16,7 +16,7 @@ const preloadActionRelations = (aq: {
     aq.preload("drawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
     aq.preload("enemyDrawCardFilter", (cfq: any) => cfq.preload("comparison").preload("tags"));
     aq.preload("toolToTargets", (tq: any) =>
-        tq.preload("target", (targetQ: any) => targetQ.preload("comparison")),
+        tq.preload("target", (targetQ: any) => targetQ.preload("comparison").preload("tag")),
     );
 };
 
@@ -42,7 +42,7 @@ const loadCardRelations = (q: ManyToManyQueryBuilderContract<typeof Card, any>) 
                                     .preload("minionPower")
                                     .preload("toolToTargets", (tq) =>
                                         tq.preload("target", (targetQ) =>
-                                            targetQ.preload("comparison"),
+                                            targetQ.preload("comparison").preload("tag"),
                                         ),
                                     ),
                             ),

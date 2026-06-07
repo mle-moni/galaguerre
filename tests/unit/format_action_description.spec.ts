@@ -1,7 +1,11 @@
 import { test } from "@japa/runner";
 import { formatActionDescription } from "#api_types/format_action_description";
 import { getDisplayedDamage, getEffectiveDamage } from "#api_types/get_effective_damage";
-import { createCardActionSnapshot, createMinionTargetSnapshot } from "#tests/helpers/game/fixtures";
+import {
+    createCardActionSnapshot,
+    createCardFilterSnapshot,
+    createMinionTargetSnapshot,
+} from "#tests/helpers/game/fixtures";
 
 test.group("get_effective_damage", () => {
     test("returns base damage when spell power is zero", ({ assert }) => {
@@ -66,6 +70,40 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Effet"),
             "Effet : Inflige 1 dégâts à un serviteur adverse aléatoire.",
+        );
+    });
+
+    test("formats draw with explicit tag label", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DRAW",
+            drawCount: 1,
+            drawCardFilter: createCardFilterSnapshot({
+                type: "MINION",
+                tagIds: [1],
+                tags: [{ label: "Bête", symbol: "🦁" }],
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Cri de guerre"),
+            "Cri de guerre : Pioche 1 carte (Monstre, 🦁 Bête).",
+        );
+    });
+
+    test("formats targeted damage with explicit tag label", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: true,
+            damage: 2,
+            target: createMinionTargetSnapshot("OPPONENT", {
+                tagId: 1,
+                tag: { label: "Bête", symbol: "🦁" },
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Cri de guerre"),
+            "Cri de guerre : Inflige 2 dégâts à un serviteur adverse (🦁 Bête).",
         );
     });
 });

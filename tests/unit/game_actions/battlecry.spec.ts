@@ -1771,7 +1771,7 @@ test.group("game:play_card battlecries", (group) => {
                                 )
                                 .preload("toolToTargets", (tq) =>
                                     tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
+                                        targetQ.preload("comparison").preload("tag"),
                                     ),
                                 ),
                         )
@@ -1796,6 +1796,7 @@ test.group("game:play_card battlecries", (group) => {
             targetTeam: "OPPONENT",
             comparison: null,
             tagId: null,
+            tag: null,
             excludeSelf: false,
             maxTargets: null,
             targetSelectionMode: null,
@@ -1891,7 +1892,7 @@ test.group("game:play_card battlecries", (group) => {
                                 )
                                 .preload("toolToTargets", (tq) =>
                                     tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
+                                        targetQ.preload("comparison").preload("tag"),
                                     ),
                                 ),
                         )
@@ -1921,6 +1922,7 @@ test.group("game:play_card battlecries", (group) => {
                 health: null,
             },
             tagId: null,
+            tag: null,
             excludeSelf: false,
             maxTargets: null,
             targetSelectionMode: null,
@@ -2018,7 +2020,7 @@ test.group("game:play_card battlecries", (group) => {
                                 )
                                 .preload("toolToTargets", (tq) =>
                                     tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
+                                        targetQ.preload("comparison").preload("tag"),
                                     ),
                                 ),
                         )
@@ -2125,7 +2127,7 @@ test.group("game:play_card battlecries", (group) => {
                                 )
                                 .preload("toolToTargets", (tq) =>
                                     tq.preload("target", (targetQ) =>
-                                        targetQ.preload("comparison"),
+                                        targetQ.preload("comparison").preload("tag"),
                                     ),
                                 ),
                         )
@@ -2155,6 +2157,7 @@ test.group("game:play_card battlecries", (group) => {
                 health: null,
             },
             tagIds: [],
+            tags: [],
         });
         assert.include(
             generated.description,
