@@ -8,8 +8,8 @@ import { SpellCardFace } from "~/components/cards/spell_card_face";
 import { WeaponCardFace } from "~/components/cards/weapon_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { notifyError } from "~/services/toasts";
-import { emitSocketEventToServer } from "~/services/ws_client";
 import { CardDetailHover } from "./card_detail_hover.jsx";
+import "./playing_card.css";
 
 interface CardProps {
     card: PlayerCard;
@@ -30,50 +30,64 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
     }
 
     const canPlay = store.isMyTurn && card.cost <= store.me.mana;
-    const cardClassName = clsx(canPlay ? "cursor-pointer" : "cursor-not-allowed opacity-60");
+    const isArmed =
+        (card.type === "SPELL" || card.type === "WEAPON") &&
+        store.targetSelectionStore.isCardArmed(card);
+    const isMinionHinted =
+        card.type === "MINION" && store.cardDragStore.minionPlayHintCardId === card.uuid;
+    const cardClassName = clsx(
+        canPlay ? "cursor-pointer" : "cursor-not-allowed opacity-60",
+        (isArmed || isMinionHinted) && "playing-card--armed",
+    );
 
-    const handleSpellClick = () => {
+    const handleInsufficientMana = () => {
+        if (card.cost > store.me.mana) {
+            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+        }
+    };
+
+    const handlePlayableCardClick = () => {
         if (!canPlay) {
-            if (card.cost > store.me.mana) {
-                notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
-            }
+            handleInsufficientMana();
             return;
         }
 
-        if (card.type === "SPELL" && store.targetSelectionStore.requiresTarget(card)) {
+        if (card.type !== "SPELL" && card.type !== "WEAPON") return;
+
+        store.targetSelectionStore.handlePlayableCardClick(card);
+    };
+
+    const handleMinionClick = () => {
+        if (!canPlay) {
+            handleInsufficientMana();
             return;
         }
 
-        if (card.type === "SPELL" || card.type === "WEAPON") {
-            emitSocketEventToServer("game:play_card", {
-                cardId: card.uuid,
-                spotId: null,
-                owner: "PLAYER",
-            });
-        }
+        store.cardDragStore.showMinionPlayHint(card.uuid);
     };
 
     const handleTargetedSpellPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
         if (!canPlay) {
-            if (card.cost > store.me.mana) {
-                notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
-            }
+            handleInsufficientMana();
             return;
         }
 
         if (card.type !== "SPELL" || !store.targetSelectionStore.requiresTarget(card)) return;
+        if (!store.targetSelectionStore.isCardArmed(card)) return;
 
         event.preventDefault();
-        event.currentTarget.setPointerCapture(event.pointerId);
 
         const rect = event.currentTarget.getBoundingClientRect();
-        const origin = {
+        const arrowOrigin = {
             x: rect.left + rect.width / 2,
             y: rect.top + rect.height / 2,
         };
 
-        store.targetSelectionStore.startSpellTargetSelection(card);
-        store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
+        store.targetSelectionStore.beginPendingSpellDrag(
+            card,
+            { x: event.clientX, y: event.clientY },
+            arrowOrigin,
+        );
     };
 
     if (card.type === "WEAPON") {
@@ -82,7 +96,7 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
                 card={card}
                 style={style}
                 className={cardClassName}
-                onClick={handleSpellClick}
+                onClick={handlePlayableCardClick}
                 wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
             />
         );
@@ -96,8 +110,8 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
                 card={card}
                 style={style}
                 className={cardClassName}
-                onClick={isTargeted ? undefined : handleSpellClick}
-                onPointerDown={isTargeted ? handleTargetedSpellPointerDown : undefined}
+                onClick={handlePlayableCardClick}
+                onPointerDown={isTargeted && isArmed ? handleTargetedSpellPointerDown : undefined}
                 wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
             />
         );
@@ -111,6 +125,7 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
             style={style}
             className={cardClassName}
             draggable={canPlay}
+            onClick={handleMinionClick}
             onDragStart={() => store.cardDragStore.setCardDragged(card)}
             onDragEnd={() => store.cardDragStore.setCardDragged(null)}
             wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}

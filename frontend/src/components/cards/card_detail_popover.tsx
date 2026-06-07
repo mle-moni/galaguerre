@@ -50,7 +50,7 @@ const SpellDescription = ({
 
     if (!hasSpellPowerBonus) {
         return (
-            <Text size="sm" c="dimmed" mb={0}>
+            <Text size="sm" c="dimmed" mb={0} className="card-description">
                 {description}
             </Text>
         );
@@ -61,7 +61,7 @@ const SpellDescription = ({
 
     if (damageIndex === -1) {
         return (
-            <Text size="sm" c="dimmed" mb={0}>
+            <Text size="sm" c="dimmed" mb={0} className="card-description">
                 {description}
             </Text>
         );
@@ -71,7 +71,7 @@ const SpellDescription = ({
     const after = description.slice(damageIndex + damagePattern.length);
 
     return (
-        <Text size="sm" c="dimmed" mb={0}>
+        <Text size="sm" c="dimmed" mb={0} className="card-description">
             {before}
             <span className="spell-effective-damage">{effectiveDamage}</span> dégâts
             {after}
@@ -101,7 +101,7 @@ export const CardDetailPopover = ({ card, children, spellPower = 0 }: CardDetail
                         <SpellDescription card={card} spellPower={spellPower} />
                     </div>
                 ) : (
-                    <Text size="sm" c="dimmed" mb={hasChips ? 8 : 0}>
+                    <Text size="sm" c="dimmed" mb={hasChips ? 8 : 0} className="card-description">
                         {getCardDescription(card, spellPower)}
                     </Text>
                 )}

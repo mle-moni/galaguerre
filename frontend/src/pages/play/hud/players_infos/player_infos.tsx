@@ -30,12 +30,16 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
 
     const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
 
+    const handleClick = () => {
+        handleDrop();
+    };
+
     const handleDrop = () => {
         store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        if (!store.targetSelectionStore.isSelectingTarget) return;
+        if (!store.targetSelectionStore.isHighlightingTargets) return;
 
         e.preventDefault();
     };
@@ -67,6 +71,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             }}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
+            onClick={handleClick}
         >
             <div
                 className={`hero-panel${canAttackWithWeapon ? " hero-panel--weapon-draggable" : ""}`}

@@ -20,12 +20,31 @@ export const spotsToSameColor = (color: string) => ({
 
 export class CardDragStore {
     public cardDragged: PlayerCard | null = null;
+    public minionPlayHintCardId: string | null = null;
 
     constructor(protected gameStore: GameStore) {
         makeAutoObservable(this);
     }
 
+    get isShowingMinionPlayHint(): boolean {
+        return this.minionPlayHintCardId !== null;
+    }
+
+    showMinionPlayHint(cardId: string) {
+        this.minionPlayHintCardId = cardId;
+        this.gameStore.targetSelectionStore.disarm();
+    }
+
+    clearMinionPlayHint() {
+        this.minionPlayHintCardId = null;
+    }
+
     setCardDragged(card: PlayerCard | null) {
+        if (card !== null) {
+            this.gameStore.targetSelectionStore.disarm();
+            this.clearMinionPlayHint();
+        }
+
         this.cardDragged = card;
     }
 

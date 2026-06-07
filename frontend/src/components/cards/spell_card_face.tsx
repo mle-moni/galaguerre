@@ -24,6 +24,8 @@ export const SpellCardFace = ({
 }: SpellCardFaceProps) => {
     const content = (
         <div
+            data-playing-card
+            data-playing-card-id={card.uuid}
             style={style}
             className={clsx("relative w-[120px] h-[150px] rounded bg-[#4a1e5f]", className)}
             onClick={onClick}

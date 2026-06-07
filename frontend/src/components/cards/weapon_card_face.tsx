@@ -22,6 +22,8 @@ export const WeaponCardFace = ({
 }: WeaponCardFaceProps) => {
     const content = (
         <div
+            data-playing-card
+            data-playing-card-id={card.uuid}
             style={style}
             className={clsx("relative w-[120px] h-[150px] rounded bg-[#5f3a1e]", className)}
             onClick={onClick}

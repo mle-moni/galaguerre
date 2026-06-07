@@ -22,6 +22,7 @@ interface MinionCardFaceProps {
     draggable?: boolean;
     onDragStart?: () => void;
     onDragEnd?: () => void;
+    onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
 }
@@ -37,6 +38,7 @@ export const MinionCardFace = ({
     draggable,
     onDragStart,
     onDragEnd,
+    onClick,
     onPointerDown,
     wrapper = (content) => content,
 }: MinionCardFaceProps) => {
@@ -52,6 +54,8 @@ export const MinionCardFace = ({
 
     const content = (
         <div
+            data-playing-card
+            data-playing-card-id={card.uuid}
             style={style}
             className={clsx(
                 "minion-card-face relative w-[120px] h-[150px] rounded bg-[#1e3a5f]",
@@ -60,6 +64,7 @@ export const MinionCardFace = ({
             )}
             title={statusLabel}
             draggable={draggable}
+            onClick={onClick}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             onPointerDown={onPointerDown}

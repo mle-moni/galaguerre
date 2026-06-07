@@ -41,6 +41,11 @@ export const cancelArrowTargeting = (store: GameStore) => {
         return;
     }
 
+    if (store.targetSelectionStore.isArmed) {
+        store.targetSelectionStore.disarm();
+        return;
+    }
+
     if (store.minionDragStore.isAttacking) {
         store.minionDragStore.cancelAttack();
         return;
@@ -48,6 +53,11 @@ export const cancelArrowTargeting = (store: GameStore) => {
 
     if (store.weaponDragStore.isAttacking) {
         store.weaponDragStore.cancelAttack();
+        return;
+    }
+
+    if (store.cardDragStore.isShowingMinionPlayHint) {
+        store.cardDragStore.clearMinionPlayHint();
     }
 };
 

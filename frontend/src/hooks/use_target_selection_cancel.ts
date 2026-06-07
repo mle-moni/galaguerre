@@ -3,13 +3,15 @@ import { cancelArrowTargeting } from "~/helpers/arrow_target_validity";
 import type { GameStore } from "~/stores/GameStore";
 
 export const useTargetSelectionCancel = (store: GameStore) => {
-    const isArrowTargetingActive =
+    const isCancelable =
+        store.targetSelectionStore.isArmed ||
         store.targetSelectionStore.isSelectingTarget ||
+        store.cardDragStore.isShowingMinionPlayHint ||
         store.minionDragStore.isAttacking ||
         store.weaponDragStore.isAttacking;
 
     useEffect(() => {
-        if (!isArrowTargetingActive) return;
+        if (!isCancelable) return;
 
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key !== "Escape") return;
@@ -22,5 +24,5 @@ export const useTargetSelectionCancel = (store: GameStore) => {
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [isArrowTargetingActive, store]);
+    }, [isCancelable, store]);
 };

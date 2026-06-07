@@ -1,0 +1,6 @@
+.playing-card--armed {
+	box-shadow:
+		0 0 0 3px #facc15,
+		0 0 18px rgba(250, 204, 21, 0.55);
+	z-index: 10;
+}

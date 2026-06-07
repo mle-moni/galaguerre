@@ -68,18 +68,19 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
         .filter((description): description is string => description !== null);
 };
 
+const formatEffectLine = (effect: string): string => {
+    const description = EFFECT_DESCRIPTIONS[effect] ?? effect;
+    return `${effect} : ${description}`;
+};
+
 export const getWeaponCardDescription = (
     damage: number,
     durability: number,
     deathrattleLines: string[] = [],
 ): string => {
-    const parts: string[] = [`Arme ${damage}/${durability}.`];
+    const parts: string[] = [`Arme ${damage}/${durability}.`, ...deathrattleLines];
 
-    if (deathrattleLines.length > 0) {
-        parts.push(deathrattleLines.join(" "));
-    }
-
-    return parts.join(" ");
+    return parts.join("\n");
 };
 
 export const getMinionCardDescription = (
@@ -90,25 +91,13 @@ export const getMinionCardDescription = (
     deathrattleLines: string[] = [],
     passiveLines: string[] = [],
 ): string => {
-    const base = `Serviteur ${attack}/${health}.`;
-    const parts: string[] = [base];
+    const parts: string[] = [
+        `Serviteur ${attack}/${health}.`,
+        ...effects.map(formatEffectLine),
+        ...passiveLines,
+        ...battlecryLines,
+        ...deathrattleLines,
+    ];
 
-    if (effects.length > 0) {
-        const details = effects.map((effect) => EFFECT_DESCRIPTIONS[effect] ?? effect).join(" ");
-        parts.push(details);
-    }
-
-    if (passiveLines.length > 0) {
-        parts.push(passiveLines.join(" "));
-    }
-
-    if (battlecryLines.length > 0) {
-        parts.push(battlecryLines.join(" "));
-    }
-
-    if (deathrattleLines.length > 0) {
-        parts.push(deathrattleLines.join(" "));
-    }
-
-    return parts.join(" ");
+    return parts.join("\n");
 };

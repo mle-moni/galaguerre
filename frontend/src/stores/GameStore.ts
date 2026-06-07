@@ -92,6 +92,10 @@ export class GameStore {
     }
 
     handleDrop(spotId: MinionSpotId | null, spotOwner: SpotOwner) {
+        if (this.targetSelectionStore.tryConfirmArmedTarget({ spotId, owner: spotOwner })) {
+            return;
+        }
+
         if (this.targetSelectionStore.isSelectingTarget) {
             return this.targetSelectionStore.confirmTarget({ spotId, owner: spotOwner });
         }
@@ -102,7 +106,7 @@ export class GameStore {
     }
 
     getMinionSpotBackgroundColor(spotId: MinionSpotId, spotOwner: SpotOwner) {
-        if (this.targetSelectionStore.isSelectingTarget) {
+        if (this.targetSelectionStore.isHighlightingTargets) {
             return this.targetSelectionStore.getMinionSpotBorderColor(
                 spotId,
                 spotOwner === "OPPONENT",
