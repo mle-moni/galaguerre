@@ -10,13 +10,21 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
         case "DAMAGE":
             if (action.damage === null || action.damage <= 0) return false;
             if (action.target !== null) {
-                return action.target.type === "HERO" || action.target.type === "MINION";
+                return (
+                    action.target.type === "HERO" ||
+                    action.target.type === "MINION" ||
+                    action.target.type === "ALL"
+                );
             }
             return true;
         case "HEAL":
             if (action.heal === null || action.heal <= 0) return false;
             if (action.target !== null) {
-                return action.target.type === "HERO" || action.target.type === "MINION";
+                return (
+                    action.target.type === "HERO" ||
+                    action.target.type === "MINION" ||
+                    action.target.type === "ALL"
+                );
             }
             return true;
         case "DRAW":
@@ -26,7 +34,11 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
         case "BOOST":
             if (!action.boost || !hasBoostEffect(action.boost)) return false;
             if (action.target !== null) {
-                return action.target.type === "HERO" || action.target.type === "MINION";
+                return (
+                    action.target.type === "HERO" ||
+                    action.target.type === "MINION" ||
+                    action.target.type === "ALL"
+                );
             }
             return false;
         default:

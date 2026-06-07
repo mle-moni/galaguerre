@@ -8,6 +8,7 @@ import {
 } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
+    createAllTargetSnapshot,
     createCardActionSnapshot,
     createGameData,
     createHeroTargetSnapshot,
@@ -351,6 +352,69 @@ test.group("game:deathrattle", (group) => {
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", null);
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", null);
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", { health: 1 });
+    });
+
+    test("ALL DAMAGE deathrattle (Abomination) damages all characters", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 5,
+            health: 5,
+        });
+        const abominationCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 4,
+            health: 4,
+            hasTaunt: true,
+            deathrattleActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    target: createAllTargetSnapshot("ALL"),
+                }),
+            ],
+        });
+        const allyMinion = createMinionCard({ uuid: "ally-minion", attack: 1, health: 3 });
+        const enemyMinion = createMinionCard({ uuid: "enemy-minion", attack: 1, health: 3 });
+
+        const result = await runMinionAction({
+            data: createGameData({
+                playerOne: {
+                    board: {
+                        ...placeMinion(
+                            createGameData().playerOne.board,
+                            "SPOT_1",
+                            createMinionState(attackerCard),
+                        ),
+                        SPOT_2: createMinionState(allyMinion),
+                    },
+                },
+                playerTwo: {
+                    board: {
+                        ...placeMinion(
+                            createGameData().playerTwo.board,
+                            "SPOT_1",
+                            createMinionState(abominationCard),
+                        ),
+                        SPOT_2: createMinionState(enemyMinion),
+                    },
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                minionId: MINION_IDS.attacker,
+                spotId: "SPOT_1",
+                owner: "OPPONENT",
+            },
+            expect: { error: null },
+        });
+
+        assertMinionActionScenario(assert, result, { error: null });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
+        assertPlayerHealth(assert, result.game, "playerOne", 13);
+        assertPlayerHealth(assert, result.game, "playerTwo", 13);
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", null);
+        assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { health: 1 });
+        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 1 });
     });
 
     test("HERO DAMAGE deathrattle with ALL damages both heroes", async ({ assert }) => {
