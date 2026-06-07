@@ -1,7 +1,10 @@
 import type { GamePlayer, MinionSpotId } from "#api_types/game.types";
 import type Game from "#models/game";
 import { recordMinionDeath } from "../game_log/record_game_log.js";
-import { revertPassiveAurasForSource } from "../passive_engine/passive_aura.js";
+import {
+    removeMinionFromAuraTracking,
+    revertPassiveAurasForSource,
+} from "../passive_engine/passive_aura.js";
 import { executeDeathrattles } from "./execute_deathrattles.js";
 
 const isGameOver = (game: Game): boolean => {
@@ -23,6 +26,7 @@ export const killMinion = (
 
     const card = minion.originalCard;
     revertPassiveAurasForSource(game, owner, minion);
+    removeMinionFromAuraTracking(game, minion);
     owner.board[spotId] = null;
 
     recordMinionDeath(game, owner, card);

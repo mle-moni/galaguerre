@@ -137,13 +137,17 @@ const getBoardOwnerForMinion = (game: Game, minion: MinionState): GamePlayer | n
     return null;
 };
 
-const trackAuraTarget = (sourceMinion: MinionState, appliedTarget: AuraAppliedTarget): void => {
+const trackAuraTarget = (
+    sourceMinion: MinionState,
+    minion: MinionState,
+    appliedTarget: Omit<AuraAppliedTarget, "minionUuid">,
+): void => {
     sourceMinion.auraAppliedTo ??= [];
     const alreadyTracked = sourceMinion.auraAppliedTo.some(
-        (entry) => entry.owner === appliedTarget.owner && entry.spotId === appliedTarget.spotId,
+        (entry) => entry.minionUuid === minion.uuid,
     );
     if (!alreadyTracked) {
-        sourceMinion.auraAppliedTo.push(appliedTarget);
+        sourceMinion.auraAppliedTo.push({ ...appliedTarget, minionUuid: minion.uuid });
     }
 };
 
@@ -177,7 +181,7 @@ const applyPassiveBoostAura = (
 
                 applyAuraBoostToMinion(minion, passiveBoost);
                 recalculateMinionKeywords(game, minion);
-                trackAuraTarget(sourceMinion, {
+                trackAuraTarget(sourceMinion, minion, {
                     owner: getSpotOwner(game, boardOwner),
                     spotId,
                 });
@@ -198,7 +202,7 @@ const applyPassiveBoostAura = (
 
                 applyAuraBoostToMinion(minion, passiveBoost);
                 recalculateMinionKeywords(game, minion);
-                trackAuraTarget(sourceMinion, {
+                trackAuraTarget(sourceMinion, minion, {
                     owner: getSpotOwner(game, boardOwner),
                     spotId,
                 });
@@ -268,12 +272,25 @@ export const applyExistingAurasToMinion = (
 
                     applyAuraBoostToMinion(minion, passiveBoost);
                     recalculateMinionKeywords(game, minion);
-                    trackAuraTarget(sourceMinion, {
+                    trackAuraTarget(sourceMinion, minion, {
                         owner: getSpotOwner(game, targetOwner),
                         spotId: targetSpotId,
                     });
                 }
             }
+        }
+    }
+};
+
+export const removeMinionFromAuraTracking = (game: Game, targetMinion: MinionState): void => {
+    for (const boardOwner of [game.data.playerOne, game.data.playerTwo]) {
+        for (const spotId of MINION_SPOT_IDS) {
+            const sourceMinion = boardOwner.board[spotId];
+            if (!sourceMinion?.auraAppliedTo) continue;
+
+            sourceMinion.auraAppliedTo = sourceMinion.auraAppliedTo.filter(
+                (entry) => entry.minionUuid !== targetMinion.uuid,
+            );
         }
     }
 };
@@ -289,13 +306,18 @@ export const revertPassiveAurasForSource = (
     for (const appliedTarget of sourceMinion.auraAppliedTo ?? []) {
         const targetOwner = getPlayerFromSpotOwner(game, appliedTarget.owner);
         const targetMinion = targetOwner.board[appliedTarget.spotId];
-        if (!targetMinion) continue;
+        if (!targetMinion || targetMinion.uuid !== appliedTarget.minionUuid) continue;
+
+        const isOpponent = targetOwner !== sourceOwner;
 
         for (const passiveBoost of passiveBoosts) {
-            if (passiveBoost.target?.type === "MINION") {
-                revertBoostFromMinion(targetMinion, passiveBoost.boost);
-                recalculateMinionKeywords(game, targetMinion);
-            }
+            const { boost, target } = passiveBoost;
+            if (!target || (target.type !== "MINION" && target.type !== "ALL")) continue;
+            if (shouldExcludeSourceMinion(target, sourceMinion, targetMinion)) continue;
+            if (!minionMatchesTarget(targetMinion, target, isOpponent)) continue;
+
+            revertBoostFromMinion(targetMinion, boost);
+            recalculateMinionKeywords(game, targetMinion);
         }
     }
 

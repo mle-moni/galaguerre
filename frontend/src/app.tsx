@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./style/app.css";
+import "./style/card_sizing.css";
 import "./style/design_tokens.css";
 
 import { MantineProvider } from "@mantine/core";

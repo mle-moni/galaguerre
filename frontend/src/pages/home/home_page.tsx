@@ -16,9 +16,9 @@ export const HomePage = observer(() => {
 
     return (
         <AppLayout>
-            <div className="flex flex-col items-center justify-center min-h-[70vh] gap-8">
-                <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gg-navy m-0">
+            <div className="flex flex-col items-center py-6 pb-8 sm:py-0 sm:pb-0 gap-6 sm:gap-8 w-full sm:min-h-[calc(100dvh-3.5rem)] sm:justify-center">
+                <div className="text-center px-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gg-navy m-0">
                         Bienvenue, {user.pseudo ?? user.email.split("@")[0]}
                     </h1>
                     <p className="text-gg-navy/60 text-sm mt-1 mb-0">
@@ -26,7 +26,7 @@ export const HomePage = observer(() => {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap gap-6 justify-center">
+                <div className="flex flex-wrap gap-4 sm:gap-6 justify-center w-full px-2">
                     <Link to={playTarget} className="gg-mode-tile">
                         <span className="gg-mode-tile__icon">⚔️</span>
                         <h2 className="gg-mode-tile__title">Jouer</h2>

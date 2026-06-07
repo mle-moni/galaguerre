@@ -1,6 +1,6 @@
 import type { ApiCatalogCard, ApiDeckCardEntry } from "#api_types/deck.types";
-import { Button, NumberInput, Select, TextInput } from "@mantine/core";
-import { IconMinus, IconPlus } from "@tabler/icons-react";
+import { Button, Collapse, NumberInput, Select, Tabs, TextInput } from "@mantine/core";
+import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -11,6 +11,7 @@ import { CenteredLoader } from "~/components/centered_loader";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
+import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
 
@@ -56,6 +57,7 @@ export const DeckBuilderPage = observer(() => {
     const cardsQuery = useCardsQuery();
     const cardSetsQuery = useCardSetsQuery();
     const updateMutation = useUpdateDeckMutation();
+    const isNarrowScreen = useIsNarrowScreen();
 
     const [deckName, setDeckName] = useState<string | null>(null);
     const [composition, setComposition] = useState<Map<number, number> | null>(null);
@@ -63,6 +65,7 @@ export const DeckBuilderPage = observer(() => {
     const [typeFilter, setTypeFilter] = useState<CardTypeFilter>("ALL");
     const [costFilter, setCostFilter] = useState<string | null>(null);
     const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
+    const [showManaCurve, setShowManaCurve] = useState(false);
 
     const catalog = cardsQuery.data ?? [];
     const cardSets = cardSetsQuery.data ?? [];
@@ -161,10 +164,175 @@ export const DeckBuilderPage = observer(() => {
         label: set.name,
     }));
 
+    const catalogPanel = (
+        <div className="lg:col-span-2 gg-panel flex flex-col flex-1 min-h-0 lg:h-full overflow-hidden">
+            <div className="gg-panel-header shrink-0">Catalogue</div>
+            <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="flex flex-wrap gap-3 items-end mb-4 shrink-0">
+                    <Select
+                        label="Set de cartes"
+                        value={selectedSetId ?? ""}
+                        onChange={(value) => setSelectedSetId(value || null)}
+                        data={cardSetOptions}
+                        className="w-full sm:w-[180px]"
+                        styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
+                        disabled={cardSetOptions.length === 0}
+                    />
+                    <TextInput
+                        placeholder="Rechercher une carte..."
+                        value={search}
+                        onChange={(e) => setSearch(e.currentTarget.value)}
+                        className="w-full sm:flex-1 sm:min-w-[180px]"
+                    />
+                    <Select
+                        value={typeFilter}
+                        onChange={(v) => setTypeFilter((v as CardTypeFilter) ?? "ALL")}
+                        data={[
+                            { value: "ALL", label: "Tous types" },
+                            { value: "MINION", label: "Serviteurs" },
+                            { value: "SPELL", label: "Sorts" },
+                            { value: "WEAPON", label: "Armes" },
+                        ]}
+                        className="w-full sm:w-[140px]"
+                    />
+                    <Select
+                        value={costFilter ?? ""}
+                        onChange={(v) => setCostFilter(v || null)}
+                        data={costOptions}
+                        className="w-full sm:w-[140px]"
+                    />
+                </div>
+                <div className="gg-catalog-grid">
+                    {filteredCatalog.length === 0 ? (
+                        <p className="text-white/50 text-sm m-0 w-full text-center py-8">
+                            Aucune carte ne correspond à vos filtres.
+                        </p>
+                    ) : (
+                        filteredCatalog.map((card) => (
+                            <CatalogCardItem
+                                key={card.id}
+                                card={card}
+                                count={currentComposition.get(card.id) ?? 0}
+                                canAdd={canAddCard(card.id)}
+                                onAdd={() => addCard(card.id)}
+                            />
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    const compositionPanel = (
+        <div className="gg-panel flex flex-col flex-1 min-h-0 lg:h-full overflow-hidden">
+            <div className="gg-panel-header shrink-0 flex justify-between items-center">
+                <span>Composition</span>
+                <span
+                    className={`text-sm font-normal ${totalCards > DECK_MAX_CARDS || totalCards < DECK_MIN_CARDS ? "text-red-400" : "text-white/70"}`}
+                >
+                    {totalCards}/{DECK_MAX_CARDS} (min. {DECK_MIN_CARDS})
+                </span>
+            </div>
+            <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="shrink-0">
+                    {isNarrowScreen ? (
+                        <>
+                            <button
+                                type="button"
+                                className="gg-mana-curve-toggle"
+                                onClick={() => setShowManaCurve((visible) => !visible)}
+                                aria-expanded={showManaCurve}
+                            >
+                                <span>Courbe de mana</span>
+                                {showManaCurve ? (
+                                    <IconChevronUp size={16} aria-hidden />
+                                ) : (
+                                    <IconChevronDown size={16} aria-hidden />
+                                )}
+                            </button>
+                            <Collapse in={showManaCurve}>
+                                <ManaCurveChart
+                                    composition={currentComposition}
+                                    catalogById={catalogById}
+                                    selectedCost={costFilter !== null ? Number(costFilter) : null}
+                                    onCostClick={handleCostClick}
+                                />
+                            </Collapse>
+                        </>
+                    ) : (
+                        <ManaCurveChart
+                            composition={currentComposition}
+                            catalogById={catalogById}
+                            selectedCost={costFilter !== null ? Number(costFilter) : null}
+                            onCostClick={handleCostClick}
+                        />
+                    )}
+                </div>
+                {compositionEntries.length === 0 ? (
+                    <p className="text-white/60 text-sm m-0">
+                        Cliquez sur des cartes du catalogue pour les ajouter.
+                    </p>
+                ) : (
+                    <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
+                        {compositionEntries.map(([cardId, count]) => {
+                            const card = catalogById.get(cardId);
+                            if (!card) return null;
+                            const isInactiveSet = !activeSetIds.has(card.cardSetId);
+                            return (
+                                <div key={cardId} className="gg-composition-row">
+                                    <div className="gg-composition-row__thumb">
+                                        <CatalogCardDisplay card={card} showDetailOnHover />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-white text-sm font-medium m-0 truncate">
+                                            {card.label}
+                                        </p>
+                                        <p className="text-white/50 text-xs m-0">
+                                            {card.cost} mana
+                                            {isInactiveSet && (
+                                                <span className="text-red-300"> — set inactif</span>
+                                            )}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            size="xs"
+                                            variant="outline"
+                                            color="gold"
+                                            onClick={() => removeCard(cardId)}
+                                        >
+                                            <IconMinus size={12} />
+                                        </Button>
+                                        <NumberInput
+                                            value={count}
+                                            readOnly
+                                            hideControls
+                                            className="w-12"
+                                            styles={{ input: { textAlign: "center" } }}
+                                        />
+                                        <Button
+                                            size="xs"
+                                            variant="outline"
+                                            color="gold"
+                                            onClick={() => addCard(cardId)}
+                                            disabled={!canAddCard(cardId)}
+                                        >
+                                            <IconPlus size={12} />
+                                        </Button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
     return (
-        <AppLayout title="Éditeur de deck" backTo="/decks" backLabel="Mes decks">
-            <div className="max-w-7xl mx-auto flex flex-col gap-4 lg:h-[calc(100dvh-10rem)]">
-                <div className="flex flex-wrap gap-3 items-end justify-between shrink-0">
+        <AppLayout title="Éditeur de deck" backTo="/decks" backLabel="Mes decks" fillViewport>
+            <div className="max-w-7xl mx-auto w-full flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end justify-between shrink-0">
                     <TextInput
                         label="Nom du deck"
                         value={currentName}
@@ -172,15 +340,20 @@ export const DeckBuilderPage = observer(() => {
                             setDeckName(e.currentTarget.value);
                             if (composition === null) setComposition(entriesToMap(deck.cards));
                         }}
-                        className="flex-1 min-w-[200px]"
+                        className="w-full sm:flex-1 sm:min-w-[200px]"
                         styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
                     />
-                    <div className="flex gap-2">
-                        <Button variant="outline" color="navy" onClick={() => navigate("/decks")}>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button
+                            variant="outline"
+                            color="navy"
+                            className="w-full sm:w-auto"
+                            onClick={() => navigate("/decks")}
+                        >
                             Retour
                         </Button>
                         <Button
-                            className="gg-btn-primary"
+                            className="gg-btn-primary w-full sm:w-auto"
                             loading={updateMutation.isPending}
                             onClick={handleSave}
                         >
@@ -189,148 +362,37 @@ export const DeckBuilderPage = observer(() => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch min-h-0 lg:flex-1">
-                    <div className="lg:col-span-2 gg-panel flex flex-col min-h-0 lg:h-full lg:overflow-hidden">
-                        <div className="gg-panel-header">Catalogue</div>
-                        <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
-                            <div className="flex flex-wrap gap-3 items-end mb-4 shrink-0">
-                                <Select
-                                    label="Set de cartes"
-                                    value={selectedSetId ?? ""}
-                                    onChange={(value) => setSelectedSetId(value || null)}
-                                    data={cardSetOptions}
-                                    className="w-[180px]"
-                                    styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
-                                    disabled={cardSetOptions.length === 0}
-                                />
-                                <TextInput
-                                    placeholder="Rechercher une carte..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.currentTarget.value)}
-                                    className="flex-1 min-w-[180px]"
-                                />
-                                <Select
-                                    value={typeFilter}
-                                    onChange={(v) => setTypeFilter((v as CardTypeFilter) ?? "ALL")}
-                                    data={[
-                                        { value: "ALL", label: "Tous types" },
-                                        { value: "MINION", label: "Serviteurs" },
-                                        { value: "SPELL", label: "Sorts" },
-                                        { value: "WEAPON", label: "Armes" },
-                                    ]}
-                                    className="w-[140px]"
-                                />
-                                <Select
-                                    value={costFilter ?? ""}
-                                    onChange={(v) => setCostFilter(v || null)}
-                                    data={costOptions}
-                                    className="w-[140px]"
-                                />
-                            </div>
-                            <div className="gg-catalog-grid">
-                                {filteredCatalog.length === 0 ? (
-                                    <p className="text-white/50 text-sm m-0 w-full text-center py-8">
-                                        Aucune carte ne correspond à vos filtres.
-                                    </p>
-                                ) : (
-                                    filteredCatalog.map((card) => (
-                                        <CatalogCardItem
-                                            key={card.id}
-                                            card={card}
-                                            count={currentComposition.get(card.id) ?? 0}
-                                            canAdd={canAddCard(card.id)}
-                                            onAdd={() => addCard(card.id)}
-                                        />
-                                    ))
-                                )}
-                            </div>
-                        </div>
+                {isNarrowScreen ? (
+                    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+                        <Tabs
+                            defaultValue="catalog"
+                            variant="pills"
+                            color="navy"
+                            classNames={{
+                                root: "gg-deck-builder-tabs",
+                                panel: "gg-deck-builder-tabs__panel",
+                            }}
+                        >
+                            <Tabs.List grow>
+                                <Tabs.Tab value="catalog">Catalogue</Tabs.Tab>
+                                <Tabs.Tab value="composition">
+                                    Composition ({totalCards}/{DECK_MAX_CARDS})
+                                </Tabs.Tab>
+                            </Tabs.List>
+                            <Tabs.Panel value="catalog" pt="sm">
+                                {catalogPanel}
+                            </Tabs.Panel>
+                            <Tabs.Panel value="composition" pt="sm">
+                                {compositionPanel}
+                            </Tabs.Panel>
+                        </Tabs>
                     </div>
-
-                    <div className="gg-panel flex flex-col min-h-0 lg:h-full lg:overflow-hidden">
-                        <div className="gg-panel-header flex justify-between items-center">
-                            <span>Composition</span>
-                            <span
-                                className={`text-sm font-normal ${totalCards > DECK_MAX_CARDS || totalCards < DECK_MIN_CARDS ? "text-red-400" : "text-white/70"}`}
-                            >
-                                {totalCards}/{DECK_MAX_CARDS} (min. {DECK_MIN_CARDS})
-                            </span>
-                        </div>
-                        <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
-                            <div className="shrink-0">
-                                <ManaCurveChart
-                                    composition={currentComposition}
-                                    catalogById={catalogById}
-                                    selectedCost={costFilter !== null ? Number(costFilter) : null}
-                                    onCostClick={handleCostClick}
-                                />
-                            </div>
-                            {compositionEntries.length === 0 ? (
-                                <p className="text-white/60 text-sm m-0">
-                                    Cliquez sur des cartes du catalogue pour les ajouter.
-                                </p>
-                            ) : (
-                                <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
-                                    {compositionEntries.map(([cardId, count]) => {
-                                        const card = catalogById.get(cardId);
-                                        if (!card) return null;
-                                        const isInactiveSet = !activeSetIds.has(card.cardSetId);
-                                        return (
-                                            <div key={cardId} className="gg-composition-row">
-                                                <div className="gg-composition-row__thumb">
-                                                    <CatalogCardDisplay
-                                                        card={card}
-                                                        showDetailOnHover
-                                                    />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-white text-sm font-medium m-0 truncate">
-                                                        {card.label}
-                                                    </p>
-                                                    <p className="text-white/50 text-xs m-0">
-                                                        {card.cost} mana
-                                                        {isInactiveSet && (
-                                                            <span className="text-red-300">
-                                                                {" "}
-                                                                — set inactif
-                                                            </span>
-                                                        )}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <Button
-                                                        size="xs"
-                                                        variant="outline"
-                                                        color="gold"
-                                                        onClick={() => removeCard(cardId)}
-                                                    >
-                                                        <IconMinus size={12} />
-                                                    </Button>
-                                                    <NumberInput
-                                                        value={count}
-                                                        readOnly
-                                                        hideControls
-                                                        className="w-12"
-                                                        styles={{ input: { textAlign: "center" } }}
-                                                    />
-                                                    <Button
-                                                        size="xs"
-                                                        variant="outline"
-                                                        color="gold"
-                                                        onClick={() => addCard(cardId)}
-                                                        disabled={!canAddCard(cardId)}
-                                                    >
-                                                        <IconPlus size={12} />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch flex-1 min-h-0 overflow-hidden">
+                        {catalogPanel}
+                        {compositionPanel}
                     </div>
-                </div>
+                )}
             </div>
         </AppLayout>
     );

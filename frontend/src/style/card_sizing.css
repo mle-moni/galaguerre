@@ -1,0 +1,49 @@
+:root {
+    --card-w: 120px;
+    --card-h: 150px;
+    --stat-badge: 25px;
+}
+
+@media (max-width: 639px) {
+    :root {
+        --card-w: clamp(64px, 19vw, 80px);
+        --card-h: calc(var(--card-w) * 1.25);
+        --stat-badge: clamp(15px, 4vw, 18px);
+    }
+}
+
+.playing-card-face {
+    width: var(--card-w);
+    height: var(--card-h);
+    touch-action: manipulation;
+}
+
+.playing-card-face__image-area {
+    height: calc(var(--card-h) * 0.5);
+}
+
+.playing-card-face__body {
+    height: calc(var(--card-h) * 0.5);
+}
+
+.card-detail-info-button {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 2;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    padding: 0;
+}

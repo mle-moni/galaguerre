@@ -116,6 +116,62 @@ test.group("passive BOOST auras", () => {
         assert.equal(game.data.playerOne.board.SPOT_1!.maxHealth, 3);
     });
 
+    test("tagged aura does not revert from a different minion at the same spot", ({ assert }) => {
+        const MURLOC_TAG = 42;
+        const murloc = createMinionCard({
+            uuid: "murloc-minion",
+            attack: 1,
+            health: 1,
+            tagIds: [MURLOC_TAG],
+        });
+        const stormwindKnight = createMinionCard({
+            uuid: "stormwind-knight",
+            attack: 2,
+            health: 5,
+        });
+        const warleader = createMinionCard({
+            uuid: "warleader",
+            passives: [
+                createPassiveSnapshot({
+                    type: "BOOST",
+                    triggersOn: null,
+                    action: null,
+                    passiveBoost: {
+                        boost: createBoostSnapshot({ attack: 2 }),
+                        target: createMinionTargetSnapshot("PLAYER", {
+                            tagId: MURLOC_TAG,
+                            excludeSelf: true,
+                        }),
+                    },
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(
+                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(murloc)),
+                    "SPOT_3",
+                    createMinionState(warleader),
+                ),
+            },
+        });
+
+        const game = createGame(data);
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_3");
+
+        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
+
+        killMinion(game, game.data.playerOne, "SPOT_1");
+
+        game.data.playerOne.board.SPOT_1 = createMinionState(stormwindKnight);
+
+        killMinion(game, game.data.playerOne, "SPOT_3");
+
+        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 2);
+        assert.equal(game.data.playerOne.board.SPOT_1!.health, 5);
+    });
+
     test("aura stats are reverted when source minion dies", ({ assert }) => {
         const ally = createMinionCard({ uuid: "ally-minion", attack: 2, health: 2 });
         const auraSource = createMinionCard({

@@ -39,6 +39,13 @@ const Game = ({ gameId, user }: GameProps) => {
 export const PlayPage = () => {
     const user = useUser();
 
+    useEffect(() => {
+        document.documentElement.classList.add("play-page-active");
+        return () => {
+            document.documentElement.classList.remove("play-page-active");
+        };
+    }, []);
+
     if (!user) return <Navigate to="/login" />;
     if (!user.currentGameId) return <Navigate to="/matchmaking" />;
 

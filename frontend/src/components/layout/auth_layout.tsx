@@ -12,7 +12,7 @@ export const AuthLayout = ({ title, subtitle, children, footer }: AuthLayoutProp
         <div className="gg-page-bg flex items-center justify-center min-h-screen p-4">
             <div className="gg-panel w-full max-w-md">
                 <div className="text-center pt-8 pb-2 px-6">
-                    <h1 className="text-3xl font-bold text-gg-gold m-0">Galaguerre</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gg-gold m-0">Galaguerre</h1>
                     <p className="text-white/70 text-sm mt-1 mb-0">Jeu de cartes stratégique</p>
                 </div>
                 <div className="gg-panel-body">

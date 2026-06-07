@@ -2,7 +2,7 @@ import type { ApiCatalogCard } from "#api_types/deck.types";
 import type { MinionCard, PlayerCard, SpellCard, WeaponCard } from "#api_types/game.types";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
-import { CardDetailPopover } from "./card_detail_popover.jsx";
+import { CardDetailAdaptive } from "./card_detail_adaptive.jsx";
 import { MinionCardFace } from "./minion_card_face.jsx";
 import { SpellCardFace } from "./spell_card_face.jsx";
 import { WeaponCardFace } from "./weapon_card_face.jsx";
@@ -55,7 +55,7 @@ export const CatalogCardDisplay = ({
 
         if (!showDetailOnHover) return inner;
 
-        return <CardDetailPopover card={playerCard}>{inner}</CardDetailPopover>;
+        return <CardDetailAdaptive card={playerCard}>{inner}</CardDetailAdaptive>;
     };
 
     if (card.type === "WEAPON") {

@@ -94,7 +94,7 @@ export const TrainingPage = observer(() => {
                         )}
 
                         <Button
-                            className="gg-btn-primary"
+                            className="gg-btn-primary w-full sm:w-auto"
                             size="md"
                             disabled={!canStart}
                             loading={startMutation.isPending}

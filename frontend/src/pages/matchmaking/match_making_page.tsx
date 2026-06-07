@@ -96,7 +96,7 @@ export const MatchmakingPage = observer(() => {
 
                         {!searchingMatch ? (
                             <Button
-                                className="gg-btn-primary"
+                                className="gg-btn-primary w-full sm:w-auto"
                                 size="md"
                                 disabled={!canSearch}
                                 loading={searchMutation.isPending}

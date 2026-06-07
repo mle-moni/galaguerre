@@ -3,8 +3,8 @@
     --gg-bg-end: #b87333;
     --gg-navy: #1e3a5f;
     --gg-navy-light: #2a4f7a;
-    --gg-gold: #c9a227;
-    --gg-gold-hover: #dbb42e;
+    --gg-gold: #f0b840;
+    --gg-gold-hover: #f5c24a;
     --gg-spell: #4a1e5f;
     --gg-weapon: #5f3a1e;
     --gg-text-on-dark: #ffffff;
@@ -15,7 +15,7 @@
 }
 
 .gg-page-bg {
-    min-height: 100vh;
+    height: 100dvh;
     background: linear-gradient(160deg, var(--gg-bg-start) 0%, var(--gg-bg-end) 100%);
 }
 
@@ -57,7 +57,7 @@
     border-radius: 10px;
     padding: 6px;
     background: rgba(42, 79, 122, 0.35);
-    border: 1px solid rgba(201, 162, 39, 0.2);
+    border: 1px solid rgba(240, 184, 64, 0.2);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
     transition:
         transform 0.15s ease,
@@ -72,7 +72,7 @@
 
 .gg-catalog-card-slot--interactive:hover {
     background: rgba(42, 79, 122, 0.55);
-    border-color: rgba(201, 162, 39, 0.65);
+    border-color: rgba(240, 184, 64, 0.65);
     transform: translateY(-3px);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
@@ -118,7 +118,7 @@
 }
 
 .gg-composition-row:hover {
-    border-color: rgba(201, 162, 39, 0.25);
+    border-color: rgba(240, 184, 64, 0.25);
 }
 
 .gg-composition-row__thumb {
@@ -147,7 +147,7 @@
 }
 
 .gg-btn-secondary:hover:not(:disabled) {
-    background-color: rgba(201, 162, 39, 0.15) !important;
+    background-color: rgba(240, 184, 64, 0.15) !important;
 }
 
 .gg-mode-tile {
@@ -226,12 +226,81 @@
     color: #fff;
 }
 
+.gg-deck-builder-tabs {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.gg-deck-builder-tabs__panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.gg-deck-builder-tabs .mantine-Tabs-list {
+    flex-shrink: 0;
+    background: rgba(30, 58, 95, 0.15);
+    border: 1px solid rgba(30, 58, 95, 0.25);
+    border-radius: var(--gg-radius-sm);
+    padding: 4px;
+    gap: 4px;
+}
+
+.gg-deck-builder-tabs .mantine-Tabs-tab {
+    color: var(--gg-navy);
+    font-weight: 600;
+    border: none;
+}
+
+.gg-deck-builder-tabs .mantine-Tabs-tab:not([data-active]) {
+    opacity: 0.7;
+}
+
+.gg-deck-builder-tabs .mantine-Tabs-tab:not([data-active]):hover {
+    background: rgba(30, 58, 95, 0.1);
+    opacity: 1;
+}
+
+.gg-deck-builder-tabs .mantine-Tabs-tab[data-active] {
+    color: var(--gg-text-on-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
 .gg-mana-curve {
     padding: 0.75rem;
     border-radius: var(--gg-radius-sm);
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.06);
     margin-bottom: 1rem;
+}
+
+.gg-mana-curve-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--gg-radius-sm);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.gg-mana-curve-toggle:hover {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(240, 184, 64, 0.25);
 }
 
 .gg-mana-curve--empty {
@@ -247,7 +316,7 @@
     overflow-x: auto;
     padding-bottom: 0.25rem;
     scrollbar-width: thin;
-    scrollbar-color: rgba(201, 162, 39, 0.4) transparent;
+    scrollbar-color: rgba(240, 184, 64, 0.4) transparent;
 }
 
 .gg-mana-curve__column {
@@ -267,12 +336,12 @@
 }
 
 .gg-mana-curve__column:hover {
-    background: rgba(201, 162, 39, 0.08);
-    border-color: rgba(201, 162, 39, 0.25);
+    background: rgba(240, 184, 64, 0.08);
+    border-color: rgba(240, 184, 64, 0.25);
 }
 
 .gg-mana-curve__column--active {
-    background: rgba(201, 162, 39, 0.12);
+    background: rgba(240, 184, 64, 0.12);
     border-color: var(--gg-gold);
 }
 
@@ -381,4 +450,39 @@
 
 .gg-mana-curve__legend-dot--weapon {
     background-color: #c4783a;
+}
+
+@media (max-width: 639px) {
+    .gg-panel-header {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .gg-panel-body {
+        padding: 1rem;
+    }
+
+    .gg-mode-tile {
+        width: 100%;
+        padding: 1.5rem 1.25rem;
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    .gg-mode-tile__icon {
+        font-size: 2.25rem;
+    }
+
+    .gg-mode-tile__title {
+        font-size: 1.25rem;
+    }
+
+    .gg-deck-card-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .gg-composition-row__thumb {
+        margin-right: -1rem;
+    }
 }

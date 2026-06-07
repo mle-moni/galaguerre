@@ -99,6 +99,7 @@ export interface PassiveSnapshot {
 export interface AuraAppliedTarget {
     owner: SpotOwner;
     spotId: MinionSpotId;
+    minionUuid: string;
 }
 
 export type MinionCard = PlayerCardBase & {

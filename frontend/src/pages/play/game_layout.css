@@ -1,9 +1,6 @@
 :root {
-	--card-w: 120px;
-	--card-h: 150px;
 	--spot-w: 126px;
 	--spot-h: 156px;
-	--stat-badge: 25px;
 	--hand-gap: 20px;
 	--hand-height: 170px;
 }
@@ -31,20 +28,6 @@
 	height: var(--stat-badge);
 	font-size: calc(var(--stat-badge) * 0.5);
 	border-width: 1px;
-}
-
-.playing-card-face {
-	width: var(--card-w);
-	height: var(--card-h);
-	touch-action: manipulation;
-}
-
-.playing-card-face__image-area {
-	height: calc(var(--card-h) * 0.5);
-}
-
-.playing-card-face__body {
-	height: calc(var(--card-h) * 0.5);
 }
 
 .minion-spot {

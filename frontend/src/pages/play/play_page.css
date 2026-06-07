@@ -1,5 +1,5 @@
-body,
-html {
+html.play-page-active,
+html.play-page-active body {
 	overflow: hidden;
 }
 

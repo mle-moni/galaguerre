@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
+import { ResponsiveTable } from "~/components/responsive_table";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { useGameHistoryListQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
@@ -63,7 +64,7 @@ const GameHistoryRow = ({
             <ResultBadge result={entry.result} />
         </Table.Td>
         <Table.Td>{formatEloDelta(entry.eloDelta)}</Table.Td>
-        <Table.Td>{entry.roundCount}</Table.Td>
+        <Table.Td className="hidden sm:table-cell">{entry.roundCount}</Table.Td>
     </Table.Tr>
 );
 
@@ -106,7 +107,7 @@ export const GameHistoryListPage = observer(() => {
             backLabel={isOwnHistory ? "Accueil" : "Classement"}
         >
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-2xl font-bold text-gg-navy m-0 mb-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-gg-navy m-0 mb-2">
                     Historique de{" "}
                     <PlayerNameLink
                         pseudo={user.pseudo}
@@ -125,38 +126,40 @@ export const GameHistoryListPage = observer(() => {
                     </div>
                 ) : (
                     <div className="gg-panel overflow-hidden">
-                        <Table
-                            striped
-                            stripedColor="rgba(255, 255, 255, 0.06)"
-                            highlightOnHover
-                            highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
-                            withTableBorder={false}
-                            styles={{
-                                th: { color: "rgba(255,255,255,0.7)", fontWeight: 600 },
-                                td: { color: "white" },
-                            }}
-                        >
-                            <Table.Thead>
-                                <Table.Tr>
-                                    <Table.Th>Date</Table.Th>
-                                    <Table.Th>Adversaire</Table.Th>
-                                    <Table.Th>Résultat</Table.Th>
-                                    <Table.Th>Elo</Table.Th>
-                                    <Table.Th>Tours</Table.Th>
-                                </Table.Tr>
-                            </Table.Thead>
-                            <Table.Tbody>
-                                {games.map((entry) => (
-                                    <GameHistoryRow
-                                        key={entry.gameId}
-                                        entry={entry}
-                                        onSelect={(gameId) =>
-                                            navigate(`/game-history/${userId}/${gameId}`)
-                                        }
-                                    />
-                                ))}
-                            </Table.Tbody>
-                        </Table>
+                        <ResponsiveTable minWidth={520}>
+                            <Table
+                                striped
+                                stripedColor="rgba(255, 255, 255, 0.06)"
+                                highlightOnHover
+                                highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
+                                withTableBorder={false}
+                                styles={{
+                                    th: { color: "rgba(255,255,255,0.7)", fontWeight: 600 },
+                                    td: { color: "white" },
+                                }}
+                            >
+                                <Table.Thead>
+                                    <Table.Tr>
+                                        <Table.Th>Date</Table.Th>
+                                        <Table.Th>Adversaire</Table.Th>
+                                        <Table.Th>Résultat</Table.Th>
+                                        <Table.Th>Elo</Table.Th>
+                                        <Table.Th className="hidden sm:table-cell">Tours</Table.Th>
+                                    </Table.Tr>
+                                </Table.Thead>
+                                <Table.Tbody>
+                                    {games.map((entry) => (
+                                        <GameHistoryRow
+                                            key={entry.gameId}
+                                            entry={entry}
+                                            onSelect={(gameId) =>
+                                                navigate(`/game-history/${userId}/${gameId}`)
+                                            }
+                                        />
+                                    ))}
+                                </Table.Tbody>
+                            </Table>
+                        </ResponsiveTable>
                     </div>
                 )}
 

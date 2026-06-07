@@ -75,7 +75,7 @@ export const GameHistoryDetailPage = observer(() => {
             backLabel="Historique"
         >
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-2xl font-bold text-gg-navy m-0 mb-6">
+                <h1 className="text-xl sm:text-2xl font-bold text-gg-navy m-0 mb-6">
                     Partie #{detail.gameId}
                 </h1>
 
