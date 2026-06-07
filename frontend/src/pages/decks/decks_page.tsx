@@ -85,8 +85,7 @@ export const DecksPage = observer(() => {
                                         </span>
                                     </div>
                                     <p className="text-white/60 text-sm m-0 mt-1">
-                                        {deck.cardCount} cartes ({DECK_MIN_CARDS}–{DECK_MAX_CARDS}{" "}
-                                        requis)
+                                        {deck.cardCount} cartes
                                     </p>
                                     {!deck.valid && deck.compositionErrors.length > 0 && (
                                         <p className="text-red-300 text-xs m-0 mt-1">

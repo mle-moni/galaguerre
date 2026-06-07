@@ -54,7 +54,7 @@ export const MatchmakingPage = observer(() => {
                                         Deck sélectionné : {selectedDeck.name}
                                     </Text>
                                     <Text size="sm" className="text-white/60">
-                                        {selectedDeck.cardCount}/20 cartes (15 minimum)
+                                        {selectedDeck.cardCount} cartes
                                         {!selectedDeck.valid && " — deck invalide"}
                                     </Text>
                                 </div>
