@@ -137,7 +137,9 @@ export type GameLogEntryType =
     | "FATIGUE_DAMAGE"
     | "ATTACK"
     | "BATTLECRY"
-    | "DEATHRATTLE";
+    | "DEATHRATTLE"
+    | "MINION_DEATH"
+    | "WEAPON_BREAK";
 
 export interface GameLogAttackTarget {
     type: "MINION" | "HERO";

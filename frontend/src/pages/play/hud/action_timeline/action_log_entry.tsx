@@ -98,5 +98,21 @@ export const ActionLogEntry = ({ entry, game, currentUserId, className }: Action
         );
     }
 
+    if (entry.type === "MINION_DEATH" && entry.card) {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} : <CardLink card={entry.card} spellPower={spellPower} /> est mort
+            </Text>
+        );
+    }
+
+    if (entry.type === "WEAPON_BREAK" && entry.card) {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} : <CardLink card={entry.card} spellPower={spellPower} /> se casse
+            </Text>
+        );
+    }
+
     return null;
 };

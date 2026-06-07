@@ -73,3 +73,21 @@ export const recordDeathrattle = (game: Game, player: GamePlayer, card: PlayerCa
         card: structuredClone(card),
     });
 };
+
+export const recordMinionDeath = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "MINION_DEATH",
+        card: structuredClone(card),
+    });
+};
+
+export const recordWeaponBreak = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "WEAPON_BREAK",
+        card: structuredClone(card),
+    });
+};

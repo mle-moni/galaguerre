@@ -6,6 +6,8 @@ import {
     createCardActionSnapshot,
     createHeroTargetSnapshot,
     createMinionState,
+    createWeaponCard,
+    createWeaponState,
     CARD_IDS,
     MINION_IDS,
     placeMinion,
@@ -14,6 +16,7 @@ import { createTestGame } from "#tests/helpers/game/game_factory";
 import { runPlayCard } from "#tests/helpers/game/run_play_card";
 import { runPassTurn, runSetupNextTurnOnGame } from "#tests/helpers/game/run_pass_turn";
 import { runMinionAction } from "#tests/helpers/game/run_minion_action";
+import { runWeaponAction } from "#tests/helpers/game/run_weapon_action";
 
 test.group("game action log", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
@@ -251,11 +254,97 @@ test.group("game action log", (group) => {
 
         const log = result.game.data.actionLog;
         const attackIndex = log.findIndex((e) => e.type === "ATTACK");
+        const minionDeathIndex = log.findIndex((e) => e.type === "MINION_DEATH");
         const deathrattleIndex = log.findIndex((e) => e.type === "DEATHRATTLE");
         assert.isAbove(attackIndex, -1);
+        assert.isAbove(minionDeathIndex, -1);
         assert.isAbove(deathrattleIndex, -1);
-        assert.isBelow(attackIndex, deathrattleIndex);
+        assert.isBelow(attackIndex, minionDeathIndex);
+        assert.isBelow(minionDeathIndex, deathrattleIndex);
+        assert.equal(log[minionDeathIndex]!.card?.label, "Mort-vivant");
+        assert.equal(log[minionDeathIndex]!.playerId, result.game.data.playerTwo.userId);
         assert.equal(log[deathrattleIndex]!.card?.label, "Mort-vivant");
         assert.equal(log[deathrattleIndex]!.playerId, result.game.data.playerTwo.userId);
+    });
+
+    test("records MINION_DEATH without DEATHRATTLE when a minion dies without deathrattle", async ({
+        assert,
+    }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            label: "Attaquant",
+            attack: 3,
+            health: 3,
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            label: "Cible fragile",
+            attack: 1,
+            health: 1,
+        });
+
+        const result = await runMinionAction({
+            data: createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                minionId: MINION_IDS.attacker,
+                spotId: "SPOT_1",
+                owner: "OPPONENT",
+            },
+            expect: { error: null },
+        });
+
+        const log = result.game.data.actionLog;
+        const attackIndex = log.findIndex((e) => e.type === "ATTACK");
+        const minionDeathIndex = log.findIndex((e) => e.type === "MINION_DEATH");
+        const deathrattleIndex = log.findIndex((e) => e.type === "DEATHRATTLE");
+        assert.isAbove(attackIndex, -1);
+        assert.isAbove(minionDeathIndex, -1);
+        assert.equal(deathrattleIndex, -1);
+        assert.isBelow(attackIndex, minionDeathIndex);
+        assert.equal(log[minionDeathIndex]!.card?.label, "Cible fragile");
+        assert.equal(log[minionDeathIndex]!.playerId, result.game.data.playerTwo.userId);
+    });
+
+    test("records WEAPON_BREAK when a weapon breaks at zero durability", async ({ assert }) => {
+        const weaponCard = createWeaponCard({ label: "Épée fragile", damage: 5, durability: 1 });
+
+        const result = await runWeaponAction({
+            data: createGameData({
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                spotId: null,
+                owner: "OPPONENT",
+            },
+            expect: { error: null },
+        });
+
+        const log = result.game.data.actionLog;
+        const attackIndex = log.findIndex((e) => e.type === "ATTACK");
+        const weaponBreakIndex = log.findIndex((e) => e.type === "WEAPON_BREAK");
+        assert.isAbove(attackIndex, -1);
+        assert.isAbove(weaponBreakIndex, -1);
+        assert.isBelow(attackIndex, weaponBreakIndex);
+        assert.equal(log[weaponBreakIndex]!.card?.label, "Épée fragile");
+        assert.equal(log[weaponBreakIndex]!.playerId, result.actorUserId);
     });
 });
