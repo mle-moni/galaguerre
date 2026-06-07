@@ -1,6 +1,7 @@
 import type { MinionSpotId, PlayerCard, SpotOwner } from "#api_types/game.types";
 
 import { makeAutoObservable } from "mobx";
+import { getElementCenter, getMinionSpotElement } from "~/helpers/resolve_target_from_point";
 import { notifyError } from "~/services/toasts";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
@@ -67,7 +68,12 @@ export class CardDragStore {
         return false;
     }
 
-    handleDrop(card: PlayerCard, spotId: MinionSpotId, spotOwner: SpotOwner) {
+    handleDrop(
+        card: PlayerCard,
+        spotId: MinionSpotId,
+        spotOwner: SpotOwner,
+        cursor?: { x: number; y: number },
+    ) {
         if (card.cost > this.gameStore.me.mana) {
             notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
             return;
@@ -82,6 +88,15 @@ export class CardDragStore {
 
         if (card.type === "MINION" && this.gameStore.targetSelectionStore.requiresTarget(card)) {
             this.gameStore.targetSelectionStore.startTargetSelection(card, spotId, spotOwner);
+
+            const spotElement = getMinionSpotElement(spotId, spotOwner);
+            if (spotElement) {
+                const origin = getElementCenter(spotElement);
+                requestAnimationFrame(() => {
+                    this.gameStore.targetingArrowStore.beginDrag(origin, cursor);
+                });
+            }
+
             return;
         }
 

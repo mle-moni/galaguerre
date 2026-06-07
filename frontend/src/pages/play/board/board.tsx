@@ -40,12 +40,18 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
     const verb = spotOwner === "OPPONENT" ? "opponent" : "me";
     const minionToRender = store[verb].board[spotId];
 
-    const handleDrop = () => {
-        store.handleDrop(spotId, spotOwner);
-    };
+    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+        if (store.targetSelectionStore.isSelectingTarget) return;
 
-    const handleClick = () => {
-        if (!store.targetSelectionStore.isSelectingTarget) return;
+        if (store.cardDragStore.cardDragged && spotId !== null) {
+            store.cardDragStore.handleDrop(store.cardDragStore.cardDragged, spotId, spotOwner, {
+                x: event.clientX,
+                y: event.clientY,
+            });
+            store.cardDragStore.setCardDragged(null);
+            return;
+        }
+
         store.handleDrop(spotId, spotOwner);
     };
 
@@ -62,7 +68,8 @@ const MinionSpot = observer(({ store, spotOwner, spotId }: MinionSpotProps) => {
     return (
         <div
             data-target-zone
-            onClick={handleClick}
+            data-spot-id={spotId}
+            data-spot-owner={spotOwner}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             className={clsx("minion-spot", "w-[126px] h-[156px] bg-red-100 border-dashed m-4")}

@@ -33,11 +33,6 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
         store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
     };
 
-    const handleClick = () => {
-        if (!store.targetSelectionStore.isSelectingTarget) return;
-        store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
-    };
-
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         const minion = store.minionDragStore.minionDragged;
         const isSelectingTarget = store.targetSelectionStore.isSelectingTarget;
@@ -60,11 +55,12 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
     return (
         <div
             data-target-zone
+            data-spot-id="hero"
+            data-spot-owner={isOpponent ? "OPPONENT" : "PLAYER"}
             className="border-2 border-dashed w-full mx-2"
             style={{
                 borderColor: dropZoneBorderColor,
             }}
-            onClick={handleClick}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >

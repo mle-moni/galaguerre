@@ -12,9 +12,12 @@ import {
     minionMatchesTarget,
 } from "#api_types/target_matching";
 
+import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import { makeAutoObservable } from "mobx";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
+
+export type TargetValidity = "valid" | "invalid" | "none";
 
 export type PendingPlay =
     | { kind: "MINION"; card: MinionCard; spotId: MinionSpotId; owner: SpotOwner }
@@ -46,6 +49,7 @@ export class TargetSelectionStore {
 
     cancelTargetSelection() {
         this.pendingPlay = null;
+        this.gameStore.targetingArrowStore.endDrag();
     }
 
     private getTargetedActions(): CardActionSnapshot[] {
@@ -90,6 +94,15 @@ export class TargetSelectionStore {
         return this.canSelectMinion(actionTarget.spotId, actionTarget.owner === "OPPONENT");
     }
 
+    getTargetValidityAtPoint(x: number, y: number): TargetValidity {
+        if (!this.isSelectingTarget) return "none";
+
+        const actionTarget = resolveTargetFromPoint(x, y);
+        if (!actionTarget) return "none";
+
+        return this.canSelectTarget(actionTarget) ? "valid" : "invalid";
+    }
+
     confirmTarget(actionTarget: ActionTarget) {
         if (!this.pendingPlay) return;
 
@@ -117,6 +130,7 @@ export class TargetSelectionStore {
         }
 
         this.pendingPlay = null;
+        this.gameStore.targetingArrowStore.endDrag();
     }
 
     getHeroBorderColor(isOpponent: boolean): string {

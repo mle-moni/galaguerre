@@ -6,6 +6,7 @@ import { CardDragStore } from "./CardDragStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
 import { TargetSelectionStore } from "./TargetSelectionStore.js";
+import { TargetingArrowStore } from "./TargetingArrowStore.js";
 import { WeaponDragStore } from "./WeaponDragStore.js";
 
 export class GameStore {
@@ -14,6 +15,7 @@ export class GameStore {
     weaponDragStore = new WeaponDragStore(this);
     playerInfosStore = new PlayerInfosStore(this);
     targetSelectionStore = new TargetSelectionStore(this);
+    targetingArrowStore = new TargetingArrowStore(this);
 
     private _game: ApiGame | null = null;
     private _user: ApiUser | null = null;

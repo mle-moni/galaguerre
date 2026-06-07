@@ -10,6 +10,7 @@ interface SpellCardFaceProps {
     className?: string;
     style?: CSSProperties;
     onClick?: () => void;
+    onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
 }
 
@@ -18,6 +19,7 @@ export const SpellCardFace = ({
     className,
     style,
     onClick,
+    onPointerDown,
     wrapper = (content) => content,
 }: SpellCardFaceProps) => {
     const content = (
@@ -25,6 +27,7 @@ export const SpellCardFace = ({
             style={style}
             className={clsx("relative w-[120px] h-[150px] rounded bg-[#4a1e5f]", className)}
             onClick={onClick}
+            onPointerDown={onPointerDown}
         >
             <div className="relative">
                 <div className="cost">{card.cost}</div>

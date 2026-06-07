@@ -1,8 +1,9 @@
 import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
-import { useRef } from "react";
+import { TargetingArrowOverlay } from "~/components/targeting/targeting_arrow_overlay";
 import { useGameContext } from "~/hooks/use_game_state";
+import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 
 import { Board } from "./board/board.jsx";
@@ -18,15 +19,15 @@ interface GameRendererProps {
 
 export const GameRenderer = observer<GameRendererProps>(({ game, user }) => {
     const { store } = useGameContext();
-    const gameContainerRef = useRef<HTMLDivElement>(null);
-    useTargetSelectionCancel(store, gameContainerRef);
+    useTargetSelectionCancel(store);
+    useTargetingArrow(store);
 
     const me = game.data.playerOne.userId === user.id ? game.data.playerOne : game.data.playerTwo;
     const opponent =
         game.data.playerOne.userId === user.id ? game.data.playerTwo : game.data.playerOne;
 
     return (
-        <div ref={gameContainerRef} className="h-full">
+        <div className="h-full">
             <div className="flex h-full">
                 <div className="flex justify-center w-[124px]">
                     <PlayersInfos me={me} opponent={opponent} />
@@ -42,6 +43,7 @@ export const GameRenderer = observer<GameRendererProps>(({ game, user }) => {
             <PlayerHand player={me} />
 
             <GameFinalScreen />
+            <TargetingArrowOverlay />
         </div>
     );
 });

@@ -41,7 +41,6 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
         }
 
         if (card.type === "SPELL" && store.targetSelectionStore.requiresTarget(card)) {
-            store.targetSelectionStore.startSpellTargetSelection(card);
             return;
         }
 
@@ -52,6 +51,29 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
                 owner: "PLAYER",
             });
         }
+    };
+
+    const handleTargetedSpellPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!canPlay) {
+            if (card.cost > store.me.mana) {
+                notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            }
+            return;
+        }
+
+        if (card.type !== "SPELL" || !store.targetSelectionStore.requiresTarget(card)) return;
+
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const origin = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        store.targetSelectionStore.startSpellTargetSelection(card);
+        store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
 
     if (card.type === "WEAPON") {
@@ -67,12 +89,15 @@ export const PlayingCard = observer(({ card, isOpponent, style }: CardProps) => 
     }
 
     if (card.type === "SPELL") {
+        const isTargeted = store.targetSelectionStore.requiresTarget(card);
+
         return (
             <SpellCardFace
                 card={card}
                 style={style}
                 className={cardClassName}
-                onClick={handleSpellClick}
+                onClick={isTargeted ? undefined : handleSpellClick}
+                onPointerDown={isTargeted ? handleTargetedSpellPointerDown : undefined}
                 wrapper={(content) => <CardDetailHover card={card}>{content}</CardDetailHover>}
             />
         );
