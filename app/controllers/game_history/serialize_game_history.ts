@@ -20,8 +20,13 @@ export const serializeGameHistoryUser = (user: User): ApiGameHistoryUser => ({
     losses: user.losses,
 });
 
-export const getOpponentUserId = (game: Game, userId: number): number =>
-    game.playerOneId === userId ? game.playerTwoId : game.playerOneId;
+export const getOpponentUserId = (game: Game, userId: number): number => {
+    if (game.playerOneId === userId) {
+        return game.playerTwoId ?? game.data.playerTwo.userId;
+    }
+
+    return game.playerOneId;
+};
 
 export const isGameParticipant = (game: Game, userId: number): boolean =>
     game.playerOneId === userId || game.playerTwoId === userId;

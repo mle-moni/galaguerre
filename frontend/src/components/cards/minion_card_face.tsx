@@ -9,7 +9,7 @@ import {
 } from "~/helpers/minion_combat";
 import "./card_faces.css";
 
-import { CardEffectSymbols } from "./card_effect_symbols";
+import { CardEffectSymbols } from "./card_effect_symbols.jsx";
 
 interface MinionCardFaceProps {
     card: MinionCard;

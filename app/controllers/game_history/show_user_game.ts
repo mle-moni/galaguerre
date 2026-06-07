@@ -5,6 +5,7 @@ import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
 import {
     getGameResult,
+    getOpponentUserId,
     getRatingResult,
     isGameParticipant,
     serializeGameHistoryPlayer,
@@ -35,7 +36,7 @@ export const showUserGame = async ({
         return response.notFound({ error: "Partie introuvable" }) as never;
     }
 
-    const opponentUserId = game.playerOneId === userId ? game.playerTwoId : game.playerOneId;
+    const opponentUserId = getOpponentUserId(game, userId);
     const opponentUser = await User.find(opponentUserId);
 
     return {

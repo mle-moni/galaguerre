@@ -13,9 +13,6 @@ import {
 } from "~/hooks/use_decks";
 import { useUser } from "~/hooks/use_user";
 
-const DECK_MIN_CARDS = 15;
-const DECK_MAX_CARDS = 20;
-
 export const DecksPage = observer(() => {
     const user = useUser();
     const navigate = useNavigate();

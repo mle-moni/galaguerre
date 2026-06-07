@@ -1,11 +1,11 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
-import type { PlayerCard } from "#api_types/game.types";
+import type { MinionCard, PlayerCard, SpellCard, WeaponCard } from "#api_types/game.types";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
-import { CardDetailPopover } from "./card_detail_popover";
-import { MinionCardFace } from "./minion_card_face";
-import { SpellCardFace } from "./spell_card_face";
-import { WeaponCardFace } from "./weapon_card_face";
+import { CardDetailPopover } from "./card_detail_popover.jsx";
+import { MinionCardFace } from "./minion_card_face.jsx";
+import { SpellCardFace } from "./spell_card_face.jsx";
+import { WeaponCardFace } from "./weapon_card_face.jsx";
 
 const toPlayerCard = (card: ApiCatalogCard): PlayerCard => {
     const base = {
@@ -61,7 +61,7 @@ export const CatalogCardDisplay = ({
     if (card.type === "WEAPON") {
         return (
             <WeaponCardFace
-                card={playerCard}
+                card={playerCard as WeaponCard}
                 style={style}
                 className={clsx(className, onClick && "cursor-pointer")}
                 onClick={onClick}
@@ -73,7 +73,7 @@ export const CatalogCardDisplay = ({
     if (card.type === "SPELL") {
         return (
             <SpellCardFace
-                card={playerCard}
+                card={playerCard as SpellCard}
                 style={style}
                 className={clsx(className, onClick && "cursor-pointer")}
                 onClick={onClick}
@@ -85,7 +85,7 @@ export const CatalogCardDisplay = ({
     return (
         <div onClick={onClick} className={clsx(onClick && "cursor-pointer")}>
             <MinionCardFace
-                card={playerCard}
+                card={playerCard as MinionCard}
                 attack={card.attack}
                 health={card.health}
                 style={style}

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { privateAxios, TOKEN_STORAGE_KEY } from "~/services/axios";
-import { USER_QUERY_KEY } from "./use_user";
+import { USER_QUERY_KEY } from "./use_user.js";
 
 export const useLogout = () => {
     const queryClient = useQueryClient();

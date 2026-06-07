@@ -1,7 +1,7 @@
 import type { ApiDeck, UpdateDeckPayload } from "#api_types/deck.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "~/services/axios";
-import { useUser } from "./use_user";
+import { useUser } from "./use_user.js";
 
 export const DECKS_QUERY_KEY = ["decks"];
 
