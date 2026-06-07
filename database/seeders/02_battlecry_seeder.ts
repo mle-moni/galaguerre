@@ -82,9 +82,9 @@ export default class extends BaseSeeder {
         ]);
 
         const farseerHealAction = await Action.create({
-            internalLabel: "Farseer du Cercle terrestre - 3 soins ciblés",
+            internalLabel: "Farseer du Cercle terrestre - 3 soins à tous les personnages",
             type: "HEAL",
-            isTargeted: true,
+            isTargeted: false,
             ...nullActionFields,
             heal: 3,
         });

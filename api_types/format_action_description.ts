@@ -23,6 +23,11 @@ const formatMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): strin
     return targetTeam === "PLAYER" ? "allié" : "adverse";
 };
 
+const formatSingleCharacterTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    if (targetTeam === "ALL") return "un personnage";
+    return targetTeam === "PLAYER" ? "un de vos personnages" : "un personnage adverse";
+};
+
 const formatAllTeamLabel = (
     targetTeam: "PLAYER" | "OPPONENT" | "ALL",
     excludeSelf = false,
@@ -212,6 +217,10 @@ export const formatActionDescription = (
                 return `${prefix} : Inflige ${damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
             }
 
+            if (action.isTargeted && action.target?.type === "ALL") {
+                return `${prefix} : Inflige ${damage} dégâts à ${formatSingleCharacterTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+            }
+
             if (action.target?.type === "MINION") {
                 return `${prefix} : Inflige ${damage} dégâts à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
@@ -245,6 +254,10 @@ export const formatActionDescription = (
 
             if (action.isTargeted && action.target?.type === "HERO") {
                 return `${prefix} : Rend ${action.heal} PV au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            if (action.isTargeted && action.target?.type === "ALL") {
+                return `${prefix} : Rend ${action.heal} PV à ${formatSingleCharacterTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
@@ -293,6 +306,10 @@ export const formatActionDescription = (
 
             if (action.isTargeted && action.target?.type === "HERO") {
                 return `${prefix} : Donne ${effectText} au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            if (action.isTargeted && action.target?.type === "ALL") {
+                return `${prefix} : Donne ${effectText} à ${formatSingleCharacterTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {

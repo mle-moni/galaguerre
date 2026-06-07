@@ -1,0 +1,26 @@
+---
+description: How to run tests with node ace test
+alwaysApply: true
+---
+
+# Running tests
+
+Use `node ace test` with the `dot` reporter. Run commands from the project root.
+
+## All tests
+
+```bash
+node ace test --reporters=dot
+```
+
+## Single test file
+
+Pass the file name (without path or `.spec.ts` extension) to `--files`:
+
+```bash
+node ace test --reporters=dot --files=battlecry
+```
+
+Examples:
+- `tests/unit/game_actions/battlecry.spec.ts` → `--files=battlecry`
+- `tests/unit/game_actions/minion_action.spec.ts` → `--files=minion_action`

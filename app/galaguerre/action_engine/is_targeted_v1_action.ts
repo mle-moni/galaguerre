@@ -11,7 +11,7 @@ export const isTargetedV1Action = (action: CardActionSnapshot): boolean => {
         return false;
     }
 
-    if (!action.target || action.target.type === "ALL") return false;
+    if (!action.target) return false;
 
     switch (action.type) {
         case "DAMAGE":
