@@ -21,7 +21,7 @@ export default class extends BaseSeeder {
         await Card.createMany([
             {
                 label: "Warglaive d'Azzinoth",
-                imageUrl: getClassicCardImage("warglaive_azzinoth"),
+                imageUrl: getClassicCardImage("Warglaive d'Azzinoth"),
                 cost: 2,
                 type: "WEAPON",
                 cardMode: "BETA",
@@ -31,7 +31,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Doubles warglaives",
-                imageUrl: getClassicCardImage("doubles_warglaives"),
+                imageUrl: getClassicCardImage("Doubles warglaives"),
                 cost: 6,
                 type: "WEAPON",
                 cardMode: "BETA",

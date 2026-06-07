@@ -121,7 +121,7 @@ export default class extends BaseSeeder {
         await Card.createMany([
             {
                 label: "Lance-tonneau",
-                imageUrl: getClassicCardImage("lance_tonneau"),
+                imageUrl: getClassicCardImage("Lance-tonneau"),
                 cost: 1,
                 type: "SPELL",
                 cardMode: "BETA",
@@ -131,7 +131,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Piétinement",
-                imageUrl: getClassicCardImage("pietinement"),
+                imageUrl: getClassicCardImage("Piétinement"),
                 cost: 2,
                 type: "SPELL",
                 cardMode: "BETA",
@@ -141,7 +141,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Hogger Frappe !",
-                imageUrl: getClassicCardImage("hogger_frappe"),
+                imageUrl: getClassicCardImage("Hogger Frappe !"),
                 cost: 4,
                 type: "SPELL",
                 cardMode: "BETA",
@@ -151,7 +151,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Héritage de l'Empereur",
-                imageUrl: getClassicCardImage("heritage_empereur"),
+                imageUrl: getClassicCardImage("Héritage de l'Empereur"),
                 cost: 3,
                 type: "SPELL",
                 cardMode: "BETA",
@@ -161,7 +161,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Salve ardente",
-                imageUrl: getClassicCardImage("salve_ardente"),
+                imageUrl: getClassicCardImage("Salve ardente"),
                 cost: 3,
                 type: "SPELL",
                 cardMode: "BETA",

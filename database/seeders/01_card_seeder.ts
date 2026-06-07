@@ -155,7 +155,7 @@ export default class extends BaseSeeder {
         const cards = await Card.createMany([
             {
                 label: "Lutin",
-                imageUrl: getClassicCardImage("lutin"),
+                imageUrl: getClassicCardImage("Lutin"),
                 cost: 0,
                 type: "MINION",
                 cardMode: "BETA",
@@ -165,7 +165,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Éclaireur pandaren",
-                imageUrl: getClassicCardImage("eclaireur_pandaren"),
+                imageUrl: getClassicCardImage("Éclaireur pandaren"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -175,7 +175,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Sanglier",
-                imageUrl: getClassicCardImage("sanglier"),
+                imageUrl: getClassicCardImage("Sanglier"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -185,7 +185,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Porte-bouclier",
-                imageUrl: getClassicCardImage("porte_bouclier"),
+                imageUrl: getClassicCardImage("Porte-bouclier"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -195,7 +195,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Jeune faucon-dragon",
-                imageUrl: getClassicCardImage("jeune_faucon_dragon"),
+                imageUrl: getClassicCardImage("Jeune faucon-dragon"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -205,7 +205,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Dragon mécanique",
-                imageUrl: getClassicCardImage("dragon_mecanique"),
+                imageUrl: getClassicCardImage("Dragon mécanique"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -215,7 +215,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Moine du Shado-Pan",
-                imageUrl: getClassicCardImage("moine_shado_pan"),
+                imageUrl: getClassicCardImage("Moine du Shado-Pan"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
@@ -225,7 +225,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Cobra empereur",
-                imageUrl: getClassicCardImage("cobra_empereur"),
+                imageUrl: getClassicCardImage("Cobra empereur"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -235,7 +235,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Patriarche dos-argenté",
-                imageUrl: getClassicCardImage("patriarche_dos_argente"),
+                imageUrl: getClassicCardImage("Patriarche dos-argenté"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -245,7 +245,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Guerrier tauren",
-                imageUrl: getClassicCardImage("guerrier_tauren"),
+                imageUrl: getClassicCardImage("Guerrier tauren"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -255,7 +255,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Farseer de Thrallmar",
-                imageUrl: getClassicCardImage("farseer_thrallmar"),
+                imageUrl: getClassicCardImage("Farseer de Thrallmar"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -265,7 +265,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Maître brasseur",
-                imageUrl: getClassicCardImage("maitre_brasseur"),
+                imageUrl: getClassicCardImage("Maître brasseur"),
                 cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
@@ -275,7 +275,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Chevalier de Hurlevent",
-                imageUrl: getClassicCardImage("chevalier_hurlevent"),
+                imageUrl: getClassicCardImage("Chevalier de Hurlevent"),
                 cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
@@ -285,7 +285,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Corsaire redoutable",
-                imageUrl: getClassicCardImage("corsaire_redoutable"),
+                imageUrl: getClassicCardImage("Corsaire redoutable"),
                 cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
@@ -295,7 +295,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Dimetrodon",
-                imageUrl: getClassicCardImage("dimetrodon"),
+                imageUrl: getClassicCardImage("Dimetrodon"),
                 cost: 5,
                 type: "MINION",
                 cardMode: "BETA",
@@ -305,7 +305,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Leeroy Jenkins",
-                imageUrl: getClassicCardImage("leeroy_jenkins"),
+                imageUrl: getClassicCardImage("Leeroy Jenkins"),
                 cost: 5,
                 type: "MINION",
                 cardMode: "BETA",
@@ -315,7 +315,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Rampant des fondrières",
-                imageUrl: getClassicCardImage("rampant_fondrieres"),
+                imageUrl: getClassicCardImage("Rampant des fondrières"),
                 cost: 5,
                 type: "MINION",
                 cardMode: "BETA",
@@ -325,7 +325,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Commandant argenté",
-                imageUrl: getClassicCardImage("commandant_argente"),
+                imageUrl: getClassicCardImage("Commandant argenté"),
                 cost: 6,
                 type: "MINION",
                 cardMode: "BETA",
@@ -335,7 +335,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Harpie furie des vents",
-                imageUrl: getClassicCardImage("harpie_furie_des_vents"),
+                imageUrl: getClassicCardImage("Harpie furie des vents"),
                 cost: 6,
                 type: "MINION",
                 cardMode: "BETA",
@@ -345,7 +345,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Seigneur de l'Arène",
-                imageUrl: getClassicCardImage("seigneur_arene"),
+                imageUrl: getClassicCardImage("Seigneur de l'Arène"),
                 cost: 6,
                 type: "MINION",
                 cardMode: "BETA",
@@ -355,7 +355,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Géant des mers",
-                imageUrl: getClassicCardImage("geant_des_mers"),
+                imageUrl: getClassicCardImage("Géant des mers"),
                 cost: 10,
                 type: "MINION",
                 cardMode: "BETA",

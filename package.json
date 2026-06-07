@@ -18,7 +18,8 @@
         "lint": "biome lint --write",
         "lint-check": "biome lint",
         "typecheck": "tsc --noEmit",
-        "frontend-typecheck": "cd frontend && yarn tsc --noEmit --project tsconfig.json"
+        "frontend-typecheck": "cd frontend && yarn tsc --noEmit --project tsconfig.json",
+        "generate:card-images": "node --experimental-strip-types scripts/generate_hs_card_ids.ts"
     },
     "imports": {
         "#adomin/*": "./app/adomin/*.js",

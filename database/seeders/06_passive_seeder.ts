@@ -285,7 +285,7 @@ export default class extends BaseSeeder {
         const passiveCards = await Card.createMany([
             {
                 label: "Baron Geddon",
-                imageUrl: getClassicCardImage("baron_geddon"),
+                imageUrl: getClassicCardImage("Baron Geddon"),
                 cost: 7,
                 type: "MINION",
                 cardMode: "BETA",
@@ -295,7 +295,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Ragnaros le Seigneur du Feu",
-                imageUrl: getClassicCardImage("ragnaros"),
+                imageUrl: getClassicCardImage("Ragnaros le Seigneur du Feu"),
                 cost: 8,
                 type: "MINION",
                 cardMode: "BETA",
@@ -305,7 +305,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Gardien de la Lumière",
-                imageUrl: getClassicCardImage("gardien_lumiere"),
+                imageUrl: getClassicCardImage("Gardien de la Lumière"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -315,7 +315,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Démolisseur",
-                imageUrl: getClassicCardImage("demolisseur"),
+                imageUrl: getClassicCardImage("Démolisseur"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -325,7 +325,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Commissaire-priseur de Gadgetzan",
-                imageUrl: getClassicCardImage("commissaire_priseur"),
+                imageUrl: getClassicCardImage("Commissaire-priseur de Gadgetzan"),
                 cost: 6,
                 type: "MINION",
                 cardMode: "BETA",
@@ -335,7 +335,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Chef de guerre murloc",
-                imageUrl: getClassicCardImage("chef_guerre_murloc"),
+                imageUrl: getClassicCardImage("Chef de guerre murloc"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -345,7 +345,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Capitaine des mers du Sud",
-                imageUrl: getClassicCardImage("capitaine_mers_sud"),
+                imageUrl: getClassicCardImage("Capitaine des mers du Sud"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -355,7 +355,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Malygos",
-                imageUrl: getClassicCardImage("malygos"),
+                imageUrl: getClassicCardImage("Malygos"),
                 cost: 9,
                 type: "MINION",
                 cardMode: "BETA",

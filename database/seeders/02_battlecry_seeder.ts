@@ -114,7 +114,7 @@ export default class extends BaseSeeder {
         await Card.createMany([
             {
                 label: "Oracle luminescent",
-                imageUrl: getClassicCardImage("oracle_luminescent"),
+                imageUrl: getClassicCardImage("Oracle luminescent"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -124,7 +124,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Mousquetaire de Forgefer",
-                imageUrl: getClassicCardImage("mousquetaire_forgefer"),
+                imageUrl: getClassicCardImage("Mousquetaire de Forgefer"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -134,7 +134,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Farseer du Cercle terrestre",
-                imageUrl: getClassicCardImage("farseer_cercle_terrestre"),
+                imageUrl: getClassicCardImage("Farseer du Cercle terrestre"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -144,7 +144,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Prêtresse d'Elune",
-                imageUrl: getClassicCardImage("pretresse_elune"),
+                imageUrl: getClassicCardImage("Prêtresse d'Elune"),
                 cost: 6,
                 type: "MINION",
                 cardMode: "BETA",
@@ -378,7 +378,7 @@ export default class extends BaseSeeder {
         await Card.createMany([
             {
                 label: "Chasseur de gros gibier",
-                imageUrl: getClassicCardImage("chasseur_gros_gibier"),
+                imageUrl: getClassicCardImage("Chasseur de gros gibier"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -388,7 +388,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Tueur de kodo",
-                imageUrl: getClassicCardImage("tueur_kodo"),
+                imageUrl: getClassicCardImage("Tueur de kodo"),
                 cost: 5,
                 type: "MINION",
                 cardMode: "BETA",
@@ -398,7 +398,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Chasseur de bêtes",
-                imageUrl: getClassicCardImage("chasseur_gros_gibier"),
+                imageUrl: getClassicCardImage("Chasseur de bêtes"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -408,7 +408,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Guérisseur de terrain",
-                imageUrl: getClassicCardImage("farseer_cercle_terrestre"),
+                imageUrl: getClassicCardImage("Guérisseur de terrain"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
@@ -418,7 +418,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Tireur d'élite",
-                imageUrl: getClassicCardImage("mousquetaire_forgefer"),
+                imageUrl: getClassicCardImage("Tireur d'élite"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -428,7 +428,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Tireur de précision",
-                imageUrl: getClassicCardImage("mousquetaire_forgefer"),
+                imageUrl: getClassicCardImage("Tireur de précision"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -438,7 +438,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Exécuteur de Quel'Thalas",
-                imageUrl: getClassicCardImage("chasseur_gros_gibier"),
+                imageUrl: getClassicCardImage("Exécuteur de Quel'Thalas"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -613,7 +613,7 @@ export default class extends BaseSeeder {
         const boostCards = await Card.createMany([
             {
                 label: "Voyant luminescent",
-                imageUrl: getClassicCardImage("voyant_luminescent"),
+                imageUrl: getClassicCardImage("Voyant luminescent"),
                 cost: 3,
                 type: "MINION",
                 cardMode: "BETA",
@@ -623,7 +623,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Défenseur d'Argus",
-                imageUrl: getClassicCardImage("defenseur_argus"),
+                imageUrl: getClassicCardImage("Défenseur d'Argus"),
                 cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
@@ -633,7 +633,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Nain de Sombrefer",
-                imageUrl: getClassicCardImage("nain_sombrefer"),
+                imageUrl: getClassicCardImage("Nain de Sombrefer"),
                 cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
@@ -643,7 +643,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Mage ancien",
-                imageUrl: getClassicCardImage("mage_ancien"),
+                imageUrl: getClassicCardImage("Mage ancien"),
                 cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
@@ -653,7 +653,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Sergent abusif",
-                imageUrl: getClassicCardImage("sergent_abusif"),
+                imageUrl: getClassicCardImage("Sergent abusif"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -734,7 +734,7 @@ export default class extends BaseSeeder {
         const [, , , tigreCard] = await Card.createMany([
             {
                 label: "Drake du Crépuscule",
-                imageUrl: getClassicCardImage("drake_crepuscule"),
+                imageUrl: getClassicCardImage("Drake du Crépuscule"),
                 cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
@@ -744,7 +744,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Maître-naturaliste",
-                imageUrl: getClassicCardImage("maitre_naturaliste"),
+                imageUrl: getClassicCardImage("Maître-naturaliste"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
@@ -754,7 +754,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Espion luminescent",
-                imageUrl: getClassicCardImage("espion_luminescent"),
+                imageUrl: getClassicCardImage("Espion luminescent"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
@@ -764,7 +764,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Tigre de Strangleronce",
-                imageUrl: getClassicCardImage("tigre_strangleronce"),
+                imageUrl: getClassicCardImage("Tigre de Strangleronce"),
                 cost: 5,
                 type: "MINION",
                 cardMode: "BETA",

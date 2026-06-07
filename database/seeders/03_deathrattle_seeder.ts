@@ -160,7 +160,7 @@ export default class extends BaseSeeder {
         await Card.createMany([
             {
                 label: "Gnome lépreux",
-                imageUrl: getClassicCardImage("gnome_lepreux"),
+                imageUrl: getClassicCardImage("Gnome lépreux"),
                 cost: 1,
                 type: "MINION",
                 cardMode: "BETA",
@@ -170,7 +170,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Glaneur de butin",
-                imageUrl: getClassicCardImage("glaneur_butin"),
+                imageUrl: getClassicCardImage("Glaneur de butin"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
@@ -180,7 +180,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Abomination",
-                imageUrl: getClassicCardImage("abomination"),
+                imageUrl: getClassicCardImage("Abomination"),
                 cost: 5,
                 type: "MINION",
                 cardMode: "BETA",
@@ -190,7 +190,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Mage de sang Thalnos",
-                imageUrl: getClassicCardImage("mage_sang_thalnos"),
+                imageUrl: getClassicCardImage("Mage de sang Thalnos"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
@@ -200,7 +200,7 @@ export default class extends BaseSeeder {
             },
             {
                 label: "Spectre apaisant",
-                imageUrl: getClassicCardImage("spectre_apaisant"),
+                imageUrl: getClassicCardImage("Spectre apaisant"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
