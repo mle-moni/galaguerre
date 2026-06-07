@@ -11,6 +11,7 @@ import Tag from "#models/tag";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
+import { getClassicCardImage } from "../seed_data/classic_card_images.js";
 
 const nullActionFields = {
     drawCount: null,
@@ -24,111 +25,46 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
-        const [damageAction, healAction, drawAction, enemyDrawAction] = await Action.createMany([
-            {
-                internalLabel: "Battlecry - 2 dégâts au héros adverse",
-                type: "DAMAGE",
-                isTargeted: false,
-                ...nullActionFields,
-                damage: 2,
-            },
-            {
-                internalLabel: "Battlecry - 3 soins au héros allié",
-                type: "HEAL",
-                isTargeted: false,
-                ...nullActionFields,
-                heal: 3,
-            },
-            {
-                internalLabel: "Battlecry - Pioche 1 carte",
-                type: "DRAW",
-                isTargeted: false,
-                ...nullActionFields,
-                drawCount: 1,
-            },
-            {
-                internalLabel: "Battlecry - L'adversaire pioche 1 carte",
-                type: "ENEMY_DRAW",
-                isTargeted: false,
-                ...nullActionFields,
-                enemyDrawCount: 1,
-            },
+        const beastTag = await Tag.query().where("name", "beast").firstOrFail();
+
+        const [murlocTag] = await Tag.createMany([
+            { name: "murloc", symbol: "🐟", label: "Murloc" },
+            { name: "pirate", symbol: "🏴‍☠️", label: "Pirate" },
         ]);
 
-        const [minionDamage, minionHeal, minionDraw, minionEnemyDraw] = await Minion.createMany([
-            {
-                internalLabel: "Monstre 2-1 BC Dégâts",
-                attack: 2,
-                health: 1,
-            },
-            {
-                internalLabel: "Monstre 2-1 BC Soins",
-                attack: 2,
-                health: 1,
-            },
-            {
-                internalLabel: "Monstre 2-1 BC Pioche",
-                attack: 2,
-                health: 1,
-            },
-            {
-                internalLabel: "Monstre 2-1 BC Pioche adverse",
-                attack: 2,
-                health: 1,
-            },
-        ]);
+        const [drawTwoAction, enemyDrawTwoAction, healHeroFourAction, riflemanDamageAction] =
+            await Action.createMany([
+                {
+                    internalLabel: "Oracle luminescent - Pioche 2 cartes",
+                    type: "DRAW",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    drawCount: 2,
+                },
+                {
+                    internalLabel: "Oracle luminescent - Adversaire pioche 2 cartes",
+                    type: "ENEMY_DRAW",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    enemyDrawCount: 2,
+                },
+                {
+                    internalLabel: "Prêtresse d'Elune - 4 soins au héros allié",
+                    type: "HEAL",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    heal: 4,
+                },
+                {
+                    internalLabel: "Mousquetaire de Forgefer - 1 dégât ciblé",
+                    type: "DAMAGE",
+                    isTargeted: true,
+                    ...nullActionFields,
+                    damage: 1,
+                },
+            ]);
 
-        await Card.createMany([
-            {
-                label: "Monster 2-1 Battlecry Damage",
-                imageUrl: "https://picsum.photos/seed/monster_bc_damage/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: minionDamage.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-1 Battlecry Heal",
-                imageUrl: "https://picsum.photos/seed/monster_bc_heal/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: minionHeal.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-1 Battlecry Draw",
-                imageUrl: "https://picsum.photos/seed/monster_bc_draw/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: minionDraw.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-1 Battlecry Enemy Draw",
-                imageUrl: "https://picsum.photos/seed/monster_bc_enemy_draw/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: minionEnemyDraw.id,
-                spellId: null,
-                weaponId: null,
-            },
-        ]);
-
-        const [enemyHeroTarget, allyHeroTarget] = await Target.createMany([
-            {
-                internalLabel: "Héros adverse",
-                type: "HERO",
-                targetTeam: "OPPONENT",
-                comparisonId: null,
-                tagId: null,
-            },
+        const [allyHeroTarget, anyCharacterTarget] = await Target.createMany([
             {
                 internalLabel: "Héros allié",
                 type: "HERO",
@@ -136,85 +72,105 @@ export default class extends BaseSeeder {
                 comparisonId: null,
                 tagId: null,
             },
+            {
+                internalLabel: "Personnage (ciblé)",
+                type: "ALL",
+                targetTeam: "ALL",
+                comparisonId: null,
+                tagId: null,
+            },
         ]);
 
+        const farseerHealAction = await Action.create({
+            internalLabel: "Farseer du Cercle terrestre - 3 soins ciblés",
+            type: "HEAL",
+            isTargeted: true,
+            ...nullActionFields,
+            heal: 3,
+        });
+
+        const [oracleLuminescent, mousquetaireForgefer, farseerCercleTerrestre, pretresseElune] =
+            await Minion.createMany([
+                { internalLabel: "Oracle luminescent", attack: 2, health: 2 },
+                { internalLabel: "Mousquetaire de Forgefer", attack: 2, health: 2 },
+                { internalLabel: "Farseer du Cercle terrestre", attack: 3, health: 3 },
+                { internalLabel: "Prêtresse d'Elune", attack: 5, health: 4 },
+            ]);
+
         await ToolToTarget.createMany([
-            { targetId: enemyHeroTarget.id, actionId: damageAction.id, boostId: null },
-            { targetId: allyHeroTarget.id, actionId: healAction.id, boostId: null },
+            { targetId: allyHeroTarget.id, actionId: healHeroFourAction.id, boostId: null },
+            { targetId: anyCharacterTarget.id, actionId: riflemanDamageAction.id, boostId: null },
+            { targetId: anyCharacterTarget.id, actionId: farseerHealAction.id, boostId: null },
         ]);
 
         await MinionBattlecryAction.createMany([
-            { minionId: minionDamage.id, actionId: damageAction.id },
-            { minionId: minionHeal.id, actionId: healAction.id },
-            { minionId: minionDraw.id, actionId: drawAction.id },
-            { minionId: minionEnemyDraw.id, actionId: enemyDrawAction.id },
+            { minionId: oracleLuminescent.id, actionId: drawTwoAction.id },
+            { minionId: oracleLuminescent.id, actionId: enemyDrawTwoAction.id },
+            { minionId: mousquetaireForgefer.id, actionId: riflemanDamageAction.id },
+            { minionId: farseerCercleTerrestre.id, actionId: farseerHealAction.id },
+            { minionId: pretresseElune.id, actionId: healHeroFourAction.id },
         ]);
 
-        const [
-            targetedHeroDamageAction,
-            targetedMinionDamageAction,
-            targetedMinionHealAction,
-            targetedStrongMinionDamageAction,
-            targetedBeastDamageAction,
-            targetedLowHealthDamageAction,
-            targetedExpensiveMinionDamageAction,
-        ] = await Action.createMany([
+        await Card.createMany([
             {
-                internalLabel: "Battlecry ciblé - 3 dégâts au héros adverse",
-                type: "DAMAGE",
-                isTargeted: true,
-                ...nullActionFields,
-                damage: 3,
+                label: "Oracle luminescent",
+                imageUrl: getClassicCardImage("oracle_luminescent"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: oracleLuminescent.id,
+                spellId: null,
+                weaponId: null,
             },
             {
-                internalLabel: "Battlecry ciblé - 3 dégâts à un serviteur adverse",
-                type: "DAMAGE",
-                isTargeted: true,
-                ...nullActionFields,
-                damage: 3,
+                label: "Mousquetaire de Forgefer",
+                imageUrl: getClassicCardImage("mousquetaire_forgefer"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: mousquetaireForgefer.id,
+                spellId: null,
+                weaponId: null,
             },
             {
-                internalLabel: "Battlecry ciblé - 2 soins à un serviteur allié",
-                type: "HEAL",
-                isTargeted: true,
-                ...nullActionFields,
-                heal: 2,
+                label: "Farseer du Cercle terrestre",
+                imageUrl: getClassicCardImage("farseer_cercle_terrestre"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: farseerCercleTerrestre.id,
+                spellId: null,
+                weaponId: null,
             },
             {
-                internalLabel: "Battlecry ciblé - 4 dégâts serviteur adverse attaque > 2",
-                type: "DAMAGE",
-                isTargeted: true,
-                ...nullActionFields,
-                damage: 4,
-            },
-            {
-                internalLabel: "Battlecry ciblé - 2 dégâts à une bête adverse",
-                type: "DAMAGE",
-                isTargeted: true,
-                ...nullActionFields,
-                damage: 2,
-            },
-            {
-                internalLabel: "Battlecry ciblé - 3 dégâts serviteur adverse pv < 4",
-                type: "DAMAGE",
-                isTargeted: true,
-                ...nullActionFields,
-                damage: 3,
-            },
-            {
-                internalLabel: "Battlecry ciblé - 3 dégâts serviteur adverse coût = 4",
-                type: "DAMAGE",
-                isTargeted: true,
-                ...nullActionFields,
-                damage: 3,
+                label: "Prêtresse d'Elune",
+                imageUrl: getClassicCardImage("pretresse_elune"),
+                cost: 6,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: pretresseElune.id,
+                spellId: null,
+                weaponId: null,
             },
         ]);
 
-        const strongMinionComparison = await Comparison.create({
+        const oracleCard = await Card.query().where("label", "Oracle luminescent").firstOrFail();
+        await CardTag.create({ cardId: oracleCard.id, tagId: murlocTag.id });
+
+        const bigGameComparison = await Comparison.create({
             costComparison: null,
             cost: null,
             attackComparison: ">",
-            attack: 2,
+            attack: 6,
+            healthComparison: null,
+            health: null,
+        });
+
+        const kodoComparison = await Comparison.create({
+            costComparison: null,
+            cost: null,
+            attackComparison: "<",
+            attack: 3,
             healthComparison: null,
             health: null,
         });
@@ -237,128 +193,63 @@ export default class extends BaseSeeder {
             health: null,
         });
 
-        const beastTag = await Tag.create({
-            name: "beast",
-            symbol: "🦁",
-            label: "Bête",
-        });
-
         const [
-            targetedHeroDamageMinion,
-            targetedMinionDamageMinion,
-            targetedMinionHealMinion,
-            targetedStrongMinionDamageMinion,
-            targetedBeastDamageMinion,
-            targetedLowHealthDamageMinion,
-            targetedExpensiveMinionDamageMinion,
-        ] = await Minion.createMany([
+            targetedHeroDamageAction,
+            targetedMinionDamageAction,
+            targetedMinionHealAction,
+            bigGameDamageAction,
+            targetedBeastDamageAction,
+            targetedLowHealthDamageAction,
+            targetedExpensiveMinionDamageAction,
+        ] = await Action.createMany([
             {
-                internalLabel: "Monstre 2-2 BC Ciblé Héros",
-                attack: 2,
-                health: 2,
+                internalLabel: "Chasseur de gros gibier - 4 dégâts ciblés héros",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 4,
             },
             {
-                internalLabel: "Monstre 2-2 BC Ciblé Serviteur",
-                attack: 2,
-                health: 2,
+                internalLabel: "Chasseur de gros gibier - 4 dégâts ciblés serviteur",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 4,
             },
             {
-                internalLabel: "Monstre 1-3 BC Ciblé Soins",
-                attack: 1,
-                health: 3,
+                internalLabel: "Soins ciblés serviteur allié",
+                type: "HEAL",
+                isTargeted: true,
+                ...nullActionFields,
+                heal: 2,
             },
             {
-                internalLabel: "Monstre 3-2 BC Ciblé Fort",
-                attack: 3,
-                health: 2,
+                internalLabel: "Chasseur de gros gibier - 4 dégâts attaque > 6",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 4,
             },
             {
-                internalLabel: "Monstre 2-2 BC Ciblé Bête",
-                attack: 2,
-                health: 2,
+                internalLabel: "Dégâts ciblés bête adverse",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 2,
             },
             {
-                internalLabel: "Monstre 2-3 BC Ciblé Faible",
-                attack: 2,
-                health: 3,
+                internalLabel: "Tueur de kodo - 3 dégâts pv < 4",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 3,
             },
             {
-                internalLabel: "Monstre 3-1 BC Ciblé Cher",
-                attack: 3,
-                health: 1,
-            },
-        ]);
-
-        await Card.createMany([
-            {
-                label: "Monster 2-2 Targeted Hero Damage",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_hero/200/300",
-                cost: 3,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedHeroDamageMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-2 Targeted Minion Damage",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_minion/200/300",
-                cost: 3,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedMinionDamageMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 1-3 Targeted Minion Heal",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_heal/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedMinionHealMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 3-2 Targeted Strong Minion",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_strong/200/300",
-                cost: 4,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedStrongMinionDamageMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-2 Targeted Beast Damage",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_beast/200/300",
-                cost: 3,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedBeastDamageMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-3 Targeted Low Health",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_low_health/200/300",
-                cost: 3,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedLowHealthDamageMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 3-1 Targeted Expensive",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_expensive/200/300",
-                cost: 3,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedExpensiveMinionDamageMinion.id,
-                spellId: null,
-                weaponId: null,
+                internalLabel: "Dégâts ciblés serviteur coût = 4",
+                type: "DAMAGE",
+                isTargeted: true,
+                ...nullActionFields,
+                damage: 3,
             },
         ]);
 
@@ -366,7 +257,7 @@ export default class extends BaseSeeder {
             targetedEnemyHeroTarget,
             targetedEnemyMinionTarget,
             targetedAllyMinionTarget,
-            targetedStrongEnemyMinionTarget,
+            bigGameTarget,
             targetedBeastEnemyMinionTarget,
             targetedLowHealthEnemyMinionTarget,
             targetedExpensiveEnemyMinionTarget,
@@ -393,10 +284,10 @@ export default class extends BaseSeeder {
                 tagId: null,
             },
             {
-                internalLabel: "Serviteur adverse attaque > 2 (ciblé)",
+                internalLabel: "Serviteur adverse attaque > 6 (ciblé)",
                 type: "MINION",
                 targetTeam: "OPPONENT",
-                comparisonId: strongMinionComparison.id,
+                comparisonId: bigGameComparison.id,
                 tagId: null,
             },
             {
@@ -422,6 +313,24 @@ export default class extends BaseSeeder {
             },
         ]);
 
+        const [
+            chasseurHero,
+            chasseurMinion,
+            soinsCibles,
+            chasseurGrosGibier,
+            chasseurBete,
+            tueurKodo,
+            chasseurCher,
+        ] = await Minion.createMany([
+            { internalLabel: "Chasseur héros", attack: 2, health: 2 },
+            { internalLabel: "Chasseur serviteur", attack: 2, health: 2 },
+            { internalLabel: "Soins ciblés", attack: 1, health: 3 },
+            { internalLabel: "Chasseur de gros gibier", attack: 4, health: 2 },
+            { internalLabel: "Chasseur bête", attack: 2, health: 2 },
+            { internalLabel: "Tueur de kodo", attack: 3, health: 5 },
+            { internalLabel: "Chasseur coûteux", attack: 3, health: 1 },
+        ]);
+
         await ToolToTarget.createMany([
             {
                 targetId: targetedEnemyHeroTarget.id,
@@ -438,11 +347,7 @@ export default class extends BaseSeeder {
                 actionId: targetedMinionHealAction.id,
                 boostId: null,
             },
-            {
-                targetId: targetedStrongEnemyMinionTarget.id,
-                actionId: targetedStrongMinionDamageAction.id,
-                boostId: null,
-            },
+            { targetId: bigGameTarget.id, actionId: bigGameDamageAction.id, boostId: null },
             {
                 targetId: targetedBeastEnemyMinionTarget.id,
                 actionId: targetedBeastDamageAction.id,
@@ -461,66 +366,129 @@ export default class extends BaseSeeder {
         ]);
 
         await MinionBattlecryAction.createMany([
-            { minionId: targetedHeroDamageMinion.id, actionId: targetedHeroDamageAction.id },
-            { minionId: targetedMinionDamageMinion.id, actionId: targetedMinionDamageAction.id },
-            { minionId: targetedMinionHealMinion.id, actionId: targetedMinionHealAction.id },
-            {
-                minionId: targetedStrongMinionDamageMinion.id,
-                actionId: targetedStrongMinionDamageAction.id,
-            },
-            { minionId: targetedBeastDamageMinion.id, actionId: targetedBeastDamageAction.id },
-            {
-                minionId: targetedLowHealthDamageMinion.id,
-                actionId: targetedLowHealthDamageAction.id,
-            },
-            {
-                minionId: targetedExpensiveMinionDamageMinion.id,
-                actionId: targetedExpensiveMinionDamageAction.id,
-            },
+            { minionId: chasseurHero.id, actionId: targetedHeroDamageAction.id },
+            { minionId: chasseurMinion.id, actionId: targetedMinionDamageAction.id },
+            { minionId: soinsCibles.id, actionId: targetedMinionHealAction.id },
+            { minionId: chasseurGrosGibier.id, actionId: bigGameDamageAction.id },
+            { minionId: chasseurBete.id, actionId: targetedBeastDamageAction.id },
+            { minionId: tueurKodo.id, actionId: targetedLowHealthDamageAction.id },
+            { minionId: chasseurCher.id, actionId: targetedExpensiveMinionDamageAction.id },
         ]);
 
-        const tauntCard = await Card.query().where("label", "Monster 1-2").first();
-        const strongCard = await Card.query().where("label", "Monster 3-1").first();
-
-        if (tauntCard) {
-            await CardTag.create({ cardId: tauntCard.id, tagId: beastTag.id });
-        }
-        if (strongCard) {
-            await CardTag.create({ cardId: strongCard.id, tagId: beastTag.id });
-        }
+        await Card.createMany([
+            {
+                label: "Chasseur de gros gibier",
+                imageUrl: getClassicCardImage("chasseur_gros_gibier"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: chasseurGrosGibier.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Tueur de kodo",
+                imageUrl: getClassicCardImage("tueur_kodo"),
+                cost: 5,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: tueurKodo.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Chasseur de bêtes",
+                imageUrl: getClassicCardImage("chasseur_gros_gibier"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: chasseurBete.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Guérisseur de terrain",
+                imageUrl: getClassicCardImage("farseer_cercle_terrestre"),
+                cost: 2,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: soinsCibles.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Tireur d'élite",
+                imageUrl: getClassicCardImage("mousquetaire_forgefer"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: chasseurMinion.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Tireur de précision",
+                imageUrl: getClassicCardImage("mousquetaire_forgefer"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: chasseurHero.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Exécuteur de Quel'Thalas",
+                imageUrl: getClassicCardImage("chasseur_gros_gibier"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: chasseurCher.id,
+                spellId: null,
+                weaponId: null,
+            },
+        ]);
 
         const tauntPower = await MinionPower.query().where("hasTaunt", true).firstOrFail();
 
-        const [boostPlusTwo, boostPlusOne, boostSpellPower, boostTaunt] = await Boost.createMany([
-            {
-                internalLabel: "Battlecry - +2/+2",
-                attack: 2,
-                health: 2,
-                spellPower: null,
-                minionPowerId: null,
-            },
-            {
-                internalLabel: "Battlecry - +1/+1",
-                attack: 1,
-                health: 1,
-                spellPower: null,
-                minionPowerId: null,
-            },
-            {
-                internalLabel: "Battlecry - +2 dégâts de sort",
-                attack: null,
-                health: null,
-                spellPower: 2,
-                minionPowerId: null,
-            },
-            {
-                internalLabel: "Battlecry - Provocation",
-                attack: null,
-                health: null,
-                spellPower: null,
-                minionPowerId: tauntPower.id,
-            },
-        ]);
+        const [boostPlusTwoHealth, boostPlusOneTaunt, boostPlusTwoAttack, boostSpellPower] =
+            await Boost.createMany([
+                {
+                    internalLabel: "Voyant luminescent - +2 PV murlocs",
+                    attack: null,
+                    health: 2,
+                    spellPower: null,
+                    minionPowerId: null,
+                },
+                {
+                    internalLabel: "Défenseur d'Argus - +1/+1",
+                    attack: 1,
+                    health: 1,
+                    spellPower: null,
+                    minionPowerId: null,
+                },
+                {
+                    internalLabel: "Nain de Sombrefer - +2 attaque",
+                    attack: 2,
+                    health: null,
+                    spellPower: null,
+                    minionPowerId: null,
+                },
+                {
+                    internalLabel: "Mage ancien - +2 dégâts de sort",
+                    attack: null,
+                    health: null,
+                    spellPower: 2,
+                    minionPowerId: null,
+                },
+            ]);
+
+        const tauntBoost = await Boost.create({
+            internalLabel: "Défenseur d'Argus - Provocation",
+            attack: null,
+            health: null,
+            spellPower: null,
+            minionPowerId: tauntPower.id,
+        });
 
         const allyMinionsTarget = await Target.create({
             internalLabel: "Serviteurs alliés (masse)",
@@ -530,172 +498,172 @@ export default class extends BaseSeeder {
             tagId: null,
         });
 
+        const otherMurlocsTarget = await Target.create({
+            internalLabel: "Autres murlocs alliés",
+            type: "MINION",
+            targetTeam: "PLAYER",
+            comparisonId: null,
+            tagId: murlocTag.id,
+            excludeSelf: true,
+        });
+
         const [
-            targetedAllyBoostAction,
-            massAllyBoostAction,
-            heroSpellPowerBoostAction,
-            targetedTauntBoostAction,
-            targetedEnemyBoostAction,
+            voyantLuminescentBoostAction,
+            defenseurArgusBoostAction,
+            defenseurArgusTauntAction,
+            nainSombreferBoostAction,
+            mageAncientSpellPowerAction,
+            sergentAbusifBoostAction,
         ] = await Action.createMany([
             {
-                internalLabel: "Battlecry - +2/+2 à un serviteur allié",
-                type: "BOOST",
-                isTargeted: true,
-                ...nullActionFields,
-                boostId: boostPlusTwo.id,
-            },
-            {
-                internalLabel: "Battlecry - +1/+1 à vos serviteurs",
+                internalLabel: "Voyant luminescent - +2 PV autres murlocs",
                 type: "BOOST",
                 isTargeted: false,
                 ...nullActionFields,
-                boostId: boostPlusOne.id,
+                boostId: boostPlusTwoHealth.id,
             },
             {
-                internalLabel: "Battlecry - +2 dégâts de sort au héros allié",
+                internalLabel: "Défenseur d'Argus - +1/+1 alliés",
+                type: "BOOST",
+                isTargeted: false,
+                ...nullActionFields,
+                boostId: boostPlusOneTaunt.id,
+            },
+            {
+                internalLabel: "Défenseur d'Argus - Provocation alliés",
+                type: "BOOST",
+                isTargeted: false,
+                ...nullActionFields,
+                boostId: tauntBoost.id,
+            },
+            {
+                internalLabel: "Nain de Sombrefer - +2 attaque ciblé",
+                type: "BOOST",
+                isTargeted: true,
+                ...nullActionFields,
+                boostId: boostPlusTwoAttack.id,
+            },
+            {
+                internalLabel: "Mage ancien - +2 dégâts de sort héros",
                 type: "BOOST",
                 isTargeted: false,
                 ...nullActionFields,
                 boostId: boostSpellPower.id,
             },
             {
-                internalLabel: "Battlecry - Provocation à un serviteur allié",
+                internalLabel: "Sergent abusif - +2 attaque ciblé",
                 type: "BOOST",
                 isTargeted: true,
                 ...nullActionFields,
-                boostId: boostTaunt.id,
-            },
-            {
-                internalLabel: "Battlecry - +1/+1 à un serviteur adverse",
-                type: "BOOST",
-                isTargeted: true,
-                ...nullActionFields,
-                boostId: boostPlusOne.id,
+                boostId: boostPlusTwoAttack.id,
             },
         ]);
 
-        const [
-            targetedAllyBoostMinion,
-            massAllyBoostMinion,
-            heroSpellPowerBoostMinion,
-            targetedTauntBoostMinion,
-            targetedEnemyBoostMinion,
-        ] = await Minion.createMany([
-            {
-                internalLabel: "Monstre 3-2 BC Boost allié ciblé",
-                attack: 3,
-                health: 2,
-            },
-            {
-                internalLabel: "Monstre 2-3 BC Boost masse allié",
-                attack: 2,
-                health: 3,
-            },
-            {
-                internalLabel: "Monstre 2-2 BC Boost spell power",
-                attack: 2,
-                health: 2,
-            },
-            {
-                internalLabel: "Monstre 2-2 BC Boost provocation",
-                attack: 2,
-                health: 2,
-            },
-            {
-                internalLabel: "Monstre 2-1 BC Boost adverse ciblé",
-                attack: 2,
-                health: 1,
-            },
-        ]);
-
-        await Card.createMany([
-            {
-                label: "Monster 3-2 Targeted Ally Boost",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_ally_boost/200/300",
-                cost: 3,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedAllyBoostMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-3 Mass Ally Boost",
-                imageUrl: "https://picsum.photos/seed/monster_mass_ally_boost/200/300",
-                cost: 3,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: massAllyBoostMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-2 Hero Spell Power Boost",
-                imageUrl: "https://picsum.photos/seed/monster_hero_spell_power_boost/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: heroSpellPowerBoostMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-2 Grant Taunt Boost",
-                imageUrl: "https://picsum.photos/seed/monster_grant_taunt_boost/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedTauntBoostMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-            {
-                label: "Monster 2-1 Targeted Enemy Boost",
-                imageUrl: "https://picsum.photos/seed/monster_targeted_enemy_boost/200/300",
-                cost: 2,
-                type: "MINION",
-                cardMode: "BETA",
-                minionId: targetedEnemyBoostMinion.id,
-                spellId: null,
-                weaponId: null,
-            },
-        ]);
+        const [voyantLuminescent, defenseurArgus, nainSombrefer, mageAncient, sergentAbusif] =
+            await Minion.createMany([
+                { internalLabel: "Voyant luminescent", attack: 2, health: 3 },
+                { internalLabel: "Défenseur d'Argus", attack: 2, health: 3 },
+                { internalLabel: "Nain de Sombrefer", attack: 4, health: 4 },
+                { internalLabel: "Mage ancien", attack: 2, health: 5 },
+                { internalLabel: "Sergent abusif", attack: 2, health: 1 },
+            ]);
 
         await ToolToTarget.createMany([
             {
-                targetId: targetedAllyMinionTarget.id,
-                actionId: targetedAllyBoostAction.id,
+                targetId: otherMurlocsTarget.id,
+                actionId: voyantLuminescentBoostAction.id,
                 boostId: null,
             },
             {
                 targetId: allyMinionsTarget.id,
-                actionId: massAllyBoostAction.id,
+                actionId: defenseurArgusBoostAction.id,
                 boostId: null,
             },
             {
-                targetId: allyHeroTarget.id,
-                actionId: heroSpellPowerBoostAction.id,
+                targetId: allyMinionsTarget.id,
+                actionId: defenseurArgusTauntAction.id,
                 boostId: null,
             },
             {
                 targetId: targetedAllyMinionTarget.id,
-                actionId: targetedTauntBoostAction.id,
+                actionId: nainSombreferBoostAction.id,
+                boostId: null,
+            },
+            {
+                targetId: allyHeroTarget.id,
+                actionId: mageAncientSpellPowerAction.id,
                 boostId: null,
             },
             {
                 targetId: targetedEnemyMinionTarget.id,
-                actionId: targetedEnemyBoostAction.id,
+                actionId: sergentAbusifBoostAction.id,
                 boostId: null,
             },
         ]);
 
         await MinionBattlecryAction.createMany([
-            { minionId: targetedAllyBoostMinion.id, actionId: targetedAllyBoostAction.id },
-            { minionId: massAllyBoostMinion.id, actionId: massAllyBoostAction.id },
-            { minionId: heroSpellPowerBoostMinion.id, actionId: heroSpellPowerBoostAction.id },
-            { minionId: targetedTauntBoostMinion.id, actionId: targetedTauntBoostAction.id },
-            { minionId: targetedEnemyBoostMinion.id, actionId: targetedEnemyBoostAction.id },
+            { minionId: voyantLuminescent.id, actionId: voyantLuminescentBoostAction.id },
+            { minionId: defenseurArgus.id, actionId: defenseurArgusBoostAction.id },
+            { minionId: defenseurArgus.id, actionId: defenseurArgusTauntAction.id },
+            { minionId: nainSombrefer.id, actionId: nainSombreferBoostAction.id },
+            { minionId: mageAncient.id, actionId: mageAncientSpellPowerAction.id },
+            { minionId: sergentAbusif.id, actionId: sergentAbusifBoostAction.id },
         ]);
+
+        const boostCards = await Card.createMany([
+            {
+                label: "Voyant luminescent",
+                imageUrl: getClassicCardImage("voyant_luminescent"),
+                cost: 3,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: voyantLuminescent.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Défenseur d'Argus",
+                imageUrl: getClassicCardImage("defenseur_argus"),
+                cost: 4,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: defenseurArgus.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Nain de Sombrefer",
+                imageUrl: getClassicCardImage("nain_sombrefer"),
+                cost: 4,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: nainSombrefer.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Mage ancien",
+                imageUrl: getClassicCardImage("mage_ancien"),
+                cost: 4,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: mageAncient.id,
+                spellId: null,
+                weaponId: null,
+            },
+            {
+                label: "Sergent abusif",
+                imageUrl: getClassicCardImage("sergent_abusif"),
+                cost: 1,
+                type: "MINION",
+                cardMode: "BETA",
+                minionId: sergentAbusif.id,
+                spellId: null,
+                weaponId: null,
+            },
+        ]);
+
+        await CardTag.create({ cardId: boostCards[0].id, tagId: murlocTag.id });
 
         const costOneComparison = await Comparison.create({
             costComparison: "=",
@@ -730,7 +698,7 @@ export default class extends BaseSeeder {
         const [filteredDrawAction, filteredBeastDrawAction, filteredEnemyDrawAction] =
             await Action.createMany([
                 {
-                    internalLabel: "Battlecry - Pioche un monstre coût 1",
+                    internalLabel: "Drake du Crépuscule - Pioche coût 1",
                     type: "DRAW",
                     isTargeted: false,
                     ...nullActionFields,
@@ -738,7 +706,7 @@ export default class extends BaseSeeder {
                     drawCardFilterId: costOneDrawFilter.id,
                 },
                 {
-                    internalLabel: "Battlecry - Pioche une bête",
+                    internalLabel: "Maître-naturaliste - Pioche bête",
                     type: "DRAW",
                     isTargeted: false,
                     ...nullActionFields,
@@ -746,7 +714,7 @@ export default class extends BaseSeeder {
                     drawCardFilterId: beastDrawFilter.id,
                 },
                 {
-                    internalLabel: "Battlecry - L'adversaire pioche un monstre coût 1",
+                    internalLabel: "Espion luminescent - Pioche adverse coût 1",
                     type: "ENEMY_DRAW",
                     isTargeted: false,
                     ...nullActionFields,
@@ -755,83 +723,69 @@ export default class extends BaseSeeder {
                 },
             ]);
 
-        const [
-            filteredDrawMinion,
-            filteredBeastDrawMinion,
-            filteredEnemyDrawMinion,
-            beastFillerMinion,
-        ] = await Minion.createMany([
-            {
-                internalLabel: "Monstre 2-2 BC Pioche filtrée coût 1",
-                attack: 2,
-                health: 2,
-            },
-            {
-                internalLabel: "Monstre 2-2 BC Pioche filtrée bête",
-                attack: 2,
-                health: 2,
-            },
-            {
-                internalLabel: "Monstre 2-2 BC Pioche adverse filtrée coût 1",
-                attack: 2,
-                health: 2,
-            },
-            {
-                internalLabel: "Monstre 1-1 Bête",
-                attack: 1,
-                health: 1,
-            },
-        ]);
+        const [drakeCrepuscule, maitreNaturaliste, espionLuminescent, tigreStrangleronce] =
+            await Minion.createMany([
+                { internalLabel: "Drake du Crépuscule", attack: 4, health: 1 },
+                { internalLabel: "Maître-naturaliste", attack: 2, health: 2 },
+                { internalLabel: "Espion luminescent", attack: 2, health: 2 },
+                { internalLabel: "Tigre de Strangleronce", attack: 5, health: 5 },
+            ]);
 
-        const [, , , beastFillerCard] = await Card.createMany([
+        const [, , , tigreCard] = await Card.createMany([
             {
-                label: "Monster 2-2 Battlecry Filtered Draw (Cost 1)",
-                imageUrl: "https://picsum.photos/seed/monster_bc_filtered_draw_cost1/200/300",
-                cost: 2,
+                label: "Drake du Crépuscule",
+                imageUrl: getClassicCardImage("drake_crepuscule"),
+                cost: 4,
                 type: "MINION",
                 cardMode: "BETA",
-                minionId: filteredDrawMinion.id,
+                minionId: drakeCrepuscule.id,
                 spellId: null,
                 weaponId: null,
             },
             {
-                label: "Monster 2-2 Battlecry Filtered Draw (Beast)",
-                imageUrl: "https://picsum.photos/seed/monster_bc_filtered_draw_beast/200/300",
+                label: "Maître-naturaliste",
+                imageUrl: getClassicCardImage("maitre_naturaliste"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
-                minionId: filteredBeastDrawMinion.id,
+                minionId: maitreNaturaliste.id,
                 spellId: null,
                 weaponId: null,
             },
             {
-                label: "Monster 2-2 Battlecry Filtered Enemy Draw (Cost 1)",
-                imageUrl: "https://picsum.photos/seed/monster_bc_filtered_enemy_draw/200/300",
+                label: "Espion luminescent",
+                imageUrl: getClassicCardImage("espion_luminescent"),
                 cost: 2,
                 type: "MINION",
                 cardMode: "BETA",
-                minionId: filteredEnemyDrawMinion.id,
+                minionId: espionLuminescent.id,
                 spellId: null,
                 weaponId: null,
             },
             {
-                label: "Monster 1-1 Beast",
-                imageUrl: "https://picsum.photos/seed/monster_1_1_beast/200/300",
-                cost: 1,
+                label: "Tigre de Strangleronce",
+                imageUrl: getClassicCardImage("tigre_strangleronce"),
+                cost: 5,
                 type: "MINION",
                 cardMode: "BETA",
-                minionId: beastFillerMinion.id,
+                minionId: tigreStrangleronce.id,
                 spellId: null,
                 weaponId: null,
             },
         ]);
 
-        await CardTag.create({ cardId: beastFillerCard.id, tagId: beastTag.id });
+        await CardTag.createMany([
+            { cardId: tigreCard.id, tagId: beastTag.id },
+            {
+                cardId: (await Card.query().where("label", "Espion luminescent").firstOrFail()).id,
+                tagId: murlocTag.id,
+            },
+        ]);
 
         await MinionBattlecryAction.createMany([
-            { minionId: filteredDrawMinion.id, actionId: filteredDrawAction.id },
-            { minionId: filteredBeastDrawMinion.id, actionId: filteredBeastDrawAction.id },
-            { minionId: filteredEnemyDrawMinion.id, actionId: filteredEnemyDrawAction.id },
+            { minionId: drakeCrepuscule.id, actionId: filteredDrawAction.id },
+            { minionId: maitreNaturaliste.id, actionId: filteredBeastDrawAction.id },
+            { minionId: espionLuminescent.id, actionId: filteredEnemyDrawAction.id },
         ]);
     }
 }

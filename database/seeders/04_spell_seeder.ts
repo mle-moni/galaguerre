@@ -1,9 +1,11 @@
 import Action from "#models/action";
+import Boost from "#models/boost";
 import Card from "#models/card";
 import Spell from "#models/spell";
 import Target from "#models/target";
 import ToolToTarget from "#models/tool_to_target";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
+import { getClassicCardImage } from "../seed_data/classic_card_images.js";
 
 const nullActionFields = {
     drawCount: null,
@@ -17,51 +19,55 @@ const nullActionFields = {
 
 export default class extends BaseSeeder {
     async run() {
-        const [
-            heroDamageAction,
-            targetedDamageAction,
-            drawAction,
-            massMinionDamageAction,
-            randomMinionDamageAction,
-        ] = await Action.createMany([
-            {
-                internalLabel: "Sort - 3 dégâts au héros adverse",
-                type: "DAMAGE",
-                isTargeted: false,
-                ...nullActionFields,
-                damage: 3,
-            },
-            {
-                internalLabel: "Sort - 4 dégâts ciblés à un serviteur adverse",
-                type: "DAMAGE",
-                isTargeted: true,
-                ...nullActionFields,
-                damage: 4,
-            },
-            {
-                internalLabel: "Sort - Pioche 1 carte",
-                type: "DRAW",
-                isTargeted: false,
-                ...nullActionFields,
-                drawCount: 1,
-            },
-            {
-                internalLabel: "Sort - 1 dégât à tous les serviteurs adverses",
-                type: "DAMAGE",
-                isTargeted: false,
-                ...nullActionFields,
-                damage: 1,
-            },
-            {
-                internalLabel: "Sort - 1 dégât à un serviteur adverse aléatoire",
-                type: "DAMAGE",
-                isTargeted: false,
-                ...nullActionFields,
-                damage: 1,
-            },
-        ]);
+        const [barrelDamageAction, stompDamageAction, hoggerDamageAction, salveDamageAction] =
+            await Action.createMany([
+                {
+                    internalLabel: "Lance-tonneau - 2 dégâts au héros adverse",
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    damage: 2,
+                },
+                {
+                    internalLabel: "Piétinement - 2 dégâts à tous les ennemis",
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    damage: 2,
+                },
+                {
+                    internalLabel: "Hogger Frappe ! - 4 dégâts au héros adverse",
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    damage: 4,
+                },
+                {
+                    internalLabel: "Salve ardente - 1 dégât aléatoire",
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    ...nullActionFields,
+                    damage: 1,
+                },
+            ]);
 
-        const [enemyHeroTarget, enemyMinionTarget, enemyMinionsTarget, randomEnemyMinionTarget] =
+        const massBoost = await Boost.create({
+            internalLabel: "Héritage de l'Empereur - +2/+2",
+            attack: 2,
+            health: 2,
+            spellPower: null,
+            minionPowerId: null,
+        });
+
+        const heritageBoostAction = await Action.create({
+            internalLabel: "Héritage de l'Empereur - +2/+2 alliés",
+            type: "BOOST",
+            isTargeted: false,
+            ...nullActionFields,
+            boostId: massBoost.id,
+        });
+
+        const [enemyHeroTarget, allEnemiesTarget, allyMinionsTarget, randomEnemyTarget] =
             await Target.createMany([
                 {
                     internalLabel: "Héros adverse",
@@ -71,123 +77,96 @@ export default class extends BaseSeeder {
                     tagId: null,
                 },
                 {
-                    internalLabel: "Serviteur adverse (ciblé)",
-                    type: "MINION",
+                    internalLabel: "Tous les ennemis",
+                    type: "ALL",
                     targetTeam: "OPPONENT",
                     comparisonId: null,
                     tagId: null,
                 },
                 {
-                    internalLabel: "Tous les serviteurs adverses",
+                    internalLabel: "Serviteurs alliés",
                     type: "MINION",
-                    targetTeam: "OPPONENT",
+                    targetTeam: "PLAYER",
                     comparisonId: null,
                     tagId: null,
                 },
                 {
-                    internalLabel: "Un serviteur adverse aléatoire",
-                    type: "MINION",
+                    internalLabel: "Cibles ennemies aléatoires",
+                    type: "ALL",
                     targetTeam: "OPPONENT",
                     comparisonId: null,
                     tagId: null,
-                    maxTargets: 1,
+                    maxTargets: 5,
                     targetSelectionMode: "RANDOM",
                 },
             ]);
 
         await ToolToTarget.createMany([
-            { targetId: enemyHeroTarget.id, actionId: heroDamageAction.id, boostId: null },
-            { targetId: enemyMinionTarget.id, actionId: targetedDamageAction.id, boostId: null },
-            {
-                targetId: enemyMinionsTarget.id,
-                actionId: massMinionDamageAction.id,
-                boostId: null,
-            },
-            {
-                targetId: randomEnemyMinionTarget.id,
-                actionId: randomMinionDamageAction.id,
-                boostId: null,
-            },
+            { targetId: enemyHeroTarget.id, actionId: barrelDamageAction.id, boostId: null },
+            { targetId: allEnemiesTarget.id, actionId: stompDamageAction.id, boostId: null },
+            { targetId: enemyHeroTarget.id, actionId: hoggerDamageAction.id, boostId: null },
+            { targetId: randomEnemyTarget.id, actionId: salveDamageAction.id, boostId: null },
+            { targetId: allyMinionsTarget.id, actionId: heritageBoostAction.id, boostId: null },
         ]);
 
-        const [
-            heroDamageSpell,
-            targetedDamageSpell,
-            drawSpell,
-            massMinionDamageSpell,
-            randomMinionDamageSpell,
-        ] = await Spell.createMany([
-            {
-                internalLabel: "Sort - Dégâts au héros",
-                actionId: heroDamageAction.id,
-            },
-            {
-                internalLabel: "Sort - Dégâts ciblés",
-                actionId: targetedDamageAction.id,
-            },
-            {
-                internalLabel: "Sort - Pioche",
-                actionId: drawAction.id,
-            },
-            {
-                internalLabel: "Sort - Dégâts de zone",
-                actionId: massMinionDamageAction.id,
-            },
-            {
-                internalLabel: "Sort - Dégâts aléatoires",
-                actionId: randomMinionDamageAction.id,
-            },
-        ]);
+        const [lanceTonneauSpell, pietinementSpell, hoggerSpell, heritageSpell, salveArdenteSpell] =
+            await Spell.createMany([
+                { internalLabel: "Lance-tonneau", actionId: barrelDamageAction.id },
+                { internalLabel: "Piétinement", actionId: stompDamageAction.id },
+                { internalLabel: "Hogger Frappe !", actionId: hoggerDamageAction.id },
+                { internalLabel: "Héritage de l'Empereur", actionId: heritageBoostAction.id },
+                { internalLabel: "Salve ardente", actionId: salveDamageAction.id },
+            ]);
 
         await Card.createMany([
             {
-                label: "Spell 2 Hero Damage",
-                imageUrl: "https://picsum.photos/seed/spell_hero_damage/200/300",
+                label: "Lance-tonneau",
+                imageUrl: getClassicCardImage("lance_tonneau"),
+                cost: 1,
+                type: "SPELL",
+                cardMode: "BETA",
+                minionId: null,
+                spellId: lanceTonneauSpell.id,
+                weaponId: null,
+            },
+            {
+                label: "Piétinement",
+                imageUrl: getClassicCardImage("pietinement"),
                 cost: 2,
                 type: "SPELL",
                 cardMode: "BETA",
                 minionId: null,
-                spellId: heroDamageSpell.id,
+                spellId: pietinementSpell.id,
                 weaponId: null,
             },
             {
-                label: "Spell 3 Targeted Damage",
-                imageUrl: "https://picsum.photos/seed/spell_targeted_damage/200/300",
+                label: "Hogger Frappe !",
+                imageUrl: getClassicCardImage("hogger_frappe"),
+                cost: 4,
+                type: "SPELL",
+                cardMode: "BETA",
+                minionId: null,
+                spellId: hoggerSpell.id,
+                weaponId: null,
+            },
+            {
+                label: "Héritage de l'Empereur",
+                imageUrl: getClassicCardImage("heritage_empereur"),
                 cost: 3,
                 type: "SPELL",
                 cardMode: "BETA",
                 minionId: null,
-                spellId: targetedDamageSpell.id,
+                spellId: heritageSpell.id,
                 weaponId: null,
             },
             {
-                label: "Spell 1 Draw",
-                imageUrl: "https://picsum.photos/seed/spell_draw/200/300",
-                cost: 1,
+                label: "Salve ardente",
+                imageUrl: getClassicCardImage("salve_ardente"),
+                cost: 3,
                 type: "SPELL",
                 cardMode: "BETA",
                 minionId: null,
-                spellId: drawSpell.id,
-                weaponId: null,
-            },
-            {
-                label: "Spell 2 Mass Minion Damage",
-                imageUrl: "https://picsum.photos/seed/spell_mass_damage/200/300",
-                cost: 2,
-                type: "SPELL",
-                cardMode: "BETA",
-                minionId: null,
-                spellId: massMinionDamageSpell.id,
-                weaponId: null,
-            },
-            {
-                label: "Spell 1 Random Minion Damage",
-                imageUrl: "https://picsum.photos/seed/spell_random_damage/200/300",
-                cost: 1,
-                type: "SPELL",
-                cardMode: "BETA",
-                minionId: null,
-                spellId: randomMinionDamageSpell.id,
+                spellId: salveArdenteSpell.id,
                 weaponId: null,
             },
         ]);
