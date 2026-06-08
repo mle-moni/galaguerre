@@ -17,12 +17,13 @@ export const PlayerHand = observer<PlayerHandProps>(({ player, isOpponent, isMob
         : isOpponent
           ? "opponent-hand card-hand"
           : "player-hand card-hand";
+    const animationOwner = isOpponent ? "OPPONENT" : "PLAYER";
 
     const rotationFactor = isMobile ? 1.5 : 2;
     const translationFactor = isMobile ? 2 : 4;
 
     return (
-        <div className={className}>
+        <div className={className} data-animation-hand data-animation-owner={animationOwner}>
             {player.hand.map((card, index) => {
                 const isLastCard = index === player.hand.length - 1;
                 const isFirstCard = index === 0;

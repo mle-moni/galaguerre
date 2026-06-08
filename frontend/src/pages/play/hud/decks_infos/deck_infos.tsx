@@ -15,11 +15,16 @@ const filler = <div className="h-[80px]" />;
 export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
     const numberOfCards = player.deckCards.length;
     const iconSize = getIconSize(numberOfCards);
+    const animationOwner = isOpponent ? "OPPONENT" : "PLAYER";
 
     return (
         <div className="flex flex-col w-full">
             {isOpponent && filler}
-            <div className="flex h-[80px] items-center">
+            <div
+                className="flex h-[80px] items-center"
+                data-animation-deck
+                data-animation-owner={animationOwner}
+            >
                 <p className="flex-1 mr-2 text-right text-xl">{numberOfCards}</p>
                 <IconPlayCard className="flex-1" size={iconSize} />
             </div>

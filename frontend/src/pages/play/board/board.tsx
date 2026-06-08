@@ -28,7 +28,10 @@ export const Board = observer(() => {
     const isMobilePortrait = useIsMobilePortrait();
 
     return (
-        <div className="flex flex-col h-full justify-center items-center min-h-0">
+        <div
+            className="flex flex-col h-full justify-center items-center min-h-0"
+            data-animation-board
+        >
             <BoardSide spotOwner="OPPONENT" isMobilePortrait={isMobilePortrait} />
             <div className="board-divider border-2 border-dashed w-full flex-shrink-0" />
             <BoardSide spotOwner="PLAYER" isMobilePortrait={isMobilePortrait} />

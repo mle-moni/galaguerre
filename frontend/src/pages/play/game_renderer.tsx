@@ -8,6 +8,8 @@ import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 
+import { GameAnimationOverlay } from "./animations/game_animation_overlay.jsx";
+import { useGameAnimations } from "./animations/use_game_animations.js";
 import { ArmedCardHint } from "./hud/armed_card_hint/armed_card_hint.jsx";
 import { ActionTimeline } from "./hud/action_timeline/action_timeline.jsx";
 import { MobileGameLayout } from "./hud/mobile/mobile_game_layout.jsx";
@@ -28,6 +30,7 @@ const DesktopGameLayout = observer<GameRendererProps>(({ game, user }) => {
     useTargetSelectionCancel(store);
     useArmedCardInteraction(store);
     useTargetingArrow(store);
+    useGameAnimations(game, user.id);
 
     const me = game.data.playerOne.userId === user.id ? game.data.playerOne : game.data.playerTwo;
     const opponent =
@@ -53,6 +56,7 @@ const DesktopGameLayout = observer<GameRendererProps>(({ game, user }) => {
             <GameFinalScreen />
             <ArmedCardHint />
             <TargetingArrowOverlay />
+            <GameAnimationOverlay />
         </div>
     );
 });

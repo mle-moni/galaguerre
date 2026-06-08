@@ -1,0 +1,113 @@
+.game-animation-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 40;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.game-animation-card-flight,
+.game-animation-draw-card,
+.game-animation-floating-text,
+.game-animation-death {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+	will-change: transform, opacity;
+}
+
+.game-animation-card-flight {
+	border-radius: 6px;
+	overflow: hidden;
+	background: #1e3a5f;
+	box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+	border: 2px solid rgba(255, 255, 255, 0.75);
+}
+
+.game-animation-card-flight img {
+	display: block;
+	width: 100%;
+	height: 64%;
+	object-fit: cover;
+}
+
+.game-animation-card-flight__label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 36%;
+	padding: 0 4px;
+	color: #fff;
+	font-size: 11px;
+	line-height: 1.1;
+	text-align: center;
+}
+
+.game-animation-draw-card {
+	width: 54px;
+	height: 72px;
+	border-radius: 6px;
+	background: linear-gradient(135deg, #1e3a5f, #0f172a);
+	border: 2px solid rgba(255, 255, 255, 0.75);
+	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.game-animation-attack-card {
+	border-color: rgba(255, 255, 255, 0.85);
+	box-shadow: 0 18px 34px rgba(0, 0, 0, 0.38);
+}
+
+.game-animation-floating-text {
+	font-weight: 900;
+	font-size: 22px;
+	-webkit-text-stroke: 1px rgba(0, 0, 0, 0.8);
+	text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.game-animation-floating-text--damage {
+	color: #ef4444;
+}
+
+.game-animation-floating-text--heal {
+	color: #22c55e;
+}
+
+.game-animation-floating-text--boost {
+	color: #facc15;
+}
+
+.game-animation-floating-text--mana {
+	color: #38bdf8;
+}
+
+.game-animation-death {
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.08);
+	border: 2px solid rgba(255, 255, 255, 0.42);
+}
+
+.game-animation-turn-banner {
+	position: absolute;
+	translate: -50% -50%;
+	min-width: 180px;
+	padding: 8px 14px;
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(4px);
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	text-align: center;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.game-animation-turn-banner--PLAYER {
+	color: #a8e6cf;
+}
+
+.game-animation-turn-banner--OPPONENT {
+	color: #ffd3b6;
+}

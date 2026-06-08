@@ -24,6 +24,8 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
     if (isOpponent) {
         return (
             <div
+                data-playing-card
+                data-playing-card-id={card.uuid}
                 style={style}
                 className={clsx("playing-card-face rounded bg-[#1e3a5f] cursor-pointer")}
             />
