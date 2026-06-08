@@ -121,9 +121,6 @@ export const GameHistoryDetailPage = observer(() => {
                             {formatGameDuration(detail.createdAt, detail.finishedAt)} —{" "}
                             {detail.roundCount} tours
                         </Text>
-                        <Text size="sm" c="dimmed">
-                            Terminée le {formatDate(detail.finishedAt)}
-                        </Text>
 
                         {isDraw ? (
                             <Text size="sm" c="dimmed">
