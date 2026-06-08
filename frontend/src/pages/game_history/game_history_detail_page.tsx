@@ -35,6 +35,20 @@ export const GameHistoryDetailPage = observer(() => {
     const currentUser = useUser();
     const detailQuery = useGameHistoryDetailQuery(userId, gameId);
 
+    const detail = detailQuery.data;
+    const isDraw = detail?.result === "DRAW";
+    const winner = useMemo(() => {
+        if (!detail || detail.winnerId === null) {
+            return null;
+        }
+
+        if (detail.winnerId === detail.player.userId) {
+            return detail.player;
+        }
+
+        return detail.opponent;
+    }, [detail]);
+
     if (!Number.isFinite(userId) || userId <= 0 || !Number.isFinite(gameId) || gameId <= 0) {
         return (
             <AppLayout title="Détail de la partie" backTo="/leaderboard" backLabel="Classement">
@@ -47,7 +61,7 @@ export const GameHistoryDetailPage = observer(() => {
 
     if (detailQuery.isLoading) return <CenteredLoader absolute />;
 
-    if (detailQuery.isError || !detailQuery.data) {
+    if (detailQuery.isError || !detailQuery.data || !detail) {
         return (
             <AppLayout
                 title="Détail de la partie"
@@ -60,20 +74,6 @@ export const GameHistoryDetailPage = observer(() => {
             </AppLayout>
         );
     }
-
-    const detail = detailQuery.data;
-    const isDraw = detail.result === "DRAW";
-    const winner = useMemo(() => {
-        if (detail.winnerId === null) {
-            return null;
-        }
-
-        if (detail.winnerId === detail.player.userId) {
-            return detail.player;
-        }
-
-        return detail.opponent;
-    }, [detail]);
 
     return (
         <AppLayout
