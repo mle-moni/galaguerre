@@ -192,7 +192,7 @@ const createDeckForUser = async (userId: number, unique: string) => {
         selected: true,
     });
 
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 30; i++) {
         await createMinionCardInDeck({
             deck,
             unique,
@@ -1020,7 +1020,7 @@ test.group("validation:validateDeck", (group) => {
             selected: true,
         });
 
-        for (let i = 0; i < 14; i++) {
+        for (let i = 0; i < 29; i++) {
             await createMinionCardInDeck({
                 deck: invalidDeck,
                 unique,

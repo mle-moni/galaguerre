@@ -52,7 +52,7 @@ test.group("game:create", (group) => {
         return deck;
     };
 
-    test("getDefaultGameData creates INIT state with 15 health and 3 cards in hand", async ({
+    test("getDefaultGameData creates INIT state with 30 health and 3 cards in hand", async ({
         assert,
     }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -83,8 +83,8 @@ test.group("game:create", (group) => {
 
         assert.equal(data.state, "INIT");
         assert.equal(data.currentRound, 0);
-        assert.equal(data.playerOne.health, 15);
-        assert.equal(data.playerTwo.health, 15);
+        assert.equal(data.playerOne.health, 30);
+        assert.equal(data.playerTwo.health, 30);
         assert.equal(data.playerOne.hand.length, 3);
         assert.equal(data.playerTwo.hand.length, 3);
         assert.equal(data.playerOne.deckCards.length, 3);
