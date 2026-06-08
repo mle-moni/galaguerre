@@ -1,12 +1,16 @@
 import CardSet from "#models/card_set";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
-import { HEARTHSTONE_CARD_SET_NAME } from "../seed_data/card_set_names.js";
+import { GALADRIM_CARD_SET_NAME, HEARTHSTONE_CARD_SET_NAME } from "../seed_data/card_set_names.js";
 
 export default class extends BaseSeeder {
     async run() {
         await CardSet.updateOrCreate(
             { name: HEARTHSTONE_CARD_SET_NAME },
             { name: HEARTHSTONE_CARD_SET_NAME, isActive: true },
+        );
+        await CardSet.updateOrCreate(
+            { name: GALADRIM_CARD_SET_NAME },
+            { name: GALADRIM_CARD_SET_NAME, isActive: true },
         );
     }
 }
