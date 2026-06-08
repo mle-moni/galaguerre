@@ -9,6 +9,7 @@ import { useGameContext } from "~/hooks/use_game_state";
 import { GameAnimationOverlay } from "../../animations/game_animation_overlay.jsx";
 import { useGameAnimations } from "../../animations/use_game_animations.js";
 import { Board } from "../../board/board.jsx";
+import { AbandonGameControl } from "../abandon_game/abandon_game_control.jsx";
 import { ActionTimelineFab } from "../action_timeline/action_timeline_fab.jsx";
 import { ArmedCardHint } from "../armed_card_hint/armed_card_hint.jsx";
 import { GameFinalScreen } from "../game_final_screen/game_final_screen.jsx";
@@ -35,6 +36,7 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(({ game, user })
 
     return (
         <div className="mobile-game-layout">
+            <AbandonGameControl />
             <ActionTimelineFab />
             <MobileOpponentBar opponent={opponent} />
             <div className="mobile-game-layout__board">

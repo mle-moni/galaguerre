@@ -100,3 +100,11 @@ export const recordWeaponBreak = (game: Game, player: GamePlayer, card: PlayerCa
         card: structuredClone(card),
     });
 };
+
+export const recordAbandon = (game: Game, player: GamePlayer): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "ABANDON",
+    });
+};

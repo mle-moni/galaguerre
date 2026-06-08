@@ -10,6 +10,7 @@ import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 
 import { GameAnimationOverlay } from "./animations/game_animation_overlay.jsx";
 import { useGameAnimations } from "./animations/use_game_animations.js";
+import { AbandonGameControl } from "./hud/abandon_game/abandon_game_control.jsx";
 import { ArmedCardHint } from "./hud/armed_card_hint/armed_card_hint.jsx";
 import { ActionTimeline } from "./hud/action_timeline/action_timeline.jsx";
 import { MobileGameLayout } from "./hud/mobile/mobile_game_layout.jsx";
@@ -38,6 +39,7 @@ const DesktopGameLayout = observer<GameRendererProps>(({ game, user }) => {
 
     return (
         <div className="h-full relative">
+            <AbandonGameControl />
             <ActionTimeline />
             <div className="flex h-full">
                 <div className="flex justify-center w-[124px]">

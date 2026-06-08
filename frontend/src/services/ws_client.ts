@@ -37,6 +37,10 @@ export const passTurn = () => {
     CLIENT_SOCKET.emit("pass_turn");
 };
 
+export const abandonGame = () => {
+    CLIENT_SOCKET.emit("game:abandon", {});
+};
+
 export const emitSocketEventToServer = <T extends ClientSocketEventKey>(
     key: T,
     data: ClientSocketEventByKey[T],

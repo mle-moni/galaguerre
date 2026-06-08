@@ -37,6 +37,7 @@ export const controllers = {
         ShowUserGame: () => import("#controllers/game_history/show_user_game"),
     },
     games: {
+        AbandonGame: () => import("#controllers/games/abandon_game"),
         CreateGame: () => import("#controllers/games/create_game"),
         CreateTrainingGame: () => import("#controllers/games/create_training_game"),
         GameSearch: () => import("#controllers/games/game_search"),

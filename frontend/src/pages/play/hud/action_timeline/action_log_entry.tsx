@@ -54,6 +54,14 @@ export const ActionLogEntry = ({ entry, game, currentUserId, className }: Action
         );
     }
 
+    if (entry.type === "ABANDON") {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} abandonne la partie
+            </Text>
+        );
+    }
+
     if (entry.type === "DRAW") {
         return (
             <Text className={entryClass} component="div">

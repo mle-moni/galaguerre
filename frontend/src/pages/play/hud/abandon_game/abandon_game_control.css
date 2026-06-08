@@ -1,0 +1,27 @@
+.abandon-game-fab {
+	position: absolute;
+	top: max(0.5rem, env(safe-area-inset-top));
+	right: max(0.5rem, env(safe-area-inset-right));
+	z-index: 20;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	border: none;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.abandon-game-fab:hover {
+	background: rgba(127, 29, 29, 0.85);
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+	.abandon-game-fab {
+		top: calc(max(0.5rem, env(safe-area-inset-top)) + 2.75rem + 52px);
+	}
+}

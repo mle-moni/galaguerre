@@ -1,4 +1,5 @@
 import { MINION_SPOT_IDS, SPOT_OWNERS } from "#api_types/game.types";
+import { abandonGame } from "#controllers/games/abandon_game";
 import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
 import { gameWeaponAction } from "#controllers/games/weapon_action/game_weapon_action";
 import { passGameTurn } from "#controllers/games/pass_game_turn";
@@ -52,10 +53,18 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
             owner: vine.enum(SPOT_OWNERS),
         }),
     );
+
+    subscribeToClientSocketEvent(
+        socket,
+        "game:abandon",
+        () => abandonGame(socket.id),
+        vine.object({}),
+    );
 };
 
 export const partAuthRestrictedEvents = (socket: Socket) => {
     socket.removeAllListeners("debug");
     socket.removeAllListeners("pass_turn");
     socket.removeAllListeners("game:play_card");
+    socket.removeAllListeners("game:abandon");
 };

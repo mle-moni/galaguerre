@@ -141,7 +141,8 @@ export type GameLogEntryType =
     | "BATTLECRY"
     | "DEATHRATTLE"
     | "MINION_DEATH"
-    | "WEAPON_BREAK";
+    | "WEAPON_BREAK"
+    | "ABANDON";
 
 export interface GameLogAttackTarget {
     type: "MINION" | "HERO";
