@@ -1,5 +1,6 @@
 import { Button, Modal, Text } from "@mantine/core";
 import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -67,21 +68,24 @@ export const DecksPage = observer(() => {
                     <div className="flex flex-col gap-3">
                         {decks.map((deck) => (
                             <div key={deck.id} className="gg-deck-card-item">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="font-semibold text-white text-lg">
+                                <div className="gg-deck-card-item__info">
+                                    <div className="gg-deck-card-item__title-row">
+                                        <span className="font-semibold text-white text-lg leading-tight">
                                             {deck.name}
                                         </span>
                                         {deck.selected && (
                                             <span className="gg-badge gg-badge--active">Actif</span>
                                         )}
                                         <span
-                                            className={`gg-badge ${deck.valid ? "gg-badge--valid" : "gg-badge--invalid"}`}
+                                            className={clsx(
+                                                "gg-badge",
+                                                deck.valid ? "gg-badge--valid" : "gg-badge--invalid",
+                                            )}
                                         >
                                             {deck.valid ? "Valide" : "Invalide"}
                                         </span>
                                     </div>
-                                    <p className="text-white/60 text-sm m-0 mt-1">
+                                    <p className="gg-deck-card-item__meta">
                                         {deck.cardCount} cartes
                                     </p>
                                     {!deck.valid && deck.compositionErrors.length > 0 && (
@@ -90,18 +94,21 @@ export const DecksPage = observer(() => {
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex gap-2 flex-wrap">
-                                    {!deck.selected && (
-                                        <Button
-                                            size="xs"
-                                            className="gg-btn-primary"
-                                            loading={selectMutation.isPending}
-                                            disabled={!deck.valid}
-                                            onClick={() => selectMutation.mutate(deck.id)}
-                                        >
-                                            Sélectionner
-                                        </Button>
-                                    )}
+                                <div className="gg-deck-card-item__actions">
+                                    <Button
+                                        size="xs"
+                                        className={clsx(
+                                            "gg-btn-primary",
+                                            deck.selected && "invisible pointer-events-none",
+                                        )}
+                                        loading={selectMutation.isPending}
+                                        disabled={!deck.valid || deck.selected}
+                                        tabIndex={deck.selected ? -1 : undefined}
+                                        aria-hidden={deck.selected}
+                                        onClick={() => selectMutation.mutate(deck.id)}
+                                    >
+                                        Sélectionner
+                                    </Button>
                                     <Button
                                         component={Link}
                                         to={`/decks/${deck.id}`}
