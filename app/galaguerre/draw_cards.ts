@@ -1,7 +1,7 @@
 import type { CardFilterSnapshot, GamePlayer } from "#api_types/game.types";
 import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import type Game from "#models/game";
-import { recordFatigueDamage } from "./game_log/record_game_log.js";
+import { recordCardDraw, recordFatigueDamage } from "./game_log/record_game_log.js";
 import { recordCardDrawn } from "./game_stats/record_player_stats.js";
 import { triggerPassives } from "./passive_engine/trigger_passives.js";
 
@@ -27,6 +27,7 @@ export const drawOneCard = (
         } else {
             player.hand.push(card);
             recordCardDrawn(player);
+            if (game) recordCardDraw(game, player, card);
             triggerDrawPassives(game, player);
         }
         return;
@@ -46,6 +47,7 @@ export const drawOneCard = (
     const [card] = player.deckCards.splice(matchIndex, 1);
     player.hand.push(card!);
     recordCardDrawn(player);
+    if (game) recordCardDraw(game, player, card!);
     triggerDrawPassives(game, player);
 };
 

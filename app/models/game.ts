@@ -1,4 +1,10 @@
-import type { ApiGame, GameData, GamePlayer, PlayerCard } from "#api_types/game.types";
+import type {
+    ApiGame,
+    GameData,
+    GameLogEntry,
+    GamePlayer,
+    PlayerCard,
+} from "#api_types/game.types";
 import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
@@ -43,10 +49,12 @@ export default class Game extends BaseModel {
         const p2 = this.data.playerTwo;
         const playerOne: GamePlayer = hidePlayerData(p1, forUserId);
         const playerTwo: GamePlayer = hidePlayerData(p2, forUserId);
+        const actionLog = hideActionLogForUser(this.data.actionLog, forUserId);
         const data: GameData = {
             ...this.data,
             playerOne,
             playerTwo,
+            actionLog,
         };
 
         return {
@@ -60,6 +68,15 @@ export default class Game extends BaseModel {
         };
     }
 }
+
+const hideActionLogForUser = (actionLog: GameLogEntry[], forUserId: number): GameLogEntry[] =>
+    actionLog.map((entry) => {
+        if (entry.type === "DRAW" && entry.card && entry.playerId !== forUserId) {
+            return { ...entry, card: hideCardData(entry.card) };
+        }
+
+        return entry;
+    });
 
 const hidePlayerData = (player: GamePlayer, forUserId: number): GamePlayer => {
     const deckCards = player.deckCards.map(hideCardData);

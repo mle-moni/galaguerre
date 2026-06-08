@@ -44,6 +44,7 @@ export interface DrawEventInput {
     type: "DRAW";
     from: AnimationRect;
     to: AnimationRect;
+    delayMs?: number;
 }
 
 export interface TurnBannerEventInput {

@@ -170,37 +170,7 @@ const pushMinionDeltaEvents = (
     }
 };
 
-const pushDrawEvents = (
-    events: PendingVisualEvent[],
-    previousGame: ApiGame,
-    nextGame: ApiGame,
-    userId: number,
-    previousSnapshot: GameAnimationSnapshot,
-    nextSnapshot: GameAnimationSnapshot,
-) => {
-    for (const owner of OWNERS) {
-        const previousPlayer = getPlayerForOwner(previousGame, userId, owner);
-        const nextPlayer = getPlayerForOwner(nextGame, userId, owner);
-
-        if (nextPlayer.deckCards.length >= previousPlayer.deckCards.length) continue;
-        if (nextPlayer.hand.length <= previousPlayer.hand.length) continue;
-
-        const previousHandIds = new Set(previousPlayer.hand.map((card) => card.uuid));
-        const drawnCard = nextPlayer.hand.find((card) => !previousHandIds.has(card.uuid));
-        const from = getFallbackRect([
-            previousSnapshot.decks.get(owner),
-            nextSnapshot.decks.get(owner),
-            previousSnapshot.hands.get(owner),
-        ]);
-        const to = getFallbackRect([
-            drawnCard ? nextSnapshot.cards.get(drawnCard.uuid) : undefined,
-            nextSnapshot.hands.get(owner),
-            previousSnapshot.hands.get(owner),
-        ]);
-
-        events.push({ type: "DRAW", from, to });
-    }
-};
+const DRAW_STAGGER_MS = 150;
 
 const pushLogEvents = (
     events: PendingVisualEvent[],
@@ -215,6 +185,7 @@ const pushLogEvents = (
     const newEntries = (nextGame.data.actionLog ?? []).filter(
         (entry) => !previousLogIds.has(entry.id),
     );
+    const drawIndexByPlayer = new Map<number, number>();
 
     for (const entry of newEntries) {
         const owner = getOwnerForPlayerId(userId, entry.playerId);
@@ -249,6 +220,28 @@ const pushLogEvents = (
             if (from && to) {
                 events.push({ type: "ATTACK", card: entry.attackerCard, from, to });
             }
+        }
+
+        if (entry.type === "DRAW" && entry.card) {
+            const drawIndex = drawIndexByPlayer.get(entry.playerId) ?? 0;
+            drawIndexByPlayer.set(entry.playerId, drawIndex + 1);
+
+            const from = getFallbackRect([
+                previousSnapshot.decks.get(owner),
+                nextSnapshot.decks.get(owner),
+            ]);
+            const to = getFallbackRect([
+                nextSnapshot.cards.get(entry.card.uuid),
+                nextSnapshot.hands.get(owner),
+                previousSnapshot.hands.get(owner),
+            ]);
+
+            events.push({
+                type: "DRAW",
+                from,
+                to,
+                delayMs: drawIndex * DRAW_STAGGER_MS,
+            });
         }
     }
 };
@@ -311,7 +304,6 @@ export const deriveGameAnimationEvents = ({
     );
     pushFloatingStatEvents(events, previousGame, nextGame, userId, previousSnapshot, nextSnapshot);
     pushMinionDeltaEvents(events, previousMinions, nextMinions);
-    pushDrawEvents(events, previousGame, nextGame, userId, previousSnapshot, nextSnapshot);
     pushTurnEvents(events, previousGame, nextGame, userId, nextSnapshot);
 
     return events;

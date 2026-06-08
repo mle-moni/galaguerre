@@ -37,6 +37,15 @@ export const recordFatigueDamage = (game: Game, player: GamePlayer, damage: numb
     });
 };
 
+export const recordCardDraw = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "DRAW",
+        card: structuredClone(card),
+    });
+};
+
 export const recordAttack = (
     game: Game,
     player: GamePlayer,

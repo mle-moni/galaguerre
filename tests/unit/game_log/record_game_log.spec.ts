@@ -73,6 +73,120 @@ test.group("game action log", (group) => {
         assert.equal(passEntry!.roundNumber, 2);
     });
 
+    test("records DRAW when a player draws at turn start", async ({ assert }) => {
+        const deckCard = createMinionCard({ uuid: "turn-draw", label: "Carte piochée" });
+
+        const result = await runPassTurn({
+            data: createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                playerTwo: {
+                    deckCards: [deckCard],
+                    hand: [],
+                },
+            }),
+            actor: "playerOne",
+            expect: { error: null },
+        });
+
+        const drawEntries = result.game.data.actionLog.filter((e) => e.type === "DRAW");
+        assert.equal(drawEntries.length, 1);
+        assert.equal(drawEntries[0]!.playerId, result.game.data.playerTwo.userId);
+        assert.equal(drawEntries[0]!.card?.uuid, "turn-draw");
+        assert.equal(drawEntries[0]!.card?.label, "Carte piochée");
+        assert.equal(drawEntries[0]!.roundNumber, 2);
+    });
+
+    test("records DRAW alongside PLAY_CARD when a battlecry draws a card", async ({ assert }) => {
+        const deckCard = createMinionCard({ uuid: "battlecry-draw", label: "Carte deck" });
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            label: "Piocheur",
+            cost: 2,
+            battlecryActions: [createCardActionSnapshot({ type: "DRAW", drawCount: 1 })],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    deckCards: [deckCard],
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        const log = result.game.data.actionLog;
+        assert.equal(log.length, 3);
+        assert.equal(log[0]!.type, "PLAY_CARD");
+        assert.equal(log[1]!.type, "BATTLECRY");
+        assert.equal(log[2]!.type, "DRAW");
+        assert.equal(log[2]!.card?.uuid, "battlecry-draw");
+        assert.equal(log[2]!.playerId, result.actorUserId);
+    });
+
+    test("records two DRAW entries when a battlecry draws two cards", async ({ assert }) => {
+        const deckCard1 = createMinionCard({ uuid: "deck-1", label: "Deck 1" });
+        const deckCard2 = createMinionCard({ uuid: "deck-2", label: "Deck 2" });
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [createCardActionSnapshot({ type: "DRAW", drawCount: 2 })],
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    deckCards: [deckCard1, deckCard2],
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        const drawEntries = result.game.data.actionLog.filter((e) => e.type === "DRAW");
+        assert.equal(drawEntries.length, 2);
+        assert.equal(drawEntries[0]!.card?.uuid, "deck-1");
+        assert.equal(drawEntries[1]!.card?.uuid, "deck-2");
+    });
+
+    test("does not record DRAW when drawing from an empty deck", async ({ assert }) => {
+        const { game, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 3,
+                playerTwo: {
+                    deckCards: [],
+                    hand: [],
+                    health: 15,
+                    maxFatigueDamageTaken: 0,
+                },
+            }),
+        );
+
+        const result = await runSetupNextTurnOnGame(game);
+
+        const drawEntries = result.game.data.actionLog.filter((e) => e.type === "DRAW");
+        const fatigueEntry = result.game.data.actionLog.find((e) => e.type === "FATIGUE_DAMAGE");
+        assert.equal(drawEntries.length, 0);
+        assert.isDefined(fatigueEntry);
+        assert.equal(fatigueEntry!.playerId, playerTwo.id);
+    });
+
     test("records FATIGUE_DAMAGE when drawing from an empty deck", async ({ assert }) => {
         const { game, playerTwo } = await createTestGame(
             createGameData({

@@ -84,13 +84,14 @@ const DrawFlight = ({ event }: { event: DrawEvent }) => {
     const reduceMotion = useReducedMotion();
     const from = getCenteredPosition(event.from, 54, 72);
     const to = getCenteredPosition(event.to, 54, 72);
+    const delay = reduceMotion ? 0 : (event.delayMs ?? 0) / 1000;
 
     return (
         <motion.div
             className="game-animation-draw-card"
             initial={{ x: from.x, y: from.y, opacity: 0, scale: reduceMotion ? 1 : 0.85 }}
             animate={{ x: to.x, y: to.y, opacity: [0, 1, 0], scale: reduceMotion ? 1 : 1 }}
-            transition={{ duration: reduceMotion ? 0.16 : 0.38, ease: "easeOut" }}
+            transition={{ duration: reduceMotion ? 0.16 : 0.38, ease: "easeOut", delay }}
             onAnimationComplete={() => removeEvent(event.id)}
         />
     );
