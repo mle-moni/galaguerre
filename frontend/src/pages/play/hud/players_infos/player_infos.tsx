@@ -3,6 +3,7 @@ import type { GamePlayer } from "#api_types/game.types";
 import { Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import type { PointerEvent } from "react";
+import clsx from "clsx";
 import { useGameContext } from "~/hooks/use_game_state";
 import "./player_infos.css";
 
@@ -29,6 +30,10 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
               : minionAttackBorderColor;
 
     const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
+    const isInteractiveTarget =
+        store.targetSelectionStore.isHighlightingTargets ||
+        store.minionDragStore.isAttacking ||
+        store.weaponDragStore.isAttacking;
 
     const handleClick = () => {
         handleDrop();
@@ -65,7 +70,10 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             data-target-zone
             data-spot-id="hero"
             data-spot-owner={isOpponent ? "OPPONENT" : "PLAYER"}
-            className="border-2 border-dashed w-full mx-2"
+            className={clsx(
+                "border-2 border-dashed w-full mx-2",
+                isInteractiveTarget && "hero-target--interactive",
+            )}
             style={{
                 borderColor: dropZoneBorderColor,
             }}

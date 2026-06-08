@@ -2,6 +2,17 @@
 	visibility: hidden;
 }
 
+.minion-spot {
+	transition:
+		border-color 140ms ease,
+		background-color 140ms ease,
+		box-shadow 140ms ease;
+}
+
+.minion-spot--interactive-target {
+	animation: minion-spot-target-pulse 900ms ease-in-out infinite;
+}
+
 .board-side--compact {
 	display: flex;
 	flex-direction: column;
@@ -39,4 +50,25 @@
 
 .minion-spot--compact:not(:has([data-playing-card])) {
 	background-color: rgba(254, 202, 202, 0.45);
+}
+
+@keyframes minion-spot-target-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+	}
+
+	50% {
+		box-shadow: 0 0 16px rgba(255, 255, 255, 0.55);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.minion-spot {
+		transition: none;
+	}
+
+	.minion-spot--interactive-target {
+		animation: none;
+	}
 }

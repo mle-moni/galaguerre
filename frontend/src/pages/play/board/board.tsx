@@ -119,6 +119,11 @@ const MinionSpot = observer(({ store, spotOwner, spotId, compact }: MinionSpotPr
 
         e.preventDefault();
     };
+    const isInteractiveTarget =
+        store.targetSelectionStore.isHighlightingTargets ||
+        store.cardDragStore.activeMinionCard !== null ||
+        store.minionDragStore.isAttacking ||
+        store.weaponDragStore.isAttacking;
 
     return (
         <div
@@ -130,6 +135,7 @@ const MinionSpot = observer(({ store, spotOwner, spotId, compact }: MinionSpotPr
             onClick={handleClick}
             className={clsx(
                 "minion-spot bg-red-100 border-dashed",
+                isInteractiveTarget && "minion-spot--interactive-target",
                 compact ? "minion-spot--compact" : "m-4",
             )}
             style={{

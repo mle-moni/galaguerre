@@ -1,3 +1,7 @@
+.hero-target--interactive {
+	animation: hero-target-pulse 900ms ease-in-out infinite;
+}
+
 .hero-panel {
 	border: 2px solid white;
 	border-radius: 8px;
@@ -71,4 +75,21 @@
 	font-size: 12px;
 	line-height: 1;
 	color: #fff;
+}
+
+@keyframes hero-target-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+	}
+
+	50% {
+		box-shadow: 0 0 18px rgba(255, 255, 255, 0.5);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hero-target--interactive {
+		animation: none;
+	}
 }
