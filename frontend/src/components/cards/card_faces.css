@@ -1,3 +1,26 @@
+.playing-card-face {
+	transition:
+		box-shadow 140ms ease,
+		filter 140ms ease,
+		opacity 140ms ease;
+}
+
+.card-hand__card {
+	transition:
+		transform 160ms ease,
+		filter 160ms ease;
+}
+
+.card-hand__card:hover {
+	z-index: 5;
+	transform: translateY(-10px);
+	filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.34));
+}
+
+.card-hand__card:active {
+	transform: translateY(-6px) scale(0.98);
+}
+
 .cost {
 	position: absolute;
 	background-color: #e3b42a;
@@ -145,4 +168,16 @@
 
 .card-description {
 	white-space: pre-line;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.playing-card-face,
+	.card-hand__card {
+		transition: none;
+	}
+
+	.card-hand__card:hover,
+	.card-hand__card:active {
+		transform: none;
+	}
 }

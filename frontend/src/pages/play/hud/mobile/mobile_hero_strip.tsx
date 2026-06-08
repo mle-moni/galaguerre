@@ -34,6 +34,10 @@ export const MobileHeroStrip = observer(
 
         const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
         const weaponLabel = player.weaponState?.originalCard.label;
+        const isInteractiveTarget =
+            store.targetSelectionStore.isHighlightingTargets ||
+            store.minionDragStore.isAttacking ||
+            store.weaponDragStore.isAttacking;
 
         const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
             if (event.target instanceof Element && event.target.closest("[data-stat-badge]")) {
@@ -69,6 +73,9 @@ export const MobileHeroStrip = observer(
                 className={clsx(
                     "mobile-bar__hero-target",
                     canAttackWithWeapon && "mobile-bar__hero-target--weapon-draggable",
+                    heroHighlight === "none" &&
+                        isInteractiveTarget &&
+                        "mobile-bar__hero-target--interactive",
                     heroHighlight === "valid" && "target-zone--valid",
                     heroHighlight === "invalid" && "target-zone--invalid",
                 )}

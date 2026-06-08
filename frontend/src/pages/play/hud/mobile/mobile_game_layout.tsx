@@ -6,6 +6,8 @@ import { useArmedCardInteraction } from "~/hooks/use_armed_card_interaction";
 import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 import { useGameContext } from "~/hooks/use_game_state";
+import { GameAnimationOverlay } from "../../animations/game_animation_overlay.jsx";
+import { useGameAnimations } from "../../animations/use_game_animations.js";
 import { Board } from "../../board/board.jsx";
 import { ActionTimelineFab } from "../action_timeline/action_timeline_fab.jsx";
 import { ArmedCardHint } from "../armed_card_hint/armed_card_hint.jsx";
@@ -25,6 +27,7 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(({ game, user })
     useTargetSelectionCancel(store);
     useArmedCardInteraction(store);
     useTargetingArrow(store);
+    useGameAnimations(game, user.id);
 
     const me = game.data.playerOne.userId === user.id ? game.data.playerOne : game.data.playerTwo;
     const opponent =
@@ -45,6 +48,7 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(({ game, user })
             <GameFinalScreen />
             <ArmedCardHint isMobile />
             <TargetingArrowOverlay />
+            <GameAnimationOverlay />
         </div>
     );
 });

@@ -34,6 +34,10 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             : undefined;
 
     const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
+    const isInteractiveTarget =
+        store.targetSelectionStore.isHighlightingTargets ||
+        store.minionDragStore.isAttacking ||
+        store.weaponDragStore.isAttacking;
 
     const handleClick = () => {
         handleDrop();
@@ -73,6 +77,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             className={clsx(
                 "w-full mx-2",
                 heroHighlight === "none" && "border-2 border-dashed",
+                heroHighlight === "none" && isInteractiveTarget && "hero-target--interactive",
                 heroHighlight === "valid" && "target-zone--valid",
                 heroHighlight === "invalid" && "target-zone--invalid",
             )}

@@ -29,7 +29,10 @@ export const Board = observer(() => {
     const isMobilePortrait = useIsMobilePortrait();
 
     return (
-        <div className="flex flex-col h-full justify-center items-center min-h-0">
+        <div
+            className="flex flex-col h-full justify-center items-center min-h-0"
+            data-animation-board
+        >
             <BoardSide spotOwner="OPPONENT" isMobilePortrait={isMobilePortrait} />
             <div className="board-divider border-2 border-dashed w-full flex-shrink-0" />
             <BoardSide spotOwner="PLAYER" isMobilePortrait={isMobilePortrait} />
@@ -117,6 +120,11 @@ const MinionSpot = observer(({ store, spotOwner, spotId, compact }: MinionSpotPr
 
         e.preventDefault();
     };
+    const isInteractiveTarget =
+        store.targetSelectionStore.isHighlightingTargets ||
+        store.cardDragStore.activeMinionCard !== null ||
+        store.minionDragStore.isAttacking ||
+        store.weaponDragStore.isAttacking;
 
     const highlight = store.getMinionSpotTargetHighlight(spotId, spotOwner);
     const borderColor =
@@ -133,6 +141,7 @@ const MinionSpot = observer(({ store, spotOwner, spotId, compact }: MinionSpotPr
             className={clsx(
                 "minion-spot bg-red-100",
                 highlight === "none" && "border-dashed",
+                highlight === "none" && isInteractiveTarget && "minion-spot--interactive-target",
                 highlight === "valid" && "target-zone--valid",
                 highlight === "invalid" && "target-zone--invalid",
                 compact ? "minion-spot--compact" : "m-4",
