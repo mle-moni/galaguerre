@@ -79,7 +79,9 @@ export const DecksPage = observer(() => {
                                         <span
                                             className={clsx(
                                                 "gg-badge",
-                                                deck.valid ? "gg-badge--valid" : "gg-badge--invalid",
+                                                deck.valid
+                                                    ? "gg-badge--valid"
+                                                    : "gg-badge--invalid",
                                             )}
                                         >
                                             {deck.valid ? "Valide" : "Invalide"}

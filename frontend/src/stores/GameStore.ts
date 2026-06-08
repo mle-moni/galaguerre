@@ -9,6 +9,16 @@ import { TargetSelectionStore } from "./TargetSelectionStore.js";
 import { TargetingArrowStore } from "./TargetingArrowStore.js";
 import { WeaponDragStore } from "./WeaponDragStore.js";
 
+export type TargetHighlight = "valid" | "invalid" | "none";
+
+const TRANSPARENT = "RGBa(0, 0, 0, 0)";
+
+const colorToTargetHighlight = (color: string): TargetHighlight => {
+    if (color === "green") return "valid";
+    if (color === "red") return "invalid";
+    return "none";
+};
+
 export class GameStore {
     cardDragStore = new CardDragStore(this);
     minionDragStore = new MinionDragStore(this);
@@ -146,5 +156,45 @@ export class GameStore {
         }
 
         return "black";
+    }
+
+    getMinionSpotTargetHighlight(spotId: MinionSpotId, spotOwner: SpotOwner): TargetHighlight {
+        if (this.targetSelectionStore.isHighlightingTargets) {
+            return colorToTargetHighlight(
+                this.targetSelectionStore.getMinionSpotBorderColor(
+                    spotId,
+                    spotOwner === "OPPONENT",
+                ),
+            );
+        }
+
+        if (this.minionDragStore.isAttacking) {
+            const color =
+                spotOwner === "OPPONENT"
+                    ? this.minionDragStore.opponentSlotsBorderColor[spotId]
+                    : this.minionDragStore.mySlotsBorderColor[spotId];
+            return colorToTargetHighlight(color);
+        }
+
+        if (this.weaponDragStore.isAttacking && spotOwner === "OPPONENT") {
+            return colorToTargetHighlight(this.weaponDragStore.opponentSlotsBorderColor[spotId]);
+        }
+
+        return "none";
+    }
+
+    getHeroTargetHighlight(isOpponent: boolean): TargetHighlight {
+        const targetSelectionColor = this.targetSelectionStore.getHeroBorderColor(isOpponent);
+        if (targetSelectionColor !== TRANSPARENT) {
+            return colorToTargetHighlight(targetSelectionColor);
+        }
+
+        const weaponAttackColor = this.weaponDragStore.getOpponentHeroBorderColor(isOpponent);
+        if (weaponAttackColor !== TRANSPARENT) {
+            return colorToTargetHighlight(weaponAttackColor);
+        }
+
+        const minionAttackColor = this.minionDragStore.getPlayerBorderColor(isOpponent);
+        return colorToTargetHighlight(minionAttackColor);
     }
 }
