@@ -3,61 +3,61 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import User from "#models/user";
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
+import { GALADRIM_CARD_SET_NAME } from "../seed_data/card_set_names.js";
 import {
-    BALANCED_DECKS_BY_EMAIL,
     buildDeckCardIds,
     DECK_SIZE,
     recipeTotalCards,
+    SEEDED_DECKS,
 } from "../seed_data/balanced_decks.js";
 
 export default class extends BaseSeeder {
     async run() {
         const users = await User.all();
         const allLabels = [
-            ...new Set(
-                Object.values(BALANCED_DECKS_BY_EMAIL).flatMap(({ recipe }) =>
-                    recipe.map(({ label }) => label),
-                ),
-            ),
+            ...new Set(SEEDED_DECKS.flatMap(({ recipe }) => recipe.map(({ label }) => label))),
         ];
 
-        const cards = await Card.query().whereIn("label", allLabels);
+        const cards = await Card.query().whereIn("label", allLabels).preload("cardSet");
         const cardByLabel = new Map(cards.map((card) => [card.label, card]));
 
+        for (const card of cards) {
+            if (card.cardSet.name !== GALADRIM_CARD_SET_NAME) {
+                throw new Error(
+                    `Card "${card.label}" belongs to set "${card.cardSet.name}", expected "${GALADRIM_CARD_SET_NAME}"`,
+                );
+            }
+        }
+
         for (const user of users) {
-            const deckConfig = BALANCED_DECKS_BY_EMAIL[user.email];
-            if (!deckConfig) {
-                throw new Error(`No balanced deck recipe configured for user: ${user.email}`);
-            }
+            for (const { name, recipe, selected } of SEEDED_DECKS) {
+                if (recipeTotalCards(recipe) !== DECK_SIZE) {
+                    throw new Error(
+                        `Deck recipe "${name}" for ${user.email} has ${recipeTotalCards(recipe)} cards, expected ${DECK_SIZE}`,
+                    );
+                }
 
-            const { name, recipe } = deckConfig;
+                const deck = await Deck.create({
+                    name,
+                    userId: user.id,
+                    selected,
+                });
 
-            if (recipeTotalCards(recipe) !== DECK_SIZE) {
-                throw new Error(
-                    `Deck recipe "${name}" for ${user.email} has ${recipeTotalCards(recipe)} cards, expected ${DECK_SIZE}`,
+                const deckCardIds = buildDeckCardIds(recipe, cardByLabel);
+
+                if (deckCardIds.length !== DECK_SIZE) {
+                    throw new Error(
+                        `Built deck "${name}" for ${user.email} has ${deckCardIds.length} cards, expected ${DECK_SIZE}`,
+                    );
+                }
+
+                await DeckCard.createMany(
+                    deckCardIds.map((cardId) => ({
+                        cardId,
+                        deckId: deck.id,
+                    })),
                 );
             }
-
-            const deck = await Deck.create({
-                name,
-                userId: user.id,
-                selected: true,
-            });
-
-            const deckCardIds = buildDeckCardIds(recipe, cardByLabel);
-
-            if (deckCardIds.length !== DECK_SIZE) {
-                throw new Error(
-                    `Built deck "${name}" for ${user.email} has ${deckCardIds.length} cards, expected ${DECK_SIZE}`,
-                );
-            }
-
-            await DeckCard.createMany(
-                deckCardIds.map((cardId) => ({
-                    cardId,
-                    deckId: deck.id,
-                })),
-            );
         }
     }
 }

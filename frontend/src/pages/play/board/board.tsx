@@ -1,4 +1,5 @@
 import "./board.css";
+import "~/components/targeting/targeting.css";
 
 import type { MinionSpotId, SpotOwner } from "#api_types/game.types";
 
@@ -125,6 +126,10 @@ const MinionSpot = observer(({ store, spotOwner, spotId, compact }: MinionSpotPr
         store.minionDragStore.isAttacking ||
         store.weaponDragStore.isAttacking;
 
+    const highlight = store.getMinionSpotTargetHighlight(spotId, spotOwner);
+    const borderColor =
+        highlight === "none" ? store.getMinionSpotBackgroundColor(spotId, spotOwner) : undefined;
+
     return (
         <div
             data-target-zone
@@ -134,13 +139,14 @@ const MinionSpot = observer(({ store, spotOwner, spotId, compact }: MinionSpotPr
             onDrop={handleDrop}
             onClick={handleClick}
             className={clsx(
-                "minion-spot bg-red-100 border-dashed",
-                isInteractiveTarget && "minion-spot--interactive-target",
+                "minion-spot bg-red-100",
+                highlight === "none" && "border-dashed",
+                highlight === "none" && isInteractiveTarget && "minion-spot--interactive-target",
+                highlight === "valid" && "target-zone--valid",
+                highlight === "invalid" && "target-zone--invalid",
                 compact ? "minion-spot--compact" : "m-4",
             )}
-            style={{
-                borderColor: store.getMinionSpotBackgroundColor(spotId, spotOwner),
-            }}
+            style={{ borderColor }}
         >
             {minionToRender && <RenderMinion state={minionToRender} spotOwner={spotOwner} />}
         </div>

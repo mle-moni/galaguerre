@@ -1,4 +1,4 @@
-export const DEFAULT_HERO_HEALTH = 15;
+export const DEFAULT_HERO_HEALTH = 30;
 
 export type ComparisonOperator = "<" | ">" | "=";
 

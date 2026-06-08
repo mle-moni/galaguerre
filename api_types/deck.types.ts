@@ -1,5 +1,9 @@
 import type { CardActionSnapshot, CardTagSnapshot, PassiveSnapshot } from "./game.types.js";
 
+export const DECK_MIN_CARDS = 30;
+export const DECK_MAX_CARDS = 30;
+export const DECK_MAX_COPIES_PER_CARD = 2;
+
 export type DeckValidationErrorDetail = {
     cardId: number;
     cardLabel: string;

@@ -18,6 +18,12 @@ export const getErrorMessage = (
         if (errorType === "E_INVALID_AUTH_UID" || errorType === "E_INVALID_AUTH_PASSWORD") {
             return "Identifiants invalides";
         }
+        if (
+            errorType === "E_INVALID_CREDENTIALS" ||
+            error.errors[0].message === "Invalid user credentials"
+        ) {
+            return "Identifiants incorrects";
+        }
     }
     if (isAdonisError(error)) {
         const message = error.message.split(":").slice(1).join(":");

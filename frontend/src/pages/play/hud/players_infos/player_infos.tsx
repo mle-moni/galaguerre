@@ -1,10 +1,11 @@
 import type { GamePlayer } from "#api_types/game.types";
 
+import clsx from "clsx";
 import { Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import type { PointerEvent } from "react";
-import clsx from "clsx";
 import { useGameContext } from "~/hooks/use_game_state";
+import "~/components/targeting/targeting.css";
 import "./player_infos.css";
 
 interface PlayerInfosProps {
@@ -22,12 +23,15 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
     const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
     const weaponAttackBorderColor = store.weaponDragStore.getOpponentHeroBorderColor(isOpponent);
     const targetSelectionBorderColor = store.targetSelectionStore.getHeroBorderColor(isOpponent);
+    const heroHighlight = store.getHeroTargetHighlight(isOpponent);
     const dropZoneBorderColor =
-        targetSelectionBorderColor !== "RGBa(0, 0, 0, 0)"
-            ? targetSelectionBorderColor
-            : weaponAttackBorderColor !== "RGBa(0, 0, 0, 0)"
-              ? weaponAttackBorderColor
-              : minionAttackBorderColor;
+        heroHighlight === "none"
+            ? targetSelectionBorderColor !== "RGBa(0, 0, 0, 0)"
+                ? targetSelectionBorderColor
+                : weaponAttackBorderColor !== "RGBa(0, 0, 0, 0)"
+                  ? weaponAttackBorderColor
+                  : minionAttackBorderColor
+            : undefined;
 
     const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
     const isInteractiveTarget =
@@ -71,8 +75,11 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             data-spot-id="hero"
             data-spot-owner={isOpponent ? "OPPONENT" : "PLAYER"}
             className={clsx(
-                "border-2 border-dashed w-full mx-2",
-                isInteractiveTarget && "hero-target--interactive",
+                "w-full mx-2",
+                heroHighlight === "none" && "border-2 border-dashed",
+                heroHighlight === "none" && isInteractiveTarget && "hero-target--interactive",
+                heroHighlight === "valid" && "target-zone--valid",
+                heroHighlight === "invalid" && "target-zone--invalid",
             )}
             style={{
                 borderColor: dropZoneBorderColor,

@@ -1,6 +1,8 @@
 import type { GamePlayer } from "#api_types/game.types";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
+import "~/components/targeting/targeting.css";
 import { MobileStatBadge } from "./mobile_stat_badge.jsx";
 import "./mobile.css";
 
@@ -20,12 +22,15 @@ export const MobileHeroStrip = observer(
             store.weaponDragStore.getOpponentHeroBorderColor(isOpponent);
         const targetSelectionBorderColor =
             store.targetSelectionStore.getHeroBorderColor(isOpponent);
+        const heroHighlight = store.getHeroTargetHighlight(isOpponent);
         const dropZoneBorderColor =
-            targetSelectionBorderColor !== "RGBa(0, 0, 0, 0)"
-                ? targetSelectionBorderColor
-                : weaponAttackBorderColor !== "RGBa(0, 0, 0, 0)"
-                  ? weaponAttackBorderColor
-                  : minionAttackBorderColor;
+            heroHighlight === "none"
+                ? targetSelectionBorderColor !== "RGBa(0, 0, 0, 0)"
+                    ? targetSelectionBorderColor
+                    : weaponAttackBorderColor !== "RGBa(0, 0, 0, 0)"
+                      ? weaponAttackBorderColor
+                      : minionAttackBorderColor
+                : undefined;
 
         const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
         const weaponLabel = player.weaponState?.originalCard.label;
@@ -65,13 +70,15 @@ export const MobileHeroStrip = observer(
                 data-target-zone
                 data-spot-id="hero"
                 data-spot-owner={isOpponent ? "OPPONENT" : "PLAYER"}
-                className={[
+                className={clsx(
                     "mobile-bar__hero-target",
-                    canAttackWithWeapon ? "mobile-bar__hero-target--weapon-draggable" : "",
-                    isInteractiveTarget ? "mobile-bar__hero-target--interactive" : "",
-                ]
-                    .filter(Boolean)
-                    .join(" ")}
+                    canAttackWithWeapon && "mobile-bar__hero-target--weapon-draggable",
+                    heroHighlight === "none" &&
+                        isInteractiveTarget &&
+                        "mobile-bar__hero-target--interactive",
+                    heroHighlight === "valid" && "target-zone--valid",
+                    heroHighlight === "invalid" && "target-zone--invalid",
+                )}
                 style={{ borderColor: dropZoneBorderColor }}
                 onDragOver={handleDragOver}
                 onDrop={handleClick}

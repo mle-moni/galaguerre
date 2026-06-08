@@ -5,7 +5,7 @@ import { useGameContext } from "~/hooks/use_game_state";
 import type { TargetValidity } from "~/stores/TargetSelectionStore";
 
 const ARROW_COLORS: Record<TargetValidity, string> = {
-    valid: "#22c55e",
+    valid: "#4ade80",
     invalid: "#ef4444",
     none: "#e2e8f0",
 };

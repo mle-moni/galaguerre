@@ -1,8 +1,11 @@
-import type { ApiDeckCardEntry } from "#api_types/deck.types";
+import {
+    DECK_MAX_CARDS,
+    DECK_MAX_COPIES_PER_CARD,
+    DECK_MIN_CARDS,
+    type ApiDeckCardEntry,
+} from "#api_types/deck.types";
 
-export const DECK_MIN_CARDS = 15;
-export const DECK_MAX_CARDS = 20;
-export const DECK_MAX_COPIES_PER_CARD = 2;
+export { DECK_MAX_CARDS, DECK_MAX_COPIES_PER_CARD, DECK_MIN_CARDS };
 
 export type DeckCompositionError = {
     reason: string;
@@ -58,7 +61,7 @@ export const validateDeckComposition = (cards: ApiDeckCardEntry[]): DeckComposit
 
     if (result.cardCount < DECK_MIN_CARDS) {
         result.errors.push({
-            reason: `Le deck doit contenir entre ${DECK_MIN_CARDS} et ${DECK_MAX_CARDS} cartes (actuellement ${result.cardCount})`,
+            reason: `Le deck doit contenir exactement ${DECK_MIN_CARDS} cartes (actuellement ${result.cardCount})`,
         });
         result.valid = false;
     }

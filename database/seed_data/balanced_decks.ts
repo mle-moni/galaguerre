@@ -3,54 +3,50 @@ export type DeckRecipeEntry = {
     copies: number;
 };
 
-export const DECK_SIZE = 20;
+export const DECK_SIZE = 30;
 
-export const AGGRO_DECK_RECIPE: DeckRecipeEntry[] = [
-    { label: "Lutin", copies: 2 },
-    { label: "Lance-tonneau", copies: 2 },
-    { label: "Sergent abusif", copies: 1 },
-    { label: "Porte-bouclier", copies: 1 },
-    { label: "Warglaive d'Azzinoth", copies: 1 },
-    { label: "Gnome lépreux", copies: 1 },
-    { label: "Sanglier", copies: 1 },
-    { label: "Espion luminescent", copies: 1 },
-    { label: "Mousquetaire de Forgefer", copies: 1 },
-    { label: "Commandant argenté", copies: 1 },
-    { label: "Chef de guerre murloc", copies: 1 },
-    { label: "Voyant luminescent", copies: 1 },
-    { label: "Chevalier de Hurlevent", copies: 1 },
-    { label: "Corsaire redoutable", copies: 1 },
-    { label: "Leeroy Jenkins", copies: 1 },
-    { label: "Jeune faucon-dragon", copies: 2 },
-    { label: "Dragon mécanique", copies: 1 },
+export const GALADRIM_AGGRO_DECK_RECIPE: DeckRecipeEntry[] = [
+    { label: "Stagiaire Dev", copies: 2 },
+    { label: "BizDev Débutant", copies: 2 },
+    { label: "Parisien Pressé", copies: 2 },
+    { label: "Sales Charismatique", copies: 2 },
+    { label: "Closer Affamé", copies: 2 },
+    { label: "Chien Foufou", copies: 2 },
+    { label: "PM Stressé", copies: 2 },
+    { label: "Négociateur", copies: 2 },
+    { label: "Tasse à Café Ébréchée", copies: 2 },
+    { label: "Clavier Mécanique", copies: 2 },
+    { label: "Heures Sup'", copies: 2 },
+    { label: "Goodies Galadrim", copies: 2 },
+    { label: "Dev Insomniaque", copies: 2 },
+    { label: "Pause Café", copies: 2 },
+    { label: "Key Account Manager", copies: 1 },
+    { label: "Directeur Commercial", copies: 1 },
 ];
 
-export const MIDRANGE_DECK_RECIPE: DeckRecipeEntry[] = [
-    { label: "Porte-bouclier", copies: 2 },
-    { label: "Gardien de la Lumière", copies: 1 },
-    { label: "Spectre apaisant", copies: 1 },
-    { label: "Glaneur de butin", copies: 1 },
-    { label: "Guérisseur de terrain", copies: 1 },
-    { label: "Mage de sang Thalnos", copies: 1 },
-    { label: "Maître-naturaliste", copies: 1 },
-    { label: "Piétinement", copies: 1 },
-    { label: "Moine du Shado-Pan", copies: 2 },
-    { label: "Farseer du Cercle terrestre", copies: 1 },
-    { label: "Capitaine des mers du Sud", copies: 1 },
-    { label: "Héritage de l'Empereur", copies: 1 },
-    { label: "Défenseur d'Argus", copies: 1 },
-    { label: "Drake du Crépuscule", copies: 1 },
-    { label: "Guerrier tauren", copies: 1 },
-    { label: "Rampant des fondrières", copies: 1 },
-    { label: "Abomination", copies: 1 },
-    { label: "Prêtresse d'Elune", copies: 1 },
+export const GALADRIM_MIDRANGE_DECK_RECIPE: DeckRecipeEntry[] = [
+    { label: "Agent Support", copies: 2 },
+    { label: "Plante Verte", copies: 2 },
+    { label: "Dev Back-End", copies: 2 },
+    { label: "Happiness Manager", copies: 2 },
+    { label: "Agiliste Convaincu", copies: 2 },
+    { label: "Scrum Master", copies: 2 },
+    { label: "Recruteur RH", copies: 2 },
+    { label: "Nantais Détendu", copies: 2 },
+    { label: "Bobo Parisien", copies: 2 },
+    { label: "Manager Bienveillant", copies: 2 },
+    { label: "Product Owner", copies: 2 },
+    { label: "Pause Café", copies: 2 },
+    { label: "Déploiement Réussi", copies: 2 },
+    { label: "Sprint Review", copies: 2 },
+    { label: "Support de Nuit", copies: 1 },
+    { label: "Architecte Système", copies: 1 },
 ];
 
-export const BALANCED_DECKS_BY_EMAIL: Record<string, { name: string; recipe: DeckRecipeEntry[] }> =
-    {
-        "test@test.fr": { name: "Deck aggro", recipe: AGGRO_DECK_RECIPE },
-        "admin@admin.fr": { name: "Deck midrange", recipe: MIDRANGE_DECK_RECIPE },
-    };
+export const SEEDED_DECKS: { name: string; recipe: DeckRecipeEntry[]; selected: boolean }[] = [
+    { name: "Deck aggro", recipe: GALADRIM_AGGRO_DECK_RECIPE, selected: true },
+    { name: "Deck midrange", recipe: GALADRIM_MIDRANGE_DECK_RECIPE, selected: false },
+];
 
 export const buildDeckCardIds = (
     recipe: DeckRecipeEntry[],
