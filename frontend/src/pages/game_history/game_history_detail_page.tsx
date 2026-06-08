@@ -11,17 +11,6 @@ import { useUser } from "~/hooks/use_user";
 import { formatGameDuration } from "~/helpers/format_game_duration";
 import { useMemo } from "react";
 
-const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`);
-
-const formatDate = (isoDate: string) =>
-    new Date(isoDate).toLocaleString("fr-FR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
-
 const RESULT_SUMMARY: Record<GameHistoryResult, string> = {
     WIN: "Victoire",
     LOSS: "Défaite",
@@ -122,21 +111,11 @@ export const GameHistoryDetailPage = observer(() => {
                             {detail.roundCount} tours
                         </Text>
 
-                        {isDraw ? (
+                        {isDraw && (
                             <Text size="sm" c="dimmed">
                                 Match nul — Elo inchangé
                             </Text>
-                        ) : detail.playerRating ? (
-                            <Text size="sm" c="dimmed">
-                                {formatEloDelta(detail.playerRating.delta)} Elo pour{" "}
-                                <PlayerNameLink
-                                    pseudo={detail.player.pseudo}
-                                    userId={detail.player.userId}
-                                    className="text-inherit no-underline hover:underline"
-                                />{" "}
-                                — Elo après : {detail.playerRating.eloAfter}
-                            </Text>
-                        ) : null}
+                        )}
 
                         <GameStatsTable
                             playerA={detail.player}
