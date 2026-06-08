@@ -1,4 +1,10 @@
-import type { ApiCatalogCard, ApiDeckCardEntry } from "#api_types/deck.types";
+import {
+    DECK_MAX_CARDS,
+    DECK_MAX_COPIES_PER_CARD,
+    DECK_MIN_CARDS,
+    type ApiCatalogCard,
+    type ApiDeckCardEntry,
+} from "#api_types/deck.types";
 import { Button, Collapse, NumberInput, Select, Tabs, TextInput } from "@mantine/core";
 import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
@@ -14,10 +20,6 @@ import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
-
-const DECK_MIN_CARDS = 15;
-const DECK_MAX_CARDS = 20;
-const DECK_MAX_COPIES = 2;
 
 type CardTypeFilter = "ALL" | "MINION" | "SPELL" | "WEAPON";
 
@@ -101,7 +103,7 @@ export const DeckBuilderPage = observer(() => {
 
     const canAddCard = (cardId: number) => {
         const count = currentComposition.get(cardId) ?? 0;
-        return count < DECK_MAX_COPIES && totalCards < DECK_MAX_CARDS;
+        return count < DECK_MAX_COPIES_PER_CARD && totalCards < DECK_MAX_CARDS;
     };
 
     const addCard = (cardId: number) => {
@@ -230,7 +232,7 @@ export const DeckBuilderPage = observer(() => {
                 <span
                     className={`text-sm font-normal ${totalCards > DECK_MAX_CARDS || totalCards < DECK_MIN_CARDS ? "text-red-400" : "text-white/70"}`}
                 >
-                    {totalCards}/{DECK_MAX_CARDS} (min. {DECK_MIN_CARDS})
+                    {totalCards}/{DECK_MAX_CARDS}
                 </span>
             </div>
             <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">

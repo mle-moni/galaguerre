@@ -89,7 +89,7 @@ export const TrainingPage = observer(() => {
 
                         {!canStart && selectedDeck && (
                             <Text size="sm" className="text-red-300">
-                                Votre deck doit être valide et contenir entre 15 et 20 cartes.
+                                Votre deck doit être valide et contenir exactement 30 cartes.
                             </Text>
                         )}
 

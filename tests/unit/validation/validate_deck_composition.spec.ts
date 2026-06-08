@@ -9,7 +9,7 @@ import {
 
 test.group("validate_deck_composition", () => {
     test("accepts a valid deck within limits", ({ assert }) => {
-        const entries = Array.from({ length: 8 }, (_, index) => ({
+        const entries = Array.from({ length: 15 }, (_, index) => ({
             cardId: index + 1,
             count: 2,
         }));
@@ -17,7 +17,7 @@ test.group("validate_deck_composition", () => {
         const result = validateDeckComposition(entries);
 
         assert.isTrue(result.valid);
-        assert.equal(result.cardCount, 16);
+        assert.equal(result.cardCount, 30);
         assert.deepEqual(result.errors, []);
     });
 
@@ -32,7 +32,7 @@ test.group("validate_deck_composition", () => {
     });
 
     test("rejects more than max total cards", ({ assert }) => {
-        const entries = Array.from({ length: 11 }, (_, index) => ({
+        const entries = Array.from({ length: 16 }, (_, index) => ({
             cardId: index + 1,
             count: 2,
         }));
@@ -40,7 +40,7 @@ test.group("validate_deck_composition", () => {
         const result = validateDeckComposition(entries);
 
         assert.isFalse(result.valid);
-        assert.equal(result.cardCount, 22);
+        assert.equal(result.cardCount, 32);
         assert.include(result.errors[0].reason, String(DECK_MAX_CARDS));
     });
 
