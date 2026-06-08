@@ -298,6 +298,7 @@ export class GameSchema extends BaseModel {
     static $columns = [
         "createdAt",
         "data",
+        "endedAt",
         "id",
         "isFinished",
         "playerOneId",
@@ -310,6 +311,8 @@ export class GameSchema extends BaseModel {
     declare createdAt: DateTime;
     @column()
     declare data: any;
+    @column.dateTime()
+    declare endedAt: DateTime | null;
     @column({ isPrimary: true })
     declare id: number;
     @column()

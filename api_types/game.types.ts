@@ -279,6 +279,7 @@ export interface ApiGame {
     isFinished: boolean;
     createdAt: string;
     updatedAt: string;
+    endedAt: string | null;
 }
 
 export const PLAYER_NUMBERS = ["PLAYER_ONE", "PLAYER_TWO"] as const;

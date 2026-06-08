@@ -1,5 +1,6 @@
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
+import { getGameFinishedAtIso } from "../../../app/galaguerre/game/get_game_finished_at.js";
 import { listUserGames } from "#controllers/game_history/list_user_games";
 import {
     getEloDelta,
@@ -147,6 +148,8 @@ test.group("game history", (group) => {
         assert.equal(result.result, "LOSS");
         assert.equal(result.winnerId, playerTwo.id);
         assert.equal(result.roundCount, 4);
+        assert.equal(result.createdAt, game.createdAt.toISO());
+        assert.equal(result.finishedAt, getGameFinishedAtIso(game));
         assert.equal(result.player.pseudo, "Alice");
         assert.equal(result.opponent.pseudo, "Bob");
         assert.equal(result.player.stats.damageDealt, 20);

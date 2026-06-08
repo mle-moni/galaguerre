@@ -11,6 +11,7 @@ import {
     serializeGameHistoryPlayer,
     serializeGameHistoryUser,
 } from "./serialize_game_history.js";
+import { getGameFinishedAtIso } from "../../galaguerre/game/get_game_finished_at.js";
 
 const showParamsValidator = vine.compile(
     vine.object({
@@ -56,6 +57,7 @@ export const showUserGame = async ({
             return game.playerOneId === userId ? ratingResult.playerOne : ratingResult.playerTwo;
         })(),
         roundCount: game.data.currentRound,
-        finishedAt: game.updatedAt.toISO()!,
+        createdAt: game.createdAt.toISO()!,
+        finishedAt: getGameFinishedAtIso(game),
     };
 };

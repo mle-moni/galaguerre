@@ -1,5 +1,6 @@
 import type Game from "#models/game";
 import { applyGameResult, getWinnerUserId } from "#services/elo";
+import { DateTime } from "luxon";
 import { sendGameUpdate } from "./send_game_update.js";
 
 export const terminateGame = async (game: Game) => {
@@ -7,6 +8,7 @@ export const terminateGame = async (game: Game) => {
 
     game.data.state = "FINISHED";
     game.isFinished = true;
+    game.endedAt = DateTime.now();
 
     if (game.data.isTraining) {
         const winnerUserId = getWinnerUserId(game);

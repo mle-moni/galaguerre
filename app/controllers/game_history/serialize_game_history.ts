@@ -11,6 +11,7 @@ import {
 } from "#api_types/game.types";
 import type Game from "#models/game";
 import type User from "#models/user";
+import { getGameFinishedAtIso } from "../../galaguerre/game/get_game_finished_at.js";
 
 export const serializeGameHistoryUser = (user: User): ApiGameHistoryUser => ({
     userId: user.id,
@@ -83,7 +84,7 @@ export const serializeGameHistoryEntry = (
         result: getGameResult(game, userId),
         eloDelta: getEloDelta(game, userId),
         roundCount: game.data.currentRound,
-        finishedAt: game.updatedAt.toISO()!,
+        finishedAt: getGameFinishedAtIso(game),
         isTraining: game.data.isTraining ?? false,
     };
 };

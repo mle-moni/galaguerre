@@ -131,6 +131,7 @@ test.group("elo", (group) => {
 
         assert.isTrue(game.isFinished);
         assert.equal(game.data.state, "FINISHED");
+        assert.isNotNull(game.endedAt);
         assert.equal(game.winnerId, playerTwo.id);
         assert.equal(playerTwo.wins, 1);
         assert.equal(playerOne.losses, 1);

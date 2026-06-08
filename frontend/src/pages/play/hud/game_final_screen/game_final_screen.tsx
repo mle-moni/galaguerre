@@ -6,6 +6,7 @@ import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { queryClient } from "~/services/query_client";
+import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
 import { GameFinalStatsTable } from "./game_final_stats_table.tsx";
 
 const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`);
@@ -53,7 +54,8 @@ export const GameFinalScreen = observer(() => {
                 ) : null}
 
                 <Text size="sm" c="dimmed">
-                    Partie terminée au tour {store.game.data.currentRound}
+                    Partie terminée au tour {store.game.data.currentRound} — Durée :{" "}
+                    {formatGameDuration(store.game.createdAt, getGameFinishedAt(store.game))}
                 </Text>
 
                 <GameFinalStatsTable

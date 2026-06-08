@@ -46,5 +46,6 @@ export interface ApiGameHistoryDetail {
     ratingResult: GameRatingResult | null;
     playerRating: GameRatingPlayerResult | null;
     roundCount: number;
+    createdAt: string;
     finishedAt: string;
 }

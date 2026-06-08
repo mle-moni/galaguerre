@@ -44,6 +44,9 @@ export default class Game extends BaseModel {
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     declare updatedAt: DateTime;
 
+    @column.dateTime()
+    declare endedAt: DateTime | null;
+
     getApiJson(forUserId: number): ApiGame {
         const p1 = this.data.playerOne;
         const p2 = this.data.playerTwo;
@@ -65,6 +68,7 @@ export default class Game extends BaseModel {
             isFinished: this.isFinished,
             createdAt: this.createdAt.toISO()!,
             updatedAt: this.updatedAt.toISO()!,
+            endedAt: this.endedAt?.toISO() ?? null,
         };
     }
 }

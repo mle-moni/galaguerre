@@ -8,6 +8,8 @@ import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { useGameHistoryDetailQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
+import { formatGameDuration } from "~/helpers/format_game_duration";
+import { useMemo } from "react";
 
 const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`);
 
@@ -61,12 +63,17 @@ export const GameHistoryDetailPage = observer(() => {
 
     const detail = detailQuery.data;
     const isDraw = detail.result === "DRAW";
-    const winner =
-        detail.winnerId === null
-            ? null
-            : detail.winnerId === detail.player.userId
-              ? detail.player
-              : detail.opponent;
+    const winner = useMemo(() => {
+        if (detail.winnerId === null) {
+            return null;
+        }
+
+        if (detail.winnerId === detail.player.userId) {
+            return detail.player;
+        }
+
+        return detail.opponent;
+    }, [detail]);
 
     return (
         <AppLayout
@@ -111,7 +118,11 @@ export const GameHistoryDetailPage = observer(() => {
                         </Text>
 
                         <Text size="sm" c="dimmed">
-                            Terminée le {formatDate(detail.finishedAt)} — tour {detail.roundCount}
+                            {formatGameDuration(detail.createdAt, detail.finishedAt)} —{" "}
+                            {detail.roundCount} tours
+                        </Text>
+                        <Text size="sm" c="dimmed">
+                            Terminée le {formatDate(detail.finishedAt)}
                         </Text>
 
                         {isDraw ? (
