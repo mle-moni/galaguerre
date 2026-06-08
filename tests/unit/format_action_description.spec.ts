@@ -106,4 +106,32 @@ test.group("format_action_description", () => {
             "Cri de guerre : Inflige 2 dégâts à un serviteur adverse 🦁 Bête.",
         );
     });
+
+    test("contracts à les into aux for mass opponent minion damage", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: false,
+            damage: 3,
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Inflige 3 dégâts aux serviteurs adverses.",
+        );
+    });
+
+    test("contracts à les into aux for mass opponent minion heal", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "HEAL",
+            isTargeted: false,
+            heal: 2,
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Rend 2 PV aux serviteurs adverses.",
+        );
+    });
 });

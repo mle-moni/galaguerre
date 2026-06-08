@@ -18,6 +18,16 @@ const formatTagChip = (tag: CardTagSnapshot): string => `${tag.symbol} ${tag.lab
 
 const formatTagList = (tags: CardTagSnapshot[]): string => tags.map(formatTagChip).join(", ");
 
+const withPrepositionA = (label: string): string => {
+    if (label.startsWith("les ")) {
+        return `aux ${label.slice(4)}`;
+    }
+    if (label.startsWith("le ")) {
+        return `au ${label.slice(3)}`;
+    }
+    return `à ${label}`;
+};
+
 const formatHeroTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
     if (targetTeam === "ALL") return "tous les héros";
     return targetTeam === "PLAYER" ? "allié" : "adverse";
@@ -210,12 +220,12 @@ export const formatActionDescription = (
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;
                 if (target.type === "MINION") {
-                    return `${prefix} : Inflige ${damage} dégâts à ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
+                    return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
                 }
                 if (target.type === "HERO") {
                     return `${prefix} : Inflige ${damage} dégâts ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`;
                 }
-                return `${prefix} : Inflige ${damage} dégâts à ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
@@ -227,15 +237,15 @@ export const formatActionDescription = (
             }
 
             if (action.isTargeted && action.target?.type === "ALL") {
-                return `${prefix} : Inflige ${damage} dégâts à ${formatSingleCharacterTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatSingleCharacterTeamLabel(action.target.targetTeam))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Inflige ${damage} dégâts à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Inflige ${damage} dégâts à ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -249,12 +259,12 @@ export const formatActionDescription = (
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;
                 if (target.type === "MINION") {
-                    return `${prefix} : Rend ${action.heal} PV à ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
+                    return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
                 }
                 if (target.type === "HERO") {
                     return `${prefix} : Rend ${action.heal} PV ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`;
                 }
-                return `${prefix} : Rend ${action.heal} PV à ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
@@ -266,15 +276,15 @@ export const formatActionDescription = (
             }
 
             if (action.isTargeted && action.target?.type === "ALL") {
-                return `${prefix} : Rend ${action.heal} PV à ${formatSingleCharacterTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatSingleCharacterTeamLabel(action.target.targetTeam))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Rend ${action.heal} PV à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Rend ${action.heal} PV à ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -301,12 +311,12 @@ export const formatActionDescription = (
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;
                 if (target.type === "MINION") {
-                    return `${prefix} : Donne ${effectText} à ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
+                    return `${prefix} : Donne ${effectText} ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
                 }
                 if (target.type === "HERO") {
                     return `${prefix} : Donne ${effectText} ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`;
                 }
-                return `${prefix} : Donne ${effectText} à ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
@@ -318,15 +328,15 @@ export const formatActionDescription = (
             }
 
             if (action.isTargeted && action.target?.type === "ALL") {
-                return `${prefix} : Donne ${effectText} à ${formatSingleCharacterTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatSingleCharacterTeamLabel(action.target.targetTeam))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Donne ${effectText} à ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Donne ${effectText} à ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
