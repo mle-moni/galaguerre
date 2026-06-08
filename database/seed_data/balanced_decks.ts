@@ -33,7 +33,7 @@ export const GALADRIM_MIDRANGE_DECK_RECIPE: DeckRecipeEntry[] = [
     { label: "Scrum Master", copies: 2 },
     { label: "Recruteur RH", copies: 2 },
     { label: "Nantais Détendu", copies: 2 },
-    { label: "Parisien Bobo", copies: 2 },
+    { label: "Bobo Parisien", copies: 2 },
     { label: "Manager Bienveillant", copies: 2 },
     { label: "Product Owner", copies: 2 },
     { label: "Pause Café", copies: 2 },
