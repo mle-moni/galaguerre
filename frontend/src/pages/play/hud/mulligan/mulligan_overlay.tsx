@@ -42,8 +42,8 @@ export const MulliganOverlay = observer(() => {
         >
             <Stack gap="md">
                 <Text size="sm" c="dimmed">
-                    Sélectionnez les cartes à remplacer, puis confirmez. Le joueur qui commence
-                    reçoit 3 cartes, l&apos;autre en reçoit 4.
+                    Cliquez sur les cartes à échanger — elles seront barrées en rouge. Le joueur qui
+                    commence reçoit 3 cartes, l&apos;autre en reçoit 4.
                 </Text>
 
                 <CountdownTimer endsAt={store.game.data.mulliganEndsAt} label="Temps restant :" />
@@ -65,11 +65,23 @@ export const MulliganOverlay = observer(() => {
                                         key={card.uuid}
                                         type="button"
                                         className={clsx("mulligan-overlay__card", {
-                                            "mulligan-overlay__card--selected": isSelected,
+                                            "mulligan-overlay__card--discarded": isSelected,
                                         })}
                                         onClick={() => store.toggleMulliganCard(card.uuid)}
+                                        aria-pressed={isSelected}
+                                        aria-label={
+                                            isSelected ? `${card.label}, à remplacer` : card.label
+                                        }
                                     >
-                                        {renderCardFace(card)}
+                                        <div className="mulligan-overlay__card-face">
+                                            {renderCardFace(card)}
+                                        </div>
+                                        {isSelected ? (
+                                            <div
+                                                className="mulligan-overlay__discard-mark"
+                                                aria-hidden
+                                            />
+                                        ) : null}
                                     </button>
                                 );
                             })}
