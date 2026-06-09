@@ -1,6 +1,9 @@
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { getDefaultGameData } from "#controllers/games/create_game";
+import { confirmAiMulliganIfNeeded } from "../../../app/galaguerre/ai/schedule_ai_mulligan.js";
+import { clearAllGameTimers } from "../../../app/galaguerre/timers/game_timers.js";
+import { runMulliganOnGame } from "#tests/helpers/game/run_mulligan";
 import { terminateGame } from "#controllers/games/terminate_game";
 import { enumerateAiMoves } from "../../../app/galaguerre/ai/enumerate_ai_moves.js";
 import { runAiTurn, setAiActionDelayForTests } from "../../../app/galaguerre/ai/run_ai_turn.js";
@@ -64,6 +67,77 @@ test.group("training:ai", (group) => {
 
         return deck;
     };
+
+    test("confirmAiMulliganIfNeeded auto-confirms AI mulligan for training games", async ({
+        assert,
+    }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const human = await User.create({
+            email: `train-mul-${unique}@test.fr`,
+            password: "test",
+        });
+        const deck = await createDeckForUser(human.id, "train-mul");
+
+        const data = getDefaultGameData({
+            playerOne: { userId: human.id, pseudo: "Human", deck },
+            playerTwo: {
+                userId: TRAINING_AI_USER_ID,
+                pseudo: TRAINING_AI_PSEUDO,
+                cards: deck.cards,
+            },
+            isTraining: true,
+        });
+
+        const game = await Game.create({
+            playerOneId: human.id,
+            playerTwoId: null,
+            data,
+            isFinished: false,
+        });
+
+        await confirmAiMulliganIfNeeded(game);
+        await game.refresh();
+
+        assert.equal(game.data.state, "MULLIGAN");
+        assert.isTrue(game.data.mulligan?.playerTwoDone);
+        assert.isFalse(game.data.mulligan?.playerOneDone);
+
+        clearAllGameTimers(game.id);
+    });
+
+    test("human mulligan starts game immediately after AI auto-confirms", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const human = await User.create({
+            email: `train-mul-flow-${unique}@test.fr`,
+            password: "test",
+        });
+        const deck = await createDeckForUser(human.id, "train-mul-flow");
+
+        const data = getDefaultGameData({
+            playerOne: { userId: human.id, pseudo: "Human", deck },
+            playerTwo: {
+                userId: TRAINING_AI_USER_ID,
+                pseudo: TRAINING_AI_PSEUDO,
+                cards: deck.cards,
+            },
+            isTraining: true,
+        });
+
+        const game = await Game.create({
+            playerOneId: human.id,
+            playerTwoId: null,
+            data,
+            isFinished: false,
+        });
+
+        await confirmAiMulliganIfNeeded(game);
+        await game.refresh();
+
+        const result = await runMulliganOnGame(game, human.id, []);
+
+        assert.equal(result.game.data.state, "PLAYER_ONE_TURN");
+        assert.isUndefined(result.game.data.mulligan);
+    });
 
     test("getDefaultGameData sets isTraining when requested", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;

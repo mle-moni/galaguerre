@@ -5,7 +5,7 @@ import { validateDeckComposition } from "../../galaguerre/validation/validate_de
 import type Card from "#models/card";
 import type Deck from "#models/deck";
 import Game from "#models/game";
-import { scheduleAiMulliganIfNeeded } from "../../galaguerre/ai/schedule_ai_mulligan.js";
+import { confirmAiMulliganIfNeeded } from "../../galaguerre/ai/schedule_ai_mulligan.js";
 import { startMulliganTimer } from "../../galaguerre/timers/game_timers.js";
 import { generatePlayerCards } from "./generate_player_cards.js";
 import { sendGameUpdate } from "./send_game_update.js";
@@ -57,8 +57,13 @@ export const createGame = async ({ playerOne, playerTwo, isTraining }: CreateGam
 
     startMulliganTimer(game);
     await game.save();
+
+    if (isTraining) {
+        await confirmAiMulliganIfNeeded(game);
+        await game.refresh();
+    }
+
     sendGameUpdate(game);
-    scheduleAiMulliganIfNeeded(game);
 
     return game;
 };

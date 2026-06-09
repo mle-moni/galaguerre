@@ -1,4 +1,5 @@
 import type Game from "#models/game";
+import { scheduleAiMulliganIfNeeded } from "../../../galaguerre/ai/schedule_ai_mulligan.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { getGameActionInfos, whichPlayerAmI } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
@@ -64,6 +65,7 @@ export const gameMulligan = async (socketId: string, { cardIds }: MulliganPayloa
 
     await currentGame.save();
     sendGameUpdate(currentGame);
+    scheduleAiMulliganIfNeeded(currentGame);
 };
 
 export const confirmMulliganForPlayer = async (
