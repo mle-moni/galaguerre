@@ -2,6 +2,8 @@ import Game from "#models/game";
 import { performPassTurn } from "#controllers/games/pass_game_turn";
 import { finalizeMulligan } from "#controllers/games/mulligan/finalize_mulligan";
 import { autoConfirmPendingMulligans } from "#controllers/games/mulligan/perform_mulligan";
+import { scheduleAiMulliganIfNeeded } from "../ai/schedule_ai_mulligan.js";
+import { scheduleAiTurnIfNeeded } from "../ai/schedule_ai_turn.js";
 
 const MULLIGAN_TIMER_MS = 60_000;
 const TURN_TIMER_MS = 75_000;
@@ -45,36 +47,71 @@ export const clearAllGameTimers = (gameId: number): void => {
     clearTurnTimer(gameId);
 };
 
-export const startMulliganTimer = (game: Game): void => {
+const scheduleMulliganTimer = async (gameId: number, expectedEndsAt: number): Promise<void> => {
+    clearMulliganTimer(gameId);
+
+    const remainingMs = expectedEndsAt - Date.now();
+    if (remainingMs <= 0) {
+        await handleMulliganTimerExpired(gameId, expectedEndsAt);
+        return;
+    }
+
     if (!shouldUseGameTimers()) return;
 
-    clearMulliganTimer(game.id);
-
-    const expectedEndsAt = Date.now() + mulliganTimerMs;
-    game.data.mulliganEndsAt = expectedEndsAt;
-
-    const gameId = game.id;
     const timer = setTimeout(() => {
         void handleMulliganTimerExpired(gameId, expectedEndsAt);
-    }, mulliganTimerMs);
+    }, remainingMs);
 
     mulliganTimers.set(gameId, timer);
 };
 
-export const startTurnTimer = (game: Game): void => {
+const scheduleTurnTimer = async (gameId: number, expectedEndsAt: number): Promise<void> => {
+    clearTurnTimer(gameId);
+
+    const remainingMs = expectedEndsAt - Date.now();
+    if (remainingMs <= 0) {
+        await handleTurnTimerExpired(gameId, expectedEndsAt);
+        return;
+    }
+
     if (!shouldUseGameTimers()) return;
 
-    clearTurnTimer(game.id);
-
-    const expectedEndsAt = Date.now() + turnTimerMs;
-    game.data.turnEndsAt = expectedEndsAt;
-
-    const gameId = game.id;
     const timer = setTimeout(() => {
         void handleTurnTimerExpired(gameId, expectedEndsAt);
-    }, turnTimerMs);
+    }, remainingMs);
 
     turnTimers.set(gameId, timer);
+};
+
+export const startMulliganTimer = (game: Game): void => {
+    const expectedEndsAt = Date.now() + mulliganTimerMs;
+    game.data.mulliganEndsAt = expectedEndsAt;
+    void scheduleMulliganTimer(game.id, expectedEndsAt);
+};
+
+export const startTurnTimer = (game: Game): void => {
+    const expectedEndsAt = Date.now() + turnTimerMs;
+    game.data.turnEndsAt = expectedEndsAt;
+    void scheduleTurnTimer(game.id, expectedEndsAt);
+};
+
+export const restoreGameTimers = async (): Promise<void> => {
+    const games = await Game.query().where("isFinished", false);
+
+    for (const game of games) {
+        if (game.data.mulliganEndsAt) {
+            await scheduleMulliganTimer(game.id, game.data.mulliganEndsAt);
+        }
+
+        if (game.data.turnEndsAt) {
+            await scheduleTurnTimer(game.id, game.data.turnEndsAt);
+        }
+
+        if (game.data.isTraining) {
+            scheduleAiMulliganIfNeeded(game);
+            scheduleAiTurnIfNeeded(game);
+        }
+    }
 };
 
 export const handleMulliganTimerExpired = async (
