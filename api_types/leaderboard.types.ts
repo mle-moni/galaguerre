@@ -6,3 +6,11 @@ export interface ApiLeaderboardEntry {
     wins: number;
     losses: number;
 }
+
+export interface ApiAiSpeedrunLeaderboardEntry {
+    rank: number;
+    userId: number;
+    pseudo: string | null;
+    durationSeconds: number;
+    roundCount: number;
+}

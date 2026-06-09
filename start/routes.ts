@@ -32,6 +32,7 @@ router
         router.post("/auth/register", [AuthController, "register"]);
         router.post("/auth/logout", [AuthController, "logout"]);
         router.get("/leaderboard", [LeaderboardController, "index"]);
+        router.get("/leaderboard/ai-speedrun", [LeaderboardController, "aiSpeedrun"]);
         router.get("/game-history/:userId", [GameHistoryController, "index"]);
         router.get("/game-history/:userId/:gameId", [GameHistoryController, "show"]);
     })

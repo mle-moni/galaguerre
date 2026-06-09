@@ -1,4 +1,8 @@
-import type { ApiLeaderboardEntry } from "#api_types/leaderboard.types";
+import type {
+    ApiAiSpeedrunLeaderboardEntry,
+    ApiLeaderboardEntry,
+} from "#api_types/leaderboard.types";
+import { getAiSpeedrunLeaderboard } from "#services/leaderboard/get_ai_speedrun_leaderboard";
 import User from "#models/user";
 import type { HttpContext } from "@adonisjs/core/http";
 
@@ -14,5 +18,9 @@ export default class LeaderboardController {
             wins: user.wins,
             losses: user.losses,
         }));
+    }
+
+    async aiSpeedrun(_ctx: HttpContext): Promise<ApiAiSpeedrunLeaderboardEntry[]> {
+        return getAiSpeedrunLeaderboard();
     }
 }

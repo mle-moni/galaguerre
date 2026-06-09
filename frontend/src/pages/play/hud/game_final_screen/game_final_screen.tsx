@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
-import { LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
+import { LEADERBOARD_QUERY_KEY, AI_SPEEDRUN_LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { queryClient } from "~/services/query_client";
 import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
@@ -20,6 +20,9 @@ export const GameFinalScreen = observer(() => {
     const handleClose = () => {
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
         queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY });
+        if (isTraining && store.isUserWinner) {
+            queryClient.invalidateQueries({ queryKey: AI_SPEEDRUN_LEADERBOARD_QUERY_KEY });
+        }
         navigate(isTraining ? "/" : "/matchmaking");
     };
 
