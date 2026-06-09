@@ -7,6 +7,7 @@ import type { HttpContext } from "@adonisjs/core/http";
 import { serializeDeck } from "#controllers/decks/serialize_deck";
 import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
+import { randomBoolean } from "../../utils/random.js";
 import { createGame } from "./create_game.js";
 
 export const gameSearch = async ({ auth, response }: HttpContext) => {
@@ -54,7 +55,7 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
             deck,
         };
 
-        const swapSeats = Math.random() < 0.5;
+        const swapSeats = randomBoolean();
         const playerOne = swapSeats ? humanTwo : humanOne;
         const playerTwo = swapSeats ? humanOne : humanTwo;
 

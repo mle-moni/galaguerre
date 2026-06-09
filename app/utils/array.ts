@@ -1,7 +1,11 @@
-// inneficient, O(N log N) but it's easy to understand an won't be used on very large arrays
+import { randomIntInRange } from "./random.js";
+
+// Fisher-Yates shuffle using crypto.randomInt; O(n), does not mutate the input array
 export const shuffleArray = <T>(array: T[]): T[] => {
-    return array
-        .map((value) => ({ value, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ value }) => value);
+    const result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = randomIntInRange(0, i);
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
 };

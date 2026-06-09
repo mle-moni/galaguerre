@@ -8,6 +8,7 @@ import { loadTrainingBotCards } from "#services/training/load_training_bot_cards
 import type { HttpContext } from "@adonisjs/core/http";
 import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
+import { randomBoolean } from "../../utils/random.js";
 import { createGame } from "./create_game.js";
 
 export const createTrainingGame = async ({ auth, response }: HttpContext) => {
@@ -52,7 +53,7 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
         cards: botCards,
     };
 
-    const swapSeats = Math.random() < 0.5;
+    const swapSeats = randomBoolean();
     const playerOne = swapSeats ? aiPlayer : humanPlayer;
     const playerTwo = swapSeats ? humanPlayer : aiPlayer;
 
