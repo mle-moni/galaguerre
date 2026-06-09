@@ -23,12 +23,12 @@ export const getAiSpeedrunLeaderboard = async (): Promise<ApiAiSpeedrunLeaderboa
                 AND (data->>'isTraining')::boolean = true
                 AND winner_id IS NOT NULL
                 AND ended_at IS NOT NULL
-            ORDER BY COALESCE(player_one_id, player_two_id), (ended_at - created_at) ASC
+            ORDER BY COALESCE(player_one_id, player_two_id), (ended_at - created_at) ASC, id ASC
         )
         SELECT br.user_id, u.pseudo, br.duration_seconds, br.round_count
         FROM best_runs br
         JOIN users u ON u.id = br.user_id
-        ORDER BY br.duration_seconds ASC, br.round_count ASC
+        ORDER BY br.duration_seconds ASC, br.round_count ASC, br.user_id ASC
         LIMIT ?
     `,
         [AI_SPEEDRUN_LEADERBOARD_LIMIT],

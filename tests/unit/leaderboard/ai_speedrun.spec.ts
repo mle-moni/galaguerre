@@ -181,4 +181,40 @@ test.group("leaderboard: ai speedrun", (group) => {
         assert.equal(entries[1]!.userId, moreRounds.id);
         assert.equal(entries[1]!.roundCount, 9);
     });
+
+    test("breaks full ties by user id", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const firstPlayer = await User.create({
+            email: `speedrun-full-tie-a-${unique}@test.fr`,
+            password: "test",
+            pseudo: "FullTieA",
+        });
+        const secondPlayer = await User.create({
+            email: `speedrun-full-tie-b-${unique}@test.fr`,
+            password: "test",
+            pseudo: "FullTieB",
+        });
+
+        await createFinishedTrainingGame({
+            human: secondPlayer,
+            humanWins: true,
+            roundCount: 7,
+            durationSeconds: 150,
+        });
+        await createFinishedTrainingGame({
+            human: firstPlayer,
+            humanWins: true,
+            roundCount: 7,
+            durationSeconds: 150,
+        });
+
+        const entries = await getAiSpeedrunLeaderboard();
+        const tiedEntries = entries.filter(
+            (entry) => entry.userId === firstPlayer.id || entry.userId === secondPlayer.id,
+        );
+
+        assert.equal(tiedEntries.length, 2);
+        assert.equal(tiedEntries[0]!.userId, firstPlayer.id);
+        assert.equal(tiedEntries[1]!.userId, secondPlayer.id);
+    });
 });
