@@ -41,20 +41,23 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         .preload("user")
         .firstOrFail();
 
-    const playerOne = {
-        userId: opponent.userId,
-        pseudo: generatePseudo(opponentDeck.user),
-        deck: opponentDeck,
-    };
-
-    const playerTwo = {
-        userId: user.id,
-        pseudo: generatePseudo(user),
-        deck,
-    };
-
     let game;
     try {
+        const humanOne = {
+            userId: opponent.userId,
+            pseudo: generatePseudo(opponentDeck.user),
+            deck: opponentDeck,
+        };
+        const humanTwo = {
+            userId: user.id,
+            pseudo: generatePseudo(user),
+            deck,
+        };
+
+        const swapSeats = Math.random() < 0.5;
+        const playerOne = swapSeats ? humanTwo : humanOne;
+        const playerTwo = swapSeats ? humanOne : humanTwo;
+
         game = await createGame({ playerOne, playerTwo });
     } catch (error) {
         if (error instanceof DeckValidationError) {

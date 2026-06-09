@@ -5,8 +5,10 @@ import { validateDeckComposition } from "../../galaguerre/validation/validate_de
 import type Card from "#models/card";
 import type Deck from "#models/deck";
 import Game from "#models/game";
+import { scheduleAiMulliganIfNeeded } from "../../galaguerre/ai/schedule_ai_mulligan.js";
+import { startMulliganTimer } from "../../galaguerre/timers/game_timers.js";
 import { generatePlayerCards } from "./generate_player_cards.js";
-import { setupNextGameTurn } from "./setup_next_game_turn.js";
+import { sendGameUpdate } from "./send_game_update.js";
 
 interface HumanPlayer {
     userId: number;
@@ -21,12 +23,12 @@ interface AiPlayer {
 }
 
 interface CreateGameOptions {
-    playerOne: HumanPlayer;
+    playerOne: HumanPlayer | AiPlayer;
     playerTwo: HumanPlayer | AiPlayer;
     isTraining?: boolean;
 }
 
-const isAiPlayer = (player: HumanPlayer | AiPlayer): player is AiPlayer => "cards" in player;
+export const isAiPlayer = (player: HumanPlayer | AiPlayer): player is AiPlayer => "cards" in player;
 
 const assertDeckPlayable = (deck: Deck) => {
     const composition = validateDeckComposition(deckCardsToEntries(deck));
@@ -38,7 +40,9 @@ const assertDeckPlayable = (deck: Deck) => {
 };
 
 export const createGame = async ({ playerOne, playerTwo, isTraining }: CreateGameOptions) => {
-    assertDeckPlayable(playerOne.deck);
+    if (!isAiPlayer(playerOne)) {
+        assertDeckPlayable(playerOne.deck);
+    }
     if (!isAiPlayer(playerTwo)) {
         assertDeckPlayable(playerTwo.deck);
     }
@@ -46,79 +50,86 @@ export const createGame = async ({ playerOne, playerTwo, isTraining }: CreateGam
     const gameData: GameData = getDefaultGameData({ playerOne, playerTwo, isTraining });
 
     const game = await Game.create({
-        playerOneId: playerOne.userId,
+        playerOneId: isAiPlayer(playerOne) ? null : playerOne.userId,
         playerTwoId: isAiPlayer(playerTwo) ? null : playerTwo.userId,
         data: gameData,
     });
-    // wait 3s then make player one draw and start the game
-    setTimeout(() => {
-        setupNextGameTurn(game);
-    }, 3000);
+
+    startMulliganTimer(game);
+    await game.save();
+    sendGameUpdate(game);
+    scheduleAiMulliganIfNeeded(game);
 
     return game;
 };
 
-const DEFAULT_HAND_SIZE = 3;
+const PLAYER_ONE_HAND_SIZE = 3;
+const PLAYER_TWO_HAND_SIZE = 4;
+
+const createEmptyBoard = () => ({
+    SPOT_1: null,
+    SPOT_2: null,
+    SPOT_3: null,
+    SPOT_4: null,
+    SPOT_5: null,
+});
+
+const createGamePlayer = (
+    userId: number,
+    pseudo: string,
+    handSize: number,
+    deck: ReturnType<typeof generatePlayerCards>,
+) => {
+    const hand = deck.slice(0, handSize);
+    const deckCards = deck.slice(handSize);
+
+    return {
+        userId,
+        pseudo,
+        deckCards,
+        hand,
+        board: createEmptyBoard(),
+        health: DEFAULT_HERO_HEALTH,
+        spellPower: 0,
+        mana: 0,
+        maxFatigueDamageTaken: 0,
+        weaponState: null,
+        heroAttacksThisRound: 0,
+        heroLastAttackAtRound: 0,
+        stats: { ...DEFAULT_PLAYER_STATS },
+    };
+};
 
 export const getDefaultGameData = ({
     playerOne,
     playerTwo,
     isTraining,
 }: CreateGameOptions): GameData => {
-    const p1Deck = generatePlayerCards(playerOne.deck);
-    const p1Hand = p1Deck.slice(0, DEFAULT_HAND_SIZE);
-    const p1DeckCards = p1Deck.slice(DEFAULT_HAND_SIZE);
-
+    const p1Source = isAiPlayer(playerOne) ? playerOne.cards : playerOne.deck;
     const p2Source = isAiPlayer(playerTwo) ? playerTwo.cards : playerTwo.deck;
+
+    const p1Deck = generatePlayerCards(p1Source);
     const p2Deck = generatePlayerCards(p2Source);
-    const p2Hand = p2Deck.slice(0, DEFAULT_HAND_SIZE);
-    const p2DeckCards = p2Deck.slice(DEFAULT_HAND_SIZE);
 
     return {
-        state: "INIT",
+        state: "MULLIGAN",
         currentRound: 0,
-        playerOne: {
-            userId: playerOne.userId,
-            pseudo: playerOne.pseudo,
-            deckCards: p1DeckCards,
-            hand: p1Hand,
-            board: {
-                SPOT_1: null,
-                SPOT_2: null,
-                SPOT_3: null,
-                SPOT_4: null,
-                SPOT_5: null,
-            },
-            health: DEFAULT_HERO_HEALTH,
-            spellPower: 0,
-            mana: 0,
-            maxFatigueDamageTaken: 0,
-            weaponState: null,
-            heroAttacksThisRound: 0,
-            heroLastAttackAtRound: 0,
-            stats: { ...DEFAULT_PLAYER_STATS },
+        mulligan: {
+            playerOneDone: false,
+            playerTwoDone: false,
         },
-        playerTwo: {
-            userId: playerTwo.userId,
-            pseudo: playerTwo.pseudo,
-            deckCards: p2DeckCards,
-            hand: p2Hand,
-            board: {
-                SPOT_1: null,
-                SPOT_2: null,
-                SPOT_3: null,
-                SPOT_4: null,
-                SPOT_5: null,
-            },
-            health: DEFAULT_HERO_HEALTH,
-            spellPower: 0,
-            mana: 0,
-            maxFatigueDamageTaken: 0,
-            weaponState: null,
-            heroAttacksThisRound: 0,
-            heroLastAttackAtRound: 0,
-            stats: { ...DEFAULT_PLAYER_STATS },
-        },
+        playerOne: createGamePlayer(
+            playerOne.userId,
+            playerOne.pseudo,
+            PLAYER_ONE_HAND_SIZE,
+            p1Deck,
+        ),
+        playerTwo: createGamePlayer(
+            playerTwo.userId,
+            playerTwo.pseudo,
+            PLAYER_TWO_HAND_SIZE,
+            p2Deck,
+        ),
         actionLog: [],
         ...(isTraining ? { isTraining: true } : {}),
     };

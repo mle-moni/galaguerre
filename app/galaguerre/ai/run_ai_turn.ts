@@ -1,5 +1,6 @@
 import Game from "#models/game";
 import { enumerateAiMoves } from "./enumerate_ai_moves.js";
+import { isAiTurn } from "./get_ai_player_seat.js";
 import { tryAiAction, withAiSocket } from "./try_ai_action.js";
 
 const MAX_ACTIONS_PER_TURN = 40;
@@ -10,9 +11,6 @@ export const setAiActionDelayForTests = (ms: number): void => {
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export const isAiTurn = (game: Game): boolean =>
-    Boolean(game.data.isTraining && game.data.state === "PLAYER_TWO_TURN");
 
 export const runAiTurn = async (gameId: number, aiUserId: number): Promise<void> => {
     await withAiSocket(gameId, aiUserId, async (socketId) => {

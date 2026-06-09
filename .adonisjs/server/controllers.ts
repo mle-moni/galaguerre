@@ -51,6 +51,11 @@ export const controllers = {
             MinionToMinionAction: () =>
                 import("#controllers/games/minion_action/minion_to_minion_action"),
         },
+        mulligan: {
+            FinalizeMulligan: () => import("#controllers/games/mulligan/finalize_mulligan"),
+            GameMulligan: () => import("#controllers/games/mulligan/game_mulligan"),
+            PerformMulligan: () => import("#controllers/games/mulligan/perform_mulligan"),
+        },
         PassGameTurn: () => import("#controllers/games/pass_game_turn"),
         playCard: {
             BreakWeapon: () => import("#controllers/games/play_card/break_weapon"),

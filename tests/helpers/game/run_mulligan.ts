@@ -1,6 +1,5 @@
 import type { GameData } from "#api_types/game.types";
-import { passGameTurn } from "#controllers/games/pass_game_turn";
-import { setupNextGameTurn } from "#controllers/games/setup_next_game_turn";
+import { gameMulligan } from "#controllers/games/mulligan/game_mulligan";
 import type Game from "#models/game";
 import { addSocketData, removeSocketData } from "#services/sockets/sockets_data";
 import { clearAllGameTimers } from "../../../app/galaguerre/timers/game_timers.js";
@@ -25,35 +24,36 @@ import {
 
 const TEST_SOCKET_ID = "test-socket";
 
-export interface PassTurnExpectation {
+export interface MulliganExpectation {
     error?: string | null;
-    isFinished?: boolean;
 }
 
-export interface PassTurnRunOptions {
+export interface MulliganRunOptions {
     authenticated?: boolean;
     outsider?: boolean;
 }
 
-export interface PassTurnScenario {
+export interface MulliganScenario {
     data: GameData;
     actor: PlayerKey;
-    expect: PassTurnExpectation;
-    options?: PassTurnRunOptions;
+    cardIds: string[];
+    expect: MulliganExpectation;
+    options?: MulliganRunOptions;
 }
 
-export interface PassTurnResult {
+export interface MulliganResult {
     game: Game;
     events: EmittedEvent[];
     errors: string[];
     updates: ReturnType<typeof getGameUpdates>;
 }
 
-const executePassTurn = async (
+const executeMulligan = async (
     game: Game,
     actorUserId: number | null,
+    cardIds: string[],
     authenticated = true,
-): Promise<PassTurnResult> => {
+): Promise<MulliganResult> => {
     if (authenticated && actorUserId !== null) {
         addSocketData(TEST_SOCKET_ID, actorUserId);
     }
@@ -61,7 +61,7 @@ const executePassTurn = async (
     installSocketCollector();
 
     try {
-        await passGameTurn(TEST_SOCKET_ID);
+        await gameMulligan(TEST_SOCKET_ID, { cardIds });
     } finally {
         removeSocketData(TEST_SOCKET_ID);
         restoreSocketCollector();
@@ -79,9 +79,9 @@ const executePassTurn = async (
     };
 };
 
-export const runPassTurn = async (
-    scenario: PassTurnScenario,
-): Promise<PassTurnResult & { actorUserId: number }> => {
+export const runMulligan = async (
+    scenario: MulliganScenario,
+): Promise<MulliganResult & { actorUserId: number }> => {
     const { game, playerOne, playerTwo } = await createTestGame(scenario.data);
 
     const options = scenario.options ?? {};
@@ -95,55 +95,33 @@ export const runPassTurn = async (
         actorUserId = getActorUserId(playerOne, playerTwo, scenario.actor);
     }
 
-    const result = await executePassTurn(game, authenticated ? actorUserId : null, authenticated);
+    const result = await executeMulligan(
+        game,
+        authenticated ? actorUserId : null,
+        scenario.cardIds,
+        authenticated,
+    );
 
     return { ...result, actorUserId };
 };
 
-export const runPassTurnOnGame = async (
+export const runMulliganOnGame = async (
     game: Game,
     actorUserId: number,
-): Promise<PassTurnResult> => {
-    return executePassTurn(game, actorUserId);
+    cardIds: string[],
+): Promise<MulliganResult> => {
+    return executeMulligan(game, actorUserId, cardIds);
 };
 
-export const runSetupNextTurnOnGame = async (game: Game): Promise<PassTurnResult> => {
-    installSocketCollector();
-
-    try {
-        await setupNextGameTurn(game);
-    } finally {
-        restoreSocketCollector();
-    }
-
-    await game.refresh();
-
-    clearAllGameTimers(game.id);
-
-    return {
-        game,
-        events: getEmittedEvents(),
-        errors: getErrors(),
-        updates: getGameUpdates(),
-    };
-};
-
-export const assertPassTurnScenario = (
+export const assertMulliganScenario = (
     assert: Assert,
-    result: PassTurnResult,
-    expect: PassTurnExpectation,
+    _result: MulliganResult,
+    expect: MulliganExpectation,
 ): void => {
     if (expect.error) {
         assertError(assert, expect.error);
     } else if (expect.error === null) {
         assertNoError(assert);
         assertGameUpdated(assert);
-    }
-
-    if (expect.isFinished !== undefined) {
-        assert.equal(result.game.isFinished, expect.isFinished);
-        if (expect.isFinished) {
-            assert.equal(result.game.data.state, "FINISHED");
-        }
     }
 };

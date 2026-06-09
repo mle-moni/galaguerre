@@ -17,6 +17,7 @@ import { MobileGameLayout } from "./hud/mobile/mobile_game_layout.jsx";
 import { Board } from "./board/board.jsx";
 import { DecksInfos } from "./hud/decks_infos/decks_infos.jsx";
 import { GameFinalScreen } from "./hud/game_final_screen/game_final_screen.jsx";
+import { MulliganOverlay } from "./hud/mulligan/mulligan_overlay.jsx";
 import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
 import { PlayersInfos } from "./hud/players_infos/players_infos.jsx";
 import "./game_layout.css";
@@ -56,6 +57,7 @@ const DesktopGameLayout = observer<GameRendererProps>(({ game, user }) => {
             <PlayerHand player={me} />
 
             <GameFinalScreen />
+            <MulliganOverlay />
             <ArmedCardHint />
             <TargetingArrowOverlay />
             <GameAnimationOverlay />

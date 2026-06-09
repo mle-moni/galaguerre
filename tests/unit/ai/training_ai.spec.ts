@@ -163,7 +163,7 @@ test.group("training:ai", (group) => {
 
         await game
             .merge({
-                data: bindUserIds(game.data, game.playerOneId, TRAINING_AI_USER_ID),
+                data: bindUserIds(game.data, game.data.playerOne.userId, TRAINING_AI_USER_ID),
                 playerTwoId: null,
             })
             .save();
@@ -206,7 +206,7 @@ test.group("training:ai", (group) => {
 
         await game
             .merge({
-                data: bindUserIds(game.data, game.playerOneId, TRAINING_AI_USER_ID),
+                data: bindUserIds(game.data, game.data.playerOne.userId, TRAINING_AI_USER_ID),
                 playerTwoId: null,
             })
             .save();

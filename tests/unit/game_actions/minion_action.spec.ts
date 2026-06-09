@@ -1,3 +1,4 @@
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
@@ -143,7 +144,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertMinionActionScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 14);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 1);
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", {
             health: 1,
             attacksThisRound: 1,
@@ -180,7 +181,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertMinionActionScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 13);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
     });
 
     test("windfury allows two attacks in the same turn", async ({ assert }) => {
@@ -212,7 +213,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertMinionActionScenario(assert, initial, { error: null });
-        assertPlayerHealth(assert, initial.game, "playerTwo", 10);
+        assertPlayerHealth(assert, initial.game, "playerTwo", DEFAULT_HERO_HEALTH - 5);
 
         const second = await runMinionActionOnGame(initial.game, initial.actorUserId, {
             minionId: MINION_IDS.attacker,
@@ -221,7 +222,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertMinionActionScenario(assert, second, { error: null });
-        assertPlayerHealth(assert, second.game, "playerTwo", 5);
+        assertPlayerHealth(assert, second.game, "playerTwo", DEFAULT_HERO_HEALTH - 10);
         assertBoardSpot(assert, second.game, "playerOne", "SPOT_1", { attacksThisRound: 2 });
     });
 
@@ -266,7 +267,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertError(assert, "Ce serviteur a déjà attaqué ce tour");
-        assertPlayerHealth(assert, third.game, "playerTwo", 13);
+        assertPlayerHealth(assert, third.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
     });
 
     test("charge and windfury allow two attacks on placement turn", async ({ assert }) => {
@@ -300,7 +301,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertMinionActionScenario(assert, initial, { error: null });
-        assertPlayerHealth(assert, initial.game, "playerTwo", 13);
+        assertPlayerHealth(assert, initial.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
 
         const second = await runMinionActionOnGame(initial.game, initial.actorUserId, {
             minionId: MINION_IDS.attacker,
@@ -309,7 +310,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertMinionActionScenario(assert, second, { error: null });
-        assertPlayerHealth(assert, second.game, "playerTwo", 11);
+        assertPlayerHealth(assert, second.game, "playerTwo", DEFAULT_HERO_HEALTH - 4);
     });
 
     test("charge and poisonous kills target on placement turn", async ({ assert }) => {
@@ -394,7 +395,7 @@ test.group("game:minion_action", (group) => {
         assertMinionActionScenario(assert, result, {
             error: "Ce n'est pas votre tour (gros con)",
         });
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("rejects attack when minion was placed this turn without charge", async ({ assert }) => {
@@ -429,7 +430,7 @@ test.group("game:minion_action", (group) => {
         assertMinionActionScenario(assert, result, {
             error: "Ce serviteur n'est pas encore prêt à attaquer",
         });
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("rejects attack when minion has zero attack", async ({ assert }) => {
@@ -466,7 +467,7 @@ test.group("game:minion_action", (group) => {
         assertMinionActionScenario(assert, result, {
             error: "Ce serviteur ne peut pas attaquer sans points d'attaque",
         });
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("rejects attack when taunt minion is ignored", async ({ assert }) => {
@@ -616,7 +617,7 @@ test.group("game:minion_action", (group) => {
     test("lethal hero attack terminates the game", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,
-            attack: 15,
+            attack: DEFAULT_HERO_HEALTH,
             health: 1,
         });
 
@@ -689,7 +690,7 @@ test.group("game:minion_action", (group) => {
         assertMinionActionScenario(assert, result, {
             error: "Vous devez d'abord attaquer un serviteur avec Provocation",
         });
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("allows attacking a taunt minion when taunt is present", async ({ assert }) => {
@@ -959,7 +960,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertError(assert, "Ce serviteur a déjà attaqué ce tour");
-        assertPlayerHealth(assert, second.game, "playerTwo", 14);
+        assertPlayerHealth(assert, second.game, "playerTwo", DEFAULT_HERO_HEALTH - 1);
     });
 
     test("increments attacksThisRound and lastActionAtRound after a successful attack", async ({
@@ -1038,7 +1039,7 @@ test.group("game:minion_action", (group) => {
         });
 
         assertMinionActionScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 10);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 5);
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", { health: 3 });
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 4 });
     });
@@ -1188,8 +1189,8 @@ test.group("game:minion_action", (group) => {
         assertMinionActionScenario(assert, result, {
             error: "J'aurai pu te laisser attaquer ton propre héros mais j'ai décidé d'être clément...",
         });
-        assertPlayerHealth(assert, result.game, "playerOne", 15);
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("rejects invalid minion action payload", async ({ assert }) => {

@@ -26,7 +26,7 @@ export const getOpponentUserId = (game: Game, userId: number): number => {
         return game.playerTwoId ?? game.data.playerTwo.userId;
     }
 
-    return game.playerOneId;
+    return game.playerOneId ?? game.data.playerOne.userId;
 };
 
 export const isGameParticipant = (game: Game, userId: number): boolean =>

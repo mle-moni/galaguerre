@@ -1,0 +1,25 @@
+.mulligan-overlay__cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.mulligan-overlay__card {
+    width: 120px;
+    border: 3px solid transparent;
+    border-radius: 8px;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.mulligan-overlay__card:hover {
+    transform: translateY(-4px);
+}
+
+.mulligan-overlay__card--selected {
+    border-color: #ffd43b;
+    box-shadow: 0 0 0 2px rgba(255, 212, 59, 0.35);
+}

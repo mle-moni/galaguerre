@@ -1,6 +1,7 @@
 import Game from "#models/game";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
-import { isAiTurn, runAiTurn } from "./run_ai_turn.js";
+import { isAiTurn } from "./get_ai_player_seat.js";
+import { runAiTurn } from "./run_ai_turn.js";
 
 const runningAiTurns = new Set<number>();
 

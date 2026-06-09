@@ -29,6 +29,8 @@ export class GameStore {
 
     private _game: ApiGame | null = null;
     private _user: ApiUser | null = null;
+    mulliganSelectedCardIds: string[] = [];
+    mulliganConfirmedLocally = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -47,8 +49,43 @@ export class GameStore {
     init(game: ApiGame, user: ApiUser): GameStore {
         this._game = game;
         this._user = user;
+        this.mulliganSelectedCardIds = [];
+        this.mulliganConfirmedLocally = false;
 
         return this;
+    }
+
+    get isMulligan() {
+        return this.game.data.state === "MULLIGAN";
+    }
+
+    get hasConfirmedMulligan() {
+        const mulligan = this.game.data.mulligan;
+        if (!mulligan) return this.mulliganConfirmedLocally;
+
+        if (this.me.userId === this.p1.userId) {
+            return mulligan.playerOneDone || this.mulliganConfirmedLocally;
+        }
+
+        return mulligan.playerTwoDone || this.mulliganConfirmedLocally;
+    }
+
+    toggleMulliganCard(cardId: string) {
+        if (this.hasConfirmedMulligan) return;
+
+        if (this.mulliganSelectedCardIds.includes(cardId)) {
+            this.mulliganSelectedCardIds = this.mulliganSelectedCardIds.filter(
+                (id) => id !== cardId,
+            );
+            return;
+        }
+
+        this.mulliganSelectedCardIds = [...this.mulliganSelectedCardIds, cardId];
+    }
+
+    confirmMulliganLocally() {
+        this.mulliganConfirmedLocally = true;
+        this.mulliganSelectedCardIds = [];
     }
 
     get isFinished() {

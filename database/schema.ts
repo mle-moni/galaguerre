@@ -318,7 +318,7 @@ export class GameSchema extends BaseModel {
     @column()
     declare isFinished: boolean | null;
     @column()
-    declare playerOneId: number;
+    declare playerOneId: number | null;
     @column()
     declare playerTwoId: number | null;
     @column.dateTime({ autoCreate: true, autoUpdate: true })

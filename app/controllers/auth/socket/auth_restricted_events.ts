@@ -1,5 +1,6 @@
 import { MINION_SPOT_IDS, SPOT_OWNERS } from "#api_types/game.types";
 import { abandonGame } from "#controllers/games/abandon_game";
+import { gameMulligan } from "#controllers/games/mulligan/game_mulligan";
 import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
 import { gameWeaponAction } from "#controllers/games/weapon_action/game_weapon_action";
 import { passGameTurn } from "#controllers/games/pass_game_turn";
@@ -60,11 +61,23 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         () => abandonGame(socket.id),
         vine.object({}),
     );
+
+    subscribeToClientSocketEvent(
+        socket,
+        "game:mulligan",
+        (data) => gameMulligan(socket.id, data),
+        vine.object({
+            cardIds: vine.array(vine.string()),
+        }),
+    );
 };
 
 export const partAuthRestrictedEvents = (socket: Socket) => {
     socket.removeAllListeners("debug");
     socket.removeAllListeners("pass_turn");
     socket.removeAllListeners("game:play_card");
+    socket.removeAllListeners("game:minion_action");
+    socket.removeAllListeners("game:weapon_action");
     socket.removeAllListeners("game:abandon");
+    socket.removeAllListeners("game:mulligan");
 };

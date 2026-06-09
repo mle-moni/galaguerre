@@ -12,11 +12,12 @@ import {
 test.group("game:pass_turn", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
-    test("setupNextGameTurn transitions INIT to PLAYER_ONE_TURN", async ({ assert }) => {
+    test("setupNextGameTurn transitions MULLIGAN to PLAYER_ONE_TURN", async ({ assert }) => {
         const { game } = await createTestGame(
             createGameData({
-                state: "INIT",
+                state: "MULLIGAN",
                 currentRound: 0,
+                mulligan: { playerOneDone: true, playerTwoDone: true },
                 playerOne: {
                     mana: 0,
                     deckCards: [createMinionCard({ uuid: "draw-1" })],

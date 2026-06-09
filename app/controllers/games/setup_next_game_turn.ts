@@ -2,6 +2,7 @@ import type Game from "#models/game";
 import { scheduleAiTurnIfNeeded } from "../../galaguerre/ai/schedule_ai_turn.js";
 import { drawOneCard } from "../../galaguerre/draw_cards.js";
 import { triggerPassives } from "../../galaguerre/passive_engine/trigger_passives.js";
+import { clearTurnTimer, startTurnTimer } from "../../galaguerre/timers/game_timers.js";
 import { sendGameUpdate } from "./send_game_update.js";
 import { terminateGame } from "./terminate_game.js";
 
@@ -37,6 +38,9 @@ export const setupNextGameTurn = async (game: Game) => {
         return;
     }
 
+    clearTurnTimer(game.id);
+    startTurnTimer(game);
+
     await game.save();
 
     sendGameUpdate(game);
@@ -45,7 +49,9 @@ export const setupNextGameTurn = async (game: Game) => {
 };
 
 const getWhoIsNext = (game: Game): "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" => {
-    if (game.data.state === "INIT") return "PLAYER_ONE_TURN";
+    if (game.data.state === "INIT" || game.data.state === "MULLIGAN") {
+        return "PLAYER_ONE_TURN";
+    }
     if (game.data.state === "PLAYER_ONE_TURN") return "PLAYER_TWO_TURN";
 
     return "PLAYER_ONE_TURN";

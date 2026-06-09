@@ -1,5 +1,7 @@
 export const DEFAULT_HERO_HEALTH = 30;
 
+export const COIN_CARD_ID = -1;
+
 export type ComparisonOperator = "<" | ">" | "=";
 
 export interface ComparisonSnapshot {
@@ -262,19 +264,27 @@ export interface GameRatingResult {
     playerTwo: GameRatingPlayerResult;
 }
 
+export interface GameMulliganState {
+    playerOneDone: boolean;
+    playerTwoDone: boolean;
+}
+
 export interface GameData {
-    state: "INIT" | "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" | "FINISHED";
+    state: "INIT" | "MULLIGAN" | "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" | "FINISHED";
     currentRound: number;
     playerOne: GamePlayer;
     playerTwo: GamePlayer;
     actionLog: GameLogEntry[];
+    mulligan?: GameMulliganState;
+    turnEndsAt?: number;
+    mulliganEndsAt?: number;
     ratingResult?: GameRatingResult;
     isTraining?: boolean;
 }
 
 export interface ApiGame {
     id: number;
-    playerOneId: number;
+    playerOneId: number | null;
     playerTwoId: number | null;
     data: GameData;
     isFinished: boolean;
