@@ -90,6 +90,20 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats targeted damage to any minion without redundant team label", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: true,
+            damage: 6,
+            target: createMinionTargetSnapshot("ALL"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Inflige 6 dégâts à un serviteur.",
+        );
+    });
+
     test("formats targeted damage with explicit tag label", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DAMAGE",

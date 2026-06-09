@@ -33,8 +33,8 @@ const formatHeroTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string 
     return targetTeam === "PLAYER" ? "allié" : "adverse";
 };
 
-const formatMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
-    if (targetTeam === "ALL") return "tous les serviteurs";
+const formatSingleMinionTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    if (targetTeam === "ALL") return "";
     return targetTeam === "PLAYER" ? "allié" : "adverse";
 };
 
@@ -123,7 +123,8 @@ const formatRandomMinionLabel = (
     maxTargets: number,
 ): string => {
     if (maxTargets === 1) {
-        return `un serviteur ${formatMinionTeamLabel(targetTeam)} aléatoire`;
+        const teamLabel = formatSingleMinionTeamLabel(targetTeam);
+        return teamLabel ? `un serviteur ${teamLabel} aléatoire` : "un serviteur aléatoire";
     }
     if (targetTeam === "ALL") {
         return `${maxTargets} serviteurs aléatoires`;
@@ -229,7 +230,9 @@ export const formatActionDescription = (
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
-                return `${prefix} : Inflige ${damage} dégâts à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : Inflige ${damage} dégâts à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
@@ -268,7 +271,9 @@ export const formatActionDescription = (
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
-                return `${prefix} : Rend ${action.heal} PV à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : Rend ${action.heal} PV à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
@@ -320,7 +325,9 @@ export const formatActionDescription = (
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
-                return `${prefix} : Donne ${effectText} à un serviteur ${formatMinionTeamLabel(action.target.targetTeam)}${formatTargetFilterSuffix(action)}.`;
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : Donne ${effectText} à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
