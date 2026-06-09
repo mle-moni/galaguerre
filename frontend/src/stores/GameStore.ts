@@ -112,6 +112,10 @@ export class GameStore {
         return this.p2;
     }
 
+    get goesFirst() {
+        return this.me.userId === this.p1.userId;
+    }
+
     get winner() {
         if (this.p1.health <= 0) return this.p2;
 
