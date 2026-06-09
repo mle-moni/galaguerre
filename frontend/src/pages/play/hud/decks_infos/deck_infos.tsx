@@ -11,8 +11,6 @@ interface DeckInfosProps {
     isOpponent?: boolean;
 }
 
-const filler = <div className="h-[80px]" />;
-
 export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
     const numberOfCards = player.deckCards.length;
     const iconSize = getIconSize(numberOfCards);
@@ -20,7 +18,7 @@ export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
 
     return (
         <div className="flex flex-col w-full">
-            {isOpponent && filler}
+            {isOpponent && <OpponentTurnTimer />}
             <div
                 className="flex h-[80px] items-center"
                 data-animation-deck
@@ -38,13 +36,31 @@ export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
     );
 });
 
+const OpponentTurnTimer = observer(() => {
+    const { store } = useGameContext();
+
+    if (store.isMyTurn) return <div className="h-[80px]" />;
+
+    return (
+        <div className="h-[80px] flex justify-center items-center">
+            <CountdownTimer
+                endsAt={store.game.data.turnEndsAt}
+                title="Temps restant pour le tour de l'adversaire"
+            />
+        </div>
+    );
+});
+
 const PlayerButton = observer(() => {
     const { store } = useGameContext();
 
     if (store.isMyTurn) {
         return (
             <Stack gap={4} align="center">
-                <CountdownTimer endsAt={store.game.data.turnEndsAt} />
+                <CountdownTimer
+                    endsAt={store.game.data.turnEndsAt}
+                    title="Temps restant pour votre tour"
+                />
                 <Button variant="filled" onClick={passTurn}>
                     Terminé
                 </Button>

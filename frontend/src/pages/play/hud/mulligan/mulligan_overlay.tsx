@@ -1,6 +1,7 @@
 import { Button, Modal, Stack, Text } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
+import type { ReactNode } from "react";
 import { useGameContext } from "~/hooks/use_game_state";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { MinionCardFace } from "~/components/cards/minion_card_face";
@@ -8,14 +9,28 @@ import { SpellCardFace } from "~/components/cards/spell_card_face";
 import { WeaponCardFace } from "~/components/cards/weapon_card_face";
 import type { PlayerCard } from "#api_types/game.types";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
+import { CardDetailHover } from "../playing_card/card_detail_hover.jsx";
 import "./mulligan_overlay.css";
 
 const renderCardFace = (card: PlayerCard) => {
+    const wrapper = (content: ReactNode) => (
+        <CardDetailHover card={card} showDetailButton>
+            {content}
+        </CardDetailHover>
+    );
+
     if (card.type === "MINION") {
-        return <MinionCardFace card={card} attack={card.attack} health={card.health} />;
+        return (
+            <MinionCardFace
+                card={card}
+                attack={card.attack}
+                health={card.health}
+                wrapper={wrapper}
+            />
+        );
     }
-    if (card.type === "SPELL") return <SpellCardFace card={card} />;
-    return <WeaponCardFace card={card} />;
+    if (card.type === "SPELL") return <SpellCardFace card={card} wrapper={wrapper} />;
+    return <WeaponCardFace card={card} wrapper={wrapper} />;
 };
 
 export const MulliganOverlay = observer(() => {
