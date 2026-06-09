@@ -12,11 +12,15 @@ import {
     placeMinion,
 } from "#tests/helpers/game/fixtures";
 import {
+    assertPlayCardScenario,
+    runPlayCard,
+    runPlayCardOnGame,
+} from "#tests/helpers/game/run_play_card";
+import {
     assertWeaponActionScenario,
     runWeaponAction,
     runWeaponActionOnGame,
 } from "#tests/helpers/game/run_weapon_action";
-import { runPlayCardOnGame } from "#tests/helpers/game/run_play_card";
 
 test.group("game:weapon_action", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
@@ -129,6 +133,55 @@ test.group("game:weapon_action", (group) => {
         assertWeaponActionScenario(assert, result, {
             error: "Vous avez déjà attaqué avec votre arme ce tour",
         });
+    });
+
+    test("allows weapon attack after replacing weapon without attacking this turn", async ({
+        assert,
+    }) => {
+        const oldWeapon = createWeaponCard({
+            uuid: "card-old-weapon",
+            cost: 2,
+            damage: 1,
+            durability: 3,
+        });
+        const newWeapon = createWeaponCard({
+            uuid: "card-new-weapon",
+            cost: 3,
+            damage: 4,
+            durability: 2,
+        });
+
+        const playResult = await runPlayCard({
+            data: createGameData({
+                currentRound: 1,
+                playerOne: {
+                    mana: 10,
+                    hand: [newWeapon],
+                    weaponState: createWeaponState(oldWeapon),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: newWeapon.uuid,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, playResult, { error: null });
+        assert.equal(playResult.game.data.playerOne.heroAttacksThisRound, 0);
+        assert.equal(playResult.game.data.playerOne.weaponState!.damage, 4);
+
+        const attackResult = await runWeaponActionOnGame(playResult.game, playResult.actorUserId, {
+            spotId: null,
+            owner: "OPPONENT",
+        });
+
+        assertWeaponActionScenario(assert, attackResult, { error: null });
+        assertPlayerHealth(assert, attackResult.game, "playerTwo", DEFAULT_HERO_HEALTH - 4);
+        assert.equal(attackResult.game.data.playerOne.heroAttacksThisRound, 1);
+        assert.equal(attackResult.game.data.playerOne.weaponState!.durability, 1);
     });
 
     test("rejects weapon attack after breaking weapon and re-equipping in the same turn", async ({

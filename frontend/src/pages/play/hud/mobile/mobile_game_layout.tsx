@@ -13,6 +13,7 @@ import { AbandonGameControl } from "../abandon_game/abandon_game_control.jsx";
 import { ActionTimelineFab } from "../action_timeline/action_timeline_fab.jsx";
 import { ArmedCardHint } from "../armed_card_hint/armed_card_hint.jsx";
 import { GameFinalScreen } from "../game_final_screen/game_final_screen.jsx";
+import { MulliganOverlay } from "../mulligan/mulligan_overlay.jsx";
 import { PlayerHand } from "../player_hand/player_hand.jsx";
 import { MobileOpponentBar } from "./mobile_opponent_bar.jsx";
 import { MobilePlayerBar } from "./mobile_player_bar.jsx";
@@ -48,6 +49,7 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(({ game, user })
             </div>
 
             <GameFinalScreen />
+            <MulliganOverlay />
             <ArmedCardHint isMobile />
             <TargetingArrowOverlay />
             <GameAnimationOverlay />

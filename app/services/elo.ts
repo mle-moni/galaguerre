@@ -50,14 +50,15 @@ export const applyGameResult = async (game: Game): Promise<void> => {
         return;
     }
 
+    const playerOneId = game.playerOneId;
     const playerTwoId = game.playerTwoId;
-    if (playerTwoId === null) {
+    if (playerOneId === null || playerTwoId === null) {
         return;
     }
 
     await db.transaction(async (trx) => {
         const playerOne = await User.query({ client: trx })
-            .where("id", game.playerOneId)
+            .where("id", playerOneId)
             .forUpdate()
             .firstOrFail();
         const playerTwo = await User.query({ client: trx })

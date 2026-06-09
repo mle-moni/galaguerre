@@ -1,3 +1,4 @@
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import Action from "#models/action";
@@ -56,7 +57,7 @@ test.group("game:play_card battlecries", (group) => {
                     mana: 5,
                     hand: [handCard],
                 },
-                playerTwo: { health: 15 },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             actor: "playerOne",
             action: {
@@ -70,7 +71,7 @@ test.group("game:play_card battlecries", (group) => {
         assertPlayCardScenario(assert, result, { error: null });
         assert.equal(result.game.data.playerOne.mana, 2);
         assert.equal(result.game.data.playerOne.hand.length, 0);
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("DAMAGE battlecry deals damage to opponent hero", async ({ assert }) => {
@@ -89,7 +90,7 @@ test.group("game:play_card battlecries", (group) => {
         const result = await runPlayCard({
             data: createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
-                playerTwo: { health: 15 },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             actor: "playerOne",
             action: {
@@ -101,7 +102,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 12);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
     });
 
     test("HEAL battlecry heals active player hero", async ({ assert }) => {
@@ -161,7 +162,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerOne", 15);
+        assertPlayerHealth(assert, result.game, "playerOne", 22);
     });
 
     test("HEAL battlecry does not overheal hero already at max PDV", async ({ assert }) => {
@@ -179,7 +180,7 @@ test.group("game:play_card battlecries", (group) => {
 
         const result = await runPlayCard({
             data: createGameData({
-                playerOne: { mana: 10, health: 15, hand: [handCard] },
+                playerOne: { mana: 10, health: DEFAULT_HERO_HEALTH, hand: [handCard] },
             }),
             actor: "playerOne",
             action: {
@@ -191,7 +192,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerOne", 15);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH);
     });
 
     test("DAMAGE battlecry resolves target team from snapshot", async ({ assert }) => {
@@ -209,8 +210,8 @@ test.group("game:play_card battlecries", (group) => {
 
         const result = await runPlayCard({
             data: createGameData({
-                playerOne: { mana: 10, health: 15, hand: [handCard] },
-                playerTwo: { health: 15 },
+                playerOne: { mana: 10, health: DEFAULT_HERO_HEALTH, hand: [handCard] },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             actor: "playerOne",
             action: {
@@ -222,8 +223,8 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerOne", 12);
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 3);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("DRAW battlecry draws cards from deck", async ({ assert }) => {
@@ -298,7 +299,7 @@ test.group("game:play_card battlecries", (group) => {
             data: createGameData({
                 playerOne: {
                     mana: 10,
-                    health: 15,
+                    health: DEFAULT_HERO_HEALTH,
                     hand: [handCard],
                     deckCards: [],
                     maxFatigueDamageTaken: 1,
@@ -314,7 +315,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerOne", 10);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 5);
         assert.equal(result.game.data.playerOne.maxFatigueDamageTaken, 3);
         assert.equal(result.game.data.playerOne.hand.length, 0);
     });
@@ -384,7 +385,7 @@ test.group("game:play_card battlecries", (group) => {
             data: createGameData({
                 playerOne: {
                     mana: 10,
-                    health: 15,
+                    health: DEFAULT_HERO_HEALTH,
                     hand: [handCard],
                     deckCards: [spell],
                     maxFatigueDamageTaken: 0,
@@ -402,7 +403,7 @@ test.group("game:play_card battlecries", (group) => {
         assertPlayCardScenario(assert, result, { error: null });
         assert.equal(result.game.data.playerOne.hand.length, 0);
         assert.equal(result.game.data.playerOne.deckCards.length, 1);
-        assertPlayerHealth(assert, result.game, "playerOne", 15);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH);
         assert.equal(result.game.data.playerOne.maxFatigueDamageTaken, 0);
     });
 
@@ -448,7 +449,9 @@ test.group("game:play_card battlecries", (group) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 2,
-            battlecryActions: [createCardActionSnapshot({ type: "DAMAGE", damage: 15 })],
+            battlecryActions: [
+                createCardActionSnapshot({ type: "DAMAGE", damage: DEFAULT_HERO_HEALTH }),
+            ],
         });
 
         const result = await runPlayCard({
@@ -466,7 +469,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", -10);
+        assertPlayerHealth(assert, result.game, "playerTwo", -25);
         assertIsFinished(assert, result.game, true);
         assertGameState(assert, result.game, "FINISHED");
     });
@@ -488,7 +491,7 @@ test.group("game:play_card battlecries", (group) => {
         const result = await runPlayCard({
             data: createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
-                playerTwo: { health: 15 },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             actor: "playerOne",
             action: {
@@ -502,7 +505,7 @@ test.group("game:play_card battlecries", (group) => {
         assertPlayCardScenario(assert, result, {
             error: "Vous devez choisir une cible pour cette carte",
         });
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("targeted DAMAGE deals damage to opponent hero", async ({ assert }) => {
@@ -522,7 +525,7 @@ test.group("game:play_card battlecries", (group) => {
         const result = await runPlayCard({
             data: createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
-                playerTwo: { health: 15 },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             actor: "playerOne",
             action: {
@@ -535,7 +538,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 10);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 5);
     });
 
     test("targeted DAMAGE deals damage to opponent minion", async ({ assert }) => {
@@ -767,8 +770,8 @@ test.group("game:play_card battlecries", (group) => {
 
         const result = await runPlayCard({
             data: createGameData({
-                playerOne: { mana: 10, health: 15, hand: [handCard] },
-                playerTwo: { health: 15 },
+                playerOne: { mana: 10, health: DEFAULT_HERO_HEALTH, hand: [handCard] },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             actor: "playerOne",
             action: {
@@ -781,8 +784,8 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerOne", 14);
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 1);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("mass HEAL with ALL type heals heroes and minions", async ({ assert }) => {
@@ -1647,7 +1650,7 @@ test.group("game:play_card battlecries", (group) => {
         const result = await runPlayCard({
             data: createGameData({
                 playerOne: { mana: 10, health: 10, hand: [handCard] },
-                playerTwo: { health: 15 },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             actor: "playerOne",
             action: {
@@ -1659,7 +1662,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", 13);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
         assertPlayerHealth(assert, result.game, "playerOne", 13);
     });
 
@@ -1668,7 +1671,7 @@ test.group("game:play_card battlecries", (group) => {
             uuid: CARD_IDS.handMinion,
             cost: 2,
             battlecryActions: [
-                createCardActionSnapshot({ type: "DAMAGE", damage: 15 }),
+                createCardActionSnapshot({ type: "DAMAGE", damage: DEFAULT_HERO_HEALTH }),
                 createCardActionSnapshot({ type: "HEAL", heal: 10 }),
             ],
         });
@@ -1688,7 +1691,7 @@ test.group("game:play_card battlecries", (group) => {
         });
 
         assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", -5);
+        assertPlayerHealth(assert, result.game, "playerTwo", -20);
         assertPlayerHealth(assert, result.game, "playerOne", 5);
         assertIsFinished(assert, result.game, true);
     });

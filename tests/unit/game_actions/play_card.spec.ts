@@ -1,7 +1,7 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
-import { assertBoardSpot } from "#tests/helpers/game/assertions";
+import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
     createCardActionSnapshot,
@@ -10,7 +10,9 @@ import {
     createMinionState,
     createMinionTargetSnapshot,
     createSpellCard,
+    createHeroTargetSnapshot,
     createWeaponCard,
+    createWeaponState,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { assertPlayCardScenario, runPlayCard } from "#tests/helpers/game/run_play_card";
@@ -353,6 +355,49 @@ test.group("game:play_card", (group) => {
         assertPlayCardScenario(assert, result, { error: null });
         assert.equal(result.game.data.playerOne.weaponState!.damage, 4);
         assert.equal(result.game.data.playerOne.weaponState!.durability, 3);
+    });
+
+    test("triggers old weapon deathrattle when playing a new one", async ({ assert }) => {
+        const oldWeapon = createWeaponCard({
+            uuid: "card-old-weapon",
+            cost: 2,
+            damage: 1,
+            durability: 1,
+            deathrattleActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+        const newWeapon = createWeaponCard({
+            uuid: "card-new-weapon",
+            cost: 3,
+            damage: 4,
+            durability: 3,
+        });
+
+        const result = await runPlayCard({
+            data: createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [newWeapon],
+                    weaponState: createWeaponState(oldWeapon),
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: newWeapon.uuid,
+                spotId: null,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assertPlayCardScenario(assert, result, { error: null });
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+        assert.equal(result.game.data.playerOne.weaponState!.damage, 4);
     });
 
     test("rejects play when it is not the player turn", async ({ assert }) => {

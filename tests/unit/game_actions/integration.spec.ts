@@ -1,3 +1,4 @@
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
@@ -66,7 +67,7 @@ test.group("game:integration", (group) => {
         });
 
         assertMinionActionScenario(assert, attackResult, { error: null });
-        assertPlayerHealth(assert, attackResult.game, "playerTwo", 13);
+        assertPlayerHealth(assert, attackResult.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
 
         const passResult = await runPassTurnOnGame(attackResult.game, playerOne.id);
 
@@ -87,7 +88,7 @@ test.group("game:integration", (group) => {
         const chargeCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 10,
-            attack: 15,
+            attack: DEFAULT_HERO_HEALTH,
             health: 1,
             hasCharge: true,
             effects: ["Charge"],
@@ -208,7 +209,7 @@ test.group("game:integration", (group) => {
         });
 
         assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
-        assertPlayerHealth(assert, blocked.game, "playerTwo", 15);
+        assertPlayerHealth(assert, blocked.game, "playerTwo", DEFAULT_HERO_HEALTH);
 
         const killTaunt = await runMinionActionOnGame(blocked.game, playerOne.id, {
             minionId: MINION_IDS.attacker,
@@ -226,7 +227,7 @@ test.group("game:integration", (group) => {
         });
 
         assertMinionActionScenario(assert, heroAttack, { error: null });
-        assertPlayerHealth(assert, heroAttack.game, "playerTwo", 12);
+        assertPlayerHealth(assert, heroAttack.game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
 
         const opponentPass = await runPassTurnOnGame(heroAttack.game, playerOne.id);
         assert.equal(opponentPass.game.data.state, "PLAYER_TWO_TURN");

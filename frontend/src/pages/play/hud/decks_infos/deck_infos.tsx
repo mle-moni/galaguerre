@@ -1,16 +1,15 @@
 import type { GamePlayer } from "#api_types/game.types";
-import { Button } from "@mantine/core";
+import { Button, Stack } from "@mantine/core";
 import { IconPlayCard } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
 import { passTurn } from "~/services/ws_client";
+import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
 
 interface DeckInfosProps {
     player: GamePlayer;
     isOpponent?: boolean;
 }
-
-const filler = <div className="h-[80px]" />;
 
 export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
     const numberOfCards = player.deckCards.length;
@@ -19,7 +18,7 @@ export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
 
     return (
         <div className="flex flex-col w-full">
-            {isOpponent && filler}
+            {isOpponent && <OpponentTurnTimer />}
             <div
                 className="flex h-[80px] items-center"
                 data-animation-deck
@@ -37,14 +36,35 @@ export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
     );
 });
 
+const OpponentTurnTimer = observer(() => {
+    const { store } = useGameContext();
+
+    if (store.isMyTurn) return <div className="h-[80px]" />;
+
+    return (
+        <div className="h-[80px] flex justify-center items-center">
+            <CountdownTimer
+                endsAt={store.game.data.turnEndsAt}
+                title="Temps restant pour le tour de l'adversaire"
+            />
+        </div>
+    );
+});
+
 const PlayerButton = observer(() => {
     const { store } = useGameContext();
 
     if (store.isMyTurn) {
         return (
-            <Button variant="filled" onClick={passTurn}>
-                Terminé
-            </Button>
+            <Stack gap={4} align="center">
+                <CountdownTimer
+                    endsAt={store.game.data.turnEndsAt}
+                    title="Temps restant pour votre tour"
+                />
+                <Button variant="filled" onClick={passTurn}>
+                    Terminé
+                </Button>
+            </Stack>
         );
     }
 

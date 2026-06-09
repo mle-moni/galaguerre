@@ -52,7 +52,7 @@ test.group("game:create", (group) => {
         return deck;
     };
 
-    test("getDefaultGameData creates INIT state with 30 health and 3 cards in hand", async ({
+    test("getDefaultGameData creates MULLIGAN state with 30 health and opening hands 3/4", async ({
         assert,
     }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -81,14 +81,16 @@ test.group("game:create", (group) => {
             },
         });
 
-        assert.equal(data.state, "INIT");
+        assert.equal(data.state, "MULLIGAN");
         assert.equal(data.currentRound, 0);
         assert.equal(data.playerOne.health, 30);
         assert.equal(data.playerTwo.health, 30);
         assert.equal(data.playerOne.hand.length, 3);
-        assert.equal(data.playerTwo.hand.length, 3);
+        assert.equal(data.playerTwo.hand.length, 4);
         assert.equal(data.playerOne.deckCards.length, 3);
-        assert.equal(data.playerTwo.deckCards.length, 3);
+        assert.equal(data.playerTwo.deckCards.length, 2);
+        assert.isFalse(data.mulligan?.playerOneDone);
+        assert.isFalse(data.mulligan?.playerTwoDone);
     });
 
     test("getDefaultGameData generates distinct decks for each player", async ({ assert }) => {
@@ -129,7 +131,7 @@ test.group("game:create", (group) => {
         }
     });
 
-    test("setupNextGameTurn after INIT starts player one turn with round 1 and mana 1", async ({
+    test("setupNextGameTurn after MULLIGAN starts player one turn with round 1 and mana 1", async ({
         assert,
     }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -145,7 +147,7 @@ test.group("game:create", (group) => {
         const deckOne = await createDeckForUser(playerOne.id, "start-a");
         const deckTwo = await createDeckForUser(playerTwo.id, "start-b");
 
-        const data = await getDefaultGameData({
+        const data = getDefaultGameData({
             playerOne: {
                 userId: playerOne.id,
                 pseudo: "Player One",
@@ -157,6 +159,8 @@ test.group("game:create", (group) => {
                 deck: deckTwo,
             },
         });
+
+        data.mulligan = { playerOneDone: true, playerTwoDone: true };
 
         const game = await Game.create({
             playerOneId: playerOne.id,
@@ -211,7 +215,7 @@ test.group("game:create", (group) => {
         const p2View = game.getApiJson(playerTwo.id);
 
         assert.equal(p1View.data.playerOne.hand.length, 3);
-        assert.equal(p1View.data.playerTwo.hand.length, 3);
+        assert.equal(p1View.data.playerTwo.hand.length, 4);
         assert.equal(p1View.data.playerTwo.hand[0]!.label, "dummy card");
         assert.equal(p2View.data.playerOne.hand[0]!.label, "dummy card");
         assert.notEqual(p2View.data.playerTwo.hand[0]!.label, "dummy card");

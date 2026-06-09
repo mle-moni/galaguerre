@@ -40,17 +40,21 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
 
     const botCards = await loadTrainingBotCards();
 
-    const playerOne = {
+    const humanPlayer = {
         userId: user.id,
         pseudo: user.pseudo ?? user.email.split("@")[0],
         deck,
     };
 
-    const playerTwo = {
+    const aiPlayer = {
         userId: TRAINING_AI_USER_ID,
         pseudo: TRAINING_AI_PSEUDO,
         cards: botCards,
     };
+
+    const swapSeats = Math.random() < 0.5;
+    const playerOne = swapSeats ? aiPlayer : humanPlayer;
+    const playerTwo = swapSeats ? humanPlayer : aiPlayer;
 
     let game;
     try {

@@ -10,7 +10,7 @@ export class PlayerInfosStore {
         const gameState = this.gameStore.game.data.state;
         const isMyTurn = this.gameStore.isMyTurn;
 
-        if (gameState === "INIT") return "yellow";
+        if (gameState === "INIT" || gameState === "MULLIGAN") return "yellow";
 
         const opponentAndHisTurn = isOpponent && !isMyTurn;
         const meAndMyTurn = !isOpponent && isMyTurn;

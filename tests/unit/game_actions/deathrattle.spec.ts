@@ -1,3 +1,4 @@
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import Action from "#models/action";
@@ -75,8 +76,8 @@ test.group("game:deathrattle", (group) => {
 
         assertMinionActionScenario(assert, result, { error: null });
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
-        assertPlayerHealth(assert, result.game, "playerOne", 15);
-        assertPlayerHealth(assert, result.game, "playerTwo", 15);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
     test("DAMAGE deathrattle deals damage to opponent hero on combat death", async ({ assert }) => {
@@ -126,7 +127,7 @@ test.group("game:deathrattle", (group) => {
 
         assertMinionActionScenario(assert, result, { error: null });
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
-        assertPlayerHealth(assert, result.game, "playerOne", 13);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 2);
     });
 
     test("deathrattle triggers when minion is killed by battlecry damage", async ({ assert }) => {
@@ -178,7 +179,7 @@ test.group("game:deathrattle", (group) => {
 
         assertPlayCardScenario(assert, result, { error: null });
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
-        assertPlayerHealth(assert, result.game, "playerOne", 12);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 3);
     });
 
     test("chained mass DAMAGE deathrattles do not recurse infinitely", async ({ assert }) => {
@@ -410,8 +411,8 @@ test.group("game:deathrattle", (group) => {
 
         assertMinionActionScenario(assert, result, { error: null });
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
-        assertPlayerHealth(assert, result.game, "playerOne", 13);
-        assertPlayerHealth(assert, result.game, "playerTwo", 13);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 2);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", null);
         assertBoardSpot(assert, result.game, "playerOne", "SPOT_2", { health: 1 });
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_2", { health: 1 });
@@ -532,8 +533,8 @@ test.group("game:deathrattle", (group) => {
 
         assertMinionActionScenario(assert, result, { error: null });
         assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", null);
-        assertPlayerHealth(assert, result.game, "playerOne", 12);
-        assertPlayerHealth(assert, result.game, "playerTwo", 12);
+        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 3);
+        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
     });
 
     test("deathrattle that reduces hero to zero ends the game", async ({ assert }) => {
@@ -549,7 +550,7 @@ test.group("game:deathrattle", (group) => {
             deathrattleActions: [
                 createCardActionSnapshot({
                     type: "DAMAGE",
-                    damage: 15,
+                    damage: DEFAULT_HERO_HEALTH,
                     target: createHeroTargetSnapshot("OPPONENT"),
                 }),
             ],
