@@ -2,7 +2,11 @@ import type { ApiDeckCardEntry } from "#api_types/deck.types";
 import Card from "#models/card";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
-import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
+import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relations";
+
+export const preloadDeckCardSet = (query: ManyToManyQueryBuilderContract<typeof Card>) => {
+    query.preload("cardSet");
+};
 
 export const deckCardsToEntries = (deck: Deck): ApiDeckCardEntry[] => {
     const counts = new Map<number, number>();
@@ -18,7 +22,7 @@ export const findUserDeck = async (userId: number, deckId: number) => {
     return Deck.query()
         .where("id", deckId)
         .andWhere("userId", userId)
-        .preload("cards", loadCardRelations)
+        .preload("cards", preloadDeckCardSet)
         .first();
 };
 
@@ -35,7 +39,7 @@ export const syncDeckCards = async (deckId: number, entries: ApiDeckCardEntry[])
 };
 
 export const preloadDeckCards = async (deck: Deck) => {
-    await deck.load("cards", (q) => loadCardRelations(q));
+    await deck.load("cards", preloadDeckCardSet);
 };
 
 export const validateCardIdsExist = async (entries: ApiDeckCardEntry[]) => {

@@ -14,7 +14,7 @@ const toPlayerCard = (card: ApiCatalogCard): PlayerCard => {
         label: card.label,
         imageUrl: card.imageUrl,
         cost: card.cost,
-        tagIds: card.tagIds,
+        tags: card.tags,
     };
 
     if (card.type === "MINION") {

@@ -18,27 +18,6 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
             options: GALAGUERRE_CARD_TYPES_OPTIONS,
             label: "Type",
         },
-        minion: {
-            type: "belongsToRelation",
-            modelName: "Minion",
-            labelFields: ["internalLabel", "attack", "health"],
-            nullable: true,
-            label: "Monstre",
-        },
-        spell: {
-            type: "belongsToRelation",
-            modelName: "Spell",
-            labelFields: ["internalLabel"],
-            nullable: true,
-            label: "Sort",
-        },
-        weapon: {
-            type: "belongsToRelation",
-            modelName: "Weapon",
-            labelFields: ["internalLabel", "damage", "durability"],
-            nullable: true,
-            label: "Arme",
-        },
         imageUrl: {
             type: "file",
             subType: "url",
@@ -53,6 +32,10 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
             labelFields: ["name"],
             label: "Set",
         },
+        // data: {
+        //     type: "json",
+        //     label: "Données",
+        // }
         createdAt: {
             type: "date",
             subType: "datetime",

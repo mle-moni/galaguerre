@@ -1,7 +1,5 @@
 import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
 import { formatActionDescription } from "../../galaguerre/action_engine/format_action_description.js";
-import { serializeAction } from "../../galaguerre/action_engine/serialize_action.js";
-import { serializePassive } from "../../galaguerre/action_engine/serialize_passive.js";
 import {
     getBattlecryDescription,
     getDeathrattleDescription,
@@ -28,83 +26,65 @@ export const generatePlayerCards = (source: CardSource) => {
             label: card.label,
             imageUrl: card.imageUrl,
             cost: card.cost,
-            tagIds: (card.tags ?? []).map((tag) => tag.id),
+            tags: card.data.tags,
         };
 
         if (card.type === "WEAPON") {
-            if (!card.weapon) throw new Error("card.weapon not found");
-
-            const deathrattleActions = (card.weapon.deathrattleActions ?? []).map((dra) =>
-                serializeAction(dra.action),
-            );
-            const deathrattleLines = getDeathrattleDescription(deathrattleActions);
+            const data = card.data as Extract<typeof card.data, { damage: number }>;
+            const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
 
             return {
                 ...base,
                 type: "WEAPON",
-                damage: card.weapon.damage,
-                durability: card.weapon.durability,
-                deathrattleActions,
+                damage: data.damage,
+                durability: data.durability,
+                deathrattleActions: data.deathrattleActions,
                 description: getWeaponCardDescription(
-                    card.weapon.damage,
-                    card.weapon.durability,
+                    data.damage,
+                    data.durability,
                     deathrattleLines,
                 ),
             };
         }
 
         if (card.type === "SPELL") {
-            if (!card.spell) throw new Error("card.spell not found");
-
-            const action = serializeAction(card.spell.action);
+            const data = card.data as Extract<typeof card.data, { action: unknown }>;
 
             return {
                 ...base,
                 type: "SPELL",
-                description: formatActionDescription(action, "Effet") ?? card.label,
-                action,
+                description: formatActionDescription(data.action, "Effet") ?? card.label,
+                action: data.action,
             };
         }
 
-        if (!card.minion) throw new Error("card.minion not found");
-
-        const effects = getMinionPowerEffects(card.minion.minionPower);
-        const battlecryActions = (card.minion.battlecryActions ?? []).map((bca) =>
-            serializeAction(bca.action),
-        );
-        const deathrattleActions = (card.minion.deathrattleActions ?? []).map((dra) =>
-            serializeAction(dra.action),
-        );
-        const passives = (card.minion.passives ?? []).map((mp) => serializePassive(mp.passive));
-        const battlecryLines = getBattlecryDescription(battlecryActions);
-        const deathrattleLines = getDeathrattleDescription(deathrattleActions);
-        const passiveLines = getPassiveDescription(passives);
+        const data = card.data as Extract<typeof card.data, { attack: number }>;
+        const effects = getMinionPowerEffects(data);
+        const battlecryLines = getBattlecryDescription(data.battlecryActions);
+        const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
+        const passiveLines = getPassiveDescription(data.passives);
 
         return {
             ...base,
             type: "MINION",
-            health: card.minion.health,
-            attack: card.minion.attack,
-            hasTaunt: card.minion.minionPower?.hasTaunt ?? false,
-            hasCharge: card.minion.minionPower?.hasCharge ?? false,
-            hasWindfury: card.minion.minionPower?.hasWindfury ?? false,
-            isPoisonous: card.minion.minionPower?.isPoisonous ?? false,
+            health: data.health,
+            attack: data.attack,
+            hasTaunt: data.hasTaunt,
+            hasCharge: data.hasCharge,
+            hasWindfury: data.hasWindfury,
+            isPoisonous: data.isPoisonous,
             effects,
-            tags: (card.tags ?? []).map((tag) => ({
-                label: tag.label,
-                symbol: tag.symbol,
-            })),
             description: getMinionCardDescription(
-                card.minion.attack,
-                card.minion.health,
+                data.attack,
+                data.health,
                 effects,
                 battlecryLines,
                 deathrattleLines,
                 passiveLines,
             ),
-            battlecryActions,
-            deathrattleActions,
-            passives,
+            battlecryActions: data.battlecryActions,
+            deathrattleActions: data.deathrattleActions,
+            passives: data.passives,
         };
     });
 

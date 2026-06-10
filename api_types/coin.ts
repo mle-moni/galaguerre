@@ -9,7 +9,7 @@ export const COIN_CARD_PREVIEW: SpellCard = {
     label: "La Pièce",
     imageUrl: COIN_IMAGE_URL,
     cost: 0,
-    tagIds: [],
+    tags: [],
     type: "SPELL",
     description: "Ce tour-ci, gagnez 1 cristal de mana.",
     action: {

@@ -4,24 +4,24 @@ export const COIN_CARD_ID = -1;
 
 export type ComparisonOperator = "<" | ">" | "=";
 
-export interface ComparisonSnapshot {
-    costComparison: ComparisonOperator | null;
-    cost: number | null;
-    attackComparison: ComparisonOperator | null;
-    attack: number | null;
-    healthComparison: ComparisonOperator | null;
-    health: number | null;
-}
+export type { CardTag } from "./card.types.js";
+export type {
+    CardActionSnapshot,
+    BoostSnapshot,
+    BoostMinionPowerSnapshot,
+    CardFilterSnapshot,
+    ComparisonSnapshot,
+    PassiveSnapshot,
+    PassiveBoostSnapshot,
+    TargetSnapshot,
+} from "./card.types.js";
+
+import type { CardActionSnapshot, CardTag, PassiveSnapshot } from "./card.types.js";
 
 export interface ComparableStats {
     cost: number;
     attack: number;
     health: number;
-}
-
-export interface CardTagSnapshot {
-    label: string;
-    symbol: string;
 }
 
 export interface PlayerCardBase {
@@ -30,73 +30,16 @@ export interface PlayerCardBase {
     label: string;
     imageUrl: string;
     cost: number;
-    tagIds: number[];
+    tags: CardTag[];
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
-
-export interface TargetSnapshot {
-    type: "HERO" | "MINION" | "ALL";
-    targetTeam: "PLAYER" | "OPPONENT" | "ALL";
-    comparison: ComparisonSnapshot | null;
-    tagId: number | null;
-    tag: CardTagSnapshot | null;
-    excludeSelf: boolean;
-    maxTargets: number | null;
-    targetSelectionMode: "RANDOM" | null;
-}
-
-export interface CardFilterSnapshot {
-    type: "MINION" | "SPELL" | "WEAPON";
-    comparison: ComparisonSnapshot | null;
-    tagIds: number[];
-    tags: CardTagSnapshot[];
-}
 
 export interface ActionTarget {
     spotId: MinionSpotId | null;
     owner: SpotOwner;
 }
 
-export interface BoostMinionPowerSnapshot {
-    hasTaunt: boolean;
-    hasCharge: boolean;
-    hasWindfury: boolean;
-    isPoisonous: boolean;
-}
-
-export interface BoostSnapshot {
-    attack: number | null;
-    health: number | null;
-    spellPower: number | null;
-    minionPower: BoostMinionPowerSnapshot | null;
-}
-
-export interface CardActionSnapshot {
-    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST";
-    isTargeted: boolean;
-    damage: number | null;
-    heal: number | null;
-    drawCount: number | null;
-    enemyDrawCount: number | null;
-    drawCardFilter: CardFilterSnapshot | null;
-    enemyDrawCardFilter: CardFilterSnapshot | null;
-    boost: BoostSnapshot | null;
-    target: TargetSnapshot | null;
-}
-
 export type PassiveTriggersOn = "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL";
-
-export interface PassiveBoostSnapshot {
-    boost: BoostSnapshot;
-    target: TargetSnapshot | null;
-}
-
-export interface PassiveSnapshot {
-    type: "ACTION" | "BOOST";
-    triggersOn: PassiveTriggersOn | null;
-    action: CardActionSnapshot | null;
-    passiveBoost: PassiveBoostSnapshot | null;
-}
 
 export interface AuraAppliedTarget {
     owner: SpotOwner;
@@ -113,7 +56,6 @@ export type MinionCard = PlayerCardBase & {
     hasWindfury: boolean;
     isPoisonous: boolean;
     effects: string[];
-    tags: CardTagSnapshot[];
     description: string;
     battlecryActions: CardActionSnapshot[];
     deathrattleActions: CardActionSnapshot[];

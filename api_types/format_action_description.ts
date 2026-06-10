@@ -2,9 +2,10 @@ import type {
     BoostSnapshot,
     CardActionSnapshot,
     CardFilterSnapshot,
-    CardTagSnapshot,
+    CardTag,
     TargetSnapshot,
 } from "./game.types.js";
+import { CARD_TAG_LABELS } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
 import { hasRandomLimitedTarget } from "./target_matching.js";
 
@@ -14,9 +15,12 @@ const CARD_TYPE_LABELS: Record<CardFilterSnapshot["type"], string> = {
     WEAPON: "Arme",
 };
 
-const formatTagChip = (tag: CardTagSnapshot): string => `${tag.symbol} ${tag.label}`;
+const formatTagChip = (tag: CardTag): string => {
+    const meta = CARD_TAG_LABELS[tag];
+    return `${meta.symbol} ${meta.label}`;
+};
 
-const formatTagList = (tags: CardTagSnapshot[]): string => tags.map(formatTagChip).join(", ");
+const formatTagList = (tags: CardTag[]): string => tags.map(formatTagChip).join(", ");
 
 const withPrepositionA = (label: string): string => {
     if (label.startsWith("les ")) {
@@ -73,8 +77,6 @@ const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
     }
     if (action.target.tag) {
         parts.push(formatTagChip(action.target.tag));
-    } else if (action.target.tagId !== null) {
-        parts.push("avec le tag requis");
     }
 
     if (parts.length === 0) return "";
@@ -201,8 +203,6 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     }
     if (filter.tags.length > 0) {
         parts.push(formatTagList(filter.tags));
-    } else if (filter.tagIds.length > 0) {
-        parts.push("avec le tag requis");
     }
 
     return ` ${parts.join(" + ")}`;

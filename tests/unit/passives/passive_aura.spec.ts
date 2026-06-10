@@ -117,12 +117,11 @@ test.group("passive BOOST auras", () => {
     });
 
     test("tagged aura does not revert from a different minion at the same spot", ({ assert }) => {
-        const MURLOC_TAG = 42;
         const murloc = createMinionCard({
             uuid: "murloc-minion",
             attack: 1,
             health: 1,
-            tagIds: [MURLOC_TAG],
+            tags: ["MURLOC"],
         });
         const stormwindKnight = createMinionCard({
             uuid: "stormwind-knight",
@@ -139,7 +138,7 @@ test.group("passive BOOST auras", () => {
                     passiveBoost: {
                         boost: createBoostSnapshot({ attack: 2 }),
                         target: createMinionTargetSnapshot("PLAYER", {
-                            tagId: MURLOC_TAG,
+                            tag: "MURLOC",
                             excludeSelf: true,
                         }),
                     },

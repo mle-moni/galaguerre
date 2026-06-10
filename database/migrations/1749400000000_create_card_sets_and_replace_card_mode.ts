@@ -54,6 +54,6 @@ export default class extends BaseSchema {
             table.dropColumn("card_set_id");
         });
 
-        this.schema.dropTable("card_sets");
+        this.schema.dropTableIfExists("card_sets");
     }
 }

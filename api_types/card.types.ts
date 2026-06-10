@@ -1,0 +1,17 @@
+export type { CardTag } from "../app/galaguerre/card_tags.js";
+export type {
+    CardActionDefinition as CardActionSnapshot,
+    BoostDefinition as BoostSnapshot,
+    BoostMinionPowerDefinition as BoostMinionPowerSnapshot,
+    CardFilterDefinition as CardFilterSnapshot,
+    ComparisonDefinition as ComparisonSnapshot,
+    PassiveDefinition as PassiveSnapshot,
+    PassiveBoostDefinition as PassiveBoostSnapshot,
+    TargetDefinition as TargetSnapshot,
+    MinionCardData,
+    SpellCardData,
+    WeaponCardData,
+    CardData,
+} from "../app/galaguerre/card_definition.schema.js";
+
+export { CARD_TAGS, CARD_TAG_LABELS } from "../app/galaguerre/card_tags.js";

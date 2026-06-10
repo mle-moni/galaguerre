@@ -1,13 +1,10 @@
-import { BaseModel, belongsTo, column, manyToMany } from "@adonisjs/lucid/orm";
-import type { BelongsTo, ManyToMany } from "@adonisjs/lucid/types/relations";
+import type { CardData } from "#galaguerre/card_definition.schema";
+import { parseCardData } from "#galaguerre/card_definition.schema";
+import type { GalaguerreCardType } from "#galaguerre/galaguerre.types";
+import { BaseModel, beforeSave, belongsTo, column } from "@adonisjs/lucid/orm";
+import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
-import type { GalaguerreCardType } from "../galaguerre/galaguerre.types.js";
 import CardSet from "./card_set.js";
-import type CardTag from "./card_tag.js";
-import Minion from "./minion.js";
-import Spell from "./spell.js";
-import Tag from "./tag.js";
-import Weapon from "./weapon.js";
 
 export default class Card extends BaseModel {
     @column({ isPrimary: true })
@@ -32,29 +29,16 @@ export default class Card extends BaseModel {
     declare cardSet: BelongsTo<typeof CardSet>;
 
     @column()
-    declare minionId: number | null;
-
-    @belongsTo(() => Minion)
-    declare minion: BelongsTo<typeof Minion>;
-
-    @column()
-    declare spellId: number | null;
-
-    @belongsTo(() => Spell)
-    declare spell: BelongsTo<typeof Spell>;
-
-    @column()
-    declare weaponId: number | null;
-
-    @belongsTo(() => Weapon)
-    declare weapon: BelongsTo<typeof Weapon>;
-
-    @manyToMany(() => Tag, { pivotTable: "card_tags" })
-    declare tags: ManyToMany<typeof Tag, typeof CardTag>;
+    declare data: CardData;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     declare updatedAt: DateTime;
+
+    @beforeSave()
+    static validateData(card: Card) {
+        card.data = parseCardData(card.type, card.data);
+    }
 }
