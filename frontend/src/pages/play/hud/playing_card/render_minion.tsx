@@ -29,6 +29,8 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
     const currentRound = store.game.data.currentRound;
     const attackStatus = getMinionAttackStatus(state, currentRound, isOwnMinion && store.isMyTurn);
     const canAttack = attackStatus === "ready";
+    const isSelectingBattlecryOrSpellTarget = store.targetSelectionStore.isHighlightingTargets;
+    const canStartAttack = canAttack && !isSelectingBattlecryOrSpellTarget;
     const remainingAttacks = isOwnMinion
         ? getMinionRemainingAttacks(state, currentRound)
         : undefined;
@@ -88,14 +90,17 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
 
     if (isMobilePortrait) {
         return (
-            <BoardMinionToken {...baseProps} onClick={canAttack ? handleAttackClick : undefined} />
+            <BoardMinionToken
+                {...baseProps}
+                onClick={canStartAttack ? handleAttackClick : undefined}
+            />
         );
     }
 
     return (
         <MinionCardFace
             {...baseProps}
-            onPointerDown={canAttack ? handleAttackPointerDown : undefined}
+            onPointerDown={canStartAttack ? handleAttackPointerDown : undefined}
         />
     );
 });
