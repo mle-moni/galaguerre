@@ -6,7 +6,8 @@ import { createInMemoryGame } from "./in_memory_game.js";
 
 const TEST_SOCKET_ID = "test-socket";
 
-const withTrainingGame = (data: GameData): Game => createInMemoryGame({ ...data, isTraining: true });
+const withTrainingGame = (data: GameData): Game =>
+    createInMemoryGame({ ...data, isTraining: true });
 
 export interface MinionCombatOptions {
     attackerSpot?: MinionSpotId;

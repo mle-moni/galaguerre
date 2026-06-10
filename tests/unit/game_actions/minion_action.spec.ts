@@ -1,6 +1,10 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import { assertBoardSpot, assertIsFinished, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import {
+    assertBoardSpot,
+    assertIsFinished,
+    assertPlayerHealth,
+} from "#tests/helpers/game/assertions";
 import {
     createGameData,
     createMinionCard,
@@ -9,6 +13,11 @@ import {
     placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { runMinionCombat, runMinionCombatOnGame } from "#tests/helpers/game/run_minion_combat";
+import {
+    runMinionActionInMemory,
+    runMinionActionOnGameInMemory,
+} from "#tests/helpers/game/run_minion_action_in_memory";
+import { assertError } from "#tests/helpers/game/socket_event_collector";
 
 test.group("minion combat", () => {
     test("normal minion vs minion combat subtracts health from both", async ({ assert }) => {
@@ -23,7 +32,8 @@ test.group("minion combat", () => {
             health: 4,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -38,7 +48,8 @@ test.group("minion combat", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", {
             health: 1,
@@ -46,7 +57,6 @@ test.group("minion combat", () => {
         });
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 1 });
     });
-
 
     test("poisonous minion kills high health target", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -62,7 +72,8 @@ test.group("minion combat", () => {
             health: 9,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -77,12 +88,12 @@ test.group("minion combat", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", null);
     });
-
 
     test("poisonous minion deals normal damage to hero", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -93,7 +104,8 @@ test.group("minion combat", () => {
             effects: ["Toxique"],
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -101,7 +113,9 @@ test.group("minion combat", () => {
                         createMinionState(attackerCard),
                     ),
                 },
-            }), { heroAttack: true });
+            }),
+            { heroAttack: true },
+        );
 
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 1);
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", {
@@ -109,7 +123,6 @@ test.group("minion combat", () => {
             attacksThisRound: 1,
         });
     });
-
 
     test("charge allows attack on the turn the minion was placed", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -120,7 +133,8 @@ test.group("minion combat", () => {
             effects: ["Charge"],
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 currentRound: 3,
                 playerOne: {
                     board: placeMinion(
@@ -129,11 +143,12 @@ test.group("minion combat", () => {
                         createMinionState(attackerCard, { placedAtRound: 3 }),
                     ),
                 },
-            }), { heroAttack: true });
+            }),
+            { heroAttack: true },
+        );
 
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
     });
-
 
     test("windfury allows two attacks in the same turn", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -144,7 +159,8 @@ test.group("minion combat", () => {
             effects: ["Furie des vents"],
         });
 
-        const { game: initialGame } = await runMinionCombat(createGameData({
+        const { game: initialGame } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -152,7 +168,9 @@ test.group("minion combat", () => {
                         createMinionState(attackerCard),
                     ),
                 },
-            }), { heroAttack: true });
+            }),
+            { heroAttack: true },
+        );
 
         assertPlayerHealth(assert, initialGame, "playerTwo", DEFAULT_HERO_HEALTH - 5);
 
@@ -161,7 +179,6 @@ test.group("minion combat", () => {
         assertPlayerHealth(assert, secondGame, "playerTwo", DEFAULT_HERO_HEALTH - 10);
         assertBoardSpot(assert, secondGame, "playerOne", "SPOT_1", { attacksThisRound: 2 });
     });
-
 
     test("charge and windfury allow two attacks on placement turn", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -173,7 +190,8 @@ test.group("minion combat", () => {
             effects: ["Charge", "Furie des vents"],
         });
 
-        const { game: initialGame } = await runMinionCombat(createGameData({
+        const { game: initialGame } = await runMinionCombat(
+            createGameData({
                 currentRound: 2,
                 playerOne: {
                     board: placeMinion(
@@ -182,7 +200,9 @@ test.group("minion combat", () => {
                         createMinionState(attackerCard, { placedAtRound: 2 }),
                     ),
                 },
-            }), { heroAttack: true });
+            }),
+            { heroAttack: true },
+        );
 
         assertPlayerHealth(assert, initialGame, "playerTwo", DEFAULT_HERO_HEALTH - 2);
 
@@ -190,7 +210,6 @@ test.group("minion combat", () => {
 
         assertPlayerHealth(assert, secondGame, "playerTwo", DEFAULT_HERO_HEALTH - 4);
     });
-
 
     test("charge and poisonous kills target on placement turn", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -207,7 +226,8 @@ test.group("minion combat", () => {
             health: 9,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 currentRound: 4,
                 playerOne: {
                     board: placeMinion(
@@ -223,7 +243,8 @@ test.group("minion combat", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", {
@@ -232,7 +253,6 @@ test.group("minion combat", () => {
         });
     });
 
-
     test("lethal hero attack terminates the game", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,
@@ -240,7 +260,8 @@ test.group("minion combat", () => {
             health: 1,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -248,12 +269,13 @@ test.group("minion combat", () => {
                         createMinionState(attackerCard),
                     ),
                 },
-            }), { heroAttack: true });
+            }),
+            { heroAttack: true },
+        );
 
         assertPlayerHealth(assert, game, "playerTwo", 0);
         assertIsFinished(assert, game, true);
     });
-
 
     test("taunt blocks hero attack", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -269,7 +291,8 @@ test.group("minion combat", () => {
             effects: ["Provocation"],
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -284,11 +307,12 @@ test.group("minion combat", () => {
                         createMinionState(tauntCard),
                     ),
                 },
-            }), { heroAttack: true });
+            }),
+            { heroAttack: true },
+        );
 
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
-
 
     test("allows attacking a taunt minion when taunt is present", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -309,7 +333,8 @@ test.group("minion combat", () => {
             health: 4,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -327,13 +352,14 @@ test.group("minion combat", () => {
                         SPOT_2: createMinionState(tauntCard),
                     },
                 },
-            }), { targetSpot: "SPOT_2" });
+            }),
+            { targetSpot: "SPOT_2" },
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_2", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 2 });
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 4 });
     });
-
 
     test("attacker dies from counter damage in minion combat", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -347,7 +373,8 @@ test.group("minion combat", () => {
             health: 4,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -362,12 +389,12 @@ test.group("minion combat", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", null);
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 3 });
     });
-
 
     test("both minions die in a lethal trade", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -381,7 +408,8 @@ test.group("minion combat", () => {
             health: 3,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -396,7 +424,8 @@ test.group("minion combat", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", null);
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
@@ -548,4 +577,317 @@ test.group("minion combat", () => {
         assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 2 });
     });
 
+    test("windfury rejects a third attack in the same turn", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 1,
+            health: 10,
+            hasWindfury: true,
+            effects: ["Furie des vents"],
+        });
+
+        const initial = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: null, owner: "OPPONENT" },
+        );
+
+        const second = await runMinionActionOnGameInMemory(initial.game, "playerOne", {
+            minionId: MINION_IDS.attacker,
+            spotId: null,
+            owner: "OPPONENT",
+        });
+
+        const third = await runMinionActionOnGameInMemory(second.game, "playerOne", {
+            minionId: MINION_IDS.attacker,
+            spotId: null,
+            owner: "OPPONENT",
+        });
+
+        assertError(assert, "Ce serviteur a déjà attaqué ce tour");
+        assertPlayerHealth(assert, third.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+    });
+
+    test("rejects attack when minion was placed this turn without charge", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 1,
+            health: 1,
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                currentRound: 2,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard, { placedAtRound: 2 }),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
+
+    test("rejects attack when minion has zero attack", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 0,
+            health: 4,
+            hasTaunt: true,
+            effects: ["Provocation"],
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                currentRound: 3,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard, { placedAtRound: 1 }),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Ce serviteur ne peut pas attaquer sans points d'attaque");
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
+
+    test("rejects attack when taunt minion is ignored", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 3,
+        });
+        const tauntCard = createMinionCard({
+            uuid: MINION_IDS.taunt,
+            attack: 1,
+            health: 3,
+            hasTaunt: true,
+            effects: ["Provocation"],
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 2,
+            health: 4,
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+                playerTwo: {
+                    board: {
+                        ...placeMinion(
+                            createGameData().playerTwo.board,
+                            "SPOT_1",
+                            createMinionState(targetCard),
+                        ),
+                        SPOT_2: createMinionState(tauntCard),
+                    },
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: "SPOT_1", owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 4 });
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 3 });
+    });
+
+    test("rejects attack on own minion", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 1,
+            health: 1,
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: "SPOT_1", owner: "PLAYER" },
+        );
+
+        assertError(
+            assert,
+            "J'aurai pu te laisser attaquer ton propre serviteur mais j'ai décidé d'être clément...",
+        );
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 1 });
+    });
+
+    test("rejects action when minion is not on the board", async ({ assert }) => {
+        await runMinionActionInMemory(createGameData(), "playerOne", {
+            minionId: "nonexistent-minion",
+            spotId: null,
+            owner: "OPPONENT",
+        });
+
+        assertError(assert, "Ce serviteur n'est pas sur le plateau (gros con)");
+    });
+
+    test("rejects attack on an empty opponent spot", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 1,
+            health: 1,
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: "SPOT_2", owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Vous ne pouvez pas jouer ce serviteur ici");
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 1 });
+    });
+
+    test("rejects a second attack without windfury", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 1,
+            health: 10,
+        });
+
+        const initial = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: null, owner: "OPPONENT" },
+        );
+
+        const second = await runMinionActionOnGameInMemory(initial.game, "playerOne", {
+            minionId: MINION_IDS.attacker,
+            spotId: null,
+            owner: "OPPONENT",
+        });
+
+        assertError(assert, "Ce serviteur a déjà attaqué ce tour");
+        assertPlayerHealth(assert, second.game, "playerTwo", DEFAULT_HERO_HEALTH - 1);
+    });
+
+    test("rejects action with opponent minion id on opponent board", async ({ assert }) => {
+        const opponentMinion = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 2,
+            health: 2,
+        });
+
+        await runMinionActionInMemory(
+            createGameData({
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(opponentMinion),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.target, spotId: "SPOT_1", owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Ce serviteur n'est pas sur le plateau (gros con)");
+    });
+
+    test("rejects attacking own hero with owner PLAYER", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 3,
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: null, owner: "PLAYER" },
+        );
+
+        assertError(
+            assert,
+            "J'aurai pu te laisser attaquer ton propre héros mais j'ai décidé d'être clément...",
+        );
+        assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH);
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
+
+    test("rejects action when it is not the player turn", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 1,
+            health: 1,
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+            }),
+            "playerTwo",
+            { minionId: MINION_IDS.attacker, spotId: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Ce n'est pas votre tour (gros con)");
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
 });

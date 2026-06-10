@@ -4,7 +4,9 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relations";
 
-export const preloadDeckCardSet = (query: ManyToManyQueryBuilderContract<typeof Card, typeof DeckCard>) => {
+export const preloadDeckCardSet = (
+    query: ManyToManyQueryBuilderContract<typeof Card, typeof DeckCard>,
+) => {
     query.preload("cardSet");
 };
 

@@ -33,7 +33,8 @@ test.group("deathrattles", () => {
             health: 1,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -48,13 +49,13 @@ test.group("deathrattles", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH);
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
-
 
     test("DAMAGE deathrattle deals damage to opponent hero on combat death", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -75,7 +76,8 @@ test.group("deathrattles", () => {
             ],
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -90,12 +92,12 @@ test.group("deathrattles", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 2);
     });
-
 
     test("deathrattle triggers when minion is killed by battlecry damage", async ({ assert }) => {
         const killerCard = createMinionCard({
@@ -123,7 +125,8 @@ test.group("deathrattles", () => {
             ],
         });
 
-        const { game } = runBattlecry(createGameData({
+        const { game } = runBattlecry(
+            createGameData({
                 playerOne: { mana: 10, hand: [killerCard] },
                 playerTwo: {
                     board: placeMinion(
@@ -132,12 +135,14 @@ test.group("deathrattles", () => {
                         createMinionState(victimCard),
                     ),
                 },
-            }), killerCard, { actionTarget: { owner: "OPPONENT", spotId: "SPOT_1" } });
+            }),
+            killerCard,
+            { actionTarget: { owner: "OPPONENT", spotId: "SPOT_1" } },
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 3);
     });
-
 
     test("chained mass DAMAGE deathrattles do not recurse infinitely", async ({ assert }) => {
         const massDamageDeathrattle = [
@@ -165,7 +170,8 @@ test.group("deathrattles", () => {
             deathrattleActions: massDamageDeathrattle,
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: {
                         ...createGameData().playerOne.board,
@@ -180,13 +186,13 @@ test.group("deathrattles", () => {
                         createMinionState(dyingCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_2", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 1 });
     });
-
 
     test("mass DAMAGE deathrattle kills all matching enemy minions", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -209,7 +215,8 @@ test.group("deathrattles", () => {
         const victimOne = createMinionCard({ uuid: "victim-1", attack: 1, health: 1 });
         const victimTwo = createMinionCard({ uuid: "victim-2", attack: 1, health: 1 });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: {
                         ...createGameData().playerOne.board,
@@ -225,14 +232,14 @@ test.group("deathrattles", () => {
                         createMinionState(dyingCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_2", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_3", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 1 });
     });
-
 
     test("mass DAMAGE deathrattle damages minions on both teams", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -255,7 +262,8 @@ test.group("deathrattles", () => {
         const allyVictim = createMinionCard({ uuid: "ally-victim", attack: 1, health: 1 });
         const enemyVictim = createMinionCard({ uuid: "enemy-victim", attack: 1, health: 1 });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: {
                         ...placeMinion(
@@ -276,14 +284,14 @@ test.group("deathrattles", () => {
                         SPOT_2: createMinionState(enemyVictim),
                     },
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_2", null);
         assertBoardSpot(assert, game, "playerTwo", "SPOT_2", null);
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 1 });
     });
-
 
     test("ALL DAMAGE deathrattle (Abomination) damages all characters", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -307,7 +315,8 @@ test.group("deathrattles", () => {
         const allyMinion = createMinionCard({ uuid: "ally-minion", attack: 1, health: 3 });
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", attack: 1, health: 3 });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: {
                         ...placeMinion(
@@ -328,7 +337,8 @@ test.group("deathrattles", () => {
                         SPOT_2: createMinionState(enemyMinion),
                     },
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 2);
@@ -337,7 +347,6 @@ test.group("deathrattles", () => {
         assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 1 });
         assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 1 });
     });
-
 
     test("ALL DAMAGE deathrattle (Abomination) does not modify player hand", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -365,7 +374,8 @@ test.group("deathrattles", () => {
         ];
         const boardMinion = createMinionCard({ uuid: "board-minion", attack: 1, health: 3 });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     hand: handCards,
                     board: {
@@ -384,7 +394,8 @@ test.group("deathrattles", () => {
                         createMinionState(abominationCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assert.equal(game.data.playerOne.hand.length, 3);
         assert.deepEqual(
@@ -396,7 +407,6 @@ test.group("deathrattles", () => {
             ["Main 1", "Main 2", "Main 3"],
         );
     });
-
 
     test("HERO DAMAGE deathrattle with ALL damages both heroes", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -417,7 +427,8 @@ test.group("deathrattles", () => {
             ],
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -432,13 +443,13 @@ test.group("deathrattles", () => {
                         createMinionState(dyingCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 3);
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
     });
-
 
     test("deathrattle that reduces hero to zero ends the game", async ({ assert }) => {
         const attackerCard = createMinionCard({
@@ -459,7 +470,8 @@ test.group("deathrattles", () => {
             ],
         });
 
-        const { game } = await runMinionCombat(createGameData({
+        const { game } = await runMinionCombat(
+            createGameData({
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
@@ -474,11 +486,10 @@ test.group("deathrattles", () => {
                         createMinionState(targetCard),
                     ),
                 },
-            }));
+            }),
+        );
 
         assertIsFinished(assert, game, true);
         assertPlayerHealth(assert, game, "playerOne", 0);
     });
-
-
 });

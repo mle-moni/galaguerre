@@ -1,5 +1,9 @@
 import { test } from "@japa/runner";
-import { assertGameState, assertIsFinished, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import {
+    assertGameState,
+    assertIsFinished,
+    assertPlayerHealth,
+} from "#tests/helpers/game/assertions";
 import { createGameData, createMinionCard } from "#tests/helpers/game/fixtures";
 import { runPassTurnOnGame, runSetupNextTurn } from "#tests/helpers/game/run_setup_next_turn";
 

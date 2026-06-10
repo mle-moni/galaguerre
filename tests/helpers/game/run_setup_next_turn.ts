@@ -15,6 +15,10 @@ export const runSetupNextTurn = async (data: GameData): Promise<{ game: Game }> 
 
 export const runPassTurnOnGame = async (data: GameData): Promise<{ game: Game }> => {
     const game = withTrainingGame(data);
+    return runPassTurnFromGame(game);
+};
+
+export const runPassTurnFromGame = async (game: Game): Promise<{ game: Game }> => {
     const activePlayer =
         game.data.state === "PLAYER_ONE_TURN" ? game.data.playerOne : game.data.playerTwo;
     await performPassTurn(game, activePlayer);

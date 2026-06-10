@@ -17,7 +17,8 @@ test.group("spell effects", () => {
     test("applies spellPower bonus to spell damage", ({ assert }) => {
         const spell = createSpellCard({ cost: 2 });
 
-        const { game } = runSpellEffect(createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     spellPower: 2,
@@ -26,11 +27,12 @@ test.group("spell effects", () => {
                 playerTwo: {
                     health: DEFAULT_HERO_HEALTH,
                 },
-            }), spell);
+            }),
+            spell,
+        );
 
         assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 5);
     });
-
 
     test("plays targeted spell on enemy minion", ({ assert }) => {
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 4 });
@@ -44,7 +46,8 @@ test.group("spell effects", () => {
             }),
         });
 
-        const { game } = runSpellEffect(createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -56,11 +59,13 @@ test.group("spell effects", () => {
                         createMinionState(enemyMinion),
                     ),
                 },
-            }), spell, { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } });
+            }),
+            spell,
+            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+        );
 
         assert.isNull(game.data.playerTwo.board.SPOT_1);
     });
-
 
     test("draw spell adds card to hand", ({ assert }) => {
         const deckCard = createMinionCard({ uuid: "deck-card" });
@@ -73,18 +78,23 @@ test.group("spell effects", () => {
             }),
         });
 
-        const { game } = runSpellEffect(createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
                     deckCards: [deckCard],
                 },
-            }), spell);
+            }),
+            spell,
+        );
 
-        assert.equal(game.data.playerOne.hand.some((card) => card.uuid === "deck-card"), true);
+        assert.equal(
+            game.data.playerOne.hand.some((card) => card.uuid === "deck-card"),
+            true,
+        );
         assert.equal(game.data.playerOne.deckCards.length, 0);
     });
-
 
     test("spell lethal damage ends the game", ({ assert }) => {
         const spell = createSpellCard({
@@ -97,7 +107,8 @@ test.group("spell effects", () => {
             }),
         });
 
-        const { game } = runSpellEffect(createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -105,12 +116,13 @@ test.group("spell effects", () => {
                 playerTwo: {
                     health: 5,
                 },
-            }), spell);
+            }),
+            spell,
+        );
 
         assert.equal(game.data.playerTwo.health, -10);
         assert.isTrue(game.isFinished);
     });
-
 
     test("mass ALL damage spell hits heroes and minions on both teams", ({ assert }) => {
         const allyMinion = createMinionCard({ uuid: "ally-minion", health: 5 });
@@ -125,7 +137,8 @@ test.group("spell effects", () => {
             }),
         });
 
-        const { game } = runSpellEffect(createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -142,7 +155,9 @@ test.group("spell effects", () => {
                         createMinionState(enemyMinion),
                     ),
                 },
-            }), spell);
+            }),
+            spell,
+        );
 
         assert.equal(game.data.playerOne.health, DEFAULT_HERO_HEALTH - 2);
         assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
@@ -191,7 +206,6 @@ test.group("spell effects", () => {
         assert.equal(game.data.playerTwo.board.SPOT_1!.health, 3);
     });
 
-
     test("random damage spell hits one enemy minion", ({ assert }) => {
         const enemyMinion1 = createMinionCard({ uuid: "enemy-minion-1", health: 5 });
         const enemyMinion2 = createMinionCard({ uuid: "enemy-minion-2", health: 5 });
@@ -208,7 +222,8 @@ test.group("spell effects", () => {
             }),
         });
 
-        const { game } = runSpellEffect(createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -224,7 +239,9 @@ test.group("spell effects", () => {
                         createMinionState(enemyMinion2),
                     ),
                 },
-            }), spell);
+            }),
+            spell,
+        );
 
         const board = game.data.playerTwo.board;
         const damagedCount = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"].filter(
@@ -232,7 +249,6 @@ test.group("spell effects", () => {
         ).length;
         assert.equal(damagedCount, 1);
     });
-
 
     test("random damage spell fizzles when no eligible minion exists", ({ assert }) => {
         const spell = createSpellCard({
@@ -248,14 +264,16 @@ test.group("spell effects", () => {
             }),
         });
 
-        const { game } = runSpellEffect(createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
                 },
-            }), spell);
+            }),
+            spell,
+        );
 
         assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH);
     });
-
 });

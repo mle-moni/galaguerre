@@ -127,7 +127,11 @@ export const weaponDataSchema = cardDataBaseSchema.extend({
     deathrattleActions: z.array(deathrattleActionSchema),
 });
 
-export const cardDataSchema = z.discriminatedUnion("type", [minionDataSchema, spellDataSchema, weaponDataSchema]);
+export const cardDataSchema = z.discriminatedUnion("type", [
+    minionDataSchema,
+    spellDataSchema,
+    weaponDataSchema,
+]);
 
 export type { CardTag } from "./card_tags.js";
 export type {
