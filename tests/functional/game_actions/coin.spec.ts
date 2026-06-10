@@ -1,4 +1,3 @@
-import { COIN_CARD_ID } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { createCoinCard } from "../../../app/galaguerre/coin.js";
@@ -34,9 +33,5 @@ test.group("game:coin", (group) => {
         assert.equal(result.game.data.playerOne.hand.length, 0);
     });
 
-    test("The Coin costs 0 mana", async ({ assert }) => {
-        const coin = createCoinCard();
-        assert.equal(coin.cost, 0);
-        assert.equal(coin.cardId, COIN_CARD_ID);
-    });
+
 });

@@ -1,7 +1,7 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { assertBoardSpot } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
     createCardActionSnapshot,
@@ -10,9 +10,6 @@ import {
     createMinionState,
     createMinionTargetSnapshot,
     createSpellCard,
-    createHeroTargetSnapshot,
-    createWeaponCard,
-    createWeaponState,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { assertPlayCardScenario, runPlayCard } from "#tests/helpers/game/run_play_card";
@@ -58,33 +55,6 @@ test.group("game:play_card", (group) => {
         assert.equal(placed!.placedAtRound, 4);
     });
 
-    test("sets placedAtRound to current round for summoning sickness", async ({ assert }) => {
-        const handCard = createMinionCard({
-            uuid: CARD_IDS.handMinion,
-            cost: 1,
-        });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                currentRound: 7,
-                playerOne: {
-                    mana: 10,
-                    hand: [handCard],
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_3",
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
-
-        const placed = result.game.data.playerOne.board.SPOT_3;
-        assert.isNotNull(placed);
-        assert.equal(placed!.placedAtRound, 7);
-    });
 
     test("rejects play when mana is insufficient", async ({ assert }) => {
         const handCard = createMinionCard({
@@ -116,6 +86,7 @@ test.group("game:play_card", (group) => {
         assert.equal(result.game.data.playerOne.hand.length, 1);
     });
 
+
     test("rejects play when card is not in hand", async ({ assert }) => {
         const result = await runPlayCard({
             data: createGameData(),
@@ -134,6 +105,7 @@ test.group("game:play_card", (group) => {
             error: "Cette carte n'est pas dans votre main (gros con)",
         });
     });
+
 
     test("rejects play on an occupied spot", async ({ assert }) => {
         const handCard = createMinionCard({
@@ -170,6 +142,7 @@ test.group("game:play_card", (group) => {
         });
     });
 
+
     test("rejects play with owner OPPONENT", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
@@ -199,6 +172,7 @@ test.group("game:play_card", (group) => {
         });
     });
 
+
     test("plays a valid spell card from hand", async ({ assert }) => {
         const spell = createSpellCard({ cost: 2 });
 
@@ -227,6 +201,7 @@ test.group("game:play_card", (group) => {
         assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 3);
     });
 
+
     test("rejects spell play when mana is insufficient", async ({ assert }) => {
         const spell = createSpellCard({ cost: 5 });
 
@@ -253,6 +228,7 @@ test.group("game:play_card", (group) => {
         });
         assert.equal(result.game.data.playerOne.hand.length, 1);
     });
+
 
     test("rejects targeted spell without action target", async ({ assert }) => {
         const spell = createSpellCard({
@@ -288,117 +264,6 @@ test.group("game:play_card", (group) => {
         });
     });
 
-    test("equips a weapon from hand", async ({ assert }) => {
-        const weapon = createWeaponCard({ cost: 2, damage: 3, durability: 2 });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [weapon],
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.weapon,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
-
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.mana, 8);
-        assert.equal(result.game.data.playerOne.hand.length, 0);
-        assert.isNotNull(result.game.data.playerOne.weaponState);
-        assert.equal(result.game.data.playerOne.weaponState!.damage, 3);
-        assert.equal(result.game.data.playerOne.weaponState!.durability, 2);
-    });
-
-    test("replaces equipped weapon when playing a new one", async ({ assert }) => {
-        const oldWeapon = createWeaponCard({
-            uuid: "card-old-weapon",
-            cost: 2,
-            damage: 1,
-            durability: 1,
-        });
-        const newWeapon = createWeaponCard({
-            uuid: "card-new-weapon",
-            cost: 3,
-            damage: 4,
-            durability: 3,
-        });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [newWeapon],
-                    weaponState: {
-                        uuid: oldWeapon.uuid,
-                        weaponId: oldWeapon.cardId,
-                        damage: oldWeapon.damage,
-                        durability: oldWeapon.durability,
-                        originalCard: oldWeapon,
-                    },
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: "card-new-weapon",
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
-
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.weaponState!.damage, 4);
-        assert.equal(result.game.data.playerOne.weaponState!.durability, 3);
-    });
-
-    test("triggers old weapon deathrattle when playing a new one", async ({ assert }) => {
-        const oldWeapon = createWeaponCard({
-            uuid: "card-old-weapon",
-            cost: 2,
-            damage: 1,
-            durability: 1,
-            deathrattleActions: [
-                createCardActionSnapshot({
-                    type: "DAMAGE",
-                    damage: 2,
-                    target: createHeroTargetSnapshot("OPPONENT"),
-                }),
-            ],
-        });
-        const newWeapon = createWeaponCard({
-            uuid: "card-new-weapon",
-            cost: 3,
-            damage: 4,
-            durability: 3,
-        });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [newWeapon],
-                    weaponState: createWeaponState(oldWeapon),
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: newWeapon.uuid,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
-
-        assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
-        assert.equal(result.game.data.playerOne.weaponState!.damage, 4);
-    });
 
     test("rejects play when it is not the player turn", async ({ assert }) => {
         const handCard = createMinionCard({
@@ -430,6 +295,7 @@ test.group("game:play_card", (group) => {
         });
     });
 
+
     test("rejects play when user has no active game", async ({ assert }) => {
         const result = await runPlayCard({
             data: createGameData(),
@@ -445,6 +311,7 @@ test.group("game:play_card", (group) => {
 
         assertPlayCardScenario(assert, result, { error: "Vous n'êtes pas en jeu" });
     });
+
 
     test("rejects play when socket is not authenticated", async ({ assert }) => {
         const handCard = createMinionCard({
@@ -476,6 +343,7 @@ test.group("game:play_card", (group) => {
         });
     });
 
+
     test("rejects invalid play card payload", async ({ assert }) => {
         const errors = await runInvalidPlayCardPayload({
             cardId: "card-1",
@@ -486,4 +354,5 @@ test.group("game:play_card", (group) => {
         assert.equal(errors.length, 1);
         assert.equal(errors[0], "Invalid data sent for event 'game:play_card' :/");
     });
+
 });

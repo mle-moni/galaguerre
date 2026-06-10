@@ -9,7 +9,13 @@ export const assertBoardSpot = (
     game: Game,
     player: PlayerKey,
     spotId: MinionSpotId,
-    expected: null | { health?: number; attack?: number; attacksThisRound?: number },
+    expected: null | {
+        health?: number;
+        attack?: number;
+        attacksThisRound?: number;
+        placedAtRound?: number;
+        lastActionAtRound?: number;
+    },
 ): void => {
     const minion = game.data[player].board[spotId];
 
@@ -23,6 +29,12 @@ export const assertBoardSpot = (
     if (expected.attack !== undefined) assert.equal(minion!.attack, expected.attack);
     if (expected.attacksThisRound !== undefined) {
         assert.equal(minion!.attacksThisRound, expected.attacksThisRound);
+    }
+    if (expected.placedAtRound !== undefined) {
+        assert.equal(minion!.placedAtRound, expected.placedAtRound);
+    }
+    if (expected.lastActionAtRound !== undefined) {
+        assert.equal(minion!.lastActionAtRound, expected.lastActionAtRound);
     }
 };
 
