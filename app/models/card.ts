@@ -1,6 +1,5 @@
 import type { CardData } from "#galaguerre/card_definition.schema";
 import { parseCardData } from "#galaguerre/card_definition.schema";
-import type { GalaguerreCardType } from "#galaguerre/galaguerre.types";
 import { BaseModel, beforeSave, belongsTo, column } from "@adonisjs/lucid/orm";
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
@@ -20,9 +19,6 @@ export default class Card extends BaseModel {
     declare cost: number;
 
     @column()
-    declare type: GalaguerreCardType;
-
-    @column()
     declare cardSetId: number;
 
     @belongsTo(() => CardSet)
@@ -39,6 +35,6 @@ export default class Card extends BaseModel {
 
     @beforeSave()
     static validateData(card: Card) {
-        card.data = parseCardData(card.type, card.data);
+        card.data = parseCardData(card.data);
     }
 }

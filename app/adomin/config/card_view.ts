@@ -1,6 +1,5 @@
 import { createModelViewConfig } from "#adomin/create_model_view_config";
 import Card from "#models/card";
-import { GALAGUERRE_CARD_TYPES_OPTIONS } from "../../galaguerre/galaguerre.types.js";
 import { createFile, deleteFile } from "../../utils/files.js";
 
 export const CARD_VIEW = createModelViewConfig(() => Card, {
@@ -12,11 +11,6 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
         cost: {
             type: "number",
             label: "Coût",
-        },
-        type: {
-            type: "enum",
-            options: GALAGUERRE_CARD_TYPES_OPTIONS,
-            label: "Type",
         },
         imageUrl: {
             type: "file",

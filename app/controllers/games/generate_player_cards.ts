@@ -29,63 +29,60 @@ export const generatePlayerCards = (source: CardSource) => {
             tags: card.data.tags,
         };
 
-        if (card.type === "WEAPON") {
-            const data = card.data as Extract<typeof card.data, { damage: number }>;
-            const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
+        switch (card.data.type) {
+            case "WEAPON": {
+                const deathrattleLines = getDeathrattleDescription(card.data.deathrattleActions);
 
-            return {
-                ...base,
-                type: "WEAPON",
-                damage: data.damage,
-                durability: data.durability,
-                deathrattleActions: data.deathrattleActions,
-                description: getWeaponCardDescription(
-                    data.damage,
-                    data.durability,
-                    deathrattleLines,
-                ),
-            };
+                return {
+                    ...base,
+                    type: "WEAPON",
+                    damage: card.data.damage,
+                    durability: card.data.durability,
+                    deathrattleActions: card.data.deathrattleActions,
+                    description: getWeaponCardDescription(
+                        card.data.damage,
+                        card.data.durability,
+                        deathrattleLines,
+                    ),
+                };
+            }
+            case "SPELL":
+                return {
+                    ...base,
+                    type: "SPELL",
+                    description: formatActionDescription(card.data.action, "Effet") ?? card.label,
+                    action: card.data.action,
+                };
+            case "MINION": {
+                const effects = getMinionPowerEffects(card.data);
+                const battlecryLines = getBattlecryDescription(card.data.battlecryActions);
+                const deathrattleLines = getDeathrattleDescription(card.data.deathrattleActions);
+                const passiveLines = getPassiveDescription(card.data.passives);
+
+                return {
+                    ...base,
+                    type: "MINION",
+                    health: card.data.health,
+                    attack: card.data.attack,
+                    hasTaunt: card.data.hasTaunt,
+                    hasCharge: card.data.hasCharge,
+                    hasWindfury: card.data.hasWindfury,
+                    isPoisonous: card.data.isPoisonous,
+                    effects,
+                    description: getMinionCardDescription(
+                        card.data.attack,
+                        card.data.health,
+                        effects,
+                        battlecryLines,
+                        deathrattleLines,
+                        passiveLines,
+                    ),
+                    battlecryActions: card.data.battlecryActions,
+                    deathrattleActions: card.data.deathrattleActions,
+                    passives: card.data.passives,
+                };
+            }
         }
-
-        if (card.type === "SPELL") {
-            const data = card.data as Extract<typeof card.data, { action: unknown }>;
-
-            return {
-                ...base,
-                type: "SPELL",
-                description: formatActionDescription(data.action, "Effet") ?? card.label,
-                action: data.action,
-            };
-        }
-
-        const data = card.data as Extract<typeof card.data, { attack: number }>;
-        const effects = getMinionPowerEffects(data);
-        const battlecryLines = getBattlecryDescription(data.battlecryActions);
-        const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
-        const passiveLines = getPassiveDescription(data.passives);
-
-        return {
-            ...base,
-            type: "MINION",
-            health: data.health,
-            attack: data.attack,
-            hasTaunt: data.hasTaunt,
-            hasCharge: data.hasCharge,
-            hasWindfury: data.hasWindfury,
-            isPoisonous: data.isPoisonous,
-            effects,
-            description: getMinionCardDescription(
-                data.attack,
-                data.health,
-                effects,
-                battlecryLines,
-                deathrattleLines,
-                passiveLines,
-            ),
-            battlecryActions: data.battlecryActions,
-            deathrattleActions: data.deathrattleActions,
-            passives: data.passives,
-        };
     });
 
     return shuffleArray(cards);

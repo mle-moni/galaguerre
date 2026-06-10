@@ -103,6 +103,7 @@ const cardDataBaseSchema = z.object({
 });
 
 export const minionDataSchema = cardDataBaseSchema.extend({
+    type: z.literal("MINION"),
     attack: z.number().int().min(0),
     health: z.number().int().min(1),
     hasTaunt: z.boolean(),
@@ -115,14 +116,18 @@ export const minionDataSchema = cardDataBaseSchema.extend({
 });
 
 export const spellDataSchema = cardDataBaseSchema.extend({
+    type: z.literal("SPELL"),
     action: cardActionSchema,
 });
 
 export const weaponDataSchema = cardDataBaseSchema.extend({
+    type: z.literal("WEAPON"),
     damage: z.number().int().min(0),
     durability: z.number().int().min(1),
     deathrattleActions: z.array(deathrattleActionSchema),
 });
+
+export const cardDataSchema = z.discriminatedUnion("type", [minionDataSchema, spellDataSchema, weaponDataSchema]);
 
 export type { CardTag } from "./card_tags.js";
 export type {
@@ -140,32 +145,14 @@ export type PassiveBoostDefinition = z.infer<typeof passiveBoostSchema>;
 export type MinionCardData = z.infer<typeof minionDataSchema>;
 export type SpellCardData = z.infer<typeof spellDataSchema>;
 export type WeaponCardData = z.infer<typeof weaponDataSchema>;
-export type CardData = MinionCardData | SpellCardData | WeaponCardData;
+export type CardData = z.infer<typeof cardDataSchema>;
 
-export type GalaguerreCardType = z.infer<typeof cardFilterSchema>["type"];
+export type GalaguerreCardType = CardData["type"];
 
 export const parseMinionData = (data: unknown) => minionDataSchema.parse(data);
 export const parseSpellData = (data: unknown) => spellDataSchema.parse(data);
 export const parseWeaponData = (data: unknown) => weaponDataSchema.parse(data);
 
-export const parseCardData = (type: GalaguerreCardType, data: unknown): CardData => {
-    switch (type) {
-        case "MINION":
-            return parseMinionData(data);
-        case "SPELL":
-            return parseSpellData(data);
-        case "WEAPON":
-            return parseWeaponData(data);
-    }
-};
+export const parseCardData = (data: unknown): CardData => cardDataSchema.parse(data);
 
-export const safeParseCardData = (type: GalaguerreCardType, data: unknown) => {
-    switch (type) {
-        case "MINION":
-            return minionDataSchema.safeParse(data);
-        case "SPELL":
-            return spellDataSchema.safeParse(data);
-        case "WEAPON":
-            return weaponDataSchema.safeParse(data);
-    }
-};
+export const safeParseCardData = (data: unknown) => cardDataSchema.safeParse(data);

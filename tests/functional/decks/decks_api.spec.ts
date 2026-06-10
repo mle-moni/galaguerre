@@ -24,7 +24,6 @@ test.group("decks api", (group) => {
             label,
             imageUrl: "https://example.com/card.png",
             cost: 1,
-            type: "MINION",
             cardSetId: await getActiveCardSetId(),
             data: parseMinionData(defaultMinionData()),
         });

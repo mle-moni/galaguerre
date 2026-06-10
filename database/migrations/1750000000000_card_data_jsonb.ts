@@ -34,9 +34,25 @@ export default class extends BaseSchema {
         this.schema.dropTableIfExists("comparisons");
         this.schema.dropTableIfExists("minion_powers");
         this.schema.dropTableIfExists("tags");
+
+        this.defer(async (db) => {
+            await db.rawQuery(`
+                UPDATE cards
+                SET data = data || jsonb_build_object('type', type)
+                WHERE type IS NOT NULL AND NOT jsonb_exists(data, 'type')
+            `);
+        });
+
+        this.schema.alterTable("cards", (table) => {
+            table.dropColumn("type");
+        });
     }
 
     async down() {
+        this.schema.alterTable("cards", (table) => {
+            table.string("type").notNullable().defaultTo("MINION");
+        });
+
         this.schema.alterTable("cards", (table) => {
             table.dropColumn("data");
             table.integer("minion_id").nullable();

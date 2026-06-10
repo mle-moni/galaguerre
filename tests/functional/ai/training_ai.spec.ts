@@ -43,7 +43,6 @@ test.group("training:ai", (group) => {
                 label: `${labelPrefix}-card-${index}`,
                 imageUrl: "https://example.com/card.png",
                 cost: 1,
-                type: "MINION",
                 cardSetId: await getActiveCardSetId(),
                 data: parseMinionData(defaultMinionData()),
             });

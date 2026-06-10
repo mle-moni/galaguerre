@@ -3,7 +3,7 @@ import type Card from "#models/card";
 import { safeParseCardData } from "#galaguerre/card_definition.schema";
 
 export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
-    const result = safeParseCardData(card.type, card.data);
+    const result = safeParseCardData(card.data);
 
     if (result.success) {
         return [];

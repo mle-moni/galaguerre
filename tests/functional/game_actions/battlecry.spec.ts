@@ -1719,7 +1719,6 @@ test.group("game:play_card battlecries", (group) => {
             label: `bc-card-${unique}`,
             imageUrl: "https://example.com/card.png",
             cost: 1,
-            type: "MINION",
             cardSetId: await getActiveCardSetId(),
             data: parseMinionData({
                 ...defaultMinionData(),
@@ -1770,7 +1769,6 @@ test.group("game:play_card battlecries", (group) => {
             label: `bc-comp-card-${unique}`,
             imageUrl: "https://example.com/card.png",
             cost: 3,
-            type: "MINION",
             cardSetId: await getActiveCardSetId(),
             data: parseMinionData({
                 ...defaultMinionData(),
@@ -1833,7 +1831,6 @@ test.group("game:play_card battlecries", (group) => {
             label: `bc-boost-card-${unique}`,
             imageUrl: "https://example.com/card.png",
             cost: 3,
-            type: "MINION",
             cardSetId: await getActiveCardSetId(),
             data: parseMinionData({
                 ...defaultMinionData(),
@@ -1881,7 +1878,6 @@ test.group("game:play_card battlecries", (group) => {
             label: `bc-draw-filter-card-${unique}`,
             imageUrl: "https://example.com/card.png",
             cost: 2,
-            type: "MINION",
             cardSetId: await getActiveCardSetId(),
             data: parseMinionData({
                 ...defaultMinionData(),

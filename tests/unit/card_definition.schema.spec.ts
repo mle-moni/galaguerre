@@ -6,7 +6,6 @@ import {
 } from "#galaguerre/card_definition.schema";
 import {
     boostAction,
-    boostSpellPower,
     damageAction,
     defaultMinionData,
     defineMinion,
@@ -56,7 +55,7 @@ test.group("card_definition.schema", () => {
             ],
         };
 
-        const result = safeParseCardData("MINION", data);
+        const result = safeParseCardData(data);
         assert.isFalse(result.success);
     });
 
@@ -79,34 +78,50 @@ test.group("card_definition.schema", () => {
             ],
         };
 
-        const result = safeParseCardData("MINION", data);
+        const result = safeParseCardData(data);
         assert.isFalse(result.success);
     });
 
     test("rejects DRAW with invalid drawCount", ({ assert }) => {
         const data = {
             schemaVersion: 1 as const,
+            type: "SPELL" as const,
             tags: [],
             action: drawAction(0),
         };
 
-        const result = safeParseCardData("SPELL", data);
+        const result = safeParseCardData(data);
         assert.isFalse(result.success);
     });
 
     test("rejects BOOST spellPower targeting MINION", ({ assert }) => {
         const data = {
             ...defaultMinionData(),
-            battlecryActions: [boostAction(boostSpellPower(1), enemyMinions())],
+            battlecryActions: [
+                boostAction(
+                    { attack: 1, health: null, spellPower: 1, minionPower: null },
+                    enemyMinions(),
+                ),
+            ],
         };
 
-        const result = safeParseCardData("MINION", data);
+        const result = safeParseCardData(data);
+        assert.isFalse(result.success);
+    });
+
+    test("rejects mismatched type discriminator", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultMinionData(),
+            type: "SPELL",
+        });
+
         assert.isFalse(result.success);
     });
 
     test("accepts valid spell", ({ assert }) => {
         const data = parseSpellData({
             schemaVersion: 1,
+            type: "SPELL",
             tags: [],
             action: damageAction(4, enemyHero()),
         });

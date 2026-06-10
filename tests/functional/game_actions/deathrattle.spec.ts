@@ -578,7 +578,7 @@ test.group("game:deathrattle", (group) => {
     });
 
     test("targeted deathrattle action is rejected by validation", async ({ assert }) => {
-        const result = safeParseCardData("MINION", {
+        const result = safeParseCardData({
             ...defaultMinionData(),
             deathrattleActions: [
                 {

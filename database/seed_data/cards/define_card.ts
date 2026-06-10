@@ -18,12 +18,9 @@ import {
     parseSpellData,
     parseWeaponData,
 } from "#galaguerre/card_definition.schema";
-import type { GalaguerreCardType } from "#galaguerre/galaguerre.types";
-
 export type CardSeedEntry = {
     label: string;
     cost: number;
-    type: GalaguerreCardType;
     imageUrl: string;
     cardSetName: string;
     data: CardData;
@@ -63,6 +60,7 @@ const nullActionFields = () => ({
 
 export const defaultMinionData = (): MinionCardData => ({
     schemaVersion: 1,
+    type: "MINION",
     tags: [],
     attack: 1,
     health: 1,
@@ -77,12 +75,14 @@ export const defaultMinionData = (): MinionCardData => ({
 
 export const defaultSpellData = (): SpellCardData => ({
     schemaVersion: 1,
+    type: "SPELL",
     tags: [],
     action: damageAction(1, enemyHero()),
 });
 
 export const defaultWeaponData = (): WeaponCardData => ({
     schemaVersion: 1,
+    type: "WEAPON",
     tags: [],
     damage: 1,
     durability: 1,
@@ -333,7 +333,6 @@ export const defineMinion = (
     return {
         label: base.label,
         cost: base.cost,
-        type: "MINION",
         imageUrl: base.imageUrl,
         cardSetName: base.cardSetName,
         data,
@@ -347,6 +346,7 @@ export const defineSpell = (
 ): CardSeedEntry => {
     const data = parseSpellData({
         schemaVersion: 1,
+        type: "SPELL",
         tags,
         action,
     });
@@ -354,7 +354,6 @@ export const defineSpell = (
     return {
         label: base.label,
         cost: base.cost,
-        type: "SPELL",
         imageUrl: base.imageUrl,
         cardSetName: base.cardSetName,
         data,
@@ -375,7 +374,6 @@ export const defineWeapon = (
     return {
         label: base.label,
         cost: base.cost,
-        type: "WEAPON",
         imageUrl: base.imageUrl,
         cardSetName: base.cardSetName,
         data,
@@ -385,8 +383,7 @@ export const defineWeapon = (
 export const buildCardInsert = (entry: CardSeedEntry, cardSetId: number) => ({
     label: entry.label,
     cost: entry.cost,
-    type: entry.type,
     imageUrl: entry.imageUrl,
     cardSetId,
-    data: parseCardData(entry.type, entry.data),
+    data: parseCardData(entry.data),
 });
