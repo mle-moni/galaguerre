@@ -20,9 +20,6 @@ import {
 } from "#galaguerre/card_definition.schema";
 export type CardSeedEntry = {
     id: number;
-    label: string;
-    cost: number;
-    imageUrl: string;
     cardSetName: string;
     data: CardData;
 };
@@ -63,6 +60,9 @@ export const defaultMinionData = (): MinionCardData => ({
     schemaVersion: 1,
     type: "MINION",
     tags: [],
+    name: "Test Card",
+    cost: 1,
+    imageUrl: "https://example.com/card.png",
     attack: 1,
     health: 1,
     hasTaunt: false,
@@ -78,6 +78,9 @@ export const defaultSpellData = (): SpellCardData => ({
     schemaVersion: 1,
     type: "SPELL",
     tags: [],
+    name: "Test Card",
+    cost: 1,
+    imageUrl: "https://example.com/card.png",
     action: damageAction(1, enemyHero()),
 });
 
@@ -85,6 +88,9 @@ export const defaultWeaponData = (): WeaponCardData => ({
     schemaVersion: 1,
     type: "WEAPON",
     tags: [],
+    name: "Test Card",
+    cost: 1,
+    imageUrl: "https://example.com/card.png",
     damage: 1,
     durability: 1,
     deathrattleActions: [],
@@ -327,6 +333,9 @@ export const defineMinion = (
 ): CardSeedEntry => {
     const data = parseMinionData({
         ...defaultMinionData(),
+        name: base.label,
+        cost: base.cost,
+        imageUrl: base.imageUrl,
         attack: base.attack,
         health: base.health,
         ...dataPartial,
@@ -334,9 +343,6 @@ export const defineMinion = (
 
     return {
         id: cardId,
-        label: base.label,
-        cost: base.cost,
-        imageUrl: base.imageUrl,
         cardSetName: base.cardSetName,
         data,
     };
@@ -352,14 +358,14 @@ export const defineSpell = (
         schemaVersion: 1,
         type: "SPELL",
         tags,
+        name: base.label,
+        cost: base.cost,
+        imageUrl: base.imageUrl,
         action,
     });
 
     return {
         id: cardId,
-        label: base.label,
-        cost: base.cost,
-        imageUrl: base.imageUrl,
         cardSetName: base.cardSetName,
         data,
     };
@@ -372,6 +378,9 @@ export const defineWeapon = (
 ): CardSeedEntry => {
     const data = parseWeaponData({
         ...defaultWeaponData(),
+        name: base.label,
+        cost: base.cost,
+        imageUrl: base.imageUrl,
         damage: base.damage,
         durability: base.durability,
         ...dataPartial,
@@ -379,18 +388,12 @@ export const defineWeapon = (
 
     return {
         id: cardId,
-        label: base.label,
-        cost: base.cost,
-        imageUrl: base.imageUrl,
         cardSetName: base.cardSetName,
         data,
     };
 };
 
 export const buildCardInsert = (entry: CardSeedEntry, cardSetId: number) => ({
-    label: entry.label,
-    cost: entry.cost,
-    imageUrl: entry.imageUrl,
     cardSetId,
     data: parseCardData(entry.data),
 });

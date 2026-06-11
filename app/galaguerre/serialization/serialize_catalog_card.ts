@@ -13,9 +13,9 @@ import {
 export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
     const base = {
         id: card.id,
-        label: card.label,
-        imageUrl: card.imageUrl,
-        cost: card.cost,
+        label: card.data.name,
+        imageUrl: card.data.imageUrl,
+        cost: card.data.cost,
         cardSetId: card.cardSetId,
         tags: card.data.tags,
     };
@@ -41,7 +41,7 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
             return {
                 ...base,
                 type: "SPELL",
-                description: formatActionDescription(card.data.action, "Effet") ?? card.label,
+                description: formatActionDescription(card.data.action, "Effet") ?? card.data.name,
                 action: card.data.action,
             };
         case "MINION": {

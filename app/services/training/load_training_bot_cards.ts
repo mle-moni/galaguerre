@@ -4,9 +4,9 @@ import { TRAINING_BOT_DECK_RECIPE } from "../../../database/seed_data/training_b
 
 export const loadTrainingBotCards = async (): Promise<Card[]> => {
     const labels = [...new Set(TRAINING_BOT_DECK_RECIPE.map(({ label }) => label))];
-    const cards = await Card.query().whereIn("label", labels);
+    const cards = await Card.query().whereRaw(`data->>'name' = ANY(?)`, [labels]);
 
-    const cardByLabel = new Map(cards.map((card) => [card.label, card]));
+    const cardByLabel = new Map(cards.map((card) => [card.data.name, card]));
     const cardIds = buildDeckCardIds(TRAINING_BOT_DECK_RECIPE, cardByLabel);
     const cardById = new Map(cards.map((card) => [card.id, card]));
 

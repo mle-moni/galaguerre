@@ -40,11 +40,11 @@ test.group("training:ai", (group) => {
 
         for (let index = 0; index < 6; index++) {
             const card = await Card.create({
-                label: `${labelPrefix}-card-${index}`,
-                imageUrl: "https://example.com/card.png",
-                cost: 1,
                 cardSetId: await getActiveCardSetId(),
-                data: parseMinionData(defaultMinionData()),
+                data: parseMinionData({
+                    ...defaultMinionData(),
+                    name: `${labelPrefix}-card-${index}`,
+                }),
             });
 
             await DeckCard.create({

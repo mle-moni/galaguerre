@@ -10,15 +10,6 @@ export default class Card extends BaseModel {
     declare id: number;
 
     @column()
-    declare label: string;
-
-    @column()
-    declare imageUrl: string;
-
-    @column()
-    declare cost: number;
-
-    @column()
     declare cardSetId: number;
 
     @belongsTo(() => CardSet)

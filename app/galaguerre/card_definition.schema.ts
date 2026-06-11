@@ -100,6 +100,9 @@ export const passiveSchema = z
 const cardDataBaseSchema = z.object({
     schemaVersion: z.literal(1),
     tags: z.array(cardTagSchema),
+    name: z.string(),
+    imageUrl: z.string(),
+    cost: z.number().int().min(0),
 });
 
 export const minionDataSchema = cardDataBaseSchema.extend({

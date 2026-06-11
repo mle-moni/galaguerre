@@ -8,6 +8,7 @@ import {
     boostAction,
     damageAction,
     defaultMinionData,
+    defaultSpellData,
     defineMinion,
     drawAction,
     enemyHero,
@@ -18,6 +19,7 @@ test.group("card_definition.schema", () => {
     test("accepts valid minion with battlecry", ({ assert }) => {
         const data = parseMinionData(
             defineMinion(
+                1,
                 {
                     label: "Test",
                     cost: 1,
@@ -84,9 +86,7 @@ test.group("card_definition.schema", () => {
 
     test("rejects DRAW with invalid drawCount", ({ assert }) => {
         const data = {
-            schemaVersion: 1 as const,
-            type: "SPELL" as const,
-            tags: [],
+            ...defaultSpellData(),
             action: drawAction(0),
         };
 
@@ -120,9 +120,7 @@ test.group("card_definition.schema", () => {
 
     test("accepts valid spell", ({ assert }) => {
         const data = parseSpellData({
-            schemaVersion: 1,
-            type: "SPELL",
-            tags: [],
+            ...defaultSpellData(),
             action: damageAction(4, enemyHero()),
         });
 

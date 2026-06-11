@@ -1,35 +1,18 @@
 import { createModelViewConfig } from "#adomin/create_model_view_config";
 import Card from "#models/card";
-import { createFile, deleteFile } from "../../utils/files.js";
 
 export const CARD_VIEW = createModelViewConfig(() => Card, {
     columns: {
-        label: {
-            type: "string",
-            label: "Nom",
-        },
-        cost: {
-            type: "number",
-            label: "Coût",
-        },
-        imageUrl: {
-            type: "file",
-            subType: "url",
-            isImage: true,
-            createFile,
-            deleteFile,
-            label: "Image",
-        },
         cardSet: {
             type: "belongsToRelation",
             modelName: "CardSet",
             labelFields: ["name"],
             label: "Set",
         },
-        // data: {
-        //     type: "json",
-        //     label: "Données",
-        // }
+        data: {
+            type: "object",
+            label: "Données",
+        },
         createdAt: {
             type: "date",
             subType: "datetime",
@@ -44,7 +27,7 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
             creatable: false,
             editable: false,
         },
-    },
+    } as Record<string, { type: string; label: string }>,
     label: "Carte",
     icon: "cards",
 });

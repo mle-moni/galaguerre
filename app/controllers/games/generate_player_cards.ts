@@ -23,9 +23,9 @@ export const generatePlayerCards = (source: CardSource) => {
         const base: PlayerCardBase = {
             uuid: randomUUID(),
             cardId: card.id,
-            label: card.label,
-            imageUrl: card.imageUrl,
-            cost: card.cost,
+            label: card.data.name,
+            imageUrl: card.data.imageUrl,
+            cost: card.data.cost,
             tags: card.data.tags,
         };
 
@@ -50,7 +50,7 @@ export const generatePlayerCards = (source: CardSource) => {
                 return {
                     ...base,
                     type: "SPELL",
-                    description: formatActionDescription(card.data.action, "Effet") ?? card.label,
+                    description: formatActionDescription(card.data.action, "Effet") ?? card.data.name,
                     action: card.data.action,
                 };
             case "MINION": {

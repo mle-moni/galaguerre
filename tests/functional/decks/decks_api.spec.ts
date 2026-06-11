@@ -21,11 +21,11 @@ test.group("decks api", (group) => {
 
     const createMinionCard = async (label: string) => {
         return Card.create({
-            label,
-            imageUrl: "https://example.com/card.png",
-            cost: 1,
             cardSetId: await getActiveCardSetId(),
-            data: parseMinionData(defaultMinionData()),
+            data: parseMinionData({
+                ...defaultMinionData(),
+                name: label,
+            }),
         });
     };
 

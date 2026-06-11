@@ -14,6 +14,9 @@ export default class extends BaseSchema {
             table.dropColumn("minion_id");
             table.dropColumn("spell_id");
             table.dropColumn("weapon_id");
+            table.dropColumn("label");
+            table.dropColumn("image_url");
+            table.dropColumn("cost");
         });
 
         this.schema.dropTableIfExists("minion_battlecry_actions");
@@ -58,6 +61,9 @@ export default class extends BaseSchema {
             table.integer("minion_id").nullable();
             table.integer("spell_id").nullable();
             table.integer("weapon_id").nullable();
+            table.string("label").nullable();
+            table.string("image_url").nullable();
+            table.integer("cost").nullable();
         });
 
         logger.warn("This migration cannot be reversed");

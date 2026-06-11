@@ -11,7 +11,7 @@ export const validateCard = (card: Card): DeckValidationErrorDetail[] => {
 
     return result.error.issues.map((issue) => ({
         cardId: card.id,
-        cardLabel: card.label,
+        cardLabel: card.data.name,
         reason: issue.message,
     }));
 };

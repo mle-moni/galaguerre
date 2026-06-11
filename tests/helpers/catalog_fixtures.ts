@@ -11,15 +11,17 @@ export const createTestCard = (overrides: {
     cardSetId?: number;
     data?: CardData;
 }): Card => {
-    const data = overrides.data ?? defaultMinionData();
+    const baseData = overrides.data ?? defaultMinionData();
 
     const card = new Card();
     card.id = overrides.id ?? 1;
-    card.label = overrides.label ?? "Test Card";
-    card.cost = overrides.cost ?? 1;
-    card.imageUrl = overrides.imageUrl ?? "https://example.com/card.png";
     card.cardSetId = overrides.cardSetId ?? 1;
-    card.data = parseCardData(data);
+    card.data = parseCardData({
+        ...baseData,
+        name: overrides.label ?? baseData.name,
+        cost: overrides.cost ?? baseData.cost,
+        imageUrl: overrides.imageUrl ?? baseData.imageUrl,
+    });
     return card;
 };
 

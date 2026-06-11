@@ -19,9 +19,9 @@ export const validateDeckCardSets = (cards: Card[]): DeckCardSetValidationResult
         if (!card.cardSet) {
             errors.push({
                 cardId: card.id,
-                cardLabel: card.label,
+                cardLabel: card.data.name,
                 cardSetName: "inconnu",
-                reason: `La carte « ${card.label} » n'appartient à aucun set`,
+                reason: `La carte « ${card.data.name} » n'appartient à aucun set`,
             });
             continue;
         }
@@ -30,9 +30,9 @@ export const validateDeckCardSets = (cards: Card[]): DeckCardSetValidationResult
 
         errors.push({
             cardId: card.id,
-            cardLabel: card.label,
+            cardLabel: card.data.name,
             cardSetName: card.cardSet.name,
-            reason: `La carte « ${card.label} » appartient au set « ${card.cardSet.name} » qui n'est pas actif`,
+            reason: `La carte « ${card.data.name} » appartient au set « ${card.cardSet.name} » qui n'est pas actif`,
         });
     }
 

@@ -18,13 +18,15 @@ export default class extends BaseSeeder {
             ...new Set(SEEDED_DECKS.flatMap(({ recipe }) => recipe.map(({ label }) => label))),
         ];
 
-        const cards = await Card.query().whereIn("label", allLabels).preload("cardSet");
-        const cardByLabel = new Map(cards.map((card) => [card.label, card]));
+        const cards = await Card.query()
+            .whereRaw(`data->>'name' = ANY(?)`, [allLabels])
+            .preload("cardSet");
+        const cardByLabel = new Map(cards.map((card) => [card.data.name, card]));
 
         for (const card of cards) {
             if (card.cardSet.name !== GALADRIM_CARD_SET_NAME) {
                 throw new Error(
-                    `Card "${card.label}" belongs to set "${card.cardSet.name}", expected "${GALADRIM_CARD_SET_NAME}"`,
+                    `Card "${card.data.name}" belongs to set "${card.cardSet.name}", expected "${GALADRIM_CARD_SET_NAME}"`,
                 );
             }
         }
