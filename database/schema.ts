@@ -67,7 +67,6 @@ export class CardSchema extends BaseModel {
         "id",
         "imageUrl",
         "label",
-        "type",
         "updatedAt",
     ] as const;
     $columns = CardSchema.$columns;
@@ -85,8 +84,6 @@ export class CardSchema extends BaseModel {
     declare imageUrl: string;
     @column()
     declare label: string;
-    @column()
-    declare type: string;
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     declare updatedAt: DateTime | null;
 }

@@ -19,6 +19,7 @@ import {
     parseWeaponData,
 } from "#galaguerre/card_definition.schema";
 export type CardSeedEntry = {
+    id: number;
     label: string;
     cost: number;
     imageUrl: string;
@@ -320,6 +321,7 @@ export const boostPassive = (
 });
 
 export const defineMinion = (
+    cardId: number,
     base: MinionSeedBase,
     dataPartial: Partial<Omit<MinionCardData, "attack" | "health">> = {},
 ): CardSeedEntry => {
@@ -331,6 +333,7 @@ export const defineMinion = (
     });
 
     return {
+        id: cardId,
         label: base.label,
         cost: base.cost,
         imageUrl: base.imageUrl,
@@ -340,6 +343,7 @@ export const defineMinion = (
 };
 
 export const defineSpell = (
+    cardId: number,
     base: CardSeedBase,
     action: CardActionDefinition,
     tags: CardTag[] = [],
@@ -352,6 +356,7 @@ export const defineSpell = (
     });
 
     return {
+        id: cardId,
         label: base.label,
         cost: base.cost,
         imageUrl: base.imageUrl,
@@ -361,6 +366,7 @@ export const defineSpell = (
 };
 
 export const defineWeapon = (
+    cardId: number,
     base: CardSeedBase & { damage: number; durability: number },
     dataPartial: Partial<Omit<WeaponCardData, "damage" | "durability">> = {},
 ): CardSeedEntry => {
@@ -372,6 +378,7 @@ export const defineWeapon = (
     });
 
     return {
+        id: cardId,
         label: base.label,
         cost: base.cost,
         imageUrl: base.imageUrl,
