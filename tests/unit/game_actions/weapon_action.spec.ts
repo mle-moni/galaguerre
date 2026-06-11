@@ -1,6 +1,5 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import testUtils from "@adonisjs/core/services/test_utils";
 import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     createGameData,
@@ -11,42 +10,31 @@ import {
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
+import { runPlayWeapon, runPlayWeaponOnGame } from "#tests/helpers/game/run_play_minion";
 import {
-    assertPlayCardScenario,
-    runPlayCard,
-    runPlayCardOnGame,
-} from "#tests/helpers/game/run_play_card";
-import {
-    assertWeaponActionScenario,
-    runWeaponAction,
-    runWeaponActionOnGame,
-} from "#tests/helpers/game/run_weapon_action";
+    runWeaponActionInMemory,
+    runWeaponActionOnGameInMemory,
+} from "#tests/helpers/game/run_weapon_action_in_memory";
+import { runWeaponCombat, runWeaponCombatOnGame } from "#tests/helpers/game/run_weapon_combat";
+import { assertError } from "#tests/helpers/game/socket_event_collector";
 
-test.group("game:weapon_action", (group) => {
-    group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
-
+test.group("weapon combat", () => {
     test("weapon attacks opponent hero and reduces durability", async ({ assert }) => {
         const weaponCard = createWeaponCard({ damage: 3, durability: 2 });
 
-        const result = await runWeaponAction({
-            data: createGameData({
+        const { game } = await runWeaponCombat(
+            createGameData({
                 playerOne: {
                     weaponState: createWeaponState(weaponCard),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                spotId: null,
-                owner: "OPPONENT",
-            },
-            expect: { error: null },
-        });
+            { spotId: null },
+        );
 
-        assertWeaponActionScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
-        assert.equal(result.game.data.playerOne.weaponState!.durability, 1);
-        assert.equal(result.game.data.playerOne.heroAttacksThisRound, 1);
-        assert.equal(result.game.data.playerOne.heroLastAttackAtRound, 1);
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
+        assert.equal(game.data.playerOne.weaponState!.durability, 1);
+        assert.equal(game.data.playerOne.heroAttacksThisRound, 1);
+        assert.equal(game.data.playerOne.heroLastAttackAtRound, 1);
     });
 
     test("weapon attacks minion and takes retaliation damage", async ({ assert }) => {
@@ -57,8 +45,8 @@ test.group("game:weapon_action", (group) => {
             health: 4,
         });
 
-        const result = await runWeaponAction({
-            data: createGameData({
+        const { game } = await runWeaponCombat(
+            createGameData({
                 playerOne: {
                     weaponState: createWeaponState(weaponCard),
                 },
@@ -70,69 +58,29 @@ test.group("game:weapon_action", (group) => {
                     ),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                spotId: "SPOT_1",
-                owner: "OPPONENT",
-            },
-            expect: { error: null },
-        });
+            { spotId: "SPOT_1" },
+        );
 
-        assertWeaponActionScenario(assert, result, { error: null });
-        assertBoardSpot(assert, result.game, "playerTwo", "SPOT_1", { health: 1 });
-        assertPlayerHealth(assert, result.game, "playerOne", DEFAULT_HERO_HEALTH - 2);
-        assert.equal(result.game.data.playerOne.weaponState!.durability, 1);
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 1 });
+        assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 2);
+        assert.equal(game.data.playerOne.weaponState!.durability, 1);
     });
 
     test("weapon breaks at zero durability", async ({ assert }) => {
         const weaponCard = createWeaponCard({ damage: 5, durability: 1 });
 
-        const result = await runWeaponAction({
-            data: createGameData({
+        const { game } = await runWeaponCombat(
+            createGameData({
                 playerOne: {
                     weaponState: createWeaponState(weaponCard),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                spotId: null,
-                owner: "OPPONENT",
-            },
-            expect: { error: null },
-        });
+            { spotId: null },
+        );
 
-        assertWeaponActionScenario(assert, result, { error: null });
-        assert.isNull(result.game.data.playerOne.weaponState);
-        assert.equal(result.game.data.playerOne.heroAttacksThisRound, 1);
-        assert.equal(result.game.data.playerOne.heroLastAttackAtRound, 1);
-    });
-
-    test("rejects second weapon attack in the same turn", async ({ assert }) => {
-        const weaponCard = createWeaponCard({ damage: 1, durability: 3 });
-        const weaponState = createWeaponState(weaponCard);
-
-        const result = await runWeaponAction({
-            data: createGameData({
-                currentRound: 1,
-                playerOne: {
-                    weaponState,
-                    heroAttacksThisRound: 1,
-                    heroLastAttackAtRound: 1,
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                spotId: null,
-                owner: "OPPONENT",
-            },
-            expect: {
-                error: "Vous avez déjà attaqué avec votre arme ce tour",
-            },
-        });
-
-        assertWeaponActionScenario(assert, result, {
-            error: "Vous avez déjà attaqué avec votre arme ce tour",
-        });
+        assert.isNull(game.data.playerOne.weaponState);
+        assert.equal(game.data.playerOne.heroAttacksThisRound, 1);
+        assert.equal(game.data.playerOne.heroLastAttackAtRound, 1);
     });
 
     test("allows weapon attack after replacing weapon without attacking this turn", async ({
@@ -151,8 +99,8 @@ test.group("game:weapon_action", (group) => {
             durability: 2,
         });
 
-        const playResult = await runPlayCard({
-            data: createGameData({
+        const { game: playGame } = await runPlayWeapon(
+            createGameData({
                 currentRound: 1,
                 playerOne: {
                     mana: 10,
@@ -160,28 +108,36 @@ test.group("game:weapon_action", (group) => {
                     weaponState: createWeaponState(oldWeapon),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: newWeapon.uuid,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            newWeapon,
+        );
 
-        assertPlayCardScenario(assert, playResult, { error: null });
-        assert.equal(playResult.game.data.playerOne.heroAttacksThisRound, 0);
-        assert.equal(playResult.game.data.playerOne.weaponState!.damage, 4);
+        assert.equal(playGame.data.playerOne.heroAttacksThisRound, 0);
+        assert.equal(playGame.data.playerOne.weaponState!.damage, 4);
 
-        const attackResult = await runWeaponActionOnGame(playResult.game, playResult.actorUserId, {
-            spotId: null,
-            owner: "OPPONENT",
-        });
+        const { game: attackGame } = await runWeaponCombatOnGame(playGame, { spotId: null });
 
-        assertWeaponActionScenario(assert, attackResult, { error: null });
-        assertPlayerHealth(assert, attackResult.game, "playerTwo", DEFAULT_HERO_HEALTH - 4);
-        assert.equal(attackResult.game.data.playerOne.heroAttacksThisRound, 1);
-        assert.equal(attackResult.game.data.playerOne.weaponState!.durability, 1);
+        assertPlayerHealth(assert, attackGame, "playerTwo", DEFAULT_HERO_HEALTH - 4);
+        assert.equal(attackGame.data.playerOne.heroAttacksThisRound, 1);
+        assert.equal(attackGame.data.playerOne.weaponState!.durability, 1);
+    });
+
+    test("rejects second weapon attack in the same turn", async ({ assert }) => {
+        const weaponCard = createWeaponCard({ damage: 1, durability: 3 });
+
+        await runWeaponActionInMemory(
+            createGameData({
+                currentRound: 1,
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                    heroAttacksThisRound: 1,
+                    heroLastAttackAtRound: 1,
+                },
+            }),
+            "playerOne",
+            { spotId: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Vous avez déjà attaqué avec votre arme ce tour");
     });
 
     test("rejects weapon attack after breaking weapon and re-equipping in the same turn", async ({
@@ -195,8 +151,8 @@ test.group("game:weapon_action", (group) => {
             durability: 2,
         });
 
-        const firstAttack = await runWeaponAction({
-            data: createGameData({
+        const firstAttack = await runWeaponActionInMemory(
+            createGameData({
                 currentRound: 1,
                 playerOne: {
                     mana: 10,
@@ -204,38 +160,21 @@ test.group("game:weapon_action", (group) => {
                     weaponState: createWeaponState(breakingWeapon),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                spotId: null,
-                owner: "OPPONENT",
-            },
-            expect: { error: null },
-        });
+            "playerOne",
+            { spotId: null, owner: "OPPONENT" },
+        );
 
-        assertWeaponActionScenario(assert, firstAttack, { error: null });
         assert.isNull(firstAttack.game.data.playerOne.weaponState);
         assert.equal(firstAttack.game.data.playerOne.heroAttacksThisRound, 1);
 
-        await runPlayCardOnGame(firstAttack.game, firstAttack.actorUserId, {
-            cardId: newWeapon.uuid,
+        await runPlayWeaponOnGame(firstAttack.game, newWeapon);
+
+        await runWeaponActionOnGameInMemory(firstAttack.game, "playerOne", {
             spotId: null,
-            owner: "PLAYER",
+            owner: "OPPONENT",
         });
 
-        assert.isNotNull(firstAttack.game.data.playerOne.weaponState);
-
-        const secondAttack = await runWeaponActionOnGame(
-            firstAttack.game,
-            firstAttack.actorUserId,
-            {
-                spotId: null,
-                owner: "OPPONENT",
-            },
-        );
-
-        assertWeaponActionScenario(assert, secondAttack, {
-            error: "Vous avez déjà attaqué avec votre arme ce tour",
-        });
+        assertError(assert, "Vous avez déjà attaqué avec votre arme ce tour");
     });
 
     test("rejects hero attack when taunt minion is on board", async ({ assert }) => {
@@ -246,8 +185,8 @@ test.group("game:weapon_action", (group) => {
             effects: ["Provocation"],
         });
 
-        const result = await runWeaponAction({
-            data: createGameData({
+        await runWeaponActionInMemory(
+            createGameData({
                 playerOne: {
                     weaponState: createWeaponState(weaponCard),
                 },
@@ -259,36 +198,19 @@ test.group("game:weapon_action", (group) => {
                     ),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                spotId: null,
-                owner: "OPPONENT",
-            },
-            expect: {
-                error: "Vous devez d'abord attaquer un serviteur avec Provocation",
-            },
-        });
+            "playerOne",
+            { spotId: null, owner: "OPPONENT" },
+        );
 
-        assertWeaponActionScenario(assert, result, {
-            error: "Vous devez d'abord attaquer un serviteur avec Provocation",
-        });
+        assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
     });
 
     test("rejects weapon action when no weapon equipped", async ({ assert }) => {
-        const result = await runWeaponAction({
-            data: createGameData(),
-            actor: "playerOne",
-            action: {
-                spotId: null,
-                owner: "OPPONENT",
-            },
-            expect: {
-                error: "Vous n'avez pas d'arme équipée",
-            },
+        await runWeaponActionInMemory(createGameData(), "playerOne", {
+            spotId: null,
+            owner: "OPPONENT",
         });
 
-        assertWeaponActionScenario(assert, result, {
-            error: "Vous n'avez pas d'arme équipée",
-        });
+        assertError(assert, "Vous n'avez pas d'arme équipée");
     });
 });

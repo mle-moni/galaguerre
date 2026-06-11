@@ -4,8 +4,8 @@ import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { MATCHMAKING_QUEUE, addMatchmakingQueueItem } from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import type { HttpContext } from "@adonisjs/core/http";
+import { preloadDeckCardSet } from "#controllers/decks/deck_utils";
 import { serializeDeck } from "#controllers/decks/serialize_deck";
-import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
 import { randomBoolean } from "../../utils/random.js";
 import { createGame } from "./create_game.js";
@@ -15,7 +15,7 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
     const deck = await Deck.query()
         .where("userId", user.id)
         .andWhere("selected", true)
-        .preload("cards", loadCardRelations)
+        .preload("cards", preloadDeckCardSet)
         .first();
 
     if (!deck) return response.badRequest({ error: "You have no deck selected" });
@@ -38,7 +38,7 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
     const opponentDeck = await Deck.query()
         .where("userId", opponent.userId)
         .andWhere("selected", true)
-        .preload("cards", loadCardRelations)
+        .preload("cards", preloadDeckCardSet)
         .preload("user")
         .firstOrFail();
 

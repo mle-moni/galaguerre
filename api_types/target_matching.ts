@@ -58,7 +58,7 @@ export const minionMatchesTarget = (
         return false;
     }
 
-    if (target.tagId !== null && !card.tagIds.includes(target.tagId)) {
+    if (target.tag !== null && !card.tags.includes(target.tag)) {
         return false;
     }
 

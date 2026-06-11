@@ -1,6 +1,6 @@
 import type { CardActionSnapshot, PassiveSnapshot } from "#api_types/game.types";
+import type { MinionCardData } from "#galaguerre/card_definition.schema";
 import { formatActionDescription } from "./action_engine/format_action_description.js";
-import type MinionPower from "#models/minion_power";
 
 const PASSIVE_TRIGGER_LABELS: Record<NonNullable<PassiveSnapshot["triggersOn"]>, string> = {
     TURN_END: "fin de tour",
@@ -16,7 +16,12 @@ const EFFECT_DESCRIPTIONS: Record<string, string> = {
     Toxique: "Détruit tout serviteur blessé par ce serviteur.",
 };
 
-export const getMinionPowerEffects = (power: MinionPower | null | undefined): string[] => {
+export const getMinionPowerEffects = (
+    power:
+        | Pick<MinionCardData, "hasTaunt" | "hasCharge" | "hasWindfury" | "isPoisonous">
+        | null
+        | undefined,
+): string[] => {
     if (!power) return [];
 
     const effects: string[] = [];

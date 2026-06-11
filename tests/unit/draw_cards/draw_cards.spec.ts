@@ -55,11 +55,11 @@ test.group("draw_cards", () => {
     });
 
     test("drawOneCard with tag filter draws matching card", ({ assert }) => {
-        const noTag = createMinionCard({ uuid: "no-tag", tagIds: [] });
-        const tagged = createMinionCard({ uuid: "tagged", tagIds: [42] });
+        const noTag = createMinionCard({ uuid: "no-tag", tags: [] });
+        const tagged = createMinionCard({ uuid: "tagged", tags: ["MURLOC"] });
         const player = createGamePlayer(1, { deckCards: [noTag, tagged], hand: [] });
 
-        drawOneCard(player, createCardFilterSnapshot({ type: "MINION", tagIds: [42] }));
+        drawOneCard(player, createCardFilterSnapshot({ type: "MINION", tags: ["MURLOC"] }));
 
         assert.equal(player.hand.length, 1);
         assert.equal(player.hand[0]!.uuid, "tagged");

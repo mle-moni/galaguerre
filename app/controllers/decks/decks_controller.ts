@@ -4,11 +4,11 @@ import Game from "#models/game";
 import type { HttpContext } from "@adonisjs/core/http";
 import vine, { SimpleMessagesProvider } from "@vinejs/vine";
 import { DEFAULT_MESSAGE_PROVIDER_CONFIG } from "#adomin/validation/default_validator";
-import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
 import { validateDeckCompositionForSave } from "../../galaguerre/validation/validate_deck_composition.js";
 import { serializeDeck } from "./serialize_deck.js";
 import {
     findUserDeck,
+    preloadDeckCardSet,
     preloadDeckCards,
     syncDeckCards,
     validateCardIdsExist,
@@ -34,7 +34,7 @@ export default class DecksController {
     async index({ auth }: HttpContext) {
         const decks = await Deck.query()
             .where("userId", auth.user!.id)
-            .preload("cards", loadCardRelations)
+            .preload("cards", preloadDeckCardSet)
             .orderBy("createdAt", "asc");
 
         return decks.map(serializeDeck);
@@ -59,7 +59,7 @@ export default class DecksController {
             selected: isFirstDeck,
         });
 
-        await deck.load("cards", (q) => loadCardRelations(q));
+        await deck.load("cards", preloadDeckCardSet);
 
         return serializeDeck(deck);
     }

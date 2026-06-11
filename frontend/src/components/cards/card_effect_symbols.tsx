@@ -1,3 +1,5 @@
+import type { CardTag } from "#api_types/card.types";
+import { CARD_TAG_LABELS } from "#api_types/card.types";
 import type { MinionCard } from "#api_types/game.types";
 
 const EFFECT_SYMBOLS: Record<string, string> = {
@@ -44,11 +46,14 @@ export const CardEffectSymbols = ({ card }: { card: MinionCard }) => {
             )}
             {tags.length > 0 && (
                 <div className="card-tags">
-                    {tags.map((tag) => (
-                        <div key={tag.label} className="card-symbol" title={tag.label}>
-                            {tag.symbol}
-                        </div>
-                    ))}
+                    {tags.map((tag: CardTag) => {
+                        const meta = CARD_TAG_LABELS[tag];
+                        return (
+                            <div key={tag} className="card-symbol" title={meta.label}>
+                                {meta.symbol}
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>

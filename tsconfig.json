@@ -21,7 +21,8 @@
             "#start/*": ["./start/*.js"],
             "#config/*": ["./config/*.js"],
             "#adomin/*": ["./app/adomin/*.js"],
-            "#api_types/*": ["./api_types/*.js"]
+            "#api_types/*": ["./api_types/*.js"],
+            "#galaguerre/*": ["./app/galaguerre/*.js"]
         }
     },
     "exclude": ["./frontend/**/*", "node_modules", "build"]

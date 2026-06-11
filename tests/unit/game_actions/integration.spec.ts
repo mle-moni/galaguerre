@@ -1,7 +1,11 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import testUtils from "@adonisjs/core/services/test_utils";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import {
+    assertBoardSpot,
+    assertGameState,
+    assertIsFinished,
+    assertPlayerHealth,
+} from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
     createGameData,
@@ -10,18 +14,16 @@ import {
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
+import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import {
-    assertMinionActionScenario,
-    runMinionActionOnGame,
-} from "#tests/helpers/game/run_minion_action";
-import { assertPlayCardScenario, runPlayCardOnGame } from "#tests/helpers/game/run_play_card";
-import { assertPassTurnScenario, runPassTurnOnGame } from "#tests/helpers/game/run_pass_turn";
-import { createTestGame } from "#tests/helpers/game/game_factory";
+    runMinionActionInMemory,
+    runMinionActionOnGameInMemory,
+} from "#tests/helpers/game/run_minion_action_in_memory";
+import { runPlayMinion, runPlayMinionOnGame } from "#tests/helpers/game/run_play_minion";
+import { runPassTurnFromGame } from "#tests/helpers/game/run_setup_next_turn";
 import { assertError } from "#tests/helpers/game/socket_event_collector";
 
-test.group("game:integration", (group) => {
-    group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
-
+test.group("game scenarios", () => {
     test("full turn: play minion, attack, pass turn, opponent plays", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
@@ -31,8 +33,12 @@ test.group("game:integration", (group) => {
             hasCharge: true,
             effects: ["Charge"],
         });
+        const opponentHandCard = createMinionCard({
+            uuid: "p2-hand",
+            cost: 1,
+        });
 
-        const { game, playerOne, playerTwo } = await createTestGame(
+        const { game: playGame } = await runPlayMinion(
             createGameData({
                 currentRound: 3,
                 playerOne: {
@@ -41,47 +47,37 @@ test.group("game:integration", (group) => {
                 },
                 playerTwo: {
                     mana: 10,
-                    hand: [
-                        createMinionCard({
-                            uuid: "p2-hand",
-                            cost: 1,
-                        }),
-                    ],
+                    hand: [opponentHandCard],
                 },
             }),
+            handCard,
         );
 
-        const playResult = await runPlayCardOnGame(game, playerOne.id, {
-            cardId: CARD_IDS.handMinion,
-            spotId: "SPOT_1",
-            owner: "PLAYER",
-        });
+        assertBoardSpot(assert, playGame, "playerOne", "SPOT_1", { health: 2 });
 
-        assertPlayCardScenario(assert, playResult, { error: null });
-        assertBoardSpot(assert, playResult.game, "playerOne", "SPOT_1", { health: 2 });
+        const { game: attackGame, errors: attackErrors } = await runMinionActionOnGameInMemory(
+            playGame,
+            "playerOne",
+            {
+                minionId: CARD_IDS.handMinion,
+                spotId: null,
+                owner: "OPPONENT",
+            },
+        );
 
-        const attackResult = await runMinionActionOnGame(playResult.game, playerOne.id, {
-            minionId: CARD_IDS.handMinion,
-            spotId: null,
-            owner: "OPPONENT",
-        });
+        assert.equal(attackErrors.length, 0);
+        assertPlayerHealth(assert, attackGame, "playerTwo", DEFAULT_HERO_HEALTH - 2);
 
-        assertMinionActionScenario(assert, attackResult, { error: null });
-        assertPlayerHealth(assert, attackResult.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+        const { game: passGame } = await runPassTurnFromGame(attackGame);
 
-        const passResult = await runPassTurnOnGame(attackResult.game, playerOne.id);
+        assertGameState(assert, passGame, "PLAYER_TWO_TURN");
 
-        assertPassTurnScenario(assert, passResult, { error: null });
-        assert.equal(passResult.game.data.state, "PLAYER_TWO_TURN");
-
-        const opponentPlay = await runPlayCardOnGame(passResult.game, playerTwo.id, {
-            cardId: "p2-hand",
+        const { game: opponentPlayGame } = await runPlayMinionOnGame(passGame, opponentHandCard, {
             spotId: "SPOT_2",
-            owner: "PLAYER",
+            actor: "playerTwo",
         });
 
-        assertPlayCardScenario(assert, opponentPlay, { error: null });
-        assertBoardSpot(assert, opponentPlay.game, "playerTwo", "SPOT_2", { health: 1 });
+        assertBoardSpot(assert, opponentPlayGame, "playerTwo", "SPOT_2", { health: 1 });
     });
 
     test("win by combat: charge minion attacks hero and finishes the game", async ({ assert }) => {
@@ -94,7 +90,7 @@ test.group("game:integration", (group) => {
             effects: ["Charge"],
         });
 
-        const { game, playerOne } = await createTestGame(
+        const { game: playGame } = await runPlayMinion(
             createGameData({
                 currentRound: 10,
                 playerOne: {
@@ -102,27 +98,22 @@ test.group("game:integration", (group) => {
                     hand: [chargeCard],
                 },
             }),
+            chargeCard,
         );
 
-        const playResult = await runPlayCardOnGame(game, playerOne.id, {
-            cardId: CARD_IDS.handMinion,
-            spotId: "SPOT_1",
-            owner: "PLAYER",
-        });
-
-        const attackResult = await runMinionActionOnGame(playResult.game, playerOne.id, {
+        const { game: attackGame } = await runMinionActionOnGameInMemory(playGame, "playerOne", {
             minionId: CARD_IDS.handMinion,
             spotId: null,
             owner: "OPPONENT",
         });
 
-        assertMinionActionScenario(assert, attackResult, { error: null, isFinished: true });
-        assertPlayerHealth(assert, attackResult.game, "playerTwo", 0);
+        assertIsFinished(assert, attackGame, true);
+        assertPlayerHealth(assert, attackGame, "playerTwo", 0);
     });
 
     test("win by fatigue after deck is exhausted", async ({ assert }) => {
-        const { game, playerOne, playerTwo } = await createTestGame(
-            createGameData({
+        let game = createInMemoryGame({
+            ...createGameData({
                 state: "PLAYER_ONE_TURN",
                 currentRound: 1,
                 playerOne: {
@@ -136,22 +127,18 @@ test.group("game:integration", (group) => {
                     maxFatigueDamageTaken: 0,
                 },
             }),
-        );
-
-        let currentGame = game;
-        let actorId = playerOne.id;
+            isTraining: true,
+        });
 
         for (let turn = 0; turn < 4; turn++) {
-            const passResult = await runPassTurnOnGame(currentGame, actorId);
-            currentGame = passResult.game;
+            const { game: nextGame } = await runPassTurnFromGame(game);
+            game = nextGame;
 
-            if (passResult.game.isFinished) {
-                assert.isTrue(passResult.game.isFinished);
-                assertPlayerHealth(assert, passResult.game, "playerTwo", 0);
+            if (game.isFinished) {
+                assertIsFinished(assert, game, true);
+                assertPlayerHealth(assert, game, "playerTwo", 0);
                 return;
             }
-
-            actorId = actorId === playerOne.id ? playerTwo.id : playerOne.id;
         }
 
         assert.fail("Expected game to finish from fatigue damage");
@@ -178,7 +165,7 @@ test.group("game:integration", (group) => {
             effects: ["Provocation"],
         });
 
-        const { game, playerOne } = await createTestGame(
+        const blocked = await runMinionActionInMemory(
             createGameData({
                 currentRound: 4,
                 playerOne: {
@@ -200,36 +187,36 @@ test.group("game:integration", (group) => {
                     ),
                 },
             }),
+            "playerOne",
+            {
+                minionId: MINION_IDS.attacker,
+                spotId: null,
+                owner: "OPPONENT",
+            },
         );
-
-        const blocked = await runMinionActionOnGame(game, playerOne.id, {
-            minionId: MINION_IDS.attacker,
-            spotId: null,
-            owner: "OPPONENT",
-        });
 
         assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
         assertPlayerHealth(assert, blocked.game, "playerTwo", DEFAULT_HERO_HEALTH);
 
-        const killTaunt = await runMinionActionOnGame(blocked.game, playerOne.id, {
+        const killTaunt = await runMinionActionOnGameInMemory(blocked.game, "playerOne", {
             minionId: MINION_IDS.attacker,
             spotId: "SPOT_1",
             owner: "OPPONENT",
         });
 
-        assertMinionActionScenario(assert, killTaunt, { error: null });
+        assert.equal(killTaunt.errors.length, 0);
         assertBoardSpot(assert, killTaunt.game, "playerTwo", "SPOT_1", null);
 
-        const heroAttack = await runMinionActionOnGame(killTaunt.game, playerOne.id, {
+        const heroAttack = await runMinionActionOnGameInMemory(killTaunt.game, "playerOne", {
             minionId: "minion-finisher",
             spotId: null,
             owner: "OPPONENT",
         });
 
-        assertMinionActionScenario(assert, heroAttack, { error: null });
+        assert.equal(heroAttack.errors.length, 0);
         assertPlayerHealth(assert, heroAttack.game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
 
-        const opponentPass = await runPassTurnOnGame(heroAttack.game, playerOne.id);
-        assert.equal(opponentPass.game.data.state, "PLAYER_TWO_TURN");
+        const { game: passGame } = await runPassTurnFromGame(heroAttack.game);
+        assertGameState(assert, passGame, "PLAYER_TWO_TURN");
     });
 });

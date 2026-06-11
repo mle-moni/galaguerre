@@ -8,8 +8,8 @@ export const deckCardMatchesFilter = (card: PlayerCard, filter: CardFilterSnapsh
         return false;
     }
 
-    for (const tagId of filter.tagIds) {
-        if (!card.tagIds.includes(tagId)) return false;
+    for (const tag of filter.tags) {
+        if (!card.tags.includes(tag)) return false;
     }
 
     return true;

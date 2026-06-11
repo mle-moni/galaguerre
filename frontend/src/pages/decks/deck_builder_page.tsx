@@ -5,6 +5,7 @@ import {
     type ApiCatalogCard,
     type ApiDeckCardEntry,
 } from "#api_types/deck.types";
+import { CARD_TAG_LABELS } from "#api_types/card.types";
 import { Button, Collapse, NumberInput, Select, Tabs, TextInput } from "@mantine/core";
 import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
@@ -46,7 +47,9 @@ const normalizeForSearch = (value: string) =>
 const cardMatchesSearch = (card: ApiCatalogCard, query: string) => {
     const normalizedQuery = normalizeForSearch(query);
     if (normalizeForSearch(card.label).includes(normalizedQuery)) return true;
-    return card.tags.some((tag) => normalizeForSearch(tag.label).includes(normalizedQuery));
+    return card.tags.some((tag) =>
+        normalizeForSearch(CARD_TAG_LABELS[tag].label).includes(normalizedQuery),
+    );
 };
 
 export const DeckBuilderPage = observer(() => {

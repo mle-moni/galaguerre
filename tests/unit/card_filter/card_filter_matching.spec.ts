@@ -37,22 +37,25 @@ test.group("card_filter_matching", () => {
         assert.isFalse(deckCardMatchesFilter(card, strictFilter));
     });
 
-    test("deckCardMatchesFilter requires all tag ids", ({ assert }) => {
-        const card = createMinionCard({ tagIds: [1, 2] });
+    test("deckCardMatchesFilter requires all tags", ({ assert }) => {
+        const card = createMinionCard({ tags: ["BEAST", "MURLOC"] });
 
         assert.isTrue(
-            deckCardMatchesFilter(card, createCardFilterSnapshot({ type: "MINION", tagIds: [1] })),
+            deckCardMatchesFilter(
+                card,
+                createCardFilterSnapshot({ type: "MINION", tags: ["BEAST"] }),
+            ),
         );
         assert.isTrue(
             deckCardMatchesFilter(
                 card,
-                createCardFilterSnapshot({ type: "MINION", tagIds: [1, 2] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["BEAST", "MURLOC"] }),
             ),
         );
         assert.isFalse(
             deckCardMatchesFilter(
                 card,
-                createCardFilterSnapshot({ type: "MINION", tagIds: [1, 3] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["BEAST", "PIRATE"] }),
             ),
         );
     });

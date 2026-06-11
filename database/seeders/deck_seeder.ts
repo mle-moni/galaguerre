@@ -14,17 +14,22 @@ import {
 export default class extends BaseSeeder {
     async run() {
         const users = await User.all();
-        const allLabels = [
-            ...new Set(SEEDED_DECKS.flatMap(({ recipe }) => recipe.map(({ label }) => label))),
+        const allCardIds = [
+            ...new Set(SEEDED_DECKS.flatMap(({ recipe }) => recipe.map(({ cardId }) => cardId))),
         ];
 
-        const cards = await Card.query().whereIn("label", allLabels).preload("cardSet");
-        const cardByLabel = new Map(cards.map((card) => [card.label, card]));
+        const cards = await Card.query().whereIn("id", allCardIds).preload("cardSet");
+        const cardById = new Map(cards.map((card) => [card.id, card]));
 
-        for (const card of cards) {
+        for (const cardId of allCardIds) {
+            const card = cardById.get(cardId);
+            if (!card) {
+                throw new Error(`Card not found for deck recipe: ${cardId}`);
+            }
+
             if (card.cardSet.name !== GALADRIM_CARD_SET_NAME) {
                 throw new Error(
-                    `Card "${card.label}" belongs to set "${card.cardSet.name}", expected "${GALADRIM_CARD_SET_NAME}"`,
+                    `Card "${card.data.name}" (id ${cardId}) belongs to set "${card.cardSet.name}", expected "${GALADRIM_CARD_SET_NAME}"`,
                 );
             }
         }
@@ -43,7 +48,7 @@ export default class extends BaseSeeder {
                     selected,
                 });
 
-                const deckCardIds = buildDeckCardIds(recipe, cardByLabel);
+                const deckCardIds = buildDeckCardIds(recipe);
 
                 if (deckCardIds.length !== DECK_SIZE) {
                     throw new Error(

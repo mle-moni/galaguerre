@@ -1,3 +1,4 @@
+import { preloadDeckCardSet } from "#controllers/decks/deck_utils";
 import { serializeDeck } from "#controllers/decks/serialize_deck";
 import Deck from "#models/deck";
 import Game from "#models/game";
@@ -6,7 +7,6 @@ import { WsRooms } from "#services/sockets/ws_rooms";
 import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
 import type { HttpContext } from "@adonisjs/core/http";
-import { loadCardRelations } from "../../galaguerre/serialization/load_card_relations.js";
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
 import { randomBoolean } from "../../utils/random.js";
 import { createGame } from "./create_game.js";
@@ -26,7 +26,7 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
     const deck = await Deck.query()
         .where("userId", user.id)
         .andWhere("selected", true)
-        .preload("cards", loadCardRelations)
+        .preload("cards", preloadDeckCardSet)
         .first();
 
     if (!deck) return response.badRequest({ error: "You have no deck selected" });

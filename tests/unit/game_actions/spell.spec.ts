@@ -1,8 +1,6 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import testUtils from "@adonisjs/core/services/test_utils";
 import {
-    CARD_IDS,
     createAllTargetSnapshot,
     createCardActionSnapshot,
     createGameData,
@@ -13,16 +11,14 @@ import {
     createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertPlayCardScenario, runPlayCard } from "#tests/helpers/game/run_play_card";
+import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 
-test.group("game:play_spell", (group) => {
-    group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
-
-    test("applies spellPower bonus to spell damage", async ({ assert }) => {
+test.group("spell effects", () => {
+    test("applies spellPower bonus to spell damage", ({ assert }) => {
         const spell = createSpellCard({ cost: 2 });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     spellPower: 2,
@@ -32,20 +28,13 @@ test.group("game:play_spell", (group) => {
                     health: DEFAULT_HERO_HEALTH,
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            spell,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 5);
+        assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 5);
     });
 
-    test("plays targeted spell on enemy minion", async ({ assert }) => {
+    test("plays targeted spell on enemy minion", ({ assert }) => {
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 4 });
         const spell = createSpellCard({
             cost: 3,
@@ -57,8 +46,8 @@ test.group("game:play_spell", (group) => {
             }),
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -71,22 +60,14 @@ test.group("game:play_spell", (group) => {
                     ),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-                actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" },
-            },
-            expect: { error: null },
-        });
+            spell,
+            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.isNull(result.game.data.playerTwo.board.SPOT_1);
-        assert.equal(result.game.data.playerOne.hand.length, 0);
+        assert.isNull(game.data.playerTwo.board.SPOT_1);
     });
 
-    test("draw spell adds card to hand", async ({ assert }) => {
+    test("draw spell adds card to hand", ({ assert }) => {
         const deckCard = createMinionCard({ uuid: "deck-card" });
         const spell = createSpellCard({
             cost: 1,
@@ -97,30 +78,25 @@ test.group("game:play_spell", (group) => {
             }),
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
                     deckCards: [deckCard],
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            spell,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.hand.length, 1);
-        assert.equal(result.game.data.playerOne.hand[0]!.uuid, "deck-card");
-        assert.equal(result.game.data.playerOne.deckCards.length, 0);
+        assert.equal(
+            game.data.playerOne.hand.some((card) => card.uuid === "deck-card"),
+            true,
+        );
+        assert.equal(game.data.playerOne.deckCards.length, 0);
     });
 
-    test("spell lethal damage ends the game", async ({ assert }) => {
+    test("spell lethal damage ends the game", ({ assert }) => {
         const spell = createSpellCard({
             cost: 2,
             action: createCardActionSnapshot({
@@ -131,8 +107,8 @@ test.group("game:play_spell", (group) => {
             }),
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -141,21 +117,14 @@ test.group("game:play_spell", (group) => {
                     health: 5,
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            spell,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerTwo.health, -10);
-        assert.isTrue(result.game.isFinished);
+        assert.equal(game.data.playerTwo.health, -10);
+        assert.isTrue(game.isFinished);
     });
 
-    test("mass ALL damage spell hits heroes and minions on both teams", async ({ assert }) => {
+    test("mass ALL damage spell hits heroes and minions on both teams", ({ assert }) => {
         const allyMinion = createMinionCard({ uuid: "ally-minion", health: 5 });
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 5 });
         const spell = createSpellCard({
@@ -168,8 +137,8 @@ test.group("game:play_spell", (group) => {
             }),
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -187,25 +156,16 @@ test.group("game:play_spell", (group) => {
                     ),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            spell,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.health, DEFAULT_HERO_HEALTH - 2);
-        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
-        assert.equal(result.game.data.playerOne.board.SPOT_1!.health, 3);
-        assert.equal(result.game.data.playerTwo.board.SPOT_1!.health, 3);
+        assert.equal(game.data.playerOne.health, DEFAULT_HERO_HEALTH - 2);
+        assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
+        assert.equal(game.data.playerOne.board.SPOT_1!.health, 3);
+        assert.equal(game.data.playerTwo.board.SPOT_1!.health, 3);
     });
 
-    test("mass ALL damage spell with OPPONENT team only hits opponent characters", async ({
-        assert,
-    }) => {
+    test("mass ALL damage spell with OPPONENT team only hits opponent characters", ({ assert }) => {
         const allyMinion = createMinionCard({ uuid: "ally-minion", health: 5 });
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 5 });
         const spell = createSpellCard({
@@ -218,8 +178,8 @@ test.group("game:play_spell", (group) => {
             }),
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -237,23 +197,16 @@ test.group("game:play_spell", (group) => {
                     ),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            spell,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.health, DEFAULT_HERO_HEALTH);
-        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
-        assert.equal(result.game.data.playerOne.board.SPOT_1!.health, 5);
-        assert.equal(result.game.data.playerTwo.board.SPOT_1!.health, 3);
+        assert.equal(game.data.playerOne.health, DEFAULT_HERO_HEALTH);
+        assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
+        assert.equal(game.data.playerOne.board.SPOT_1!.health, 5);
+        assert.equal(game.data.playerTwo.board.SPOT_1!.health, 3);
     });
 
-    test("random damage spell hits one enemy minion", async ({ assert }) => {
+    test("random damage spell hits one enemy minion", ({ assert }) => {
         const enemyMinion1 = createMinionCard({ uuid: "enemy-minion-1", health: 5 });
         const enemyMinion2 = createMinionCard({ uuid: "enemy-minion-2", health: 5 });
         const spell = createSpellCard({
@@ -269,8 +222,8 @@ test.group("game:play_spell", (group) => {
             }),
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
@@ -287,25 +240,17 @@ test.group("game:play_spell", (group) => {
                     ),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            spell,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        const board = result.game.data.playerTwo.board;
+        const board = game.data.playerTwo.board;
         const damagedCount = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"].filter(
             (spotId) => board[spotId as keyof typeof board]?.health === 4,
         ).length;
         assert.equal(damagedCount, 1);
-        assert.equal(result.game.data.playerOne.mana, 8);
     });
 
-    test("random damage spell fizzles when no eligible minion exists", async ({ assert }) => {
+    test("random damage spell fizzles when no eligible minion exists", ({ assert }) => {
         const spell = createSpellCard({
             cost: 2,
             action: createCardActionSnapshot({
@@ -319,25 +264,16 @@ test.group("game:play_spell", (group) => {
             }),
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = runSpellEffect(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [spell],
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            spell,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.mana, 8);
-        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH);
-        assert.equal(result.game.data.playerOne.hand.length, 0);
+        assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH);
     });
 });

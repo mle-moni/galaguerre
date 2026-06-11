@@ -51,6 +51,7 @@ export default defineConfig({
         () => import("#start/kernel"),
         () => import("#start/web_sockets"),
         () => import("#start/game_timers"),
+        () => import("#start/sync_cards"),
     ],
 
     /*

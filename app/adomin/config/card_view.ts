@@ -1,57 +1,17 @@
 import { createModelViewConfig } from "#adomin/create_model_view_config";
 import Card from "#models/card";
-import { GALAGUERRE_CARD_TYPES_OPTIONS } from "../../galaguerre/galaguerre.types.js";
-import { createFile, deleteFile } from "../../utils/files.js";
 
 export const CARD_VIEW = createModelViewConfig(() => Card, {
     columns: {
-        label: {
-            type: "string",
-            label: "Nom",
-        },
-        cost: {
-            type: "number",
-            label: "Coût",
-        },
-        type: {
-            type: "enum",
-            options: GALAGUERRE_CARD_TYPES_OPTIONS,
-            label: "Type",
-        },
-        minion: {
-            type: "belongsToRelation",
-            modelName: "Minion",
-            labelFields: ["internalLabel", "attack", "health"],
-            nullable: true,
-            label: "Monstre",
-        },
-        spell: {
-            type: "belongsToRelation",
-            modelName: "Spell",
-            labelFields: ["internalLabel"],
-            nullable: true,
-            label: "Sort",
-        },
-        weapon: {
-            type: "belongsToRelation",
-            modelName: "Weapon",
-            labelFields: ["internalLabel", "damage", "durability"],
-            nullable: true,
-            label: "Arme",
-        },
-        imageUrl: {
-            type: "file",
-            subType: "url",
-            isImage: true,
-            createFile,
-            deleteFile,
-            label: "Image",
-        },
         cardSet: {
             type: "belongsToRelation",
             modelName: "CardSet",
             labelFields: ["name"],
             label: "Set",
+        },
+        data: {
+            type: "object",
+            label: "Données",
         },
         createdAt: {
             type: "date",
@@ -67,7 +27,7 @@ export const CARD_VIEW = createModelViewConfig(() => Card, {
             creatable: false,
             editable: false,
         },
-    },
+    } as Record<string, { type: string; label: string }>,
     label: "Carte",
     icon: "cards",
 });

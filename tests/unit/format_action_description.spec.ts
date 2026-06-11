@@ -79,8 +79,7 @@ test.group("format_action_description", () => {
             drawCount: 1,
             drawCardFilter: createCardFilterSnapshot({
                 type: "MINION",
-                tagIds: [1],
-                tags: [{ label: "Bête", symbol: "🦁" }],
+                tags: ["BEAST"],
             }),
         });
 
@@ -110,8 +109,7 @@ test.group("format_action_description", () => {
             isTargeted: true,
             damage: 2,
             target: createMinionTargetSnapshot("OPPONENT", {
-                tagId: 1,
-                tag: { label: "Bête", symbol: "🦁" },
+                tag: "BEAST",
             }),
         });
 

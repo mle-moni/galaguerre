@@ -1,4 +1,5 @@
 import type { PlayerCard } from "#api_types/game.types";
+import { CARD_TAG_LABELS } from "#api_types/card.types";
 import { formatActionDescription } from "#api_types/format_action_description";
 import { getDisplayedDamage } from "#api_types/get_effective_damage";
 import { Text } from "@mantine/core";
@@ -108,11 +109,14 @@ export const CardDetailContent = ({ card, spellPower = 0 }: CardDetailContentPro
                             {effect}
                         </span>
                     ))}
-                    {tags.map((tag) => (
-                        <span key={`tag-${tag.label}`} className="card-tag-chip">
-                            {tag.symbol} {tag.label}
-                        </span>
-                    ))}
+                    {tags.map((tag) => {
+                        const meta = CARD_TAG_LABELS[tag];
+                        return (
+                            <span key={`tag-${tag}`} className="card-tag-chip">
+                                {meta.symbol} {meta.label}
+                            </span>
+                        );
+                    })}
                 </div>
             )}
         </>

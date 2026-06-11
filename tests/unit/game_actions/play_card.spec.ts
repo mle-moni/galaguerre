@@ -1,26 +1,27 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import testUtils from "@adonisjs/core/services/test_utils";
 import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
+    createBoostSnapshot,
     createCardActionSnapshot,
+    createComparisonSnapshot,
     createGameData,
+    createHeroTargetSnapshot,
     createMinionCard,
     createMinionState,
     createMinionTargetSnapshot,
     createSpellCard,
-    createHeroTargetSnapshot,
     createWeaponCard,
     createWeaponState,
+    MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertPlayCardScenario, runPlayCard } from "#tests/helpers/game/run_play_card";
-import { runInvalidPlayCardPayload } from "#tests/helpers/game/run_socket_event";
+import { runPlayCardInMemory } from "#tests/helpers/game/run_play_card_in_memory";
+import { runPlayMinion, runPlaySpell, runPlayWeapon } from "#tests/helpers/game/run_play_minion";
+import { assertError } from "#tests/helpers/game/socket_event_collector";
 
-test.group("game:play_card", (group) => {
-    group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
-
+test.group("play card rules", () => {
     test("plays a valid minion card from hand", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
@@ -29,290 +30,62 @@ test.group("game:play_card", (group) => {
             health: 3,
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = await runPlayMinion(
+            createGameData({
                 currentRound: 4,
                 playerOne: {
                     mana: 5,
                     hand: [handCard],
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            handCard,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.mana, 2);
-        assert.equal(result.game.data.playerOne.hand.length, 0);
-        assertBoardSpot(assert, result.game, "playerOne", "SPOT_1", {
-            health: 3,
-            attack: 2,
-        });
-        const placed = result.game.data.playerOne.board.SPOT_1;
-        assert.isNotNull(placed);
-        assert.equal(placed!.placedAtRound, 4);
+        assert.equal(game.data.playerOne.mana, 2);
+        assert.equal(game.data.playerOne.hand.length, 0);
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2, health: 3 });
     });
 
     test("sets placedAtRound to current round for summoning sickness", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
-            cost: 1,
+            cost: 2,
+            attack: 1,
+            health: 2,
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
-                currentRound: 7,
+        const { game } = await runPlayMinion(
+            createGameData({
+                currentRound: 5,
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_3",
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            handCard,
+        );
 
-        const placed = result.game.data.playerOne.board.SPOT_3;
-        assert.isNotNull(placed);
-        assert.equal(placed!.placedAtRound, 7);
-    });
-
-    test("rejects play when mana is insufficient", async ({ assert }) => {
-        const handCard = createMinionCard({
-            uuid: CARD_IDS.handMinion,
-            cost: 5,
-        });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 2,
-                    hand: [handCard],
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
-                owner: "PLAYER",
-            },
-            expect: {
-                error: "Vous n'avez pas assez de mana pour jouer cette carte",
-            },
-        });
-
-        assertPlayCardScenario(assert, result, {
-            error: "Vous n'avez pas assez de mana pour jouer cette carte",
-        });
-        assert.equal(result.game.data.playerOne.hand.length, 1);
-    });
-
-    test("rejects play when card is not in hand", async ({ assert }) => {
-        const result = await runPlayCard({
-            data: createGameData(),
-            actor: "playerOne",
-            action: {
-                cardId: "missing-card",
-                spotId: "SPOT_1",
-                owner: "PLAYER",
-            },
-            expect: {
-                error: "Cette carte n'est pas dans votre main (gros con)",
-            },
-        });
-
-        assertPlayCardScenario(assert, result, {
-            error: "Cette carte n'est pas dans votre main (gros con)",
-        });
-    });
-
-    test("rejects play on an occupied spot", async ({ assert }) => {
-        const handCard = createMinionCard({
-            uuid: CARD_IDS.handMinion,
-            cost: 1,
-        });
-        const existing = createMinionCard({ uuid: "existing-minion" });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [handCard],
-                    board: placeMinion(
-                        createGameData().playerOne.board,
-                        "SPOT_1",
-                        createMinionState(existing),
-                    ),
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
-                owner: "PLAYER",
-            },
-            expect: {
-                error: "Vous ne pouvez pas jouer cette carte ici",
-            },
-        });
-
-        assertPlayCardScenario(assert, result, {
-            error: "Vous ne pouvez pas jouer cette carte ici",
-        });
-    });
-
-    test("rejects play with owner OPPONENT", async ({ assert }) => {
-        const handCard = createMinionCard({
-            uuid: CARD_IDS.handMinion,
-            cost: 1,
-        });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [handCard],
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
-                owner: "OPPONENT",
-            },
-            expect: {
-                error: "Vous ne pouvez pas jouer cette carte ici",
-            },
-        });
-
-        assertPlayCardScenario(assert, result, {
-            error: "Vous ne pouvez pas jouer cette carte ici",
-        });
-    });
-
-    test("plays a valid spell card from hand", async ({ assert }) => {
-        const spell = createSpellCard({ cost: 2 });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [spell],
-                },
-                playerTwo: {
-                    health: DEFAULT_HERO_HEALTH,
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
-
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.mana, 8);
-        assert.equal(result.game.data.playerOne.hand.length, 0);
-        assert.equal(result.game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 3);
-    });
-
-    test("rejects spell play when mana is insufficient", async ({ assert }) => {
-        const spell = createSpellCard({ cost: 5 });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 2,
-                    hand: [spell],
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: {
-                error: "Vous n'avez pas assez de mana pour jouer cette carte",
-            },
-        });
-
-        assertPlayCardScenario(assert, result, {
-            error: "Vous n'avez pas assez de mana pour jouer cette carte",
-        });
-        assert.equal(result.game.data.playerOne.hand.length, 1);
-    });
-
-    test("rejects targeted spell without action target", async ({ assert }) => {
-        const spell = createSpellCard({
-            cost: 3,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: true,
-                damage: 4,
-                target: createMinionTargetSnapshot("OPPONENT"),
-            }),
-        });
-
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [spell],
-                },
-            }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.spell,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: {
-                error: "Vous devez choisir une cible pour cette carte",
-            },
-        });
-
-        assertPlayCardScenario(assert, result, {
-            error: "Vous devez choisir une cible pour cette carte",
-        });
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { placedAtRound: 5 });
     });
 
     test("equips a weapon from hand", async ({ assert }) => {
         const weapon = createWeaponCard({ cost: 2, damage: 3, durability: 2 });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = await runPlayWeapon(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [weapon],
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.weapon,
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            weapon,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.mana, 8);
-        assert.equal(result.game.data.playerOne.hand.length, 0);
-        assert.isNotNull(result.game.data.playerOne.weaponState);
-        assert.equal(result.game.data.playerOne.weaponState!.damage, 3);
-        assert.equal(result.game.data.playerOne.weaponState!.durability, 2);
+        assert.equal(game.data.playerOne.mana, 8);
+        assert.equal(game.data.playerOne.hand.length, 0);
+        assert.isNotNull(game.data.playerOne.weaponState);
+        assert.equal(game.data.playerOne.weaponState!.damage, 3);
+        assert.equal(game.data.playerOne.weaponState!.durability, 2);
     });
 
     test("replaces equipped weapon when playing a new one", async ({ assert }) => {
@@ -329,32 +102,19 @@ test.group("game:play_card", (group) => {
             durability: 3,
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = await runPlayWeapon(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [newWeapon],
-                    weaponState: {
-                        uuid: oldWeapon.uuid,
-                        weaponId: oldWeapon.cardId,
-                        damage: oldWeapon.damage,
-                        durability: oldWeapon.durability,
-                        originalCard: oldWeapon,
-                    },
+                    weaponState: createWeaponState(oldWeapon),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: "card-new-weapon",
-                spotId: null,
-                owner: "PLAYER",
-            },
-            expect: { error: null },
-        });
+            newWeapon,
+        );
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assert.equal(result.game.data.playerOne.weaponState!.damage, 4);
-        assert.equal(result.game.data.playerOne.weaponState!.durability, 3);
+        assert.equal(game.data.playerOne.weaponState!.damage, 4);
+        assert.equal(game.data.playerOne.weaponState!.durability, 3);
     });
 
     test("triggers old weapon deathrattle when playing a new one", async ({ assert }) => {
@@ -378,26 +138,183 @@ test.group("game:play_card", (group) => {
             durability: 3,
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        const { game } = await runPlayWeapon(
+            createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [newWeapon],
                     weaponState: createWeaponState(oldWeapon),
                 },
             }),
-            actor: "playerOne",
-            action: {
-                cardId: newWeapon.uuid,
+            newWeapon,
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+        assert.equal(game.data.playerOne.weaponState!.damage, 4);
+    });
+
+    test("plays a valid spell card from hand", async ({ assert }) => {
+        const spell = createSpellCard({ cost: 2 });
+
+        const { game } = await runPlaySpell(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    health: DEFAULT_HERO_HEALTH,
+                },
+            }),
+            spell,
+        );
+
+        assert.equal(game.data.playerOne.mana, 8);
+        assert.equal(game.data.playerOne.hand.length, 0);
+        assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 3);
+    });
+
+    test("rejects play when mana is insufficient", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 5,
+        });
+
+        const { game, errors } = await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 2,
+                    hand: [handCard],
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+        );
+
+        assertError(assert, "Vous n'avez pas assez de mana pour jouer cette carte");
+        assert.equal(game.data.playerOne.hand.length, 1);
+        assert.equal(errors.length, 1);
+    });
+
+    test("rejects play when card is not in hand", async ({ assert }) => {
+        const { errors } = await runPlayCardInMemory(createGameData(), "playerOne", {
+            cardId: "missing-card",
+            spotId: "SPOT_1",
+            owner: "PLAYER",
+        });
+
+        assert.equal(errors.length, 1);
+        assert.equal(errors[0], "Cette carte n'est pas dans votre main (gros con)");
+    });
+
+    test("rejects play on an occupied spot", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 1,
+        });
+        const existing = createMinionCard({ uuid: "existing-minion" });
+
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(existing),
+                    ),
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+        );
+
+        assertError(assert, "Vous ne pouvez pas jouer cette carte ici");
+    });
+
+    test("rejects play with owner OPPONENT", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 1,
+        });
+
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "OPPONENT",
+            },
+        );
+
+        assertError(assert, "Vous ne pouvez pas jouer cette carte ici");
+    });
+
+    test("rejects spell play when mana is insufficient", async ({ assert }) => {
+        const spell = createSpellCard({ cost: 5 });
+
+        const { game, errors } = await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 2,
+                    hand: [spell],
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.spell,
                 spotId: null,
                 owner: "PLAYER",
             },
-            expect: { error: null },
+        );
+
+        assertError(assert, "Vous n'avez pas assez de mana pour jouer cette carte");
+        assert.equal(game.data.playerOne.hand.length, 1);
+        assert.equal(errors.length, 1);
+    });
+
+    test("rejects targeted spell without action target", async ({ assert }) => {
+        const spell = createSpellCard({
+            cost: 3,
+            action: createCardActionSnapshot({
+                type: "DAMAGE",
+                isTargeted: true,
+                damage: 4,
+                target: createMinionTargetSnapshot("OPPONENT"),
+            }),
         });
 
-        assertPlayCardScenario(assert, result, { error: null });
-        assertPlayerHealth(assert, result.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
-        assert.equal(result.game.data.playerOne.weaponState!.damage, 4);
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.spell,
+                spotId: null,
+                owner: "PLAYER",
+            },
+        );
+
+        assertError(assert, "Vous devez choisir une cible pour cette carte");
     });
 
     test("rejects play when it is not the player turn", async ({ assert }) => {
@@ -406,84 +323,176 @@ test.group("game:play_card", (group) => {
             cost: 1,
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
+        await runPlayCardInMemory(
+            createGameData({
                 state: "PLAYER_ONE_TURN",
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
                 },
             }),
-            actor: "playerTwo",
-            action: {
+            "playerTwo",
+            {
                 cardId: CARD_IDS.handMinion,
                 spotId: "SPOT_1",
                 owner: "PLAYER",
             },
-            expect: {
-                error: "Ce n'est pas votre tour (gros con)",
-            },
-        });
+        );
 
-        assertPlayCardScenario(assert, result, {
-            error: "Ce n'est pas votre tour (gros con)",
-        });
+        assertError(assert, "Ce n'est pas votre tour (gros con)");
     });
 
-    test("rejects play when user has no active game", async ({ assert }) => {
-        const result = await runPlayCard({
-            data: createGameData(),
-            actor: "playerOne",
-            action: {
-                cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
-                owner: "PLAYER",
-            },
-            expect: { error: "Vous n'êtes pas en jeu" },
-            options: { outsider: true },
-        });
-
-        assertPlayCardScenario(assert, result, { error: "Vous n'êtes pas en jeu" });
-    });
-
-    test("rejects play when socket is not authenticated", async ({ assert }) => {
+    test("rejects targeted battlecry without actionTarget", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
-            cost: 1,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 5,
+                    isTargeted: true,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
         });
 
-        const result = await runPlayCard({
-            data: createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [handCard],
-                },
+        const { game } = await runPlayCardInMemory(
+            createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
-            actor: "playerOne",
-            action: {
+            "playerOne",
+            {
                 cardId: CARD_IDS.handMinion,
                 spotId: "SPOT_1",
                 owner: "PLAYER",
             },
-            expect: {
-                error: "Une erreur est survenue, essayez de rafraichir la page",
-            },
-            options: { authenticated: false },
-        });
+        );
 
-        assertPlayCardScenario(assert, result, {
-            error: "Une erreur est survenue, essayez de rafraichir la page",
-        });
+        assertError(assert, "Vous devez choisir une cible pour cette carte");
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
-    test("rejects invalid play card payload", async ({ assert }) => {
-        const errors = await runInvalidPlayCardPayload({
-            cardId: "card-1",
-            spotId: "BAD_SPOT",
-            owner: "PLAYER",
+    test("rejects invalid targeted minion battlecry", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 1,
+        });
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 3,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            attackComparison: ">",
+                            attack: 2,
+                        }),
+                    }),
+                }),
+            ],
         });
 
-        assert.equal(errors.length, 1);
-        assert.equal(errors[0], "Invalid data sent for event 'game:play_card' :/");
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_2",
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+        );
+
+        assertError(assert, "Cible invalide pour cette carte");
+    });
+
+    test("rejects targeted minion when current attack fails comparison", async ({ assert }) => {
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            health: 4,
+            attack: 3,
+        });
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        comparison: createComparisonSnapshot({
+                            attackComparison: ">",
+                            attack: 2,
+                        }),
+                    }),
+                }),
+            ],
+        });
+
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_2",
+                        createMinionState(targetCard, { attack: 1 }),
+                    ),
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+            },
+        );
+
+        assertError(assert, "Cible invalide pour cette carte");
+    });
+
+    test("rejects targeted BOOST battlecry without actionTarget", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "BOOST",
+                    isTargeted: true,
+                    boost: createBoostSnapshot({ attack: 2, health: 2 }),
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: { mana: 10, hand: [handCard] },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                spotId: "SPOT_1",
+                owner: "PLAYER",
+            },
+        );
+
+        assertError(assert, "Vous devez choisir une cible pour cette carte");
     });
 });
