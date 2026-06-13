@@ -161,6 +161,45 @@ test.group("passive ACTION triggers", () => {
         assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 2 });
     });
 
+    test("TURN_END passive with onlySelf boosts only the source minion", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "passive-minion",
+            attack: 1,
+            health: 1,
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "TURN_END",
+                    action: createCardActionSnapshot({
+                        type: "BOOST",
+                        boost: { attack: 1, health: 1, spellPower: null, minionPowers: null },
+                        target: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
+                    }),
+                }),
+            ],
+        });
+        const allyMinion = createMinionCard({ uuid: "ally-minion", attack: 2, health: 2 });
+
+        const data = createGameData({
+            state: "PLAYER_ONE_TURN",
+            currentRound: 1,
+            playerOne: {
+                board: placeMinion(
+                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                    "SPOT_2",
+                    createMinionState(allyMinion),
+                ),
+            },
+        });
+
+        const game = createGame(data);
+        const { gameEnded } = triggerPassives(game, "TURN_END", game.data.playerOne);
+
+        assert.isFalse(gameEnded);
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2, health: 2 });
+        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 2, health: 2 });
+    });
+
     test("TURN_END passive without excludeSelf damages all allied minions", ({ assert }) => {
         const passiveMinion = createMinionCard({
             uuid: "passive-minion",

@@ -42,6 +42,11 @@ export const shouldExcludeSourceMinion = (
     sourceMinion: MinionState | undefined,
     candidateMinion: MinionState,
 ): boolean => {
+    if (target.onlySelf) {
+        if (!sourceMinion) return true;
+        return sourceMinion.uuid !== candidateMinion.uuid;
+    }
+
     if (!sourceMinion || !target.excludeSelf) return false;
     return sourceMinion.uuid === candidateMinion.uuid;
 };

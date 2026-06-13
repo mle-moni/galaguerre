@@ -50,7 +50,10 @@ const formatSingleCharacterTeamLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL
 const formatAllTeamLabel = (
     targetTeam: "PLAYER" | "OPPONENT" | "ALL",
     excludeSelf = false,
+    onlySelf = false,
 ): string => {
+    if (onlySelf) return "lui-même";
+
     if (targetTeam === "ALL") {
         return excludeSelf ? "tous les autres personnages" : "tous les personnages";
     }
@@ -112,7 +115,10 @@ const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
 const formatMassMinionTeamLabel = (
     targetTeam: "PLAYER" | "OPPONENT" | "ALL",
     excludeSelf = false,
+    onlySelf = false,
 ): string => {
+    if (onlySelf) return "lui-même";
+
     if (targetTeam === "ALL") {
         return excludeSelf ? "tous les autres serviteurs" : "tous les serviteurs";
     }
@@ -246,11 +252,11 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -287,11 +293,11 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -341,11 +347,11 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "HERO") {
@@ -370,11 +376,11 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Réduit au silence ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Réduit au silence ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Réduit au silence ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Réduit au silence ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
             return `${prefix} : Réduit au silence un serviteur.`;

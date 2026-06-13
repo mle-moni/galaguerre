@@ -191,6 +191,7 @@ Table Target [headercolor: #d35400] {
     comparisonId number 
     tagId number 
     excludeSelf boolean [not null, default: false]
+    onlySelf boolean [not null, default: false]
     createdAt DateTime [not null]
     updatedAt DateTime [not null]
 }

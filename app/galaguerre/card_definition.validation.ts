@@ -24,6 +24,7 @@ export type TargetDefinition = {
     comparison: ComparisonDefinition | null;
     tag: CardTag | null;
     excludeSelf: boolean;
+    onlySelf: boolean;
     maxTargets: number | null;
     targetSelectionMode: "RANDOM" | null;
 };
@@ -114,6 +115,47 @@ const validateTargetExcludeSelf = (
     }
 };
 
+const validateTargetOnlySelf = (
+    target: TargetDefinition,
+    isTargeted: boolean,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (!target.onlySelf) return;
+
+    if (target.excludeSelf) {
+        ctx.addIssue({
+            code: "custom",
+            message: "onlySelf and excludeSelf are mutually exclusive",
+            path: [...path, "onlySelf"],
+        });
+    }
+
+    if (target.type !== "MINION" && target.type !== "ALL") {
+        ctx.addIssue({
+            code: "custom",
+            message: "onlySelf is only supported for MINION targets",
+            path: [...path, "onlySelf"],
+        });
+    }
+
+    if (isTargeted) {
+        ctx.addIssue({
+            code: "custom",
+            message: "onlySelf is incompatible with isTargeted actions",
+            path: [...path, "onlySelf"],
+        });
+    }
+
+    if (target.maxTargets !== null || target.targetSelectionMode !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "onlySelf is incompatible with targetSelectionMode",
+            path: [...path, "onlySelf"],
+        });
+    }
+};
+
 const validateTargetSelection = (
     target: TargetDefinition,
     isTargeted: boolean,
@@ -169,6 +211,7 @@ const validateTargetFilters = (
     path: (string | number)[],
 ) => {
     validateTargetExcludeSelf(target, ctx, path);
+    validateTargetOnlySelf(target, isTargeted, ctx, path);
     validateTargetSelection(target, isTargeted, ctx, path);
 
     if (target.comparison !== null || target.tag !== null) {

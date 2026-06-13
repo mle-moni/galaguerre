@@ -47,6 +47,7 @@ test.group("generatePlayerCards", () => {
             comparison: null,
             tag: null,
             excludeSelf: false,
+            onlySelf: false,
             maxTargets: null,
             targetSelectionMode: null,
         });
@@ -89,6 +90,7 @@ test.group("generatePlayerCards", () => {
             },
             tag: null,
             excludeSelf: false,
+            onlySelf: false,
             maxTargets: null,
             targetSelectionMode: null,
         });

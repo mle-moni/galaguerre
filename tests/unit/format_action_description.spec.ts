@@ -146,4 +146,18 @@ test.group("format_action_description", () => {
             "Effet : Rend 2 PV aux serviteurs adverses.",
         );
     });
+
+    test("formats onlySelf boost as lui-même", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "BOOST",
+            isTargeted: false,
+            boost: { attack: 1, health: 1, spellPower: null, minionPowers: null },
+            target: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Passif (fin de tour)"),
+            "Passif (fin de tour) : Donne +1/+1 à lui-même.",
+        );
+    });
 });

@@ -277,7 +277,6 @@ export const applyExistingAurasToMinion = (
             ) {
                 continue;
             }
-            if (sourceMinion.uuid === targetMinion.uuid) continue;
 
             const sourceCard = sourceMinion.originalCard as MinionCard;
             for (const passiveBoost of collectBoostPassives(sourceCard)) {

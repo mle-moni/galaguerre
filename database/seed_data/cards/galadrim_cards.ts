@@ -8,6 +8,7 @@ import {
     boostAction,
     boostAttack,
     boostAttackWithCharge,
+    boostAttackWithStealth,
     boostBoth,
     boostBothWithTaunt,
     boostCharge,
@@ -27,6 +28,7 @@ import {
     otherAllyMinions,
     otherAllyMinionsWithTag,
     randomEnemyTargets,
+    selfMinion,
     silenceAction,
     spellDrawFilter,
     targetedAllyMinion,
@@ -50,6 +52,15 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             tags: ["DEVELOPPEUR"],
             battlecryActions: [drawAction(1, spellDrawFilter())],
+        },
+    ),
+    defineMinion(
+        113,
+        { ...gal("Stagiaire Planqué", 1), attack: 2, health: 1 },
+        {
+            minionPowers: {
+                hasStealth: true,
+            },
         },
     ),
     defineMinion(
@@ -349,6 +360,16 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             },
         },
     ),
+    defineMinion(
+        114,
+        { ...gal("Télétravailleur Injoignable", 3), attack: 1, health: 1 },
+        {
+            minionPowers: {
+                hasStealth: true,
+            },
+            passives: [actionPassive("TURN_END", boostAction(boostBoth(1, 1), selfMinion()))],
+        },
+    ),
 
     // --- spells ---
     defineSpell(96, gal("Pause Café", 2), [boostAction(boostBoth(1, 1), allyMinions())]),
@@ -371,6 +392,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ]),
     defineSpell(110, gal("Casque à Réduction de Bruit", 1), [
         boostAction(boostDivineShield(), targetedAllyMinion(), true),
+    ]),
+    defineSpell(112, gal("Navigation Privée", 1), [
+        boostAction(boostAttackWithStealth(1), targetedAnyMinion(), true),
     ]),
 
     // --- weapons ---

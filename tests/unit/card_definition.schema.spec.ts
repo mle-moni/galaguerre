@@ -6,6 +6,7 @@ import {
 } from "#galaguerre/card_definition.schema";
 import {
     boostAction,
+    boostBoth,
     damageAction,
     defaultMinionData,
     defaultSpellData,
@@ -13,7 +14,9 @@ import {
     drawAction,
     enemyHero,
     enemyMinions,
+    selfMinion,
     silenceAction,
+    actionPassive,
     targetedEnemyMinion,
 } from "../../database/seed_data/cards/define_card.js";
 
@@ -183,5 +186,34 @@ test.group("card_definition.schema", () => {
         });
 
         assert.isFalse(result.success);
+    });
+
+    test("rejects target with onlySelf and excludeSelf together", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultMinionData(),
+            battlecryActions: [
+                damageAction(1, {
+                    type: "MINION",
+                    targetTeam: "PLAYER",
+                    comparison: null,
+                    tag: null,
+                    excludeSelf: true,
+                    onlySelf: true,
+                    maxTargets: null,
+                    targetSelectionMode: null,
+                }),
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("accepts onlySelf target on passive action", ({ assert }) => {
+        const data = parseMinionData({
+            ...defaultMinionData(),
+            passives: [actionPassive("TURN_END", boostAction(boostBoth(1, 1), selfMinion()))],
+        });
+
+        assert.equal(data.passives[0]!.action?.target?.onlySelf, true);
     });
 });

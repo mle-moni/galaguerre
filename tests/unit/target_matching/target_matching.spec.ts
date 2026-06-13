@@ -153,6 +153,16 @@ test.group("target_matching", () => {
         );
     });
 
+    test("shouldExcludeSourceMinion with onlySelf keeps only the source minion", ({ assert }) => {
+        const source = createMinionState(createMinionCard({ uuid: "passive-source" }));
+        const ally = createMinionState(createMinionCard({ uuid: "ally" }));
+        const target = createMinionTargetSnapshot("PLAYER", { onlySelf: true });
+
+        assert.isFalse(shouldExcludeSourceMinion(target, source, source));
+        assert.isTrue(shouldExcludeSourceMinion(target, source, ally));
+        assert.isTrue(shouldExcludeSourceMinion(target, undefined, source));
+    });
+
     test("selectedTargetMatchesAction rejects opponent minion with stealth", ({ assert }) => {
         const stealthCard = createMinionCard({
             uuid: "stealth-minion",

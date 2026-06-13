@@ -205,6 +205,36 @@ test.group("weapon combat", () => {
         assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
     });
 
+    test("allows hero attack when only taunt minion has stealth", async ({ assert }) => {
+        const weaponCard = createWeaponCard({ damage: 3, durability: 2 });
+        const stealthTauntCard = createMinionCard({
+            uuid: "stealth-taunt",
+            attack: 1,
+            health: 3,
+            minionPowers: { hasTaunt: true, hasStealth: true },
+            effects: ["Provocation", "Discrétion"],
+        });
+
+        const { game } = await runWeaponActionInMemory(
+            createGameData({
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(stealthTauntCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { spotId: null, owner: "OPPONENT" },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
+    });
+
     test("rejects weapon action when no weapon equipped", async ({ assert }) => {
         await runWeaponActionInMemory(createGameData(), "playerOne", {
             spotId: null,

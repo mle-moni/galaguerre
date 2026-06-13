@@ -36,6 +36,7 @@ export const targetSchema = z.object({
     comparison: comparisonSchema.nullable(),
     tag: cardTagSchema.nullable(),
     excludeSelf: z.boolean(),
+    onlySelf: z.boolean().default(false),
     maxTargets: z.number().nullable(),
     targetSelectionMode: z.enum(GALAGUERRE_TARGET_SELECTION_MODES).nullable(),
 });

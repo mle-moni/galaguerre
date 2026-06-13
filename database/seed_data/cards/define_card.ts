@@ -116,6 +116,7 @@ const baseTarget = (overrides: Partial<TargetDefinition>): TargetDefinition => (
     comparison: null,
     tag: null,
     excludeSelf: false,
+    onlySelf: false,
     maxTargets: null,
     targetSelectionMode: null,
     ...overrides,
@@ -141,6 +142,9 @@ export const allEnemies = (): TargetDefinition =>
 
 export const otherAllyMinions = (): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "PLAYER", excludeSelf: true });
+
+export const selfMinion = (): TargetDefinition =>
+    baseTarget({ type: "MINION", targetTeam: "PLAYER", onlySelf: true });
 
 export const otherAllyMinionsWithTag = (tag: CardTag): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "PLAYER", tag, excludeSelf: true });
@@ -297,6 +301,12 @@ export const boostAttackWithCharge = (attack: number): BoostDefinition =>
             hasStealth: false,
             hasDivineShield: false,
         },
+    });
+
+export const boostAttackWithStealth = (attack: number): BoostDefinition =>
+    boostStats({
+        attack,
+        minionPowers: { hasStealth: true },
     });
 
 export const boostDivineShield = (): BoostDefinition =>
