@@ -291,12 +291,14 @@ test.group("play card rules", () => {
     test("rejects targeted spell without action target", async ({ assert }) => {
         const spell = createSpellCard({
             cost: 3,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: true,
-                damage: 4,
-                target: createMinionTargetSnapshot("OPPONENT"),
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: true,
+                    damage: 4,
+                    target: createMinionTargetSnapshot("OPPONENT"),
+                }),
+            ],
         });
 
         await runPlayCardInMemory(

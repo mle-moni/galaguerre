@@ -22,6 +22,19 @@ const getOpponent = (game: PlayCardOptions["game"], player: PlayCardOptions["pla
     return player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
 };
 
+const validateActionTargetForCard = (
+    card: SpellCard,
+    actionTarget: ActionTarget,
+    player: PlayCardOptions["player"],
+    opponent: PlayCardOptions["player"],
+): boolean => {
+    const targetedActions = card.spellActions.filter((action) => action.isTargeted);
+
+    return targetedActions.every((action) =>
+        validateSelectedTargetForAction(actionTarget, action, player, opponent),
+    );
+};
+
 export const playSpell = async ({
     card,
     player,
@@ -61,10 +74,7 @@ export const playSpell = async ({
         return;
     }
 
-    if (
-        actionTarget &&
-        !validateSelectedTargetForAction(actionTarget, card.action, player, opponent)
-    ) {
+    if (actionTarget && !validateActionTargetForCard(card, actionTarget, player, opponent)) {
         emitSocketEvent("notify_error", { error: "Cible invalide pour cette carte" }, socketId);
         return;
     }

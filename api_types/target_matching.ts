@@ -66,7 +66,7 @@ export const minionMatchesTarget = (
 };
 
 export const actionRequiresTarget = (card: MinionCard | SpellCard): boolean => {
-    if (card.type === "SPELL") return card.action.isTargeted;
+    if (card.type === "SPELL") return card.spellActions.some((action) => action.isTargeted);
     return card.battlecryActions?.some((action) => action.isTargeted) ?? false;
 };
 

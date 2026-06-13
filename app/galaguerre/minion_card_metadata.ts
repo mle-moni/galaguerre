@@ -44,6 +44,14 @@ export const getDeathrattleDescription = (actions: CardActionSnapshot[]): string
         .filter((description): description is string => description !== null);
 };
 
+export const getSpellEffectDescription = (actions: CardActionSnapshot[]): string[] => {
+    return actions
+        .map((action) => formatActionDescription(action, "Effet"))
+        .filter((description): description is string => description !== null);
+};
+
+export const getSpellCardDescription = (effectLines: string[]): string => effectLines.join("\n");
+
 export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => {
     return passives
         .map((passive) => {

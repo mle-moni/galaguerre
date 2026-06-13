@@ -46,7 +46,7 @@ export type CardFilterDefinition = {
 };
 
 export type CardActionDefinition = {
-    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST";
+    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "SILENCE";
     isTargeted: boolean;
     damage: number | null;
     heal: number | null;
@@ -65,7 +65,7 @@ export type PassiveDefinition = {
     passiveBoost: { boost: BoostDefinition; target: TargetDefinition | null } | null;
 };
 
-const TARGETED_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST"] as const;
+const TARGETED_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST", "SILENCE"] as const;
 
 const validateComparisonSnapshot = (
     comparison: ComparisonDefinition,
@@ -205,6 +205,62 @@ const validateBoostContent = (
     }
 };
 
+const validateSilenceTarget = (
+    target: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.type !== "MINION" && target.type !== "ALL") {
+        ctx.addIssue({
+            code: "custom",
+            message: "SILENCE target must be MINION or ALL",
+            path: [...path, "type"],
+        });
+    }
+};
+
+const validateSilencePayload = (
+    action: CardActionDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.damage !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SILENCE action must not set damage",
+            path: [...path, "damage"],
+        });
+    }
+    if (action.heal !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SILENCE action must not set heal",
+            path: [...path, "heal"],
+        });
+    }
+    if (action.drawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SILENCE action must not set drawCount",
+            path: [...path, "drawCount"],
+        });
+    }
+    if (action.enemyDrawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SILENCE action must not set enemyDrawCount",
+            path: [...path, "enemyDrawCount"],
+        });
+    }
+    if (action.boost !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SILENCE action must not set boost",
+            path: [...path, "boost"],
+        });
+    }
+};
+
 const validateBoostTargetCompatibility = (
     target: TargetDefinition,
     boost: BoostDefinition,
@@ -290,6 +346,10 @@ const validateTargetedAction = (
             }
             validateBoostContent(action.boost, ctx, [...path, "boost"]);
             validateBoostTargetCompatibility(action.target, action.boost, ctx, path);
+            break;
+        case "SILENCE":
+            validateSilencePayload(action, ctx, path);
+            validateSilenceTarget(action.target, ctx, [...path, "target"]);
             break;
     }
 };
@@ -400,6 +460,20 @@ const validateNonTargetedAction = (
                 return;
             }
             validateBoostTargetCompatibility(action.target, action.boost, ctx, path);
+            validateTargetFilters(action.target, false, ctx, [...path, "target"]);
+            break;
+        }
+        case "SILENCE": {
+            validateSilencePayload(action, ctx, path);
+            if (!action.target) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "SILENCE action requires a MINION or ALL target",
+                    path: [...path, "target"],
+                });
+                return;
+            }
+            validateSilenceTarget(action.target, ctx, [...path, "target"]);
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
             break;
         }

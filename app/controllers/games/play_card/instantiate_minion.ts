@@ -24,5 +24,6 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
         originalCard: {
             ...card,
         },
+        isSilenced: false,
     };
 };

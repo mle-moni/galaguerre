@@ -81,7 +81,7 @@ export const defaultSpellData = (): SpellCardData => ({
     name: "Test Card",
     cost: 1,
     imageUrl: "https://example.com/card.png",
-    action: damageAction(1, enemyHero()),
+    spellActions: [damageAction(1, enemyHero())],
 });
 
 export const defaultWeaponData = (): WeaponCardData => ({
@@ -231,6 +231,9 @@ export const boostAction = (
     isTargeted = false,
 ): CardActionDefinition => baseAction({ type: "BOOST", boost, target, isTargeted });
 
+export const silenceAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
+    baseAction({ type: "SILENCE", target, isTargeted });
+
 export const boostStats = (overrides: Partial<BoostDefinition> = {}): BoostDefinition => ({
     attack: null,
     health: null,
@@ -351,7 +354,7 @@ export const defineMinion = (
 export const defineSpell = (
     cardId: number,
     base: CardSeedBase,
-    action: CardActionDefinition,
+    spellActions: CardActionDefinition[],
     tags: CardTag[] = [],
 ): CardSeedEntry => {
     const data = parseSpellData({
@@ -361,7 +364,7 @@ export const defineSpell = (
         name: base.label,
         cost: base.cost,
         imageUrl: base.imageUrl,
-        action,
+        spellActions,
     });
 
     return {

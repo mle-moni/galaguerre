@@ -42,7 +42,7 @@ export type ApiCatalogMinionCard = ApiCatalogCardBase & {
 
 export type ApiCatalogSpellCard = ApiCatalogCardBase & {
     type: "SPELL";
-    action: CardActionSnapshot;
+    spellActions: CardActionSnapshot[];
 };
 
 export type ApiCatalogWeaponCard = ApiCatalogCardBase & {

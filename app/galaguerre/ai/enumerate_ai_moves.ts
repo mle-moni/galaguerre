@@ -69,7 +69,7 @@ const enumerateHeroAndMinionTargets = (
 
 const getTargetedActionsForCard = (card: MinionCard | SpellCard): CardActionSnapshot[] => {
     if (card.type === "SPELL") {
-        return card.action.isTargeted ? [card.action] : [];
+        return card.spellActions.filter((action) => action.isTargeted);
     }
 
     return (card.battlecryActions ?? []).filter((action) => action.isTargeted);

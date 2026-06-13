@@ -1,11 +1,12 @@
 import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
-import { formatActionDescription } from "../../galaguerre/action_engine/format_action_description.js";
 import {
     getBattlecryDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
     getPassiveDescription,
+    getSpellCardDescription,
+    getSpellEffectDescription,
     getWeaponCardDescription,
 } from "../../galaguerre/minion_card_metadata.js";
 import type Deck from "#models/deck";
@@ -46,13 +47,16 @@ export const generatePlayerCards = (source: CardSource) => {
                     ),
                 };
             }
-            case "SPELL":
+            case "SPELL": {
+                const effectLines = getSpellEffectDescription(card.data.spellActions);
+
                 return {
                     ...base,
                     type: "SPELL",
-                    description: formatActionDescription(card.data.action, "Effet") ?? card.data.name,
-                    action: card.data.action,
+                    description: getSpellCardDescription(effectLines) || card.data.name,
+                    spellActions: card.data.spellActions,
                 };
+            }
             case "MINION": {
                 const effects = getMinionPowerEffects(card.data);
                 const battlecryLines = getBattlecryDescription(card.data.battlecryActions);

@@ -88,11 +88,13 @@ test.group("player stats", (group) => {
         const spell = createSpellCard({
             uuid: CARD_IDS.spell,
             cost: 2,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                damage: 5,
-                target: createHeroTargetSnapshot("OPPONENT"),
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 5,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
         });
 
         const result = await runPlayCard({
@@ -116,11 +118,13 @@ test.group("player stats", (group) => {
         const spell = createSpellCard({
             uuid: CARD_IDS.spell,
             cost: 2,
-            action: createCardActionSnapshot({
-                type: "HEAL",
-                heal: 4,
-                target: createHeroTargetSnapshot("PLAYER"),
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "HEAL",
+                    heal: 4,
+                    target: createHeroTargetSnapshot("PLAYER"),
+                }),
+            ],
         });
 
         const result = await runPlayCard({

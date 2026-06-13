@@ -13,6 +13,8 @@ import {
     drawAction,
     enemyHero,
     enemyMinions,
+    silenceAction,
+    targetedEnemyMinion,
 } from "../../database/seed_data/cards/define_card.js";
 
 test.group("card_definition.schema", () => {
@@ -87,7 +89,7 @@ test.group("card_definition.schema", () => {
     test("rejects DRAW with invalid drawCount", ({ assert }) => {
         const data = {
             ...defaultSpellData(),
-            action: drawAction(0),
+            spellActions: [drawAction(0)],
         };
 
         const result = safeParseCardData(data);
@@ -121,9 +123,65 @@ test.group("card_definition.schema", () => {
     test("accepts valid spell", ({ assert }) => {
         const data = parseSpellData({
             ...defaultSpellData(),
-            action: damageAction(4, enemyHero()),
+            spellActions: [damageAction(4, enemyHero())],
         });
 
-        assert.equal(data.action.damage, 4);
+        assert.equal(data.spellActions[0]!.damage, 4);
+    });
+
+    test("accepts spell with multiple actions", ({ assert }) => {
+        const data = parseSpellData({
+            ...defaultSpellData(),
+            spellActions: [
+                silenceAction(targetedEnemyMinion(), true),
+                damageAction(1, targetedEnemyMinion(), true),
+            ],
+        });
+
+        assert.equal(data.spellActions.length, 2);
+        assert.equal(data.spellActions[0]!.type, "SILENCE");
+        assert.equal(data.spellActions[1]!.type, "DAMAGE");
+    });
+
+    test("rejects spell with empty spellActions", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("accepts valid SILENCE action targeting minion", ({ assert }) => {
+        const data = parseMinionData({
+            ...defaultMinionData(),
+            battlecryActions: [silenceAction(targetedEnemyMinion(), true)],
+        });
+
+        assert.equal(data.battlecryActions[0]!.type, "SILENCE");
+        assert.isTrue(data.battlecryActions[0]!.isTargeted);
+    });
+
+    test("rejects SILENCE targeting HERO", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [silenceAction(enemyHero())],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("rejects SILENCE with boost payload", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultMinionData(),
+            battlecryActions: [
+                {
+                    ...silenceAction(enemyMinions()),
+                    boost: { attack: 1, health: null, spellPower: null, minionPower: null },
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
     });
 });

@@ -61,12 +61,19 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
         isPoisonous: false,
     };
 
-    const keywords = {
-        hasTaunt: initial.hasTaunt || permanent.hasTaunt,
-        hasCharge: initial.hasCharge || permanent.hasCharge,
-        hasWindfury: initial.hasWindfury || permanent.hasWindfury,
-        isPoisonous: initial.isPoisonous || permanent.isPoisonous,
-    };
+    const keywords = minion.isSilenced
+        ? {
+              hasTaunt: false,
+              hasCharge: false,
+              hasWindfury: false,
+              isPoisonous: false,
+          }
+        : {
+              hasTaunt: initial.hasTaunt || permanent.hasTaunt,
+              hasCharge: initial.hasCharge || permanent.hasCharge,
+              hasWindfury: initial.hasWindfury || permanent.hasWindfury,
+              isPoisonous: initial.isPoisonous || permanent.isPoisonous,
+          };
 
     const targetBoardOwner = getBoardOwnerForMinion(game, minion);
     if (!targetBoardOwner) return;
@@ -78,7 +85,13 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
 
         for (const sourceSpotId of MINION_SPOT_IDS) {
             const sourceMinion = sourceOwner.board[sourceSpotId];
-            if (!sourceMinion || sourceMinion.originalCard.type !== "MINION") continue;
+            if (
+                !sourceMinion ||
+                sourceMinion.originalCard.type !== "MINION" ||
+                sourceMinion.isSilenced
+            ) {
+                continue;
+            }
 
             const sourceCard = sourceMinion.originalCard as MinionCard;
             for (const passiveBoost of collectBoostPassives(sourceCard)) {
@@ -225,7 +238,9 @@ export const applyPassiveAurasForSource = (
     sourceSpotId: MinionSpotId,
 ): void => {
     const sourceMinion = sourceOwner.board[sourceSpotId];
-    if (!sourceMinion || sourceMinion.originalCard.type !== "MINION") return;
+    if (!sourceMinion || sourceMinion.originalCard.type !== "MINION" || sourceMinion.isSilenced) {
+        return;
+    }
 
     const card = sourceMinion.originalCard as MinionCard;
     sourceMinion.auraAppliedTo = [];
@@ -249,7 +264,13 @@ export const applyExistingAurasToMinion = (
 
         for (const sourceSpotId of MINION_SPOT_IDS) {
             const sourceMinion = sourceOwner.board[sourceSpotId];
-            if (!sourceMinion || sourceMinion.originalCard.type !== "MINION") continue;
+            if (
+                !sourceMinion ||
+                sourceMinion.originalCard.type !== "MINION" ||
+                sourceMinion.isSilenced
+            ) {
+                continue;
+            }
             if (sourceMinion.uuid === targetMinion.uuid) continue;
 
             const sourceCard = sourceMinion.originalCard as MinionCard;

@@ -184,6 +184,7 @@ export const createMinionState = (
         isPoisonous: false,
     },
     originalCard: { ...card },
+    isSilenced: false,
     ...overrides,
 });
 
@@ -237,17 +238,18 @@ export const placeMinion = (
 export const createSpellCard = (
     overrides: Partial<SpellCard> & { uuid?: string } = {},
 ): SpellCard => {
-    const action =
-        overrides.action ??
+    const defaultSpellActions = [
         createCardActionSnapshot({
             type: "DAMAGE",
             isTargeted: false,
             damage: 3,
             target: createHeroTargetSnapshot("OPPONENT"),
-        });
+        }),
+    ];
+    const { spellActions = defaultSpellActions, ...rest } = overrides;
 
     return {
-        uuid: overrides.uuid ?? CARD_IDS.spell,
+        uuid: rest.uuid ?? CARD_IDS.spell,
         cardId: 2,
         label: "Test Spell",
         imageUrl: "https://example.com/spell.png",
@@ -255,8 +257,8 @@ export const createSpellCard = (
         tags: [],
         type: "SPELL",
         description: "Effet : Inflige 3 dégâts au héros adverse.",
-        action,
-        ...overrides,
+        spellActions,
+        ...rest,
     };
 };
 

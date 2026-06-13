@@ -352,6 +352,31 @@ export const formatActionDescription = (
 
             return `${prefix} : Donne ${effectText}.`;
         }
+        case "SILENCE": {
+            if (action.target && hasRandomLimitedTarget(action.target)) {
+                const { target } = action;
+                if (target.type === "MINION") {
+                    return `${prefix} : Réduit au silence ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
+                }
+                return `${prefix} : Réduit au silence ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.isTargeted && action.target?.type === "MINION") {
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : Réduit au silence un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "MINION") {
+                return `${prefix} : Réduit au silence ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "ALL") {
+                return `${prefix} : Réduit au silence ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            return `${prefix} : Réduit au silence un serviteur.`;
+        }
         default:
             return null;
     }

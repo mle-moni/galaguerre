@@ -11,6 +11,7 @@ import {
     createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
+import { assertBoardSpot } from "#tests/helpers/game/assertions";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 
 test.group("spell effects", () => {
@@ -38,12 +39,14 @@ test.group("spell effects", () => {
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 4 });
         const spell = createSpellCard({
             cost: 3,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: true,
-                damage: 4,
-                target: createMinionTargetSnapshot("OPPONENT"),
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: true,
+                    damage: 4,
+                    target: createMinionTargetSnapshot("OPPONENT"),
+                }),
+            ],
         });
 
         const { game } = runSpellEffect(
@@ -71,11 +74,13 @@ test.group("spell effects", () => {
         const deckCard = createMinionCard({ uuid: "deck-card" });
         const spell = createSpellCard({
             cost: 1,
-            action: createCardActionSnapshot({
-                type: "DRAW",
-                isTargeted: false,
-                drawCount: 1,
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DRAW",
+                    isTargeted: false,
+                    drawCount: 1,
+                }),
+            ],
         });
 
         const { game } = runSpellEffect(
@@ -99,12 +104,14 @@ test.group("spell effects", () => {
     test("spell lethal damage ends the game", ({ assert }) => {
         const spell = createSpellCard({
             cost: 2,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: false,
-                damage: 15,
-                target: createHeroTargetSnapshot("OPPONENT"),
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 15,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
         });
 
         const { game } = runSpellEffect(
@@ -129,12 +136,14 @@ test.group("spell effects", () => {
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 5 });
         const spell = createSpellCard({
             cost: 3,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: false,
-                damage: 2,
-                target: createAllTargetSnapshot("ALL"),
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 2,
+                    target: createAllTargetSnapshot("ALL"),
+                }),
+            ],
         });
 
         const { game } = runSpellEffect(
@@ -170,12 +179,14 @@ test.group("spell effects", () => {
         const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 5 });
         const spell = createSpellCard({
             cost: 3,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: false,
-                damage: 2,
-                target: createAllTargetSnapshot("OPPONENT"),
-            }),
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 2,
+                    target: createAllTargetSnapshot("OPPONENT"),
+                }),
+            ],
         });
 
         const { game } = runSpellEffect(
@@ -211,15 +222,17 @@ test.group("spell effects", () => {
         const enemyMinion2 = createMinionCard({ uuid: "enemy-minion-2", health: 5 });
         const spell = createSpellCard({
             cost: 2,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: false,
-                damage: 1,
-                target: createMinionTargetSnapshot("OPPONENT", {
-                    maxTargets: 1,
-                    targetSelectionMode: "RANDOM",
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 1,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        maxTargets: 1,
+                        targetSelectionMode: "RANDOM",
+                    }),
                 }),
-            }),
+            ],
         });
 
         const { game } = runSpellEffect(
@@ -253,15 +266,17 @@ test.group("spell effects", () => {
     test("random damage spell fizzles when no eligible minion exists", ({ assert }) => {
         const spell = createSpellCard({
             cost: 2,
-            action: createCardActionSnapshot({
-                type: "DAMAGE",
-                isTargeted: false,
-                damage: 1,
-                target: createMinionTargetSnapshot("OPPONENT", {
-                    maxTargets: 1,
-                    targetSelectionMode: "RANDOM",
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 1,
+                    target: createMinionTargetSnapshot("OPPONENT", {
+                        maxTargets: 1,
+                        targetSelectionMode: "RANDOM",
+                    }),
                 }),
-            }),
+            ],
         });
 
         const { game } = runSpellEffect(
@@ -275,5 +290,134 @@ test.group("spell effects", () => {
         );
 
         assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH);
+    });
+
+    test("earth shock silences then damages the same minion", ({ assert }) => {
+        const tauntMinion = createMinionCard({
+            uuid: "taunt-minion",
+            attack: 2,
+            health: 1,
+            hasTaunt: true,
+        });
+        const spell = createSpellCard({
+            cost: 1,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "SILENCE",
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("ALL"),
+                }),
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: true,
+                    damage: 1,
+                    target: createMinionTargetSnapshot("ALL"),
+                }),
+            ],
+        });
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(tauntMinion),
+                    ),
+                },
+            }),
+            spell,
+            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+        );
+
+        assert.isNull(game.data.playerTwo.board.SPOT_1);
+    });
+
+    test("silence then damage removes native taunt when minion survives", ({ assert }) => {
+        const tauntMinion = createMinionCard({
+            uuid: "taunt-minion",
+            attack: 2,
+            health: 3,
+            hasTaunt: true,
+            effects: ["Provocation"],
+        });
+        const spell = createSpellCard({
+            cost: 1,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "SILENCE",
+                    isTargeted: true,
+                    target: createMinionTargetSnapshot("ALL"),
+                }),
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: true,
+                    damage: 1,
+                    target: createMinionTargetSnapshot("ALL"),
+                }),
+            ],
+        });
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(tauntMinion),
+                    ),
+                },
+            }),
+            spell,
+            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+        );
+
+        const card = game.data.playerTwo.board.SPOT_1!.originalCard;
+        assert.isFalse(card.type === "MINION" && card.hasTaunt);
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
+    });
+
+    test("applies spellPower bonus to each damage action", ({ assert }) => {
+        const spell = createSpellCard({
+            cost: 2,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 1,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 1,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    spellPower: 2,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    health: DEFAULT_HERO_HEALTH,
+                },
+            }),
+            spell,
+        );
+
+        assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 6);
     });
 });

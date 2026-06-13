@@ -16,6 +16,7 @@ import {
 } from "../game_stats/record_player_stats.js";
 import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
+import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
@@ -97,6 +98,12 @@ const applyEffectToResolvedTarget = (
             } else {
                 applyBoostToMinion(resolved.minion, action.boost);
             }
+            return false;
+        }
+        case "SILENCE": {
+            if (resolved.type !== "MINION") return false;
+            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            applySilenceToMinion(game, owner, resolved.spotId);
             return false;
         }
         default:
@@ -283,6 +290,14 @@ export const executeAction = (
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
                     applyBoostToHero(target, action.boost);
                 }
+            }
+            break;
+        }
+        case "SILENCE": {
+            if (!action.target) break;
+
+            if (action.target.type === "ALL" || action.target.type === "MINION") {
+                applySilenceToAllMinions(game, player, opponent, action.target, sourceMinion);
             }
             break;
         }

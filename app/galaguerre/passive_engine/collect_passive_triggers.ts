@@ -26,7 +26,7 @@ const collectFromBoard = (
 
     for (const spotId of MINION_SPOT_IDS) {
         const minion = board[spotId];
-        if (!minion || minion.originalCard.type !== "MINION") continue;
+        if (!minion || minion.originalCard.type !== "MINION" || minion.isSilenced) continue;
 
         const card = minion.originalCard as MinionCard;
         for (const passive of card.passives ?? []) {

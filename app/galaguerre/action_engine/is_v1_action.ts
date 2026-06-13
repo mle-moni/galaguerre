@@ -41,6 +41,9 @@ export const isV1Action = (action: CardActionSnapshot): boolean => {
                 );
             }
             return false;
+        case "SILENCE":
+            if (action.target === null) return false;
+            return action.target.type === "MINION" || action.target.type === "ALL";
         default:
             return false;
     }

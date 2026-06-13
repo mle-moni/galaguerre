@@ -120,7 +120,7 @@ export const minionDataSchema = cardDataBaseSchema.extend({
 
 export const spellDataSchema = cardDataBaseSchema.extend({
     type: z.literal("SPELL"),
-    action: cardActionSchema,
+    spellActions: z.array(cardActionSchema).min(1),
 });
 
 export const weaponDataSchema = cardDataBaseSchema.extend({

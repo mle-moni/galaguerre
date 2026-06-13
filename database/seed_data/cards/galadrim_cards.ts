@@ -27,6 +27,7 @@ import {
     otherAllyMinions,
     otherAllyMinionsWithTag,
     randomEnemyTargets,
+    silenceAction,
     spellDrawFilter,
     targetedAllyMinion,
     targetedAnyMinion,
@@ -271,24 +272,24 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineMinion(95, { ...gal("Plante Verte", 1), attack: 0, health: 4 }, { hasTaunt: true }),
 
     // --- spells ---
-    defineSpell(96, gal("Pause Café", 2), boostAction(boostBoth(1, 1), allyMinions())),
-    defineSpell(97, gal("Bug en Prod", 4), damageAction(3, allMinions())),
-    defineSpell(98, gal("Déploiement Réussi", 3), drawAction(2)),
-    defineSpell(99, gal("Réunion Interminable", 3), damageAction(3, enemyMinions())),
-    defineSpell(
-        100,
-        gal("Sprint Review", 4),
+    defineSpell(96, gal("Pause Café", 2), [boostAction(boostBoth(1, 1), allyMinions())]),
+    defineSpell(97, gal("Bug en Prod", 4), [damageAction(3, allMinions())]),
+    defineSpell(98, gal("Déploiement Réussi", 3), [drawAction(2)]),
+    defineSpell(99, gal("Réunion Interminable", 3), [damageAction(3, enemyMinions())]),
+    defineSpell(100, gal("Sprint Review", 4), [
         boostAction(boostBothWithTaunt(3, 3), targetedAllyMinion(), true),
-    ),
-    defineSpell(
-        101,
-        gal("Heures Sup'", 3),
+    ]),
+    defineSpell(101, gal("Heures Sup'", 3), [
         boostAction(boostAttackWithCharge(3), targetedAllyMinion(), true),
-    ),
-    defineSpell(102, gal("Burnout", 4), damageAction(6, targetedAnyMinion(), true)),
-    defineSpell(103, gal("Team Building", 3), drawAction(2, minionDrawFilter())),
-    defineSpell(104, gal("Goodies Galadrim", 1), healAction(5, targetedAllyMinion(), true)),
-    defineSpell(105, gal("Coupure Internet", 6), damageAction(4, randomEnemyTargets(3))),
+    ]),
+    defineSpell(102, gal("Burnout", 4), [damageAction(6, targetedAnyMinion(), true)]),
+    defineSpell(103, gal("Team Building", 3), [drawAction(2, minionDrawFilter())]),
+    defineSpell(104, gal("Goodies Galadrim", 1), [healAction(5, targetedAllyMinion(), true)]),
+    defineSpell(105, gal("Coupure Internet", 6), [damageAction(4, randomEnemyTargets(3))]),
+    defineSpell(109, gal("Lendemain de soirée", 1), [
+        silenceAction(targetedAnyMinion(), true),
+        damageAction(1, targetedAnyMinion(), true),
+    ]),
 
     // --- weapons ---
     defineWeapon(106, { ...gal("Tasse à Café Ébréchée", 1), damage: 1, durability: 4 }),

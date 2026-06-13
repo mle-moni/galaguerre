@@ -174,23 +174,21 @@ export class TargetSelectionStore {
     private getTargetedActions(): CardActionSnapshot[] {
         if (this.pendingPlay) {
             if (this.pendingPlay.kind === "SPELL") {
-                return this.pendingPlay.card.action.isTargeted
-                    ? [this.pendingPlay.card.action]
-                    : [];
+                return this.pendingPlay.card.spellActions.filter((action) => action.isTargeted);
             }
 
             return this.pendingPlay.card.battlecryActions.filter((action) => action.isTargeted);
         }
 
         if (this.armedCard?.type === "SPELL" && this.requiresTarget(this.armedCard)) {
-            return this.armedCard.action.isTargeted ? [this.armedCard.action] : [];
+            return this.armedCard.spellActions.filter((action) => action.isTargeted);
         }
 
         return [];
     }
 
     private canSelectTargetForSpell(card: SpellCard, actionTarget: ActionTarget): boolean {
-        const targetedActions = card.action.isTargeted ? [card.action] : [];
+        const targetedActions = card.spellActions.filter((action) => action.isTargeted);
         if (targetedActions.length === 0) return false;
 
         if (actionTarget.spotId === null) {

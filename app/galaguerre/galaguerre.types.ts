@@ -29,7 +29,14 @@ export const GALAGUERRE_CARD_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_CARD_TYPES_LABEL_OBJ,
 );
 
-export const GALAGUERRE_ACTIONS_TYPES = ["DAMAGE", "HEAL", "BOOST", "DRAW", "ENEMY_DRAW"] as const;
+export const GALAGUERRE_ACTIONS_TYPES = [
+    "DAMAGE",
+    "HEAL",
+    "BOOST",
+    "DRAW",
+    "ENEMY_DRAW",
+    "SILENCE",
+] as const;
 export type GalaguerreActionType = GenerateTypeFromEnum<typeof GALAGUERRE_ACTIONS_TYPES>;
 export const GALAGUERRE_ACTIONS_TYPES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_ACTIONS_TYPES);
 export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActionType> = {
@@ -38,6 +45,7 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     DRAW: "Draw",
     ENEMY_DRAW: "Enemy Draw",
     HEAL: "Heal",
+    SILENCE: "Silence",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,

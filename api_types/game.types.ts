@@ -65,7 +65,7 @@ export type MinionCard = PlayerCardBase & {
 export type SpellCard = PlayerCardBase & {
     type: "SPELL";
     description: string;
-    action: CardActionSnapshot;
+    spellActions: CardActionSnapshot[];
 };
 
 export type WeaponCard = PlayerCardBase & {
@@ -133,6 +133,7 @@ export interface MinionState {
     permanentKeywords?: MinionKeywordFlags;
     auraAppliedTo?: AuraAppliedTarget[];
     auraHeroSpellPowerAppliedTo?: "PLAYER" | "OPPONENT" | "ALL" | null;
+    isSilenced?: boolean;
 }
 
 export interface MinionPosition {

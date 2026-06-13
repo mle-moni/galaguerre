@@ -1,12 +1,13 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import type Card from "#models/card";
-import { formatActionDescription } from "../action_engine/format_action_description.js";
 import {
     getBattlecryDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
     getPassiveDescription,
+    getSpellCardDescription,
+    getSpellEffectDescription,
     getWeaponCardDescription,
 } from "../minion_card_metadata.js";
 
@@ -37,13 +38,16 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
                 ),
             };
         }
-        case "SPELL":
+        case "SPELL": {
+            const effectLines = getSpellEffectDescription(card.data.spellActions);
+
             return {
                 ...base,
                 type: "SPELL",
-                description: formatActionDescription(card.data.action, "Effet") ?? card.data.name,
-                action: card.data.action,
+                description: getSpellCardDescription(effectLines) || card.data.name,
+                spellActions: card.data.spellActions,
             };
+        }
         case "MINION": {
             const effects = getMinionPowerEffects(card.data);
             const battlecryLines = getBattlecryDescription(card.data.battlecryActions);

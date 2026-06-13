@@ -11,6 +11,7 @@ export const assertBoardSpot = (
     spotId: MinionSpotId,
     expected: null | {
         health?: number;
+        maxHealth?: number;
         attack?: number;
         attacksThisRound?: number;
         placedAtRound?: number;
@@ -26,6 +27,7 @@ export const assertBoardSpot = (
 
     assert.isNotNull(minion, `Expected ${player}.${spotId} to have a minion`);
     if (expected.health !== undefined) assert.equal(minion!.health, expected.health);
+    if (expected.maxHealth !== undefined) assert.equal(minion!.maxHealth, expected.maxHealth);
     if (expected.attack !== undefined) assert.equal(minion!.attack, expected.attack);
     if (expected.attacksThisRound !== undefined) {
         assert.equal(minion!.attacksThisRound, expected.attacksThisRound);

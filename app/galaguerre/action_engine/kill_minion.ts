@@ -25,12 +25,15 @@ export const killMinion = (
     }
 
     const card = minion.originalCard;
+    const isSilenced = minion.isSilenced === true;
     revertPassiveAurasForSource(game, owner, minion);
     removeMinionFromAuraTracking(game, minion);
     owner.board[spotId] = null;
 
     recordMinionDeath(game, owner, card);
-    const { gameEnded } = executeDeathrattles(game, owner, card);
+    const { gameEnded } = isSilenced
+        ? { gameEnded: false }
+        : executeDeathrattles(game, owner, card);
 
     return { gameEnded: gameEnded || isGameOver(game) };
 };
