@@ -7,6 +7,7 @@ interface CardDetailSheetProps {
     spellPower?: number;
     opened: boolean;
     onClose: () => void;
+    isSilenced?: boolean;
 }
 
 export const CardDetailSheet = ({
@@ -14,6 +15,7 @@ export const CardDetailSheet = ({
     spellPower = 0,
     opened,
     onClose,
+    isSilenced,
 }: CardDetailSheetProps) => {
     return (
         <Drawer
@@ -25,7 +27,7 @@ export const CardDetailSheet = ({
             withinPortal
             classNames={{ content: "card-detail-sheet-content" }}
         >
-            <CardDetailContent card={card} spellPower={spellPower} />
+            <CardDetailContent card={card} spellPower={spellPower} isSilenced={isSilenced} />
         </Drawer>
     );
 };

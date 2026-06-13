@@ -170,6 +170,11 @@
 	white-space: pre-line;
 }
 
+.card-description-line--silenced {
+	text-decoration: line-through;
+	opacity: 0.55;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.playing-card-face,
 	.card-hand__card {

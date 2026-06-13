@@ -73,7 +73,11 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
     };
 
     const wrapper = (content: ReactNode) => (
-        <CardDetailHover card={card} showDetailButton={isMobilePortrait}>
+        <CardDetailHover
+            card={card}
+            showDetailButton={isMobilePortrait}
+            isSilenced={state.isSilenced === true}
+        >
             {content}
         </CardDetailHover>
     );

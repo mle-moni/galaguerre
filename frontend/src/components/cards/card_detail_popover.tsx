@@ -8,6 +8,7 @@ interface CardDetailPopoverProps {
     children: ReactNode;
     spellPower?: number;
     disablePointerEvents?: boolean;
+    isSilenced?: boolean;
 }
 
 export const CardDetailPopover = ({
@@ -15,12 +16,13 @@ export const CardDetailPopover = ({
     children,
     spellPower = 0,
     disablePointerEvents = false,
+    isSilenced,
 }: CardDetailPopoverProps) => {
     return (
         <HoverCard width={300} shadow="md" openDelay={250} position="top" withinPortal>
             <HoverCard.Target>{children}</HoverCard.Target>
             <HoverCard.Dropdown style={{ pointerEvents: disablePointerEvents ? "none" : "auto" }}>
-                <CardDetailContent card={card} spellPower={spellPower} />
+                <CardDetailContent card={card} spellPower={spellPower} isSilenced={isSilenced} />
             </HoverCard.Dropdown>
         </HoverCard>
     );

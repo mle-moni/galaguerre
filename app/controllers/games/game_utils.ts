@@ -14,6 +14,7 @@ import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
+import { popStealth } from "../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { recordHeroAttack as recordHeroAttackStat } from "../../galaguerre/game_stats/record_player_stats.js";
 
 export const getGameActionInfos = async (socketId: string) => {
@@ -191,6 +192,7 @@ export const recordMinionAttack = (minion: MinionState, currentRound: number): v
         minion.attacksThisRound = (minion.attacksThisRound ?? 1) + 1;
     }
     minion.lastActionAtRound = currentRound;
+    popStealth(minion);
 };
 
 export const canMinionAttack = (minion: MinionState, currentRound: number): boolean => {

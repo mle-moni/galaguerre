@@ -11,10 +11,11 @@ interface CardDetailHoverProps {
     card: PlayerCard;
     children: ReactNode;
     showDetailButton?: boolean;
+    isSilenced?: boolean;
 }
 
 export const CardDetailHover = observer(
-    ({ card, children, showDetailButton = false }: CardDetailHoverProps) => {
+    ({ card, children, showDetailButton = false, isSilenced }: CardDetailHoverProps) => {
         const { store } = useGameContext();
         const isMobilePortrait = useIsMobilePortrait();
         const [sheetOpened, setSheetOpened] = useState(false);
@@ -28,6 +29,7 @@ export const CardDetailHover = observer(
                     card={card}
                     spellPower={store.me.spellPower}
                     disablePointerEvents={isDraggingCard}
+                    isSilenced={isSilenced}
                 >
                     {children}
                 </CardDetailPopover>
@@ -59,6 +61,7 @@ export const CardDetailHover = observer(
                     spellPower={store.me.spellPower}
                     opened={sheetOpened}
                     onClose={() => setSheetOpened(false)}
+                    isSilenced={isSilenced}
                 />
             </>
         );

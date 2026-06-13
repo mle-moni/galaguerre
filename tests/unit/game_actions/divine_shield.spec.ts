@@ -25,6 +25,44 @@ import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 const divineShieldPowers = createMinionPowersSnapshot({ hasDivineShield: true });
 
 test.group("divine shield", () => {
+    test("attacker keeps divine shield when retaliating minion has 0 attack", async ({
+        assert,
+    }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 3,
+            minionPowers: divineShieldPowers,
+            effects: ["Immunité"],
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 0,
+            health: 2,
+        });
+
+        const { game } = await runMinionCombat(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createEmptyBoard(),
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                },
+            }),
+        );
+
+        const attacker = game.data.playerOne.board.SPOT_1!;
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 3 });
+        assert.isTrue(getMinionHasDivineShield(attacker));
+        assert.equal(attacker.originalCard.type, "MINION");
+        assert.include((attacker.originalCard as MinionCard).effects, "Immunité");
+    });
+
     test("minion survives first combat hit and loses divine shield", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,

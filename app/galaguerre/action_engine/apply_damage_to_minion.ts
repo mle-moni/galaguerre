@@ -24,6 +24,14 @@ export const popDivineShield = (minion: MinionState): void => {
     minion.originalCard.effects = getMinionPowerEffects(minion.originalCard.minionPowers);
 };
 
+export const popStealth = (minion: MinionState): void => {
+    if (minion.originalCard.type !== "MINION") return;
+    if (!minion.originalCard.minionPowers.hasStealth) return;
+
+    minion.originalCard.minionPowers.hasStealth = false;
+    minion.originalCard.effects = getMinionPowerEffects(minion.originalCard.minionPowers);
+};
+
 export const applyDamageToMinion = (
     game: Game,
     owner: GamePlayer,
@@ -32,6 +40,10 @@ export const applyDamageToMinion = (
     damage: number,
     sourcePlayer: GamePlayer,
 ): MinionDamageResult => {
+    if (damage <= 0) {
+        return { damageDealt: 0, killed: false, gameEnded: false };
+    }
+
     if (getMinionHasDivineShield(minion)) {
         popDivineShield(minion);
         return { damageDealt: 0, killed: false, gameEnded: false };

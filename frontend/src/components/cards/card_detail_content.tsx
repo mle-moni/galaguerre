@@ -1,7 +1,11 @@
-import type { CardActionSnapshot, PlayerCard } from "#api_types/game.types";
+import type { CardActionSnapshot, MinionCard, PlayerCard } from "#api_types/game.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
 import { formatActionDescription } from "#api_types/format_action_description";
 import { getDisplayedDamage } from "#api_types/get_effective_damage";
+import {
+    getActiveMinionEffectNames,
+    isMinionDescriptionLineDisabled,
+} from "#api_types/get_minion_description_line_state";
 import { Text } from "@mantine/core";
 import "./card_faces.css";
 
@@ -92,12 +96,41 @@ const SpellDescription = ({
     );
 };
 
+const MinionDescription = ({
+    card,
+    isSilenced = false,
+}: {
+    card: MinionCard;
+    isSilenced?: boolean;
+}) => {
+    const lines = getCardDescription(card).split("\n");
+    const activeEffects = getActiveMinionEffectNames(card);
+
+    return (
+        <div className="card-description">
+            {lines.map((line, index) => (
+                <div
+                    key={index}
+                    className={
+                        isMinionDescriptionLineDisabled(line, index, activeEffects, isSilenced)
+                            ? "card-description-line--silenced"
+                            : undefined
+                    }
+                >
+                    {line}
+                </div>
+            ))}
+        </div>
+    );
+};
+
 interface CardDetailContentProps {
     card: PlayerCard;
     spellPower?: number;
+    isSilenced?: boolean;
 }
 
-export const CardDetailContent = ({ card, spellPower = 0 }: CardDetailContentProps) => {
+export const CardDetailContent = ({ card, spellPower = 0, isSilenced }: CardDetailContentProps) => {
     const { effects, tags } = getCardChips(card);
     const hasChips = effects.length > 0 || tags.length > 0;
 
@@ -113,6 +146,10 @@ export const CardDetailContent = ({ card, spellPower = 0 }: CardDetailContentPro
                 <div className={hasChips ? "mb-2" : undefined}>
                     <SpellDescription card={card} spellPower={spellPower} />
                 </div>
+            ) : card.type === "MINION" ? (
+                <Text size="sm" c="dimmed" mb={hasChips ? 8 : 0} component="div">
+                    <MinionDescription card={card} isSilenced={isSilenced} />
+                </Text>
             ) : (
                 <Text size="sm" c="dimmed" mb={hasChips ? 8 : 0} className="card-description">
                     {getCardDescription(card, spellPower)}
