@@ -4,6 +4,7 @@ import { getDisplayedDamage, getEffectiveDamage } from "#api_types/get_effective
 import {
     createCardActionSnapshot,
     createCardFilterSnapshot,
+    createComparisonSnapshot,
     createMinionTargetSnapshot,
 } from "#tests/helpers/game/fixtures";
 
@@ -158,6 +159,53 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Passif (fin de tour)"),
             "Passif (fin de tour) : Donne +1/+1 à lui-même.",
+        );
+    });
+
+    test("formats onTargetResult survived with exact health clause", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: true,
+            damage: 2,
+            target: createMinionTargetSnapshot("ALL"),
+            onTargetResult: {
+                when: "SURVIVED",
+                healthComparison: createComparisonSnapshot({
+                    healthComparison: "=",
+                    health: 1,
+                }),
+                action: createCardActionSnapshot({
+                    type: "DRAW",
+                    drawCount: 2,
+                }),
+            },
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Inflige 2 dégâts à un serviteur. Si la cible survit avec 1 PV, pioche 2 cartes.",
+        );
+    });
+
+    test("formats onTargetResult killed clause", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: true,
+            damage: 1,
+            target: createMinionTargetSnapshot("ALL"),
+            onTargetResult: {
+                when: "KILLED",
+                healthComparison: null,
+                action: createCardActionSnapshot({
+                    type: "DRAW",
+                    drawCount: 1,
+                }),
+            },
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Inflige 1 dégâts à un serviteur. Si la cible est détruite, pioche 1 carte.",
         );
     });
 });

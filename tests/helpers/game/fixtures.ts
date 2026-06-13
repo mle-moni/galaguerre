@@ -128,6 +128,7 @@ export const createCardActionSnapshot = (
     enemyDrawCardFilter: null,
     boost: null,
     target: null,
+    onTargetResult: null,
     ...overrides,
 });
 

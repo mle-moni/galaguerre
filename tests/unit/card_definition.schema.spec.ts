@@ -244,4 +244,71 @@ test.group("card_definition.schema", () => {
 
         assert.isFalse(result.success);
     });
+
+    test("accepts targeted damage with onTargetResult", ({ assert }) => {
+        const data = parseSpellData({
+            ...defaultSpellData(),
+            spellActions: [
+                damageAction(2, targetedEnemyMinion(), true, {
+                    onTargetResult: {
+                        when: "SURVIVED",
+                        healthComparison: {
+                            costComparison: null,
+                            cost: null,
+                            attackComparison: null,
+                            attack: null,
+                            healthComparison: "=",
+                            health: 1,
+                        },
+                        action: drawAction(2),
+                    },
+                }),
+            ],
+        });
+
+        assert.isNotNull(data.spellActions[0]!.onTargetResult);
+        assert.equal(data.spellActions[0]!.onTargetResult!.when, "SURVIVED");
+    });
+
+    test("rejects onTargetResult on non-targeted damage", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [
+                {
+                    ...damageAction(2, enemyMinions()),
+                    onTargetResult: {
+                        when: "KILLED",
+                        healthComparison: null,
+                        action: drawAction(1),
+                    },
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("rejects KILLED onTargetResult with healthComparison", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [
+                damageAction(2, targetedEnemyMinion(), true, {
+                    onTargetResult: {
+                        when: "KILLED",
+                        healthComparison: {
+                            costComparison: null,
+                            cost: null,
+                            attackComparison: null,
+                            attack: null,
+                            healthComparison: "=",
+                            health: 1,
+                        },
+                        action: drawAction(1),
+                    },
+                }),
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
 });

@@ -1,8 +1,10 @@
 import type {
     BoostSnapshot,
+    CardActionFieldsSnapshot,
     CardActionSnapshot,
     CardFilterSnapshot,
     CardTag,
+    OnTargetResultDefinition,
     TargetSnapshot,
 } from "./game.types.js";
 import { CARD_TAG_LABELS } from "./card.types.js";
@@ -216,6 +218,58 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     return ` ${parts.join(" + ")}`;
 };
 
+const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | null => {
+    switch (action.type) {
+        case "DRAW": {
+            if (action.drawCount === null || action.drawCount <= 0) return null;
+            const suffix = action.drawCount === 1 ? "carte" : "cartes";
+            return `pioche ${action.drawCount} ${suffix}${formatCardFilterSuffix(action.drawCardFilter)}`;
+        }
+        case "ENEMY_DRAW": {
+            if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
+            const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
+            return `l'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}`;
+        }
+        default:
+            return (
+                formatActionDescription({ ...action, onTargetResult: null }, "")?.replace(
+                    /^ : /,
+                    "",
+                ) ?? null
+            );
+    }
+};
+
+const formatOnTargetResultClause = (onTargetResult: OnTargetResultDefinition): string | null => {
+    const followUp = formatFollowUpActionClause(onTargetResult.action);
+    if (!followUp) return null;
+
+    if (onTargetResult.when === "KILLED") {
+        return `Si la cible est détruite, ${followUp}.`;
+    }
+
+    const comparison = onTargetResult.healthComparison;
+    if (comparison?.healthComparison === "=" && comparison.health !== null) {
+        return `Si la cible survit avec ${comparison.health} PV, ${followUp}.`;
+    }
+
+    if (comparison?.healthComparison && comparison.health !== null) {
+        const operatorLabel = comparison.healthComparison === "<" ? "moins de" : "plus de";
+        return `Si la cible survit avec ${operatorLabel} ${comparison.health} PV, ${followUp}.`;
+    }
+
+    return `Si la cible survit, ${followUp}.`;
+};
+
+const appendOnTargetResultClause = (description: string, action: CardActionSnapshot): string => {
+    if (!action.onTargetResult) return description;
+
+    const clause = formatOnTargetResultClause(action.onTargetResult);
+    if (!clause) return description;
+
+    return `${description.replace(/\.$/, "")}. ${clause}`;
+};
+
 export const formatActionDescription = (
     action: CardActionSnapshot,
     prefix = "Cri de guerre",
@@ -229,40 +283,70 @@ export const formatActionDescription = (
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;
                 if (target.type === "MINION") {
-                    return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
+                    return appendOnTargetResultClause(
+                        `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`,
+                        action,
+                    );
                 }
                 if (target.type === "HERO") {
-                    return `${prefix} : Inflige ${damage} dégâts ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`;
+                    return appendOnTargetResultClause(
+                        `${prefix} : Inflige ${damage} dégâts ${formatRandomHeroLabel(target.targetTeam, target.maxTargets!)}.`,
+                        action,
+                    );
                 }
-                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return appendOnTargetResultClause(
+                    `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`,
+                    action,
+                );
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : Inflige ${damage} dégâts à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+                return appendOnTargetResultClause(
+                    `${prefix} : Inflige ${damage} dégâts à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`,
+                    action,
+                );
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
-                return `${prefix} : Inflige ${damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return appendOnTargetResultClause(
+                    `${prefix} : Inflige ${damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`,
+                    action,
+                );
             }
 
             if (action.isTargeted && action.target?.type === "ALL") {
-                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatSingleCharacterTeamLabel(action.target.targetTeam))}${formatTargetFilterSuffix(action)}.`;
+                return appendOnTargetResultClause(
+                    `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatSingleCharacterTeamLabel(action.target.targetTeam))}${formatTargetFilterSuffix(action)}.`,
+                    action,
+                );
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return appendOnTargetResultClause(
+                    `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`,
+                    action,
+                );
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return appendOnTargetResultClause(
+                    `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`,
+                    action,
+                );
             }
 
             if (action.target?.type === "HERO") {
-                return `${prefix} : Inflige ${damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+                return appendOnTargetResultClause(
+                    `${prefix} : Inflige ${damage} dégâts au héros ${formatHeroTeamLabel(action.target.targetTeam)}.`,
+                    action,
+                );
             }
-            return `${prefix} : Inflige ${damage} dégâts au héros adverse.`;
+            return appendOnTargetResultClause(
+                `${prefix} : Inflige ${damage} dégâts au héros adverse.`,
+                action,
+            );
         }
         case "HEAL": {
             if (action.heal === null || action.heal <= 0) return null;

@@ -4,6 +4,7 @@ import type {
     BoostDefinition,
     CardFilterDefinition,
     ComparisonDefinition,
+    OnTargetResultDefinition,
     PassiveDefinition,
     TargetDefinition,
 } from "#galaguerre/card_definition.validation";
@@ -55,6 +56,7 @@ const nullActionFields = () => ({
     heal: null,
     boost: null,
     target: null,
+    onTargetResult: null,
 });
 
 export const defaultMinionData = (): MinionCardData => ({
@@ -104,6 +106,9 @@ export const attackGreaterThan = (attack: number): ComparisonDefinition =>
 
 export const healthLessThan = (health: number): ComparisonDefinition =>
     comparison({ healthComparison: "<", health });
+
+export const healthEquals = (health: number): ComparisonDefinition =>
+    comparison({ healthComparison: "=", health });
 
 export const costEquals = (cost: number): ComparisonDefinition =>
     comparison({ costComparison: "=", cost });
@@ -209,7 +214,30 @@ export const damageAction = (
     damage: number,
     target: TargetDefinition,
     isTargeted = false,
-): CardActionDefinition => baseAction({ type: "DAMAGE", damage, target, isTargeted });
+    options: { onTargetResult?: OnTargetResultDefinition | null } = {},
+): CardActionDefinition =>
+    baseAction({
+        type: "DAMAGE",
+        damage,
+        target,
+        isTargeted,
+        onTargetResult: options.onTargetResult ?? null,
+    });
+
+export const onTargetKilled = (action: CardActionDefinition): OnTargetResultDefinition => ({
+    when: "KILLED",
+    healthComparison: null,
+    action,
+});
+
+export const onTargetSurvivedWithHealth = (
+    healthComparison: ComparisonDefinition,
+    action: CardActionDefinition,
+): OnTargetResultDefinition => ({
+    when: "SURVIVED",
+    healthComparison,
+    action,
+});
 
 export const healAction = (
     heal: number,

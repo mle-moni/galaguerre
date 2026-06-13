@@ -1,6 +1,7 @@
 import {
     DEFAULT_HERO_HEALTH,
     type ActionTarget,
+    type CardActionFieldsSnapshot,
     type CardActionSnapshot,
     type GamePlayer,
     type MinionState,
@@ -19,6 +20,10 @@ import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./
 import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
+import {
+    shouldTriggerOnTargetResult,
+    type TargetEffectOutcome,
+} from "./evaluate_on_target_result.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
 import {
@@ -51,7 +56,7 @@ const applyEffectToResolvedTarget = (
     player: GamePlayer,
     opponent: GamePlayer,
     damageBonus: number,
-): boolean => {
+): TargetEffectOutcome => {
     switch (action.type) {
         case "DAMAGE": {
             const damage = getEffectiveDamage(action, damageBonus);
@@ -59,19 +64,23 @@ const applyEffectToResolvedTarget = (
                 const actualDamage = getActualDamage(resolved.player.health, damage);
                 resolved.player.health -= damage;
                 recordDamageDealt(player, actualDamage);
-            } else {
-                const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
-                const result = applyDamageToMinion(
-                    game,
-                    owner,
-                    resolved.spotId,
-                    resolved.minion,
-                    damage,
-                    player,
-                );
-                if (result.gameEnded) return true;
+                return { gameEnded: false };
             }
-            return false;
+
+            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            const result = applyDamageToMinion(
+                game,
+                owner,
+                resolved.spotId,
+                resolved.minion,
+                damage,
+                player,
+            );
+            return {
+                gameEnded: result.gameEnded,
+                minionKilled: result.killed,
+                survivingMinion: result.killed ? undefined : resolved.minion,
+            };
         }
         case "HEAL": {
             if (resolved.type === "HERO") {
@@ -92,66 +101,36 @@ const applyEffectToResolvedTarget = (
                 resolved.minion.health = applyHeal(resolved.minion.health, action.heal!, maxHealth);
                 recordHealingDone(player, actualHeal);
             }
-            return triggerHealIfNeeded(game);
+            return { gameEnded: triggerHealIfNeeded(game) };
         }
         case "BOOST": {
-            if (!action.boost) return false;
+            if (!action.boost) return { gameEnded: false };
             if (resolved.type === "HERO") {
                 applyBoostToHero(resolved.player, action.boost);
             } else {
                 applyBoostToMinion(resolved.minion, action.boost);
             }
-            return false;
+            return { gameEnded: false };
         }
         case "SILENCE": {
-            if (resolved.type !== "MINION") return false;
+            if (resolved.type !== "MINION") return { gameEnded: false };
             const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
             applySilenceToMinion(game, owner, resolved.spotId);
-            return false;
+            return { gameEnded: false };
         }
         default:
-            return false;
+            return { gameEnded: false };
     }
 };
 
-export const executeAction = (
-    action: CardActionSnapshot,
+const executeNonTargetedV1Action = (
+    action: CardActionFieldsSnapshot,
     game: Game,
     player: GamePlayer,
     opponent: GamePlayer,
-    selectedTarget?: ActionTarget,
-    damageBonus = 0,
+    damageBonus: number,
     sourceMinion?: MinionState,
 ): void => {
-    if (isTargetedV1Action(action)) {
-        if (!selectedTarget) return;
-
-        const resolved = resolveSelectedTarget(selectedTarget, player, opponent);
-        if (!resolved) return;
-
-        applyEffectToResolvedTarget(resolved, action, game, player, opponent, damageBonus);
-        return;
-    }
-
-    if (action.target && hasRandomLimitedTarget(action.target)) {
-        const picks = pickRandomLimitedTargets(action.target, player, opponent, sourceMinion);
-        for (const pick of picks) {
-            const resolved = resolveSelectedTarget(pick, player, opponent);
-            if (!resolved) continue;
-
-            const shouldStop = applyEffectToResolvedTarget(
-                resolved,
-                action,
-                game,
-                player,
-                opponent,
-                damageBonus,
-            );
-            if (shouldStop) return;
-        }
-        return;
-    }
-
     if (!isV1Action(action)) return;
 
     switch (action.type) {
@@ -219,7 +198,7 @@ export const executeAction = (
                     player,
                     sourceMinion,
                 );
-                if (triggerHealIfNeeded(game)) return;
+                triggerHealIfNeeded(game);
                 break;
             }
 
@@ -233,7 +212,7 @@ export const executeAction = (
                     player,
                     sourceMinion,
                 );
-                if (triggerHealIfNeeded(game)) return;
+                triggerHealIfNeeded(game);
                 break;
             }
 
@@ -246,7 +225,7 @@ export const executeAction = (
                 target.health = applyHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
                 recordHealingDone(player, actualHeal);
             }
-            if (triggerHealIfNeeded(game)) return;
+            triggerHealIfNeeded(game);
             break;
         }
         case "DRAW":
@@ -305,4 +284,100 @@ export const executeAction = (
             break;
         }
     }
+};
+
+const tryExecuteOnTargetResult = (
+    action: CardActionSnapshot,
+    outcome: TargetEffectOutcome,
+    game: Game,
+    player: GamePlayer,
+    opponent: GamePlayer,
+    damageBonus: number,
+    sourceMinion?: MinionState,
+): void => {
+    if (!action.onTargetResult) return;
+
+    if (!shouldTriggerOnTargetResult(action.onTargetResult, outcome)) return;
+
+    executeNonTargetedV1Action(
+        action.onTargetResult.action,
+        game,
+        player,
+        opponent,
+        damageBonus,
+        sourceMinion,
+    );
+};
+
+const applyTargetedEffectWithFollowUp = (
+    resolved: ResolvedTarget,
+    action: CardActionSnapshot,
+    game: Game,
+    player: GamePlayer,
+    opponent: GamePlayer,
+    damageBonus: number,
+    sourceMinion?: MinionState,
+): boolean => {
+    const outcome = applyEffectToResolvedTarget(
+        resolved,
+        action,
+        game,
+        player,
+        opponent,
+        damageBonus,
+    );
+    if (outcome.gameEnded) return true;
+
+    tryExecuteOnTargetResult(action, outcome, game, player, opponent, damageBonus, sourceMinion);
+    return false;
+};
+
+export const executeAction = (
+    action: CardActionSnapshot,
+    game: Game,
+    player: GamePlayer,
+    opponent: GamePlayer,
+    selectedTarget?: ActionTarget,
+    damageBonus = 0,
+    sourceMinion?: MinionState,
+): void => {
+    if (isTargetedV1Action(action)) {
+        if (!selectedTarget) return;
+
+        const resolved = resolveSelectedTarget(selectedTarget, player, opponent);
+        if (!resolved) return;
+
+        applyTargetedEffectWithFollowUp(
+            resolved,
+            action,
+            game,
+            player,
+            opponent,
+            damageBonus,
+            sourceMinion,
+        );
+        return;
+    }
+
+    if (action.target && hasRandomLimitedTarget(action.target)) {
+        const picks = pickRandomLimitedTargets(action.target, player, opponent, sourceMinion);
+        for (const pick of picks) {
+            const resolved = resolveSelectedTarget(pick, player, opponent);
+            if (!resolved) continue;
+
+            const shouldStop = applyTargetedEffectWithFollowUp(
+                resolved,
+                action,
+                game,
+                player,
+                opponent,
+                damageBonus,
+                sourceMinion,
+            );
+            if (shouldStop) return;
+        }
+        return;
+    }
+
+    executeNonTargetedV1Action(action, game, player, opponent, damageBonus, sourceMinion);
 };

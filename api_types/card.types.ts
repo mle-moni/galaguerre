@@ -1,10 +1,12 @@
 export type { CardTag } from "../app/galaguerre/card_tags.js";
 export type {
     CardActionDefinition as CardActionSnapshot,
+    CardActionFieldsDefinition as CardActionFieldsSnapshot,
     BoostDefinition as BoostSnapshot,
     MinionPower as MinionPowerSnapshot,
     CardFilterDefinition as CardFilterSnapshot,
     ComparisonDefinition as ComparisonSnapshot,
+    OnTargetResultDefinition,
     PassiveDefinition as PassiveSnapshot,
     PassiveBoostDefinition as PassiveBoostSnapshot,
     TargetDefinition as TargetSnapshot,

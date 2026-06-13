@@ -7,10 +7,12 @@ export type ComparisonOperator = "<" | ">" | "=";
 export type { CardTag } from "./card.types.js";
 export type {
     CardActionSnapshot,
+    CardActionFieldsSnapshot,
     BoostSnapshot,
     MinionPowerSnapshot,
     CardFilterSnapshot,
     ComparisonSnapshot,
+    OnTargetResultDefinition,
     PassiveSnapshot,
     PassiveBoostSnapshot,
     TargetSnapshot,

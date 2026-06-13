@@ -42,7 +42,7 @@ export type CardFilterDefinition = {
     tags: CardTag[];
 };
 
-export type CardActionDefinition = {
+export type CardActionFieldsDefinition = {
     type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "SILENCE";
     isTargeted: boolean;
     damage: number | null;
@@ -53,6 +53,16 @@ export type CardActionDefinition = {
     enemyDrawCardFilter: CardFilterDefinition | null;
     boost: BoostDefinition | null;
     target: TargetDefinition | null;
+};
+
+export type OnTargetResultDefinition = {
+    when: "KILLED" | "SURVIVED";
+    healthComparison: ComparisonDefinition | null;
+    action: CardActionFieldsDefinition;
+};
+
+export type CardActionDefinition = CardActionFieldsDefinition & {
+    onTargetResult: OnTargetResultDefinition | null;
 };
 
 export type PassiveDefinition = {
@@ -331,6 +341,55 @@ const validateBoostTargetCompatibility = (
     }
 };
 
+const validateOnTargetResult = (
+    action: CardActionDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.onTargetResult == null) return;
+
+    if (!action.isTargeted || action.type !== "DAMAGE") {
+        ctx.addIssue({
+            code: "custom",
+            message: "onTargetResult is only allowed on targeted DAMAGE actions",
+            path: [...path, "onTargetResult"],
+        });
+        return;
+    }
+
+    const { when, healthComparison, action: followUpAction } = action.onTargetResult;
+
+    if (when === "KILLED" && healthComparison !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "KILLED onTargetResult must not set healthComparison",
+            path: [...path, "onTargetResult", "healthComparison"],
+        });
+    }
+
+    if (when === "SURVIVED" && healthComparison !== null) {
+        validateComparisonSnapshot(healthComparison, ctx, [
+            ...path,
+            "onTargetResult",
+            "healthComparison",
+        ]);
+    }
+
+    if (followUpAction.isTargeted) {
+        ctx.addIssue({
+            code: "custom",
+            message: "onTargetResult follow-up action cannot be targeted",
+            path: [...path, "onTargetResult", "action", "isTargeted"],
+        });
+    }
+
+    validateNonTargetedAction({ ...followUpAction, onTargetResult: null }, ctx, [
+        ...path,
+        "onTargetResult",
+        "action",
+    ]);
+};
+
 const validateTargetedAction = (
     action: CardActionDefinition,
     ctx: z.RefinementCtx,
@@ -392,6 +451,8 @@ const validateTargetedAction = (
             validateSilenceTarget(action.target, ctx, [...path, "target"]);
             break;
     }
+
+    validateOnTargetResult(action, ctx, path);
 };
 
 const validateNonTargetedAction = (
@@ -517,6 +578,14 @@ const validateNonTargetedAction = (
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
             break;
         }
+    }
+
+    if (action.onTargetResult != null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "onTargetResult is only allowed on targeted DAMAGE actions",
+            path: [...path, "onTargetResult"],
+        });
     }
 };
 

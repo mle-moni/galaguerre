@@ -1,11 +1,11 @@
-import type { CardActionSnapshot } from "./game.types.js";
+import type { CardActionFieldsSnapshot } from "./game.types.js";
 
-export const getEffectiveDamage = (action: CardActionSnapshot, spellPower = 0): number => {
+export const getEffectiveDamage = (action: CardActionFieldsSnapshot, spellPower = 0): number => {
     return (action.damage ?? 0) + spellPower;
 };
 
 export const getDisplayedDamage = (
-    action: CardActionSnapshot,
+    action: CardActionFieldsSnapshot,
     spellPower?: number,
 ): number | null => {
     if (action.damage === null || action.damage <= 0) return null;

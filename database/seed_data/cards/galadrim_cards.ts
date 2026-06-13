@@ -23,6 +23,8 @@ import {
     enemyDrawAction,
     enemyHero,
     enemyMinions,
+    healthEquals,
+    onTargetSurvivedWithHealth,
     healAction,
     minionDrawFilter,
     otherAllyMinions,
@@ -448,6 +450,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ]),
     defineSpell(112, gal("Navigation Privée", 1), [
         boostAction(boostAttackWithStealth(1), targetedAnyMinion(), true),
+    ]),
+    defineSpell(120, gal("Jet de Ducros", 2), [
+        damageAction(2, targetedAnyMinion(), true, {
+            onTargetResult: onTargetSurvivedWithHealth(healthEquals(1), drawAction(2)),
+        }),
     ]),
 
     // --- weapons ---

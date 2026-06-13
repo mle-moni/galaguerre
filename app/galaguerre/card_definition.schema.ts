@@ -65,18 +65,44 @@ export const cardFilterSchema = z.object({
     tags: z.array(cardTagSchema),
 });
 
-export const cardActionSchema = z
+const cardActionFieldsSchema = z.object({
+    type: z.enum(GALAGUERRE_ACTIONS_TYPES),
+    isTargeted: z.boolean(),
+    damage: z.number().nullable(),
+    heal: z.number().nullable(),
+    drawCount: z.number().nullable(),
+    enemyDrawCount: z.number().nullable(),
+    drawCardFilter: cardFilterSchema.nullable(),
+    enemyDrawCardFilter: cardFilterSchema.nullable(),
+    boost: boostSchema.nullable(),
+    target: targetSchema.nullable(),
+});
+
+export const onTargetResultSchema = z
     .object({
-        type: z.enum(GALAGUERRE_ACTIONS_TYPES),
-        isTargeted: z.boolean(),
-        damage: z.number().nullable(),
-        heal: z.number().nullable(),
-        drawCount: z.number().nullable(),
-        enemyDrawCount: z.number().nullable(),
-        drawCardFilter: cardFilterSchema.nullable(),
-        enemyDrawCardFilter: cardFilterSchema.nullable(),
-        boost: boostSchema.nullable(),
-        target: targetSchema.nullable(),
+        when: z.enum(["KILLED", "SURVIVED"]),
+        healthComparison: comparisonSchema.nullable(),
+        action: cardActionFieldsSchema,
+    })
+    .superRefine((onTargetResult, ctx) => {
+        if (onTargetResult.when === "KILLED" && onTargetResult.healthComparison !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "KILLED onTargetResult must not set healthComparison",
+                path: ["healthComparison"],
+            });
+        }
+
+        if (onTargetResult.when === "SURVIVED" && onTargetResult.healthComparison !== null) {
+            validateComparisonRefinement(onTargetResult.healthComparison, ctx, [
+                "healthComparison",
+            ]);
+        }
+    });
+
+export const cardActionSchema = cardActionFieldsSchema
+    .extend({
+        onTargetResult: onTargetResultSchema.nullable().default(null),
     })
     .superRefine((action, ctx) => {
         validateCardAction(action, ctx, [], { allowTargeted: true });
@@ -142,8 +168,10 @@ export const cardDataSchema = z.discriminatedUnion("type", [
 export type { CardTag } from "./card_tags.js";
 export type {
     CardActionDefinition,
+    CardActionFieldsDefinition,
     BoostDefinition,
     ComparisonDefinition,
+    OnTargetResultDefinition,
     PassiveDefinition,
     TargetDefinition,
 } from "./card_definition.validation.js";

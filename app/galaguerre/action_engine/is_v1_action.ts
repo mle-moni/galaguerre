@@ -1,8 +1,8 @@
-import type { CardActionSnapshot } from "#api_types/game.types";
+import type { CardActionFieldsSnapshot } from "#api_types/game.types";
 import { hasBoostEffect } from "./boost_utils.js";
 import { V1_ACTION_TYPES } from "./v1_action_types.js";
 
-export const isV1Action = (action: CardActionSnapshot): boolean => {
+export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
     if (action.isTargeted) return false;
     if (!V1_ACTION_TYPES.includes(action.type as (typeof V1_ACTION_TYPES)[number])) return false;
 
