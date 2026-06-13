@@ -12,7 +12,9 @@ import {
     placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { assertBoardSpot } from "#tests/helpers/game/assertions";
+import { runPlayCardInMemory } from "#tests/helpers/game/run_play_card_in_memory";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
+import { assertError } from "#tests/helpers/game/socket_event_collector";
 
 test.group("spell effects", () => {
     test("applies spellPower bonus to spell damage", ({ assert }) => {
@@ -419,5 +421,91 @@ test.group("spell effects", () => {
         );
 
         assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 6);
+    });
+
+    test("rejects targeted spell on enemy stealth minion", async ({ assert }) => {
+        const stealthMinion = createMinionCard({
+            uuid: "stealth-minion",
+            health: 4,
+            minionPowers: { hasStealth: true },
+            effects: ["Discrétion"],
+        });
+        const spell = createSpellCard({
+            uuid: "targeted-spell",
+            cost: 3,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: true,
+                    damage: 4,
+                    target: createMinionTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const { game } = await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(stealthMinion),
+                    ),
+                },
+            }),
+            "playerOne",
+            {
+                cardId: "targeted-spell",
+                spotId: null,
+                owner: "PLAYER",
+                actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" },
+            },
+        );
+
+        assertError(assert, "Cible invalide pour cette carte");
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 4 });
+    });
+
+    test("aoe spell damages stealth minion", ({ assert }) => {
+        const stealthMinion = createMinionCard({
+            uuid: "stealth-minion",
+            health: 4,
+            minionPowers: { hasStealth: true },
+            effects: ["Discrétion"],
+        });
+        const spell = createSpellCard({
+            cost: 2,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 2,
+                    target: createMinionTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(stealthMinion),
+                    ),
+                },
+            }),
+            spell,
+        );
+
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
     });
 });

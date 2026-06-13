@@ -18,7 +18,20 @@ const toPlayerCard = (card: ApiCatalogCard): PlayerCard => {
     };
 
     if (card.type === "MINION") {
-        return { ...base, ...card, type: "MINION" as const };
+        const { id, cardSetId, minionPowers, ...minionFields } = card;
+        return {
+            ...base,
+            ...minionFields,
+            type: "MINION" as const,
+            minionPowers: minionPowers ?? {
+                hasTaunt: false,
+                hasCharge: false,
+                hasWindfury: false,
+                isPoisonous: false,
+                hasStealth: false,
+                hasDivineShield: false,
+            },
+        };
     }
     if (card.type === "SPELL") {
         return { ...base, ...card, type: "SPELL" as const };

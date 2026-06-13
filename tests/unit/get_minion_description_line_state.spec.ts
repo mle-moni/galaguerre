@@ -11,6 +11,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
     label: "Test",
     cost: 1,
     imageUrl: "",
+    tags: [],
     type: "MINION",
     attack: 2,
     health: 2,
@@ -24,7 +25,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
     },
     effects: [],
     description:
-        "Serviteur 2/2.\nImmunité : Bloque la première source de dégâts reçue.\nDiscrétion : Ne peut être ciblé par les attaques.",
+        "Serviteur 2/2.\nImmunité : Bloque la première source de dégâts reçue.\nDiscrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
     battlecryActions: [],
     deathrattleActions: [],
     passives: [],
@@ -57,7 +58,7 @@ test.group("get_minion_description_line_state", () => {
         );
         assert.isTrue(
             isMinionDescriptionLineDisabled(
-                "Discrétion : Ne peut être ciblé par les attaques.",
+                "Discrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
                 2,
                 activeEffects,
             ),
@@ -88,7 +89,7 @@ test.group("get_minion_description_line_state", () => {
         );
         assert.isFalse(
             isMinionDescriptionLineDisabled(
-                "Discrétion : Ne peut être ciblé par les attaques.",
+                "Discrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
                 2,
                 activeEffects,
             ),

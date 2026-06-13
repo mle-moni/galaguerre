@@ -2,11 +2,14 @@ import { test } from "@japa/runner";
 import {
     heroMatchesTarget,
     minionMatchesTarget,
+    selectedTargetMatchesAction,
     shouldExcludeSourceMinion,
 } from "#api_types/target_matching";
 import {
     createAllTargetSnapshot,
+    createCardActionSnapshot,
     createComparisonSnapshot,
+    createEmptyBoard,
     createHeroTargetSnapshot,
     createMinionCard,
     createMinionState,
@@ -148,5 +151,62 @@ test.group("target_matching", () => {
         assert.isFalse(
             shouldExcludeSourceMinion(createMinionTargetSnapshot("PLAYER"), source, source),
         );
+    });
+
+    test("selectedTargetMatchesAction rejects opponent minion with stealth", ({ assert }) => {
+        const stealthCard = createMinionCard({
+            uuid: "stealth-minion",
+            minionPowers: { hasStealth: true },
+        });
+        const stealthMinion = createMinionState(stealthCard);
+        const playerBoard = createEmptyBoard();
+        const opponentBoard = { ...createEmptyBoard(), SPOT_1: stealthMinion };
+        const action = createCardActionSnapshot({
+            isTargeted: true,
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.isFalse(
+            selectedTargetMatchesAction(
+                { spotId: "SPOT_1", owner: "OPPONENT" },
+                action,
+                playerBoard,
+                opponentBoard,
+            ),
+        );
+    });
+
+    test("selectedTargetMatchesAction allows ally minion with stealth", ({ assert }) => {
+        const stealthCard = createMinionCard({
+            uuid: "stealth-minion",
+            minionPowers: { hasStealth: true },
+        });
+        const stealthMinion = createMinionState(stealthCard);
+        const playerBoard = { ...createEmptyBoard(), SPOT_1: stealthMinion };
+        const opponentBoard = createEmptyBoard();
+        const action = createCardActionSnapshot({
+            isTargeted: true,
+            target: createMinionTargetSnapshot("PLAYER"),
+        });
+
+        assert.isTrue(
+            selectedTargetMatchesAction(
+                { spotId: "SPOT_1", owner: "PLAYER" },
+                action,
+                playerBoard,
+                opponentBoard,
+            ),
+        );
+    });
+
+    test("minionMatchesTarget still matches stealth minions for AoE filtering", ({ assert }) => {
+        const stealthCard = createMinionCard({
+            uuid: "stealth-minion",
+            minionPowers: { hasStealth: true },
+        });
+        const stealthMinion = createMinionState(stealthCard);
+        const target = createMinionTargetSnapshot("OPPONENT");
+
+        assert.isTrue(minionMatchesTarget(stealthMinion, target, true));
     });
 });

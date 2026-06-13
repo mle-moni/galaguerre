@@ -4,7 +4,7 @@ import {
     getActualDamage,
     recordDamageDealt,
 } from "../../../galaguerre/game_stats/record_player_stats.js";
-import { ensureValidTauntTarget, recordMinionAttack } from "../game_utils.js";
+import { ensureValidAttackTarget, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import type { MinionActionOptions } from "./minion_to_minion_action.js";
@@ -28,7 +28,7 @@ export const minionToHeroAction = async ({
         return;
     }
 
-    const isValidTarget = ensureValidTauntTarget(opponent.board, null, owner, null, socketId);
+    const isValidTarget = ensureValidAttackTarget(opponent.board, null, owner, null, socketId);
     if (!isValidTarget) return;
 
     recordAttack(game, player, minionInfos.minion.originalCard, {

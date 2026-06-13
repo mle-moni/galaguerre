@@ -20,7 +20,8 @@ const EFFECT_DESCRIPTIONS: Record<string, string> = {
     Charge: "Peut attaquer dès le tour où il est joué.",
     "Furie des vents": "Peut attaquer deux fois par tour.",
     Toxique: "Détruit tout serviteur blessé par ce serviteur.",
-    Discrétion: "Ne peut être ciblé par les attaques.",
+    Discrétion:
+        "Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
     Immunité: "Bloque la première source de dégâts reçue.",
 };
 

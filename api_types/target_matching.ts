@@ -30,6 +30,13 @@ export const heroMatchesTarget = (target: TargetSnapshot, isOpponentHero: boolea
     return targetIsOpponent === isOpponentHero;
 };
 
+export const getMinionHasStealth = (minion: MinionState): boolean =>
+    minion.originalCard.type === "MINION" &&
+    (minion.originalCard.minionPowers?.hasStealth ?? false);
+
+export const canOpponentDirectlyTargetMinion = (minion: MinionState): boolean =>
+    !getMinionHasStealth(minion);
+
 export const shouldExcludeSourceMinion = (
     target: TargetSnapshot,
     sourceMinion: MinionState | undefined,
@@ -88,5 +95,9 @@ export const selectedTargetMatchesAction = (
     const minion = board[selectedTarget.spotId];
     if (!minion) return false;
 
-    return minionMatchesTarget(minion, action.target, isOpponent);
+    if (!minionMatchesTarget(minion, action.target, isOpponent)) return false;
+
+    if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) return false;
+
+    return true;
 };

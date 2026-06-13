@@ -127,4 +127,30 @@ test.group("pick_random_targets", () => {
 
         assert.deepEqual(picks, []);
     });
+
+    test("collectEligibleActionTargets excludes opponent stealth minions", ({ assert }) => {
+        const data = createGameData();
+        const visibleMinion = createMinionState(createMinionCard({ uuid: "visible" }));
+        const stealthMinion = createMinionState(
+            createMinionCard({
+                uuid: "stealth",
+                minionPowers: { hasStealth: true },
+            }),
+        );
+
+        data.playerTwo.board = placeMinion(
+            placeMinion(data.playerTwo.board, "SPOT_1", visibleMinion),
+            "SPOT_2",
+            stealthMinion,
+        );
+
+        const target = createMinionTargetSnapshot("OPPONENT", {
+            maxTargets: 1,
+            targetSelectionMode: "RANDOM",
+        });
+
+        const eligible = collectEligibleActionTargets(target, data.playerOne, data.playerTwo);
+
+        assert.deepEqual(eligible, [{ spotId: "SPOT_1", owner: "OPPONENT" }]);
+    });
 });

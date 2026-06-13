@@ -888,4 +888,134 @@ test.group("minion combat", () => {
         assertError(assert, "Ce n'est pas votre tour (gros con)");
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
+
+    test("rejects attack on stealth minion", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 3,
+        });
+        const stealthCard = createMinionCard({
+            uuid: "stealth-minion",
+            attack: 1,
+            health: 3,
+            minionPowers: { hasStealth: true },
+            effects: ["Discrétion"],
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(stealthCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: "SPOT_1", owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Ce serviteur ne peut pas être ciblé");
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 3 });
+    });
+
+    test("allows hero attack when only taunt minion has stealth", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 3,
+        });
+        const stealthTauntCard = createMinionCard({
+            uuid: "stealth-taunt",
+            attack: 1,
+            health: 3,
+            minionPowers: { hasTaunt: true, hasStealth: true },
+            effects: ["Provocation", "Discrétion"],
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        "SPOT_1",
+                        createMinionState(attackerCard),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        "SPOT_1",
+                        createMinionState(stealthTauntCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, spotId: null, owner: "OPPONENT" },
+        );
+
+        assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 3);
+    });
+
+    test("allows attacking stealth minion after it has attacked", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 5,
+        });
+        const stealthCard = createMinionCard({
+            uuid: "stealth-minion",
+            attack: 2,
+            health: 4,
+            minionPowers: { hasStealth: true, hasCharge: true },
+            effects: ["Discrétion", "Charge"],
+        });
+
+        const data = createGameData({
+            currentRound: 2,
+            playerOne: {
+                board: placeMinion(
+                    createGameData().playerOne.board,
+                    "SPOT_1",
+                    createMinionState(attackerCard, { placedAtRound: 1 }),
+                ),
+            },
+            playerTwo: {
+                board: placeMinion(
+                    createGameData().playerTwo.board,
+                    "SPOT_1",
+                    createMinionState(stealthCard, { placedAtRound: 1 }),
+                ),
+            },
+        });
+
+        const { game: gameAfterStealthAttack } = await runMinionActionInMemory(
+            { ...data, state: "PLAYER_TWO_TURN" },
+            "playerTwo",
+            {
+                minionId: "stealth-minion",
+                spotId: null,
+                owner: "OPPONENT",
+            },
+        );
+
+        gameAfterStealthAttack.data.state = "PLAYER_ONE_TURN";
+
+        const { game } = await runMinionActionOnGameInMemory(gameAfterStealthAttack, "playerOne", {
+            minionId: MINION_IDS.attacker,
+            spotId: "SPOT_1",
+            owner: "OPPONENT",
+        });
+
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 1 });
+    });
 });

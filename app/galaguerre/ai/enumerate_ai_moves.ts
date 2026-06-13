@@ -14,8 +14,9 @@ import {
     minionMatchesTarget,
     selectedTargetMatchesAction,
 } from "#api_types/target_matching";
+import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 import {
-    boardHasTaunt,
+    boardHasAttackableTaunt,
     canMinionAttack,
     canWeaponAttack,
     getMinionHasTaunt,
@@ -103,12 +104,16 @@ const targetMatchesAllActions = (
 
 const enumerateAttackTargets = (
     opponentBoard: GamePlayer["board"],
-    hasTaunt: boolean,
+    hasAttackableTaunt: boolean,
 ): Array<{ spotId: MinionSpotId | null; owner: "OPPONENT" }> => {
-    if (hasTaunt) {
+    if (hasAttackableTaunt) {
         return MINION_SPOT_IDS.filter((spotId) => {
             const minion = opponentBoard[spotId];
-            return minion !== null && getMinionHasTaunt(minion);
+            return (
+                minion !== null &&
+                getMinionHasTaunt(minion) &&
+                canOpponentDirectlyTargetMinion(minion)
+            );
         }).map((spotId) => ({ spotId, owner: "OPPONENT" as const }));
     }
 
@@ -117,7 +122,8 @@ const enumerateAttackTargets = (
     ];
 
     for (const spotId of MINION_SPOT_IDS) {
-        if (opponentBoard[spotId] !== null) {
+        const minion = opponentBoard[spotId];
+        if (minion !== null && canOpponentDirectlyTargetMinion(minion)) {
             targets.push({ spotId, owner: "OPPONENT" });
         }
     }
@@ -133,8 +139,8 @@ const enumerateWeaponAttacks = (game: Game, player: GamePlayer, opponent: GamePl
         return moves;
     }
 
-    const hasTaunt = boardHasTaunt(opponent.board);
-    const targets = enumerateAttackTargets(opponent.board, hasTaunt);
+    const hasAttackableTaunt = boardHasAttackableTaunt(opponent.board);
+    const targets = enumerateAttackTargets(opponent.board, hasAttackableTaunt);
 
     for (const { spotId, owner } of targets) {
         moves.push({
@@ -149,8 +155,8 @@ const enumerateWeaponAttacks = (game: Game, player: GamePlayer, opponent: GamePl
 const enumerateMinionAttacks = (game: Game, player: GamePlayer, opponent: GamePlayer): AiMove[] => {
     const moves: AiMove[] = [];
     const currentRound = game.data.currentRound;
-    const hasTaunt = boardHasTaunt(opponent.board);
-    const targets = enumerateAttackTargets(opponent.board, hasTaunt);
+    const hasAttackableTaunt = boardHasAttackableTaunt(opponent.board);
+    const targets = enumerateAttackTargets(opponent.board, hasAttackableTaunt);
 
     for (const spotId of MINION_SPOT_IDS) {
         const minion = player.board[spotId];

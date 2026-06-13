@@ -6,6 +6,7 @@ import type {
     SpotOwner,
 } from "#api_types/game.types";
 import { MINION_SPOT_IDS } from "#api_types/game.types";
+import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 
 import { makeAutoObservable } from "mobx";
 import { canMinionAttack } from "~/helpers/minion_combat";
@@ -20,10 +21,12 @@ const getMinionHasTaunt = (minion: MinionState): boolean => {
     return minion.originalCard.minionPowers?.hasTaunt ?? false;
 };
 
-const boardHasTaunt = (board: BoardState): boolean => {
+const boardHasAttackableTaunt = (board: BoardState): boolean => {
     return MINION_SPOT_IDS.some((spotId) => {
         const minion = board[spotId];
-        return minion !== null && getMinionHasTaunt(minion);
+        return (
+            minion !== null && getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion)
+        );
     });
 };
 
@@ -93,16 +96,18 @@ export class MinionDragStore {
         if (!canMinionAttack(minion, this.gameStore.game.data.currentRound)) return false;
 
         const opponentBoard = this.gameStore.opponent.board;
-        const hasTaunt = boardHasTaunt(opponentBoard);
+        const hasAttackableTaunt = boardHasAttackableTaunt(opponentBoard);
 
-        if (spotId === null) return !hasTaunt;
+        if (spotId === null) return !hasAttackableTaunt;
 
         if (!this.canPlayMinionOnSpot(spotId, spotOwner)) return false;
 
-        if (!hasTaunt) return true;
-
         const targetMinion = opponentBoard[spotId];
-        return targetMinion !== null && getMinionHasTaunt(targetMinion);
+        if (!targetMinion || !canOpponentDirectlyTargetMinion(targetMinion)) return false;
+
+        if (!hasAttackableTaunt) return true;
+
+        return getMinionHasTaunt(targetMinion);
     }
 
     canSelectTarget(actionTarget: ActionTarget): boolean {
@@ -146,7 +151,7 @@ export class MinionDragStore {
         if (!canMinionAttack(this.attackingMinion, this.gameStore.game.data.currentRound))
             return transparent;
 
-        if (boardHasTaunt(this.gameStore.opponent.board)) return "red";
+        if (boardHasAttackableTaunt(this.gameStore.opponent.board)) return "red";
 
         return "green";
     }

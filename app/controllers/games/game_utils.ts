@@ -16,6 +16,7 @@ import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { popStealth } from "../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { recordHeroAttack as recordHeroAttackStat } from "../../galaguerre/game_stats/record_player_stats.js";
+import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 
 export const getGameActionInfos = async (socketId: string) => {
     const socketData = getSocketDataFromSocketId(socketId);
@@ -210,6 +211,15 @@ export const boardHasTaunt = (board: BoardState): boolean => {
     });
 };
 
+export const boardHasAttackableTaunt = (board: BoardState): boolean => {
+    return MINION_SPOT_IDS.some((spotId) => {
+        const minion = board[spotId];
+        return (
+            minion !== null && getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion)
+        );
+    });
+};
+
 export const getHeroAttacksThisRound = (player: GamePlayer, currentRound: number): number => {
     if (player.heroLastAttackAtRound !== currentRound) return 0;
     return player.heroAttacksThisRound ?? 1;
@@ -238,32 +248,45 @@ export const canWeaponAttack = (
     return canHeroAttack(player, currentRound);
 };
 
-export const ensureValidTauntTarget = (
+export const ensureValidAttackTarget = (
     opponentBoard: BoardState,
     spotId: MinionSpotId | null,
     owner: SpotOwner,
     targetMinion: MinionState | null,
     socketId: string,
 ): boolean => {
-    if (!boardHasTaunt(opponentBoard)) return true;
+    if (boardHasAttackableTaunt(opponentBoard)) {
+        if (spotId === null || owner !== "OPPONENT") {
+            emitSocketEvent(
+                "notify_error",
+                { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+                socketId,
+            );
+            return false;
+        }
 
-    if (spotId === null || owner !== "OPPONENT") {
-        emitSocketEvent(
-            "notify_error",
-            { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
-            socketId,
-        );
-        return false;
+        if (!targetMinion || !getMinionHasTaunt(targetMinion)) {
+            emitSocketEvent(
+                "notify_error",
+                { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+                socketId,
+            );
+            return false;
+        }
     }
 
-    if (!targetMinion || !getMinionHasTaunt(targetMinion)) {
-        emitSocketEvent(
-            "notify_error",
-            { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
-            socketId,
-        );
+    if (
+        spotId !== null &&
+        owner === "OPPONENT" &&
+        targetMinion &&
+        !canOpponentDirectlyTargetMinion(targetMinion)
+    ) {
+        emitSocketEvent("notify_error", { error: "Ce serviteur ne peut pas être ciblé" }, socketId);
         return false;
     }
 
     return true;
 };
+
+/** @deprecated Use ensureValidAttackTarget */
+export const ensureValidTauntTarget = ensureValidAttackTarget;

@@ -9,6 +9,7 @@ import type {
 } from "#api_types/game.types";
 import {
     actionRequiresTarget,
+    canOpponentDirectlyTargetMinion,
     heroMatchesTarget,
     minionMatchesTarget,
 } from "#api_types/target_matching";
@@ -205,6 +206,10 @@ export class TargetSelectionStore {
         const minion = board[actionTarget.spotId];
         if (!minion) return false;
 
+        if (actionTarget.owner === "OPPONENT" && !canOpponentDirectlyTargetMinion(minion)) {
+            return false;
+        }
+
         return targetedActions.every((action) => {
             if (!action.target) return false;
             return minionMatchesTarget(minion, action.target, actionTarget.owner === "OPPONENT");
@@ -228,6 +233,8 @@ export class TargetSelectionStore {
         const board = isOpponent ? this.gameStore.opponent.board : this.gameStore.me.board;
         const minion = board[spotId];
         if (!minion) return false;
+
+        if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) return false;
 
         return targetedActions.every((action) => {
             if (!action.target) return false;

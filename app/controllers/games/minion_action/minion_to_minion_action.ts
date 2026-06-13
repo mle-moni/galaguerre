@@ -6,7 +6,11 @@ import {
     applyDamageToMinion,
     applyPoisonousToMinion,
 } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
-import { ensureValidTauntTarget, getMinionIsPoisonous, recordMinionAttack } from "../game_utils.js";
+import {
+    ensureValidAttackTarget,
+    getMinionIsPoisonous,
+    recordMinionAttack,
+} from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 
@@ -51,7 +55,7 @@ export const minionToMinionAction = async ({
         return;
     }
 
-    const isValidTarget = ensureValidTauntTarget(
+    const isValidTarget = ensureValidAttackTarget(
         opponent.board,
         spotId,
         owner,
