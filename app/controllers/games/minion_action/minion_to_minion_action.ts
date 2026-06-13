@@ -3,10 +3,9 @@ import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import {
-    getActualDamage,
-    recordDamageDealt,
-} from "../../../galaguerre/game_stats/record_player_stats.js";
-import { killMinion } from "../../../galaguerre/action_engine/kill_minion.js";
+    applyDamageToMinion,
+    applyPoisonousToMinion,
+} from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { ensureValidTauntTarget, getMinionIsPoisonous, recordMinionAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -71,41 +70,65 @@ export const minionToMinionAction = async ({
     const targetIsPoisonous = getMinionIsPoisonous(targetMinion);
     const attackerIsPoisonous = getMinionIsPoisonous(attacker);
 
-    if (targetIsPoisonous) {
-        recordDamageDealt(opponent, attacker.health);
-        attacker.health = 0;
-    } else {
-        const retaliationDamage = getActualDamage(attacker.health, targetMinion.attack);
-        attacker.health -= targetMinion.attack;
-        recordDamageDealt(opponent, retaliationDamage);
-    }
-    if (attackerIsPoisonous) {
-        recordDamageDealt(player, targetMinion.health);
-        targetMinion.health = 0;
-    } else {
-        const attackDamage = getActualDamage(targetMinion.health, attacker.attack);
-        targetMinion.health -= attacker.attack;
-        recordDamageDealt(player, attackDamage);
-    }
-    recordMinionAttack(minionInfos.minion, game.data.currentRound);
-
     const initiatorOwner = minionInfos.position.owner === "PLAYER" ? player : opponent;
     const targetOwner = opponent;
+    const attackerSpotId = minionInfos.position.spotId;
 
-    if (minionInfos.minion.health <= 0) {
-        const { gameEnded } = killMinion(game, initiatorOwner, minionInfos.position.spotId);
-        if (gameEnded) {
+    if (targetIsPoisonous) {
+        const retaliationResult = applyPoisonousToMinion(
+            game,
+            initiatorOwner,
+            attackerSpotId,
+            attacker,
+            opponent,
+        );
+        if (retaliationResult.gameEnded) {
+            await terminateGame(game);
+            return;
+        }
+    } else {
+        const retaliationResult = applyDamageToMinion(
+            game,
+            initiatorOwner,
+            attackerSpotId,
+            attacker,
+            targetMinion.attack,
+            opponent,
+        );
+        if (retaliationResult.gameEnded) {
             await terminateGame(game);
             return;
         }
     }
-    if (targetMinion.health <= 0) {
-        const { gameEnded } = killMinion(game, targetOwner, spotId);
-        if (gameEnded) {
+
+    if (attackerIsPoisonous) {
+        const attackResult = applyPoisonousToMinion(
+            game,
+            targetOwner,
+            spotId,
+            targetMinion,
+            player,
+        );
+        if (attackResult.gameEnded) {
+            await terminateGame(game);
+            return;
+        }
+    } else {
+        const attackResult = applyDamageToMinion(
+            game,
+            targetOwner,
+            spotId,
+            targetMinion,
+            attacker.attack,
+            player,
+        );
+        if (attackResult.gameEnded) {
             await terminateGame(game);
             return;
         }
     }
+
+    recordMinionAttack(minionInfos.minion, game.data.currentRound);
 
     await game.save();
 

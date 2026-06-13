@@ -98,9 +98,9 @@ test.group("target_matching", () => {
     });
 
     test("minionMatchesTarget with ALL still applies tag filter", ({ assert }) => {
-        const target = createMinionTargetSnapshot("ALL", { tag: "MURLOC" });
-        const matchingMinion = createMinionState(createMinionCard({ tags: ["MURLOC"] }));
-        const otherMinion = createMinionState(createMinionCard({ tags: ["BEAST"] }));
+        const target = createMinionTargetSnapshot("ALL", { tag: "DEVELOPPEUR" });
+        const matchingMinion = createMinionState(createMinionCard({ tags: ["DEVELOPPEUR"] }));
+        const otherMinion = createMinionState(createMinionCard({ tags: ["PM"] }));
 
         assert.isTrue(minionMatchesTarget(matchingMinion, target, false));
         assert.isTrue(minionMatchesTarget(matchingMinion, target, true));
@@ -130,9 +130,9 @@ test.group("target_matching", () => {
     });
 
     test("minionMatchesTarget with ALL type still applies tag filter", ({ assert }) => {
-        const target = createAllTargetSnapshot("ALL", { tag: "MURLOC" });
-        const matchingMinion = createMinionState(createMinionCard({ tags: ["MURLOC"] }));
-        const otherMinion = createMinionState(createMinionCard({ tags: ["BEAST"] }));
+        const target = createAllTargetSnapshot("ALL", { tag: "DEVELOPPEUR" });
+        const matchingMinion = createMinionState(createMinionCard({ tags: ["DEVELOPPEUR"] }));
+        const otherMinion = createMinionState(createMinionCard({ tags: ["PM"] }));
 
         assert.isTrue(minionMatchesTarget(matchingMinion, target, false));
         assert.isFalse(minionMatchesTarget(otherMinion, target, true));

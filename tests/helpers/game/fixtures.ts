@@ -19,7 +19,7 @@ import {
     type WeaponCard,
     type WeaponState,
 } from "#api_types/game.types";
-import { normalizeMinionPowers } from "#galaguerre/minion_card_metadata";
+import { getMinionPowerEffects, normalizeMinionPowers } from "#galaguerre/minion_card_metadata";
 
 export const MINION_IDS = {
     attacker: "minion-attacker",
@@ -177,6 +177,7 @@ export const createMinionState = (
         placedAtRound: 0,
         lastActionAtRound: 0,
         attacksThisRound: 0,
+        divineShieldConsumed: false,
         initialKeywords: {
             hasTaunt: minionPowers.hasTaunt,
             hasCharge: minionPowers.hasCharge,
@@ -193,7 +194,11 @@ export const createMinionState = (
             hasStealth: false,
             hasDivineShield: false,
         },
-        originalCard: { ...card },
+        originalCard: {
+            ...card,
+            minionPowers,
+            effects: getMinionPowerEffects(minionPowers),
+        },
         isSilenced: false,
         ...overrides,
     };

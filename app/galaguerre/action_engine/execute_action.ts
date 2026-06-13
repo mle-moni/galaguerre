@@ -16,11 +16,11 @@ import {
 } from "../game_stats/record_player_stats.js";
 import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
+import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
-import { killMinion } from "./kill_minion.js";
 import {
     applyDamageToAllMinions,
     applyHealToAllMinions,
@@ -60,13 +60,16 @@ const applyEffectToResolvedTarget = (
                 resolved.player.health -= damage;
                 recordDamageDealt(player, actualDamage);
             } else {
-                const actualDamage = getActualDamage(resolved.minion.health, damage);
-                resolved.minion.health -= damage;
-                recordDamageDealt(player, actualDamage);
-                if (resolved.minion.health <= 0) {
-                    const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
-                    killMinion(game, owner, resolved.spotId);
-                }
+                const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+                const result = applyDamageToMinion(
+                    game,
+                    owner,
+                    resolved.spotId,
+                    resolved.minion,
+                    damage,
+                    player,
+                );
+                if (result.gameEnded) return true;
             }
             return false;
         }

@@ -1,10 +1,7 @@
 export const CARD_TAGS = [
-    "BEAST",
-    "MECH",
-    "MURLOC",
-    "PIRATE",
     "DEVELOPPEUR",
     "PM",
+    "SALES",
     "PARISIEN",
     "NANTAIS",
     "LYONNAIS",
@@ -14,12 +11,9 @@ export const CARD_TAGS = [
 export type CardTag = (typeof CARD_TAGS)[number];
 
 export const CARD_TAG_LABELS: Record<CardTag, { label: string; symbol: string }> = {
-    BEAST: { label: "Bête", symbol: "🦁" },
-    MECH: { label: "Méca", symbol: "⚙️" },
-    MURLOC: { label: "Murloc", symbol: "🐟" },
-    PIRATE: { label: "Pirate", symbol: "🏴‍☠️" },
     DEVELOPPEUR: { label: "Développeur", symbol: "💻" },
     PM: { label: "PM", symbol: "📊" },
+    SALES: { label: "Sales", symbol: "💰" },
     PARISIEN: { label: "Parisien", symbol: "📍" },
     NANTAIS: { label: "Nantais", symbol: "📍" },
     LYONNAIS: { label: "Lyonnais", symbol: "📍" },

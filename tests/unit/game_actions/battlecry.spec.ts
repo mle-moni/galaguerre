@@ -790,7 +790,7 @@ test.group("battlecries", () => {
             uuid: MINION_IDS.target,
             health: 4,
             attack: 2,
-            tags: ["MURLOC"],
+            tags: ["DEVELOPPEUR"],
         });
         const targetMinion = createMinionState(targetCard);
 
@@ -802,7 +802,7 @@ test.group("battlecries", () => {
                     type: "DAMAGE",
                     damage: 2,
                     isTargeted: true,
-                    target: createMinionTargetSnapshot("OPPONENT", { tag: "MURLOC" }),
+                    target: createMinionTargetSnapshot("OPPONENT", { tag: "DEVELOPPEUR" }),
                 }),
             ],
         });

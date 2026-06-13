@@ -21,7 +21,7 @@ const EFFECT_DESCRIPTIONS: Record<string, string> = {
     "Furie des vents": "Peut attaquer deux fois par tour.",
     Toxique: "Détruit tout serviteur blessé par ce serviteur.",
     Discrétion: "Ne peut être ciblé par les attaques.",
-    Immunité: "Bloque la première attaque reçue.",
+    Immunité: "Bloque la première source de dégâts reçue.",
 };
 
 export const normalizeMinionPowers = (

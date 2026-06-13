@@ -79,13 +79,13 @@ test.group("format_action_description", () => {
             drawCount: 1,
             drawCardFilter: createCardFilterSnapshot({
                 type: "MINION",
-                tags: ["BEAST"],
+                tags: ["DEVELOPPEUR"],
             }),
         });
 
         assert.equal(
             formatActionDescription(action, "Cri de guerre"),
-            "Cri de guerre : Pioche 1 carte Monstre + 🦁 Bête.",
+            "Cri de guerre : Pioche 1 carte Monstre + 💻 Développeur.",
         );
     });
 
@@ -109,13 +109,13 @@ test.group("format_action_description", () => {
             isTargeted: true,
             damage: 2,
             target: createMinionTargetSnapshot("OPPONENT", {
-                tag: "BEAST",
+                tag: "DEVELOPPEUR",
             }),
         });
 
         assert.equal(
             formatActionDescription(action, "Cri de guerre"),
-            "Cri de guerre : Inflige 2 dégâts à un serviteur adverse 🦁 Bête.",
+            "Cri de guerre : Inflige 2 dégâts à un serviteur adverse 💻 Développeur.",
         );
     });
 

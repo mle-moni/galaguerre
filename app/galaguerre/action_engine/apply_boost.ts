@@ -46,6 +46,15 @@ export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): v
             card.minionPowers.isPoisonous = true;
             minion.permanentKeywords.isPoisonous = true;
         }
+        if (boost.minionPowers.hasStealth) {
+            card.minionPowers.hasStealth = true;
+            minion.permanentKeywords.hasStealth = true;
+        }
+        if (boost.minionPowers.hasDivineShield) {
+            card.minionPowers.hasDivineShield = true;
+            minion.permanentKeywords.hasDivineShield = true;
+            minion.divineShieldConsumed = false;
+        }
 
         card.effects = getMinionPowerEffects(card.minionPowers);
     }

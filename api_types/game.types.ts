@@ -129,6 +129,7 @@ export interface MinionState {
     auraAppliedTo?: AuraAppliedTarget[];
     auraHeroSpellPowerAppliedTo?: "PLAYER" | "OPPONENT" | "ALL" | null;
     isSilenced?: boolean;
+    divineShieldConsumed?: boolean;
 }
 
 export interface MinionPosition {

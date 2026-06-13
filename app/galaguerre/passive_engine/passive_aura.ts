@@ -139,6 +139,8 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
     card.minionPowers.hasCharge = keywords.hasCharge;
     card.minionPowers.hasWindfury = keywords.hasWindfury;
     card.minionPowers.isPoisonous = keywords.isPoisonous;
+    card.minionPowers.hasStealth = keywords.hasStealth;
+    card.minionPowers.hasDivineShield = keywords.hasDivineShield && !minion.divineShieldConsumed;
 
     card.effects = getMinionPowerEffects(card.minionPowers);
 };

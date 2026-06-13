@@ -7,15 +7,10 @@ import {
 } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
-import {
-    getActualDamage,
-    getActualHeal,
-    recordDamageDealt,
-    recordHealingDone,
-} from "../game_stats/record_player_stats.js";
+import { getActualHeal, recordHealingDone } from "../game_stats/record_player_stats.js";
 import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
+import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
-import { killMinion } from "./kill_minion.js";
 
 type BoardEntry = {
     board: BoardState;
@@ -56,13 +51,8 @@ export const applyDamageToAllMinions = (
             if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
-            const actualDamage = getActualDamage(minion.health, damage);
-            minion.health -= damage;
-            recordDamageDealt(sourcePlayer, actualDamage);
-            if (minion.health <= 0) {
-                const result = killMinion(game, owner, spotId);
-                if (result.gameEnded) return { gameEnded: true };
-            }
+            const result = applyDamageToMinion(game, owner, spotId, minion, damage, sourcePlayer);
+            if (result.gameEnded) return { gameEnded: true };
         }
     }
 

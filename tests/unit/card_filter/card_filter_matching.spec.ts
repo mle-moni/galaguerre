@@ -38,24 +38,24 @@ test.group("card_filter_matching", () => {
     });
 
     test("deckCardMatchesFilter requires all tags", ({ assert }) => {
-        const card = createMinionCard({ tags: ["BEAST", "MURLOC"] });
+        const card = createMinionCard({ tags: ["DEVELOPPEUR", "PM"] });
 
         assert.isTrue(
             deckCardMatchesFilter(
                 card,
-                createCardFilterSnapshot({ type: "MINION", tags: ["BEAST"] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
             ),
         );
         assert.isTrue(
             deckCardMatchesFilter(
                 card,
-                createCardFilterSnapshot({ type: "MINION", tags: ["BEAST", "MURLOC"] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR", "PM"] }),
             ),
         );
         assert.isFalse(
             deckCardMatchesFilter(
                 card,
-                createCardFilterSnapshot({ type: "MINION", tags: ["BEAST", "PIRATE"] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR", "SALES"] }),
             ),
         );
     });

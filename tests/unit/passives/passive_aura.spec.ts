@@ -121,7 +121,7 @@ test.group("passive BOOST auras", () => {
             uuid: "murloc-minion",
             attack: 1,
             health: 1,
-            tags: ["MURLOC"],
+            tags: ["DEVELOPPEUR"],
         });
         const stormwindKnight = createMinionCard({
             uuid: "stormwind-knight",
@@ -138,7 +138,7 @@ test.group("passive BOOST auras", () => {
                     passiveBoost: {
                         boost: createBoostSnapshot({ attack: 2 }),
                         target: createMinionTargetSnapshot("PLAYER", {
-                            tag: "MURLOC",
+                            tag: "DEVELOPPEUR",
                             excludeSelf: true,
                         }),
                     },

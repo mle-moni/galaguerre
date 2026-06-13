@@ -6,7 +6,7 @@ import {
     getActualDamage,
     recordDamageDealt,
 } from "../../../galaguerre/game_stats/record_player_stats.js";
-import { killMinion } from "../../../galaguerre/action_engine/kill_minion.js";
+import { applyDamageToMinion } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { ensureValidTauntTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -67,23 +67,24 @@ export const weaponToMinionAction = async ({
         card: targetMinion.originalCard,
     });
 
-    const weaponDamage = getActualDamage(targetMinion.health, weaponState.damage);
-    targetMinion.health -= weaponState.damage;
-    recordDamageDealt(player, weaponDamage);
+    const weaponDamageResult = applyDamageToMinion(
+        game,
+        opponent,
+        spotId,
+        targetMinion,
+        weaponState.damage,
+        player,
+    );
+    if (weaponDamageResult.gameEnded) {
+        await terminateGame(game);
+        return;
+    }
 
     const retaliationDamage = getActualDamage(player.health, targetMinion.attack);
     player.health -= targetMinion.attack;
     recordDamageDealt(opponent, retaliationDamage);
 
     recordHeroAttack(player, game.data.currentRound);
-
-    if (targetMinion.health <= 0) {
-        const { gameEnded } = killMinion(game, opponent, spotId);
-        if (gameEnded) {
-            await terminateGame(game);
-            return;
-        }
-    }
 
     const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
     if (durabilityGameEnded || player.health <= 0 || opponent.health <= 0) {

@@ -176,6 +176,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         77,
         { ...gal("Sales Charismatique", 2), attack: 2, health: 3 },
         {
+            tags: ["SALES"],
             battlecryActions: [drawAction(1), enemyDrawAction(1)],
         },
     ),
