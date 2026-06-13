@@ -1,4 +1,4 @@
-import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
+import { DEFAULT_HERO_HEALTH, MinionCard } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import {
     assertBoardSpot,
@@ -1063,10 +1063,9 @@ test.group("minion combat", () => {
             },
         );
 
-        assert.isFalse(
-            gameAfterStealthAttack.data.playerTwo.board.SPOT_1!.originalCard.minionPowers!
-                .hasStealth,
-        );
+        const spot1Card = gameAfterStealthAttack.data.playerTwo.board.SPOT_1!.originalCard;
+
+        assert.isFalse((spot1Card as MinionCard).minionPowers!.hasStealth);
         assertPlayerHealth(assert, gameAfterStealthAttack, "playerOne", DEFAULT_HERO_HEALTH - 1);
 
         gameAfterStealthAttack.data.state = "PLAYER_ONE_TURN";

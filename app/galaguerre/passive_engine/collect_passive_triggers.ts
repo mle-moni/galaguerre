@@ -4,8 +4,10 @@ import {
     type MinionCard,
     type PassiveSnapshot,
     type PassiveTriggersOn,
+    type PlayerCard,
     type SpotOwner,
 } from "#api_types/game.types";
+import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import type Game from "#models/game";
 
 export interface PassiveTriggerEntry {
@@ -21,6 +23,7 @@ const collectFromBoard = (
     sourceOwner: SpotOwner,
     triggersOn: PassiveTriggersOn,
     activePlayer?: GamePlayer,
+    playedCard?: PlayerCard,
 ): PassiveTriggerEntry[] => {
     const entries: PassiveTriggerEntry[] = [];
 
@@ -33,7 +36,15 @@ const collectFromBoard = (
             if (passive.type !== "ACTION" || passive.triggersOn !== triggersOn) continue;
             if (!passive.action) continue;
 
-            if (
+            if (triggersOn === "PLAY_CARD") {
+                if (!playedCard || !activePlayer || owner !== activePlayer) continue;
+                if (
+                    passive.playCardFilter !== null &&
+                    !deckCardMatchesFilter(playedCard, passive.playCardFilter)
+                ) {
+                    continue;
+                }
+            } else if (
                 (triggersOn === "TURN_END" ||
                     triggersOn === "TURN_BEGIN" ||
                     triggersOn === "DRAW") &&
@@ -59,6 +70,7 @@ export const collectPassiveTriggers = (
     game: Game,
     triggersOn: PassiveTriggersOn,
     activePlayer?: GamePlayer,
+    playedCard?: PlayerCard,
 ): PassiveTriggerEntry[] => {
     const playerOne = game.data.playerOne;
     const playerTwo = game.data.playerTwo;
@@ -69,6 +81,7 @@ export const collectPassiveTriggers = (
         "PLAYER",
         triggersOn,
         activePlayer,
+        playedCard,
     );
     const playerTwoEntries = collectFromBoard(
         playerTwo.board,
@@ -76,6 +89,7 @@ export const collectPassiveTriggers = (
         "OPPONENT",
         triggersOn,
         activePlayer,
+        playedCard,
     );
 
     return [...playerOneEntries, ...playerTwoEntries];

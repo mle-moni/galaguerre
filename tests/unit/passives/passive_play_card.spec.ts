@@ -1,0 +1,369 @@
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
+import { test } from "@japa/runner";
+import type Game from "#models/game";
+import { triggerPlayCardPassives } from "../../../app/galaguerre/passive_engine/trigger_play_card_passives.js";
+import {
+    createCardActionSnapshot,
+    createCardFilterSnapshot,
+    createEmptyBoard,
+    createGameData,
+    createHeroTargetSnapshot,
+    createMinionCard,
+    createMinionState,
+    createMinionTargetSnapshot,
+    createPassiveSnapshot,
+    createSpellCard,
+    placeMinion,
+} from "#tests/helpers/game/fixtures";
+import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { runPlayMinion, runPlaySpell } from "#tests/helpers/game/run_play_minion";
+
+const createGame = (data: ReturnType<typeof createGameData>) => ({ data }) as Game;
+
+const spellPlayCardFilter = createCardFilterSnapshot({ type: "SPELL" });
+const minionPlayCardFilter = createCardFilterSnapshot({ type: "MINION" });
+
+test.group("passive PLAY_CARD triggers", () => {
+    test("SPELL filter deals damage to all minions after a spell is played (Pyromancer)", ({
+        assert,
+    }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "pyromancer",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: spellPlayCardFilter,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createMinionTargetSnapshot("ALL"),
+                    }),
+                }),
+            ],
+        });
+        const boardMinion = createMinionCard({ uuid: "board-minion", health: 3 });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+            playerTwo: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(boardMinion)),
+            },
+        });
+
+        const game = createGame(data);
+        const spell = createSpellCard({ uuid: "fireball", cost: 0 });
+
+        triggerPlayCardPassives(game, game.data.playerOne, spell);
+
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
+    });
+
+    test("MINION filter deals damage to opponent hero after a minion is played (Knife Juggler)", ({
+        assert,
+    }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "knife-juggler",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: minionPlayCardFilter,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        const playedMinion = createMinionCard({ uuid: "played-minion", cost: 1 });
+
+        triggerPlayCardPassives(game, game.data.playerOne, playedMinion);
+
+        assertPlayerHealth(assert, game, "playerTwo", 14);
+    });
+
+    test("MINION filter does not trigger when a spell is played", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "knife-juggler",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: minionPlayCardFilter,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        triggerPlayCardPassives(game, game.data.playerOne, createSpellCard({ cost: 0 }));
+
+        assertPlayerHealth(assert, game, "playerTwo", 15);
+    });
+
+    test("SPELL filter does not trigger when a minion is played", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "pyromancer",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: spellPlayCardFilter,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        triggerPlayCardPassives(
+            game,
+            game.data.playerOne,
+            createMinionCard({ uuid: "played-minion", cost: 1 }),
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", 15);
+    });
+
+    test("opponent passive does not trigger when the other player plays a card", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "opponent-passive",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: null,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: { health: 15 },
+            playerTwo: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+        });
+
+        const game = createGame(data);
+        triggerPlayCardPassives(
+            game,
+            game.data.playerOne,
+            createMinionCard({ uuid: "played-minion", cost: 1 }),
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
+
+    test("null playCardFilter triggers on both spell and minion plays", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "generic-watcher",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: null,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const baseData = {
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+            playerTwo: { health: 15 },
+        };
+
+        const gameAfterSpell = createGame(createGameData(baseData));
+        triggerPlayCardPassives(
+            gameAfterSpell,
+            gameAfterSpell.data.playerOne,
+            createSpellCard({ cost: 0 }),
+        );
+        assertPlayerHealth(assert, gameAfterSpell, "playerTwo", 14);
+
+        const gameAfterMinion = createGame(createGameData(baseData));
+        triggerPlayCardPassives(
+            gameAfterMinion,
+            gameAfterMinion.data.playerOne,
+            createMinionCard({ uuid: "played-minion", cost: 1 }),
+        );
+        assertPlayerHealth(assert, gameAfterMinion, "playerTwo", 14);
+    });
+
+    test("silenced minion passive does not trigger", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "silenced-watcher",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: null,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", {
+                    ...createMinionState(passiveMinion),
+                    isSilenced: true,
+                }),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        triggerPlayCardPassives(
+            game,
+            game.data.playerOne,
+            createMinionCard({ uuid: "played-minion", cost: 1 }),
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", 15);
+    });
+
+    test("triggers after battlecry when playing a minion", async ({ assert }) => {
+        const watcher = createMinionCard({
+            uuid: "watcher",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: minionPlayCardFilter,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+        const battlecryMinion = createMinionCard({
+            uuid: "battlecry-minion",
+            cost: 1,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const { game } = await runPlayMinion(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [battlecryMinion],
+                    board: placeMinion(createEmptyBoard(), "SPOT_2", createMinionState(watcher)),
+                },
+                playerTwo: { health: 20 },
+            }),
+            battlecryMinion,
+            { spotId: "SPOT_1" },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", 17);
+    });
+
+    test("triggers after spell effect when playing a spell", async ({ assert }) => {
+        const watcher = createMinionCard({
+            uuid: "pyromancer",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "PLAY_CARD",
+                    playCardFilter: spellPlayCardFilter,
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createMinionTargetSnapshot("ALL"),
+                    }),
+                }),
+            ],
+        });
+        const boardMinion = createMinionCard({ uuid: "enemy-minion", health: 3 });
+        const spell = createSpellCard({
+            uuid: "fireball",
+            cost: 0,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    damage: 2,
+                    target: createHeroTargetSnapshot("OPPONENT"),
+                }),
+            ],
+        });
+
+        const { game } = await runPlaySpell(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(watcher)),
+                },
+                playerTwo: {
+                    health: 20,
+                    board: placeMinion(
+                        createEmptyBoard(),
+                        "SPOT_1",
+                        createMinionState(boardMinion),
+                    ),
+                },
+            }),
+            spell,
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", 18);
+        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
+    });
+});

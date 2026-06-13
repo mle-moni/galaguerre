@@ -57,9 +57,10 @@ export type CardActionDefinition = {
 
 export type PassiveDefinition = {
     type: "ACTION" | "BOOST";
-    triggersOn: "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL" | null;
+    triggersOn: "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL" | "PLAY_CARD" | null;
     action: CardActionDefinition | null;
     passiveBoost: { boost: BoostDefinition; target: TargetDefinition | null } | null;
+    playCardFilter: CardFilterDefinition | null;
 };
 
 const TARGETED_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST", "SILENCE"] as const;
@@ -603,11 +604,27 @@ export const validatePassiveDefinition = (
             });
         }
 
+        if (passive.triggersOn !== "PLAY_CARD" && passive.playCardFilter !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "playCardFilter is only allowed for PLAY_CARD passives",
+                path: [...path, "playCardFilter"],
+            });
+        }
+
         validateCardAction(passive.action, ctx, [...path, "action"], { deathrattle: true });
         return;
     }
 
     if (passive.type === "BOOST") {
+        if (passive.playCardFilter !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "BOOST passive cannot have playCardFilter",
+                path: [...path, "playCardFilter"],
+            });
+        }
+
         if (passive.triggersOn !== null) {
             ctx.addIssue({
                 code: "custom",

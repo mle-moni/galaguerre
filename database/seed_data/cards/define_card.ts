@@ -2,6 +2,7 @@ import type { CardTag } from "#galaguerre/card_tags";
 import type {
     CardActionDefinition,
     BoostDefinition,
+    CardFilterDefinition,
     ComparisonDefinition,
     PassiveDefinition,
     TargetDefinition,
@@ -337,11 +338,13 @@ export const spellDrawFilter = (): NonNullable<CardActionDefinition["drawCardFil
 export const actionPassive = (
     triggersOn: NonNullable<PassiveDefinition["triggersOn"]>,
     action: CardActionDefinition,
+    playCardFilter: CardFilterDefinition | null = null,
 ): PassiveDefinition => ({
     type: "ACTION",
     triggersOn,
     action,
     passiveBoost: null,
+    playCardFilter,
 });
 
 export const boostPassive = (
@@ -352,6 +355,7 @@ export const boostPassive = (
     triggersOn: null,
     action: null,
     passiveBoost: { boost, target },
+    playCardFilter: null,
 });
 
 export const defineMinion = (

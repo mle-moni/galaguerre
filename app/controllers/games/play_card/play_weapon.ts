@@ -1,5 +1,6 @@
 import type { WeaponCard } from "#api_types/game.types";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
+import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import {
     recordManaSpent,
     recordWeaponPlayed,
@@ -29,6 +30,13 @@ export const playWeapon = async ({ card, player, game }: PlayWeaponOptions) => {
     player.mana -= card.cost;
     recordManaSpent(player, card.cost);
     recordWeaponPlayed(player);
+
+    const { gameEnded } = triggerPlayCardPassives(game, player, card);
+
+    if (gameEnded) {
+        await terminateGame(game);
+        return;
+    }
 
     await game.save();
 

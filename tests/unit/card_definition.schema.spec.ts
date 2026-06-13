@@ -14,9 +14,11 @@ import {
     drawAction,
     enemyHero,
     enemyMinions,
+    allMinions,
     selfMinion,
     silenceAction,
     actionPassive,
+    spellDrawFilter,
     targetedEnemyMinion,
 } from "../../database/seed_data/cards/define_card.js";
 
@@ -215,5 +217,31 @@ test.group("card_definition.schema", () => {
         });
 
         assert.equal(data.passives[0]!.action?.target?.onlySelf, true);
+    });
+
+    test("accepts PLAY_CARD passive with playCardFilter", ({ assert }) => {
+        const data = parseMinionData({
+            ...defaultMinionData(),
+            passives: [
+                actionPassive("PLAY_CARD", damageAction(1, allMinions()), spellDrawFilter()),
+            ],
+        });
+
+        assert.equal(data.passives[0]!.triggersOn, "PLAY_CARD");
+        assert.equal(data.passives[0]!.playCardFilter?.type, "SPELL");
+    });
+
+    test("rejects playCardFilter on TURN_END passive", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultMinionData(),
+            passives: [
+                {
+                    ...actionPassive("TURN_END", damageAction(1, enemyHero())),
+                    playCardFilter: spellDrawFilter(),
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
     });
 });

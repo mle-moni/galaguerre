@@ -97,6 +97,7 @@ export const passiveSchema = z
         triggersOn: z.enum(GALAGUERRE_PASSIVES_TRIGGERS_ON).nullable(),
         action: cardActionSchema.nullable(),
         passiveBoost: passiveBoostSchema.nullable(),
+        playCardFilter: cardFilterSchema.nullable(),
     })
     .superRefine((passive, ctx) => {
         validatePassiveDefinition(passive, ctx, []);

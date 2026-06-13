@@ -1,6 +1,7 @@
 import type { ActionTarget, SpellCard } from "#api_types/game.types";
 import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
 import { isCoinCard } from "../../../galaguerre/coin.js";
+import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
@@ -85,9 +86,21 @@ export const playSpell = async ({
     recordManaSpent(player, card.cost);
     recordSpellCast(player);
 
-    const { gameEnded } = executeSpellEffect(game, player, card, actionTarget ?? undefined);
+    const { gameEnded: spellGameEnded } = executeSpellEffect(
+        game,
+        player,
+        card,
+        actionTarget ?? undefined,
+    );
 
-    if (gameEnded) {
+    if (spellGameEnded) {
+        await terminateGame(game);
+        return;
+    }
+
+    const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
+
+    if (playCardPassiveGameEnded) {
         await terminateGame(game);
         return;
     }

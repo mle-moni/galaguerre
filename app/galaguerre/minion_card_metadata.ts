@@ -13,6 +13,7 @@ const PASSIVE_TRIGGER_LABELS: Record<NonNullable<PassiveSnapshot["triggersOn"]>,
     TURN_BEGIN: "début de tour",
     DRAW: "pioche",
     HEAL: "soin",
+    PLAY_CARD: "carte jouée",
 };
 
 const EFFECT_DESCRIPTIONS: Record<string, string> = {

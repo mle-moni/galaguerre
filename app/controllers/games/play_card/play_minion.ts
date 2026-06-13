@@ -1,6 +1,7 @@
 import type { ActionTarget, MinionCard, MinionSpotId } from "#api_types/game.types";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
 import { refreshAurasAfterMinionPlayed } from "../../../galaguerre/passive_engine/refresh_passive_auras.js";
+import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
@@ -91,9 +92,21 @@ export const playMinion = async ({
 
     refreshAurasAfterMinionPlayed(game, player, spotId);
 
-    const { gameEnded } = executeBattlecries(game, player, card, actionTarget ?? undefined);
+    const { gameEnded: battlecryGameEnded } = executeBattlecries(
+        game,
+        player,
+        card,
+        actionTarget ?? undefined,
+    );
 
-    if (gameEnded) {
+    if (battlecryGameEnded) {
+        await terminateGame(game);
+        return;
+    }
+
+    const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
+
+    if (playCardPassiveGameEnded) {
         await terminateGame(game);
         return;
     }

@@ -62,7 +62,13 @@ export const GALAGUERRE_PASSIVES_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_PASSIVES_TYPES_LABEL_OBJ,
 );
 
-export const GALAGUERRE_PASSIVES_TRIGGERS_ON = ["TURN_END", "TURN_BEGIN", "DRAW", "HEAL"] as const;
+export const GALAGUERRE_PASSIVES_TRIGGERS_ON = [
+    "TURN_END",
+    "TURN_BEGIN",
+    "DRAW",
+    "HEAL",
+    "PLAY_CARD",
+] as const;
 export type GalaguerrePassiveTriggersOn = GenerateTypeFromEnum<
     typeof GALAGUERRE_PASSIVES_TRIGGERS_ON
 >;
@@ -73,6 +79,7 @@ export const GALAGUERRE_PASSIVES_TRIGGERS_ON_LABEL_OBJ: LabelObjectType<Galaguer
     {
         DRAW: "Draw",
         HEAL: "Heal",
+        PLAY_CARD: "Play Card",
         TURN_BEGIN: "Turn Begin",
         TURN_END: "Turn End",
     };
