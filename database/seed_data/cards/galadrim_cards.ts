@@ -27,6 +27,7 @@ import {
     minionDrawFilter,
     otherAllyMinions,
     otherAllyMinionsWithTag,
+    randomEnemyCharacter,
     randomEnemyTargets,
     selfMinion,
     silenceAction,
@@ -368,6 +369,58 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 hasStealth: true,
             },
             passives: [actionPassive("TURN_END", boostAction(boostBoth(1, 1), selfMinion()))],
+        },
+    ),
+
+    // --- play-card trigger minions ---
+    defineMinion(
+        115,
+        { ...gal("Commère de l'Open Space", 2), attack: 3, health: 2 },
+        {
+            passives: [
+                actionPassive(
+                    "PLAY_CARD",
+                    damageAction(1, randomEnemyCharacter()),
+                    minionDrawFilter(),
+                ),
+            ],
+        },
+    ),
+    defineMinion(
+        116,
+        { ...gal("Office Manager Dévoué", 3), attack: 3, health: 3 },
+        {
+            tags: ["SUPPORT"],
+            passives: [actionPassive("PLAY_CARD", healAction(2, allyHero()), minionDrawFilter())],
+        },
+    ),
+    defineMinion(
+        117,
+        { ...gal("Alternant Surmotivé", 1), attack: 1, health: 2 },
+        {
+            passives: [
+                actionPassive(
+                    "PLAY_CARD",
+                    boostAction(boostAttack(1), selfMinion()),
+                    spellDrawFilter(),
+                ),
+            ],
+        },
+    ),
+    defineMinion(
+        118,
+        { ...gal("Distributeur de Croquettes", 3), attack: 0, health: 4 },
+        {
+            passives: [actionPassive("PLAY_CARD", drawAction(1), minionDrawFilter(["PETS"]))],
+        },
+    ),
+    defineMinion(
+        119,
+        { ...gal("DevOps en Sueur", 2), attack: 3, health: 2 },
+        {
+            passives: [
+                actionPassive("PLAY_CARD", damageAction(1, allMinions()), spellDrawFilter()),
+            ],
         },
     ),
 
