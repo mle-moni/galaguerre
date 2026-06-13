@@ -6,6 +6,7 @@ export const CARD_TAGS = [
     "NANTAIS",
     "LYONNAIS",
     "PETS",
+    "SUPPORT",
 ] as const;
 
 export type CardTag = (typeof CARD_TAGS)[number];
@@ -18,4 +19,5 @@ export const CARD_TAG_LABELS: Record<CardTag, { label: string; symbol: string }>
     NANTAIS: { label: "Nantais", symbol: "📍" },
     LYONNAIS: { label: "Lyonnais", symbol: "📍" },
     PETS: { label: "Pets", symbol: "🐾" },
+    SUPPORT: { label: "Équipe support", symbol: "❤️‍🩹" },
 };

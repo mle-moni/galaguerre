@@ -169,6 +169,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         76,
         { ...gal("BizDev Débutant", 1), attack: 1, health: 3 },
         {
+            tags: ["SALES"],
             passives: [actionPassive("TURN_END", damageAction(1, enemyHero()))],
         },
     ),
@@ -184,6 +185,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         78,
         { ...gal("Closer Affamé", 3), attack: 3, health: 2 },
         {
+            tags: ["SALES"],
             minionPowers: {
                 hasWindfury: true,
             },
@@ -193,6 +195,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         79,
         { ...gal("Négociateur", 4), attack: 4, health: 4 },
         {
+            tags: ["SALES"],
             battlecryActions: [damageAction(4, enemyHero())],
         },
     ),
@@ -200,6 +203,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         80,
         { ...gal("Key Account Manager", 6), attack: 6, health: 5 },
         {
+            tags: ["SALES"],
             minionPowers: {
                 hasCharge: true,
             },
@@ -209,6 +213,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         81,
         { ...gal("Directeur Commercial", 6), attack: 5, health: 5 },
         {
+            tags: ["SALES"],
             deathrattleActions: [damageAction(5, enemyHero())],
         },
     ),
@@ -216,6 +221,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         82,
         { ...gal("Agent Support", 1), attack: 1, health: 3 },
         {
+            tags: ["SUPPORT"],
             minionPowers: {
                 hasTaunt: true,
             },
@@ -225,6 +231,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         83,
         { ...gal("Happiness Manager", 2), attack: 2, health: 3 },
         {
+            tags: ["SUPPORT"],
             battlecryActions: [healAction(4, allyHero())],
         },
     ),
@@ -232,6 +239,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         84,
         { ...gal("Recruteur RH", 3), attack: 2, health: 4 },
         {
+            tags: ["SUPPORT"],
             battlecryActions: [drawAction(1, minionDrawFilter([], costLessThan(4)))],
         },
     ),
@@ -239,6 +247,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         85,
         { ...gal("Manager Bienveillant", 4), attack: 3, health: 5 },
         {
+            tags: ["SUPPORT"],
             minionPowers: {
                 hasTaunt: true,
             },
@@ -247,8 +256,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         86,
-        { ...gal("Support de Nuit", 5), attack: 4, health: 7 },
+        { ...gal("Balin", 5), attack: 4, health: 7 },
         {
+            tags: ["SUPPORT"],
             minionPowers: {
                 hasTaunt: true,
             },

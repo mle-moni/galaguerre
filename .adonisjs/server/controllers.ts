@@ -4,78 +4,83 @@
  */
 
 export const controllers = {
-  auth: {
-    AdominLogin: () => import('#controllers/auth/adomin_login'),
-    AdominLogout: () => import('#controllers/auth/adomin_logout'),
-    Auth: () => import('#controllers/auth/auth_controller'),
-    Me: () => import('#controllers/auth/me'),
-    Register: () => import('#controllers/auth/register'),
-    socket: {
-      AuthRestrictedEvents: () => import('#controllers/auth/socket/auth_restricted_events'),
-      Index: () => import('#controllers/auth/socket/index'),
-      SocketAuth: () => import('#controllers/auth/socket/socket_auth'),
-      SocketLogout: () => import('#controllers/auth/socket/socket_logout'),
+    auth: {
+        AdominLogin: () => import("#controllers/auth/adomin_login"),
+        AdominLogout: () => import("#controllers/auth/adomin_logout"),
+        Auth: () => import("#controllers/auth/auth_controller"),
+        Me: () => import("#controllers/auth/me"),
+        Register: () => import("#controllers/auth/register"),
+        socket: {
+            AuthRestrictedEvents: () => import("#controllers/auth/socket/auth_restricted_events"),
+            Index: () => import("#controllers/auth/socket/index"),
+            SocketAuth: () => import("#controllers/auth/socket/socket_auth"),
+            SocketLogout: () => import("#controllers/auth/socket/socket_logout"),
+        },
     },
-  },
-  cardSets: {
-    CardSets: () => import('#controllers/card_sets/card_sets_controller'),
-    ListCardSets: () => import('#controllers/card_sets/list_card_sets'),
-  },
-  cards: {
-    Cards: () => import('#controllers/cards/cards_controller'),
-    ListCards: () => import('#controllers/cards/list_cards'),
-  },
-  decks: {
-    DeckUtils: () => import('#controllers/decks/deck_utils'),
-    Decks: () => import('#controllers/decks/decks_controller'),
-    SerializeDeck: () => import('#controllers/decks/serialize_deck'),
-  },
-  gameHistory: {
-    GameHistory: () => import('#controllers/game_history/game_history_controller'),
-    ListUserGames: () => import('#controllers/game_history/list_user_games'),
-    SerializeGameHistory: () => import('#controllers/game_history/serialize_game_history'),
-    ShowUserGame: () => import('#controllers/game_history/show_user_game'),
-  },
-  games: {
-    AbandonGame: () => import('#controllers/games/abandon_game'),
-    CreateGame: () => import('#controllers/games/create_game'),
-    CreateTrainingGame: () => import('#controllers/games/create_training_game'),
-    GameSearch: () => import('#controllers/games/game_search'),
-    GameUtils: () => import('#controllers/games/game_utils'),
-    Games: () => import('#controllers/games/games_controller'),
-    GeneratePlayerCards: () => import('#controllers/games/generate_player_cards'),
-    minionAction: {
-      GameMinionAction: () => import('#controllers/games/minion_action/game_minion_action'),
-      MinionToHeroAction: () => import('#controllers/games/minion_action/minion_to_hero_action'),
-      MinionToMinionAction: () => import('#controllers/games/minion_action/minion_to_minion_action'),
+    cardSets: {
+        CardSets: () => import("#controllers/card_sets/card_sets_controller"),
+        ListCardSets: () => import("#controllers/card_sets/list_card_sets"),
     },
-    mulligan: {
-      FinalizeMulligan: () => import('#controllers/games/mulligan/finalize_mulligan'),
-      GameMulligan: () => import('#controllers/games/mulligan/game_mulligan'),
-      PerformMulligan: () => import('#controllers/games/mulligan/perform_mulligan'),
+    cards: {
+        Cards: () => import("#controllers/cards/cards_controller"),
+        ListCards: () => import("#controllers/cards/list_cards"),
     },
-    PassGameTurn: () => import('#controllers/games/pass_game_turn'),
-    playCard: {
-      BreakWeapon: () => import('#controllers/games/play_card/break_weapon'),
-      GamePlayCard: () => import('#controllers/games/play_card/game_play_card'),
-      InstantiateMinion: () => import('#controllers/games/play_card/instantiate_minion'),
-      InstantiateWeapon: () => import('#controllers/games/play_card/instantiate_weapon'),
-      PlayMinion: () => import('#controllers/games/play_card/play_minion'),
-      PlaySpell: () => import('#controllers/games/play_card/play_spell'),
-      PlayWeapon: () => import('#controllers/games/play_card/play_weapon'),
+    decks: {
+        DeckUtils: () => import("#controllers/decks/deck_utils"),
+        Decks: () => import("#controllers/decks/decks_controller"),
+        SerializeDeck: () => import("#controllers/decks/serialize_deck"),
     },
-    SendGameUpdate: () => import('#controllers/games/send_game_update'),
-    SetupNextGameTurn: () => import('#controllers/games/setup_next_game_turn'),
-    ShowGame: () => import('#controllers/games/show_game'),
-    TerminateGame: () => import('#controllers/games/terminate_game'),
-    weaponAction: {
-      GameWeaponAction: () => import('#controllers/games/weapon_action/game_weapon_action'),
-      ReduceWeaponDurability: () => import('#controllers/games/weapon_action/reduce_weapon_durability'),
-      WeaponToHeroAction: () => import('#controllers/games/weapon_action/weapon_to_hero_action'),
-      WeaponToMinionAction: () => import('#controllers/games/weapon_action/weapon_to_minion_action'),
+    gameHistory: {
+        GameHistory: () => import("#controllers/game_history/game_history_controller"),
+        ListUserGames: () => import("#controllers/game_history/list_user_games"),
+        SerializeGameHistory: () => import("#controllers/game_history/serialize_game_history"),
+        ShowUserGame: () => import("#controllers/game_history/show_user_game"),
     },
-  },
-  leaderboard: {
-    Leaderboard: () => import('#controllers/leaderboard/leaderboard_controller'),
-  },
-}
+    games: {
+        AbandonGame: () => import("#controllers/games/abandon_game"),
+        CreateGame: () => import("#controllers/games/create_game"),
+        CreateTrainingGame: () => import("#controllers/games/create_training_game"),
+        GameSearch: () => import("#controllers/games/game_search"),
+        GameUtils: () => import("#controllers/games/game_utils"),
+        Games: () => import("#controllers/games/games_controller"),
+        GeneratePlayerCards: () => import("#controllers/games/generate_player_cards"),
+        minionAction: {
+            GameMinionAction: () => import("#controllers/games/minion_action/game_minion_action"),
+            MinionToHeroAction: () =>
+                import("#controllers/games/minion_action/minion_to_hero_action"),
+            MinionToMinionAction: () =>
+                import("#controllers/games/minion_action/minion_to_minion_action"),
+        },
+        mulligan: {
+            FinalizeMulligan: () => import("#controllers/games/mulligan/finalize_mulligan"),
+            GameMulligan: () => import("#controllers/games/mulligan/game_mulligan"),
+            PerformMulligan: () => import("#controllers/games/mulligan/perform_mulligan"),
+        },
+        PassGameTurn: () => import("#controllers/games/pass_game_turn"),
+        playCard: {
+            BreakWeapon: () => import("#controllers/games/play_card/break_weapon"),
+            GamePlayCard: () => import("#controllers/games/play_card/game_play_card"),
+            InstantiateMinion: () => import("#controllers/games/play_card/instantiate_minion"),
+            InstantiateWeapon: () => import("#controllers/games/play_card/instantiate_weapon"),
+            PlayMinion: () => import("#controllers/games/play_card/play_minion"),
+            PlaySpell: () => import("#controllers/games/play_card/play_spell"),
+            PlayWeapon: () => import("#controllers/games/play_card/play_weapon"),
+        },
+        SendGameUpdate: () => import("#controllers/games/send_game_update"),
+        SetupNextGameTurn: () => import("#controllers/games/setup_next_game_turn"),
+        ShowGame: () => import("#controllers/games/show_game"),
+        TerminateGame: () => import("#controllers/games/terminate_game"),
+        weaponAction: {
+            GameWeaponAction: () => import("#controllers/games/weapon_action/game_weapon_action"),
+            ReduceWeaponDurability: () =>
+                import("#controllers/games/weapon_action/reduce_weapon_durability"),
+            WeaponToHeroAction: () =>
+                import("#controllers/games/weapon_action/weapon_to_hero_action"),
+            WeaponToMinionAction: () =>
+                import("#controllers/games/weapon_action/weapon_to_minion_action"),
+        },
+    },
+    leaderboard: {
+        Leaderboard: () => import("#controllers/leaderboard/leaderboard_controller"),
+    },
+};
