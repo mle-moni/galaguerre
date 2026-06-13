@@ -97,11 +97,13 @@ const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
         parts.push(`+${boost.spellPower} dégâts de sort`);
     }
 
-    if (boost.minionPower) {
-        if (boost.minionPower.hasTaunt) parts.push("Provocation");
-        if (boost.minionPower.hasCharge) parts.push("Charge");
-        if (boost.minionPower.hasWindfury) parts.push("Furie des vents");
-        if (boost.minionPower.isPoisonous) parts.push("Toxique");
+    if (boost.minionPowers) {
+        if (boost.minionPowers?.hasTaunt) parts.push("Provocation");
+        if (boost.minionPowers?.hasCharge) parts.push("Charge");
+        if (boost.minionPowers?.hasWindfury) parts.push("Furie des vents");
+        if (boost.minionPowers?.isPoisonous) parts.push("Toxique");
+        if (boost.minionPowers?.hasStealth) parts.push("Discrétion");
+        if (boost.minionPowers?.hasDivineShield) parts.push("Immunité");
     }
 
     return parts.join(", ");

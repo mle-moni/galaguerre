@@ -40,18 +40,22 @@ export const targetSchema = z.object({
     targetSelectionMode: z.enum(GALAGUERRE_TARGET_SELECTION_MODES).nullable(),
 });
 
-export const boostMinionPowerSchema = z.object({
-    hasTaunt: z.boolean(),
-    hasCharge: z.boolean(),
-    hasWindfury: z.boolean(),
-    isPoisonous: z.boolean(),
+export const zMinionPowerSchema = z.object({
+    hasTaunt: z.boolean().optional(),
+    hasCharge: z.boolean().optional(),
+    hasWindfury: z.boolean().optional(),
+    isPoisonous: z.boolean().optional(),
+    hasStealth: z.boolean().optional(),
+    hasDivineShield: z.boolean().optional(),
 });
+
+export type MinionPower = z.infer<typeof zMinionPowerSchema>;
 
 export const boostSchema = z.object({
     attack: z.number().nullable(),
     health: z.number().nullable(),
     spellPower: z.number().nullable(),
-    minionPower: boostMinionPowerSchema.nullable(),
+    minionPowers: zMinionPowerSchema.nullable(),
 });
 
 export const cardFilterSchema = z.object({
@@ -109,10 +113,7 @@ export const minionDataSchema = cardDataBaseSchema.extend({
     type: z.literal("MINION"),
     attack: z.number().int().min(0),
     health: z.number().int().min(1),
-    hasTaunt: z.boolean(),
-    hasCharge: z.boolean(),
-    hasWindfury: z.boolean(),
-    isPoisonous: z.boolean(),
+    minionPowers: zMinionPowerSchema.nullable(),
     battlecryActions: z.array(cardActionSchema),
     deathrattleActions: z.array(deathrattleActionSchema),
     passives: z.array(passiveSchema),
@@ -145,7 +146,6 @@ export type {
     TargetDefinition,
 } from "./card_definition.validation.js";
 
-export type BoostMinionPowerDefinition = z.infer<typeof boostMinionPowerSchema>;
 export type CardFilterDefinition = z.infer<typeof cardFilterSchema>;
 export type DeathrattleActionDefinition = z.infer<typeof deathrattleActionSchema>;
 export type PassiveBoostDefinition = z.infer<typeof passiveBoostSchema>;

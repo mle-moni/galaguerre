@@ -1,4 +1,9 @@
-import type { CardActionSnapshot, CardTag, PassiveSnapshot } from "./card.types.js";
+import type {
+    CardActionSnapshot,
+    CardTag,
+    MinionPowerSnapshot,
+    PassiveSnapshot,
+} from "./card.types.js";
 
 export const DECK_MIN_CARDS = 30;
 export const DECK_MAX_CARDS = 30;
@@ -30,10 +35,7 @@ export type ApiCatalogMinionCard = ApiCatalogCardBase & {
     type: "MINION";
     health: number;
     attack: number;
-    hasTaunt: boolean;
-    hasCharge: boolean;
-    hasWindfury: boolean;
-    isPoisonous: boolean;
+    minionPowers: MinionPowerSnapshot | null;
     effects: string[];
     battlecryActions: CardActionSnapshot[];
     deathrattleActions: CardActionSnapshot[];

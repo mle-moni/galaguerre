@@ -101,7 +101,7 @@ test.group("card_definition.schema", () => {
             ...defaultMinionData(),
             battlecryActions: [
                 boostAction(
-                    { attack: 1, health: null, spellPower: 1, minionPower: null },
+                    { attack: 1, health: null, spellPower: 1, minionPowers: null },
                     enemyMinions(),
                 ),
             ],
@@ -177,7 +177,7 @@ test.group("card_definition.schema", () => {
             battlecryActions: [
                 {
                     ...silenceAction(enemyMinions()),
-                    boost: { attack: 1, health: null, spellPower: null, minionPower: null },
+                    boost: { attack: 1, health: null, spellPower: null, minionPowers: null },
                 },
             ],
         });

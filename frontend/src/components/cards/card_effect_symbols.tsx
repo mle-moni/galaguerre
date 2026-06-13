@@ -1,5 +1,6 @@
 import type { CardTag } from "#api_types/card.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
+import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type { MinionCard } from "#api_types/game.types";
 
 const EFFECT_SYMBOLS: Record<string, string> = {
@@ -7,6 +8,8 @@ const EFFECT_SYMBOLS: Record<string, string> = {
     Charge: "💥",
     "Furie des vents": "🌪️",
     Toxique: "🐍",
+    Discrétion: "🥷",
+    Immunité: "🛡️",
 };
 
 const EFFECT_SYMBOLS_EXTENDED: Record<string, string> = {
@@ -15,15 +18,14 @@ const EFFECT_SYMBOLS_EXTENDED: Record<string, string> = {
 };
 
 const getCardEffects = (card: MinionCard): string[] => {
-    const effects: string[] = [];
-    if (card.effects?.length) {
-        effects.push(...card.effects);
-    } else if (card.hasTaunt) {
-        effects.push("Provocation");
-    }
+    const effects = card.effects?.length
+        ? [...card.effects]
+        : getMinionPowerEffects(card.minionPowers);
+
     if (card.deathrattleActions?.length) {
         effects.push("Dernier souffle");
     }
+
     return effects;
 };
 

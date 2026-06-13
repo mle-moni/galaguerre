@@ -8,7 +8,7 @@ export type { CardTag } from "./card.types.js";
 export type {
     CardActionSnapshot,
     BoostSnapshot,
-    BoostMinionPowerSnapshot,
+    MinionPowerSnapshot,
     CardFilterSnapshot,
     ComparisonSnapshot,
     PassiveSnapshot,
@@ -16,7 +16,12 @@ export type {
     TargetSnapshot,
 } from "./card.types.js";
 
-import type { CardActionSnapshot, CardTag, PassiveSnapshot } from "./card.types.js";
+import type {
+    CardActionSnapshot,
+    CardTag,
+    MinionPowerSnapshot,
+    PassiveSnapshot,
+} from "./card.types.js";
 
 export interface ComparableStats {
     cost: number;
@@ -51,10 +56,7 @@ export type MinionCard = PlayerCardBase & {
     type: "MINION";
     health: number;
     attack: number;
-    hasTaunt: boolean;
-    hasCharge: boolean;
-    hasWindfury: boolean;
-    isPoisonous: boolean;
+    minionPowers: MinionPowerSnapshot;
     effects: string[];
     description: string;
     battlecryActions: CardActionSnapshot[];
@@ -113,13 +115,6 @@ export interface WeaponState {
     originalCard: WeaponCard;
 }
 
-export interface MinionKeywordFlags {
-    hasTaunt: boolean;
-    hasCharge: boolean;
-    hasWindfury: boolean;
-    isPoisonous: boolean;
-}
-
 export interface MinionState {
     uuid: string;
     health: number;
@@ -129,8 +124,8 @@ export interface MinionState {
     lastActionAtRound: number;
     attacksThisRound: number;
     originalCard: PlayerCard;
-    initialKeywords?: MinionKeywordFlags;
-    permanentKeywords?: MinionKeywordFlags;
+    initialKeywords?: MinionPowerSnapshot;
+    permanentKeywords?: MinionPowerSnapshot;
     auraAppliedTo?: AuraAppliedTarget[];
     auraHeroSpellPowerAppliedTo?: "PLAYER" | "OPPONENT" | "ALL" | null;
     isSilenced?: boolean;

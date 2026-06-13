@@ -6,6 +6,7 @@ import {
     type MinionState,
     type TargetSnapshot,
 } from "#api_types/game.types";
+import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 
 export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): void => {
@@ -18,38 +19,35 @@ export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): v
         minion.maxHealth += boost.health;
     }
 
-    if (boost.minionPower && minion.originalCard.type === "MINION") {
+    if (boost.minionPowers && minion.originalCard.type === "MINION") {
         const card = minion.originalCard;
         minion.permanentKeywords ??= {
             hasTaunt: false,
             hasCharge: false,
             hasWindfury: false,
             isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
         };
 
-        if (boost.minionPower.hasTaunt) {
-            card.hasTaunt = true;
+        if (boost.minionPowers.hasTaunt) {
+            card.minionPowers.hasTaunt = true;
             minion.permanentKeywords.hasTaunt = true;
         }
-        if (boost.minionPower.hasCharge) {
-            card.hasCharge = true;
+        if (boost.minionPowers.hasCharge) {
+            card.minionPowers.hasCharge = true;
             minion.permanentKeywords.hasCharge = true;
         }
-        if (boost.minionPower.hasWindfury) {
-            card.hasWindfury = true;
+        if (boost.minionPowers.hasWindfury) {
+            card.minionPowers.hasWindfury = true;
             minion.permanentKeywords.hasWindfury = true;
         }
-        if (boost.minionPower.isPoisonous) {
-            card.isPoisonous = true;
+        if (boost.minionPowers.isPoisonous) {
+            card.minionPowers.isPoisonous = true;
             minion.permanentKeywords.isPoisonous = true;
         }
 
-        const effects: string[] = [];
-        if (card.hasTaunt) effects.push("Provocation");
-        if (card.hasCharge) effects.push("Charge");
-        if (card.hasWindfury) effects.push("Furie des vents");
-        if (card.isPoisonous) effects.push("Toxique");
-        card.effects = effects;
+        card.effects = getMinionPowerEffects(card.minionPowers);
     }
 };
 

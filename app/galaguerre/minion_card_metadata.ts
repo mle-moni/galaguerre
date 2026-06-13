@@ -1,6 +1,12 @@
-import type { CardActionSnapshot, PassiveSnapshot } from "#api_types/game.types";
-import type { MinionCardData } from "#galaguerre/card_definition.schema";
+import type {
+    CardActionSnapshot,
+    MinionPowerSnapshot,
+    PassiveSnapshot,
+} from "#api_types/game.types";
+import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import { formatActionDescription } from "./action_engine/format_action_description.js";
+
+export { getMinionPowerEffects };
 
 const PASSIVE_TRIGGER_LABELS: Record<NonNullable<PassiveSnapshot["triggersOn"]>, string> = {
     TURN_END: "fin de tour",
@@ -14,23 +20,20 @@ const EFFECT_DESCRIPTIONS: Record<string, string> = {
     Charge: "Peut attaquer dès le tour où il est joué.",
     "Furie des vents": "Peut attaquer deux fois par tour.",
     Toxique: "Détruit tout serviteur blessé par ce serviteur.",
+    Discrétion: "Ne peut être ciblé par les attaques.",
+    Immunité: "Bloque la première attaque reçue.",
 };
 
-export const getMinionPowerEffects = (
-    power:
-        | Pick<MinionCardData, "hasTaunt" | "hasCharge" | "hasWindfury" | "isPoisonous">
-        | null
-        | undefined,
-): string[] => {
-    if (!power) return [];
-
-    const effects: string[] = [];
-    if (power.hasTaunt) effects.push("Provocation");
-    if (power.hasCharge) effects.push("Charge");
-    if (power.hasWindfury) effects.push("Furie des vents");
-    if (power.isPoisonous) effects.push("Toxique");
-    return effects;
-};
+export const normalizeMinionPowers = (
+    power: MinionPowerSnapshot | null | undefined,
+): MinionPowerSnapshot => ({
+    hasTaunt: power?.hasTaunt ?? false,
+    hasCharge: power?.hasCharge ?? false,
+    hasWindfury: power?.hasWindfury ?? false,
+    isPoisonous: power?.isPoisonous ?? false,
+    hasStealth: power?.hasStealth ?? false,
+    hasDivineShield: power?.hasDivineShield ?? false,
+});
 
 export const getBattlecryDescription = (actions: CardActionSnapshot[]): string[] => {
     return actions

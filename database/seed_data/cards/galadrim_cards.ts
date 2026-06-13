@@ -32,6 +32,7 @@ import {
     targetedAllyMinion,
     targetedAnyMinion,
     type CardSeedEntry,
+    boostDivineShield,
 } from "./define_card.js";
 
 const gal = (label: string, cost: number) => ({
@@ -72,14 +73,21 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { ...gal("Dev Aigri", 3), attack: 2, health: 3 },
         {
             tags: ["DEVELOPPEUR"],
-            hasTaunt: true,
+            minionPowers: {
+                hasTaunt: true,
+            },
             battlecryActions: [damageAction(2, targetedAnyMinion(), true)],
         },
     ),
     defineMinion(
         66,
         { ...gal("QA Testeur Impitoyable", 3), attack: 1, health: 4 },
-        { tags: ["DEVELOPPEUR"], isPoisonous: true },
+        {
+            tags: ["DEVELOPPEUR"],
+            minionPowers: {
+                isPoisonous: true,
+            },
+        },
     ),
     defineMinion(
         67,
@@ -171,7 +179,15 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             battlecryActions: [drawAction(1), enemyDrawAction(1)],
         },
     ),
-    defineMinion(78, { ...gal("Closer Affamé", 3), attack: 3, health: 2 }, { hasWindfury: true }),
+    defineMinion(
+        78,
+        { ...gal("Closer Affamé", 3), attack: 3, health: 2 },
+        {
+            minionPowers: {
+                hasWindfury: true,
+            },
+        },
+    ),
     defineMinion(
         79,
         { ...gal("Négociateur", 4), attack: 4, health: 4 },
@@ -182,7 +198,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineMinion(
         80,
         { ...gal("Key Account Manager", 6), attack: 6, health: 5 },
-        { hasCharge: true },
+        {
+            minionPowers: {
+                hasCharge: true,
+            },
+        },
     ),
     defineMinion(
         81,
@@ -191,7 +211,15 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             deathrattleActions: [damageAction(5, enemyHero())],
         },
     ),
-    defineMinion(82, { ...gal("Agent Support", 1), attack: 1, health: 3 }, { hasTaunt: true }),
+    defineMinion(
+        82,
+        { ...gal("Agent Support", 1), attack: 1, health: 3 },
+        {
+            minionPowers: {
+                hasTaunt: true,
+            },
+        },
+    ),
     defineMinion(
         83,
         { ...gal("Happiness Manager", 2), attack: 2, health: 3 },
@@ -210,17 +238,32 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         85,
         { ...gal("Manager Bienveillant", 4), attack: 3, health: 5 },
         {
-            hasTaunt: true,
+            minionPowers: {
+                hasTaunt: true,
+            },
             deathrattleActions: [healAction(3, allyMinions())],
         },
     ),
-    defineMinion(86, { ...gal("Support de Nuit", 5), attack: 4, health: 7 }, { hasTaunt: true }),
+    defineMinion(
+        86,
+        { ...gal("Support de Nuit", 5), attack: 4, health: 7 },
+        {
+            minionPowers: {
+                hasTaunt: true,
+            },
+        },
+    ),
 
     // --- regional / pets minions ---
     defineMinion(
         87,
         { ...gal("Parisien Pressé", 2), attack: 3, health: 1 },
-        { tags: ["PARISIEN"], hasCharge: true },
+        {
+            tags: ["PARISIEN"],
+            minionPowers: {
+                hasCharge: true,
+            },
+        },
     ),
     defineMinion(
         88,
@@ -260,16 +303,41 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { ...gal("Chat sur le Clavier", 2), attack: 1, health: 2 },
         {
             tags: ["PETS"],
-            hasTaunt: true,
+            minionPowers: {
+                hasTaunt: true,
+            },
             deathrattleActions: [drawAction(1)],
         },
     ),
     defineMinion(
         94,
         { ...gal("Chien Foufou", 3), attack: 3, health: 2 },
-        { tags: ["PETS"], hasCharge: true },
+        {
+            tags: ["PETS"],
+            minionPowers: {
+                hasCharge: true,
+            },
+        },
     ),
-    defineMinion(95, { ...gal("Plante Verte", 1), attack: 0, health: 4 }, { hasTaunt: true }),
+    defineMinion(
+        95,
+        { ...gal("Plante Verte", 1), attack: 0, health: 4 },
+        {
+            minionPowers: {
+                hasTaunt: true,
+            },
+        },
+    ),
+    defineMinion(
+        111,
+        { ...gal("PM en télétravail", 3), attack: 3, health: 1 },
+        {
+            tags: ["PM"],
+            minionPowers: {
+                hasDivineShield: true,
+            },
+        },
+    ),
 
     // --- spells ---
     defineSpell(96, gal("Pause Café", 2), [boostAction(boostBoth(1, 1), allyMinions())]),
@@ -289,6 +357,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(109, gal("Lendemain de soirée", 1), [
         silenceAction(targetedAnyMinion(), true),
         damageAction(1, targetedAnyMinion(), true),
+    ]),
+    defineSpell(110, gal("Casque à Réduction de Bruit", 1), [
+        boostAction(boostDivineShield(), targetedAllyMinion(), true),
     ]),
 
     // --- weapons ---

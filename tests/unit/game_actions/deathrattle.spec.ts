@@ -303,7 +303,7 @@ test.group("deathrattles", () => {
             uuid: MINION_IDS.target,
             attack: 4,
             health: 4,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             deathrattleActions: [
                 createCardActionSnapshot({
                     type: "DAMAGE",
@@ -358,7 +358,7 @@ test.group("deathrattles", () => {
             uuid: MINION_IDS.target,
             attack: 4,
             health: 4,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             deathrattleActions: [
                 createCardActionSnapshot({
                     type: "DAMAGE",

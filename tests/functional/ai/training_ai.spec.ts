@@ -158,14 +158,14 @@ test.group("training:ai", (group) => {
     test("enumerateAiMoves respects taunt and mana", async ({ assert }) => {
         const tauntCard = createMinionCard({
             uuid: "taunt-card",
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             attack: 2,
             health: 3,
         });
         const attackerCard = createMinionCard({
             uuid: "attacker-card",
             attack: 3,
-            hasCharge: true,
+            minionPowers: { hasCharge: true },
         });
 
         const { game, playerTwo } = await createTestGame(

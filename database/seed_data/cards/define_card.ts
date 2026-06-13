@@ -65,10 +65,7 @@ export const defaultMinionData = (): MinionCardData => ({
     imageUrl: "https://example.com/card.png",
     attack: 1,
     health: 1,
-    hasTaunt: false,
-    hasCharge: false,
-    hasWindfury: false,
-    isPoisonous: false,
+    minionPowers: null,
     battlecryActions: [],
     deathrattleActions: [],
     passives: [],
@@ -238,7 +235,7 @@ export const boostStats = (overrides: Partial<BoostDefinition> = {}): BoostDefin
     attack: null,
     health: null,
     spellPower: null,
-    minionPower: null,
+    minionPowers: null,
     ...overrides,
 });
 
@@ -253,21 +250,25 @@ export const boostSpellPower = (spellPower: number): BoostDefinition => boostSta
 
 export const boostTaunt = (): BoostDefinition =>
     boostStats({
-        minionPower: {
+        minionPowers: {
             hasTaunt: true,
             hasCharge: false,
             hasWindfury: false,
             isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
         },
     });
 
 export const boostCharge = (): BoostDefinition =>
     boostStats({
-        minionPower: {
+        minionPowers: {
             hasTaunt: false,
             hasCharge: true,
             hasWindfury: false,
             isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
         },
     });
 
@@ -275,23 +276,37 @@ export const boostBothWithTaunt = (attack: number, health: number): BoostDefinit
     boostStats({
         attack,
         health,
-        minionPower: {
+        minionPowers: {
             hasTaunt: true,
             hasCharge: false,
             hasWindfury: false,
             isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
         },
     });
 
 export const boostAttackWithCharge = (attack: number): BoostDefinition =>
     boostStats({
         attack,
-        minionPower: {
+        minionPowers: {
             hasTaunt: false,
             hasCharge: true,
             hasWindfury: false,
             isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
         },
+    });
+
+export const boostDivineShield = (): BoostDefinition =>
+    boostStats({
+        minionPowers: { hasDivineShield: true },
+    });
+
+export const boostStealth = (): BoostDefinition =>
+    boostStats({
+        minionPowers: { hasStealth: true },
     });
 
 export const minionDrawFilter = (

@@ -7,6 +7,7 @@ import {
 import { V1_ACTION_TYPES } from "./action_engine/v1_action_types.js";
 import { GALAGUERRE_TARGET_SELECTION_MODES } from "./galaguerre.types.js";
 import type { CardTag } from "./card_tags.js";
+import { MinionPower } from "./card_definition.schema.ts";
 
 export type ComparisonDefinition = {
     costComparison: "<" | ">" | "=" | null;
@@ -31,12 +32,7 @@ export type BoostDefinition = {
     attack: number | null;
     health: number | null;
     spellPower: number | null;
-    minionPower: {
-        hasTaunt: boolean;
-        hasCharge: boolean;
-        hasWindfury: boolean;
-        isPoisonous: boolean;
-    } | null;
+    minionPowers: MinionPower | null;
 };
 
 export type CardFilterDefinition = {

@@ -46,7 +46,7 @@ export const MinionCardFace = ({
     const showWindfuryBadge =
         attackStatus !== undefined &&
         attackStatus !== "idle" &&
-        card.hasWindfury &&
+        card.minionPowers?.hasWindfury &&
         remainingAttacks !== undefined;
     const statusLabel = attackStatus
         ? getMinionAttackStatusLabel(attackStatus, maxAttacks)

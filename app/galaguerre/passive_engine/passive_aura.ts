@@ -9,6 +9,7 @@ import {
     type SpotOwner,
 } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
+import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type Game from "#models/game";
 import { getTargetBoardEntries } from "../action_engine/apply_mass_minion_effects.js";
 import { applyBoostToHero } from "../action_engine/apply_boost.js";
@@ -49,10 +50,12 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
 
     const card = minion.originalCard;
     const initial = minion.initialKeywords ?? {
-        hasTaunt: card.hasTaunt,
-        hasCharge: card.hasCharge,
-        hasWindfury: card.hasWindfury,
-        isPoisonous: card.isPoisonous,
+        hasTaunt: card.minionPowers.hasTaunt,
+        hasCharge: card.minionPowers.hasCharge,
+        hasWindfury: card.minionPowers.hasWindfury,
+        isPoisonous: card.minionPowers.isPoisonous,
+        hasStealth: card.minionPowers.hasStealth,
+        hasDivineShield: card.minionPowers.hasDivineShield,
     };
     const permanent = minion.permanentKeywords ?? {
         hasTaunt: false,
@@ -67,12 +70,16 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
               hasCharge: false,
               hasWindfury: false,
               isPoisonous: false,
+              hasStealth: false,
+              hasDivineShield: false,
           }
         : {
               hasTaunt: initial.hasTaunt || permanent.hasTaunt,
               hasCharge: initial.hasCharge || permanent.hasCharge,
               hasWindfury: initial.hasWindfury || permanent.hasWindfury,
               isPoisonous: initial.isPoisonous || permanent.isPoisonous,
+              hasStealth: initial.hasStealth || permanent.hasStealth,
+              hasDivineShield: initial.hasDivineShield || permanent.hasDivineShield,
           };
 
     const targetBoardOwner = getBoardOwnerForMinion(game, minion);
@@ -96,7 +103,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
             const sourceCard = sourceMinion.originalCard as MinionCard;
             for (const passiveBoost of collectBoostPassives(sourceCard)) {
                 const { boost, target } = passiveBoost;
-                if (!boost.minionPower || !target || target.type !== "MINION") continue;
+                if (!boost.minionPowers || !target || target.type !== "MINION") continue;
 
                 for (const { board, isOpponent } of getTargetBoardEntries(
                     target,
@@ -117,26 +124,23 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
                     if (shouldExcludeSourceMinion(target, sourceMinion, boardMinion)) continue;
                     if (!minionMatchesTarget(boardMinion, target, isOpponent)) continue;
 
-                    if (boost.minionPower.hasTaunt) keywords.hasTaunt = true;
-                    if (boost.minionPower.hasCharge) keywords.hasCharge = true;
-                    if (boost.minionPower.hasWindfury) keywords.hasWindfury = true;
-                    if (boost.minionPower.isPoisonous) keywords.isPoisonous = true;
+                    if (boost.minionPowers.hasTaunt) keywords.hasTaunt = true;
+                    if (boost.minionPowers.hasCharge) keywords.hasCharge = true;
+                    if (boost.minionPowers.hasWindfury) keywords.hasWindfury = true;
+                    if (boost.minionPowers.isPoisonous) keywords.isPoisonous = true;
+                    if (boost.minionPowers.hasStealth) keywords.hasStealth = true;
+                    if (boost.minionPowers.hasDivineShield) keywords.hasDivineShield = true;
                 }
             }
         }
     }
 
-    card.hasTaunt = keywords.hasTaunt;
-    card.hasCharge = keywords.hasCharge;
-    card.hasWindfury = keywords.hasWindfury;
-    card.isPoisonous = keywords.isPoisonous;
+    card.minionPowers.hasTaunt = keywords.hasTaunt;
+    card.minionPowers.hasCharge = keywords.hasCharge;
+    card.minionPowers.hasWindfury = keywords.hasWindfury;
+    card.minionPowers.isPoisonous = keywords.isPoisonous;
 
-    const effects: string[] = [];
-    if (card.hasTaunt) effects.push("Provocation");
-    if (card.hasCharge) effects.push("Charge");
-    if (card.hasWindfury) effects.push("Furie des vents");
-    if (card.isPoisonous) effects.push("Toxique");
-    card.effects = effects;
+    card.effects = getMinionPowerEffects(card.minionPowers);
 };
 
 const getBoardOwnerForMinion = (game: Game, minion: MinionState): GamePlayer | null => {

@@ -30,7 +30,7 @@ test.group("game scenarios", () => {
             cost: 2,
             attack: 2,
             health: 2,
-            hasCharge: true,
+            minionPowers: { hasCharge: true },
             effects: ["Charge"],
         });
         const opponentHandCard = createMinionCard({
@@ -86,7 +86,7 @@ test.group("game scenarios", () => {
             cost: 10,
             attack: DEFAULT_HERO_HEALTH,
             health: 1,
-            hasCharge: true,
+            minionPowers: { hasCharge: true },
             effects: ["Charge"],
         });
 
@@ -154,14 +154,14 @@ test.group("game scenarios", () => {
             uuid: "minion-finisher",
             attack: 3,
             health: 3,
-            hasCharge: true,
+            minionPowers: { hasCharge: true },
             effects: ["Charge"],
         });
         const tauntCard = createMinionCard({
             uuid: MINION_IDS.taunt,
             attack: 1,
             health: 2,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
 

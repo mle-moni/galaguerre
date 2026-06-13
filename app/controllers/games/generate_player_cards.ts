@@ -4,6 +4,7 @@ import {
     getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
+    normalizeMinionPowers,
     getPassiveDescription,
     getSpellCardDescription,
     getSpellEffectDescription,
@@ -58,7 +59,7 @@ export const generatePlayerCards = (source: CardSource) => {
                 };
             }
             case "MINION": {
-                const effects = getMinionPowerEffects(card.data);
+                const effects = getMinionPowerEffects(card.data.minionPowers);
                 const battlecryLines = getBattlecryDescription(card.data.battlecryActions);
                 const deathrattleLines = getDeathrattleDescription(card.data.deathrattleActions);
                 const passiveLines = getPassiveDescription(card.data.passives);
@@ -68,10 +69,7 @@ export const generatePlayerCards = (source: CardSource) => {
                     type: "MINION",
                     health: card.data.health,
                     attack: card.data.attack,
-                    hasTaunt: card.data.hasTaunt,
-                    hasCharge: card.data.hasCharge,
-                    hasWindfury: card.data.hasWindfury,
-                    isPoisonous: card.data.isPoisonous,
+                    minionPowers: normalizeMinionPowers(card.data.minionPowers),
                     effects,
                     description: getMinionCardDescription(
                         card.data.attack,

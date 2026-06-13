@@ -2,12 +2,12 @@ import type { MinionCard, MinionState } from "#api_types/game.types";
 
 export const getMinionHasCharge = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.hasCharge ?? false;
+    return minion.originalCard.minionPowers?.hasCharge ?? false;
 };
 
 export const getMinionHasWindfury = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.hasWindfury ?? false;
+    return minion.originalCard.minionPowers?.hasWindfury ?? false;
 };
 
 export const getMinionMaxAttacks = (minion: MinionState): number => {
@@ -49,7 +49,7 @@ export const getMinionRemainingAttacks = (minion: MinionState, currentRound: num
 };
 
 export const getMinionCardMaxAttacks = (card: MinionCard): number => {
-    return card.hasWindfury ? 2 : 1;
+    return card.minionPowers?.hasWindfury ? 2 : 1;
 };
 
 export const getMinionAttackStatusLabel = (

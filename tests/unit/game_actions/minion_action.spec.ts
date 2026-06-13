@@ -63,7 +63,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 1,
             health: 1,
-            isPoisonous: true,
+            minionPowers: { isPoisonous: true },
             effects: ["Toxique"],
         });
         const targetCard = createMinionCard({
@@ -100,7 +100,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 1,
             health: 1,
-            isPoisonous: true,
+            minionPowers: { isPoisonous: true },
             effects: ["Toxique"],
         });
 
@@ -129,7 +129,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 2,
             health: 2,
-            hasCharge: true,
+            minionPowers: { hasCharge: true },
             effects: ["Charge"],
         });
 
@@ -155,7 +155,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 5,
             health: 5,
-            hasWindfury: true,
+            minionPowers: { hasWindfury: true },
             effects: ["Furie des vents"],
         });
 
@@ -185,8 +185,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 2,
             health: 2,
-            hasCharge: true,
-            hasWindfury: true,
+            minionPowers: { hasCharge: true, hasWindfury: true },
             effects: ["Charge", "Furie des vents"],
         });
 
@@ -216,8 +215,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 1,
             health: 1,
-            hasCharge: true,
-            isPoisonous: true,
+            minionPowers: { hasCharge: true, isPoisonous: true },
             effects: ["Charge", "Toxique"],
         });
         const targetCard = createMinionCard({
@@ -287,7 +285,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.taunt,
             attack: 1,
             health: 3,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
 
@@ -324,7 +322,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.taunt,
             attack: 1,
             health: 3,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
         const targetCard = createMinionCard({
@@ -438,7 +436,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 1,
             health: 1,
-            isPoisonous: true,
+            minionPowers: { isPoisonous: true },
             effects: ["Toxique"],
         });
         const targetCard = createMinionCard({
@@ -482,7 +480,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.target,
             attack: 1,
             health: 1,
-            isPoisonous: true,
+            minionPowers: { isPoisonous: true },
             effects: ["Toxique"],
         });
 
@@ -582,7 +580,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 1,
             health: 10,
-            hasWindfury: true,
+            minionPowers: { hasWindfury: true },
             effects: ["Furie des vents"],
         });
 
@@ -647,7 +645,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.attacker,
             attack: 0,
             health: 4,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
 
@@ -680,7 +678,7 @@ test.group("minion combat", () => {
             uuid: MINION_IDS.taunt,
             attack: 1,
             health: 3,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
         const targetCard = createMinionCard({

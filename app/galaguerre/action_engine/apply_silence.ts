@@ -8,6 +8,7 @@ import {
 } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
+import { getMinionPowerEffects } from "../minion_card_metadata.js";
 import {
     applyExistingAurasToMinion,
     recalculateMinionKeywords,
@@ -16,12 +17,7 @@ import {
 import { getTargetBoardEntries } from "./apply_mass_minion_effects.js";
 
 const syncMinionCardEffects = (card: MinionCard): void => {
-    const effects: string[] = [];
-    if (card.hasTaunt) effects.push("Provocation");
-    if (card.hasCharge) effects.push("Charge");
-    if (card.hasWindfury) effects.push("Furie des vents");
-    if (card.isPoisonous) effects.push("Toxique");
-    card.effects = effects;
+    card.effects = getMinionPowerEffects(card.minionPowers);
 };
 
 const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
@@ -34,12 +30,16 @@ const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
         hasCharge: false,
         hasWindfury: false,
         isPoisonous: false,
+        hasStealth: false,
+        hasDivineShield: false,
     };
 
-    card.hasTaunt = false;
-    card.hasCharge = false;
-    card.hasWindfury = false;
-    card.isPoisonous = false;
+    card.minionPowers.hasTaunt = false;
+    card.minionPowers.hasCharge = false;
+    card.minionPowers.hasWindfury = false;
+    card.minionPowers.isPoisonous = false;
+    card.minionPowers.hasStealth = false;
+    card.minionPowers.hasDivineShield = false;
     syncMinionCardEffects(card);
 };
 

@@ -17,7 +17,7 @@ import type { TargetValidity } from "./TargetSelectionStore.js";
 
 const getMinionHasTaunt = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.hasTaunt ?? false;
+    return minion.originalCard.minionPowers?.hasTaunt ?? false;
 };
 
 const boardHasTaunt = (board: BoardState): boolean => {

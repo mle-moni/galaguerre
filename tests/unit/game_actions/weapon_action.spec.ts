@@ -181,7 +181,7 @@ test.group("weapon combat", () => {
         const weaponCard = createWeaponCard({ damage: 3, durability: 2 });
         const tauntCard = createMinionCard({
             uuid: MINION_IDS.taunt,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
 

@@ -1129,7 +1129,7 @@ test.group("battlecries", () => {
                     type: "BOOST",
                     isTargeted: true,
                     boost: createBoostSnapshot({
-                        minionPower: {
+                        minionPowers: {
                             hasTaunt: true,
                             hasCharge: false,
                             hasWindfury: false,
@@ -1155,7 +1155,7 @@ test.group("battlecries", () => {
 
         const boosted = game.data.playerOne.board.SPOT_2;
         const boostedCard = boosted?.originalCard;
-        assert.isTrue(boostedCard?.type === "MINION" && boostedCard.hasTaunt);
+        assert.isTrue(boostedCard?.type === "MINION" && boostedCard.minionPowers.hasTaunt);
         if (boostedCard?.type === "MINION") {
             assert.include(boostedCard.effects, "Provocation");
         }

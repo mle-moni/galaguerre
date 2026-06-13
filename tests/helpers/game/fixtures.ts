@@ -9,6 +9,7 @@ import {
     type GameData,
     type GamePlayer,
     type MinionCard,
+    type MinionPowerSnapshot,
     type MinionSpotId,
     type MinionState,
     type PassiveSnapshot,
@@ -18,6 +19,7 @@ import {
     type WeaponCard,
     type WeaponState,
 } from "#api_types/game.types";
+import { normalizeMinionPowers } from "#galaguerre/minion_card_metadata";
 
 export const MINION_IDS = {
     attacker: "minion-attacker",
@@ -97,7 +99,7 @@ export const createBoostSnapshot = (overrides: Partial<BoostSnapshot> = {}): Boo
     attack: null,
     health: null,
     spellPower: null,
-    minionPower: null,
+    minionPowers: null,
     ...overrides,
 });
 
@@ -138,10 +140,7 @@ export const createMinionCard = (
     type: "MINION",
     attack: 1,
     health: 1,
-    hasTaunt: false,
-    hasCharge: false,
-    hasWindfury: false,
-    isPoisonous: false,
+    minionPowers: normalizeMinionPowers(null),
     effects: [],
     description: "",
     battlecryActions: [],
@@ -149,6 +148,10 @@ export const createMinionCard = (
     passives: [],
     ...overrides,
 });
+
+export const createMinionPowersSnapshot = (
+    overrides: Partial<MinionPowerSnapshot> = {},
+): MinionPowerSnapshot => normalizeMinionPowers(overrides);
 
 export const createPassiveSnapshot = (
     overrides: Partial<PassiveSnapshot> = {},
@@ -163,30 +166,38 @@ export const createPassiveSnapshot = (
 export const createMinionState = (
     card: MinionCard,
     overrides: Partial<MinionState> = {},
-): MinionState => ({
-    uuid: card.uuid,
-    health: card.health,
-    attack: card.attack,
-    maxHealth: card.health,
-    placedAtRound: 0,
-    lastActionAtRound: 0,
-    attacksThisRound: 0,
-    initialKeywords: {
-        hasTaunt: card.hasTaunt,
-        hasCharge: card.hasCharge,
-        hasWindfury: card.hasWindfury,
-        isPoisonous: card.isPoisonous,
-    },
-    permanentKeywords: {
-        hasTaunt: false,
-        hasCharge: false,
-        hasWindfury: false,
-        isPoisonous: false,
-    },
-    originalCard: { ...card },
-    isSilenced: false,
-    ...overrides,
-});
+): MinionState => {
+    const minionPowers = normalizeMinionPowers(card.minionPowers);
+
+    return {
+        uuid: card.uuid,
+        health: card.health,
+        attack: card.attack,
+        maxHealth: card.health,
+        placedAtRound: 0,
+        lastActionAtRound: 0,
+        attacksThisRound: 0,
+        initialKeywords: {
+            hasTaunt: minionPowers.hasTaunt,
+            hasCharge: minionPowers.hasCharge,
+            hasWindfury: minionPowers.hasWindfury,
+            isPoisonous: minionPowers.isPoisonous,
+            hasStealth: minionPowers.hasStealth,
+            hasDivineShield: minionPowers.hasDivineShield,
+        },
+        permanentKeywords: {
+            hasTaunt: false,
+            hasCharge: false,
+            hasWindfury: false,
+            isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
+        },
+        originalCard: { ...card },
+        isSilenced: false,
+        ...overrides,
+    };
+};
 
 export const createGamePlayer = (
     userId: number,

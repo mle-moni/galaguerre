@@ -297,7 +297,7 @@ test.group("spell effects", () => {
             uuid: "taunt-minion",
             attack: 2,
             health: 1,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
         });
         const spell = createSpellCard({
             cost: 1,
@@ -342,7 +342,7 @@ test.group("spell effects", () => {
             uuid: "taunt-minion",
             attack: 2,
             health: 3,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
         const spell = createSpellCard({
@@ -381,7 +381,7 @@ test.group("spell effects", () => {
         );
 
         const card = game.data.playerTwo.board.SPOT_1!.originalCard;
-        assert.isFalse(card.type === "MINION" && card.hasTaunt);
+        assert.isFalse(card.type === "MINION" && card.minionPowers.hasTaunt);
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
     });
 

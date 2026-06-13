@@ -155,22 +155,22 @@ export const ensureMinionFoundInBoard = (
 
 export const getMinionHasTaunt = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.hasTaunt ?? false;
+    return minion.originalCard.minionPowers?.hasTaunt ?? false;
 };
 
 export const getMinionHasCharge = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.hasCharge ?? false;
+    return minion.originalCard.minionPowers?.hasCharge ?? false;
 };
 
 export const getMinionHasWindfury = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.hasWindfury ?? false;
+    return minion.originalCard.minionPowers?.hasWindfury ?? false;
 };
 
 export const getMinionIsPoisonous = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.isPoisonous ?? false;
+    return minion.originalCard.minionPowers?.isPoisonous ?? false;
 };
 
 export const getMinionMaxAttacks = (minion: MinionState): number => {

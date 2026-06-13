@@ -105,7 +105,7 @@ test.group("SILENCE action", () => {
             uuid: "target",
             attack: 2,
             health: 4,
-            hasTaunt: true,
+            minionPowers: { hasTaunt: true },
             effects: ["Provocation"],
         });
         const target = createMinionState(targetCard);
@@ -121,7 +121,7 @@ test.group("SILENCE action", () => {
         applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
 
         const card = game.data.playerTwo.board.SPOT_1!.originalCard;
-        assert.isFalse(card.type === "MINION" && card.hasTaunt);
+        assert.isFalse(card.type === "MINION" && card.minionPowers.hasTaunt);
     });
 
     test("removes taunt granted by boost", ({ assert }) => {
@@ -131,7 +131,7 @@ test.group("SILENCE action", () => {
             attack: null,
             health: null,
             spellPower: null,
-            minionPower: {
+            minionPowers: {
                 hasTaunt: true,
                 hasCharge: false,
                 hasWindfury: false,
@@ -150,7 +150,7 @@ test.group("SILENCE action", () => {
         applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
 
         const card = game.data.playerTwo.board.SPOT_1!.originalCard;
-        assert.isFalse(card.type === "MINION" && card.hasTaunt);
+        assert.isFalse(card.type === "MINION" && card.minionPowers.hasTaunt);
     });
 
     test("disables deathrattle", ({ assert }) => {

@@ -1,6 +1,9 @@
 import type { MinionCard, MinionState } from "#api_types/game.types";
+import { normalizeMinionPowers } from "../../../galaguerre/minion_card_metadata.js";
 
 export const instantiateMinion = (card: MinionCard, roundNumber: number): MinionState => {
+    const minionPowers = normalizeMinionPowers(card.minionPowers);
+
     return {
         uuid: card.uuid,
         health: card.health,
@@ -10,16 +13,20 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
         lastActionAtRound: 0,
         attacksThisRound: 0,
         initialKeywords: {
-            hasTaunt: card.hasTaunt,
-            hasCharge: card.hasCharge,
-            hasWindfury: card.hasWindfury,
-            isPoisonous: card.isPoisonous,
+            hasTaunt: minionPowers.hasTaunt,
+            hasCharge: minionPowers.hasCharge,
+            hasWindfury: minionPowers.hasWindfury,
+            isPoisonous: minionPowers.isPoisonous,
+            hasStealth: minionPowers.hasStealth,
+            hasDivineShield: minionPowers.hasDivineShield,
         },
         permanentKeywords: {
             hasTaunt: false,
             hasCharge: false,
             hasWindfury: false,
             isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
         },
         originalCard: {
             ...card,

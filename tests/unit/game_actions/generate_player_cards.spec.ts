@@ -123,7 +123,7 @@ test.group("generatePlayerCards", () => {
             attack: 2,
             health: 2,
             spellPower: null,
-            minionPower: null,
+            minionPowers: null,
         });
         assert.include(generated.description, "Cri de guerre : Donne +2/+2 à un serviteur allié.");
     });
