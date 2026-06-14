@@ -6,5 +6,6 @@ export const V1_ACTION_TYPES = [
     "BOOST",
     "SILENCE",
     "RECONVERSION",
+    "MIND_CONTROL",
 ] as const;
 export type V1ActionType = (typeof V1_ACTION_TYPES)[number];

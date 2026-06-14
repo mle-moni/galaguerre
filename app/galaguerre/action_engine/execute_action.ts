@@ -22,6 +22,12 @@ import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.
 import { applyReconversionToAllMinions, applyReconversionToMinion } from "./apply_reconversion.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import {
+    applyMindControlToMinion,
+    canMindControlTarget,
+    canMindControlWithBoardSpace,
+} from "./apply_mind_control.js";
+import { evaluateActionCondition } from "./evaluate_action_condition.js";
+import {
     shouldTriggerOnTargetResult,
     type TargetEffectOutcome,
 } from "./evaluate_on_target_result.js";
@@ -131,6 +137,18 @@ const applyEffectToResolvedTarget = (
                 action.reconvertParameters,
                 resolved.minion,
             );
+            return { gameEnded: false };
+        }
+        case "MIND_CONTROL": {
+            if (resolved.type !== "MINION") return { gameEnded: false };
+            if (!evaluateActionCondition(action.actionCondition, player, opponent)) {
+                return { gameEnded: false };
+            }
+            const sourceOwner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            if (!canMindControlTarget(player, sourceOwner, resolved.spotId)) {
+                return { gameEnded: false };
+            }
+            applyMindControlToMinion(game, player, sourceOwner, resolved.spotId);
             return { gameEnded: false };
         }
         default:
@@ -313,6 +331,8 @@ const executeNonTargetedV1Action = (
             }
             break;
         }
+        case "MIND_CONTROL":
+            break;
     }
 };
 
@@ -371,6 +391,11 @@ export const executeAction = (
     damageBonus = 0,
     sourceMinion?: MinionState,
 ): void => {
+    if (action.type === "MIND_CONTROL") {
+        if (!evaluateActionCondition(action.actionCondition, player, opponent)) return;
+        if (!canMindControlWithBoardSpace(player)) return;
+    }
+
     if (isTargetedV1Action(action)) {
         if (!selectedTarget) return;
 

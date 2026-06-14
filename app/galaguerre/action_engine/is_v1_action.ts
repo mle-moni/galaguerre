@@ -48,6 +48,9 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
             if (action.reconvertParameters === null) return false;
             if (action.target === null) return false;
             return action.target.type === "MINION" || action.target.type === "ALL";
+        case "MIND_CONTROL":
+            if (action.target === null) return false;
+            return action.target.type === "MINION" || action.target.type === "ALL";
         default:
             return false;
     }

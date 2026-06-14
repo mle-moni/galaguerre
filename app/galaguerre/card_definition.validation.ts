@@ -9,6 +9,10 @@ import { GALAGUERRE_TARGET_SELECTION_MODES } from "./galaguerre.types.js";
 import type { CardTag } from "./card_tags.js";
 import { MinionPower } from "./card_definition.schema.ts";
 
+export type ActionConditionDefinition = {
+    opponentMinionCountMin: number | null;
+};
+
 export type ComparisonDefinition = {
     costComparison: "<" | ">" | "=" | null;
     cost: number | null;
@@ -48,7 +52,15 @@ export type ReconvertParametersDefinition = CardFilterDefinition & {
 };
 
 export type CardActionFieldsDefinition = {
-    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "SILENCE" | "RECONVERSION";
+    type:
+        | "DAMAGE"
+        | "HEAL"
+        | "DRAW"
+        | "ENEMY_DRAW"
+        | "BOOST"
+        | "SILENCE"
+        | "RECONVERSION"
+        | "MIND_CONTROL";
     isTargeted: boolean;
     damage: number | null;
     heal: number | null;
@@ -59,6 +71,7 @@ export type CardActionFieldsDefinition = {
     boost: BoostDefinition | null;
     reconvertParameters: ReconvertParametersDefinition | null;
     target: TargetDefinition | null;
+    actionCondition: ActionConditionDefinition | null;
 };
 
 export type OnTargetResultDefinition = {
@@ -79,7 +92,14 @@ export type PassiveDefinition = {
     playCardFilter: CardFilterDefinition | null;
 };
 
-const TARGETED_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST", "SILENCE", "RECONVERSION"] as const;
+const TARGETED_ACTION_TYPES = [
+    "DAMAGE",
+    "HEAL",
+    "BOOST",
+    "SILENCE",
+    "RECONVERSION",
+    "MIND_CONTROL",
+] as const;
 
 const validateComparisonSnapshot = (
     comparison: ComparisonDefinition,
@@ -324,6 +344,69 @@ const validateSilencePayload = (
     }
 };
 
+const validateMindControlTarget = (
+    target: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.type !== "MINION" && target.type !== "ALL") {
+        ctx.addIssue({
+            code: "custom",
+            message: "MIND_CONTROL target must be MINION or ALL",
+            path: [...path, "type"],
+        });
+    }
+};
+
+const validateMindControlPayload = (
+    action: CardActionDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.damage !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "MIND_CONTROL action must not set damage",
+            path: [...path, "damage"],
+        });
+    }
+    if (action.heal !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "MIND_CONTROL action must not set heal",
+            path: [...path, "heal"],
+        });
+    }
+    if (action.drawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "MIND_CONTROL action must not set drawCount",
+            path: [...path, "drawCount"],
+        });
+    }
+    if (action.enemyDrawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "MIND_CONTROL action must not set enemyDrawCount",
+            path: [...path, "enemyDrawCount"],
+        });
+    }
+    if (action.boost !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "MIND_CONTROL action must not set boost",
+            path: [...path, "boost"],
+        });
+    }
+    if (action.reconvertParameters !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "MIND_CONTROL action must not set reconvertParameters",
+            path: [...path, "reconvertParameters"],
+        });
+    }
+};
+
 const validateReconvertParameters = (
     parameters: ReconvertParametersDefinition,
     ctx: z.RefinementCtx,
@@ -559,6 +642,10 @@ const validateTargetedAction = (
             validateReconversionPayload(action, ctx, path);
             validateReconversionTarget(action.target, ctx, [...path, "target"]);
             break;
+        case "MIND_CONTROL":
+            validateMindControlPayload(action, ctx, path);
+            validateMindControlTarget(action.target, ctx, [...path, "target"]);
+            break;
     }
 
     validateOnTargetResult(action, ctx, path);
@@ -698,6 +785,20 @@ const validateNonTargetedAction = (
                 return;
             }
             validateReconversionTarget(action.target, ctx, [...path, "target"]);
+            validateTargetFilters(action.target, false, ctx, [...path, "target"]);
+            break;
+        }
+        case "MIND_CONTROL": {
+            validateMindControlPayload(action, ctx, path);
+            if (!action.target) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "MIND_CONTROL action requires a MINION or ALL target",
+                    path: [...path, "target"],
+                });
+                return;
+            }
+            validateMindControlTarget(action.target, ctx, [...path, "target"]);
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
             break;
         }

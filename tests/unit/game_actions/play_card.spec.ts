@@ -316,7 +316,7 @@ test.group("play card rules", () => {
             },
         );
 
-        assertError(assert, "Vous devez choisir une cible pour cette carte");
+        assertError(assert, "Aucune cible valide pour cette carte");
     });
 
     test("rejects play when it is not the player turn", async ({ assert }) => {
@@ -419,7 +419,7 @@ test.group("play card rules", () => {
             },
         );
 
-        assertError(assert, "Cible invalide pour cette carte");
+        assertError(assert, "Aucune cible valide pour cette carte");
     });
 
     test("rejects targeted minion when current attack fails comparison", async ({ assert }) => {
@@ -466,7 +466,7 @@ test.group("play card rules", () => {
             },
         );
 
-        assertError(assert, "Cible invalide pour cette carte");
+        assertError(assert, "Aucune cible valide pour cette carte");
     });
 
     test("rejects targeted BOOST battlecry without actionTarget", async ({ assert }) => {
@@ -495,6 +495,6 @@ test.group("play card rules", () => {
             },
         );
 
-        assertError(assert, "Vous devez choisir une cible pour cette carte");
+        assertError(assert, "Aucune cible valide pour cette carte");
     });
 });

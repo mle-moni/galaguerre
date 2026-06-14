@@ -341,6 +341,13 @@ const appendOnTargetResultClause = (description: string, action: CardActionSnaps
     return `${description.replace(/\.$/, "")}. ${clause}`;
 };
 
+const formatActionConditionPrefix = (action: CardActionSnapshot): string => {
+    if (!action.actionCondition?.opponentMinionCountMin) return "";
+
+    const count = action.actionCondition.opponentMinionCountMin;
+    return `Si votre adversaire a ${count} serviteurs ou plus, `;
+};
+
 export const formatActionDescription = (
     action: CardActionSnapshot,
     prefix = "Cri de guerre",
@@ -566,6 +573,29 @@ export const formatActionDescription = (
             }
 
             return `${prefix} : Reconvertit un serviteur en ${targetLabel}.`;
+        }
+        case "MIND_CONTROL": {
+            const conditionPrefix = formatActionConditionPrefix(action);
+
+            if (action.target && hasRandomLimitedTarget(action.target)) {
+                const { target } = action;
+                if (target.type === "MINION") {
+                    return `${prefix} : ${conditionPrefix}prend le contrôle ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
+                }
+                return `${prefix} : ${conditionPrefix}prend le contrôle ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.isTargeted && action.target?.type === "MINION") {
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : ${conditionPrefix}prend le contrôle d'un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "MINION") {
+                return `${prefix} : ${conditionPrefix}prend le contrôle ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            return `${prefix} : ${conditionPrefix}prend le contrôle d'un serviteur adverse.`;
         }
         default:
             return null;

@@ -37,6 +37,7 @@ export const GALAGUERRE_ACTIONS_TYPES = [
     "ENEMY_DRAW",
     "SILENCE",
     "RECONVERSION",
+    "MIND_CONTROL",
 ] as const;
 export type GalaguerreActionType = GenerateTypeFromEnum<typeof GALAGUERRE_ACTIONS_TYPES>;
 export const GALAGUERRE_ACTIONS_TYPES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_ACTIONS_TYPES);
@@ -48,6 +49,7 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     HEAL: "Heal",
     SILENCE: "Silence",
     RECONVERSION: "Reconversion",
+    MIND_CONTROL: "Mind Control",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,

@@ -10,9 +10,11 @@ import type {
 import {
     actionRequiresTarget,
     canOpponentDirectlyTargetMinion,
+    cardHasPlayableTarget,
     heroMatchesTarget,
     minionMatchesTarget,
 } from "#api_types/target_matching";
+import { MINION_SPOT_IDS } from "#api_types/game.types";
 
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import { makeAutoObservable } from "mobx";
@@ -70,6 +72,25 @@ export class TargetSelectionStore {
 
     requiresTarget(card: MinionCard | SpellCard): boolean {
         return actionRequiresTarget(card);
+    }
+
+    hasPlayableTarget(card: MinionCard | SpellCard): boolean {
+        return cardHasPlayableTarget(
+            card,
+            this.gameStore.me.board,
+            this.gameStore.opponent.board,
+            MINION_SPOT_IDS.some((spotId) => this.gameStore.me.board[spotId] === null),
+        );
+    }
+
+    private targetedActionRequiresMindControlSpace(): boolean {
+        return this.getTargetedActions().some(
+            (action) => action.type === "MIND_CONTROL" && action.isTargeted,
+        );
+    }
+
+    private playerBoardHasSpaceForMindControl(): boolean {
+        return MINION_SPOT_IDS.some((spotId) => this.gameStore.me.board[spotId] === null);
     }
 
     isCardArmed(card: ArmedPlayableCard): boolean {
@@ -192,6 +213,13 @@ export class TargetSelectionStore {
         const targetedActions = card.spellActions.filter((action) => action.isTargeted);
         if (targetedActions.length === 0) return false;
 
+        if (
+            this.targetedActionRequiresMindControlSpace() &&
+            !this.playerBoardHasSpaceForMindControl()
+        ) {
+            return false;
+        }
+
         if (actionTarget.spotId === null) {
             return targetedActions.every((action) => {
                 if (!action.target) return false;
@@ -229,6 +257,13 @@ export class TargetSelectionStore {
     canSelectMinion(spotId: MinionSpotId, isOpponent: boolean): boolean {
         const targetedActions = this.getTargetedActions();
         if (targetedActions.length === 0) return false;
+
+        if (
+            this.targetedActionRequiresMindControlSpace() &&
+            !this.playerBoardHasSpaceForMindControl()
+        ) {
+            return false;
+        }
 
         const board = isOpponent ? this.gameStore.opponent.board : this.gameStore.me.board;
         const minion = board[spotId];

@@ -26,6 +26,7 @@ export const COIN_CARD_PREVIEW: SpellCard = {
             reconvertParameters: null,
             target: null,
             onTargetResult: null,
+            actionCondition: null,
         },
     ],
 };

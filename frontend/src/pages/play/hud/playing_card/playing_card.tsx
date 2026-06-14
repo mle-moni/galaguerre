@@ -32,7 +32,13 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         );
     }
 
-    const canPlay = store.isMyTurn && card.cost <= store.me.mana;
+    const canPlay =
+        store.isMyTurn &&
+        card.cost <= store.me.mana &&
+        (card.type === "SPELL" || card.type === "MINION"
+            ? !store.targetSelectionStore.requiresTarget(card) ||
+              store.targetSelectionStore.hasPlayableTarget(card)
+            : true);
     const isArmed =
         (card.type === "SPELL" || card.type === "WEAPON") &&
         store.targetSelectionStore.isCardArmed(card);

@@ -7,6 +7,7 @@ import type {
     SpellCard,
     TargetSnapshot,
 } from "./game.types.js";
+import { MINION_SPOT_IDS } from "./game.types.js";
 import { getBoardMinionStats, matchesComparison } from "./comparison_matching.js";
 
 export { matchesComparison } from "./comparison_matching.js";
@@ -82,13 +83,67 @@ export const actionRequiresTarget = (card: MinionCard | SpellCard): boolean => {
     return card.battlecryActions?.some((action) => action.isTargeted) ?? false;
 };
 
+const actionRequiresMindControlBoardSpace = (action: CardActionSnapshot): boolean => {
+    return action.type === "MIND_CONTROL" && action.isTargeted;
+};
+
+const getCardActions = (card: MinionCard | SpellCard): CardActionSnapshot[] => {
+    if (card.type === "SPELL") return card.spellActions;
+    return card.battlecryActions ?? [];
+};
+
+export const cardHasPlayableTarget = (
+    card: MinionCard | SpellCard,
+    playerBoard: BoardState,
+    opponentBoard: BoardState,
+    playerHasSpace = true,
+): boolean => {
+    const targetedActions = getCardActions(card).filter((action) => action.isTargeted);
+    if (targetedActions.length === 0) return true;
+
+    const requiresMindControlSpace = targetedActions.some(actionRequiresMindControlBoardSpace);
+    if (requiresMindControlSpace && !playerHasSpace) return false;
+
+    for (const isOpponent of [true, false] as const) {
+        const heroValid = targetedActions.every((action) => {
+            if (!action.target) return false;
+            return heroMatchesTarget(action.target, isOpponent);
+        });
+
+        if (heroValid) return true;
+    }
+
+    for (const isOpponent of [true, false] as const) {
+        const board = isOpponent ? opponentBoard : playerBoard;
+
+        for (const spotId of MINION_SPOT_IDS) {
+            const minion = board[spotId];
+            if (!minion) continue;
+
+            const minionValid = targetedActions.every((action) => {
+                if (!action.target) return false;
+                if (!minionMatchesTarget(minion, action.target, isOpponent)) return false;
+                if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) return false;
+                return true;
+            });
+
+            if (minionValid) return true;
+        }
+    }
+
+    return false;
+};
+
 export const selectedTargetMatchesAction = (
     selectedTarget: ActionTarget,
     action: CardActionSnapshot,
     playerBoard: BoardState,
     opponentBoard: BoardState,
+    playerHasSpace = true,
 ): boolean => {
     if (!action.isTargeted || !action.target) return false;
+
+    if (actionRequiresMindControlBoardSpace(action) && !playerHasSpace) return false;
 
     const isOpponent = selectedTarget.owner === "OPPONENT";
 

@@ -1,5 +1,6 @@
 export type { CardTag } from "../app/galaguerre/card_tags.js";
 export type {
+    ActionConditionDefinition as ActionConditionSnapshot,
     CardActionDefinition as CardActionSnapshot,
     CardActionFieldsDefinition as CardActionFieldsSnapshot,
     BoostDefinition as BoostSnapshot,

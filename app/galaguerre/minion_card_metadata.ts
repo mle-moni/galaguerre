@@ -79,6 +79,7 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
                     reconvertParameters: null,
                     target: passive.passiveBoost.target,
                     onTargetResult: null,
+                    actionCondition: null,
                 };
                 return formatActionDescription(actionLike, "Passif");
             }

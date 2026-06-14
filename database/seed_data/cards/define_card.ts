@@ -1,6 +1,7 @@
 import type { CardTag } from "#galaguerre/card_tags";
 import type {
     CardActionDefinition,
+    ActionConditionDefinition,
     BoostDefinition,
     CardFilterDefinition,
     ComparisonDefinition,
@@ -64,6 +65,7 @@ const nullActionFields = () => ({
     reconvertParameters: null,
     target: null,
     onTargetResult: null,
+    actionCondition: null,
 });
 
 export const defaultMinionData = (): MinionCardData => ({
@@ -270,6 +272,18 @@ export const boostAction = (
 
 export const silenceAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
     baseAction({ type: "SILENCE", target, isTargeted });
+
+export const mindControlAction = (
+    target: TargetDefinition,
+    isTargeted = false,
+    options: { condition?: ActionConditionDefinition | null } = {},
+): CardActionDefinition =>
+    baseAction({
+        type: "MIND_CONTROL",
+        target,
+        isTargeted,
+        actionCondition: options.condition ?? null,
+    });
 
 export const reconvertParameters = (
     overrides: Partial<ReconvertParametersDefinition> = {},

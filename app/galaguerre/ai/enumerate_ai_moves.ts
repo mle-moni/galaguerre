@@ -10,10 +10,12 @@ import { MINION_SPOT_IDS } from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import {
     actionRequiresTarget,
+    cardHasPlayableTarget,
     heroMatchesTarget,
     minionMatchesTarget,
     selectedTargetMatchesAction,
 } from "#api_types/target_matching";
+import { playerHasBoardSpace } from "../action_engine/apply_mind_control.js";
 import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 import {
     boardHasAttackableTaunt,
@@ -98,7 +100,13 @@ const targetMatchesAllActions = (
     const targetedActions = getTargetedActionsForCard(card);
 
     return targetedActions.every((action) =>
-        selectedTargetMatchesAction(actionTarget, action, player.board, opponent.board),
+        selectedTargetMatchesAction(
+            actionTarget,
+            action,
+            player.board,
+            opponent.board,
+            playerHasBoardSpace(player),
+        ),
     );
 };
 
@@ -189,6 +197,17 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
                 if (player.board[spotId] !== null) continue;
 
                 if (actionRequiresTarget(card)) {
+                    if (
+                        !cardHasPlayableTarget(
+                            card,
+                            player.board,
+                            opponent.board,
+                            playerHasBoardSpace(player),
+                        )
+                    ) {
+                        continue;
+                    }
+
                     const targets = enumerateTargetsForCard(card, player, opponent);
                     for (const actionTarget of targets) {
                         if (!targetMatchesAllActions(actionTarget, card, player, opponent)) {
@@ -218,6 +237,17 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
             }
         } else if (card.type === "SPELL") {
             if (actionRequiresTarget(card)) {
+                if (
+                    !cardHasPlayableTarget(
+                        card,
+                        player.board,
+                        opponent.board,
+                        playerHasBoardSpace(player),
+                    )
+                ) {
+                    continue;
+                }
+
                 const targets = enumerateTargetsForCard(card, player, opponent);
                 for (const actionTarget of targets) {
                     if (!targetMatchesAllActions(actionTarget, card, player, opponent)) {

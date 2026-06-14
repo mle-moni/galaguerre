@@ -466,7 +466,7 @@ test.group("spell effects", () => {
             },
         );
 
-        assertError(assert, "Cible invalide pour cette carte");
+        assertError(assert, "Aucune cible valide pour cette carte");
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 4 });
     });
 

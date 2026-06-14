@@ -142,6 +142,7 @@ export const createCardActionSnapshot = (
     reconvertParameters: null,
     target: null,
     onTargetResult: null,
+    actionCondition: null,
     ...overrides,
 });
 

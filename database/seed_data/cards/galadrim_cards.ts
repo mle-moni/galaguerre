@@ -27,16 +27,22 @@ import {
     onTargetSurvivedWithHealth,
     healAction,
     minionDrawFilter,
+    mindControlAction,
     otherAllyMinions,
     otherAllyMinionsWithTag,
     randomEnemyCharacter,
+    randomEnemyMinion,
     randomEnemyTargets,
     reconversionToCardId,
+    reconversionAction,
+    reconvertParameters,
+    relativeCostReconversion,
     selfMinion,
     silenceAction,
     spellDrawFilter,
     targetedAllyMinion,
     targetedAnyMinion,
+    targetedEnemyMinion,
     type CardSeedEntry,
     boostDivineShield,
 } from "./define_card.js";
@@ -460,6 +466,35 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(122, gal("Doom scrolling", 4), [
         reconversionToCardId(121, targetedAnyMinion(), true),
     ]),
+    defineSpell(123, gal("Levée de Fonds", 1), [
+        relativeCostReconversion(1, targetedAllyMinion(), true),
+    ]),
+    defineSpell(124, gal("Coupe Budgétaire", 2), [relativeCostReconversion(-1, enemyMinions())]),
+    defineSpell(126, gal("Congrès Tech", 5), [
+        reconversionAction(
+            reconvertParameters({
+                tags: ["DEVELOPPEUR"],
+                comparison: costLessThan(4),
+            }),
+            allMinions(),
+        ),
+    ]),
+    defineSpell(127, gal("Contrat Freelance", 3), [
+        reconversionToCardId(125, targetedAnyMinion(), true),
+    ]),
+    defineSpell(128, gal("Débauchage", 8), [mindControlAction(targetedEnemyMinion(), true)]),
+    defineMinion(
+        129,
+        { ...gal("Chasseur de Têtes", 3), attack: 3, health: 3 },
+        {
+            tags: ["SUPPORT"],
+            battlecryActions: [
+                mindControlAction(randomEnemyMinion(), false, {
+                    condition: { opponentMinionCountMin: 4 },
+                }),
+            ],
+        },
+    ),
 
     // --- weapons ---
     defineWeapon(106, { ...gal("Tasse à Café Ébréchée", 1), damage: 1, durability: 4 }),
@@ -476,4 +511,10 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
 
     // --- cartes non collectionnables ---
     defineMinion(121, { ...gal("Légume", 1), attack: 1, health: 1 }, {}, { isCollectible: false }),
+    defineMinion(
+        125,
+        { ...gal("Freelance", 3), attack: 3, health: 3 },
+        {},
+        { isCollectible: false },
+    ),
 ];

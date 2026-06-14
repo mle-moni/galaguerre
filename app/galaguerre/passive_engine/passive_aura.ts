@@ -308,6 +308,40 @@ export const applyExistingAurasToMinion = (
     }
 };
 
+export const revertAurasReceivedByMinion = (game: Game, targetMinion: MinionState): void => {
+    const targetBoardOwner = getBoardOwnerForMinion(game, targetMinion);
+    if (!targetBoardOwner) return;
+
+    for (const sourceOwner of [game.data.playerOne, game.data.playerTwo]) {
+        for (const sourceSpotId of MINION_SPOT_IDS) {
+            const sourceMinion = sourceOwner.board[sourceSpotId];
+            if (!sourceMinion?.auraAppliedTo) continue;
+
+            const hasTarget = sourceMinion.auraAppliedTo.some(
+                (entry) => entry.minionUuid === targetMinion.uuid,
+            );
+            if (!hasTarget) continue;
+
+            const card = sourceMinion.originalCard as MinionCard;
+            const isOpponent = targetBoardOwner !== sourceOwner;
+
+            for (const passiveBoost of collectBoostPassives(card)) {
+                const { boost, target } = passiveBoost;
+                if (!target || (target.type !== "MINION" && target.type !== "ALL")) continue;
+                if (shouldExcludeSourceMinion(target, sourceMinion, targetMinion)) continue;
+                if (!minionMatchesTarget(targetMinion, target, isOpponent)) continue;
+
+                revertBoostFromMinion(targetMinion, boost);
+                recalculateMinionKeywords(game, targetMinion);
+            }
+
+            sourceMinion.auraAppliedTo = sourceMinion.auraAppliedTo.filter(
+                (entry) => entry.minionUuid !== targetMinion.uuid,
+            );
+        }
+    }
+};
+
 export const removeMinionFromAuraTracking = (game: Game, targetMinion: MinionState): void => {
     for (const boardOwner of [game.data.playerOne, game.data.playerTwo]) {
         for (const spotId of MINION_SPOT_IDS) {

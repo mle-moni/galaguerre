@@ -9,6 +9,8 @@ import {
 } from "../../../galaguerre/game_stats/record_player_stats.js";
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
+import { cardHasPlayableTarget } from "#api_types/target_matching";
+import { playerHasBoardSpace } from "../../../galaguerre/action_engine/apply_mind_control.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -56,6 +58,18 @@ export const playSpell = async ({
 
     const requiresTarget = cardRequiresActionTarget(card);
     const opponent = getOpponent(game, player);
+
+    if (
+        requiresTarget &&
+        !cardHasPlayableTarget(card, player.board, opponent.board, playerHasBoardSpace(player))
+    ) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Aucune cible valide pour cette carte" },
+            socketId,
+        );
+        return;
+    }
 
     if (requiresTarget && !actionTarget) {
         emitSocketEvent(

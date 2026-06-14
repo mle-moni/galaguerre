@@ -70,6 +70,13 @@ export const reconvertParametersSchema = cardFilterSchema.extend({
     relativeToSource: z.boolean().default(false),
 });
 
+export const actionConditionSchema = z
+    .object({
+        opponentMinionCountMin: z.number().int().positive().nullable().default(null),
+    })
+    .nullable()
+    .default(null);
+
 const cardActionFieldsSchema = z.object({
     type: z.enum(GALAGUERRE_ACTIONS_TYPES),
     isTargeted: z.boolean(),
@@ -82,6 +89,7 @@ const cardActionFieldsSchema = z.object({
     boost: boostSchema.nullable(),
     reconvertParameters: reconvertParametersSchema.nullable().default(null),
     target: targetSchema.nullable(),
+    actionCondition: actionConditionSchema,
 });
 
 export const onTargetResultSchema = z
@@ -173,6 +181,7 @@ export const cardDataSchema = z.discriminatedUnion("type", [
 
 export type { CardTag } from "./card_tags.js";
 export type {
+    ActionConditionDefinition,
     CardActionDefinition,
     CardActionFieldsDefinition,
     BoostDefinition,
