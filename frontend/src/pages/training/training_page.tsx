@@ -1,24 +1,34 @@
+import type { ApiUser } from "#api_types/auth.types";
 import { Button, Text } from "@mantine/core";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
-import { useUser } from "~/hooks/use_user";
+import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
 import { privateAxios } from "~/services/axios";
 
 export const TrainingPage = observer(() => {
     const user = useUser();
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const decksQuery = useDecksQuery();
     const cardsQuery = useCardsQuery();
 
     const startMutation = useMutation({
         mutationFn: async () => {
-            const response = await privateAxios.post("/api/games/training");
+            const response = await privateAxios.post<{ gameId: number }>("/api/games/training");
             return response.data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
+                if (!oldUser) return oldUser;
+                return { ...oldUser, currentGameId: data.gameId };
+            });
+            navigate("/play");
         },
     });
 

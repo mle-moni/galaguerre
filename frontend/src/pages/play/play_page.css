@@ -12,6 +12,11 @@ html.play-page-active body {
 	overflow: hidden;
 }
 
+.play-page--offline {
+	pointer-events: none;
+	opacity: 0.75;
+}
+
 .card-detail-sheet-content {
 	user-select: text;
 }

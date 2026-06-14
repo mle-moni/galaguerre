@@ -6,7 +6,9 @@ import type { ApiUser } from "#api_types/auth.types";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
+import { ConnectionBanner } from "~/components/connection_banner";
 import { GameStateContext, useGameState } from "~/hooks/use_game_state";
+import { useIsSocketReady } from "~/hooks/use_socket_connection";
 import { useUser } from "~/hooks/use_user";
 import { GAME_STORE } from "~/stores/store_singletons";
 import { GameRenderer } from "./game_renderer.js";
@@ -18,6 +20,7 @@ interface GameProps {
 
 const Game = ({ gameId, user }: GameProps) => {
     const gameQuery = useGameState(gameId);
+    const isSocketReady = useIsSocketReady();
     const [isStoreInit, setIsStoreInit] = useState(false);
 
     useEffect(() => {
@@ -31,7 +34,9 @@ const Game = ({ gameId, user }: GameProps) => {
 
     return (
         <GameStateContext.Provider value={gameQuery.data}>
-            <GameRenderer game={gameQuery.data} user={user} />
+            <div className={isSocketReady ? undefined : "play-page--offline"}>
+                <GameRenderer game={gameQuery.data} user={user} />
+            </div>
         </GameStateContext.Provider>
     );
 };
@@ -51,6 +56,7 @@ export const PlayPage = () => {
 
     return (
         <div className="play-page">
+            <ConnectionBanner />
             <Game user={user} gameId={user.currentGameId} />
         </div>
     );

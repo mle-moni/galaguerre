@@ -1,18 +1,20 @@
 import { Button, Text } from "@mantine/core";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
-import { useUser } from "~/hooks/use_user";
+import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
 import { privateAxios } from "~/services/axios";
+import { fetchCurrentUser } from "~/services/fetch_current_user";
 
 export const MatchmakingPage = observer(() => {
     const user = useUser();
+    const queryClient = useQueryClient();
     const [searchingMatch, setSearchingMatch] = useState(false);
     const decksQuery = useDecksQuery();
     const cardsQuery = useCardsQuery();
@@ -26,6 +28,25 @@ export const MatchmakingPage = observer(() => {
             setSearchingMatch(true);
         },
     });
+
+    useEffect(() => {
+        if (!searchingMatch) return;
+
+        const pollForGame = async () => {
+            try {
+                const freshUser = await fetchCurrentUser();
+                queryClient.setQueryData(USER_QUERY_KEY, freshUser);
+            } catch {
+                // Ignore polling errors; socket events remain the primary path.
+            }
+        };
+
+        const interval = setInterval(() => {
+            void pollForGame();
+        }, 3_000);
+
+        return () => clearInterval(interval);
+    }, [queryClient, searchingMatch]);
 
     if (!user) return <Navigate to="/login" />;
     if (user.currentGameId) return <Navigate to="/play" />;

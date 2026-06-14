@@ -16,6 +16,7 @@ export const useGameState = (gameId: number) => {
 
             return response.data;
         },
+        refetchOnWindowFocus: true,
     });
 
     return query;

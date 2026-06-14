@@ -1,0 +1,21 @@
+.connection-banner {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 10000;
+	padding: 0.5rem 1rem;
+	text-align: center;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #fff;
+	pointer-events: none;
+}
+
+.connection-banner--reconnecting {
+	background-color: rgba(180, 120, 20, 0.95);
+}
+
+.connection-banner--disconnected {
+	background-color: rgba(180, 40, 40, 0.95);
+}
