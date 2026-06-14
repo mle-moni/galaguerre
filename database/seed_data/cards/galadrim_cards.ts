@@ -31,7 +31,7 @@ import {
     otherAllyMinionsWithTag,
     randomEnemyCharacter,
     randomEnemyTargets,
-    reconversionAction,
+    reconversionToCardId,
     selfMinion,
     silenceAction,
     spellDrawFilter,
@@ -458,7 +458,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         }),
     ]),
     defineSpell(122, gal("Doom scrolling", 4), [
-        reconversionAction(121, targetedAnyMinion(), true),
+        reconversionToCardId(121, targetedAnyMinion(), true),
     ]),
 
     // --- weapons ---

@@ -120,11 +120,17 @@ const applyEffectToResolvedTarget = (
             return { gameEnded: false };
         }
         case "RECONVERSION": {
-            if (resolved.type !== "MINION" || action.reconvertCardId === null) {
+            if (resolved.type !== "MINION" || action.reconvertParameters === null) {
                 return { gameEnded: false };
             }
             const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
-            applyReconversionToMinion(game, owner, resolved.spotId, action.reconvertCardId);
+            applyReconversionToMinion(
+                game,
+                owner,
+                resolved.spotId,
+                action.reconvertParameters,
+                resolved.minion,
+            );
             return { gameEnded: false };
         }
         default:
@@ -293,7 +299,7 @@ const executeNonTargetedV1Action = (
             break;
         }
         case "RECONVERSION": {
-            if (!action.target || action.reconvertCardId === null) break;
+            if (!action.target || action.reconvertParameters === null) break;
 
             if (action.target.type === "ALL" || action.target.type === "MINION") {
                 applyReconversionToAllMinions(
@@ -301,7 +307,7 @@ const executeNonTargetedV1Action = (
                     player,
                     opponent,
                     action.target,
-                    action.reconvertCardId,
+                    action.reconvertParameters,
                     sourceMinion,
                 );
             }

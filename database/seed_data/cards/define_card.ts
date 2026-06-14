@@ -6,6 +6,7 @@ import type {
     ComparisonDefinition,
     OnTargetResultDefinition,
     PassiveDefinition,
+    ReconvertParametersDefinition,
     TargetDefinition,
 } from "#galaguerre/card_definition.validation";
 import type {
@@ -60,7 +61,7 @@ const nullActionFields = () => ({
     damage: null,
     heal: null,
     boost: null,
-    reconvertCardId: null,
+    reconvertParameters: null,
     target: null,
     onTargetResult: null,
 });
@@ -270,12 +271,50 @@ export const boostAction = (
 export const silenceAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
     baseAction({ type: "SILENCE", target, isTargeted });
 
+export const reconvertParameters = (
+    overrides: Partial<ReconvertParametersDefinition> = {},
+): ReconvertParametersDefinition => ({
+    type: "MINION",
+    comparison: null,
+    tags: [],
+    cardId: null,
+    relativeToSource: false,
+    ...overrides,
+});
+
 export const reconversionAction = (
-    reconvertCardId: number,
+    parameters: ReconvertParametersDefinition,
     target: TargetDefinition,
     isTargeted = false,
 ): CardActionDefinition =>
-    baseAction({ type: "RECONVERSION", reconvertCardId, target, isTargeted });
+    baseAction({ type: "RECONVERSION", reconvertParameters: parameters, target, isTargeted });
+
+export const reconversionToCardId = (
+    cardId: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => reconversionAction(reconvertParameters({ cardId }), target, isTargeted);
+
+export const randomCostReconversion = (
+    cost: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition =>
+    reconversionAction(reconvertParameters({ comparison: costEquals(cost) }), target, isTargeted);
+
+export const relativeCostReconversion = (
+    costOffset: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition =>
+    reconversionAction(
+        reconvertParameters({
+            comparison: costEquals(costOffset),
+            relativeToSource: true,
+        }),
+        target,
+        isTargeted,
+    );
 
 export const boostStats = (overrides: Partial<BoostDefinition> = {}): BoostDefinition => ({
     attack: null,

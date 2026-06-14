@@ -42,6 +42,11 @@ export type CardFilterDefinition = {
     tags: CardTag[];
 };
 
+export type ReconvertParametersDefinition = CardFilterDefinition & {
+    cardId: number | null;
+    relativeToSource: boolean;
+};
+
 export type CardActionFieldsDefinition = {
     type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "SILENCE" | "RECONVERSION";
     isTargeted: boolean;
@@ -52,7 +57,7 @@ export type CardActionFieldsDefinition = {
     drawCardFilter: CardFilterDefinition | null;
     enemyDrawCardFilter: CardFilterDefinition | null;
     boost: BoostDefinition | null;
-    reconvertCardId: number | null;
+    reconvertParameters: ReconvertParametersDefinition | null;
     target: TargetDefinition | null;
 };
 
@@ -310,12 +315,38 @@ const validateSilencePayload = (
             path: [...path, "boost"],
         });
     }
-    if (action.reconvertCardId !== null) {
+    if (action.reconvertParameters !== null) {
         ctx.addIssue({
             code: "custom",
-            message: "SILENCE action must not set reconvertCardId",
-            path: [...path, "reconvertCardId"],
+            message: "SILENCE action must not set reconvertParameters",
+            path: [...path, "reconvertParameters"],
         });
+    }
+};
+
+const validateReconvertParameters = (
+    parameters: ReconvertParametersDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (parameters.type !== "MINION") {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION reconvertParameters.type must be MINION",
+            path: [...path, "type"],
+        });
+    }
+
+    if (parameters.cardId !== null && parameters.cardId <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION reconvertParameters.cardId must be > 0 when set",
+            path: [...path, "cardId"],
+        });
+    }
+
+    if (parameters.comparison !== null) {
+        validateComparisonSnapshot(parameters.comparison, ctx, [...path, "comparison"]);
     }
 };
 
@@ -373,13 +404,16 @@ const validateReconversionPayload = (
             path: [...path, "boost"],
         });
     }
-    if (action.reconvertCardId === null || action.reconvertCardId <= 0) {
+    if (action.reconvertParameters === null) {
         ctx.addIssue({
             code: "custom",
-            message: "RECONVERSION action requires reconvertCardId > 0",
-            path: [...path, "reconvertCardId"],
+            message: "RECONVERSION action requires reconvertParameters",
+            path: [...path, "reconvertParameters"],
         });
+        return;
     }
+
+    validateReconvertParameters(action.reconvertParameters, ctx, [...path, "reconvertParameters"]);
 };
 
 const validateBoostTargetCompatibility = (
@@ -684,6 +718,14 @@ export const validateCardAction = (
     path: (string | number)[],
     options: { allowTargeted?: boolean; deathrattle?: boolean } = {},
 ) => {
+    if (action.type !== "RECONVERSION" && action.reconvertParameters !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: `${action.type} action must not set reconvertParameters`,
+            path: [...path, "reconvertParameters"],
+        });
+    }
+
     if (options.deathrattle && action.isTargeted) {
         ctx.addIssue({
             code: "custom",

@@ -76,7 +76,7 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
                     drawCardFilter: null,
                     enemyDrawCardFilter: null,
                     boost: passive.passiveBoost.boost,
-                    reconvertCardId: null,
+                    reconvertParameters: null,
                     target: passive.passiveBoost.target,
                     onTargetResult: null,
                 };

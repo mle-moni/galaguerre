@@ -14,6 +14,7 @@ import {
     type MinionState,
     type PassiveSnapshot,
     type PlayerCard,
+    type ReconvertParametersSnapshot,
     type SpellCard,
     type TargetSnapshot,
     type WeaponCard,
@@ -115,6 +116,17 @@ export const createCardFilterSnapshot = (
     ...overrides,
 });
 
+export const createReconvertParametersSnapshot = (
+    overrides: Partial<ReconvertParametersSnapshot> = {},
+): ReconvertParametersSnapshot => ({
+    type: "MINION",
+    comparison: null,
+    tags: [],
+    cardId: null,
+    relativeToSource: false,
+    ...overrides,
+});
+
 export const createCardActionSnapshot = (
     overrides: Partial<CardActionSnapshot> = {},
 ): CardActionSnapshot => ({
@@ -127,7 +139,7 @@ export const createCardActionSnapshot = (
     drawCardFilter: null,
     enemyDrawCardFilter: null,
     boost: null,
-    reconvertCardId: null,
+    reconvertParameters: null,
     target: null,
     onTargetResult: null,
     ...overrides,

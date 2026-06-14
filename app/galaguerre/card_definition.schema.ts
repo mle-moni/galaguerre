@@ -65,6 +65,11 @@ export const cardFilterSchema = z.object({
     tags: z.array(cardTagSchema),
 });
 
+export const reconvertParametersSchema = cardFilterSchema.extend({
+    cardId: z.number().int().positive().nullable().default(null),
+    relativeToSource: z.boolean().default(false),
+});
+
 const cardActionFieldsSchema = z.object({
     type: z.enum(GALAGUERRE_ACTIONS_TYPES),
     isTargeted: z.boolean(),
@@ -75,7 +80,7 @@ const cardActionFieldsSchema = z.object({
     drawCardFilter: cardFilterSchema.nullable(),
     enemyDrawCardFilter: cardFilterSchema.nullable(),
     boost: boostSchema.nullable(),
-    reconvertCardId: z.number().nullable().default(null),
+    reconvertParameters: reconvertParametersSchema.nullable().default(null),
     target: targetSchema.nullable(),
 });
 
@@ -178,6 +183,7 @@ export type {
 } from "./card_definition.validation.js";
 
 export type CardFilterDefinition = z.infer<typeof cardFilterSchema>;
+export type ReconvertParametersDefinition = z.infer<typeof reconvertParametersSchema>;
 export type DeathrattleActionDefinition = z.infer<typeof deathrattleActionSchema>;
 export type PassiveBoostDefinition = z.infer<typeof passiveBoostSchema>;
 export type MinionCardData = z.infer<typeof minionDataSchema>;

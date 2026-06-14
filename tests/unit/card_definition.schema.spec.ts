@@ -18,6 +18,8 @@ import {
     selfMinion,
     silenceAction,
     reconversionAction,
+    reconversionToCardId,
+    reconvertParameters,
     actionPassive,
     spellDrawFilter,
     targetedEnemyMinion,
@@ -194,21 +196,46 @@ test.group("card_definition.schema", () => {
     test("accepts valid RECONVERSION action targeting minion", ({ assert }) => {
         const data = parseSpellData({
             ...defaultSpellData(),
-            spellActions: [reconversionAction(121, targetedEnemyMinion(), true)],
+            spellActions: [reconversionToCardId(121, targetedEnemyMinion(), true)],
         });
 
         assert.equal(data.spellActions[0]!.type, "RECONVERSION");
-        assert.equal(data.spellActions[0]!.reconvertCardId, 121);
+        assert.equal(data.spellActions[0]!.reconvertParameters?.cardId, 121);
         assert.isTrue(data.spellActions[0]!.isTargeted);
     });
 
-    test("rejects RECONVERSION without reconvertCardId", ({ assert }) => {
+    test("accepts RECONVERSION with filter parameters and no cardId", ({ assert }) => {
+        const data = parseSpellData({
+            ...defaultSpellData(),
+            spellActions: [
+                reconversionAction(
+                    reconvertParameters({
+                        comparison: {
+                            costComparison: "=",
+                            cost: 3,
+                            attackComparison: null,
+                            attack: null,
+                            healthComparison: null,
+                            health: null,
+                        },
+                    }),
+                    enemyMinions(),
+                ),
+            ],
+        });
+
+        assert.equal(data.spellActions[0]!.type, "RECONVERSION");
+        assert.isNull(data.spellActions[0]!.reconvertParameters?.cardId);
+        assert.equal(data.spellActions[0]!.reconvertParameters?.comparison?.cost, 3);
+    });
+
+    test("rejects RECONVERSION without reconvertParameters", ({ assert }) => {
         const result = safeParseCardData({
             ...defaultSpellData(),
             spellActions: [
                 {
-                    ...reconversionAction(121, targetedEnemyMinion(), true),
-                    reconvertCardId: null,
+                    ...reconversionToCardId(121, targetedEnemyMinion(), true),
+                    reconvertParameters: null,
                 },
             ],
         });
@@ -219,7 +246,7 @@ test.group("card_definition.schema", () => {
     test("rejects RECONVERSION targeting HERO", ({ assert }) => {
         const result = safeParseCardData({
             ...defaultSpellData(),
-            spellActions: [reconversionAction(121, enemyHero())],
+            spellActions: [reconversionToCardId(121, enemyHero())],
         });
 
         assert.isFalse(result.success);
@@ -230,7 +257,7 @@ test.group("card_definition.schema", () => {
             ...defaultSpellData(),
             spellActions: [
                 {
-                    ...reconversionAction(121, targetedEnemyMinion(), true),
+                    ...reconversionToCardId(121, targetedEnemyMinion(), true),
                     damage: 1,
                 },
             ],

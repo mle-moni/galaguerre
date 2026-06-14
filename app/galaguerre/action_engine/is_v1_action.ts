@@ -45,7 +45,7 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
             if (action.target === null) return false;
             return action.target.type === "MINION" || action.target.type === "ALL";
         case "RECONVERSION":
-            if (action.reconvertCardId === null || action.reconvertCardId <= 0) return false;
+            if (action.reconvertParameters === null) return false;
             if (action.target === null) return false;
             return action.target.type === "MINION" || action.target.type === "ALL";
         default:

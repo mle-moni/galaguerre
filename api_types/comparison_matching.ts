@@ -50,6 +50,31 @@ export const getBoardMinionStats = (minion: MinionState): ComparableStats => ({
     health: minion.health,
 });
 
+export const resolveRelativeComparison = (
+    comparison: ComparisonSnapshot | null,
+    sourceStats: ComparableStats,
+): ComparisonSnapshot | null => {
+    if (!comparison) return null;
+
+    return {
+        costComparison: comparison.costComparison,
+        cost:
+            comparison.costComparison !== null && comparison.cost !== null
+                ? sourceStats.cost + comparison.cost
+                : null,
+        attackComparison: comparison.attackComparison,
+        attack:
+            comparison.attackComparison !== null && comparison.attack !== null
+                ? sourceStats.attack + comparison.attack
+                : null,
+        healthComparison: comparison.healthComparison,
+        health:
+            comparison.healthComparison !== null && comparison.health !== null
+                ? sourceStats.health + comparison.health
+                : null,
+    };
+};
+
 export const getDeckCardStats = (card: PlayerCard): ComparableStats => {
     if (card.type === "MINION") {
         return { cost: card.cost, attack: card.attack, health: card.health };

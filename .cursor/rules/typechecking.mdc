@@ -1,0 +1,6 @@
+---
+description: Run typecheck after implementing new feature
+alwaysApply: true
+---
+
+When implementing a new feature, finish your work by ensuring `yarn typecheck` passes.

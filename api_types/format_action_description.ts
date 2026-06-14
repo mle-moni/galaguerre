@@ -5,6 +5,7 @@ import type {
     CardFilterSnapshot,
     CardTag,
     OnTargetResultDefinition,
+    ReconvertParametersSnapshot,
     TargetSnapshot,
 } from "./game.types.js";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
@@ -217,6 +218,75 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     }
 
     return ` ${parts.join(" + ")}`;
+};
+
+const formatRelativeReconvertSuffix = (parameters: ReconvertParametersSnapshot): string => {
+    if (!parameters.relativeToSource || !parameters.comparison) return "";
+
+    const parts: string[] = [];
+    const comparison = parameters.comparison;
+
+    if (comparison.costComparison !== null && comparison.cost !== null) {
+        const offset = comparison.cost;
+        if (offset === 0) {
+            parts.push("du même coût que la cible");
+        } else if (offset > 0) {
+            parts.push(`coûtant ${offset} de plus que la cible`);
+        } else {
+            parts.push(`coûtant ${Math.abs(offset)} de moins que la cible`);
+        }
+    }
+    if (comparison.attackComparison !== null && comparison.attack !== null) {
+        const offset = comparison.attack;
+        if (offset === 0) {
+            parts.push("de la même attaque que la cible");
+        } else if (offset > 0) {
+            parts.push(`avec ${offset} d'attaque de plus que la cible`);
+        } else {
+            parts.push(`avec ${Math.abs(offset)} d'attaque de moins que la cible`);
+        }
+    }
+    if (comparison.healthComparison !== null && comparison.health !== null) {
+        const offset = comparison.health;
+        if (offset === 0) {
+            parts.push("avec les mêmes pv que la cible");
+        } else if (offset > 0) {
+            parts.push(`avec ${offset} pv de plus que la cible`);
+        } else {
+            parts.push(`avec ${Math.abs(offset)} pv de moins que la cible`);
+        }
+    }
+
+    return parts.length > 0 ? ` ${parts.join(", ")}` : "";
+};
+
+const formatReconvertTargetLabel = (parameters: ReconvertParametersSnapshot | null): string => {
+    if (!parameters) return "une autre carte";
+
+    if (parameters.cardId !== null) {
+        return (
+            GALADRIM_CARDS.find((entry) => entry.id === parameters.cardId)?.data.name ??
+            "une autre carte"
+        );
+    }
+
+    let label = "un serviteur aléatoire";
+
+    if (parameters.relativeToSource) {
+        label += formatRelativeReconvertSuffix(parameters);
+    } else {
+        label += formatCardFilterSuffix({
+            type: parameters.type,
+            comparison: parameters.comparison,
+            tags: [],
+        });
+    }
+
+    if (parameters.tags.length > 0) {
+        label += ` ${formatTagList(parameters.tags)}`;
+    }
+
+    return label;
 };
 
 const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | null => {
@@ -471,11 +541,7 @@ export const formatActionDescription = (
             return `${prefix} : Réduit au silence un serviteur.`;
         }
         case "RECONVERSION": {
-            const targetLabel =
-                action.reconvertCardId !== null
-                    ? GALADRIM_CARDS.find((entry) => entry.id === action.reconvertCardId)?.data
-                          .name ?? "une autre carte"
-                    : "une autre carte";
+            const targetLabel = formatReconvertTargetLabel(action.reconvertParameters);
 
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;

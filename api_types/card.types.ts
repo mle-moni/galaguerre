@@ -5,6 +5,7 @@ export type {
     BoostDefinition as BoostSnapshot,
     MinionPower as MinionPowerSnapshot,
     CardFilterDefinition as CardFilterSnapshot,
+    ReconvertParametersDefinition as ReconvertParametersSnapshot,
     ComparisonDefinition as ComparisonSnapshot,
     OnTargetResultDefinition,
     PassiveDefinition as PassiveSnapshot,

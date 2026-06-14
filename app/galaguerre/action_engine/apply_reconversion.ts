@@ -1,14 +1,13 @@
-import {
-    MINION_SPOT_IDS,
-    type GamePlayer,
-    type MinionCard,
-    type MinionSpotId,
-    type MinionState,
-    type TargetSnapshot,
+import type {
+    MinionCard,
+    MinionSpotId,
+    MinionState,
+    ReconvertParametersSnapshot,
+    TargetSnapshot,
 } from "#api_types/game.types";
+import { MINION_SPOT_IDS, type GamePlayer } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
-import { getMinionCardTemplateById } from "../card_catalog.js";
 import { getMinionPowerEffects, normalizeMinionPowers } from "../minion_card_metadata.js";
 import {
     applyExistingAurasToMinion,
@@ -16,6 +15,7 @@ import {
     revertPassiveAurasForSource,
 } from "../passive_engine/passive_aura.js";
 import { getTargetBoardEntries } from "./apply_mass_minion_effects.js";
+import { resolveReconvertTemplate } from "./resolve_reconvert_template.js";
 
 const emptyPermanentKeywords = (): NonNullable<MinionState["permanentKeywords"]> => ({
     hasTaunt: false,
@@ -37,17 +37,14 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
     };
 };
 
-export const applyReconversionToMinion = (
+export const applyReconversionWithTemplate = (
     game: Game,
     owner: GamePlayer,
     spotId: MinionSpotId,
-    reconvertCardId: number,
+    template: MinionCard,
 ): void => {
     const minion = owner.board[spotId];
     if (!minion || minion.originalCard.type !== "MINION") return;
-
-    const template = getMinionCardTemplateById(reconvertCardId);
-    if (!template) return;
 
     revertPassiveAurasForSource(game, owner, minion);
 
@@ -75,12 +72,28 @@ export const applyReconversionToMinion = (
     recalculateMinionKeywords(game, minion);
 };
 
+export const applyReconversionToMinion = (
+    game: Game,
+    owner: GamePlayer,
+    spotId: MinionSpotId,
+    parameters: ReconvertParametersSnapshot,
+    sourceMinionForRelative: MinionState,
+): void => {
+    const minion = owner.board[spotId];
+    if (!minion || minion.originalCard.type !== "MINION") return;
+
+    const template = resolveReconvertTemplate(parameters, sourceMinionForRelative);
+    if (!template) return;
+
+    applyReconversionWithTemplate(game, owner, spotId, template);
+};
+
 export const applyReconversionToAllMinions = (
     game: Game,
     player: GamePlayer,
     opponent: GamePlayer,
     target: TargetSnapshot,
-    reconvertCardId: number,
+    parameters: ReconvertParametersSnapshot,
     sourceMinion?: MinionState,
 ): void => {
     for (const { board, owner, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
@@ -90,7 +103,7 @@ export const applyReconversionToAllMinions = (
             if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
-            applyReconversionToMinion(game, owner, spotId, reconvertCardId);
+            applyReconversionToMinion(game, owner, spotId, parameters, minion);
         }
     }
 };

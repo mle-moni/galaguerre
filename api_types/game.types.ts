@@ -11,6 +11,7 @@ export type {
     BoostSnapshot,
     MinionPowerSnapshot,
     CardFilterSnapshot,
+    ReconvertParametersSnapshot,
     ComparisonSnapshot,
     OnTargetResultDefinition,
     PassiveSnapshot,

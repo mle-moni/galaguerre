@@ -52,3 +52,6 @@ const MINION_CARD_CATALOG = new Map<number, MinionCard>(
 
 export const getMinionCardTemplateById = (cardId: number): MinionCard | undefined =>
     MINION_CARD_CATALOG.get(cardId);
+
+export const getAllMinionCardTemplates = (): MinionCard[] =>
+    Array.from(MINION_CARD_CATALOG.values());
