@@ -17,6 +17,7 @@ import {
     allMinions,
     selfMinion,
     silenceAction,
+    reconversionAction,
     actionPassive,
     spellDrawFilter,
     targetedEnemyMinion,
@@ -183,6 +184,54 @@ test.group("card_definition.schema", () => {
                 {
                     ...silenceAction(enemyMinions()),
                     boost: { attack: 1, health: null, spellPower: null, minionPowers: null },
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("accepts valid RECONVERSION action targeting minion", ({ assert }) => {
+        const data = parseSpellData({
+            ...defaultSpellData(),
+            spellActions: [reconversionAction(121, targetedEnemyMinion(), true)],
+        });
+
+        assert.equal(data.spellActions[0]!.type, "RECONVERSION");
+        assert.equal(data.spellActions[0]!.reconvertCardId, 121);
+        assert.isTrue(data.spellActions[0]!.isTargeted);
+    });
+
+    test("rejects RECONVERSION without reconvertCardId", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [
+                {
+                    ...reconversionAction(121, targetedEnemyMinion(), true),
+                    reconvertCardId: null,
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("rejects RECONVERSION targeting HERO", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [reconversionAction(121, enemyHero())],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("rejects RECONVERSION with damage payload", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [
+                {
+                    ...reconversionAction(121, targetedEnemyMinion(), true),
+                    damage: 1,
                 },
             ],
         });

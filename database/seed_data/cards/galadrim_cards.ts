@@ -31,6 +31,7 @@ import {
     otherAllyMinionsWithTag,
     randomEnemyCharacter,
     randomEnemyTargets,
+    reconversionAction,
     selfMinion,
     silenceAction,
     spellDrawFilter,
@@ -455,6 +456,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         damageAction(2, targetedAnyMinion(), true, {
             onTargetResult: onTargetSurvivedWithHealth(healthEquals(1), drawAction(2)),
         }),
+    ]),
+    defineSpell(122, gal("Doom scrolling", 4), [
+        reconversionAction(121, targetedAnyMinion(), true),
     ]),
 
     // --- weapons ---

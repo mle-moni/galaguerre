@@ -127,6 +127,7 @@ export const createCardActionSnapshot = (
     drawCardFilter: null,
     enemyDrawCardFilter: null,
     boost: null,
+    reconvertCardId: null,
     target: null,
     onTargetResult: null,
     ...overrides,

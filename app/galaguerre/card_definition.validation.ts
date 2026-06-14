@@ -43,7 +43,7 @@ export type CardFilterDefinition = {
 };
 
 export type CardActionFieldsDefinition = {
-    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "SILENCE";
+    type: "DAMAGE" | "HEAL" | "DRAW" | "ENEMY_DRAW" | "BOOST" | "SILENCE" | "RECONVERSION";
     isTargeted: boolean;
     damage: number | null;
     heal: number | null;
@@ -52,6 +52,7 @@ export type CardActionFieldsDefinition = {
     drawCardFilter: CardFilterDefinition | null;
     enemyDrawCardFilter: CardFilterDefinition | null;
     boost: BoostDefinition | null;
+    reconvertCardId: number | null;
     target: TargetDefinition | null;
 };
 
@@ -73,7 +74,7 @@ export type PassiveDefinition = {
     playCardFilter: CardFilterDefinition | null;
 };
 
-const TARGETED_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST", "SILENCE"] as const;
+const TARGETED_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST", "SILENCE", "RECONVERSION"] as const;
 
 const validateComparisonSnapshot = (
     comparison: ComparisonDefinition,
@@ -309,6 +310,76 @@ const validateSilencePayload = (
             path: [...path, "boost"],
         });
     }
+    if (action.reconvertCardId !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SILENCE action must not set reconvertCardId",
+            path: [...path, "reconvertCardId"],
+        });
+    }
+};
+
+const validateReconversionTarget = (
+    target: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.type !== "MINION" && target.type !== "ALL") {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION target must be MINION or ALL",
+            path: [...path, "type"],
+        });
+    }
+};
+
+const validateReconversionPayload = (
+    action: CardActionDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.damage !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION action must not set damage",
+            path: [...path, "damage"],
+        });
+    }
+    if (action.heal !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION action must not set heal",
+            path: [...path, "heal"],
+        });
+    }
+    if (action.drawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION action must not set drawCount",
+            path: [...path, "drawCount"],
+        });
+    }
+    if (action.enemyDrawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION action must not set enemyDrawCount",
+            path: [...path, "enemyDrawCount"],
+        });
+    }
+    if (action.boost !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION action must not set boost",
+            path: [...path, "boost"],
+        });
+    }
+    if (action.reconvertCardId === null || action.reconvertCardId <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "RECONVERSION action requires reconvertCardId > 0",
+            path: [...path, "reconvertCardId"],
+        });
+    }
 };
 
 const validateBoostTargetCompatibility = (
@@ -450,6 +521,10 @@ const validateTargetedAction = (
             validateSilencePayload(action, ctx, path);
             validateSilenceTarget(action.target, ctx, [...path, "target"]);
             break;
+        case "RECONVERSION":
+            validateReconversionPayload(action, ctx, path);
+            validateReconversionTarget(action.target, ctx, [...path, "target"]);
+            break;
     }
 
     validateOnTargetResult(action, ctx, path);
@@ -575,6 +650,20 @@ const validateNonTargetedAction = (
                 return;
             }
             validateSilenceTarget(action.target, ctx, [...path, "target"]);
+            validateTargetFilters(action.target, false, ctx, [...path, "target"]);
+            break;
+        }
+        case "RECONVERSION": {
+            validateReconversionPayload(action, ctx, path);
+            if (!action.target) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "RECONVERSION action requires a MINION or ALL target",
+                    path: [...path, "target"],
+                });
+                return;
+            }
+            validateReconversionTarget(action.target, ctx, [...path, "target"]);
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
             break;
         }

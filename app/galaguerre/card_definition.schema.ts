@@ -75,6 +75,7 @@ const cardActionFieldsSchema = z.object({
     drawCardFilter: cardFilterSchema.nullable(),
     enemyDrawCardFilter: cardFilterSchema.nullable(),
     boost: boostSchema.nullable(),
+    reconvertCardId: z.number().nullable().default(null),
     target: targetSchema.nullable(),
 });
 

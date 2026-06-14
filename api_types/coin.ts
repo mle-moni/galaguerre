@@ -23,6 +23,7 @@ export const COIN_CARD_PREVIEW: SpellCard = {
             drawCardFilter: null,
             enemyDrawCardFilter: null,
             boost: null,
+            reconvertCardId: null,
             target: null,
             onTargetResult: null,
         },

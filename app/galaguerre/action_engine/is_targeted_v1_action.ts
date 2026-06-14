@@ -1,7 +1,7 @@
 import type { CardActionSnapshot } from "#api_types/game.types";
 import { hasBoostEffect } from "./boost_utils.js";
 
-const TARGETED_V1_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST", "SILENCE"] as const;
+const TARGETED_V1_ACTION_TYPES = ["DAMAGE", "HEAL", "BOOST", "SILENCE", "RECONVERSION"] as const;
 
 export const isTargetedV1Action = (action: CardActionSnapshot): boolean => {
     if (!action.isTargeted) return false;
@@ -22,6 +22,12 @@ export const isTargetedV1Action = (action: CardActionSnapshot): boolean => {
             return action.boost !== null && hasBoostEffect(action.boost);
         case "SILENCE":
             return action.target.type === "MINION" || action.target.type === "ALL";
+        case "RECONVERSION":
+            return (
+                action.reconvertCardId !== null &&
+                action.reconvertCardId > 0 &&
+                (action.target.type === "MINION" || action.target.type === "ALL")
+            );
         default:
             return false;
     }

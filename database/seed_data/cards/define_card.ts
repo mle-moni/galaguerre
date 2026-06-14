@@ -60,6 +60,7 @@ const nullActionFields = () => ({
     damage: null,
     heal: null,
     boost: null,
+    reconvertCardId: null,
     target: null,
     onTargetResult: null,
 });
@@ -268,6 +269,13 @@ export const boostAction = (
 
 export const silenceAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
     baseAction({ type: "SILENCE", target, isTargeted });
+
+export const reconversionAction = (
+    reconvertCardId: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition =>
+    baseAction({ type: "RECONVERSION", reconvertCardId, target, isTargeted });
 
 export const boostStats = (overrides: Partial<BoostDefinition> = {}): BoostDefinition => ({
     attack: null,

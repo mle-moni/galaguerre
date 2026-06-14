@@ -19,6 +19,7 @@ import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js"
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.js";
+import { applyReconversionToAllMinions, applyReconversionToMinion } from "./apply_reconversion.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
 import {
     shouldTriggerOnTargetResult,
@@ -116,6 +117,14 @@ const applyEffectToResolvedTarget = (
             if (resolved.type !== "MINION") return { gameEnded: false };
             const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
             applySilenceToMinion(game, owner, resolved.spotId);
+            return { gameEnded: false };
+        }
+        case "RECONVERSION": {
+            if (resolved.type !== "MINION" || action.reconvertCardId === null) {
+                return { gameEnded: false };
+            }
+            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            applyReconversionToMinion(game, owner, resolved.spotId, action.reconvertCardId);
             return { gameEnded: false };
         }
         default:
@@ -280,6 +289,21 @@ const executeNonTargetedV1Action = (
 
             if (action.target.type === "ALL" || action.target.type === "MINION") {
                 applySilenceToAllMinions(game, player, opponent, action.target, sourceMinion);
+            }
+            break;
+        }
+        case "RECONVERSION": {
+            if (!action.target || action.reconvertCardId === null) break;
+
+            if (action.target.type === "ALL" || action.target.type === "MINION") {
+                applyReconversionToAllMinions(
+                    game,
+                    player,
+                    opponent,
+                    action.target,
+                    action.reconvertCardId,
+                    sourceMinion,
+                );
             }
             break;
         }

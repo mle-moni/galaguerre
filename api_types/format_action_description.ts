@@ -7,6 +7,7 @@ import type {
     OnTargetResultDefinition,
     TargetSnapshot,
 } from "./game.types.js";
+import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 import { CARD_TAG_LABELS } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
 import { hasRandomLimitedTarget } from "./target_matching.js";
@@ -468,6 +469,37 @@ export const formatActionDescription = (
             }
 
             return `${prefix} : Réduit au silence un serviteur.`;
+        }
+        case "RECONVERSION": {
+            const targetLabel =
+                action.reconvertCardId !== null
+                    ? GALADRIM_CARDS.find((entry) => entry.id === action.reconvertCardId)?.data
+                          .name ?? "une autre carte"
+                    : "une autre carte";
+
+            if (action.target && hasRandomLimitedTarget(action.target)) {
+                const { target } = action;
+                if (target.type === "MINION") {
+                    return `${prefix} : Reconvertit ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+                }
+                return `${prefix} : Reconvertit ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.isTargeted && action.target?.type === "MINION") {
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : Reconvertit un serviteur${teamPart} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "MINION") {
+                return `${prefix} : Reconvertit ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "ALL") {
+                return `${prefix} : Reconvertit ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            return `${prefix} : Reconvertit un serviteur en ${targetLabel}.`;
         }
         default:
             return null;
