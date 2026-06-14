@@ -18,6 +18,9 @@ export default class Card extends BaseModel {
     @column()
     declare data: CardData;
 
+    @column()
+    declare isCollectible: boolean;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

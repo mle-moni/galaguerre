@@ -20,10 +20,15 @@ import {
     parseSpellData,
     parseWeaponData,
 } from "#galaguerre/card_definition.schema";
+export type CardSeedOptions = {
+    isCollectible?: boolean;
+};
+
 export type CardSeedEntry = {
     id: number;
     cardSetName: string;
     data: CardData;
+    isCollectible?: boolean;
 };
 
 type CardSeedBase = {
@@ -390,6 +395,7 @@ export const defineMinion = (
     cardId: number,
     base: MinionSeedBase,
     dataPartial: Partial<Omit<MinionCardData, "attack" | "health">> = {},
+    options: CardSeedOptions = {},
 ): CardSeedEntry => {
     const data = parseMinionData({
         ...defaultMinionData(),
@@ -405,6 +411,7 @@ export const defineMinion = (
         id: cardId,
         cardSetName: base.cardSetName,
         data,
+        isCollectible: options.isCollectible,
     };
 };
 
@@ -413,6 +420,7 @@ export const defineSpell = (
     base: CardSeedBase,
     spellActions: CardActionDefinition[],
     tags: CardTag[] = [],
+    options: CardSeedOptions = {},
 ): CardSeedEntry => {
     const data = parseSpellData({
         schemaVersion: 1,
@@ -428,6 +436,7 @@ export const defineSpell = (
         id: cardId,
         cardSetName: base.cardSetName,
         data,
+        isCollectible: options.isCollectible,
     };
 };
 
@@ -435,6 +444,7 @@ export const defineWeapon = (
     cardId: number,
     base: CardSeedBase & { damage: number; durability: number },
     dataPartial: Partial<Omit<WeaponCardData, "damage" | "durability">> = {},
+    options: CardSeedOptions = {},
 ): CardSeedEntry => {
     const data = parseWeaponData({
         ...defaultWeaponData(),
@@ -450,10 +460,12 @@ export const defineWeapon = (
         id: cardId,
         cardSetName: base.cardSetName,
         data,
+        isCollectible: options.isCollectible,
     };
 };
 
 export const buildCardInsert = (entry: CardSeedEntry, cardSetId: number) => ({
     cardSetId,
     data: parseCardData(entry.data),
+    isCollectible: entry.isCollectible ?? true,
 });

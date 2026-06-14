@@ -1,6 +1,7 @@
 import { DEFAULT_HERO_HEALTH, DEFAULT_PLAYER_STATS, type GameData } from "#api_types/game.types";
 import { deckCardsToEntries } from "#controllers/decks/deck_utils";
 import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
+import { validateDeckCollectible } from "../../galaguerre/validation/validate_deck_collectible.js";
 import { validateDeckComposition } from "../../galaguerre/validation/validate_deck_composition.js";
 import type Card from "#models/card";
 import type Deck from "#models/deck";
@@ -34,6 +35,11 @@ const assertDeckPlayable = (deck: Deck) => {
     const composition = validateDeckComposition(deckCardsToEntries(deck));
     if (!composition.valid) {
         throw new Error(composition.errors[0]?.reason ?? "Deck invalide");
+    }
+
+    const collectible = validateDeckCollectible(deck.cards);
+    if (!collectible.valid) {
+        throw new Error(collectible.errors[0]?.reason ?? "Deck invalide");
     }
 
     assertDeckValid(deck);

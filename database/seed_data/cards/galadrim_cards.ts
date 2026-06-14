@@ -469,4 +469,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { ...gal("Câble Réseau", 4), damage: 4, durability: 2 },
         { deathrattleActions: [damageAction(2, enemyMinions())] },
     ),
+
+    // --- cartes non collectionnables ---
+    defineMinion(121, { ...gal("Légume", 1), attack: 1, health: 1 }, {}, { isCollectible: false }),
 ];

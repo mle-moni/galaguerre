@@ -4,6 +4,7 @@ import { serializeCatalogCard } from "../../galaguerre/serialization/serialize_c
 
 export const listCards = async (_ctx: HttpContext) => {
     const cards = await Card.query()
+        .where("isCollectible", true)
         .orderByRaw("(data->>'cost')::int asc")
         .orderByRaw("data->>'name' asc");
     return cards.map(serializeCatalogCard);

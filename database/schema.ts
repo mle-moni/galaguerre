@@ -59,7 +59,14 @@ export class CardSetSchema extends BaseModel {
 }
 
 export class CardSchema extends BaseModel {
-    static $columns = ["cardSetId", "createdAt", "data", "id", "updatedAt"] as const;
+    static $columns = [
+        "cardSetId",
+        "createdAt",
+        "data",
+        "id",
+        "isCollectible",
+        "updatedAt",
+    ] as const;
     $columns = CardSchema.$columns;
     @column()
     declare cardSetId: number;
@@ -69,6 +76,8 @@ export class CardSchema extends BaseModel {
     declare data: any;
     @column({ isPrimary: true })
     declare id: number;
+    @column()
+    declare isCollectible: boolean;
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     declare updatedAt: DateTime | null;
 }

@@ -105,6 +105,7 @@ export const DeckBuilderPage = observer(() => {
     });
 
     const canAddCard = (cardId: number) => {
+        if (!catalogById.has(cardId)) return false;
         const count = currentComposition.get(cardId) ?? 0;
         return count < DECK_MAX_COPIES_PER_CARD && totalCards < DECK_MAX_CARDS;
     };
@@ -281,7 +282,37 @@ export const DeckBuilderPage = observer(() => {
                     <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
                         {compositionEntries.map(([cardId, count]) => {
                             const card = catalogById.get(cardId);
-                            if (!card) return null;
+                            if (!card) {
+                                return (
+                                    <div key={cardId} className="gg-composition-row">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-white text-sm font-medium m-0 truncate">
+                                                Carte non collectionnable (#{cardId})
+                                            </p>
+                                            <p className="text-red-300 text-xs m-0">
+                                                Cette carte ne peut pas figurer dans un deck
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                size="xs"
+                                                variant="outline"
+                                                color="gold"
+                                                onClick={() => removeCard(cardId)}
+                                            >
+                                                <IconMinus size={12} />
+                                            </Button>
+                                            <NumberInput
+                                                value={count}
+                                                readOnly
+                                                hideControls
+                                                className="w-12"
+                                                styles={{ input: { textAlign: "center" } }}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            }
                             const isInactiveSet = !activeSetIds.has(card.cardSetId);
                             return (
                                 <div key={cardId} className="gg-composition-row">

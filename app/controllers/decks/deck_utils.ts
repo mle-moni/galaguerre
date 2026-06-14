@@ -3,6 +3,7 @@ import Card from "#models/card";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import type { ManyToManyQueryBuilderContract } from "@adonisjs/lucid/types/relations";
+import { validateDeckEntriesCollectible } from "../../galaguerre/validation/validate_deck_collectible.js";
 
 export const preloadDeckCardSet = (
     query: ManyToManyQueryBuilderContract<typeof Card, typeof DeckCard>,
@@ -44,10 +45,14 @@ export const preloadDeckCards = async (deck: Deck) => {
     await deck.load("cards", preloadDeckCardSet);
 };
 
-export const validateCardIdsExist = async (entries: ApiDeckCardEntry[]) => {
-    const cardIds = entries.map((e) => e.cardId);
-    if (cardIds.length === 0) return true;
+export const validateDeckCardEntries = async (entries: ApiDeckCardEntry[]) => {
+    const cardIds = [...new Set(entries.map((entry) => entry.cardId))];
+    if (cardIds.length === 0) {
+        return { valid: true, errors: [] };
+    }
 
     const found = await Card.query().whereIn("id", cardIds);
-    return found.length === new Set(cardIds).size;
+    const cardsById = new Map(found.map((card) => [card.id, card]));
+
+    return validateDeckEntriesCollectible(entries, cardsById);
 };

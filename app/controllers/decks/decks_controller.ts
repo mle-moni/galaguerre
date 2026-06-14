@@ -11,7 +11,7 @@ import {
     preloadDeckCardSet,
     preloadDeckCards,
     syncDeckCards,
-    validateCardIdsExist,
+    validateDeckCardEntries,
 } from "./deck_utils.js";
 
 const deckCardEntrySchema = vine.object({
@@ -81,9 +81,12 @@ export default class DecksController {
             });
         }
 
-        const cardsExist = await validateCardIdsExist(payload.cards);
-        if (!cardsExist) {
-            return response.badRequest({ error: "Une ou plusieurs cartes sont introuvables" });
+        const cardEntries = await validateDeckCardEntries(payload.cards);
+        if (!cardEntries.valid) {
+            return response.badRequest({
+                error: "Une ou plusieurs cartes sont invalides",
+                details: cardEntries.errors,
+            });
         }
 
         deck.name = payload.name;
