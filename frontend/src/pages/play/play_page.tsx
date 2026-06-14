@@ -3,6 +3,7 @@ import "./game_layout.css";
 
 import type { ApiUser } from "#api_types/auth.types";
 
+import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
@@ -34,7 +35,7 @@ const Game = ({ gameId, user }: GameProps) => {
 
     return (
         <GameStateContext.Provider value={gameQuery.data}>
-            <div className={isSocketReady ? undefined : "play-page--offline"}>
+            <div className={clsx("h-full", !isSocketReady && "play-page--offline")}>
                 <GameRenderer game={gameQuery.data} user={user} />
             </div>
         </GameStateContext.Provider>
