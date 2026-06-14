@@ -1,11 +1,15 @@
 import { test } from "@japa/runner";
-import { formatActionDescription } from "#api_types/format_action_description";
+import {
+    formatActionDescription,
+    formatPlayCardPassiveTriggerLabel,
+} from "#api_types/format_action_description";
 import { getDisplayedDamage, getEffectiveDamage } from "#api_types/get_effective_damage";
 import {
     createCardActionSnapshot,
     createCardFilterSnapshot,
     createComparisonSnapshot,
     createMinionTargetSnapshot,
+    createReconvertParametersSnapshot,
 } from "#tests/helpers/game/fixtures";
 
 test.group("get_effective_damage", () => {
@@ -148,6 +152,24 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats PLAY_CARD passive trigger with card type filter", ({ assert }) => {
+        assert.equal(formatPlayCardPassiveTriggerLabel(null), "carte jouée");
+        assert.equal(
+            formatPlayCardPassiveTriggerLabel(createCardFilterSnapshot({ type: "SPELL" })),
+            "sort joué",
+        );
+        assert.equal(
+            formatPlayCardPassiveTriggerLabel(createCardFilterSnapshot({ type: "MINION" })),
+            "monstre joué",
+        );
+        assert.equal(
+            formatPlayCardPassiveTriggerLabel(
+                createCardFilterSnapshot({ type: "MINION", tags: ["PETS"] }),
+            ),
+            "monstre 🐾 Pets joué",
+        );
+    });
+
     test("formats onlySelf boost as lui-même", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "BOOST",
@@ -184,6 +206,40 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Effet"),
             "Effet : Inflige 2 dégâts à un serviteur. Si la cible survit avec 1 PV, pioche 2 cartes.",
+        );
+    });
+
+    test("formats mass reconversion with direct object for opponent minions", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "RECONVERSION",
+            isTargeted: false,
+            target: createMinionTargetSnapshot("OPPONENT"),
+            reconvertParameters: createReconvertParametersSnapshot({
+                relativeToSource: true,
+                comparison: createComparisonSnapshot({ costComparison: "=", cost: -1 }),
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Reconvertit les serviteurs adverses en un serviteur aléatoire coûtant 1 de moins que la cible.",
+        );
+    });
+
+    test("formats targeted reconversion with relative cost", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "RECONVERSION",
+            isTargeted: true,
+            target: createMinionTargetSnapshot("PLAYER"),
+            reconvertParameters: createReconvertParametersSnapshot({
+                relativeToSource: true,
+                comparison: createComparisonSnapshot({ costComparison: "=", cost: 1 }),
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Reconvertit un serviteur allié en un serviteur aléatoire coûtant 1 de plus que la cible.",
         );
     });
 

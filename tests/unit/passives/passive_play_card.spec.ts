@@ -1,6 +1,7 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import type Game from "#models/game";
+import { getMinionCardTemplateById } from "#galaguerre/card_catalog";
 import { triggerPlayCardPassives } from "../../../app/galaguerre/passive_engine/trigger_play_card_passives.js";
 import {
     createCardActionSnapshot,
@@ -313,6 +314,107 @@ test.group("passive PLAY_CARD triggers", () => {
         );
 
         assertPlayerHealth(assert, game, "playerTwo", 17);
+    });
+
+    test("Alternant Surmotivé gains +1 attack when a spell is played", ({ assert }) => {
+        const alternantTemplate = getMinionCardTemplateById(117)!;
+        const alternant = { ...alternantTemplate, uuid: "alternant-surmotive" };
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(alternant)),
+            },
+        });
+
+        const game = createGame(data);
+        triggerPlayCardPassives(game, game.data.playerOne, createSpellCard({ cost: 0 }));
+
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2 });
+    });
+
+    test("Alternant Surmotivé gains +1 attack through playSpell flow", async ({ assert }) => {
+        const alternantTemplate = getMinionCardTemplateById(117)!;
+        const alternant = { ...alternantTemplate, uuid: "alternant-surmotive" };
+        const spell = createSpellCard({ uuid: "test-spell", cost: 0 });
+
+        const { game } = await runPlaySpell(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(alternant)),
+                },
+            }),
+            spell,
+        );
+
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2 });
+    });
+
+    test("PLAY_CARD passive does not trigger when the minion is played from hand", async ({
+        assert,
+    }) => {
+        const officeManagerTemplate = getMinionCardTemplateById(116)!;
+        const officeManager = { ...officeManagerTemplate, uuid: "office-manager-devoue" };
+
+        const { game } = await runPlayMinion(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    health: 10,
+                    hand: [officeManager],
+                },
+            }),
+            officeManager,
+            { spotId: "SPOT_1" },
+        );
+
+        assertPlayerHealth(assert, game, "playerOne", 10);
+    });
+
+    test("PLAY_CARD passive triggers on the next minion played", async ({ assert }) => {
+        const officeManagerTemplate = getMinionCardTemplateById(116)!;
+        const officeManager = { ...officeManagerTemplate, uuid: "office-manager-devoue" };
+        const playedMinion = createMinionCard({ uuid: "played-minion", cost: 1 });
+
+        const { game } = await runPlayMinion(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    health: 10,
+                    hand: [playedMinion],
+                    board: placeMinion(
+                        createEmptyBoard(),
+                        "SPOT_2",
+                        createMinionState(officeManager),
+                    ),
+                },
+            }),
+            playedMinion,
+            { spotId: "SPOT_1" },
+        );
+
+        assertPlayerHealth(assert, game, "playerOne", 12);
+    });
+
+    test("Alternant Surmotivé does not gain attack when a minion is played", async ({ assert }) => {
+        const alternantTemplate = getMinionCardTemplateById(117)!;
+        const alternant = { ...alternantTemplate, uuid: "alternant-surmotive" };
+        const playedMinion = createMinionCard({ uuid: "played-minion", cost: 1 });
+
+        const { game } = await runPlayMinion(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [playedMinion],
+                    board: placeMinion(createEmptyBoard(), "SPOT_2", createMinionState(alternant)),
+                },
+            }),
+            playedMinion,
+            { spotId: "SPOT_1" },
+        );
+
+        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 1 });
     });
 
     test("triggers after spell effect when playing a spell", async ({ assert }) => {

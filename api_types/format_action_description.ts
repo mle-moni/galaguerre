@@ -220,6 +220,21 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     return ` ${parts.join(" + ")}`;
 };
 
+export const formatPlayCardPassiveTriggerLabel = (
+    playCardFilter: CardFilterSnapshot | null,
+): string => {
+    if (!playCardFilter) return "carte jouée";
+
+    const parts: string[] = [CARD_TYPE_LABELS[playCardFilter.type].toLowerCase()];
+    if (playCardFilter.tags.length > 0) {
+        parts.push(formatTagList(playCardFilter.tags));
+    }
+
+    const noun = parts.join(" ");
+    if (playCardFilter.type === "WEAPON") return `${noun} jouée`;
+    return `${noun} joué`;
+};
+
 const formatRelativeReconvertSuffix = (parameters: ReconvertParametersSnapshot): string => {
     if (!parameters.relativeToSource || !parameters.comparison) return "";
 
@@ -553,9 +568,9 @@ export const formatActionDescription = (
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;
                 if (target.type === "MINION") {
-                    return `${prefix} : Reconvertit ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+                    return `${prefix} : Reconvertit ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
                 }
-                return `${prefix} : Reconvertit ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Reconvertit ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
@@ -565,11 +580,11 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Reconvertit ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Reconvertit ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf)} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Reconvertit ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Reconvertit ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf)} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
             }
 
             return `${prefix} : Reconvertit un serviteur en ${targetLabel}.`;

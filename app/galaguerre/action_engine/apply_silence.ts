@@ -34,6 +34,15 @@ const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
         hasDivineShield: false,
     };
 
+    minion.initialKeywords = {
+        hasTaunt: false,
+        hasCharge: false,
+        hasWindfury: false,
+        isPoisonous: false,
+        hasStealth: false,
+        hasDivineShield: false,
+    };
+
     card.minionPowers.hasTaunt = false;
     card.minionPowers.hasCharge = false;
     card.minionPowers.hasWindfury = false;

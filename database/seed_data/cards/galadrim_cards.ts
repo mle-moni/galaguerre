@@ -222,7 +222,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         80,
-        { ...gal("Key Account Manager", 6), attack: 6, health: 5 },
+        { ...gal("Key Account Manager", 6), attack: 6, health: 2 },
         {
             tags: ["SALES"],
             minionPowers: {

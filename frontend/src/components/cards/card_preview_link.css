@@ -1,4 +1,4 @@
-.coin-card-link {
+.card-preview-link {
     color: inherit;
     font-weight: inherit;
     text-decoration: underline;
@@ -11,6 +11,6 @@
     font: inherit;
 }
 
-.coin-card-link:hover {
+.card-preview-link:hover {
     color: var(--mantine-color-yellow-4);
 }

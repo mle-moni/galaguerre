@@ -66,12 +66,12 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
 
     const keywords = minion.isSilenced
         ? {
-              hasTaunt: false,
-              hasCharge: false,
-              hasWindfury: false,
-              isPoisonous: false,
-              hasStealth: false,
-              hasDivineShield: false,
+              hasTaunt: initial.hasTaunt,
+              hasCharge: initial.hasCharge,
+              hasWindfury: initial.hasWindfury,
+              isPoisonous: initial.isPoisonous,
+              hasStealth: initial.hasStealth,
+              hasDivineShield: initial.hasDivineShield,
           }
         : {
               hasTaunt: initial.hasTaunt || permanent.hasTaunt,

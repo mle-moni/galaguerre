@@ -47,10 +47,17 @@ export class GameStore {
     }
 
     init(game: ApiGame, user: ApiUser): GameStore {
+        const isNewGame = this._game?.id !== game.id;
+        const leavingMulligan =
+            !isNewGame && this._game?.data.state === "MULLIGAN" && game.data.state !== "MULLIGAN";
+
         this._game = game;
         this._user = user;
-        this.mulliganSelectedCardIds = [];
-        this.mulliganConfirmedLocally = false;
+
+        if (isNewGame || leavingMulligan) {
+            this.mulliganSelectedCardIds = [];
+            this.mulliganConfirmedLocally = false;
+        }
 
         return this;
     }

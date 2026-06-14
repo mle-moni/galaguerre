@@ -27,8 +27,10 @@ export const isMinionDescriptionLineDisabled = (
     activeEffects: string[],
     isSilenced = false,
 ): boolean => {
-    if (isSilenced && lineIndex > 0) return true;
-
     const effectName = getEffectNameFromLine(line);
-    return effectName !== null && !activeEffects.includes(effectName);
+    if (effectName !== null) {
+        return !activeEffects.includes(effectName);
+    }
+
+    return isSilenced && lineIndex > 0;
 };

@@ -1,5 +1,6 @@
 import type { CardActionSnapshot, MinionCard, PlayerCard } from "#api_types/game.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
+import { getCardPreviewById } from "#api_types/card_preview";
 import { formatActionDescription } from "#api_types/format_action_description";
 import { getDisplayedDamage } from "#api_types/get_effective_damage";
 import {
@@ -7,7 +8,34 @@ import {
     isMinionDescriptionLineDisabled,
 } from "#api_types/get_minion_description_line_state";
 import { Text } from "@mantine/core";
+import { CardPreviewLink } from "./card_preview_link.jsx";
 import "./card_faces.css";
+
+const renderReconversionCardLabel = (
+    description: string,
+    cardLabel: string,
+    card: PlayerCard,
+    spellPower: number,
+) => {
+    const marker = ` en ${cardLabel}`;
+    const markerIndex = description.lastIndexOf(marker);
+    if (markerIndex === -1) {
+        return description;
+    }
+
+    const before = description.slice(0, markerIndex + 4);
+    const after = description.slice(markerIndex + marker.length);
+
+    return (
+        <>
+            {before}
+            <CardPreviewLink card={card} spellPower={spellPower}>
+                {cardLabel}
+            </CardPreviewLink>
+            {after}
+        </>
+    );
+};
 
 export const getCardDescription = (card: PlayerCard, spellPower = 0): string => {
     switch (card.type) {
@@ -47,7 +75,23 @@ const SpellEffectLine = ({
         effectiveDamage !== null &&
         effectiveDamage > baseDamage;
 
+    const reconversionCardId =
+        action.type === "RECONVERSION" ? action.reconvertParameters?.cardId : null;
+    const reconversionCard =
+        reconversionCardId !== null && reconversionCardId !== undefined
+            ? getCardPreviewById(reconversionCardId)
+            : undefined;
+
     if (!hasSpellPowerBonus) {
+        if (reconversionCard) {
+            return renderReconversionCardLabel(
+                description,
+                reconversionCard.label,
+                reconversionCard,
+                spellPower,
+            );
+        }
+
         return <>{description}</>;
     }
 

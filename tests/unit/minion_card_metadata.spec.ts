@@ -2,7 +2,7 @@ import { test } from "@japa/runner";
 import {
     getMinionCardDescription,
     getWeaponCardDescription,
-} from "../../app/galaguerre/minion_card_metadata.js";
+} from "../../api_types/minion_card_description.js";
 
 test.group("minion_card_metadata", () => {
     test("getMinionCardDescription includes minion power effect details", ({ assert }) => {

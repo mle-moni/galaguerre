@@ -8,12 +8,19 @@ import type {
 import { MINION_SPOT_IDS, type GamePlayer } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
-import { getMinionPowerEffects, normalizeMinionPowers } from "../minion_card_metadata.js";
 import {
-    applyExistingAurasToMinion,
+    getBattlecryDescription,
+    getDeathrattleDescription,
+    getMinionPowerEffects,
+    getPassiveDescription,
+    normalizeMinionPowers,
+} from "../minion_card_metadata.js";
+import { getMinionCardDescription } from "#api_types/minion_card_description";
+import {
     recalculateMinionKeywords,
     revertPassiveAurasForSource,
 } from "../passive_engine/passive_aura.js";
+import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
 import { getTargetBoardEntries } from "./apply_mass_minion_effects.js";
 import { resolveReconvertTemplate } from "./resolve_reconvert_template.js";
 
@@ -28,12 +35,27 @@ const emptyPermanentKeywords = (): NonNullable<MinionState["permanentKeywords"]>
 
 const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): MinionCard => {
     const minionPowers = normalizeMinionPowers(template.minionPowers);
+    const effects = getMinionPowerEffects(minionPowers);
+    const battlecryLines = getBattlecryDescription(template.battlecryActions);
+    const deathrattleLines = getDeathrattleDescription(template.deathrattleActions);
+    const passiveLines = getPassiveDescription(template.passives);
 
     return {
         ...template,
         uuid: boardUuid,
         minionPowers,
-        effects: getMinionPowerEffects(minionPowers),
+        effects,
+        battlecryActions: template.battlecryActions,
+        deathrattleActions: template.deathrattleActions,
+        passives: template.passives,
+        description: getMinionCardDescription(
+            template.attack,
+            template.health,
+            effects,
+            battlecryLines,
+            deathrattleLines,
+            passiveLines,
+        ),
     };
 };
 
@@ -66,9 +88,9 @@ export const applyReconversionWithTemplate = (
         hasDivineShield: minionPowers.hasDivineShield,
     };
     minion.permanentKeywords = emptyPermanentKeywords();
-    minion.isSilenced = true;
+    minion.isSilenced = false;
 
-    applyExistingAurasToMinion(game, owner, spotId);
+    refreshAurasAfterMinionPlayed(game, owner, spotId);
     recalculateMinionKeywords(game, minion);
 };
 

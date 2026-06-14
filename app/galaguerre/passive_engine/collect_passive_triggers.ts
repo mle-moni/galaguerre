@@ -38,6 +38,7 @@ const collectFromBoard = (
 
             if (triggersOn === "PLAY_CARD") {
                 if (!playedCard || !activePlayer || owner !== activePlayer) continue;
+                if (minion.uuid === playedCard.uuid) continue;
                 if (
                     passive.playCardFilter !== null &&
                     !deckCardMatchesFilter(playedCard, passive.playCardFilter)

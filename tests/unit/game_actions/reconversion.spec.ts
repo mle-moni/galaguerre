@@ -65,35 +65,9 @@ test.group("RECONVERSION action", () => {
         assert.equal(game.data.playerTwo.board.SPOT_1!.uuid, "target");
     });
 
-    test("silences the reconverted minion", ({ assert }) => {
-        const targetCard = createMinionCard({
-            uuid: "target",
-            attack: 3,
-            health: 3,
-            battlecryActions: [
-                createCardActionSnapshot({
-                    type: "DRAW",
-                    drawCount: 1,
-                }),
-            ],
-            deathrattleActions: [
-                createCardActionSnapshot({
-                    type: "DRAW",
-                    drawCount: 1,
-                }),
-            ],
-            passives: [
-                createPassiveSnapshot({
-                    type: "ACTION",
-                    triggersOn: "TURN_END",
-                    action: createCardActionSnapshot({
-                        type: "DAMAGE",
-                        damage: 1,
-                        target: createMinionTargetSnapshot("OPPONENT", { type: "HERO" }),
-                    }),
-                }),
-            ],
-        });
+    test("reconverted minion keeps all effects of the new card form", ({ assert }) => {
+        const DIRECTEUR_COMMERCIAL_CARD_ID = 81;
+        const targetCard = createMinionCard({ uuid: "target", attack: 3, health: 3 });
         const target = createMinionState(targetCard);
 
         const game = createGame(
@@ -104,13 +78,19 @@ test.group("RECONVERSION action", () => {
             }),
         );
 
-        applyLegumeReconversion(game, "playerTwo", "SPOT_1", target);
+        applyReconversionToMinion(
+            game,
+            game.data.playerTwo,
+            "SPOT_1",
+            createReconvertParametersSnapshot({ cardId: DIRECTEUR_COMMERCIAL_CARD_ID }),
+            target,
+        );
 
-        const card = game.data.playerTwo.board.SPOT_1!.originalCard;
-        assert.isTrue(game.data.playerTwo.board.SPOT_1!.isSilenced);
-        assert.equal(card.type === "MINION" ? card.battlecryActions.length : -1, 0);
-        assert.equal(card.type === "MINION" ? card.deathrattleActions.length : -1, 0);
-        assert.equal(card.type === "MINION" ? card.passives.length : -1, 0);
+        const minion = game.data.playerTwo.board.SPOT_1!;
+        const card = minion.originalCard;
+        assert.isFalse(minion.isSilenced);
+        assert.equal(card.type === "MINION" ? card.cardId : -1, DIRECTEUR_COMMERCIAL_CARD_ID);
+        assert.isAbove(card.type === "MINION" ? card.deathrattleActions.length : 0, 0);
     });
 
     test("does not trigger deathrattle of the original minion", ({ assert }) => {
@@ -208,6 +188,103 @@ test.group("RECONVERSION action", () => {
 
         assert.equal(game.data.playerOne.board.SPOT_1!.attack, 2);
         assert.equal(game.data.playerOne.board.SPOT_2!.attack, 1);
+    });
+
+    test("reconverted minion keeps innate keyword effects from new form", ({ assert }) => {
+        const DEV_AIGRI_CARD_ID = 65;
+
+        const targetCard = createMinionCard({ uuid: "target", attack: 1, health: 1 });
+        const target = createMinionState(targetCard);
+
+        const game = createGame(
+            createGameData({
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            game,
+            game.data.playerTwo,
+            "SPOT_1",
+            createReconvertParametersSnapshot({ cardId: DEV_AIGRI_CARD_ID }),
+            target,
+        );
+
+        const minion = game.data.playerTwo.board.SPOT_1!;
+        const card = minion.originalCard;
+        assert.equal(card.type === "MINION" ? card.cardId : -1, DEV_AIGRI_CARD_ID);
+        assert.isTrue(card.type === "MINION" && card.minionPowers.hasTaunt);
+        assert.isTrue(card.type === "MINION" && card.effects.includes("Provocation"));
+        assert.include(
+            card.type === "MINION" ? card.description : "",
+            "Provocation : Les adversaires doivent attaquer ce serviteur avant les autres cibles.",
+        );
+        assert.isFalse(minion.isSilenced);
+        assert.isAbove(card.type === "MINION" ? card.battlecryActions.length : 0, 0);
+    });
+
+    test("reconverted minion triggers new form deathrattle on kill", ({ assert }) => {
+        const DIRECTEUR_COMMERCIAL_CARD_ID = 81;
+        const targetCard = createMinionCard({ uuid: "target", attack: 1, health: 1 });
+        const target = createMinionState(targetCard);
+
+        const game = createGame(
+            createGameData({
+                playerOne: { health: 30 },
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            game,
+            game.data.playerTwo,
+            "SPOT_1",
+            createReconvertParametersSnapshot({ cardId: DIRECTEUR_COMMERCIAL_CARD_ID }),
+            target,
+        );
+        killMinion(game, game.data.playerTwo, "SPOT_1");
+
+        assert.equal(game.data.playerOne.health, 25);
+    });
+
+    test("reconverted minion applies passive aura from new form", ({ assert }) => {
+        const SCRUM_MASTER_CARD_ID = 71;
+        const devAlly = createMinionCard({
+            uuid: "dev-ally",
+            attack: 2,
+            health: 2,
+            tags: ["DEVELOPPEUR"],
+        });
+        const target = createMinionState(
+            createMinionCard({ uuid: "target", attack: 1, health: 1 }),
+        );
+
+        const game = createGame(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(devAlly)),
+                        "SPOT_2",
+                        target,
+                    ),
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            game,
+            game.data.playerOne,
+            "SPOT_2",
+            createReconvertParametersSnapshot({ cardId: SCRUM_MASTER_CARD_ID }),
+            target,
+        );
+
+        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
+        assert.equal(game.data.playerOne.board.SPOT_1!.health, 3);
     });
 
     test("removes divine shield and taunt from reconverted minion", ({ assert }) => {

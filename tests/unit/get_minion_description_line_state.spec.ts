@@ -114,5 +114,13 @@ test.group("get_minion_description_line_state", () => {
         assert.isTrue(
             isMinionDescriptionLineDisabled("Passif : pioche 1 carte.", 1, activeEffects, true),
         );
+        assert.isTrue(
+            isMinionDescriptionLineDisabled(
+                "Immunité : Bloque la première source de dégâts reçue.",
+                1,
+                [],
+                true,
+            ),
+        );
     });
 });
