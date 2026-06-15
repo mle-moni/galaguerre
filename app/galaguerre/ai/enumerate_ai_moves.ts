@@ -16,6 +16,7 @@ import {
     selectedTargetMatchesAction,
 } from "#api_types/target_matching";
 import { playerHasBoardSpace } from "../action_engine/apply_mind_control.js";
+import { computeEffectiveCost } from "../dynamic_cost/compute_effective_cost.js";
 import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 import {
     boardHasAttackableTaunt,
@@ -188,7 +189,7 @@ const enumerateMinionAttacks = (game: Game, player: GamePlayer, opponent: GamePl
 const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMove[] => {
     const moves: AiMove[] = [];
     const playableCards = [...player.hand]
-        .filter((card) => card.cost <= player.mana)
+        .filter((card) => computeEffectiveCost(card, player, opponent) <= player.mana)
         .sort((a, b) => b.cost - a.cost);
 
     for (const card of playableCards) {

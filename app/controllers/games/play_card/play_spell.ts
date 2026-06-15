@@ -10,6 +10,7 @@ import {
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
 import { cardHasPlayableTarget } from "#api_types/target_matching";
+import { computeEffectiveCost } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { playerHasBoardSpace } from "../../../galaguerre/action_engine/apply_mind_control.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { sendGameUpdate } from "../send_game_update.js";
@@ -94,10 +95,13 @@ export const playSpell = async ({
         return;
     }
 
+    const effectiveCost = computeEffectiveCost(card, player, opponent);
+    card.cost = effectiveCost;
+
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
     recordPlayCard(game, player, card);
-    player.mana -= card.cost;
-    recordManaSpent(player, card.cost);
+    player.mana -= effectiveCost;
+    recordManaSpent(player, effectiveCost);
     recordSpellCast(player);
 
     const { gameEnded: spellGameEnded } = executeSpellEffect(

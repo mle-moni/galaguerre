@@ -269,9 +269,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { ...gal("Avocat d'Affaires", 5), attack: 4, health: 5 },
         {
             tags: ["SUPPORT"],
-            passives: [
-                actionPassive("DAMAGE", damageAction(2, enemyHero()), null, allyHero()),
-            ],
+            passives: [actionPassive("DAMAGE", damageAction(2, enemyHero()), null, allyHero())],
         },
     ),
     defineMinion(

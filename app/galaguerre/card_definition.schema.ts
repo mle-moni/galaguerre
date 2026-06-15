@@ -8,6 +8,7 @@ import {
 import {
     GALAGUERRE_ACTIONS_TYPES,
     GALAGUERRE_CARD_TYPES,
+    GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
     GALAGUERRE_PASSIVES_TYPES,
     GALAGUERRE_TARGET_SELECTION_MODES,
@@ -144,12 +145,22 @@ export const passiveSchema = z
         validatePassiveDefinition(passive, ctx, []);
     });
 
+const dynamicCostReductionSchema = z.object({
+    source: z.enum(GALAGUERRE_DYNAMIC_COST_SOURCES),
+    amountPer: z.number().positive().default(1),
+});
+
+export const dynamicCostSchema = z.object({
+    reductions: z.array(dynamicCostReductionSchema).min(1),
+});
+
 const cardDataBaseSchema = z.object({
     schemaVersion: z.literal(1),
     tags: z.array(cardTagSchema),
     name: z.string(),
     imageUrl: z.string(),
     cost: z.number().int().min(0),
+    dynamicCost: dynamicCostSchema.nullable(),
 });
 
 export const minionDataSchema = cardDataBaseSchema.extend({
@@ -192,6 +203,7 @@ export type {
     TargetDefinition,
 } from "./card_definition.validation.js";
 
+export type DynamicCostDefinition = z.infer<typeof dynamicCostSchema>;
 export type CardFilterDefinition = z.infer<typeof cardFilterSchema>;
 export type ReconvertParametersDefinition = z.infer<typeof reconvertParametersSchema>;
 export type DeathrattleActionDefinition = z.infer<typeof deathrattleActionSchema>;

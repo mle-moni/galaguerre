@@ -12,6 +12,7 @@ export type {
     PassiveDefinition as PassiveSnapshot,
     PassiveBoostDefinition as PassiveBoostSnapshot,
     TargetDefinition as TargetSnapshot,
+    DynamicCostDefinition as DynamicCostSnapshot,
     MinionCardData,
     SpellCardData,
     WeaponCardData,

@@ -105,6 +105,8 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     deathrattleActions: [],
     passives: [],
     cost: 0,
+    baseCost: 0,
+    dynamicCost: null,
     label: "dummy card",
     imageUrl: "https://picsum.photos/seed/dummy_card/200/300",
     uuid: card.uuid,

@@ -13,7 +13,9 @@ const toPlayerCard = (card: ApiCatalogCard): PlayerCard => {
         cardId: card.id,
         label: card.label,
         imageUrl: card.imageUrl,
+        baseCost: card.cost,
         cost: card.cost,
+        dynamicCost: null,
         tags: card.tags,
     };
 

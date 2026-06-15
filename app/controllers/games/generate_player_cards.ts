@@ -27,7 +27,9 @@ export const generatePlayerCards = (source: CardSource) => {
             cardId: card.id,
             label: card.data.name,
             imageUrl: card.data.imageUrl,
+            baseCost: card.data.cost,
             cost: card.data.cost,
+            dynamicCost: card.data.dynamicCost,
             tags: card.data.tags,
         };
 

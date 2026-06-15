@@ -2,6 +2,7 @@ import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { WsRooms } from "#services/sockets/ws_rooms";
+import { refreshGameDynamicCosts } from "../../galaguerre/dynamic_cost/compute_effective_cost.js";
 
 const getTrainingHumanUserId = (game: Game): number => {
     if (game.data.playerOne.userId === TRAINING_AI_USER_ID) {
@@ -12,6 +13,8 @@ const getTrainingHumanUserId = (game: Game): number => {
 };
 
 export const sendGameUpdate = (game: Game) => {
+    refreshGameDynamicCosts(game.data);
+
     if (game.data.isTraining) {
         const humanUserId = getTrainingHumanUserId(game);
 

@@ -131,3 +131,24 @@ export const GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ: LabelObjectType<Galagu
 export const GALAGUERRE_TARGET_SELECTION_MODES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ,
 );
+
+export const GALAGUERRE_DYNAMIC_COST_SOURCES = [
+    "HAND_CARD_COUNT",
+    "BOARD_MINION_COUNT",
+    "HERO_MISSING_HEALTH",
+] as const;
+export type GalaguerreDynamicCostSource = GenerateTypeFromEnum<
+    typeof GALAGUERRE_DYNAMIC_COST_SOURCES
+>;
+export const GALAGUERRE_DYNAMIC_COST_SOURCES_OBJ = generateTypeObjectFromEnum(
+    GALAGUERRE_DYNAMIC_COST_SOURCES,
+);
+export const GALAGUERRE_DYNAMIC_COST_SOURCES_LABEL_OBJ: LabelObjectType<GalaguerreDynamicCostSource> =
+    {
+        HAND_CARD_COUNT: "Hand Card Count",
+        BOARD_MINION_COUNT: "Board Minion Count",
+        HERO_MISSING_HEALTH: "Hero Missing Health",
+    };
+export const GALAGUERRE_DYNAMIC_COST_SOURCES_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_DYNAMIC_COST_SOURCES_LABEL_OBJ,
+);

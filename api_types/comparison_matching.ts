@@ -76,9 +76,11 @@ export const resolveRelativeComparison = (
 };
 
 export const getDeckCardStats = (card: PlayerCard): ComparableStats => {
+    const printedCost = card.baseCost ?? card.cost;
+
     if (card.type === "MINION") {
-        return { cost: card.cost, attack: card.attack, health: card.health };
+        return { cost: printedCost, attack: card.attack, health: card.health };
     }
 
-    return { cost: card.cost, attack: 0, health: 0 };
+    return { cost: printedCost, attack: 0, health: 0 };
 };

@@ -37,6 +37,10 @@
 	border: 2px solid #000;
 }
 
+.cost--reduced {
+	background-color: #3cb371;
+}
+
 .attack,
 .health {
 	width: var(--stat-badge);

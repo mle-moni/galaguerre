@@ -9,6 +9,10 @@ import {
 import { playMinion } from "#controllers/games/play_card/play_minion";
 import { playSpell } from "#controllers/games/play_card/play_spell";
 import { playWeapon } from "#controllers/games/play_card/play_weapon";
+import {
+    computeEffectiveCost,
+    refreshGameDynamicCosts,
+} from "#galaguerre/dynamic_cost/compute_effective_cost";
 import { createInMemoryGame } from "./in_memory_game.js";
 import {
     getErrors,
@@ -51,7 +55,11 @@ export const runPlayCardInMemory = async (
             return { game, errors: getErrors() };
         }
 
-        if (card.cost > player.mana) {
+        refreshGameDynamicCosts(game.data);
+        const opponent = player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
+        const effectiveCost = computeEffectiveCost(card, player, opponent);
+
+        if (effectiveCost > player.mana) {
             emitSocketEvent(
                 "notify_error",
                 { error: "Vous n'avez pas assez de mana pour jouer cette carte" },

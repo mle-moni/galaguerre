@@ -148,24 +148,30 @@ export const createCardActionSnapshot = (
 
 export const createMinionCard = (
     overrides: Partial<MinionCard> & { uuid?: string } = {},
-): MinionCard => ({
-    uuid: overrides.uuid ?? "card-default",
-    cardId: 1,
-    label: "Test Minion",
-    imageUrl: "https://example.com/card.png",
-    cost: 1,
-    tags: [],
-    type: "MINION",
-    attack: 1,
-    health: 1,
-    minionPowers: normalizeMinionPowers(null),
-    effects: [],
-    description: "",
-    battlecryActions: [],
-    deathrattleActions: [],
-    passives: [],
-    ...overrides,
-});
+): MinionCard => {
+    const cost = overrides.cost ?? 1;
+
+    return {
+        uuid: overrides.uuid ?? "card-default",
+        cardId: 1,
+        label: "Test Minion",
+        imageUrl: "https://example.com/card.png",
+        baseCost: overrides.baseCost ?? cost,
+        cost,
+        dynamicCost: overrides.dynamicCost ?? null,
+        tags: [],
+        type: "MINION",
+        attack: 1,
+        health: 1,
+        minionPowers: normalizeMinionPowers(null),
+        effects: [],
+        description: "",
+        battlecryActions: [],
+        deathrattleActions: [],
+        passives: [],
+        ...overrides,
+    };
+};
 
 export const createMinionPowersSnapshot = (
     overrides: Partial<MinionPowerSnapshot> = {},
@@ -283,13 +289,16 @@ export const createSpellCard = (
         }),
     ];
     const { spellActions = defaultSpellActions, ...rest } = overrides;
+    const cost = rest.cost ?? 2;
 
     return {
         uuid: rest.uuid ?? CARD_IDS.spell,
         cardId: 2,
         label: "Test Spell",
         imageUrl: "https://example.com/spell.png",
-        cost: 2,
+        baseCost: rest.baseCost ?? cost,
+        cost,
+        dynamicCost: rest.dynamicCost ?? null,
         tags: [],
         type: "SPELL",
         description: "Effet : Inflige 3 dégâts au héros adverse.",
@@ -300,20 +309,26 @@ export const createSpellCard = (
 
 export const createWeaponCard = (
     overrides: Partial<WeaponCard> & { uuid?: string } = {},
-): WeaponCard => ({
-    uuid: overrides.uuid ?? CARD_IDS.weapon,
-    cardId: 3,
-    label: "Test Weapon",
-    imageUrl: "https://example.com/weapon.png",
-    cost: 3,
-    tags: [],
-    type: "WEAPON",
-    damage: 3,
-    durability: 2,
-    description: "Arme 3/2.",
-    deathrattleActions: [],
-    ...overrides,
-});
+): WeaponCard => {
+    const cost = overrides.cost ?? 3;
+
+    return {
+        uuid: overrides.uuid ?? CARD_IDS.weapon,
+        cardId: 3,
+        label: "Test Weapon",
+        imageUrl: "https://example.com/weapon.png",
+        baseCost: overrides.baseCost ?? cost,
+        cost,
+        dynamicCost: overrides.dynamicCost ?? null,
+        tags: [],
+        type: "WEAPON",
+        damage: 3,
+        durability: 2,
+        description: "Arme 3/2.",
+        deathrattleActions: [],
+        ...overrides,
+    };
+};
 
 export const createWeaponState = (
     card: WeaponCard,

@@ -12,6 +12,7 @@ import type {
 } from "#galaguerre/card_definition.validation";
 import type {
     CardData,
+    DynamicCostDefinition,
     MinionCardData,
     SpellCardData,
     WeaponCardData,
@@ -74,6 +75,7 @@ export const defaultMinionData = (): MinionCardData => ({
     tags: [],
     name: "Test Card",
     cost: 1,
+    dynamicCost: null,
     imageUrl: "https://example.com/card.png",
     attack: 1,
     health: 1,
@@ -89,6 +91,7 @@ export const defaultSpellData = (): SpellCardData => ({
     tags: [],
     name: "Test Card",
     cost: 1,
+    dynamicCost: null,
     imageUrl: "https://example.com/card.png",
     spellActions: [damageAction(1, enemyHero())],
 });
@@ -99,10 +102,23 @@ export const defaultWeaponData = (): WeaponCardData => ({
     tags: [],
     name: "Test Card",
     cost: 1,
+    dynamicCost: null,
     imageUrl: "https://example.com/card.png",
     damage: 1,
     durability: 1,
     deathrattleActions: [],
+});
+
+export const dynamicCostPerHandCard = (amountPer = 1): DynamicCostDefinition => ({
+    reductions: [{ source: "HAND_CARD_COUNT", amountPer }],
+});
+
+export const dynamicCostPerBoardMinion = (amountPer = 1): DynamicCostDefinition => ({
+    reductions: [{ source: "BOARD_MINION_COUNT", amountPer }],
+});
+
+export const dynamicCostPerHeroMissingHealth = (amountPer = 1): DynamicCostDefinition => ({
+    reductions: [{ source: "HERO_MISSING_HEALTH", amountPer }],
 });
 
 export const comparison = (overrides: Partial<ComparisonDefinition>): ComparisonDefinition => ({
@@ -487,8 +503,7 @@ export const defineSpell = (
     options: CardSeedOptions = {},
 ): CardSeedEntry => {
     const data = parseSpellData({
-        schemaVersion: 1,
-        type: "SPELL",
+        ...defaultSpellData(),
         tags,
         name: base.label,
         cost: base.cost,

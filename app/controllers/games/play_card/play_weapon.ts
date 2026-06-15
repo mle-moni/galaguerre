@@ -1,4 +1,5 @@
 import type { WeaponCard } from "#api_types/game.types";
+import { computeEffectiveCost } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import {
@@ -24,11 +25,15 @@ export const playWeapon = async ({ card, player, game }: PlayWeaponOptions) => {
         }
     }
 
+    const opponent = player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
+    const effectiveCost = computeEffectiveCost(card, player, opponent);
+    card.cost = effectiveCost;
+
     player.weaponState = instantiateWeapon(card);
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
     recordPlayCard(game, player, card);
-    player.mana -= card.cost;
-    recordManaSpent(player, card.cost);
+    player.mana -= effectiveCost;
+    recordManaSpent(player, effectiveCost);
     recordWeaponPlayed(player);
 
     const { gameEnded } = triggerPlayCardPassives(game, player, card);

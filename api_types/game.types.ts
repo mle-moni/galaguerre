@@ -17,11 +17,13 @@ export type {
     PassiveSnapshot,
     PassiveBoostSnapshot,
     TargetSnapshot,
+    DynamicCostSnapshot,
 } from "./card.types.js";
 
 import type {
     CardActionSnapshot,
     CardTag,
+    DynamicCostSnapshot,
     MinionPowerSnapshot,
     PassiveSnapshot,
 } from "./card.types.js";
@@ -37,7 +39,9 @@ export interface PlayerCardBase {
     cardId: number;
     label: string;
     imageUrl: string;
+    baseCost: number;
     cost: number;
+    dynamicCost: DynamicCostSnapshot | null;
     tags: CardTag[];
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;

@@ -9,6 +9,10 @@ import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
+    computeEffectiveCost,
+    refreshGameDynamicCosts,
+} from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
+import {
     ensureCardFoundInHand,
     ensureIsMyTurn,
     getGameActionInfos,
@@ -48,9 +52,13 @@ export interface PlayCardOptions {
 }
 
 const playCard = async (opts: PlayCardOptions) => {
-    const { card } = opts;
+    const { card, game, player } = opts;
 
-    if (card.cost > opts.player.mana) {
+    refreshGameDynamicCosts(game.data);
+    const opponent = player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
+    const effectiveCost = computeEffectiveCost(card, player, opponent);
+
+    if (effectiveCost > player.mana) {
         emitSocketEvent(
             "notify_error",
             { error: "Vous n'avez pas assez de mana pour jouer cette carte" },

@@ -76,7 +76,9 @@ export const MinionCardFace = ({
                 </span>
             )}
             <div className="relative playing-card-face__image-area">
-                <div className="cost">{card.cost}</div>
+                <div className={clsx("cost", card.cost < card.baseCost && "cost--reduced")}>
+                    {card.cost}
+                </div>
                 <Image
                     className="rounded-t h-full w-full object-cover"
                     src={card.imageUrl}

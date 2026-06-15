@@ -20,6 +20,9 @@ import {
     reconversionAction,
     reconversionToCardId,
     reconvertParameters,
+    dynamicCostPerBoardMinion,
+    dynamicCostPerHandCard,
+    dynamicCostPerHeroMissingHealth,
     actionPassive,
     allyMinions,
     spellDrawFilter,
@@ -47,6 +50,35 @@ test.group("card_definition.schema", () => {
 
         assert.equal(data.battlecryActions.length, 1);
         assert.equal(data.battlecryActions[0]!.damage, 2);
+    });
+
+    test("accepts dynamicCost reductions on minion data", ({ assert }) => {
+        const data = parseMinionData({
+            ...defaultMinionData(),
+            cost: 10,
+            dynamicCost: {
+                reductions: [
+                    { source: "HAND_CARD_COUNT", amountPer: 1 },
+                    { source: "BOARD_MINION_COUNT", amountPer: 1 },
+                    { source: "HERO_MISSING_HEALTH", amountPer: 1 },
+                ],
+            },
+        });
+
+        assert.equal(data.dynamicCost?.reductions.length, 3);
+        assert.equal(data.dynamicCost?.reductions[0]!.source, "HAND_CARD_COUNT");
+    });
+
+    test("accepts dynamicCost helper definitions", ({ assert }) => {
+        assert.deepEqual(dynamicCostPerHandCard(), {
+            reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }],
+        });
+        assert.deepEqual(dynamicCostPerBoardMinion(2), {
+            reductions: [{ source: "BOARD_MINION_COUNT", amountPer: 2 }],
+        });
+        assert.deepEqual(dynamicCostPerHeroMissingHealth(), {
+            reductions: [{ source: "HERO_MISSING_HEALTH", amountPer: 1 }],
+        });
     });
 
     test("rejects targeted deathrattle action", ({ assert }) => {
