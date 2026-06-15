@@ -2,7 +2,9 @@ import type {
     ActionTarget,
     BoardState,
     CardActionSnapshot,
+    GamePlayer,
     MinionCard,
+    MinionSpotId,
     MinionState,
     SpellCard,
     TargetSnapshot,
@@ -76,6 +78,42 @@ export const minionMatchesTarget = (
     }
 
     return true;
+};
+
+export type PassiveTriggerEvent =
+    | { type: "HERO"; affectedPlayer: GamePlayer }
+    | { type: "MINION"; owner: GamePlayer; spotId: MinionSpotId; minion: MinionState };
+
+export type PassiveTriggerGameContext = {
+    playerOne: GamePlayer;
+    playerTwo: GamePlayer;
+};
+
+const getOpponentPlayer = (context: PassiveTriggerGameContext, player: GamePlayer): GamePlayer =>
+    player === context.playerOne ? context.playerTwo : context.playerOne;
+
+export const passiveTriggerEventMatchesFilter = (
+    event: PassiveTriggerEvent,
+    filter: TargetSnapshot | null,
+    passiveOwner: GamePlayer,
+    gameContext: PassiveTriggerGameContext,
+    sourceMinion: MinionState,
+): boolean => {
+    if (filter === null) return true;
+
+    const passiveOpponent = getOpponentPlayer(gameContext, passiveOwner);
+
+    if (event.type === "HERO") {
+        if (filter.type === "MINION") return false;
+        const isOpponentHero = event.affectedPlayer === passiveOpponent;
+        return heroMatchesTarget(filter, isOpponentHero);
+    }
+
+    if (filter.type === "HERO") return false;
+
+    const isOpponentMinion = event.owner === passiveOpponent;
+    if (shouldExcludeSourceMinion(filter, sourceMinion, event.minion)) return false;
+    return minionMatchesTarget(event.minion, filter, isOpponentMinion);
 };
 
 export const actionRequiresTarget = (card: MinionCard | SpellCard): boolean => {

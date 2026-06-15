@@ -433,12 +433,14 @@ export const actionPassive = (
     triggersOn: NonNullable<PassiveDefinition["triggersOn"]>,
     action: CardActionDefinition,
     playCardFilter: CardFilterDefinition | null = null,
+    triggerTargetFilter: TargetDefinition | null = null,
 ): PassiveDefinition => ({
     type: "ACTION",
     triggersOn,
     action,
     passiveBoost: null,
     playCardFilter,
+    triggerTargetFilter,
 });
 
 export const boostPassive = (
@@ -450,6 +452,7 @@ export const boostPassive = (
     action: null,
     passiveBoost: { boost, target },
     playCardFilter: null,
+    triggerTargetFilter: null,
 });
 
 export const defineMinion = (

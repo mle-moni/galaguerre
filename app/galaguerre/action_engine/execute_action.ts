@@ -1,5 +1,4 @@
 import {
-    DEFAULT_HERO_HEALTH,
     type ActionTarget,
     type CardActionFieldsSnapshot,
     type CardActionSnapshot,
@@ -9,18 +8,12 @@ import {
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
 import { drawCards } from "../draw_cards.js";
-import {
-    getActualDamage,
-    getActualHeal,
-    recordDamageDealt,
-    recordHealingDone,
-} from "../game_stats/record_player_stats.js";
-import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyDamageToMinion } from "./apply_damage_to_minion.js";
+import { applyDamageToHero } from "./apply_damage_to_hero.js";
 import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.js";
 import { applyReconversionToAllMinions, applyReconversionToMinion } from "./apply_reconversion.js";
-import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
+import { applyHealToHero, applyHealToMinion } from "./apply_heal_with_passives.js";
 import {
     applyMindControlToMinion,
     canMindControlTarget,
@@ -41,11 +34,6 @@ import {
 import { hasRandomLimitedTarget, pickRandomLimitedTargets } from "./pick_random_targets.js";
 import { resolveHeroTargets } from "./resolve_hero_target.js";
 import { resolveSelectedTarget, type ResolvedTarget } from "./resolve_selected_target.js";
-
-const triggerHealIfNeeded = (game: Game): boolean => {
-    const { gameEnded } = triggerHealPassives(game);
-    return gameEnded;
-};
 
 const getMinionOwner = (
     board: GamePlayer["board"],
@@ -68,10 +56,8 @@ const applyEffectToResolvedTarget = (
         case "DAMAGE": {
             const damage = getEffectiveDamage(action, damageBonus);
             if (resolved.type === "HERO") {
-                const actualDamage = getActualDamage(resolved.player.health, damage);
-                resolved.player.health -= damage;
-                recordDamageDealt(player, actualDamage);
-                return { gameEnded: false };
+                const { gameEnded } = applyDamageToHero(game, resolved.player, damage, player);
+                return { gameEnded };
             }
 
             const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
@@ -91,24 +77,20 @@ const applyEffectToResolvedTarget = (
         }
         case "HEAL": {
             if (resolved.type === "HERO") {
-                const actualHeal = getActualHeal(
-                    resolved.player.health,
-                    action.heal!,
-                    DEFAULT_HERO_HEALTH,
-                );
-                resolved.player.health = applyHeal(
-                    resolved.player.health,
-                    action.heal!,
-                    DEFAULT_HERO_HEALTH,
-                );
-                recordHealingDone(player, actualHeal);
-            } else {
-                const maxHealth = getMinionMaxHealth(resolved.minion);
-                const actualHeal = getActualHeal(resolved.minion.health, action.heal!, maxHealth);
-                resolved.minion.health = applyHeal(resolved.minion.health, action.heal!, maxHealth);
-                recordHealingDone(player, actualHeal);
+                const { gameEnded } = applyHealToHero(game, resolved.player, action.heal!, player);
+                return { gameEnded };
             }
-            return { gameEnded: triggerHealIfNeeded(game) };
+
+            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            const { gameEnded } = applyHealToMinion(
+                game,
+                owner,
+                resolved.spotId,
+                resolved.minion,
+                action.heal!,
+                player,
+            );
+            return { gameEnded };
         }
         case "BOOST": {
             if (!action.boost) return { gameEnded: false };
@@ -171,9 +153,8 @@ const executeNonTargetedV1Action = (
             const damage = getEffectiveDamage(action, damageBonus);
             if (action.target?.type === "ALL") {
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
-                    const actualDamage = getActualDamage(target.health, damage);
-                    target.health -= damage;
-                    recordDamageDealt(player, actualDamage);
+                    const { gameEnded } = applyDamageToHero(game, target, damage, player);
+                    if (gameEnded) return;
                 }
                 applyDamageToAllMinions(
                     game,
@@ -205,22 +186,16 @@ const executeNonTargetedV1Action = (
                     ? resolveHeroTargets(action.target, player, opponent)
                     : [opponent];
             for (const target of targets) {
-                const actualDamage = getActualDamage(target.health, damage);
-                target.health -= damage;
-                recordDamageDealt(player, actualDamage);
+                const { gameEnded } = applyDamageToHero(game, target, damage, player);
+                if (gameEnded) return;
             }
             break;
         }
         case "HEAL": {
             if (action.target?.type === "ALL") {
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
-                    const actualHeal = getActualHeal(
-                        target.health,
-                        action.heal!,
-                        DEFAULT_HERO_HEALTH,
-                    );
-                    target.health = applyHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
-                    recordHealingDone(player, actualHeal);
+                    const { gameEnded } = applyHealToHero(game, target, action.heal!, player);
+                    if (gameEnded) return;
                 }
                 applyHealToAllMinions(
                     game,
@@ -231,7 +206,6 @@ const executeNonTargetedV1Action = (
                     player,
                     sourceMinion,
                 );
-                triggerHealIfNeeded(game);
                 break;
             }
 
@@ -245,7 +219,6 @@ const executeNonTargetedV1Action = (
                     player,
                     sourceMinion,
                 );
-                triggerHealIfNeeded(game);
                 break;
             }
 
@@ -254,11 +227,9 @@ const executeNonTargetedV1Action = (
                     ? resolveHeroTargets(action.target, player, opponent)
                     : [player];
             for (const target of targets) {
-                const actualHeal = getActualHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
-                target.health = applyHeal(target.health, action.heal!, DEFAULT_HERO_HEALTH);
-                recordHealingDone(player, actualHeal);
+                const { gameEnded } = applyHealToHero(game, target, action.heal!, player);
+                if (gameEnded) return;
             }
-            triggerHealIfNeeded(game);
             break;
         }
         case "DRAW":

@@ -47,7 +47,13 @@ export interface ActionTarget {
     owner: SpotOwner;
 }
 
-export type PassiveTriggersOn = "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL" | "PLAY_CARD";
+export type PassiveTriggersOn =
+    | "TURN_END"
+    | "TURN_BEGIN"
+    | "DRAW"
+    | "HEAL"
+    | "DAMAGE"
+    | "PLAY_CARD";
 
 export interface AuraAppliedTarget {
     owner: SpotOwner;

@@ -268,4 +268,231 @@ test.group("passive ACTION triggers", () => {
         assert.isTrue(gameEnded);
         assertPlayerHealth(assert, game, "playerTwo", -5);
     });
+
+    test("DAMAGE passive triggers when allied minion takes damage", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "passive-minion",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "DAMAGE",
+                    triggerTargetFilter: createMinionTargetSnapshot("PLAYER"),
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+        const allyMinion = createMinionCard({ uuid: "ally-minion", health: 5 });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(
+                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                    "SPOT_2",
+                    createMinionState(allyMinion),
+                ),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        executeAction(
+            createCardActionSnapshot({
+                type: "DAMAGE",
+                damage: 2,
+                isTargeted: true,
+                target: createMinionTargetSnapshot("PLAYER"),
+            }),
+            game,
+            game.data.playerOne,
+            game.data.playerTwo,
+            { spotId: "SPOT_2", owner: "PLAYER" },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", 14);
+        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 3 });
+    });
+
+    test("DAMAGE passive with onlySelf triggers when the source minion takes damage", ({
+        assert,
+    }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "passive-minion",
+            health: 5,
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "DAMAGE",
+                    triggerTargetFilter: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        executeAction(
+            createCardActionSnapshot({
+                type: "DAMAGE",
+                damage: 2,
+                isTargeted: true,
+                target: createMinionTargetSnapshot("PLAYER"),
+            }),
+            game,
+            game.data.playerOne,
+            game.data.playerTwo,
+            { spotId: "SPOT_1", owner: "PLAYER" },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", 14);
+        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 3 });
+    });
+
+    test("DAMAGE passive with filter does not trigger on non-matching target", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "passive-minion",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "DAMAGE",
+                    triggerTargetFilter: createMinionTargetSnapshot("PLAYER"),
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        executeAction(
+            createCardActionSnapshot({
+                type: "DAMAGE",
+                damage: 2,
+                target: createHeroTargetSnapshot("OPPONENT"),
+            }),
+            game,
+            game.data.playerOne,
+            game.data.playerTwo,
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", 13);
+    });
+
+    test("HEAL passive with ally minion filter triggers only for matching minion heal", ({
+        assert,
+    }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "passive-minion",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "HEAL",
+                    triggerTargetFilter: createMinionTargetSnapshot("PLAYER", {
+                        excludeSelf: true,
+                    }),
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+        const allyMinion = createMinionCard({ uuid: "ally-minion", health: 4 });
+
+        const data = createGameData({
+            playerOne: {
+                health: 10,
+                board: placeMinion(
+                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                    "SPOT_2",
+                    createMinionState(allyMinion, { health: 2 }),
+                ),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        executeAction(
+            createCardActionSnapshot({
+                type: "HEAL",
+                heal: 2,
+                target: createMinionTargetSnapshot("PLAYER"),
+            }),
+            game,
+            game.data.playerOne,
+            game.data.playerTwo,
+        );
+
+        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 4 });
+        assertPlayerHealth(assert, game, "playerTwo", 14);
+    });
+
+    test("HEAL passive with hero filter does not trigger on minion heal", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "passive-minion",
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "HEAL",
+                    triggerTargetFilter: createHeroTargetSnapshot("PLAYER"),
+                    action: createCardActionSnapshot({
+                        type: "DAMAGE",
+                        damage: 1,
+                        target: createHeroTargetSnapshot("OPPONENT"),
+                    }),
+                }),
+            ],
+        });
+        const allyMinion = createMinionCard({ uuid: "ally-minion", health: 4 });
+
+        const data = createGameData({
+            playerOne: {
+                health: 10,
+                board: placeMinion(
+                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                    "SPOT_2",
+                    createMinionState(allyMinion, { health: 2 }),
+                ),
+            },
+            playerTwo: { health: 15 },
+        });
+
+        const game = createGame(data);
+        executeAction(
+            createCardActionSnapshot({
+                type: "HEAL",
+                heal: 2,
+                target: createMinionTargetSnapshot("PLAYER"),
+            }),
+            game,
+            game.data.playerOne,
+            game.data.playerTwo,
+        );
+
+        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 4 });
+        assertPlayerHealth(assert, game, "playerTwo", 15);
+    });
 });

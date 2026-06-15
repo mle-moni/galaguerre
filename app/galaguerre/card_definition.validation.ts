@@ -86,10 +86,11 @@ export type CardActionDefinition = CardActionFieldsDefinition & {
 
 export type PassiveDefinition = {
     type: "ACTION" | "BOOST";
-    triggersOn: "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL" | "PLAY_CARD" | null;
+    triggersOn: "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL" | "DAMAGE" | "PLAY_CARD" | null;
     action: CardActionDefinition | null;
     passiveBoost: { boost: BoostDefinition; target: TargetDefinition | null } | null;
     playCardFilter: CardFilterDefinition | null;
+    triggerTargetFilter: TargetDefinition | null;
 };
 
 const TARGETED_ACTION_TYPES = [
@@ -874,6 +875,22 @@ const validatePassiveBoost = (
     validateTargetFilters(target, false, ctx, [...path, "passiveBoost", "target"]);
 };
 
+const validatePassiveTriggerTargetFilter = (
+    filter: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    validateTargetFilters(filter, false, ctx, path);
+
+    if (filter.maxTargets !== null || filter.targetSelectionMode !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "triggerTargetFilter cannot set maxTargets or targetSelectionMode",
+            path,
+        });
+    }
+};
+
 export const validatePassiveDefinition = (
     passive: PassiveDefinition,
     ctx: z.RefinementCtx,
@@ -913,6 +930,25 @@ export const validatePassiveDefinition = (
             });
         }
 
+        if (
+            passive.triggersOn !== "HEAL" &&
+            passive.triggersOn !== "DAMAGE" &&
+            passive.triggerTargetFilter !== null
+        ) {
+            ctx.addIssue({
+                code: "custom",
+                message: "triggerTargetFilter is only allowed for HEAL and DAMAGE passives",
+                path: [...path, "triggerTargetFilter"],
+            });
+        }
+
+        if (passive.triggerTargetFilter !== null) {
+            validatePassiveTriggerTargetFilter(passive.triggerTargetFilter, ctx, [
+                ...path,
+                "triggerTargetFilter",
+            ]);
+        }
+
         validateCardAction(passive.action, ctx, [...path, "action"], { deathrattle: true });
         return;
     }
@@ -923,6 +959,14 @@ export const validatePassiveDefinition = (
                 code: "custom",
                 message: "BOOST passive cannot have playCardFilter",
                 path: [...path, "playCardFilter"],
+            });
+        }
+
+        if (passive.triggerTargetFilter !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "BOOST passive cannot have triggerTargetFilter",
+                path: [...path, "triggerTargetFilter"],
             });
         }
 

@@ -21,6 +21,7 @@ import {
     reconversionToCardId,
     reconvertParameters,
     actionPassive,
+    allyMinions,
     spellDrawFilter,
     targetedEnemyMinion,
 } from "../../database/seed_data/cards/define_card.js";
@@ -314,6 +315,48 @@ test.group("card_definition.schema", () => {
                 {
                     ...actionPassive("TURN_END", damageAction(1, enemyHero())),
                     playCardFilter: spellDrawFilter(),
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("accepts DAMAGE passive with triggerTargetFilter", ({ assert }) => {
+        const data = parseMinionData({
+            ...defaultMinionData(),
+            passives: [actionPassive("DAMAGE", damageAction(1, enemyHero()), null, allyMinions())],
+        });
+
+        assert.equal(data.passives[0]!.triggersOn, "DAMAGE");
+        assert.equal(data.passives[0]!.triggerTargetFilter?.targetTeam, "PLAYER");
+    });
+
+    test("rejects triggerTargetFilter on TURN_END passive", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultMinionData(),
+            passives: [
+                {
+                    ...actionPassive("TURN_END", damageAction(1, enemyHero())),
+                    triggerTargetFilter: allyMinions(),
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("rejects maxTargets on triggerTargetFilter", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultMinionData(),
+            passives: [
+                {
+                    ...actionPassive("HEAL", damageAction(1, enemyHero()), null, allyMinions()),
+                    triggerTargetFilter: {
+                        ...allyMinions(),
+                        maxTargets: 1,
+                        targetSelectionMode: "RANDOM" as const,
+                    },
                 },
             ],
         });

@@ -2,10 +2,7 @@ import type { GamePlayer, MinionSpotId, SpotOwner, WeaponState } from "#api_type
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
-import {
-    getActualDamage,
-    recordDamageDealt,
-} from "../../../galaguerre/game_stats/record_player_stats.js";
+import { applyDamageToHero } from "../../../galaguerre/action_engine/apply_damage_to_hero.js";
 import { applyDamageToMinion } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { ensureValidAttackTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
@@ -80,14 +77,17 @@ export const weaponToMinionAction = async ({
         return;
     }
 
-    const retaliationDamage = getActualDamage(player.health, targetMinion.attack);
-    player.health -= targetMinion.attack;
-    recordDamageDealt(opponent, retaliationDamage);
+    const { gameEnded: retaliationGameEnded } = applyDamageToHero(
+        game,
+        player,
+        targetMinion.attack,
+        opponent,
+    );
 
     recordHeroAttack(player, game.data.currentRound);
 
     const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
-    if (durabilityGameEnded || player.health <= 0 || opponent.health <= 0) {
+    if (durabilityGameEnded || retaliationGameEnded || player.health <= 0 || opponent.health <= 0) {
         await terminateGame(game);
         return;
     }

@@ -8,6 +8,10 @@ import {
     type SpotOwner,
 } from "#api_types/game.types";
 import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
+import {
+    passiveTriggerEventMatchesFilter,
+    type PassiveTriggerEvent,
+} from "#api_types/target_matching";
 import type Game from "#models/game";
 
 export interface PassiveTriggerEntry {
@@ -22,8 +26,10 @@ const collectFromBoard = (
     owner: GamePlayer,
     sourceOwner: SpotOwner,
     triggersOn: PassiveTriggersOn,
+    game: Game,
     activePlayer?: GamePlayer,
     playedCard?: PlayerCard,
+    event?: PassiveTriggerEvent,
 ): PassiveTriggerEntry[] => {
     const entries: PassiveTriggerEntry[] = [];
 
@@ -53,6 +59,18 @@ const collectFromBoard = (
                 owner !== activePlayer
             ) {
                 continue;
+            } else if ((triggersOn === "HEAL" || triggersOn === "DAMAGE") && event) {
+                if (
+                    !passiveTriggerEventMatchesFilter(
+                        event,
+                        passive.triggerTargetFilter ?? null,
+                        owner,
+                        game.data,
+                        minion,
+                    )
+                ) {
+                    continue;
+                }
             }
 
             entries.push({
@@ -72,6 +90,7 @@ export const collectPassiveTriggers = (
     triggersOn: PassiveTriggersOn,
     activePlayer?: GamePlayer,
     playedCard?: PlayerCard,
+    event?: PassiveTriggerEvent,
 ): PassiveTriggerEntry[] => {
     const playerOne = game.data.playerOne;
     const playerTwo = game.data.playerTwo;
@@ -81,16 +100,20 @@ export const collectPassiveTriggers = (
         playerOne,
         "PLAYER",
         triggersOn,
+        game,
         activePlayer,
         playedCard,
+        event,
     );
     const playerTwoEntries = collectFromBoard(
         playerTwo.board,
         playerTwo,
         "OPPONENT",
         triggersOn,
+        game,
         activePlayer,
         playedCard,
+        event,
     );
 
     return [...playerOneEntries, ...playerTwoEntries];

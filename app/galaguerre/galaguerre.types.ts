@@ -71,6 +71,7 @@ export const GALAGUERRE_PASSIVES_TRIGGERS_ON = [
     "TURN_BEGIN",
     "DRAW",
     "HEAL",
+    "DAMAGE",
     "PLAY_CARD",
 ] as const;
 export type GalaguerrePassiveTriggersOn = GenerateTypeFromEnum<
@@ -81,6 +82,7 @@ export const GALAGUERRE_PASSIVES_TRIGGERS_ON_OBJ = generateTypeObjectFromEnum(
 );
 export const GALAGUERRE_PASSIVES_TRIGGERS_ON_LABEL_OBJ: LabelObjectType<GalaguerrePassiveTriggersOn> =
     {
+        DAMAGE: "Damage",
         DRAW: "Draw",
         HEAL: "Heal",
         PLAY_CARD: "Play Card",

@@ -179,6 +179,7 @@ export const createPassiveSnapshot = (
     action: null,
     passiveBoost: null,
     playCardFilter: null,
+    triggerTargetFilter: null,
     ...overrides,
 });
 

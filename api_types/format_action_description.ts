@@ -235,6 +235,27 @@ export const formatPlayCardPassiveTriggerLabel = (
     return `${noun} joué`;
 };
 
+export const formatHealDamagePassiveTriggerLabel = (
+    triggersOn: "HEAL" | "DAMAGE",
+    triggerTargetFilter: TargetSnapshot | null,
+): string => {
+    const eventLabel = triggersOn === "HEAL" ? "soin" : "dégâts";
+
+    if (!triggerTargetFilter) return eventLabel;
+
+    const { type, targetTeam, excludeSelf, onlySelf } = triggerTargetFilter;
+
+    if (type === "HERO") {
+        return `${eventLabel} sur héros ${formatHeroTeamLabel(targetTeam)}`;
+    }
+
+    if (type === "MINION") {
+        return `${eventLabel} sur ${formatMassMinionTeamLabel(targetTeam, excludeSelf, onlySelf)}`;
+    }
+
+    return `${eventLabel} sur ${formatAllTeamLabel(targetTeam, excludeSelf, onlySelf)}`;
+};
+
 const formatRelativeReconvertSuffix = (parameters: ReconvertParametersSnapshot): string => {
     if (!parameters.relativeToSource || !parameters.comparison) return "";
 

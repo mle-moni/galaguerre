@@ -2,6 +2,7 @@ import type { GamePlayer, MinionSpotId, MinionState } from "#api_types/game.type
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type Game from "#models/game";
 import { getActualDamage, recordDamageDealt } from "../game_stats/record_player_stats.js";
+import { triggerDamagePassives } from "../passive_engine/trigger_damage_passives.js";
 import { killMinion } from "./kill_minion.js";
 
 export type MinionDamageResult = {
@@ -53,6 +54,18 @@ export const applyDamageToMinion = (
     minion.health -= damage;
     recordDamageDealt(sourcePlayer, damageDealt);
 
+    if (damageDealt > 0) {
+        const passiveResult = triggerDamagePassives(game, {
+            type: "MINION",
+            owner,
+            spotId,
+            minion,
+        });
+        if (passiveResult.gameEnded) {
+            return { damageDealt, killed: false, gameEnded: true };
+        }
+    }
+
     if (minion.health <= 0) {
         const { gameEnded } = killMinion(game, owner, spotId);
         return { damageDealt, killed: true, gameEnded };
@@ -76,6 +89,18 @@ export const applyPoisonousToMinion = (
     const damageDealt = minion.health;
     minion.health = 0;
     recordDamageDealt(sourcePlayer, damageDealt);
+
+    if (damageDealt > 0) {
+        const passiveResult = triggerDamagePassives(game, {
+            type: "MINION",
+            owner,
+            spotId,
+            minion,
+        });
+        if (passiveResult.gameEnded) {
+            return { damageDealt, killed: false, gameEnded: true };
+        }
+    }
 
     const { gameEnded } = killMinion(game, owner, spotId);
     return { damageDealt, killed: true, gameEnded };

@@ -1,6 +1,7 @@
 import type { CardFilterSnapshot, GamePlayer } from "#api_types/game.types";
 import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import type Game from "#models/game";
+import { applyDamageToHero } from "./action_engine/apply_damage_to_hero.js";
 import { recordCardDraw, recordFatigueDamage } from "./game_log/record_game_log.js";
 import { recordCardDrawn } from "./game_stats/record_player_stats.js";
 import { triggerPassives } from "./passive_engine/trigger_passives.js";
@@ -21,9 +22,13 @@ export const drawOneCard = (
         const card = player.deckCards.shift();
         if (!card) {
             const fatigueDamage = getFatigueDamage(player);
-            player.health -= fatigueDamage;
             player.maxFatigueDamageTaken = fatigueDamage;
-            if (game) recordFatigueDamage(game, player, fatigueDamage);
+            if (game) {
+                recordFatigueDamage(game, player, fatigueDamage);
+                applyDamageToHero(game, player, fatigueDamage, player);
+            } else {
+                player.health -= fatigueDamage;
+            }
         } else {
             player.hand.push(card);
             recordCardDrawn(player);
@@ -35,9 +40,13 @@ export const drawOneCard = (
 
     if (player.deckCards.length === 0) {
         const fatigueDamage = getFatigueDamage(player);
-        player.health -= fatigueDamage;
         player.maxFatigueDamageTaken = fatigueDamage;
-        if (game) recordFatigueDamage(game, player, fatigueDamage);
+        if (game) {
+            recordFatigueDamage(game, player, fatigueDamage);
+            applyDamageToHero(game, player, fatigueDamage, player);
+        } else {
+            player.health -= fatigueDamage;
+        }
         return;
     }
 

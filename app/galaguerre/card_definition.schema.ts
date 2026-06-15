@@ -138,6 +138,7 @@ export const passiveSchema = z
         action: cardActionSchema.nullable(),
         passiveBoost: passiveBoostSchema.nullable(),
         playCardFilter: cardFilterSchema.nullable(),
+        triggerTargetFilter: targetSchema.nullable().default(null),
     })
     .superRefine((passive, ctx) => {
         validatePassiveDefinition(passive, ctx, []);

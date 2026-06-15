@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import {
     heroMatchesTarget,
     minionMatchesTarget,
+    passiveTriggerEventMatchesFilter,
     selectedTargetMatchesAction,
     shouldExcludeSourceMinion,
 } from "#api_types/target_matching";
@@ -10,10 +11,12 @@ import {
     createCardActionSnapshot,
     createComparisonSnapshot,
     createEmptyBoard,
+    createGameData,
     createHeroTargetSnapshot,
     createMinionCard,
     createMinionState,
     createMinionTargetSnapshot,
+    placeMinion,
 } from "#tests/helpers/game/fixtures";
 
 test.group("target_matching", () => {
@@ -218,5 +221,91 @@ test.group("target_matching", () => {
         const target = createMinionTargetSnapshot("OPPONENT");
 
         assert.isTrue(minionMatchesTarget(stealthMinion, target, true));
+    });
+});
+
+test.group("passiveTriggerEventMatchesFilter", () => {
+    test("matches ally minion damage event for PLAYER minion filter", ({ assert }) => {
+        const data = createGameData();
+        const allyMinion = createMinionState(createMinionCard({ uuid: "ally-minion" }));
+        const passiveSource = createMinionState(createMinionCard({ uuid: "passive-minion" }));
+        data.playerOne.board = placeMinion(createEmptyBoard(), "SPOT_1", passiveSource);
+        data.playerOne.board = placeMinion(data.playerOne.board, "SPOT_2", allyMinion);
+
+        const filter = createMinionTargetSnapshot("PLAYER");
+        const event = {
+            type: "MINION" as const,
+            owner: data.playerOne,
+            spotId: "SPOT_2" as const,
+            minion: allyMinion,
+        };
+
+        assert.isTrue(
+            passiveTriggerEventMatchesFilter(event, filter, data.playerOne, data, passiveSource),
+        );
+    });
+
+    test("matches hero damage event for HERO filter", ({ assert }) => {
+        const data = createGameData();
+        const passiveSource = createMinionState(createMinionCard({ uuid: "passive-minion" }));
+        data.playerOne.board = placeMinion(createEmptyBoard(), "SPOT_1", passiveSource);
+
+        const filter = createHeroTargetSnapshot("PLAYER");
+        const event = { type: "HERO" as const, affectedPlayer: data.playerOne };
+
+        assert.isTrue(
+            passiveTriggerEventMatchesFilter(event, filter, data.playerOne, data, passiveSource),
+        );
+    });
+
+    test("onlySelf filter matches only the passive source minion", ({ assert }) => {
+        const data = createGameData();
+        const passiveSource = createMinionState(createMinionCard({ uuid: "passive-minion" }));
+        const allyMinion = createMinionState(createMinionCard({ uuid: "ally-minion" }));
+        data.playerOne.board = placeMinion(createEmptyBoard(), "SPOT_1", passiveSource);
+        data.playerOne.board = placeMinion(data.playerOne.board, "SPOT_2", allyMinion);
+
+        const filter = createMinionTargetSnapshot("PLAYER", { onlySelf: true });
+        const selfEvent = {
+            type: "MINION" as const,
+            owner: data.playerOne,
+            spotId: "SPOT_1" as const,
+            minion: passiveSource,
+        };
+        const allyEvent = {
+            type: "MINION" as const,
+            owner: data.playerOne,
+            spotId: "SPOT_2" as const,
+            minion: allyMinion,
+        };
+
+        assert.isTrue(
+            passiveTriggerEventMatchesFilter(
+                selfEvent,
+                filter,
+                data.playerOne,
+                data,
+                passiveSource,
+            ),
+        );
+        assert.isFalse(
+            passiveTriggerEventMatchesFilter(
+                allyEvent,
+                filter,
+                data.playerOne,
+                data,
+                passiveSource,
+            ),
+        );
+    });
+
+    test("null filter matches any event", ({ assert }) => {
+        const data = createGameData();
+        const passiveSource = createMinionState(createMinionCard({ uuid: "passive-minion" }));
+        const event = { type: "HERO" as const, affectedPlayer: data.playerTwo };
+
+        assert.isTrue(
+            passiveTriggerEventMatchesFilter(event, null, data.playerOne, data, passiveSource),
+        );
     });
 });

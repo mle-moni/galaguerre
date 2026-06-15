@@ -1,9 +1,6 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
-import {
-    getActualDamage,
-    recordDamageDealt,
-} from "../../../galaguerre/game_stats/record_player_stats.js";
+import { applyDamageToHero } from "../../../galaguerre/action_engine/apply_damage_to_hero.js";
 import { ensureValidAttackTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -37,13 +34,16 @@ export const weaponToHeroAction = async ({
         playerId: opponent.userId,
     });
 
-    const damage = getActualDamage(opponent.health, weaponState.damage);
-    opponent.health -= weaponState.damage;
-    recordDamageDealt(player, damage);
+    const { gameEnded: damageGameEnded } = applyDamageToHero(
+        game,
+        opponent,
+        weaponState.damage,
+        player,
+    );
     recordHeroAttack(player, game.data.currentRound);
 
     const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
-    if (durabilityGameEnded || player.health <= 0 || opponent.health <= 0) {
+    if (durabilityGameEnded || damageGameEnded || player.health <= 0 || opponent.health <= 0) {
         await terminateGame(game);
         return;
     }

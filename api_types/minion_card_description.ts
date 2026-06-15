@@ -1,15 +1,17 @@
 import type { CardActionSnapshot, PassiveSnapshot } from "./game.types.js";
 import {
     formatActionDescription,
+    formatHealDamagePassiveTriggerLabel,
     formatPlayCardPassiveTriggerLabel,
 } from "./format_action_description.js";
 
-const PASSIVE_TRIGGER_LABELS: Record<NonNullable<PassiveSnapshot["triggersOn"]>, string> = {
+const PASSIVE_TRIGGER_LABELS: Record<
+    Exclude<NonNullable<PassiveSnapshot["triggersOn"]>, "HEAL" | "DAMAGE" | "PLAY_CARD">,
+    string
+> = {
     TURN_END: "fin de tour",
     TURN_BEGIN: "début de tour",
     DRAW: "pioche",
-    HEAL: "soin",
-    PLAY_CARD: "carte jouée",
 };
 
 const EFFECT_DESCRIPTIONS: Record<string, string> = {
@@ -49,7 +51,12 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
                 const triggerLabel =
                     passive.triggersOn === "PLAY_CARD"
                         ? formatPlayCardPassiveTriggerLabel(passive.playCardFilter)
-                        : PASSIVE_TRIGGER_LABELS[passive.triggersOn];
+                        : passive.triggersOn === "HEAL" || passive.triggersOn === "DAMAGE"
+                          ? formatHealDamagePassiveTriggerLabel(
+                                passive.triggersOn,
+                                passive.triggerTargetFilter ?? null,
+                            )
+                          : PASSIVE_TRIGGER_LABELS[passive.triggersOn];
                 return formatActionDescription(passive.action, `Passif (${triggerLabel})`);
             }
 
