@@ -65,6 +65,7 @@ const buildMinionPreview = (entry: CardSeedEntry): MinionCard => {
             battlecryLines,
             deathrattleLines,
             passiveLines,
+            data.dynamicCost,
         ),
         battlecryActions: data.battlecryActions,
         deathrattleActions: data.deathrattleActions,

@@ -1,5 +1,6 @@
 import { test } from "@japa/runner";
 import {
+    getDynamicCostDescription,
     getMinionCardDescription,
     getWeaponCardDescription,
 } from "../../api_types/minion_card_description.js";
@@ -57,5 +58,35 @@ test.group("minion_card_metadata", () => {
         ]);
 
         assert.equal(description, "Arme 3/2.\nDernier souffle : Inflige 1 dégât au héros adverse.");
+    });
+
+    test("getMinionCardDescription includes dynamic cost reductions", ({ assert }) => {
+        const description = getMinionCardDescription(8, 8, [], [], [], [], {
+            reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }],
+        });
+
+        assert.equal(description, "Serviteur 8/8.\nCoût réduit de 1 pour chaque carte en main.");
+    });
+
+    test("getDynamicCostDescription supports all reduction sources", ({ assert }) => {
+        assert.deepEqual(getDynamicCostDescription(null), []);
+        assert.deepEqual(
+            getDynamicCostDescription({
+                reductions: [{ source: "BOARD_MINION_COUNT", amountPer: 2 }],
+            }),
+            ["Coût réduit de 2 pour chaque serviteur sur le plateau."],
+        );
+        assert.deepEqual(
+            getDynamicCostDescription({
+                reductions: [
+                    { source: "HAND_CARD_COUNT", amountPer: 1 },
+                    { source: "HERO_MISSING_HEALTH", amountPer: 1 },
+                ],
+            }),
+            [
+                "Coût réduit de 1 pour chaque carte en main.",
+                "Coût réduit de 1 pour chaque point de vie manquant au héros.",
+            ],
+        );
     });
 });

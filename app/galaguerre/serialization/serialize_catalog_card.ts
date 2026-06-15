@@ -68,6 +68,7 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
                     battlecryLines,
                     deathrattleLines,
                     passiveLines,
+                    card.data.dynamicCost,
                 ),
                 battlecryActions: card.data.battlecryActions,
                 deathrattleActions: card.data.deathrattleActions,

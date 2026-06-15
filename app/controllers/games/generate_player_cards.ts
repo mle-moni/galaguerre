@@ -80,6 +80,7 @@ export const generatePlayerCards = (source: CardSource) => {
                         battlecryLines,
                         deathrattleLines,
                         passiveLines,
+                        card.data.dynamicCost,
                     ),
                     battlecryActions: card.data.battlecryActions,
                     deathrattleActions: card.data.deathrattleActions,

@@ -1,4 +1,5 @@
-import type { CardActionSnapshot, PassiveSnapshot } from "./game.types.js";
+import type { CardActionSnapshot, DynamicCostSnapshot, PassiveSnapshot } from "./game.types.js";
+import type { GalaguerreDynamicCostSource } from "../app/galaguerre/galaguerre.types.js";
 import {
     formatActionDescription,
     formatHealDamagePassiveTriggerLabel,
@@ -89,6 +90,25 @@ const formatEffectLine = (effect: string): string => {
     return `${effect} : ${description}`;
 };
 
+const DYNAMIC_COST_REDUCTION_LABELS: Record<
+    GalaguerreDynamicCostSource,
+    (amountPer: number) => string
+> = {
+    HAND_CARD_COUNT: (amountPer) => `Coût réduit de ${amountPer} pour chaque carte en main.`,
+    BOARD_MINION_COUNT: (amountPer) =>
+        `Coût réduit de ${amountPer} pour chaque serviteur sur le plateau.`,
+    HERO_MISSING_HEALTH: (amountPer) =>
+        `Coût réduit de ${amountPer} pour chaque point de vie manquant au héros.`,
+};
+
+export const getDynamicCostDescription = (dynamicCost: DynamicCostSnapshot | null): string[] => {
+    if (!dynamicCost) return [];
+
+    return dynamicCost.reductions.map(({ source, amountPer }) =>
+        DYNAMIC_COST_REDUCTION_LABELS[source](amountPer),
+    );
+};
+
 export const getWeaponCardDescription = (
     damage: number,
     durability: number,
@@ -106,9 +126,11 @@ export const getMinionCardDescription = (
     battlecryLines: string[] = [],
     deathrattleLines: string[] = [],
     passiveLines: string[] = [],
+    dynamicCost: DynamicCostSnapshot | null = null,
 ): string => {
     const parts: string[] = [
         `Serviteur ${attack}/${health}.`,
+        ...getDynamicCostDescription(dynamicCost),
         ...effects.map(formatEffectLine),
         ...passiveLines,
         ...battlecryLines,
