@@ -583,6 +583,31 @@ export const formatActionDescription = (
 
             return `${prefix} : Réduit au silence un serviteur.`;
         }
+        case "DESTROY": {
+            if (action.target && hasRandomLimitedTarget(action.target)) {
+                const { target } = action;
+                if (target.type === "MINION") {
+                    return `${prefix} : Détruit ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
+                }
+                return `${prefix} : Détruit ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.isTargeted && action.target?.type === "MINION") {
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : Détruit un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "MINION") {
+                return `${prefix} : Détruit ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            if (action.target?.type === "ALL") {
+                return `${prefix} : Détruit ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+            }
+
+            return `${prefix} : Détruit un serviteur.`;
+        }
         case "RECONVERSION": {
             const targetLabel = formatReconvertTargetLabel(action.reconvertParameters);
 

@@ -198,6 +198,9 @@ export const targetedAnyCharacter = (): TargetDefinition =>
 export const targetedEnemyMinionWithComparison = (comp: ComparisonDefinition): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "OPPONENT", comparison: comp });
 
+export const targetedAnyMinionWithComparison = (comp: ComparisonDefinition): TargetDefinition =>
+    baseTarget({ type: "MINION", targetTeam: "ALL", comparison: comp });
+
 export const targetedEnemyMinionWithTag = (tag: CardTag): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "OPPONENT", tag });
 
@@ -288,6 +291,9 @@ export const boostAction = (
 
 export const silenceAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
     baseAction({ type: "SILENCE", target, isTargeted });
+
+export const destroyAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
+    baseAction({ type: "DESTROY", target, isTargeted });
 
 export const mindControlAction = (
     target: TargetDefinition,

@@ -59,6 +59,7 @@ export type CardActionFieldsDefinition = {
         | "ENEMY_DRAW"
         | "BOOST"
         | "SILENCE"
+        | "DESTROY"
         | "RECONVERSION"
         | "MIND_CONTROL";
     isTargeted: boolean;
@@ -98,6 +99,7 @@ const TARGETED_ACTION_TYPES = [
     "HEAL",
     "BOOST",
     "SILENCE",
+    "DESTROY",
     "RECONVERSION",
     "MIND_CONTROL",
 ] as const;
@@ -340,6 +342,69 @@ const validateSilencePayload = (
         ctx.addIssue({
             code: "custom",
             message: "SILENCE action must not set reconvertParameters",
+            path: [...path, "reconvertParameters"],
+        });
+    }
+};
+
+const validateDestroyTarget = (
+    target: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.type !== "MINION" && target.type !== "ALL") {
+        ctx.addIssue({
+            code: "custom",
+            message: "DESTROY target must be MINION or ALL",
+            path: [...path, "type"],
+        });
+    }
+};
+
+const validateDestroyPayload = (
+    action: CardActionDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.damage !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DESTROY action must not set damage",
+            path: [...path, "damage"],
+        });
+    }
+    if (action.heal !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DESTROY action must not set heal",
+            path: [...path, "heal"],
+        });
+    }
+    if (action.drawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DESTROY action must not set drawCount",
+            path: [...path, "drawCount"],
+        });
+    }
+    if (action.enemyDrawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DESTROY action must not set enemyDrawCount",
+            path: [...path, "enemyDrawCount"],
+        });
+    }
+    if (action.boost !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DESTROY action must not set boost",
+            path: [...path, "boost"],
+        });
+    }
+    if (action.reconvertParameters !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DESTROY action must not set reconvertParameters",
             path: [...path, "reconvertParameters"],
         });
     }
@@ -639,6 +704,10 @@ const validateTargetedAction = (
             validateSilencePayload(action, ctx, path);
             validateSilenceTarget(action.target, ctx, [...path, "target"]);
             break;
+        case "DESTROY":
+            validateDestroyPayload(action, ctx, path);
+            validateDestroyTarget(action.target, ctx, [...path, "target"]);
+            break;
         case "RECONVERSION":
             validateReconversionPayload(action, ctx, path);
             validateReconversionTarget(action.target, ctx, [...path, "target"]);
@@ -772,6 +841,20 @@ const validateNonTargetedAction = (
                 return;
             }
             validateSilenceTarget(action.target, ctx, [...path, "target"]);
+            validateTargetFilters(action.target, false, ctx, [...path, "target"]);
+            break;
+        }
+        case "DESTROY": {
+            validateDestroyPayload(action, ctx, path);
+            if (!action.target) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "DESTROY action requires a MINION or ALL target",
+                    path: [...path, "target"],
+                });
+                return;
+            }
+            validateDestroyTarget(action.target, ctx, [...path, "target"]);
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
             break;
         }

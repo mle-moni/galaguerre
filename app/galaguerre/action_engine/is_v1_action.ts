@@ -44,6 +44,9 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
         case "SILENCE":
             if (action.target === null) return false;
             return action.target.type === "MINION" || action.target.type === "ALL";
+        case "DESTROY":
+            if (action.target === null) return false;
+            return action.target.type === "MINION" || action.target.type === "ALL";
         case "RECONVERSION":
             if (action.reconvertParameters === null) return false;
             if (action.target === null) return false;

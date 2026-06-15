@@ -41,6 +41,9 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
                 );
             }
             return false;
+        case "DESTROY":
+            if (action.target === null) return false;
+            return action.target.type === "MINION" || action.target.type === "ALL";
         default:
             return false;
     }

@@ -1,6 +1,7 @@
 import type { CardActionSnapshot, GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
 import { applyDamageToAllMinions, applyHealToAllMinions } from "./apply_mass_minion_effects.js";
+import { applyDestroyToAllMinions } from "./apply_destroy.js";
 import { executeAction } from "./execute_action.js";
 import { isDeathrattleV1Action } from "./is_deathrattle_v1_action.js";
 
@@ -31,6 +32,10 @@ export const executeDeathrattleAction = (
 
     if (action.type === "HEAL" && action.target?.type === "MINION") {
         return applyHealToAllMinions(game, player, opponent, action.target, action.heal!, player);
+    }
+
+    if (action.type === "DESTROY" && action.target?.type === "MINION") {
+        return applyDestroyToAllMinions(game, player, opponent, action.target);
     }
 
     executeAction(action, game, player, opponent);

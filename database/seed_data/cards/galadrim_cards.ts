@@ -5,6 +5,7 @@ import {
     allyHero,
     allyMinions,
     allMinions,
+    attackGreaterThan,
     boostAction,
     boostAttack,
     boostAttackWithCharge,
@@ -16,6 +17,7 @@ import {
     boostSpellPower,
     costLessThan,
     damageAction,
+    destroyAction,
     defineMinion,
     defineSpell,
     defineWeapon,
@@ -42,6 +44,7 @@ import {
     spellDrawFilter,
     targetedAllyMinion,
     targetedAnyMinion,
+    targetedAnyMinionWithComparison,
     targetedEnemyMinion,
     type CardSeedEntry,
     boostDivineShield,
@@ -238,6 +241,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             deathrattleActions: [damageAction(5, enemyHero())],
         },
     ),
+
     defineMinion(
         82,
         { ...gal("Agent Support", 1), attack: 1, health: 3 },
@@ -299,6 +303,22 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             minionPowers: {
                 hasTaunt: true,
             },
+        },
+    ),
+    defineMinion(
+        136,
+        { ...gal("Léa", 12), attack: 8, health: 8 },
+        {
+            tags: ["SUPPORT"],
+            dynamicCost: { reductions: [{ source: "BOARD_MINION_COUNT", amountPer: 1 }] },
+        },
+    ),
+    defineMinion(
+        138,
+        { ...gal("Expert comptable", 12), attack: 8, health: 8 },
+        {
+            tags: ["SUPPORT"],
+            dynamicCost: { reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }] },
         },
     ),
 
@@ -448,6 +468,14 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ],
         },
     ),
+    defineMinion(
+        137,
+        { ...gal("Léo", 20), attack: 8, health: 8 },
+        {
+            tags: ["DEVELOPPEUR"],
+            dynamicCost: { reductions: [{ source: "HERO_MISSING_HEALTH", amountPer: 1 }] },
+        },
+    ),
 
     // --- spells ---
     defineSpell(96, gal("Pause Café", 2), [boostAction(boostBoth(1, 1), allyMinions())]),
@@ -460,7 +488,18 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(101, gal("Heures Sup'", 3), [
         boostAction(boostAttackWithCharge(3), targetedAllyMinion(), true),
     ]),
-    defineSpell(102, gal("Burnout", 4), [damageAction(6, targetedAnyMinion(), true)]),
+    defineSpell(102, gal("Burnout", 2), [
+        destroyAction(targetedAnyMinionWithComparison(attackGreaterThan(4)), true),
+    ]),
+    defineSpell(132, gal("Fin de Période d'Essai", 2), [
+        destroyAction(targetedAnyMinionWithComparison(costLessThan(4)), true),
+    ]),
+    defineSpell(133, gal("Licenciement pour Faute", 5), [destroyAction(targetedAnyMinion(), true)]),
+    defineSpell(134, gal("Licenciement collectif", 8), [destroyAction(allMinions())]),
+    defineSpell(135, gal("Optimisation Salariale", 1), [
+        destroyAction(targetedAllyMinion(), true),
+        drawAction(2),
+    ]),
     defineSpell(103, gal("Team Building", 3), [drawAction(2, minionDrawFilter())]),
     defineSpell(104, gal("Goodies Galadrim", 1), [healAction(5, targetedAllyMinion(), true)]),
     defineSpell(105, gal("Coupure Internet", 6), [damageAction(4, randomEnemyTargets(3))]),

@@ -5,6 +5,7 @@ export const V1_ACTION_TYPES = [
     "ENEMY_DRAW",
     "BOOST",
     "SILENCE",
+    "DESTROY",
     "RECONVERSION",
     "MIND_CONTROL",
 ] as const;

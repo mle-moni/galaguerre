@@ -12,6 +12,8 @@ import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./
 import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applyDamageToHero } from "./apply_damage_to_hero.js";
 import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.js";
+import { applyDestroyToAllMinions } from "./apply_destroy.js";
+import { killMinion } from "./kill_minion.js";
 import { applyReconversionToAllMinions, applyReconversionToMinion } from "./apply_reconversion.js";
 import { applyHealToHero, applyHealToMinion } from "./apply_heal_with_passives.js";
 import {
@@ -106,6 +108,11 @@ const applyEffectToResolvedTarget = (
             const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
             applySilenceToMinion(game, owner, resolved.spotId);
             return { gameEnded: false };
+        }
+        case "DESTROY": {
+            if (resolved.type !== "MINION") return { gameEnded: false };
+            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            return killMinion(game, owner, resolved.spotId);
         }
         case "RECONVERSION": {
             if (resolved.type !== "MINION" || action.reconvertParameters === null) {
@@ -284,6 +291,21 @@ const executeNonTargetedV1Action = (
 
             if (action.target.type === "ALL" || action.target.type === "MINION") {
                 applySilenceToAllMinions(game, player, opponent, action.target, sourceMinion);
+            }
+            break;
+        }
+        case "DESTROY": {
+            if (!action.target) break;
+
+            if (action.target.type === "ALL" || action.target.type === "MINION") {
+                const { gameEnded } = applyDestroyToAllMinions(
+                    game,
+                    player,
+                    opponent,
+                    action.target,
+                    sourceMinion,
+                );
+                if (gameEnded) return;
             }
             break;
         }

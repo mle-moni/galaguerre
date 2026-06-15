@@ -264,4 +264,29 @@ test.group("format_action_description", () => {
             "Effet : Inflige 1 dégâts à un serviteur. Si la cible est détruite, pioche 1 carte.",
         );
     });
+
+    test("formats targeted destroy on enemy minion", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DESTROY",
+            isTargeted: true,
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Détruit un serviteur adverse.",
+        );
+    });
+
+    test("formats mass destroy on all enemy minions", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DESTROY",
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Détruit aux serviteurs adverses.",
+        );
+    });
 });

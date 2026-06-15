@@ -36,6 +36,7 @@ export const GALAGUERRE_ACTIONS_TYPES = [
     "DRAW",
     "ENEMY_DRAW",
     "SILENCE",
+    "DESTROY",
     "RECONVERSION",
     "MIND_CONTROL",
 ] as const;
@@ -48,6 +49,7 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     ENEMY_DRAW: "Enemy Draw",
     HEAL: "Heal",
     SILENCE: "Silence",
+    DESTROY: "Destroy",
     RECONVERSION: "Reconversion",
     MIND_CONTROL: "Mind Control",
 };
