@@ -4,10 +4,11 @@ import {
     formatActionDescription,
     formatHealDamagePassiveTriggerLabel,
     formatPlayCardPassiveTriggerLabel,
+    formatSummonPassiveTriggerLabel,
 } from "./format_action_description.js";
 
 const PASSIVE_TRIGGER_LABELS: Record<
-    Exclude<NonNullable<PassiveSnapshot["triggersOn"]>, "HEAL" | "DAMAGE" | "PLAY_CARD">,
+    Exclude<NonNullable<PassiveSnapshot["triggersOn"]>, "HEAL" | "DAMAGE" | "PLAY_CARD" | "SUMMON">,
     string
 > = {
     TURN_END: "fin de tour",
@@ -52,12 +53,14 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
                 const triggerLabel =
                     passive.triggersOn === "PLAY_CARD"
                         ? formatPlayCardPassiveTriggerLabel(passive.playCardFilter)
-                        : passive.triggersOn === "HEAL" || passive.triggersOn === "DAMAGE"
-                          ? formatHealDamagePassiveTriggerLabel(
-                                passive.triggersOn,
-                                passive.triggerTargetFilter ?? null,
-                            )
-                          : PASSIVE_TRIGGER_LABELS[passive.triggersOn];
+                        : passive.triggersOn === "SUMMON"
+                          ? formatSummonPassiveTriggerLabel(passive.summonFilter)
+                          : passive.triggersOn === "HEAL" || passive.triggersOn === "DAMAGE"
+                            ? formatHealDamagePassiveTriggerLabel(
+                                  passive.triggersOn,
+                                  passive.triggerTargetFilter ?? null,
+                              )
+                            : PASSIVE_TRIGGER_LABELS[passive.triggersOn];
                 return formatActionDescription(passive.action, `Passif (${triggerLabel})`);
             }
 
@@ -73,6 +76,9 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
                     enemyDrawCardFilter: null,
                     boost: passive.passiveBoost.boost,
                     reconvertParameters: null,
+                    summonParameters: null,
+                    summonCount: null,
+                    summonTargetTeam: "PLAYER",
                     target: passive.passiveBoost.target,
                     onTargetResult: null,
                     actionCondition: null,

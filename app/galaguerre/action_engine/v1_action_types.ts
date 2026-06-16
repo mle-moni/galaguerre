@@ -8,5 +8,6 @@ export const V1_ACTION_TYPES = [
     "DESTROY",
     "RECONVERSION",
     "MIND_CONTROL",
+    "SUMMON",
 ] as const;
 export type V1ActionType = (typeof V1_ACTION_TYPES)[number];

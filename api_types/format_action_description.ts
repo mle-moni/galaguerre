@@ -235,6 +235,19 @@ export const formatPlayCardPassiveTriggerLabel = (
     return `${noun} joué`;
 };
 
+export const formatSummonPassiveTriggerLabel = (
+    summonFilter: CardFilterSnapshot | null,
+): string => {
+    if (!summonFilter) return "serviteur invoqué";
+
+    const parts: string[] = [CARD_TYPE_LABELS[summonFilter.type].toLowerCase()];
+    if (summonFilter.tags.length > 0) {
+        parts.push(formatTagList(summonFilter.tags));
+    }
+
+    return `${parts.join(" ")} invoqué`;
+};
+
 export const formatHealDamagePassiveTriggerLabel = (
     triggersOn: "HEAL" | "DAMAGE",
     triggerTargetFilter: TargetSnapshot | null,
@@ -657,6 +670,17 @@ export const formatActionDescription = (
             }
 
             return `${prefix} : ${conditionPrefix}prend le contrôle d'un serviteur adverse.`;
+        }
+        case "SUMMON": {
+            const count = action.summonCount ?? 1;
+            const targetLabel = formatReconvertTargetLabel(action.summonParameters);
+            const boardLabel =
+                action.summonTargetTeam === "OPPONENT"
+                    ? "sur le plateau adverse"
+                    : "sur votre plateau";
+            const countLabel = count > 1 ? `${count} serviteurs` : "un serviteur";
+
+            return `${prefix} : Invoque ${countLabel} (${targetLabel}) ${boardLabel}.`;
         }
         default:
             return null;

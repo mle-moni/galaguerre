@@ -54,6 +54,10 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
         case "MIND_CONTROL":
             if (action.target === null) return false;
             return action.target.type === "MINION" || action.target.type === "ALL";
+        case "SUMMON":
+            if (action.summonParameters === null) return false;
+            if (action.summonCount === null || action.summonCount <= 0) return false;
+            return action.summonTargetTeam === "PLAYER" || action.summonTargetTeam === "OPPONENT";
         default:
             return false;
     }

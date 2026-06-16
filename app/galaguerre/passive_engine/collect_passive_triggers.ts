@@ -51,6 +51,15 @@ const collectFromBoard = (
                 ) {
                     continue;
                 }
+            } else if (triggersOn === "SUMMON") {
+                if (!playedCard || !activePlayer || owner !== activePlayer) continue;
+                if (minion.uuid === playedCard.uuid) continue;
+                if (
+                    passive.summonFilter !== null &&
+                    !deckCardMatchesFilter(playedCard, passive.summonFilter)
+                ) {
+                    continue;
+                }
             } else if (
                 (triggersOn === "TURN_END" ||
                     triggersOn === "TURN_BEGIN" ||

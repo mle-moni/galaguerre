@@ -39,6 +39,7 @@ export const GALAGUERRE_ACTIONS_TYPES = [
     "DESTROY",
     "RECONVERSION",
     "MIND_CONTROL",
+    "SUMMON",
 ] as const;
 export type GalaguerreActionType = GenerateTypeFromEnum<typeof GALAGUERRE_ACTIONS_TYPES>;
 export const GALAGUERRE_ACTIONS_TYPES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_ACTIONS_TYPES);
@@ -52,6 +53,7 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     DESTROY: "Destroy",
     RECONVERSION: "Reconversion",
     MIND_CONTROL: "Mind Control",
+    SUMMON: "Summon",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,
@@ -75,6 +77,7 @@ export const GALAGUERRE_PASSIVES_TRIGGERS_ON = [
     "HEAL",
     "DAMAGE",
     "PLAY_CARD",
+    "SUMMON",
 ] as const;
 export type GalaguerrePassiveTriggersOn = GenerateTypeFromEnum<
     typeof GALAGUERRE_PASSIVES_TRIGGERS_ON
@@ -88,6 +91,7 @@ export const GALAGUERRE_PASSIVES_TRIGGERS_ON_LABEL_OBJ: LabelObjectType<Galaguer
         DRAW: "Draw",
         HEAL: "Heal",
         PLAY_CARD: "Play Card",
+        SUMMON: "Summon",
         TURN_BEGIN: "Turn Begin",
         TURN_END: "Turn End",
     };

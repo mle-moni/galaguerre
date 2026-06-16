@@ -36,6 +36,8 @@ import {
 import { hasRandomLimitedTarget, pickRandomLimitedTargets } from "./pick_random_targets.js";
 import { resolveHeroTargets } from "./resolve_hero_target.js";
 import { resolveSelectedTarget, type ResolvedTarget } from "./resolve_selected_target.js";
+import { summonMinions } from "./summon_minion.js";
+import { triggerSummonPassivesForCards } from "../passive_engine/trigger_summon_passives.js";
 
 const getMinionOwner = (
     board: GamePlayer["board"],
@@ -326,6 +328,21 @@ const executeNonTargetedV1Action = (
         }
         case "MIND_CONTROL":
             break;
+        case "SUMMON": {
+            if (!action.summonParameters || action.summonCount === null) break;
+
+            const { summonedCards } = summonMinions(
+                game,
+                player,
+                action.summonTargetTeam,
+                action.summonParameters,
+                action.summonCount,
+                sourceMinion,
+            );
+            const { gameEnded } = triggerSummonPassivesForCards(game, player, summonedCards);
+            if (gameEnded) return;
+            break;
+        }
     }
 };
 

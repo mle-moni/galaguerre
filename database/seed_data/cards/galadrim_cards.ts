@@ -424,8 +424,10 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             passives: [
                 actionPassive(
-                    "PLAY_CARD",
+                    "SUMMON",
                     damageAction(1, randomEnemyCharacter()),
+                    null,
+                    null,
                     minionDrawFilter(),
                 ),
             ],
@@ -436,7 +438,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { ...gal("Office Manager Dévoué", 3), attack: 3, health: 3 },
         {
             tags: ["SUPPORT"],
-            passives: [actionPassive("PLAY_CARD", healAction(2, allyHero()), minionDrawFilter())],
+            passives: [
+                actionPassive("SUMMON", healAction(2, allyHero()), null, null, minionDrawFilter()),
+            ],
         },
     ),
     defineMinion(
@@ -456,7 +460,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         118,
         { ...gal("Distributeur de Croquettes", 3), attack: 0, health: 4 },
         {
-            passives: [actionPassive("PLAY_CARD", drawAction(1), minionDrawFilter(["PETS"]))],
+            passives: [
+                actionPassive("SUMMON", drawAction(1), null, null, minionDrawFilter(["PETS"])),
+            ],
         },
     ),
     defineMinion(

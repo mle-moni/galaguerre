@@ -89,6 +89,9 @@ const cardActionFieldsSchema = z.object({
     enemyDrawCardFilter: cardFilterSchema.nullable(),
     boost: boostSchema.nullable(),
     reconvertParameters: reconvertParametersSchema.nullable().default(null),
+    summonParameters: reconvertParametersSchema.nullable().default(null),
+    summonCount: z.number().int().positive().nullable().default(null),
+    summonTargetTeam: z.enum(["PLAYER", "OPPONENT"]).default("PLAYER"),
     target: targetSchema.nullable(),
     actionCondition: actionConditionSchema,
 });
@@ -139,6 +142,7 @@ export const passiveSchema = z
         action: cardActionSchema.nullable(),
         passiveBoost: passiveBoostSchema.nullable(),
         playCardFilter: cardFilterSchema.nullable(),
+        summonFilter: cardFilterSchema.nullable().default(null),
         triggerTargetFilter: targetSchema.nullable().default(null),
     })
     .superRefine((passive, ctx) => {

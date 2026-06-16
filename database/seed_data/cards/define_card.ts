@@ -64,6 +64,9 @@ const nullActionFields = () => ({
     heal: null,
     boost: null,
     reconvertParameters: null,
+    summonParameters: null,
+    summonCount: null,
+    summonTargetTeam: "PLAYER" as const,
     target: null,
     onTargetResult: null,
     actionCondition: null,
@@ -352,6 +355,23 @@ export const relativeCostReconversion = (
         isTargeted,
     );
 
+export const summonAction = (
+    parameters: ReconvertParametersDefinition,
+    options: { count?: number; targetTeam?: "PLAYER" | "OPPONENT" } = {},
+): CardActionDefinition =>
+    baseAction({
+        type: "SUMMON",
+        summonParameters: parameters,
+        summonCount: options.count ?? 1,
+        summonTargetTeam: options.targetTeam ?? "PLAYER",
+    });
+
+export const summonCardId = (
+    cardId: number,
+    count = 1,
+    targetTeam: "PLAYER" | "OPPONENT" = "PLAYER",
+): CardActionDefinition => summonAction(reconvertParameters({ cardId }), { count, targetTeam });
+
 export const boostStats = (overrides: Partial<BoostDefinition> = {}): BoostDefinition => ({
     attack: null,
     health: null,
@@ -456,12 +476,14 @@ export const actionPassive = (
     action: CardActionDefinition,
     playCardFilter: CardFilterDefinition | null = null,
     triggerTargetFilter: TargetDefinition | null = null,
+    summonFilter: CardFilterDefinition | null = null,
 ): PassiveDefinition => ({
     type: "ACTION",
     triggersOn,
     action,
     passiveBoost: null,
     playCardFilter,
+    summonFilter,
     triggerTargetFilter,
 });
 
@@ -474,6 +496,7 @@ export const boostPassive = (
     action: null,
     passiveBoost: { boost, target },
     playCardFilter: null,
+    summonFilter: null,
     triggerTargetFilter: null,
 });
 

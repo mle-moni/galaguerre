@@ -3,6 +3,7 @@ import { test } from "@japa/runner";
 import type Game from "#models/game";
 import { getMinionCardTemplateById } from "#galaguerre/card_catalog";
 import { triggerPlayCardPassives } from "../../../app/galaguerre/passive_engine/trigger_play_card_passives.js";
+import { triggerSummonPassives } from "../../../app/galaguerre/passive_engine/trigger_summon_passives.js";
 import {
     createCardActionSnapshot,
     createCardFilterSnapshot,
@@ -22,7 +23,7 @@ import { runPlayMinion, runPlaySpell } from "#tests/helpers/game/run_play_minion
 const createGame = (data: ReturnType<typeof createGameData>) => ({ data }) as Game;
 
 const spellPlayCardFilter = createCardFilterSnapshot({ type: "SPELL" });
-const minionPlayCardFilter = createCardFilterSnapshot({ type: "MINION" });
+const minionSummonFilter = createCardFilterSnapshot({ type: "MINION" });
 
 test.group("passive PLAY_CARD triggers", () => {
     test("SPELL filter deals damage to all minions after a spell is played (Pyromancer)", ({
@@ -62,7 +63,7 @@ test.group("passive PLAY_CARD triggers", () => {
         assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
     });
 
-    test("MINION filter deals damage to opponent hero after a minion is played (Knife Juggler)", ({
+    test("MINION PLAY_CARD filter does not trigger on minion summon (uses SUMMON trigger instead)", ({
         assert,
     }) => {
         const passiveMinion = createMinionCard({
@@ -71,7 +72,7 @@ test.group("passive PLAY_CARD triggers", () => {
                 createPassiveSnapshot({
                     type: "ACTION",
                     triggersOn: "PLAY_CARD",
-                    playCardFilter: minionPlayCardFilter,
+                    playCardFilter: minionSummonFilter,
                     action: createCardActionSnapshot({
                         type: "DAMAGE",
                         damage: 1,
@@ -89,21 +90,23 @@ test.group("passive PLAY_CARD triggers", () => {
         });
 
         const game = createGame(data);
-        const playedMinion = createMinionCard({ uuid: "played-minion", cost: 1 });
+        triggerSummonPassives(
+            game,
+            game.data.playerOne,
+            createMinionCard({ uuid: "summoned-minion", cost: 1 }),
+        );
 
-        triggerPlayCardPassives(game, game.data.playerOne, playedMinion);
-
-        assertPlayerHealth(assert, game, "playerTwo", 14);
+        assertPlayerHealth(assert, game, "playerTwo", 15);
     });
 
-    test("MINION filter does not trigger when a spell is played", ({ assert }) => {
+    test("MINION PLAY_CARD filter does not trigger when a spell is played", ({ assert }) => {
         const passiveMinion = createMinionCard({
             uuid: "knife-juggler",
             passives: [
                 createPassiveSnapshot({
                     type: "ACTION",
                     triggersOn: "PLAY_CARD",
-                    playCardFilter: minionPlayCardFilter,
+                    playCardFilter: minionSummonFilter,
                     action: createCardActionSnapshot({
                         type: "DAMAGE",
                         damage: 1,
@@ -194,7 +197,7 @@ test.group("passive PLAY_CARD triggers", () => {
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
-    test("null playCardFilter triggers on both spell and minion plays", ({ assert }) => {
+    test("null playCardFilter triggers on spell plays", ({ assert }) => {
         const passiveMinion = createMinionCard({
             uuid: "generic-watcher",
             passives: [
@@ -225,24 +228,16 @@ test.group("passive PLAY_CARD triggers", () => {
             createSpellCard({ cost: 0 }),
         );
         assertPlayerHealth(assert, gameAfterSpell, "playerTwo", 14);
-
-        const gameAfterMinion = createGame(createGameData(baseData));
-        triggerPlayCardPassives(
-            gameAfterMinion,
-            gameAfterMinion.data.playerOne,
-            createMinionCard({ uuid: "played-minion", cost: 1 }),
-        );
-        assertPlayerHealth(assert, gameAfterMinion, "playerTwo", 14);
     });
 
-    test("silenced minion passive does not trigger", ({ assert }) => {
+    test("silenced minion SUMMON passive does not trigger", ({ assert }) => {
         const passiveMinion = createMinionCard({
             uuid: "silenced-watcher",
             passives: [
                 createPassiveSnapshot({
                     type: "ACTION",
-                    triggersOn: "PLAY_CARD",
-                    playCardFilter: null,
+                    triggersOn: "SUMMON",
+                    summonFilter: null,
                     action: createCardActionSnapshot({
                         type: "DAMAGE",
                         damage: 1,
@@ -263,57 +258,13 @@ test.group("passive PLAY_CARD triggers", () => {
         });
 
         const game = createGame(data);
-        triggerPlayCardPassives(
+        triggerSummonPassives(
             game,
             game.data.playerOne,
-            createMinionCard({ uuid: "played-minion", cost: 1 }),
+            createMinionCard({ uuid: "summoned-minion", cost: 1 }),
         );
 
         assertPlayerHealth(assert, game, "playerTwo", 15);
-    });
-
-    test("triggers after battlecry when playing a minion", async ({ assert }) => {
-        const watcher = createMinionCard({
-            uuid: "watcher",
-            passives: [
-                createPassiveSnapshot({
-                    type: "ACTION",
-                    triggersOn: "PLAY_CARD",
-                    playCardFilter: minionPlayCardFilter,
-                    action: createCardActionSnapshot({
-                        type: "DAMAGE",
-                        damage: 1,
-                        target: createHeroTargetSnapshot("OPPONENT"),
-                    }),
-                }),
-            ],
-        });
-        const battlecryMinion = createMinionCard({
-            uuid: "battlecry-minion",
-            cost: 1,
-            battlecryActions: [
-                createCardActionSnapshot({
-                    type: "DAMAGE",
-                    damage: 2,
-                    target: createHeroTargetSnapshot("OPPONENT"),
-                }),
-            ],
-        });
-
-        const { game } = await runPlayMinion(
-            createGameData({
-                playerOne: {
-                    mana: 10,
-                    hand: [battlecryMinion],
-                    board: placeMinion(createEmptyBoard(), "SPOT_2", createMinionState(watcher)),
-                },
-                playerTwo: { health: 20 },
-            }),
-            battlecryMinion,
-            { spotId: "SPOT_1" },
-        );
-
-        assertPlayerHealth(assert, game, "playerTwo", 17);
     });
 
     test("Alternant Surmotivé gains +1 attack when a spell is played", ({ assert }) => {
@@ -351,9 +302,7 @@ test.group("passive PLAY_CARD triggers", () => {
         assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2 });
     });
 
-    test("PLAY_CARD passive does not trigger when the minion is played from hand", async ({
-        assert,
-    }) => {
+    test("SUMMON passive does not trigger on self when played from hand", async ({ assert }) => {
         const officeManagerTemplate = getMinionCardTemplateById(116)!;
         const officeManager = { ...officeManagerTemplate, uuid: "office-manager-devoue" };
 
@@ -372,7 +321,7 @@ test.group("passive PLAY_CARD triggers", () => {
         assertPlayerHealth(assert, game, "playerOne", 10);
     });
 
-    test("PLAY_CARD passive triggers on the next minion played", async ({ assert }) => {
+    test("SUMMON passive triggers on the next minion played", async ({ assert }) => {
         const officeManagerTemplate = getMinionCardTemplateById(116)!;
         const officeManager = { ...officeManagerTemplate, uuid: "office-manager-devoue" };
         const playedMinion = createMinionCard({ uuid: "played-minion", cost: 1 });

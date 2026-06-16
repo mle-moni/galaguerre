@@ -61,7 +61,8 @@ export type CardActionFieldsDefinition = {
         | "SILENCE"
         | "DESTROY"
         | "RECONVERSION"
-        | "MIND_CONTROL";
+        | "MIND_CONTROL"
+        | "SUMMON";
     isTargeted: boolean;
     damage: number | null;
     heal: number | null;
@@ -71,6 +72,9 @@ export type CardActionFieldsDefinition = {
     enemyDrawCardFilter: CardFilterDefinition | null;
     boost: BoostDefinition | null;
     reconvertParameters: ReconvertParametersDefinition | null;
+    summonParameters: ReconvertParametersDefinition | null;
+    summonCount: number | null;
+    summonTargetTeam: "PLAYER" | "OPPONENT";
     target: TargetDefinition | null;
     actionCondition: ActionConditionDefinition | null;
 };
@@ -87,10 +91,19 @@ export type CardActionDefinition = CardActionFieldsDefinition & {
 
 export type PassiveDefinition = {
     type: "ACTION" | "BOOST";
-    triggersOn: "TURN_END" | "TURN_BEGIN" | "DRAW" | "HEAL" | "DAMAGE" | "PLAY_CARD" | null;
+    triggersOn:
+        | "TURN_END"
+        | "TURN_BEGIN"
+        | "DRAW"
+        | "HEAL"
+        | "DAMAGE"
+        | "PLAY_CARD"
+        | "SUMMON"
+        | null;
     action: CardActionDefinition | null;
     passiveBoost: { boost: BoostDefinition; target: TargetDefinition | null } | null;
     playCardFilter: CardFilterDefinition | null;
+    summonFilter: CardFilterDefinition | null;
     triggerTargetFilter: TargetDefinition | null;
 };
 
@@ -473,6 +486,105 @@ const validateMindControlPayload = (
     }
 };
 
+const validateSummonParameters = (
+    parameters: ReconvertParametersDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (parameters.type !== "MINION") {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON summonParameters.type must be MINION",
+            path: [...path, "type"],
+        });
+    }
+
+    if (parameters.cardId !== null && parameters.cardId <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON summonParameters.cardId must be > 0 when set",
+            path: [...path, "cardId"],
+        });
+    }
+
+    if (parameters.comparison !== null) {
+        validateComparisonSnapshot(parameters.comparison, ctx, [...path, "comparison"]);
+    }
+};
+
+const validateSummonPayload = (
+    action: CardActionDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.damage !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action must not set damage",
+            path: [...path, "damage"],
+        });
+    }
+    if (action.heal !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action must not set heal",
+            path: [...path, "heal"],
+        });
+    }
+    if (action.drawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action must not set drawCount",
+            path: [...path, "drawCount"],
+        });
+    }
+    if (action.enemyDrawCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action must not set enemyDrawCount",
+            path: [...path, "enemyDrawCount"],
+        });
+    }
+    if (action.boost !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action must not set boost",
+            path: [...path, "boost"],
+        });
+    }
+    if (action.reconvertParameters !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action must not set reconvertParameters",
+            path: [...path, "reconvertParameters"],
+        });
+    }
+    if (action.target !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action must not set target",
+            path: [...path, "target"],
+        });
+    }
+    if (action.summonParameters === null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action requires summonParameters",
+            path: [...path, "summonParameters"],
+        });
+        return;
+    }
+    if (action.summonCount === null || action.summonCount <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action requires summonCount > 0",
+            path: [...path, "summonCount"],
+        });
+    }
+
+    validateSummonParameters(action.summonParameters, ctx, [...path, "summonParameters"]);
+};
+
 const validateReconvertParameters = (
     parameters: ReconvertParametersDefinition,
     ctx: z.RefinementCtx,
@@ -716,6 +828,9 @@ const validateTargetedAction = (
             validateMindControlPayload(action, ctx, path);
             validateMindControlTarget(action.target, ctx, [...path, "target"]);
             break;
+        case "SUMMON":
+            validateSummonPayload(action, ctx, path);
+            break;
     }
 
     validateOnTargetResult(action, ctx, path);
@@ -886,6 +1001,10 @@ const validateNonTargetedAction = (
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
             break;
         }
+        case "SUMMON": {
+            validateSummonPayload(action, ctx, path);
+            break;
+        }
     }
 
     if (action.onTargetResult != null) {
@@ -908,6 +1027,22 @@ export const validateCardAction = (
             code: "custom",
             message: `${action.type} action must not set reconvertParameters`,
             path: [...path, "reconvertParameters"],
+        });
+    }
+
+    if (action.type !== "SUMMON" && action.summonParameters !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: `${action.type} action must not set summonParameters`,
+            path: [...path, "summonParameters"],
+        });
+    }
+
+    if (action.type !== "SUMMON" && action.summonCount !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: `${action.type} action must not set summonCount`,
+            path: [...path, "summonCount"],
         });
     }
 
@@ -1013,6 +1148,22 @@ export const validatePassiveDefinition = (
             });
         }
 
+        if (passive.triggersOn !== "SUMMON" && passive.summonFilter !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "summonFilter is only allowed for SUMMON passives",
+                path: [...path, "summonFilter"],
+            });
+        }
+
+        if (passive.triggersOn === "SUMMON" && passive.playCardFilter !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "SUMMON passive cannot have playCardFilter",
+                path: [...path, "playCardFilter"],
+            });
+        }
+
         if (
             passive.triggersOn !== "HEAL" &&
             passive.triggersOn !== "DAMAGE" &&
@@ -1042,6 +1193,14 @@ export const validatePassiveDefinition = (
                 code: "custom",
                 message: "BOOST passive cannot have playCardFilter",
                 path: [...path, "playCardFilter"],
+            });
+        }
+
+        if (passive.summonFilter !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "BOOST passive cannot have summonFilter",
+                path: [...path, "summonFilter"],
             });
         }
 

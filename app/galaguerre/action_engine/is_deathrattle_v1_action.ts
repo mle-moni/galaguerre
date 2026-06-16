@@ -44,6 +44,10 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
         case "DESTROY":
             if (action.target === null) return false;
             return action.target.type === "MINION" || action.target.type === "ALL";
+        case "SUMMON":
+            if (action.summonParameters === null) return false;
+            if (action.summonCount === null || action.summonCount <= 0) return false;
+            return action.summonTargetTeam === "PLAYER" || action.summonTargetTeam === "OPPONENT";
         default:
             return false;
     }

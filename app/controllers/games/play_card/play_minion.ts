@@ -1,7 +1,7 @@
 import type { ActionTarget, MinionCard, MinionSpotId } from "#api_types/game.types";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
-import { refreshAurasAfterMinionPlayed } from "../../../galaguerre/passive_engine/refresh_passive_auras.js";
-import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
+import { summonMinionAtSpot } from "../../../galaguerre/action_engine/summon_minion.js";
+import { triggerSummonPassives } from "../../../galaguerre/passive_engine/trigger_summon_passives.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
@@ -16,7 +16,6 @@ import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import type { PlayCardOptions } from "./game_play_card.js";
-import { instantiateMinion } from "./instantiate_minion.js";
 
 interface PlayMinionOptions extends Omit<PlayCardOptions, "card" | "spotId"> {
     card: MinionCard;
@@ -101,14 +100,21 @@ export const playMinion = async ({
     const effectiveCost = computeEffectiveCost(card, player, opponent);
     card.cost = effectiveCost;
 
-    player.board[spotId] = instantiateMinion(card, game.data.currentRound);
+    const { summoned } = summonMinionAtSpot(game, player, spotId, card);
+    if (!summoned) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous ne pouvez pas jouer cette carte ici" },
+            socketId,
+        );
+        return;
+    }
+
     player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
     recordPlayCard(game, player, card);
     player.mana -= effectiveCost;
     recordManaSpent(player, effectiveCost);
     recordMinionPlayed(player);
-
-    refreshAurasAfterMinionPlayed(game, player, spotId);
 
     const { gameEnded: battlecryGameEnded } = executeBattlecries(
         game,
@@ -122,9 +128,9 @@ export const playMinion = async ({
         return;
     }
 
-    const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
+    const { gameEnded: summonPassiveGameEnded } = triggerSummonPassives(game, player, card);
 
-    if (playCardPassiveGameEnded) {
+    if (summonPassiveGameEnded) {
         await terminateGame(game);
         return;
     }

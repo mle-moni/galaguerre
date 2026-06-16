@@ -140,6 +140,9 @@ export const createCardActionSnapshot = (
     enemyDrawCardFilter: null,
     boost: null,
     reconvertParameters: null,
+    summonParameters: null,
+    summonCount: null,
+    summonTargetTeam: "PLAYER",
     target: null,
     onTargetResult: null,
     actionCondition: null,
@@ -185,6 +188,7 @@ export const createPassiveSnapshot = (
     action: null,
     passiveBoost: null,
     playCardFilter: null,
+    summonFilter: null,
     triggerTargetFilter: null,
     ...overrides,
 });

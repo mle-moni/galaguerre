@@ -57,7 +57,8 @@ export type PassiveTriggersOn =
     | "DRAW"
     | "HEAL"
     | "DAMAGE"
-    | "PLAY_CARD";
+    | "PLAY_CARD"
+    | "SUMMON";
 
 export interface AuraAppliedTarget {
     owner: SpotOwner;
