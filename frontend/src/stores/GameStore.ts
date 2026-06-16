@@ -2,6 +2,8 @@ import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame, GamePlayer, MinionSpotId, SpotOwner } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
 import { _assert } from "~/helpers/assertions";
+import { notifyError } from "~/services/toasts";
+import { CLIENT_SOCKET, isSocketReady } from "~/services/ws_client";
 import { CardDragStore } from "./CardDragStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
@@ -31,6 +33,7 @@ export class GameStore {
     private _user: ApiUser | null = null;
     mulliganSelectedCardIds: string[] = [];
     mulliganConfirmedLocally = false;
+    private passTurnSubmittedAt: { state: ApiGame["data"]["state"]; round: number } | null = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -57,6 +60,7 @@ export class GameStore {
         if (isNewGame || leavingMulligan) {
             this.mulliganSelectedCardIds = [];
             this.mulliganConfirmedLocally = false;
+            this.passTurnSubmittedAt = null;
         }
 
         return this;
@@ -147,6 +151,34 @@ export class GameStore {
         }
 
         return false;
+    }
+
+    get isPassTurnPending() {
+        if (!this.passTurnSubmittedAt) return false;
+
+        return (
+            this.game.data.state === this.passTurnSubmittedAt.state &&
+            this.game.data.currentRound === this.passTurnSubmittedAt.round
+        );
+    }
+
+    get canPassTurn() {
+        return this.isMyTurn && !this.isPassTurnPending;
+    }
+
+    requestPassTurn() {
+        if (!this.canPassTurn) return;
+
+        if (!isSocketReady()) {
+            notifyError("Connexion perdue, reconnexion en cours...");
+            return;
+        }
+
+        this.passTurnSubmittedAt = {
+            state: this.game.data.state,
+            round: this.game.data.currentRound,
+        };
+        CLIENT_SOCKET.emit("pass_turn");
     }
 
     handleDrop(spotId: MinionSpotId | null, spotOwner: SpotOwner) {

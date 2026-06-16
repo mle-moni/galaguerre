@@ -3,7 +3,6 @@ import { Button, Stack } from "@mantine/core";
 import { IconPlayCard } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
-import { passTurn } from "~/services/ws_client";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
 
 interface DeckInfosProps {
@@ -61,7 +60,12 @@ const PlayerButton = observer(() => {
                     endsAt={store.game.data.turnEndsAt}
                     title="Temps restant pour votre tour"
                 />
-                <Button variant="filled" onClick={passTurn}>
+                <Button
+                    variant="filled"
+                    loading={store.isPassTurnPending}
+                    disabled={!store.canPassTurn}
+                    onClick={() => store.requestPassTurn()}
+                >
                     Terminé
                 </Button>
             </Stack>

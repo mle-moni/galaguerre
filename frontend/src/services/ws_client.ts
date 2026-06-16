@@ -97,15 +97,6 @@ export const subscribeToSocketEvent = <T extends SocketEventKey>(
 
 setupEvents(CLIENT_SOCKET);
 
-export const passTurn = () => {
-    if (!isSocketReady()) {
-        notifyError("Connexion perdue, reconnexion en cours...");
-        return;
-    }
-
-    CLIENT_SOCKET.emit("pass_turn");
-};
-
 export const abandonGame = () => {
     emitSocketEventToServer("game:abandon", {});
 };
