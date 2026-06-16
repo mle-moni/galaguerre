@@ -348,6 +348,11 @@ const executeNonTargetedV1Action = (
         case "DECK_CARD":
             executeDeckCardAction(action, game, player, opponent);
             break;
+        case "MANA":
+            if (action.subtype === "TEMPORARY_CHANGE") {
+                player.mana += action.amount;
+            }
+            break;
     }
 };
 

@@ -1,6 +1,6 @@
 export const DEFAULT_HERO_HEALTH = 30;
 
-export const COIN_CARD_ID = -1;
+export const COIN_CARD_ID = 1;
 
 export type ComparisonOperator = "<" | ">" | "=";
 

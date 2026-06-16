@@ -10,5 +10,6 @@ export const V1_ACTION_TYPES = [
     "MIND_CONTROL",
     "SUMMON",
     "DECK_CARD",
+    "MANA",
 ] as const;
 export type V1ActionType = (typeof V1_ACTION_TYPES)[number];

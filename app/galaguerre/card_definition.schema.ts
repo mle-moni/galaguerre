@@ -9,6 +9,7 @@ import {
     GALAGUERRE_CARD_TYPES,
     GALAGUERRE_DECK_CARD_OPERATIONS,
     GALAGUERRE_DECK_PLACEMENTS,
+    GALAGUERRE_MANA_SUBTYPES,
     GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
     GALAGUERRE_PASSIVES_TYPES,
@@ -160,6 +161,14 @@ const deckCardActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const manaActionFieldsSchema = z.object({
+    type: z.literal("MANA"),
+    isTargeted: z.literal(false).default(false),
+    subtype: z.enum(GALAGUERRE_MANA_SUBTYPES),
+    amount: z.number().int().positive(),
+    actionCondition: actionConditionSchema,
+});
+
 const cardActionFieldsSchema = z.discriminatedUnion("type", [
     damageActionFieldsSchema,
     healActionFieldsSchema,
@@ -172,6 +181,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     mindControlActionFieldsSchema,
     summonActionFieldsSchema,
     deckCardActionFieldsSchema,
+    manaActionFieldsSchema,
 ]);
 
 export const onTargetResultSchema = z
@@ -213,6 +223,7 @@ export const cardActionSchema = z
         mindControlActionFieldsSchema.extend(cardActionOnTargetResultField),
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),
         deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
+        manaActionFieldsSchema.extend(cardActionOnTargetResultField),
     ])
     .superRefine((action, ctx) => {
         validateCardAction(action, ctx, [], { allowTargeted: true });

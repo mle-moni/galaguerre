@@ -125,6 +125,15 @@ export const enemyDrawAction = (
     onTargetResult: null,
 });
 
+export const manaTemporaryChangeAction = (amount: number): CardActionDefinition => ({
+    type: "MANA",
+    isTargeted: false,
+    subtype: "TEMPORARY_CHANGE",
+    amount,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const boostAction = (
     boost: BoostDefinition,
     target: TargetDefinition,

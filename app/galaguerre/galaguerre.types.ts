@@ -29,6 +29,9 @@ export const GALAGUERRE_CARD_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_CARD_TYPES_LABEL_OBJ,
 );
 
+export const GALAGUERRE_MANA_SUBTYPES = ["TEMPORARY_CHANGE"] as const;
+export type GalaguerreManaSubtype = GenerateTypeFromEnum<typeof GALAGUERRE_MANA_SUBTYPES>;
+
 export const GALAGUERRE_ACTIONS_TYPES = [
     "DAMAGE",
     "HEAL",
@@ -41,6 +44,7 @@ export const GALAGUERRE_ACTIONS_TYPES = [
     "MIND_CONTROL",
     "SUMMON",
     "DECK_CARD",
+    "MANA",
 ] as const;
 export type GalaguerreActionType = GenerateTypeFromEnum<typeof GALAGUERRE_ACTIONS_TYPES>;
 export const GALAGUERRE_ACTIONS_TYPES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_ACTIONS_TYPES);
@@ -56,6 +60,7 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     MIND_CONTROL: "Mind Control",
     SUMMON: "Summon",
     DECK_CARD: "Deck Card",
+    MANA: "Mana",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,

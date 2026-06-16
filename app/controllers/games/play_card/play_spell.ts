@@ -1,6 +1,5 @@
 import type { ActionTarget, SpellCard } from "#api_types/game.types";
 import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
-import { isCoinCard } from "../../../galaguerre/coin.js";
 import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
@@ -46,17 +45,6 @@ export const playSpell = async ({
     socketId,
     actionTarget,
 }: PlaySpellOptions) => {
-    if (isCoinCard(card)) {
-        player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
-        recordPlayCard(game, player, card);
-        player.mana += 1;
-        recordSpellCast(player);
-
-        await game.save();
-        sendGameUpdate(game);
-        return;
-    }
-
     const requiresTarget = cardRequiresActionTarget(card);
     const opponent = getOpponent(game, player);
 

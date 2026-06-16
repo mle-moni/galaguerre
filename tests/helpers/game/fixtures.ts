@@ -146,6 +146,8 @@ type CardActionSnapshotOverrides = {
     deckTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
     cardId?: number;
     copyCount?: number | null;
+    subtype?: "TEMPORARY_CHANGE";
+    amount?: number;
     target?: TargetSnapshot | null;
     onTargetResult?: CardActionSnapshot["onTargetResult"];
     actionCondition?: CardActionSnapshot["actionCondition"];
@@ -258,6 +260,15 @@ export const createCardActionSnapshot = (
                 deckTargetTeam: overrides.deckTargetTeam ?? "PLAYER",
                 cardId: overrides.cardId ?? 121,
                 copyCount: overrides.copyCount !== undefined ? overrides.copyCount : 1,
+                actionCondition,
+                onTargetResult,
+            };
+        case "MANA":
+            return {
+                type: "MANA",
+                isTargeted: false,
+                subtype: overrides.subtype ?? "TEMPORARY_CHANGE",
+                amount: overrides.amount ?? 1,
                 actionCondition,
                 onTargetResult,
             };

@@ -741,6 +741,24 @@ const validateNonTargetedAction = (
             validateDeckCardPayload(action, ctx, path);
             break;
         }
+        case "MANA": {
+            if (action.subtype !== "TEMPORARY_CHANGE") {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "MANA action requires subtype TEMPORARY_CHANGE",
+                    path: [...path, "subtype"],
+                });
+                return;
+            }
+            if (action.amount <= 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "MANA TEMPORARY_CHANGE action requires amount > 0",
+                    path: [...path, "amount"],
+                });
+            }
+            break;
+        }
     }
 
     if ("onTargetResult" in action && action.onTargetResult != null) {

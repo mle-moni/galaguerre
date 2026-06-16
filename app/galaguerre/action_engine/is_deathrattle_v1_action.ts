@@ -29,6 +29,8 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
                 return action.copyCount !== null && action.copyCount > 0;
             }
             return action.copyCount === null || action.copyCount > 0;
+        case "MANA":
+            return action.subtype === "TEMPORARY_CHANGE" && action.amount > 0;
         default:
             return false;
     }

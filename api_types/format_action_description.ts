@@ -383,6 +383,11 @@ const formatDeckCardAddLocationOn = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"):
     }
 };
 
+const formatManaTemporaryChange = (amount: number): string => {
+    const crystalLabel = amount === 1 ? "cristal de mana" : "cristaux de mana";
+    return `Ce tour-ci, gagnez ${amount} ${crystalLabel}.`;
+};
+
 const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | null => {
     switch (action.type) {
         case "DRAW": {
@@ -394,6 +399,10 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
             const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
             return `l'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}`;
+        }
+        case "MANA": {
+            if (action.subtype !== "TEMPORARY_CHANGE" || action.amount <= 0) return null;
+            return formatManaTemporaryChange(action.amount).replace(/\.$/, "").toLowerCase();
         }
         default:
             return (
@@ -749,6 +758,12 @@ export const formatActionDescription = (
                 default:
                     return `${prefix} : Mélange ${copies} ${formatDeckCardAddLocationIn(action.deckTargetTeam)}.`;
             }
+        }
+        case "MANA": {
+            if (action.subtype !== "TEMPORARY_CHANGE" || action.amount <= 0) return null;
+            return prefix
+                ? `${prefix} : ${formatManaTemporaryChange(action.amount)}`
+                : formatManaTemporaryChange(action.amount);
         }
         default:
             return null;

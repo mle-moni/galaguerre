@@ -30,6 +30,7 @@ import {
     healAction,
     minionDrawFilter,
     mindControlAction,
+    manaTemporaryChangeAction,
     otherAllyMinions,
     otherAllyMinionsWithTag,
     randomEnemyCharacter,
@@ -571,6 +572,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
 
     // --- cartes non collectionnables ---
+    defineSpell(
+        1,
+        {
+            label: "La Pièce",
+            cost: 0,
+            imageUrl:
+                "https://static.wikia.nocookie.net/hearthstone_gamepedia/images/8/8e/TheCoin.png",
+            cardSetName: GALADRIM_CARD_SET_NAME,
+        },
+        [manaTemporaryChangeAction(1)],
+        [],
+        { isCollectible: false },
+    ),
     defineMinion(121, { ...gal("Légume", 1), attack: 1, health: 1 }, {}, { isCollectible: false }),
     defineMinion(
         125,

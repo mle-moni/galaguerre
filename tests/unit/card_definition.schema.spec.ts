@@ -17,6 +17,7 @@ import {
     allMinions,
     selfMinion,
     silenceAction,
+    manaTemporaryChangeAction,
     reconversionAction,
     reconversionToCardId,
     reconvertParameters,
@@ -448,6 +449,37 @@ test.group("card_definition.schema", () => {
                         action: drawAction(1),
                     },
                 }),
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("accepts spell with MANA TEMPORARY_CHANGE action", ({ assert }) => {
+        const data = parseSpellData({
+            ...defaultSpellData(),
+            spellActions: [manaTemporaryChangeAction(2)],
+        });
+
+        assert.equal(data.spellActions[0]!.type, "MANA");
+        if (data.spellActions[0]!.type === "MANA") {
+            assert.equal(data.spellActions[0]!.subtype, "TEMPORARY_CHANGE");
+            assert.equal(data.spellActions[0]!.amount, 2);
+        }
+    });
+
+    test("rejects MANA action with amount <= 0", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [
+                {
+                    type: "MANA",
+                    isTargeted: false,
+                    subtype: "TEMPORARY_CHANGE",
+                    amount: 0,
+                    actionCondition: null,
+                    onTargetResult: null,
+                },
             ],
         });
 
