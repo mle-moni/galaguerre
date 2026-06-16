@@ -477,7 +477,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         137,
-        { ...gal("Léo", 20), attack: 8, health: 8 },
+        { ...gal("Léo Pompier", 20), attack: 8, health: 8 },
         {
             tags: ["DEVELOPPEUR"],
             dynamicCost: { reductions: [{ source: "HERO_MISSING_HEALTH", amountPer: 1 }] },
