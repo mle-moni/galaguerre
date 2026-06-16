@@ -127,27 +127,130 @@ export const createReconvertParametersSnapshot = (
     ...overrides,
 });
 
+type CardActionSnapshotOverrides = {
+    type?: CardActionSnapshot["type"];
+    isTargeted?: boolean;
+    damage?: number;
+    heal?: number;
+    drawCount?: number;
+    enemyDrawCount?: number;
+    drawCardFilter?: CardFilterSnapshot | null;
+    enemyDrawCardFilter?: CardFilterSnapshot | null;
+    boost?: BoostSnapshot;
+    reconvertParameters?: ReconvertParametersSnapshot;
+    summonParameters?: ReconvertParametersSnapshot;
+    summonCount?: number;
+    summonTargetTeam?: "PLAYER" | "OPPONENT";
+    target?: TargetSnapshot | null;
+    onTargetResult?: CardActionSnapshot["onTargetResult"];
+    actionCondition?: CardActionSnapshot["actionCondition"];
+};
+
 export const createCardActionSnapshot = (
-    overrides: Partial<CardActionSnapshot> = {},
-): CardActionSnapshot => ({
-    type: "DAMAGE",
-    isTargeted: false,
-    damage: null,
-    heal: null,
-    drawCount: null,
-    enemyDrawCount: null,
-    drawCardFilter: null,
-    enemyDrawCardFilter: null,
-    boost: null,
-    reconvertParameters: null,
-    summonParameters: null,
-    summonCount: null,
-    summonTargetTeam: "PLAYER",
-    target: null,
-    onTargetResult: null,
-    actionCondition: null,
-    ...overrides,
-});
+    overrides: CardActionSnapshotOverrides = {},
+): CardActionSnapshot => {
+    const type = overrides.type ?? "DAMAGE";
+    const actionCondition = overrides.actionCondition ?? null;
+    const onTargetResult = overrides.onTargetResult ?? null;
+
+    switch (type) {
+        case "HEAL":
+            return {
+                type: "HEAL",
+                isTargeted: overrides.isTargeted ?? false,
+                heal: overrides.heal ?? 1,
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "DRAW":
+            return {
+                type: "DRAW",
+                isTargeted: false,
+                drawCount: overrides.drawCount ?? 1,
+                drawCardFilter: overrides.drawCardFilter ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "ENEMY_DRAW":
+            return {
+                type: "ENEMY_DRAW",
+                isTargeted: false,
+                enemyDrawCount: overrides.enemyDrawCount ?? 1,
+                enemyDrawCardFilter: overrides.enemyDrawCardFilter ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "BOOST":
+            return {
+                type: "BOOST",
+                isTargeted: overrides.isTargeted ?? false,
+                boost: overrides.boost ?? {
+                    attack: 1,
+                    health: null,
+                    spellPower: null,
+                    minionPowers: null,
+                },
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "SILENCE":
+            return {
+                type: "SILENCE",
+                isTargeted: overrides.isTargeted ?? false,
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "DESTROY":
+            return {
+                type: "DESTROY",
+                isTargeted: overrides.isTargeted ?? false,
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "RECONVERSION":
+            return {
+                type: "RECONVERSION",
+                isTargeted: overrides.isTargeted ?? false,
+                reconvertParameters:
+                    overrides.reconvertParameters ?? createReconvertParametersSnapshot(),
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "MIND_CONTROL":
+            return {
+                type: "MIND_CONTROL",
+                isTargeted: overrides.isTargeted ?? false,
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "SUMMON":
+            return {
+                type: "SUMMON",
+                isTargeted: false,
+                summonParameters: overrides.summonParameters ?? createReconvertParametersSnapshot(),
+                summonCount: overrides.summonCount ?? 1,
+                summonTargetTeam: overrides.summonTargetTeam ?? "PLAYER",
+                actionCondition,
+                onTargetResult,
+            };
+        case "DAMAGE":
+        default:
+            return {
+                type: "DAMAGE",
+                isTargeted: overrides.isTargeted ?? false,
+                damage: overrides.damage ?? 1,
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+    }
+};
 
 export const createMinionCard = (
     overrides: Partial<MinionCard> & { uuid?: string } = {},

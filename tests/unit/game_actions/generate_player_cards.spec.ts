@@ -38,10 +38,12 @@ test.group("generatePlayerCards", () => {
         if (!generated || generated.type !== "MINION") return;
 
         assert.equal(generated.battlecryActions.length, 1);
-        assert.equal(generated.battlecryActions[0]!.type, "DAMAGE");
-        assert.equal(generated.battlecryActions[0]!.damage, 4);
-        assert.equal(generated.battlecryActions[0]!.isTargeted, false);
-        assert.deepEqual(generated.battlecryActions[0]!.target, {
+        const battlecry = generated.battlecryActions[0]!;
+        assert.equal(battlecry.type, "DAMAGE");
+        if (battlecry.type !== "DAMAGE") return;
+        assert.equal(battlecry.damage, 4);
+        assert.equal(battlecry.isTargeted, false);
+        assert.deepEqual(battlecry.target, {
             type: "HERO",
             targetTeam: "OPPONENT",
             comparison: null,
@@ -76,8 +78,10 @@ test.group("generatePlayerCards", () => {
         if (!generated || generated.type !== "MINION") return;
 
         assert.equal(generated.battlecryActions.length, 1);
-        assert.equal(generated.battlecryActions[0]!.isTargeted, true);
-        assert.deepEqual(generated.battlecryActions[0]!.target, {
+        const battlecry = generated.battlecryActions[0]!;
+        if (battlecry.type !== "DAMAGE") return;
+        assert.equal(battlecry.isTargeted, true);
+        assert.deepEqual(battlecry.target, {
             type: "MINION",
             targetTeam: "OPPONENT",
             comparison: {
@@ -120,8 +124,10 @@ test.group("generatePlayerCards", () => {
         if (!generated || generated.type !== "MINION") return;
 
         assert.equal(generated.battlecryActions.length, 1);
-        assert.equal(generated.battlecryActions[0]!.type, "BOOST");
-        assert.deepEqual(generated.battlecryActions[0]!.boost, {
+        const battlecry = generated.battlecryActions[0]!;
+        assert.equal(battlecry.type, "BOOST");
+        if (battlecry.type !== "BOOST") return;
+        assert.deepEqual(battlecry.boost, {
             attack: 2,
             health: 2,
             spellPower: null,
@@ -148,9 +154,11 @@ test.group("generatePlayerCards", () => {
         if (!generated || generated.type !== "MINION") return;
 
         assert.equal(generated.battlecryActions.length, 1);
-        assert.equal(generated.battlecryActions[0]!.type, "DRAW");
-        assert.equal(generated.battlecryActions[0]!.drawCount, 1);
-        assert.deepEqual(generated.battlecryActions[0]!.drawCardFilter, {
+        const battlecry = generated.battlecryActions[0]!;
+        assert.equal(battlecry.type, "DRAW");
+        if (battlecry.type !== "DRAW") return;
+        assert.equal(battlecry.drawCount, 1);
+        assert.deepEqual(battlecry.drawCardFilter, {
             type: "MINION",
             comparison: {
                 costComparison: "=",
@@ -183,8 +191,10 @@ test.group("generatePlayerCards", () => {
         if (!generated || generated.type !== "SPELL") return;
 
         assert.equal(generated.spellActions.length, 1);
-        assert.equal(generated.spellActions[0]!.type, "DAMAGE");
-        assert.equal(generated.spellActions[0]!.damage, 4);
+        const spellAction = generated.spellActions[0]!;
+        assert.equal(spellAction.type, "DAMAGE");
+        if (spellAction.type !== "DAMAGE") return;
+        assert.equal(spellAction.damage, 4);
         assert.include(generated.description, "Effet : Inflige 4 dégâts au héros adverse.");
     });
 

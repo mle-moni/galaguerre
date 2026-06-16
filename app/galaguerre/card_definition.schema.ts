@@ -6,7 +6,6 @@ import {
     validatePassiveDefinition,
 } from "./card_definition.validation.js";
 import {
-    GALAGUERRE_ACTIONS_TYPES,
     GALAGUERRE_CARD_TYPES,
     GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
@@ -78,23 +77,88 @@ export const actionConditionSchema = z
     .nullable()
     .default(null);
 
-const cardActionFieldsSchema = z.object({
-    type: z.enum(GALAGUERRE_ACTIONS_TYPES),
+const targetedActionBaseFields = {
     isTargeted: z.boolean(),
-    damage: z.number().nullable(),
-    heal: z.number().nullable(),
-    drawCount: z.number().nullable(),
-    enemyDrawCount: z.number().nullable(),
-    drawCardFilter: cardFilterSchema.nullable(),
-    enemyDrawCardFilter: cardFilterSchema.nullable(),
-    boost: boostSchema.nullable(),
-    reconvertParameters: reconvertParametersSchema.nullable().default(null),
-    summonParameters: reconvertParametersSchema.nullable().default(null),
-    summonCount: z.number().int().positive().nullable().default(null),
-    summonTargetTeam: z.enum(["PLAYER", "OPPONENT"]).default("PLAYER"),
     target: targetSchema.nullable(),
     actionCondition: actionConditionSchema,
+};
+
+const damageActionFieldsSchema = z.object({
+    type: z.literal("DAMAGE"),
+    ...targetedActionBaseFields,
+    damage: z.number(),
 });
+
+const healActionFieldsSchema = z.object({
+    type: z.literal("HEAL"),
+    ...targetedActionBaseFields,
+    heal: z.number(),
+});
+
+const drawActionFieldsSchema = z.object({
+    type: z.literal("DRAW"),
+    isTargeted: z.literal(false).default(false),
+    drawCount: z.number(),
+    drawCardFilter: cardFilterSchema.nullable(),
+    actionCondition: actionConditionSchema,
+});
+
+const enemyDrawActionFieldsSchema = z.object({
+    type: z.literal("ENEMY_DRAW"),
+    isTargeted: z.literal(false).default(false),
+    enemyDrawCount: z.number(),
+    enemyDrawCardFilter: cardFilterSchema.nullable(),
+    actionCondition: actionConditionSchema,
+});
+
+const boostActionFieldsSchema = z.object({
+    type: z.literal("BOOST"),
+    ...targetedActionBaseFields,
+    boost: boostSchema,
+});
+
+const silenceActionFieldsSchema = z.object({
+    type: z.literal("SILENCE"),
+    ...targetedActionBaseFields,
+});
+
+const destroyActionFieldsSchema = z.object({
+    type: z.literal("DESTROY"),
+    ...targetedActionBaseFields,
+});
+
+const reconversionActionFieldsSchema = z.object({
+    type: z.literal("RECONVERSION"),
+    ...targetedActionBaseFields,
+    reconvertParameters: reconvertParametersSchema,
+});
+
+const mindControlActionFieldsSchema = z.object({
+    type: z.literal("MIND_CONTROL"),
+    ...targetedActionBaseFields,
+});
+
+const summonActionFieldsSchema = z.object({
+    type: z.literal("SUMMON"),
+    isTargeted: z.literal(false).default(false),
+    summonParameters: reconvertParametersSchema,
+    summonCount: z.number().int().positive(),
+    summonTargetTeam: z.enum(["PLAYER", "OPPONENT"]).default("PLAYER"),
+    actionCondition: actionConditionSchema,
+});
+
+const cardActionFieldsSchema = z.discriminatedUnion("type", [
+    damageActionFieldsSchema,
+    healActionFieldsSchema,
+    drawActionFieldsSchema,
+    enemyDrawActionFieldsSchema,
+    boostActionFieldsSchema,
+    silenceActionFieldsSchema,
+    destroyActionFieldsSchema,
+    reconversionActionFieldsSchema,
+    mindControlActionFieldsSchema,
+    summonActionFieldsSchema,
+]);
 
 export const onTargetResultSchema = z
     .object({
@@ -118,10 +182,23 @@ export const onTargetResultSchema = z
         }
     });
 
-export const cardActionSchema = cardActionFieldsSchema
-    .extend({
-        onTargetResult: onTargetResultSchema.nullable().default(null),
-    })
+const cardActionOnTargetResultField = {
+    onTargetResult: onTargetResultSchema.nullable().default(null),
+};
+
+export const cardActionSchema = z
+    .discriminatedUnion("type", [
+        damageActionFieldsSchema.extend(cardActionOnTargetResultField),
+        healActionFieldsSchema.extend(cardActionOnTargetResultField),
+        drawActionFieldsSchema.extend(cardActionOnTargetResultField),
+        enemyDrawActionFieldsSchema.extend(cardActionOnTargetResultField),
+        boostActionFieldsSchema.extend(cardActionOnTargetResultField),
+        silenceActionFieldsSchema.extend(cardActionOnTargetResultField),
+        destroyActionFieldsSchema.extend(cardActionOnTargetResultField),
+        reconversionActionFieldsSchema.extend(cardActionOnTargetResultField),
+        mindControlActionFieldsSchema.extend(cardActionOnTargetResultField),
+        summonActionFieldsSchema.extend(cardActionOnTargetResultField),
+    ])
     .superRefine((action, ctx) => {
         validateCardAction(action, ctx, [], { allowTargeted: true });
     });
@@ -198,14 +275,15 @@ export const cardDataSchema = z.discriminatedUnion("type", [
 export type { CardTag } from "./card_tags.js";
 export type {
     ActionConditionDefinition,
-    CardActionDefinition,
-    CardActionFieldsDefinition,
     BoostDefinition,
     ComparisonDefinition,
-    OnTargetResultDefinition,
     PassiveDefinition,
     TargetDefinition,
 } from "./card_definition.validation.js";
+
+export type CardActionFieldsDefinition = z.infer<typeof cardActionFieldsSchema>;
+export type OnTargetResultDefinition = z.infer<typeof onTargetResultSchema>;
+export type CardActionDefinition = z.infer<typeof cardActionSchema>;
 
 export type DynamicCostDefinition = z.infer<typeof dynamicCostSchema>;
 export type CardFilterDefinition = z.infer<typeof cardFilterSchema>;

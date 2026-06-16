@@ -8,6 +8,7 @@ import type {
 } from "#api_types/game.types";
 import { MINION_SPOT_IDS } from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
+import { getActionTarget } from "#api_types/action_fields_utils";
 import {
     actionRequiresTarget,
     cardHasPlayableTarget,
@@ -41,8 +42,9 @@ const enumerateHeroAndMinionTargets = (
 
     for (const isOpponent of [true, false] as const) {
         const heroValid = targetedActions.every((action) => {
-            if (!action.target) return false;
-            return heroMatchesTarget(action.target, isOpponent);
+            const target = getActionTarget(action);
+            if (!target) return false;
+            return heroMatchesTarget(target, isOpponent);
         });
 
         if (heroValid) {
@@ -58,8 +60,9 @@ const enumerateHeroAndMinionTargets = (
             if (!minion) continue;
 
             const minionValid = targetedActions.every((action) => {
-                if (!action.target) return false;
-                return minionMatchesTarget(minion, action.target, isOpponent);
+                const target = getActionTarget(action);
+                if (!target) return false;
+                return minionMatchesTarget(minion, target, isOpponent);
             });
 
             if (minionValid) {

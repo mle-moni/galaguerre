@@ -1,4 +1,5 @@
 import type { ActionTarget, CardActionSnapshot, GamePlayer } from "#api_types/game.types";
+import { getActionTarget } from "#api_types/action_fields_utils";
 import { selectedTargetMatchesAction } from "#api_types/target_matching";
 import { playerHasBoardSpace } from "./apply_mind_control.js";
 
@@ -8,7 +9,7 @@ export const validateSelectedTargetForAction = (
     player: GamePlayer,
     opponent: GamePlayer,
 ): boolean => {
-    if (!action.isTargeted || !action.target) return false;
+    if (!action.isTargeted || !getActionTarget(action)) return false;
 
     return selectedTargetMatchesAction(
         selectedTarget,

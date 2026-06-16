@@ -1,6 +1,7 @@
 import type { CardTag } from "#galaguerre/card_tags";
 import type {
     CardActionDefinition,
+    CardActionFieldsDefinition,
     ActionConditionDefinition,
     BoostDefinition,
     CardFilterDefinition,
@@ -9,7 +10,7 @@ import type {
     PassiveDefinition,
     ReconvertParametersDefinition,
     TargetDefinition,
-} from "#galaguerre/card_definition.validation";
+} from "#galaguerre/card_definition.schema";
 import type {
     CardData,
     DynamicCostDefinition,
@@ -55,22 +56,169 @@ const nullComparison = (): ComparisonDefinition => ({
     health: null,
 });
 
-const nullActionFields = () => ({
-    drawCount: null,
-    enemyDrawCount: null,
-    drawCardFilter: null,
-    enemyDrawCardFilter: null,
-    damage: null,
-    heal: null,
-    boost: null,
-    reconvertParameters: null,
-    summonParameters: null,
-    summonCount: null,
-    summonTargetTeam: "PLAYER" as const,
-    target: null,
-    onTargetResult: null,
-    actionCondition: null,
+const defaultActionCondition = (): ActionConditionDefinition | null => null;
+
+export const damageAction = (
+    damage: number,
+    target: TargetDefinition,
+    isTargeted = false,
+    options: { onTargetResult?: OnTargetResultDefinition | null } = {},
+): CardActionDefinition => ({
+    type: "DAMAGE",
+    damage,
+    target,
+    isTargeted,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: options.onTargetResult ?? null,
 });
+
+export const onTargetKilled = (action: CardActionFieldsDefinition): OnTargetResultDefinition => ({
+    when: "KILLED",
+    healthComparison: null,
+    action,
+});
+
+export const onTargetSurvivedWithHealth = (
+    healthComparison: ComparisonDefinition,
+    action: CardActionFieldsDefinition,
+): OnTargetResultDefinition => ({
+    when: "SURVIVED",
+    healthComparison,
+    action,
+});
+
+export const healAction = (
+    heal: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => ({
+    type: "HEAL",
+    heal,
+    target,
+    isTargeted,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const drawAction = (
+    drawCount: number,
+    drawCardFilter: CardFilterDefinition | null = null,
+): CardActionDefinition => ({
+    type: "DRAW",
+    isTargeted: false,
+    drawCount,
+    drawCardFilter,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const enemyDrawAction = (
+    enemyDrawCount: number,
+    enemyDrawCardFilter: CardFilterDefinition | null = null,
+): CardActionDefinition => ({
+    type: "ENEMY_DRAW",
+    isTargeted: false,
+    enemyDrawCount,
+    enemyDrawCardFilter,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const boostAction = (
+    boost: BoostDefinition,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => ({
+    type: "BOOST",
+    boost,
+    target,
+    isTargeted,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const silenceAction = (
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => ({
+    type: "SILENCE",
+    target,
+    isTargeted,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const destroyAction = (
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => ({
+    type: "DESTROY",
+    target,
+    isTargeted,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const mindControlAction = (
+    target: TargetDefinition,
+    isTargeted = false,
+    options: { condition?: ActionConditionDefinition | null } = {},
+): CardActionDefinition => ({
+    type: "MIND_CONTROL",
+    target,
+    isTargeted,
+    actionCondition: options.condition ?? defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const reconvertParameters = (
+    overrides: Partial<ReconvertParametersDefinition> = {},
+): ReconvertParametersDefinition => ({
+    type: "MINION",
+    comparison: null,
+    tags: [],
+    cardId: null,
+    relativeToSource: false,
+    ...overrides,
+});
+
+export const reconversionAction = (
+    parameters: ReconvertParametersDefinition,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => ({
+    type: "RECONVERSION",
+    reconvertParameters: parameters,
+    target,
+    isTargeted,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const reconversionToCardId = (
+    cardId: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => reconversionAction(reconvertParameters({ cardId }), target, isTargeted);
+
+export const summonAction = (
+    parameters: ReconvertParametersDefinition,
+    options: { count?: number; targetTeam?: "PLAYER" | "OPPONENT" } = {},
+): CardActionDefinition => ({
+    type: "SUMMON",
+    isTargeted: false,
+    summonParameters: parameters,
+    summonCount: options.count ?? 1,
+    summonTargetTeam: options.targetTeam ?? "PLAYER",
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const summonCardId = (
+    cardId: number,
+    count = 1,
+    targetTeam: "PLAYER" | "OPPONENT" = "PLAYER",
+): CardActionDefinition => summonAction(reconvertParameters({ cardId }), { count, targetTeam });
 
 export const defaultMinionData = (): MinionCardData => ({
     schemaVersion: 1,
@@ -143,6 +291,27 @@ export const costEquals = (cost: number): ComparisonDefinition =>
 
 export const costLessThan = (cost: number): ComparisonDefinition =>
     comparison({ costComparison: "<", cost });
+
+export const randomCostReconversion = (
+    cost: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition =>
+    reconversionAction(reconvertParameters({ comparison: costEquals(cost) }), target, isTargeted);
+
+export const relativeCostReconversion = (
+    costOffset: number,
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition =>
+    reconversionAction(
+        reconvertParameters({
+            comparison: costEquals(costOffset),
+            relativeToSource: true,
+        }),
+        target,
+        isTargeted,
+    );
 
 const baseTarget = (overrides: Partial<TargetDefinition>): TargetDefinition => ({
     type: "HERO",
@@ -234,144 +403,6 @@ export const randomEnemyCharacter = (): TargetDefinition =>
 export const otherCharacters = (): TargetDefinition =>
     baseTarget({ type: "ALL", targetTeam: "ALL", excludeSelf: true });
 
-const baseAction = (overrides: Partial<CardActionDefinition>): CardActionDefinition => ({
-    type: "DAMAGE",
-    isTargeted: false,
-    ...nullActionFields(),
-    ...overrides,
-});
-
-export const damageAction = (
-    damage: number,
-    target: TargetDefinition,
-    isTargeted = false,
-    options: { onTargetResult?: OnTargetResultDefinition | null } = {},
-): CardActionDefinition =>
-    baseAction({
-        type: "DAMAGE",
-        damage,
-        target,
-        isTargeted,
-        onTargetResult: options.onTargetResult ?? null,
-    });
-
-export const onTargetKilled = (action: CardActionDefinition): OnTargetResultDefinition => ({
-    when: "KILLED",
-    healthComparison: null,
-    action,
-});
-
-export const onTargetSurvivedWithHealth = (
-    healthComparison: ComparisonDefinition,
-    action: CardActionDefinition,
-): OnTargetResultDefinition => ({
-    when: "SURVIVED",
-    healthComparison,
-    action,
-});
-
-export const healAction = (
-    heal: number,
-    target: TargetDefinition,
-    isTargeted = false,
-): CardActionDefinition => baseAction({ type: "HEAL", heal, target, isTargeted });
-
-export const drawAction = (
-    drawCount: number,
-    drawCardFilter: CardActionDefinition["drawCardFilter"] = null,
-): CardActionDefinition => baseAction({ type: "DRAW", drawCount, drawCardFilter });
-
-export const enemyDrawAction = (
-    enemyDrawCount: number,
-    enemyDrawCardFilter: CardActionDefinition["enemyDrawCardFilter"] = null,
-): CardActionDefinition => baseAction({ type: "ENEMY_DRAW", enemyDrawCount, enemyDrawCardFilter });
-
-export const boostAction = (
-    boost: BoostDefinition,
-    target: TargetDefinition,
-    isTargeted = false,
-): CardActionDefinition => baseAction({ type: "BOOST", boost, target, isTargeted });
-
-export const silenceAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
-    baseAction({ type: "SILENCE", target, isTargeted });
-
-export const destroyAction = (target: TargetDefinition, isTargeted = false): CardActionDefinition =>
-    baseAction({ type: "DESTROY", target, isTargeted });
-
-export const mindControlAction = (
-    target: TargetDefinition,
-    isTargeted = false,
-    options: { condition?: ActionConditionDefinition | null } = {},
-): CardActionDefinition =>
-    baseAction({
-        type: "MIND_CONTROL",
-        target,
-        isTargeted,
-        actionCondition: options.condition ?? null,
-    });
-
-export const reconvertParameters = (
-    overrides: Partial<ReconvertParametersDefinition> = {},
-): ReconvertParametersDefinition => ({
-    type: "MINION",
-    comparison: null,
-    tags: [],
-    cardId: null,
-    relativeToSource: false,
-    ...overrides,
-});
-
-export const reconversionAction = (
-    parameters: ReconvertParametersDefinition,
-    target: TargetDefinition,
-    isTargeted = false,
-): CardActionDefinition =>
-    baseAction({ type: "RECONVERSION", reconvertParameters: parameters, target, isTargeted });
-
-export const reconversionToCardId = (
-    cardId: number,
-    target: TargetDefinition,
-    isTargeted = false,
-): CardActionDefinition => reconversionAction(reconvertParameters({ cardId }), target, isTargeted);
-
-export const randomCostReconversion = (
-    cost: number,
-    target: TargetDefinition,
-    isTargeted = false,
-): CardActionDefinition =>
-    reconversionAction(reconvertParameters({ comparison: costEquals(cost) }), target, isTargeted);
-
-export const relativeCostReconversion = (
-    costOffset: number,
-    target: TargetDefinition,
-    isTargeted = false,
-): CardActionDefinition =>
-    reconversionAction(
-        reconvertParameters({
-            comparison: costEquals(costOffset),
-            relativeToSource: true,
-        }),
-        target,
-        isTargeted,
-    );
-
-export const summonAction = (
-    parameters: ReconvertParametersDefinition,
-    options: { count?: number; targetTeam?: "PLAYER" | "OPPONENT" } = {},
-): CardActionDefinition =>
-    baseAction({
-        type: "SUMMON",
-        summonParameters: parameters,
-        summonCount: options.count ?? 1,
-        summonTargetTeam: options.targetTeam ?? "PLAYER",
-    });
-
-export const summonCardId = (
-    cardId: number,
-    count = 1,
-    targetTeam: "PLAYER" | "OPPONENT" = "PLAYER",
-): CardActionDefinition => summonAction(reconvertParameters({ cardId }), { count, targetTeam });
-
 export const boostStats = (overrides: Partial<BoostDefinition> = {}): BoostDefinition => ({
     attack: null,
     health: null,
@@ -459,13 +490,13 @@ export const boostStealth = (): BoostDefinition =>
 export const minionDrawFilter = (
     tags: CardTag[] = [],
     comp: ComparisonDefinition | null = null,
-): NonNullable<CardActionDefinition["drawCardFilter"]> => ({
+): CardFilterDefinition => ({
     type: "MINION",
     comparison: comp,
     tags,
 });
 
-export const spellDrawFilter = (): NonNullable<CardActionDefinition["drawCardFilter"]> => ({
+export const spellDrawFilter = (): CardFilterDefinition => ({
     type: "SPELL",
     comparison: null,
     tags: [],

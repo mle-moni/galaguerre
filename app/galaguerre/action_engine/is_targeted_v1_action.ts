@@ -23,20 +23,17 @@ export const isTargetedV1Action = (action: CardActionSnapshot): boolean => {
 
     switch (action.type) {
         case "DAMAGE":
-            return action.damage !== null && action.damage > 0;
+            return action.damage > 0;
         case "HEAL":
-            return action.heal !== null && action.heal > 0;
+            return action.heal > 0;
         case "BOOST":
-            return action.boost !== null && hasBoostEffect(action.boost);
+            return hasBoostEffect(action.boost);
         case "SILENCE":
             return action.target.type === "MINION" || action.target.type === "ALL";
         case "DESTROY":
             return action.target.type === "MINION" || action.target.type === "ALL";
         case "RECONVERSION":
-            return (
-                action.reconvertParameters !== null &&
-                (action.target.type === "MINION" || action.target.type === "ALL")
-            );
+            return action.target.type === "MINION" || action.target.type === "ALL";
         case "MIND_CONTROL":
             return action.target.type === "MINION" || action.target.type === "ALL";
         default:

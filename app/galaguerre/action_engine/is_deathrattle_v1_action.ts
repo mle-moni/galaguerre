@@ -8,46 +8,22 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
 
     switch (action.type) {
         case "DAMAGE":
-            if (action.damage === null || action.damage <= 0) return false;
-            if (action.target !== null) {
-                return (
-                    action.target.type === "HERO" ||
-                    action.target.type === "MINION" ||
-                    action.target.type === "ALL"
-                );
-            }
-            return true;
+            return action.damage > 0;
         case "HEAL":
-            if (action.heal === null || action.heal <= 0) return false;
-            if (action.target !== null) {
-                return (
-                    action.target.type === "HERO" ||
-                    action.target.type === "MINION" ||
-                    action.target.type === "ALL"
-                );
-            }
-            return true;
+            return action.heal > 0;
         case "DRAW":
-            return action.drawCount !== null && action.drawCount > 0;
+            return action.drawCount > 0;
         case "ENEMY_DRAW":
-            return action.enemyDrawCount !== null && action.enemyDrawCount > 0;
+            return action.enemyDrawCount > 0;
         case "BOOST":
-            if (!action.boost || !hasBoostEffect(action.boost)) return false;
-            if (action.target !== null) {
-                return (
-                    action.target.type === "HERO" ||
-                    action.target.type === "MINION" ||
-                    action.target.type === "ALL"
-                );
-            }
-            return false;
+            return hasBoostEffect(action.boost) && action.target !== null;
         case "DESTROY":
-            if (action.target === null) return false;
-            return action.target.type === "MINION" || action.target.type === "ALL";
+            return (
+                action.target !== null &&
+                (action.target.type === "MINION" || action.target.type === "ALL")
+            );
         case "SUMMON":
-            if (action.summonParameters === null) return false;
-            if (action.summonCount === null || action.summonCount <= 0) return false;
-            return action.summonTargetTeam === "PLAYER" || action.summonTargetTeam === "OPPONENT";
+            return action.summonCount > 0;
         default:
             return false;
     }

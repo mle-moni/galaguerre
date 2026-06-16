@@ -5,6 +5,7 @@ import {
     type GamePlayer,
     type MinionState,
 } from "#api_types/game.types";
+import { getActionTarget } from "#api_types/action_fields_utils";
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
 import { drawCards } from "../draw_cards.js";
@@ -424,8 +425,9 @@ export const executeAction = (
         return;
     }
 
-    if (action.target && hasRandomLimitedTarget(action.target)) {
-        const picks = pickRandomLimitedTargets(action.target, player, opponent, sourceMinion);
+    const randomTarget = getActionTarget(action);
+    if (randomTarget && hasRandomLimitedTarget(randomTarget)) {
+        const picks = pickRandomLimitedTargets(randomTarget, player, opponent, sourceMinion);
         for (const pick of picks) {
             const resolved = resolveSelectedTarget(pick, player, opponent);
             if (!resolved) continue;

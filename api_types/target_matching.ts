@@ -10,6 +10,7 @@ import type {
     TargetSnapshot,
 } from "./game.types.js";
 import { MINION_SPOT_IDS } from "./game.types.js";
+import { getActionTarget } from "./action_fields_utils.js";
 import { getBoardMinionStats, matchesComparison } from "./comparison_matching.js";
 
 export { matchesComparison } from "./comparison_matching.js";
@@ -144,8 +145,9 @@ export const cardHasPlayableTarget = (
 
     for (const isOpponent of [true, false] as const) {
         const heroValid = targetedActions.every((action) => {
-            if (!action.target) return false;
-            return heroMatchesTarget(action.target, isOpponent);
+            const target = getActionTarget(action);
+            if (!target) return false;
+            return heroMatchesTarget(target, isOpponent);
         });
 
         if (heroValid) return true;
@@ -159,8 +161,9 @@ export const cardHasPlayableTarget = (
             if (!minion) continue;
 
             const minionValid = targetedActions.every((action) => {
-                if (!action.target) return false;
-                if (!minionMatchesTarget(minion, action.target, isOpponent)) return false;
+                const target = getActionTarget(action);
+                if (!target) return false;
+                if (!minionMatchesTarget(minion, target, isOpponent)) return false;
                 if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) return false;
                 return true;
             });
@@ -179,21 +182,24 @@ export const selectedTargetMatchesAction = (
     opponentBoard: BoardState,
     playerHasSpace = true,
 ): boolean => {
-    if (!action.isTargeted || !action.target) return false;
+    if (!action.isTargeted) return false;
+
+    const target = getActionTarget(action);
+    if (!target) return false;
 
     if (actionRequiresMindControlBoardSpace(action) && !playerHasSpace) return false;
 
     const isOpponent = selectedTarget.owner === "OPPONENT";
 
     if (selectedTarget.spotId === null) {
-        return heroMatchesTarget(action.target, isOpponent);
+        return heroMatchesTarget(target, isOpponent);
     }
 
     const board = isOpponent ? opponentBoard : playerBoard;
     const minion = board[selectedTarget.spotId];
     if (!minion) return false;
 
-    if (!minionMatchesTarget(minion, action.target, isOpponent)) return false;
+    if (!minionMatchesTarget(minion, target, isOpponent)) return false;
 
     if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) return false;
 

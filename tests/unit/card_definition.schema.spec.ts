@@ -49,7 +49,11 @@ test.group("card_definition.schema", () => {
         );
 
         assert.equal(data.battlecryActions.length, 1);
-        assert.equal(data.battlecryActions[0]!.damage, 2);
+        const battlecry = data.battlecryActions[0]!;
+        assert.equal(battlecry.type, "DAMAGE");
+        if (battlecry.type === "DAMAGE") {
+            assert.equal(battlecry.damage, 2);
+        }
     });
 
     test("accepts dynamicCost reductions on minion data", ({ assert }) => {
@@ -84,20 +88,7 @@ test.group("card_definition.schema", () => {
     test("rejects targeted deathrattle action", ({ assert }) => {
         const data = {
             ...defaultMinionData(),
-            deathrattleActions: [
-                {
-                    type: "DAMAGE" as const,
-                    isTargeted: true,
-                    damage: 1,
-                    heal: null,
-                    drawCount: null,
-                    enemyDrawCount: null,
-                    drawCardFilter: null,
-                    enemyDrawCardFilter: null,
-                    boost: null,
-                    target: enemyHero(),
-                },
-            ],
+            deathrattleActions: [damageAction(1, enemyHero(), true)],
         };
 
         const result = safeParseCardData(data);
@@ -107,20 +98,7 @@ test.group("card_definition.schema", () => {
     test("rejects DAMAGE without target", ({ assert }) => {
         const data = {
             ...defaultMinionData(),
-            battlecryActions: [
-                {
-                    type: "DAMAGE" as const,
-                    isTargeted: false,
-                    damage: 2,
-                    heal: null,
-                    drawCount: null,
-                    enemyDrawCount: null,
-                    drawCardFilter: null,
-                    enemyDrawCardFilter: null,
-                    boost: null,
-                    target: null,
-                },
-            ],
+            battlecryActions: [{ ...damageAction(2, enemyHero()), target: null }],
         };
 
         const result = safeParseCardData(data);
@@ -167,7 +145,10 @@ test.group("card_definition.schema", () => {
             spellActions: [damageAction(4, enemyHero())],
         });
 
-        assert.equal(data.spellActions[0]!.damage, 4);
+        assert.equal(data.spellActions[0]!.type, "DAMAGE");
+        if (data.spellActions[0]!.type === "DAMAGE") {
+            assert.equal(data.spellActions[0]!.damage, 4);
+        }
     });
 
     test("accepts spell with multiple actions", ({ assert }) => {
@@ -212,8 +193,8 @@ test.group("card_definition.schema", () => {
         assert.isFalse(result.success);
     });
 
-    test("rejects SILENCE with boost payload", ({ assert }) => {
-        const result = safeParseCardData({
+    test("strips unknown fields from SILENCE action", ({ assert }) => {
+        const data = parseMinionData({
             ...defaultMinionData(),
             battlecryActions: [
                 {
@@ -223,7 +204,8 @@ test.group("card_definition.schema", () => {
             ],
         });
 
-        assert.isFalse(result.success);
+        assert.equal(data.battlecryActions[0]!.type, "SILENCE");
+        assert.notProperty(data.battlecryActions[0], "boost");
     });
 
     test("accepts valid RECONVERSION action targeting minion", ({ assert }) => {
@@ -233,8 +215,10 @@ test.group("card_definition.schema", () => {
         });
 
         assert.equal(data.spellActions[0]!.type, "RECONVERSION");
-        assert.equal(data.spellActions[0]!.reconvertParameters?.cardId, 121);
-        assert.isTrue(data.spellActions[0]!.isTargeted);
+        if (data.spellActions[0]!.type === "RECONVERSION") {
+            assert.equal(data.spellActions[0]!.reconvertParameters.cardId, 121);
+            assert.isTrue(data.spellActions[0]!.isTargeted);
+        }
     });
 
     test("accepts RECONVERSION with filter parameters and no cardId", ({ assert }) => {
@@ -258,8 +242,10 @@ test.group("card_definition.schema", () => {
         });
 
         assert.equal(data.spellActions[0]!.type, "RECONVERSION");
-        assert.isNull(data.spellActions[0]!.reconvertParameters?.cardId);
-        assert.equal(data.spellActions[0]!.reconvertParameters?.comparison?.cost, 3);
+        if (data.spellActions[0]!.type === "RECONVERSION") {
+            assert.isNull(data.spellActions[0]!.reconvertParameters.cardId);
+            assert.equal(data.spellActions[0]!.reconvertParameters.comparison?.cost, 3);
+        }
     });
 
     test("rejects RECONVERSION without reconvertParameters", ({ assert }) => {
@@ -285,8 +271,8 @@ test.group("card_definition.schema", () => {
         assert.isFalse(result.success);
     });
 
-    test("rejects RECONVERSION with damage payload", ({ assert }) => {
-        const result = safeParseCardData({
+    test("strips unknown fields from RECONVERSION action", ({ assert }) => {
+        const data = parseSpellData({
             ...defaultSpellData(),
             spellActions: [
                 {
@@ -296,7 +282,8 @@ test.group("card_definition.schema", () => {
             ],
         });
 
-        assert.isFalse(result.success);
+        assert.equal(data.spellActions[0]!.type, "RECONVERSION");
+        assert.notProperty(data.spellActions[0], "damage");
     });
 
     test("rejects target with onlySelf and excludeSelf together", ({ assert }) => {
@@ -325,7 +312,11 @@ test.group("card_definition.schema", () => {
             passives: [actionPassive("TURN_END", boostAction(boostBoth(1, 1), selfMinion()))],
         });
 
-        assert.equal(data.passives[0]!.action?.target?.onlySelf, true);
+        const passiveAction = data.passives[0]!.action;
+        assert.isDefined(passiveAction);
+        if (passiveAction?.type === "BOOST") {
+            assert.equal(passiveAction.target?.onlySelf, true);
+        }
     });
 
     test("accepts PLAY_CARD passive with playCardFilter", ({ assert }) => {

@@ -1,6 +1,6 @@
 import { getBoardMinionStats, matchesComparison } from "#api_types/comparison_matching";
 import type { MinionState } from "#api_types/game.types";
-import type { OnTargetResultDefinition } from "#galaguerre/card_definition.validation";
+import type { OnTargetResultDefinition } from "#galaguerre/card_definition.schema";
 
 export type TargetEffectOutcome = {
     gameEnded: boolean;

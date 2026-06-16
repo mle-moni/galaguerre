@@ -7,7 +7,8 @@ import {
 import { V1_ACTION_TYPES } from "./action_engine/v1_action_types.js";
 import { GALAGUERRE_TARGET_SELECTION_MODES } from "./galaguerre.types.js";
 import type { CardTag } from "./card_tags.js";
-import { MinionPower } from "./card_definition.schema.ts";
+import type { MinionPower } from "./card_definition.schema.ts";
+import type { CardActionDefinition } from "./card_definition.schema.ts";
 
 export type ActionConditionDefinition = {
     opponentMinionCountMin: number | null;
@@ -51,43 +52,7 @@ export type ReconvertParametersDefinition = CardFilterDefinition & {
     relativeToSource: boolean;
 };
 
-export type CardActionFieldsDefinition = {
-    type:
-        | "DAMAGE"
-        | "HEAL"
-        | "DRAW"
-        | "ENEMY_DRAW"
-        | "BOOST"
-        | "SILENCE"
-        | "DESTROY"
-        | "RECONVERSION"
-        | "MIND_CONTROL"
-        | "SUMMON";
-    isTargeted: boolean;
-    damage: number | null;
-    heal: number | null;
-    drawCount: number | null;
-    enemyDrawCount: number | null;
-    drawCardFilter: CardFilterDefinition | null;
-    enemyDrawCardFilter: CardFilterDefinition | null;
-    boost: BoostDefinition | null;
-    reconvertParameters: ReconvertParametersDefinition | null;
-    summonParameters: ReconvertParametersDefinition | null;
-    summonCount: number | null;
-    summonTargetTeam: "PLAYER" | "OPPONENT";
-    target: TargetDefinition | null;
-    actionCondition: ActionConditionDefinition | null;
-};
-
-export type OnTargetResultDefinition = {
-    when: "KILLED" | "SURVIVED";
-    healthComparison: ComparisonDefinition | null;
-    action: CardActionFieldsDefinition;
-};
-
-export type CardActionDefinition = CardActionFieldsDefinition & {
-    onTargetResult: OnTargetResultDefinition | null;
-};
+export type { OnTargetResultDefinition } from "./card_definition.schema.ts";
 
 export type PassiveDefinition = {
     type: "ACTION" | "BOOST";
@@ -311,55 +276,6 @@ const validateSilenceTarget = (
     }
 };
 
-const validateSilencePayload = (
-    action: CardActionDefinition,
-    ctx: z.RefinementCtx,
-    path: (string | number)[],
-) => {
-    if (action.damage !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SILENCE action must not set damage",
-            path: [...path, "damage"],
-        });
-    }
-    if (action.heal !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SILENCE action must not set heal",
-            path: [...path, "heal"],
-        });
-    }
-    if (action.drawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SILENCE action must not set drawCount",
-            path: [...path, "drawCount"],
-        });
-    }
-    if (action.enemyDrawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SILENCE action must not set enemyDrawCount",
-            path: [...path, "enemyDrawCount"],
-        });
-    }
-    if (action.boost !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SILENCE action must not set boost",
-            path: [...path, "boost"],
-        });
-    }
-    if (action.reconvertParameters !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SILENCE action must not set reconvertParameters",
-            path: [...path, "reconvertParameters"],
-        });
-    }
-};
-
 const validateDestroyTarget = (
     target: TargetDefinition,
     ctx: z.RefinementCtx,
@@ -374,55 +290,6 @@ const validateDestroyTarget = (
     }
 };
 
-const validateDestroyPayload = (
-    action: CardActionDefinition,
-    ctx: z.RefinementCtx,
-    path: (string | number)[],
-) => {
-    if (action.damage !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "DESTROY action must not set damage",
-            path: [...path, "damage"],
-        });
-    }
-    if (action.heal !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "DESTROY action must not set heal",
-            path: [...path, "heal"],
-        });
-    }
-    if (action.drawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "DESTROY action must not set drawCount",
-            path: [...path, "drawCount"],
-        });
-    }
-    if (action.enemyDrawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "DESTROY action must not set enemyDrawCount",
-            path: [...path, "enemyDrawCount"],
-        });
-    }
-    if (action.boost !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "DESTROY action must not set boost",
-            path: [...path, "boost"],
-        });
-    }
-    if (action.reconvertParameters !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "DESTROY action must not set reconvertParameters",
-            path: [...path, "reconvertParameters"],
-        });
-    }
-};
-
 const validateMindControlTarget = (
     target: TargetDefinition,
     ctx: z.RefinementCtx,
@@ -433,55 +300,6 @@ const validateMindControlTarget = (
             code: "custom",
             message: "MIND_CONTROL target must be MINION or ALL",
             path: [...path, "type"],
-        });
-    }
-};
-
-const validateMindControlPayload = (
-    action: CardActionDefinition,
-    ctx: z.RefinementCtx,
-    path: (string | number)[],
-) => {
-    if (action.damage !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "MIND_CONTROL action must not set damage",
-            path: [...path, "damage"],
-        });
-    }
-    if (action.heal !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "MIND_CONTROL action must not set heal",
-            path: [...path, "heal"],
-        });
-    }
-    if (action.drawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "MIND_CONTROL action must not set drawCount",
-            path: [...path, "drawCount"],
-        });
-    }
-    if (action.enemyDrawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "MIND_CONTROL action must not set enemyDrawCount",
-            path: [...path, "enemyDrawCount"],
-        });
-    }
-    if (action.boost !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "MIND_CONTROL action must not set boost",
-            path: [...path, "boost"],
-        });
-    }
-    if (action.reconvertParameters !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "MIND_CONTROL action must not set reconvertParameters",
-            path: [...path, "reconvertParameters"],
         });
     }
 };
@@ -513,75 +331,10 @@ const validateSummonParameters = (
 };
 
 const validateSummonPayload = (
-    action: CardActionDefinition,
+    action: Extract<CardActionDefinition, { type: "SUMMON" }>,
     ctx: z.RefinementCtx,
     path: (string | number)[],
 ) => {
-    if (action.damage !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action must not set damage",
-            path: [...path, "damage"],
-        });
-    }
-    if (action.heal !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action must not set heal",
-            path: [...path, "heal"],
-        });
-    }
-    if (action.drawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action must not set drawCount",
-            path: [...path, "drawCount"],
-        });
-    }
-    if (action.enemyDrawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action must not set enemyDrawCount",
-            path: [...path, "enemyDrawCount"],
-        });
-    }
-    if (action.boost !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action must not set boost",
-            path: [...path, "boost"],
-        });
-    }
-    if (action.reconvertParameters !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action must not set reconvertParameters",
-            path: [...path, "reconvertParameters"],
-        });
-    }
-    if (action.target !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action must not set target",
-            path: [...path, "target"],
-        });
-    }
-    if (action.summonParameters === null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action requires summonParameters",
-            path: [...path, "summonParameters"],
-        });
-        return;
-    }
-    if (action.summonCount === null || action.summonCount <= 0) {
-        ctx.addIssue({
-            code: "custom",
-            message: "SUMMON action requires summonCount > 0",
-            path: [...path, "summonCount"],
-        });
-    }
-
     validateSummonParameters(action.summonParameters, ctx, [...path, "summonParameters"]);
 };
 
@@ -626,54 +379,10 @@ const validateReconversionTarget = (
 };
 
 const validateReconversionPayload = (
-    action: CardActionDefinition,
+    action: Extract<CardActionDefinition, { type: "RECONVERSION" }>,
     ctx: z.RefinementCtx,
     path: (string | number)[],
 ) => {
-    if (action.damage !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "RECONVERSION action must not set damage",
-            path: [...path, "damage"],
-        });
-    }
-    if (action.heal !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "RECONVERSION action must not set heal",
-            path: [...path, "heal"],
-        });
-    }
-    if (action.drawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "RECONVERSION action must not set drawCount",
-            path: [...path, "drawCount"],
-        });
-    }
-    if (action.enemyDrawCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "RECONVERSION action must not set enemyDrawCount",
-            path: [...path, "enemyDrawCount"],
-        });
-    }
-    if (action.boost !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "RECONVERSION action must not set boost",
-            path: [...path, "boost"],
-        });
-    }
-    if (action.reconvertParameters === null) {
-        ctx.addIssue({
-            code: "custom",
-            message: "RECONVERSION action requires reconvertParameters",
-            path: [...path, "reconvertParameters"],
-        });
-        return;
-    }
-
     validateReconvertParameters(action.reconvertParameters, ctx, [...path, "reconvertParameters"]);
 };
 
@@ -714,7 +423,7 @@ const validateOnTargetResult = (
 ) => {
     if (action.onTargetResult == null) return;
 
-    if (!action.isTargeted || action.type !== "DAMAGE") {
+    if (action.type !== "DAMAGE" || !action.isTargeted) {
         ctx.addIssue({
             code: "custom",
             message: "onTargetResult is only allowed on targeted DAMAGE actions",
@@ -741,7 +450,7 @@ const validateOnTargetResult = (
         ]);
     }
 
-    if (followUpAction.isTargeted) {
+    if ("isTargeted" in followUpAction && followUpAction.isTargeted) {
         ctx.addIssue({
             code: "custom",
             message: "onTargetResult follow-up action cannot be targeted",
@@ -757,7 +466,7 @@ const validateOnTargetResult = (
 };
 
 const validateTargetedAction = (
-    action: CardActionDefinition,
+    action: Extract<CardActionDefinition, { target: unknown }>,
     ctx: z.RefinementCtx,
     path: (string | number)[],
 ) => {
@@ -783,7 +492,7 @@ const validateTargetedAction = (
 
     switch (action.type) {
         case "DAMAGE":
-            if (action.damage === null || action.damage <= 0) {
+            if (action.damage <= 0) {
                 ctx.addIssue({
                     code: "custom",
                     message: "DAMAGE action requires damage > 0",
@@ -792,7 +501,7 @@ const validateTargetedAction = (
             }
             break;
         case "HEAL":
-            if (action.heal === null || action.heal <= 0) {
+            if (action.heal <= 0) {
                 ctx.addIssue({
                     code: "custom",
                     message: "HEAL action requires heal > 0",
@@ -801,23 +510,13 @@ const validateTargetedAction = (
             }
             break;
         case "BOOST":
-            if (!action.boost) {
-                ctx.addIssue({
-                    code: "custom",
-                    message: "BOOST action requires boost",
-                    path: [...path, "boost"],
-                });
-                return;
-            }
             validateBoostContent(action.boost, ctx, [...path, "boost"]);
             validateBoostTargetCompatibility(action.target, action.boost, ctx, path);
             break;
         case "SILENCE":
-            validateSilencePayload(action, ctx, path);
             validateSilenceTarget(action.target, ctx, [...path, "target"]);
             break;
         case "DESTROY":
-            validateDestroyPayload(action, ctx, path);
             validateDestroyTarget(action.target, ctx, [...path, "target"]);
             break;
         case "RECONVERSION":
@@ -825,11 +524,7 @@ const validateTargetedAction = (
             validateReconversionTarget(action.target, ctx, [...path, "target"]);
             break;
         case "MIND_CONTROL":
-            validateMindControlPayload(action, ctx, path);
             validateMindControlTarget(action.target, ctx, [...path, "target"]);
-            break;
-        case "SUMMON":
-            validateSummonPayload(action, ctx, path);
             break;
     }
 
@@ -842,7 +537,7 @@ const validateNonTargetedAction = (
     path: (string | number)[],
     options: { allowTargeted?: boolean } = {},
 ) => {
-    if (action.isTargeted) {
+    if ("isTargeted" in action && action.isTargeted) {
         if (options.allowTargeted) {
             validateTargetedAction(action, ctx, path);
         } else {
@@ -866,7 +561,7 @@ const validateNonTargetedAction = (
 
     switch (action.type) {
         case "DAMAGE": {
-            if (action.damage === null || action.damage <= 0) {
+            if (action.damage <= 0) {
                 ctx.addIssue({
                     code: "custom",
                     message: "DAMAGE action requires damage > 0",
@@ -886,7 +581,7 @@ const validateNonTargetedAction = (
             break;
         }
         case "HEAL": {
-            if (action.heal === null || action.heal <= 0) {
+            if (action.heal <= 0) {
                 ctx.addIssue({
                     code: "custom",
                     message: "HEAL action requires heal > 0",
@@ -906,7 +601,7 @@ const validateNonTargetedAction = (
             break;
         }
         case "DRAW":
-            if (action.drawCount === null || action.drawCount <= 0) {
+            if (action.drawCount <= 0) {
                 ctx.addIssue({
                     code: "custom",
                     message: "DRAW action requires drawCount > 0",
@@ -915,7 +610,7 @@ const validateNonTargetedAction = (
             }
             break;
         case "ENEMY_DRAW":
-            if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) {
+            if (action.enemyDrawCount <= 0) {
                 ctx.addIssue({
                     code: "custom",
                     message: "ENEMY_DRAW action requires enemyDrawCount > 0",
@@ -924,14 +619,6 @@ const validateNonTargetedAction = (
             }
             break;
         case "BOOST": {
-            if (!action.boost) {
-                ctx.addIssue({
-                    code: "custom",
-                    message: "BOOST action requires boost",
-                    path: [...path, "boost"],
-                });
-                return;
-            }
             validateBoostContent(action.boost, ctx, [...path, "boost"]);
             if (!action.target) {
                 ctx.addIssue({
@@ -946,7 +633,6 @@ const validateNonTargetedAction = (
             break;
         }
         case "SILENCE": {
-            validateSilencePayload(action, ctx, path);
             if (!action.target) {
                 ctx.addIssue({
                     code: "custom",
@@ -960,7 +646,6 @@ const validateNonTargetedAction = (
             break;
         }
         case "DESTROY": {
-            validateDestroyPayload(action, ctx, path);
             if (!action.target) {
                 ctx.addIssue({
                     code: "custom",
@@ -988,7 +673,6 @@ const validateNonTargetedAction = (
             break;
         }
         case "MIND_CONTROL": {
-            validateMindControlPayload(action, ctx, path);
             if (!action.target) {
                 ctx.addIssue({
                     code: "custom",
@@ -1007,7 +691,7 @@ const validateNonTargetedAction = (
         }
     }
 
-    if (action.onTargetResult != null) {
+    if ("onTargetResult" in action && action.onTargetResult != null) {
         ctx.addIssue({
             code: "custom",
             message: "onTargetResult is only allowed on targeted DAMAGE actions",
@@ -1022,31 +706,7 @@ export const validateCardAction = (
     path: (string | number)[],
     options: { allowTargeted?: boolean; deathrattle?: boolean } = {},
 ) => {
-    if (action.type !== "RECONVERSION" && action.reconvertParameters !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: `${action.type} action must not set reconvertParameters`,
-            path: [...path, "reconvertParameters"],
-        });
-    }
-
-    if (action.type !== "SUMMON" && action.summonParameters !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: `${action.type} action must not set summonParameters`,
-            path: [...path, "summonParameters"],
-        });
-    }
-
-    if (action.type !== "SUMMON" && action.summonCount !== null) {
-        ctx.addIssue({
-            code: "custom",
-            message: `${action.type} action must not set summonCount`,
-            path: [...path, "summonCount"],
-        });
-    }
-
-    if (options.deathrattle && action.isTargeted) {
+    if (options.deathrattle && "isTargeted" in action && action.isTargeted) {
         ctx.addIssue({
             code: "custom",
             message: "Deathrattle action cannot be targeted",
@@ -1055,7 +715,7 @@ export const validateCardAction = (
         return;
     }
 
-    if (action.isTargeted && !options.deathrattle) {
+    if ("isTargeted" in action && action.isTargeted && !options.deathrattle) {
         validateTargetedAction(action, ctx, path);
         return;
     }

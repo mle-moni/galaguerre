@@ -11,6 +11,7 @@ import type {
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 import { CARD_TAG_LABELS } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
+import { hasActionTarget } from "./action_fields_utils.js";
 import { hasRandomLimitedTarget } from "./target_matching.js";
 
 const CARD_TYPE_LABELS: Record<CardFilterSnapshot["type"], string> = {
@@ -68,7 +69,7 @@ const formatAllTeamLabel = (
 };
 
 const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
-    if (!action.target) return "";
+    if (!hasActionTarget(action) || !action.target) return "";
 
     const parts: string[] = [];
     const comparison = action.target.comparison;
