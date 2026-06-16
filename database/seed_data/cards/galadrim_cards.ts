@@ -495,7 +495,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(101, gal("Heures Sup'", 3), [
         boostAction(boostAttackWithCharge(3), targetedAllyMinion(), true),
     ]),
-    defineSpell(102, gal("Burnout", 2), [
+    defineSpell(102, gal("Burnout", 3), [
         destroyAction(targetedAnyMinionWithComparison(attackGreaterThan(4)), true),
     ]),
     defineSpell(132, gal("Fin de Période d'Essai", 2), [
