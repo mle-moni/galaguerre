@@ -6,7 +6,7 @@ import { scheduleAiMulliganIfNeeded } from "../ai/schedule_ai_mulligan.js";
 import { scheduleAiTurnIfNeeded } from "../ai/schedule_ai_turn.js";
 
 const MULLIGAN_TIMER_MS = 60_000;
-const TURN_TIMER_MS = 75_000;
+const TURN_TIMER_MS = 105_000;
 
 const shouldUseGameTimers = (): boolean => process.env.NODE_ENV !== "test";
 
