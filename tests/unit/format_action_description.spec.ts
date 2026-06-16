@@ -306,6 +306,70 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats DECK_CARD ADD single copy on top of opponent deck", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "ADD",
+            deckPlacement: "TOP",
+            deckTargetTeam: "OPPONENT",
+            cardId: 121,
+            copyCount: 1,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Place 1 copie de Légume en haut du deck adverse.",
+        );
+    });
+
+    test("formats DECK_CARD ADD random placement in opponent deck", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "ADD",
+            deckPlacement: "RANDOM",
+            deckTargetTeam: "OPPONENT",
+            cardId: 121,
+            copyCount: 2,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Mélange 2 copies de Légume dans le deck adverse.",
+        );
+    });
+
+    test("formats DECK_CARD ADD bottom placement in every deck", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "ADD",
+            deckPlacement: "BOTTOM",
+            deckTargetTeam: "ALL",
+            cardId: 121,
+            copyCount: 2,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Place 2 copies de Légume en bas de chaque deck.",
+        );
+    });
+
+    test("formats DECK_CARD DELETE single copy from player deck", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "DELETE",
+            deckPlacement: "TOP",
+            deckTargetTeam: "PLAYER",
+            cardId: 121,
+            copyCount: 1,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Retire 1 copie de la carte Légume de votre deck.",
+        );
+    });
+
     test("formats DECK_CARD DELETE from opponent deck", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DECK_CARD",
@@ -318,7 +382,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Retire 2 copies de Légume du deck adverse.",
+            "Effet : Retire 2 copies de la carte Légume du deck adverse.",
         );
     });
 
@@ -335,6 +399,22 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Effet"),
             "Effet : Supprime toutes les copies de la carte Légume du deck adverse.",
+        );
+    });
+
+    test("formats DECK_CARD DELETE all copies from every deck", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "DELETE",
+            deckPlacement: null,
+            deckTargetTeam: "ALL",
+            cardId: 121,
+            copyCount: null,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Cri de guerre"),
+            "Cri de guerre : Supprime toutes les copies de la carte Légume de chaque deck.",
         );
     });
 });

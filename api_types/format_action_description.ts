@@ -339,6 +339,50 @@ const formatReconvertTargetLabel = (parameters: ReconvertParametersSnapshot | nu
     return label;
 };
 
+const formatDeckCardName = (cardId: number): string =>
+    GALADRIM_CARDS.find((entry) => entry.id === cardId)?.data.name ?? "une carte";
+
+const formatDeckCardAddCopies = (copyCount: number, cardName: string): string =>
+    copyCount === 1 ? `1 copie de ${cardName}` : `${copyCount} copies de ${cardName}`;
+
+const formatDeckCardDeleteCopies = (copyCount: number, cardName: string): string =>
+    copyCount === 1
+        ? `1 copie de la carte ${cardName}`
+        : `${copyCount} copies de la carte ${cardName}`;
+
+const formatDeckCardDeleteLocation = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    switch (targetTeam) {
+        case "OPPONENT":
+            return "du deck adverse";
+        case "ALL":
+            return "de chaque deck";
+        default:
+            return "de votre deck";
+    }
+};
+
+const formatDeckCardAddLocationIn = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    switch (targetTeam) {
+        case "OPPONENT":
+            return "dans le deck adverse";
+        case "ALL":
+            return "dans chaque deck";
+        default:
+            return "dans votre deck";
+    }
+};
+
+const formatDeckCardAddLocationOn = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    switch (targetTeam) {
+        case "OPPONENT":
+            return "du deck adverse";
+        case "ALL":
+            return "de chaque deck";
+        default:
+            return "de votre deck";
+    }
+};
+
 const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | null => {
     switch (action.type) {
         case "DRAW": {
@@ -684,51 +728,26 @@ export const formatActionDescription = (
             return `${prefix} : Invoque ${countLabel} (${targetLabel}) ${boardLabel}.`;
         }
         case "DECK_CARD": {
-            const cardName =
-                GALADRIM_CARDS.find((entry) => entry.id === action.cardId)?.data.name ??
-                "une carte";
-
-            const deckLabel = (() => {
-                switch (action.deckTargetTeam) {
-                    case "OPPONENT":
-                        return "du deck adverse";
-                    case "ALL":
-                        return "de chaque deck";
-                    default:
-                        return "de votre deck";
-                }
-            })();
+            const cardName = formatDeckCardName(action.cardId);
+            const deleteLocation = formatDeckCardDeleteLocation(action.deckTargetTeam);
 
             if (action.deckCardOperation === "DELETE") {
                 if (action.copyCount === null) {
-                    return `${prefix} : Supprime toutes les copies de la carte ${cardName} ${deckLabel}.`;
+                    return `${prefix} : Supprime toutes les copies de la carte ${cardName} ${deleteLocation}.`;
                 }
 
-                const copyLabel = action.copyCount === 1 ? "1 copie" : `${action.copyCount} copies`;
-                return `${prefix} : Retire ${copyLabel} de ${cardName} ${deckLabel}.`;
+                return `${prefix} : Retire ${formatDeckCardDeleteCopies(action.copyCount, cardName)} ${deleteLocation}.`;
             }
 
-            const copyLabel = action.copyCount === 1 ? "1 copie" : `${action.copyCount} copies`;
-            const cardLabel = action.copyCount === 1 ? cardName : `${copyLabel} de ${cardName}`;
-
-            const addDeckLabel = (() => {
-                switch (action.deckTargetTeam) {
-                    case "OPPONENT":
-                        return "du deck adverse";
-                    case "ALL":
-                        return "dans chaque deck";
-                    default:
-                        return "dans votre deck";
-                }
-            })();
+            const copies = formatDeckCardAddCopies(action.copyCount!, cardName);
 
             switch (action.deckPlacement) {
                 case "TOP":
-                    return `${prefix} : Place ${cardLabel} en haut ${addDeckLabel.replace("dans ", "de ")}.`;
+                    return `${prefix} : Place ${copies} en haut ${formatDeckCardAddLocationOn(action.deckTargetTeam)}.`;
                 case "BOTTOM":
-                    return `${prefix} : Place ${cardLabel} en bas ${addDeckLabel.replace("dans ", "de ")}.`;
+                    return `${prefix} : Place ${copies} en bas ${formatDeckCardAddLocationOn(action.deckTargetTeam)}.`;
                 default:
-                    return `${prefix} : Mélange ${cardLabel} ${addDeckLabel}.`;
+                    return `${prefix} : Mélange ${copies} ${formatDeckCardAddLocationIn(action.deckTargetTeam)}.`;
             }
         }
         default:
