@@ -316,9 +316,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         138,
-        { ...gal("Expert comptable", 12), attack: 8, health: 8 },
+        { ...gal("Vincent", 12), attack: 8, health: 8 },
         {
-            tags: ["SUPPORT"],
+            tags: ["PM"],
             dynamicCost: { reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }] },
         },
     ),
