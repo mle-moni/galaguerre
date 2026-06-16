@@ -683,6 +683,54 @@ export const formatActionDescription = (
 
             return `${prefix} : Invoque ${countLabel} (${targetLabel}) ${boardLabel}.`;
         }
+        case "DECK_CARD": {
+            const cardName =
+                GALADRIM_CARDS.find((entry) => entry.id === action.cardId)?.data.name ??
+                "une carte";
+
+            const deckLabel = (() => {
+                switch (action.deckTargetTeam) {
+                    case "OPPONENT":
+                        return "du deck adverse";
+                    case "ALL":
+                        return "de chaque deck";
+                    default:
+                        return "de votre deck";
+                }
+            })();
+
+            if (action.deckCardOperation === "DELETE") {
+                if (action.copyCount === null) {
+                    return `${prefix} : Supprime toutes les copies de la carte ${cardName} ${deckLabel}.`;
+                }
+
+                const copyLabel = action.copyCount === 1 ? "1 copie" : `${action.copyCount} copies`;
+                return `${prefix} : Retire ${copyLabel} de ${cardName} ${deckLabel}.`;
+            }
+
+            const copyLabel = action.copyCount === 1 ? "1 copie" : `${action.copyCount} copies`;
+            const cardLabel = action.copyCount === 1 ? cardName : `${copyLabel} de ${cardName}`;
+
+            const addDeckLabel = (() => {
+                switch (action.deckTargetTeam) {
+                    case "OPPONENT":
+                        return "du deck adverse";
+                    case "ALL":
+                        return "dans chaque deck";
+                    default:
+                        return "dans votre deck";
+                }
+            })();
+
+            switch (action.deckPlacement) {
+                case "TOP":
+                    return `${prefix} : Place ${cardLabel} en haut ${addDeckLabel.replace("dans ", "de ")}.`;
+                case "BOTTOM":
+                    return `${prefix} : Place ${cardLabel} en bas ${addDeckLabel.replace("dans ", "de ")}.`;
+                default:
+                    return `${prefix} : Mélange ${cardLabel} ${addDeckLabel}.`;
+            }
+        }
         default:
             return null;
     }

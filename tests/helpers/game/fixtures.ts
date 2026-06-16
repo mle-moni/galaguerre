@@ -141,6 +141,11 @@ type CardActionSnapshotOverrides = {
     summonParameters?: ReconvertParametersSnapshot;
     summonCount?: number;
     summonTargetTeam?: "PLAYER" | "OPPONENT";
+    deckCardOperation?: "ADD" | "DELETE";
+    deckPlacement?: "TOP" | "BOTTOM" | "RANDOM" | null;
+    deckTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
+    cardId?: number;
+    copyCount?: number | null;
     target?: TargetSnapshot | null;
     onTargetResult?: CardActionSnapshot["onTargetResult"];
     actionCondition?: CardActionSnapshot["actionCondition"];
@@ -236,6 +241,23 @@ export const createCardActionSnapshot = (
                 summonParameters: overrides.summonParameters ?? createReconvertParametersSnapshot(),
                 summonCount: overrides.summonCount ?? 1,
                 summonTargetTeam: overrides.summonTargetTeam ?? "PLAYER",
+                actionCondition,
+                onTargetResult,
+            };
+        case "DECK_CARD":
+            return {
+                type: "DECK_CARD",
+                isTargeted: false,
+                deckCardOperation: overrides.deckCardOperation ?? "ADD",
+                deckPlacement:
+                    overrides.deckPlacement !== undefined
+                        ? overrides.deckPlacement
+                        : overrides.deckCardOperation === "DELETE" && overrides.copyCount === null
+                          ? null
+                          : "RANDOM",
+                deckTargetTeam: overrides.deckTargetTeam ?? "PLAYER",
+                cardId: overrides.cardId ?? 121,
+                copyCount: overrides.copyCount !== undefined ? overrides.copyCount : 1,
                 actionCondition,
                 onTargetResult,
             };

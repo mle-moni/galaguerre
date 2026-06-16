@@ -9,5 +9,6 @@ export const V1_ACTION_TYPES = [
     "RECONVERSION",
     "MIND_CONTROL",
     "SUMMON",
+    "DECK_CARD",
 ] as const;
 export type V1ActionType = (typeof V1_ACTION_TYPES)[number];

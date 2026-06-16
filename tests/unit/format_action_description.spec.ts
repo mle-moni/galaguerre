@@ -289,4 +289,52 @@ test.group("format_action_description", () => {
             "Effet : Détruit aux serviteurs adverses.",
         );
     });
+
+    test("formats DECK_CARD ADD with random placement", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "ADD",
+            deckPlacement: "RANDOM",
+            deckTargetTeam: "PLAYER",
+            cardId: 121,
+            copyCount: 2,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Mélange 2 copies de Légume dans votre deck.",
+        );
+    });
+
+    test("formats DECK_CARD DELETE from opponent deck", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "DELETE",
+            deckPlacement: "TOP",
+            deckTargetTeam: "OPPONENT",
+            cardId: 121,
+            copyCount: 2,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Retire 2 copies de Légume du deck adverse.",
+        );
+    });
+
+    test("formats DECK_CARD DELETE all copies from opponent deck", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "DELETE",
+            deckPlacement: null,
+            deckTargetTeam: "OPPONENT",
+            cardId: 121,
+            copyCount: null,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Supprime toutes les copies de la carte Légume du deck adverse.",
+        );
+    });
 });

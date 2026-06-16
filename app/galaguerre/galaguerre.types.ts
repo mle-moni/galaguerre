@@ -40,6 +40,7 @@ export const GALAGUERRE_ACTIONS_TYPES = [
     "RECONVERSION",
     "MIND_CONTROL",
     "SUMMON",
+    "DECK_CARD",
 ] as const;
 export type GalaguerreActionType = GenerateTypeFromEnum<typeof GALAGUERRE_ACTIONS_TYPES>;
 export const GALAGUERRE_ACTIONS_TYPES_OBJ = generateTypeObjectFromEnum(GALAGUERRE_ACTIONS_TYPES);
@@ -54,9 +55,40 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     RECONVERSION: "Reconversion",
     MIND_CONTROL: "Mind Control",
     SUMMON: "Summon",
+    DECK_CARD: "Deck Card",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,
+);
+
+export const GALAGUERRE_DECK_CARD_OPERATIONS = ["ADD", "DELETE"] as const;
+export type GalaguerreDeckCardOperation = GenerateTypeFromEnum<
+    typeof GALAGUERRE_DECK_CARD_OPERATIONS
+>;
+export const GALAGUERRE_DECK_CARD_OPERATIONS_OBJ = generateTypeObjectFromEnum(
+    GALAGUERRE_DECK_CARD_OPERATIONS,
+);
+export const GALAGUERRE_DECK_CARD_OPERATIONS_LABEL_OBJ: LabelObjectType<GalaguerreDeckCardOperation> =
+    {
+        ADD: "Add",
+        DELETE: "Delete",
+    };
+export const GALAGUERRE_DECK_CARD_OPERATIONS_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_DECK_CARD_OPERATIONS_LABEL_OBJ,
+);
+
+export const GALAGUERRE_DECK_PLACEMENTS = ["TOP", "BOTTOM", "RANDOM"] as const;
+export type GalaguerreDeckPlacement = GenerateTypeFromEnum<typeof GALAGUERRE_DECK_PLACEMENTS>;
+export const GALAGUERRE_DECK_PLACEMENTS_OBJ = generateTypeObjectFromEnum(
+    GALAGUERRE_DECK_PLACEMENTS,
+);
+export const GALAGUERRE_DECK_PLACEMENTS_LABEL_OBJ: LabelObjectType<GalaguerreDeckPlacement> = {
+    TOP: "Top",
+    BOTTOM: "Bottom",
+    RANDOM: "Random",
+};
+export const GALAGUERRE_DECK_PLACEMENTS_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_DECK_PLACEMENTS_LABEL_OBJ,
 );
 
 export const GALAGUERRE_PASSIVES_TYPES = ["ACTION", "BOOST"] as const;

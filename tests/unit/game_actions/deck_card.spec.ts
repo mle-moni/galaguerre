@@ -1,0 +1,302 @@
+import { test } from "@japa/runner";
+import {
+    addCardsToDeck,
+    removeCardsFromDeck,
+} from "../../../app/galaguerre/deck_card_operations.js";
+import {
+    createCardActionSnapshot,
+    createGameData,
+    createGamePlayer,
+    createMinionCard,
+    createSpellCard,
+} from "#tests/helpers/game/fixtures";
+import { runBattlecry } from "#tests/helpers/game/run_battlecry";
+import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
+
+const LEGUME_CARD_ID = 121;
+
+test.group("deck_card_operations", () => {
+    test("addCardsToDeck TOP places last added copy on top", ({ assert }) => {
+        const player = createGamePlayer(1, { deckCards: [], hand: [] });
+
+        addCardsToDeck(player, LEGUME_CARD_ID, 2, "TOP");
+
+        assert.equal(player.deckCards.length, 2);
+        assert.equal(player.deckCards[0]!.cardId, LEGUME_CARD_ID);
+        assert.equal(player.deckCards[1]!.cardId, LEGUME_CARD_ID);
+        assert.notEqual(player.deckCards[0]!.uuid, player.deckCards[1]!.uuid);
+    });
+
+    test("addCardsToDeck BOTTOM appends copies at the end", ({ assert }) => {
+        const existing = createMinionCard({ uuid: "existing", cardId: 1 });
+        const player = createGamePlayer(1, { deckCards: [existing], hand: [] });
+
+        addCardsToDeck(player, LEGUME_CARD_ID, 1, "BOTTOM");
+
+        assert.equal(player.deckCards.length, 2);
+        assert.equal(player.deckCards[0]!.uuid, "existing");
+        assert.equal(player.deckCards[1]!.cardId, LEGUME_CARD_ID);
+    });
+
+    test("addCardsToDeck RANDOM increases deck size", ({ assert }) => {
+        const player = createGamePlayer(1, { deckCards: [], hand: [] });
+
+        addCardsToDeck(player, LEGUME_CARD_ID, 2, "RANDOM");
+
+        assert.equal(player.deckCards.length, 2);
+        assert.isTrue(player.deckCards.every((card) => card.cardId === LEGUME_CARD_ID));
+    });
+
+    test("removeCardsFromDeck TOP removes highest card", ({ assert }) => {
+        const top = createMinionCard({ uuid: "top", cardId: LEGUME_CARD_ID });
+        const bottom = createMinionCard({ uuid: "bottom", cardId: LEGUME_CARD_ID });
+        const other = createMinionCard({ uuid: "other", cardId: 1 });
+        const player = createGamePlayer(1, { deckCards: [top, other, bottom], hand: [] });
+
+        removeCardsFromDeck(player, LEGUME_CARD_ID, 1, "TOP");
+
+        assert.equal(player.deckCards.length, 2);
+        assert.equal(player.deckCards[0]!.uuid, "other");
+        assert.equal(player.deckCards[1]!.uuid, "bottom");
+    });
+
+    test("removeCardsFromDeck BOTTOM removes lowest matching card", ({ assert }) => {
+        const top = createMinionCard({ uuid: "top", cardId: LEGUME_CARD_ID });
+        const bottom = createMinionCard({ uuid: "bottom", cardId: LEGUME_CARD_ID });
+        const other = createMinionCard({ uuid: "other", cardId: 1 });
+        const player = createGamePlayer(1, { deckCards: [top, other, bottom], hand: [] });
+
+        removeCardsFromDeck(player, LEGUME_CARD_ID, 1, "BOTTOM");
+
+        assert.equal(player.deckCards.length, 2);
+        assert.equal(player.deckCards[0]!.uuid, "top");
+        assert.equal(player.deckCards[1]!.uuid, "other");
+    });
+
+    test("removeCardsFromDeck removes only available copies when partial", ({ assert }) => {
+        const onlyCopy = createMinionCard({ uuid: "only", cardId: LEGUME_CARD_ID });
+        const player = createGamePlayer(1, { deckCards: [onlyCopy], hand: [] });
+
+        const removed = removeCardsFromDeck(player, LEGUME_CARD_ID, 2, "TOP");
+
+        assert.equal(removed, 1);
+        assert.equal(player.deckCards.length, 0);
+    });
+
+    test("removeCardsFromDeck with null copyCount removes all matching copies", ({ assert }) => {
+        const copyOne = createMinionCard({ uuid: "legume-1", cardId: LEGUME_CARD_ID });
+        const copyTwo = createMinionCard({ uuid: "legume-2", cardId: LEGUME_CARD_ID });
+        const other = createMinionCard({ uuid: "other", cardId: 1 });
+        const player = createGamePlayer(1, {
+            deckCards: [copyOne, other, copyTwo],
+            hand: [],
+        });
+
+        const removed = removeCardsFromDeck(player, LEGUME_CARD_ID, null, null);
+
+        assert.equal(removed, 2);
+        assert.equal(player.deckCards.length, 1);
+        assert.equal(player.deckCards[0]!.uuid, "other");
+    });
+});
+
+test.group("deck_card battlecry", () => {
+    test("ADD battlecry adds copies to allied deck", ({ assert }) => {
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "ADD",
+                    deckPlacement: "TOP",
+                    deckTargetTeam: "PLAYER",
+                    cardId: LEGUME_CARD_ID,
+                    copyCount: 2,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 2);
+        assert.isTrue(
+            game.data.playerOne.deckCards.every((card) => card.cardId === LEGUME_CARD_ID),
+        );
+        assert.equal(game.data.playerTwo.deckCards.length, 0);
+    });
+
+    test("ADD battlecry targets opponent deck", ({ assert }) => {
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "ADD",
+                    deckPlacement: "BOTTOM",
+                    deckTargetTeam: "OPPONENT",
+                    cardId: LEGUME_CARD_ID,
+                    copyCount: 1,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [] },
+                playerTwo: { deckCards: [] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 0);
+        assert.equal(game.data.playerTwo.deckCards.length, 1);
+        assert.equal(game.data.playerTwo.deckCards[0]!.cardId, LEGUME_CARD_ID);
+    });
+
+    test("ADD battlecry with ALL targets both decks", ({ assert }) => {
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "ADD",
+                    deckPlacement: "RANDOM",
+                    deckTargetTeam: "ALL",
+                    cardId: LEGUME_CARD_ID,
+                    copyCount: 1,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [] },
+                playerTwo: { deckCards: [] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 1);
+        assert.equal(game.data.playerTwo.deckCards.length, 1);
+    });
+
+    test("DELETE battlecry removes copies from deck", ({ assert }) => {
+        const deckCopy = createMinionCard({ uuid: "legume-1", cardId: LEGUME_CARD_ID });
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "DELETE",
+                    deckPlacement: "TOP",
+                    deckTargetTeam: "PLAYER",
+                    cardId: LEGUME_CARD_ID,
+                    copyCount: 2,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [deckCopy] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 0);
+    });
+
+    test("DELETE all battlecry removes every matching copy from deck", ({ assert }) => {
+        const copyOne = createMinionCard({ uuid: "legume-1", cardId: LEGUME_CARD_ID });
+        const copyTwo = createMinionCard({ uuid: "legume-2", cardId: LEGUME_CARD_ID });
+        const other = createMinionCard({ uuid: "other", cardId: 1 });
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "DELETE",
+                    deckPlacement: null,
+                    deckTargetTeam: "PLAYER",
+                    cardId: LEGUME_CARD_ID,
+                    copyCount: null,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [copyOne, other, copyTwo] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 1);
+        assert.equal(game.data.playerOne.deckCards[0]!.uuid, "other");
+    });
+
+    test("DELETE all battlecry targets opponent deck", ({ assert }) => {
+        const copyOne = createMinionCard({ uuid: "legume-1", cardId: LEGUME_CARD_ID });
+        const copyTwo = createMinionCard({ uuid: "legume-2", cardId: LEGUME_CARD_ID });
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "DELETE",
+                    deckPlacement: null,
+                    deckTargetTeam: "OPPONENT",
+                    cardId: LEGUME_CARD_ID,
+                    copyCount: null,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [] },
+                playerTwo: { deckCards: [copyOne, copyTwo] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerTwo.deckCards.length, 0);
+    });
+});
+
+test.group("deck_card spell", () => {
+    test("ADD spell effect adds non-collectible card to deck", ({ assert }) => {
+        const spell = createSpellCard({
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "ADD",
+                    deckPlacement: "RANDOM",
+                    deckTargetTeam: "PLAYER",
+                    cardId: LEGUME_CARD_ID,
+                    copyCount: 2,
+                }),
+            ],
+        });
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: { hand: [spell], deckCards: [] },
+            }),
+            spell,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 2);
+        assert.equal(game.data.playerOne.deckCards[0]!.label, "Légume");
+    });
+});
+
+test.group("deck_card validation", () => {
+    test("addCardsToDeck ignores unknown cardId at runtime", ({ assert }) => {
+        const player = createGamePlayer(1, { deckCards: [], hand: [] });
+
+        const added = addCardsToDeck(player, 999999, 2, "TOP");
+
+        assert.equal(added, 0);
+        assert.equal(player.deckCards.length, 0);
+    });
+});

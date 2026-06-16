@@ -338,6 +338,54 @@ const validateSummonPayload = (
     validateSummonParameters(action.summonParameters, ctx, [...path, "summonParameters"]);
 };
 
+const validateDeckCardPayload = (
+    action: Extract<CardActionDefinition, { type: "DECK_CARD" }>,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.deckCardOperation === "ADD") {
+        if (action.copyCount === null || action.copyCount <= 0) {
+            ctx.addIssue({
+                code: "custom",
+                message: "DECK_CARD ADD action requires copyCount > 0",
+                path: [...path, "copyCount"],
+            });
+        }
+        if (action.deckPlacement === null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "DECK_CARD ADD action requires deckPlacement",
+                path: [...path, "deckPlacement"],
+            });
+        }
+        return;
+    }
+
+    if (action.copyCount !== null && action.copyCount <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DECK_CARD DELETE action requires copyCount > 0 when set",
+            path: [...path, "copyCount"],
+        });
+    }
+
+    if (action.copyCount === null && action.deckPlacement !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DECK_CARD DELETE all copies must not set deckPlacement",
+            path: [...path, "deckPlacement"],
+        });
+    }
+
+    if (action.copyCount !== null && action.deckPlacement === null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DECK_CARD DELETE with copyCount requires deckPlacement",
+            path: [...path, "deckPlacement"],
+        });
+    }
+};
+
 const validateReconvertParameters = (
     parameters: ReconvertParametersDefinition,
     ctx: z.RefinementCtx,
@@ -687,6 +735,10 @@ const validateNonTargetedAction = (
         }
         case "SUMMON": {
             validateSummonPayload(action, ctx, path);
+            break;
+        }
+        case "DECK_CARD": {
+            validateDeckCardPayload(action, ctx, path);
             break;
         }
     }

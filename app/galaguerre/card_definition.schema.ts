@@ -7,6 +7,8 @@ import {
 } from "./card_definition.validation.js";
 import {
     GALAGUERRE_CARD_TYPES,
+    GALAGUERRE_DECK_CARD_OPERATIONS,
+    GALAGUERRE_DECK_PLACEMENTS,
     GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
     GALAGUERRE_PASSIVES_TYPES,
@@ -147,6 +149,17 @@ const summonActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const deckCardActionFieldsSchema = z.object({
+    type: z.literal("DECK_CARD"),
+    isTargeted: z.literal(false).default(false),
+    deckCardOperation: z.enum(GALAGUERRE_DECK_CARD_OPERATIONS),
+    deckPlacement: z.enum(GALAGUERRE_DECK_PLACEMENTS).nullable(),
+    deckTargetTeam: z.enum(GALAGUERRE_TARGET_TEAMS).default("PLAYER"),
+    cardId: z.number().int().positive(),
+    copyCount: z.number().int().positive().nullable(),
+    actionCondition: actionConditionSchema,
+});
+
 const cardActionFieldsSchema = z.discriminatedUnion("type", [
     damageActionFieldsSchema,
     healActionFieldsSchema,
@@ -158,6 +171,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     reconversionActionFieldsSchema,
     mindControlActionFieldsSchema,
     summonActionFieldsSchema,
+    deckCardActionFieldsSchema,
 ]);
 
 export const onTargetResultSchema = z
@@ -198,6 +212,7 @@ export const cardActionSchema = z
         reconversionActionFieldsSchema.extend(cardActionOnTargetResultField),
         mindControlActionFieldsSchema.extend(cardActionOnTargetResultField),
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),
+        deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
     ])
     .superRefine((action, ctx) => {
         validateCardAction(action, ctx, [], { allowTargeted: true });

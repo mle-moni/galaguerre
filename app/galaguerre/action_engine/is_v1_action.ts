@@ -51,6 +51,11 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
             );
         case "SUMMON":
             return action.summonCount > 0;
+        case "DECK_CARD":
+            if (action.deckCardOperation === "ADD") {
+                return action.copyCount !== null && action.copyCount > 0;
+            }
+            return action.copyCount === null || action.copyCount > 0;
         default:
             return false;
     }

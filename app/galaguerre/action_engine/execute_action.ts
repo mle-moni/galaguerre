@@ -9,6 +9,7 @@ import { getActionTarget } from "#api_types/action_fields_utils";
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
 import { drawCards } from "../draw_cards.js";
+import { executeDeckCardAction } from "../deck_card_operations.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applyDamageToHero } from "./apply_damage_to_hero.js";
@@ -344,6 +345,9 @@ const executeNonTargetedV1Action = (
             if (gameEnded) return;
             break;
         }
+        case "DECK_CARD":
+            executeDeckCardAction(action, game, player, opponent);
+            break;
     }
 };
 

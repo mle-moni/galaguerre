@@ -18,6 +18,7 @@ import type {
     SpellCardData,
     WeaponCardData,
 } from "#galaguerre/card_definition.schema";
+import type { GalaguerreDeckPlacement, GalaguerreTargetTeam } from "#galaguerre/galaguerre.types";
 import {
     parseCardData,
     parseMinionData,
@@ -219,6 +220,48 @@ export const summonCardId = (
     count = 1,
     targetTeam: "PLAYER" | "OPPONENT" = "PLAYER",
 ): CardActionDefinition => summonAction(reconvertParameters({ cardId }), { count, targetTeam });
+
+type DeckCardActionOptions = {
+    placement?: GalaguerreDeckPlacement;
+    targetTeam?: GalaguerreTargetTeam;
+};
+
+export const deckCardAddAction = (
+    cardId: number,
+    copyCount = 1,
+    options: DeckCardActionOptions = {},
+): CardActionDefinition => ({
+    type: "DECK_CARD",
+    isTargeted: false,
+    deckCardOperation: "ADD",
+    deckPlacement: options.placement ?? "RANDOM",
+    deckTargetTeam: options.targetTeam ?? "PLAYER",
+    cardId,
+    copyCount,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const deckCardDeleteAction = (
+    cardId: number,
+    copyCount: number | null = 1,
+    options: DeckCardActionOptions = {},
+): CardActionDefinition => ({
+    type: "DECK_CARD",
+    isTargeted: false,
+    deckCardOperation: "DELETE",
+    deckPlacement: copyCount === null ? null : options.placement ?? "RANDOM",
+    deckTargetTeam: options.targetTeam ?? "PLAYER",
+    cardId,
+    copyCount,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const deckCardDeleteAllAction = (
+    cardId: number,
+    options: Omit<DeckCardActionOptions, "placement"> = {},
+): CardActionDefinition => deckCardDeleteAction(cardId, null, options);
 
 export const defaultMinionData = (): MinionCardData => ({
     schemaVersion: 1,
