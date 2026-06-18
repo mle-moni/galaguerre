@@ -417,4 +417,46 @@ test.group("format_action_description", () => {
             "Cri de guerre : Supprime toutes les copies de la carte Légume de chaque deck.",
         );
     });
+
+    test("formats HAND_CARD ADD to player hand", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "HAND_CARD",
+            handTargetTeam: "PLAYER",
+            cardId: 121,
+            copyCount: 2,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Ajoute 2 copies de Légume à votre main.",
+        );
+    });
+
+    test("formats HAND_CARD ADD to opponent hand", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "HAND_CARD",
+            handTargetTeam: "OPPONENT",
+            cardId: 121,
+            copyCount: 1,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Ajoute 1 copie de Légume à la main adverse.",
+        );
+    });
+
+    test("formats HAND_CARD ADD to every hand", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "HAND_CARD",
+            handTargetTeam: "ALL",
+            cardId: 121,
+            copyCount: 2,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Ajoute 2 copies de Légume à chaque main.",
+        );
+    });
 });

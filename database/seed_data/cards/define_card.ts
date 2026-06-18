@@ -272,6 +272,24 @@ export const deckCardDeleteAllAction = (
     options: Omit<DeckCardActionOptions, "placement"> = {},
 ): CardActionDefinition => deckCardDeleteAction(cardId, null, options);
 
+type HandCardActionOptions = {
+    targetTeam?: GalaguerreTargetTeam;
+};
+
+export const handCardAddAction = (
+    cardId: number,
+    copyCount = 1,
+    options: HandCardActionOptions = {},
+): CardActionDefinition => ({
+    type: "HAND_CARD",
+    isTargeted: false,
+    handTargetTeam: options.targetTeam ?? "PLAYER",
+    cardId,
+    copyCount,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const defaultMinionData = (): MinionCardData => ({
     schemaVersion: 1,
     type: "MINION",

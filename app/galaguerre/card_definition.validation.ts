@@ -386,6 +386,20 @@ const validateDeckCardPayload = (
     }
 };
 
+const validateHandCardPayload = (
+    action: Extract<CardActionDefinition, { type: "HAND_CARD" }>,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.copyCount <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "HAND_CARD action requires copyCount > 0",
+            path: [...path, "copyCount"],
+        });
+    }
+};
+
 const validateReconvertParameters = (
     parameters: ReconvertParametersDefinition,
     ctx: z.RefinementCtx,
@@ -739,6 +753,10 @@ const validateNonTargetedAction = (
         }
         case "DECK_CARD": {
             validateDeckCardPayload(action, ctx, path);
+            break;
+        }
+        case "HAND_CARD": {
+            validateHandCardPayload(action, ctx, path);
             break;
         }
         case "MANA": {

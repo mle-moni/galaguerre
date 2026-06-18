@@ -161,6 +161,15 @@ const deckCardActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const handCardActionFieldsSchema = z.object({
+    type: z.literal("HAND_CARD"),
+    isTargeted: z.literal(false).default(false),
+    handTargetTeam: z.enum(GALAGUERRE_TARGET_TEAMS).default("PLAYER"),
+    cardId: z.number().int().positive(),
+    copyCount: z.number().int().positive(),
+    actionCondition: actionConditionSchema,
+});
+
 const manaActionFieldsSchema = z.object({
     type: z.literal("MANA"),
     isTargeted: z.literal(false).default(false),
@@ -181,6 +190,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     mindControlActionFieldsSchema,
     summonActionFieldsSchema,
     deckCardActionFieldsSchema,
+    handCardActionFieldsSchema,
     manaActionFieldsSchema,
 ]);
 
@@ -223,6 +233,7 @@ export const cardActionSchema = z
         mindControlActionFieldsSchema.extend(cardActionOnTargetResultField),
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),
         deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
+        handCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         manaActionFieldsSchema.extend(cardActionOnTargetResultField),
     ])
     .superRefine((action, ctx) => {

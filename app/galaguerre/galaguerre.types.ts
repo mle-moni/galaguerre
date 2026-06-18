@@ -44,6 +44,7 @@ export const GALAGUERRE_ACTIONS_TYPES = [
     "MIND_CONTROL",
     "SUMMON",
     "DECK_CARD",
+    "HAND_CARD",
     "MANA",
 ] as const;
 export type GalaguerreActionType = GenerateTypeFromEnum<typeof GALAGUERRE_ACTIONS_TYPES>;
@@ -60,6 +61,7 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     MIND_CONTROL: "Mind Control",
     SUMMON: "Summon",
     DECK_CARD: "Deck Card",
+    HAND_CARD: "Hand Card",
     MANA: "Mana",
 };
 export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(

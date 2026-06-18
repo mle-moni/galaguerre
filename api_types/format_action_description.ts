@@ -383,6 +383,17 @@ const formatDeckCardAddLocationOn = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"):
     }
 };
 
+const formatHandCardAddLocation = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    switch (targetTeam) {
+        case "OPPONENT":
+            return "à la main adverse";
+        case "ALL":
+            return "à chaque main";
+        default:
+            return "à votre main";
+    }
+};
+
 const formatManaTemporaryChange = (amount: number): string => {
     const crystalLabel = amount === 1 ? "cristal de mana" : "cristaux de mana";
     return `Ce tour-ci, gagnez ${amount} ${crystalLabel}.`;
@@ -758,6 +769,12 @@ export const formatActionDescription = (
                 default:
                     return `${prefix} : Mélange ${copies} ${formatDeckCardAddLocationIn(action.deckTargetTeam)}.`;
             }
+        }
+        case "HAND_CARD": {
+            const cardName = formatDeckCardName(action.cardId);
+            const copies = formatDeckCardAddCopies(action.copyCount, cardName);
+
+            return `${prefix} : Ajoute ${copies} ${formatHandCardAddLocation(action.handTargetTeam)}.`;
         }
         case "MANA": {
             if (action.subtype !== "TEMPORARY_CHANGE" || action.amount <= 0) return null;
