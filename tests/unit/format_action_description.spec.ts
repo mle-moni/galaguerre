@@ -8,6 +8,7 @@ import {
     createCardActionSnapshot,
     createCardFilterSnapshot,
     createComparisonSnapshot,
+    createHeroTargetSnapshot,
     createMinionTargetSnapshot,
     createReconvertParametersSnapshot,
 } from "#tests/helpers/game/fixtures";
@@ -287,6 +288,31 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Effet"),
             "Effet : Détruit aux serviteurs adverses.",
+        );
+    });
+
+    test("formats BREAK_WEAPON on enemy hero", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "BREAK_WEAPON",
+            target: createHeroTargetSnapshot("OPPONENT"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Détruit l'arme du héros adverse.",
+        );
+    });
+
+    test("formats targeted BREAK_WEAPON on ally hero", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "BREAK_WEAPON",
+            isTargeted: true,
+            target: createHeroTargetSnapshot("PLAYER"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Détruit l'arme du héros allié.",
         );
     });
 

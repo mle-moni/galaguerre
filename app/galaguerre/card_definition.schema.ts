@@ -130,6 +130,11 @@ const destroyActionFieldsSchema = z.object({
     ...targetedActionBaseFields,
 });
 
+const breakWeaponActionFieldsSchema = z.object({
+    type: z.literal("BREAK_WEAPON"),
+    ...targetedActionBaseFields,
+});
+
 const reconversionActionFieldsSchema = z.object({
     type: z.literal("RECONVERSION"),
     ...targetedActionBaseFields,
@@ -186,6 +191,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     boostActionFieldsSchema,
     silenceActionFieldsSchema,
     destroyActionFieldsSchema,
+    breakWeaponActionFieldsSchema,
     reconversionActionFieldsSchema,
     mindControlActionFieldsSchema,
     summonActionFieldsSchema,
@@ -229,6 +235,7 @@ export const cardActionSchema = z
         boostActionFieldsSchema.extend(cardActionOnTargetResultField),
         silenceActionFieldsSchema.extend(cardActionOnTargetResultField),
         destroyActionFieldsSchema.extend(cardActionOnTargetResultField),
+        breakWeaponActionFieldsSchema.extend(cardActionOnTargetResultField),
         reconversionActionFieldsSchema.extend(cardActionOnTargetResultField),
         mindControlActionFieldsSchema.extend(cardActionOnTargetResultField),
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),

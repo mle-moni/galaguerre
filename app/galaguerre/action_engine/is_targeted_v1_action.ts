@@ -7,6 +7,7 @@ const TARGETED_V1_ACTION_TYPES = [
     "BOOST",
     "SILENCE",
     "DESTROY",
+    "BREAK_WEAPON",
     "RECONVERSION",
     "MIND_CONTROL",
 ] as const;
@@ -32,6 +33,8 @@ export const isTargetedV1Action = (action: CardActionSnapshot): boolean => {
             return action.target.type === "MINION" || action.target.type === "ALL";
         case "DESTROY":
             return action.target.type === "MINION" || action.target.type === "ALL";
+        case "BREAK_WEAPON":
+            return action.target.type === "HERO";
         case "RECONVERSION":
             return action.target.type === "MINION" || action.target.type === "ALL";
         case "MIND_CONTROL":

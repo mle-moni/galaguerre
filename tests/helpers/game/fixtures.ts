@@ -219,6 +219,14 @@ export const createCardActionSnapshot = (
                 actionCondition,
                 onTargetResult,
             };
+        case "BREAK_WEAPON":
+            return {
+                type: "BREAK_WEAPON",
+                isTargeted: overrides.isTargeted ?? false,
+                target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
         case "RECONVERSION":
             return {
                 type: "RECONVERSION",

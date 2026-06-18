@@ -8,6 +8,7 @@ import {
 import { getActionTarget } from "#api_types/action_fields_utils";
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
+import { breakWeapon } from "#controllers/games/play_card/break_weapon";
 import { drawCards } from "../draw_cards.js";
 import { executeDeckCardAction } from "../deck_card_operations.js";
 import { executeHandCardAction } from "../hand_card_operations.js";
@@ -118,6 +119,10 @@ const applyEffectToResolvedTarget = (
             if (resolved.type !== "MINION") return { gameEnded: false };
             const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
             return killMinion(game, owner, resolved.spotId);
+        }
+        case "BREAK_WEAPON": {
+            if (resolved.type !== "HERO") return { gameEnded: false };
+            return breakWeapon(game, resolved.player);
         }
         case "RECONVERSION": {
             if (resolved.type !== "MINION" || action.reconvertParameters === null) {
@@ -310,6 +315,15 @@ const executeNonTargetedV1Action = (
                     action.target,
                     sourceMinion,
                 );
+                if (gameEnded) return;
+            }
+            break;
+        }
+        case "BREAK_WEAPON": {
+            if (!action.target) break;
+
+            for (const target of resolveHeroTargets(action.target, player, opponent)) {
+                const { gameEnded } = breakWeapon(game, target);
                 if (gameEnded) return;
             }
             break;

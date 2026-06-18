@@ -39,6 +39,8 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
                 action.target !== null &&
                 (action.target.type === "MINION" || action.target.type === "ALL")
             );
+        case "BREAK_WEAPON":
+            return action.target !== null && action.target.type === "HERO";
         case "RECONVERSION":
             return (
                 action.target !== null &&

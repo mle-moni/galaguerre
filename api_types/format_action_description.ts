@@ -686,6 +686,17 @@ export const formatActionDescription = (
 
             return `${prefix} : Détruit un serviteur.`;
         }
+        case "BREAK_WEAPON": {
+            if (action.isTargeted && action.target?.type === "HERO") {
+                return `${prefix} : Détruit l'arme du héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            if (action.target?.type === "HERO") {
+                return `${prefix} : Détruit l'arme du héros ${formatHeroTeamLabel(action.target.targetTeam)}.`;
+            }
+
+            return `${prefix} : Détruit l'arme du héros adverse.`;
+        }
         case "RECONVERSION": {
             const targetLabel = formatReconvertTargetLabel(action.reconvertParameters);
 

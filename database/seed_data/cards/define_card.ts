@@ -169,6 +169,17 @@ export const destroyAction = (
     onTargetResult: null,
 });
 
+export const breakWeaponAction = (
+    target: TargetDefinition,
+    isTargeted = false,
+): CardActionDefinition => ({
+    type: "BREAK_WEAPON",
+    target,
+    isTargeted,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const mindControlAction = (
     target: TargetDefinition,
     isTargeted = false,

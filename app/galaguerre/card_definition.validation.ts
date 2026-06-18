@@ -78,6 +78,7 @@ const TARGETED_ACTION_TYPES = [
     "BOOST",
     "SILENCE",
     "DESTROY",
+    "BREAK_WEAPON",
     "RECONVERSION",
     "MIND_CONTROL",
 ] as const;
@@ -285,6 +286,20 @@ const validateDestroyTarget = (
         ctx.addIssue({
             code: "custom",
             message: "DESTROY target must be MINION or ALL",
+            path: [...path, "type"],
+        });
+    }
+};
+
+const validateBreakWeaponTarget = (
+    target: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.type !== "HERO") {
+        ctx.addIssue({
+            code: "custom",
+            message: "BREAK_WEAPON target must be HERO",
             path: [...path, "type"],
         });
     }
@@ -581,6 +596,9 @@ const validateTargetedAction = (
         case "DESTROY":
             validateDestroyTarget(action.target, ctx, [...path, "target"]);
             break;
+        case "BREAK_WEAPON":
+            validateBreakWeaponTarget(action.target, ctx, [...path, "target"]);
+            break;
         case "RECONVERSION":
             validateReconversionPayload(action, ctx, path);
             validateReconversionTarget(action.target, ctx, [...path, "target"]);
@@ -717,6 +735,19 @@ const validateNonTargetedAction = (
                 return;
             }
             validateDestroyTarget(action.target, ctx, [...path, "target"]);
+            validateTargetFilters(action.target, false, ctx, [...path, "target"]);
+            break;
+        }
+        case "BREAK_WEAPON": {
+            if (!action.target) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "BREAK_WEAPON action requires a HERO target",
+                    path: [...path, "target"],
+                });
+                return;
+            }
+            validateBreakWeaponTarget(action.target, ctx, [...path, "target"]);
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
             break;
         }
