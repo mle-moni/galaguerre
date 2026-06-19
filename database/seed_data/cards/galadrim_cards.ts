@@ -64,7 +64,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         62,
         {
             ...gal("Stagiaire Dev", 1),
-            imageUrl: "/card-covers/galadrim/stagiaire-dev.png",
+            imageUrl: "/card-covers/galadrim/stagiaire-dev.webp",
             attack: 1,
             health: 1,
         },
@@ -77,7 +77,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         113,
         {
             ...gal("Stagiaire Planqué", 1),
-            imageUrl: "/card-covers/galadrim/stagiaire-planque.png",
+            imageUrl: "/card-covers/galadrim/stagiaire-planque.webp",
             attack: 2,
             health: 1,
         },
@@ -91,7 +91,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         63,
         {
             ...gal("Dev Front-End", 2),
-            imageUrl: "/card-covers/galadrim/dev-front-end.png",
+            imageUrl: "/card-covers/galadrim/dev-front-end.webp",
             attack: 2,
             health: 3,
         },
@@ -104,7 +104,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         64,
         {
             ...gal("Dev Back-End", 2),
-            imageUrl: "/card-covers/galadrim/dev-back-end.png",
+            imageUrl: "/card-covers/galadrim/dev-back-end.webp",
             attack: 2,
             health: 3,
         },
@@ -117,7 +117,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         65,
         {
             ...gal("Dev Aigri", 3),
-            imageUrl: "/card-covers/galadrim/dev-aigri.png",
+            imageUrl: "/card-covers/galadrim/dev-aigri.webp",
             attack: 2,
             health: 3,
         },
@@ -298,7 +298,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         130,
         {
             ...gal("Avocat d'Affaires", 5),
-            imageUrl: "/card-covers/galadrim/avocat-d-affaires.png",
+            imageUrl: "/card-covers/galadrim/avocat-d-affaires.webp",
             attack: 4,
             health: 5,
         },
@@ -311,7 +311,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         131,
         {
             ...gal("Membre du CSE", 3),
-            imageUrl: "/card-covers/galadrim/membre-du-cse.png",
+            imageUrl: "/card-covers/galadrim/membre-du-cse.webp",
             attack: 1,
             health: 3,
         },
@@ -335,7 +335,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         86,
         {
             ...gal("Balin", 5),
-            imageUrl: "/card-covers/galadrim/balin.png",
+            imageUrl: "/card-covers/galadrim/balin.webp",
             attack: 4,
             health: 7,
         },
@@ -350,7 +350,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         136,
         {
             ...gal("Fanny", 12),
-            imageUrl: "/card-covers/galadrim/fanny.png",
+            imageUrl: "/card-covers/galadrim/fanny.webp",
             attack: 8,
             health: 8,
         },
@@ -363,7 +363,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         138,
         {
             ...gal("Vincent", 12),
-            imageUrl: "/card-covers/galadrim/vincent.png",
+            imageUrl: "/card-covers/galadrim/vincent.webp",
             attack: 8,
             health: 8,
         },
@@ -473,7 +473,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         115,
         {
             ...gal("Commère de l'Open Space", 2),
-            imageUrl: "/card-covers/galadrim/commere-de-l-open-space.png",
+            imageUrl: "/card-covers/galadrim/commere-de-l-open-space.webp",
             attack: 3,
             health: 2,
         },
@@ -493,7 +493,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         116,
         {
             ...gal("Office Manager Dévoué", 3),
-            imageUrl: "/card-covers/galadrim/office-manager-devoue.png",
+            imageUrl: "/card-covers/galadrim/office-manager-devoue.webp",
             attack: 3,
             health: 3,
         },
@@ -508,7 +508,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         117,
         {
             ...gal("Alternant Surmotivé", 1),
-            imageUrl: "/card-covers/galadrim/alternant-surmotive.png",
+            imageUrl: "/card-covers/galadrim/alternant-surmotive.webp",
             attack: 1,
             health: 2,
         },
@@ -526,7 +526,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         118,
         {
             ...gal("Distributeur de Croquettes", 3),
-            imageUrl: "/card-covers/galadrim/distributeur-de-croquettes-yomy.png",
+            imageUrl: "/card-covers/galadrim/distributeur-de-croquettes-yomy.webp",
             attack: 0,
             health: 4,
         },
@@ -540,7 +540,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         119,
         {
             ...gal("DevOps en Sueur", 2),
-            imageUrl: "/card-covers/galadrim/devops-en-sueur.png",
+            imageUrl: "/card-covers/galadrim/devops-en-sueur.webp",
             attack: 3,
             health: 2,
         },
@@ -554,7 +554,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         137,
         {
             ...gal("Léo Pompier", 20),
-            imageUrl: "/card-covers/galadrim/leo-pompier.png",
+            imageUrl: "/card-covers/galadrim/leo-pompier.webp",
             attack: 8,
             health: 8,
         },
@@ -582,7 +582,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         132,
         {
             ...gal("Fin de Période d'Essai", 2),
-            imageUrl: "/card-covers/galadrim/fin-de-periode-d-essai.png",
+            imageUrl: "/card-covers/galadrim/fin-de-periode-d-essai.webp",
         },
         [destroyAction(targetedAnyMinionWithComparison(costLessThan(4)), true)],
     ),
@@ -590,7 +590,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         133,
         {
             ...gal("Licenciement pour Faute", 5),
-            imageUrl: "/card-covers/galadrim/licenciement-pour-faute.png",
+            imageUrl: "/card-covers/galadrim/licenciement-pour-faute.webp",
         },
         [destroyAction(targetedAnyMinion(), true)],
     ),
@@ -598,7 +598,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         134,
         {
             ...gal("Licenciement collectif", 8),
-            imageUrl: "/card-covers/galadrim/licenciement-collectif.png",
+            imageUrl: "/card-covers/galadrim/licenciement-collectif.webp",
         },
         [destroyAction(allMinions())],
     ),
@@ -606,7 +606,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         135,
         {
             ...gal("Optimisation Salariale", 1),
-            imageUrl: "/card-covers/galadrim/optimisation-salariale.png",
+            imageUrl: "/card-covers/galadrim/optimisation-salariale.webp",
         },
         [destroyAction(targetedAllyMinion(), true), drawAction(2)],
     ),
@@ -625,7 +625,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ]),
     defineSpell(
         120,
-        { ...gal("Jet de Ducros", 2), imageUrl: "/card-covers/galadrim/jet-de-ducros.png" },
+        { ...gal("Jet de Ducros", 2), imageUrl: "/card-covers/galadrim/jet-de-ducros.webp" },
         [
             damageAction(2, targetedAnyMinion(), true, {
                 onTargetResult: onTargetSurvivedWithHealth(healthEquals(1), drawAction(2)),
@@ -634,25 +634,25 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         122,
-        { ...gal("Doom scrolling", 4), imageUrl: "/card-covers/galadrim/doom-scrolling.png" },
+        { ...gal("Doom scrolling", 4), imageUrl: "/card-covers/galadrim/doom-scrolling.webp" },
         [reconversionToCardId(121, targetedAnyMinion(), true)],
     ),
     defineSpell(
         123,
-        { ...gal("Levée de Fonds", 1), imageUrl: "/card-covers/galadrim/levee-de-fonds.png" },
+        { ...gal("Levée de Fonds", 1), imageUrl: "/card-covers/galadrim/levee-de-fonds.webp" },
         [relativeCostReconversion(1, targetedAllyMinion(), true)],
     ),
     defineSpell(
         124,
         {
             ...gal("Coupe Budgétaire", 2),
-            imageUrl: "/card-covers/galadrim/coupe-budgetaire.png",
+            imageUrl: "/card-covers/galadrim/coupe-budgetaire.webp",
         },
         [relativeCostReconversion(-1, enemyMinions())],
     ),
     defineSpell(
         126,
-        { ...gal("Congrès Tech", 5), imageUrl: "/card-covers/galadrim/congres-tech.png" },
+        { ...gal("Congrès Tech", 5), imageUrl: "/card-covers/galadrim/congres-tech.webp" },
         [
             reconversionAction(
                 reconvertParameters({
@@ -667,20 +667,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         127,
         {
             ...gal("Contrat Freelance", 3),
-            imageUrl: "/card-covers/galadrim/contrat-freelance.png",
+            imageUrl: "/card-covers/galadrim/contrat-freelance.webp",
         },
         [reconversionToCardId(125, targetedAnyMinion(), true)],
     ),
     defineSpell(
         128,
-        { ...gal("Débauchage", 8), imageUrl: "/card-covers/galadrim/debauchage.png" },
+        { ...gal("Débauchage", 8), imageUrl: "/card-covers/galadrim/debauchage.webp" },
         [mindControlAction(targetedEnemyMinion(), true)],
     ),
     defineMinion(
         129,
         {
             ...gal("Chasseur de Têtes", 3),
-            imageUrl: "/card-covers/galadrim/chasseur-de-tetes.png",
+            imageUrl: "/card-covers/galadrim/chasseur-de-tetes.webp",
             attack: 3,
             health: 3,
         },
@@ -725,7 +725,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         121,
         {
             ...gal("Légume", 1),
-            imageUrl: "/card-covers/galadrim/legume.png",
+            imageUrl: "/card-covers/galadrim/legume.webp",
             attack: 1,
             health: 1,
         },
@@ -736,7 +736,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         125,
         {
             ...gal("Freelance", 3),
-            imageUrl: "/card-covers/galadrim/freelance.png",
+            imageUrl: "/card-covers/galadrim/freelance.webp",
             attack: 3,
             health: 3,
         },
