@@ -62,7 +62,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     // --- développeur minions ---
     defineMinion(
         62,
-        { ...gal("Stagiaire Dev", 1), attack: 1, health: 1 },
+        {
+            ...gal("Stagiaire Dev", 1),
+            imageUrl: "/card-covers/galadrim/stagiaire-dev.webp",
+            attack: 1,
+            health: 1,
+        },
         {
             tags: ["DEVELOPPEUR"],
             battlecryActions: [drawAction(1, spellDrawFilter())],
@@ -70,7 +75,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         113,
-        { ...gal("Stagiaire Planqué", 1), attack: 2, health: 1 },
+        {
+            ...gal("Stagiaire Planqué", 1),
+            imageUrl: "/card-covers/galadrim/stagiaire-planque.webp",
+            attack: 2,
+            health: 1,
+        },
         {
             minionPowers: {
                 hasStealth: true,
@@ -79,7 +89,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         63,
-        { ...gal("Dev Front-End", 2), attack: 2, health: 3 },
+        {
+            ...gal("Dev Front-End", 2),
+            imageUrl: "/card-covers/galadrim/dev-front-end.webp",
+            attack: 2,
+            health: 3,
+        },
         {
             tags: ["DEVELOPPEUR"],
             battlecryActions: [healAction(5, allyHero())],
@@ -87,7 +102,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         64,
-        { ...gal("Dev Back-End", 2), attack: 2, health: 3 },
+        {
+            ...gal("Dev Back-End", 2),
+            imageUrl: "/card-covers/galadrim/dev-back-end.webp",
+            attack: 2,
+            health: 3,
+        },
         {
             tags: ["DEVELOPPEUR"],
             deathrattleActions: [drawAction(1, minionDrawFilter(["DEVELOPPEUR"]))],
@@ -95,7 +115,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         65,
-        { ...gal("Dev Aigri", 3), attack: 2, health: 3 },
+        {
+            ...gal("Dev Aigri", 3),
+            imageUrl: "/card-covers/galadrim/dev-aigri.webp",
+            attack: 2,
+            health: 3,
+        },
         {
             tags: ["DEVELOPPEUR"],
             minionPowers: {
@@ -271,7 +296,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         130,
-        { ...gal("Avocat d'Affaires", 5), attack: 4, health: 5 },
+        {
+            ...gal("Avocat d'Affaires", 5),
+            imageUrl: "/card-covers/galadrim/avocat-d-affaires.webp",
+            attack: 4,
+            health: 5,
+        },
         {
             tags: ["SUPPORT"],
             passives: [actionPassive("DAMAGE", damageAction(2, enemyHero()), null, allyHero())],
@@ -279,7 +309,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         131,
-        { ...gal("Membre du CSE", 3), attack: 1, health: 3 },
+        {
+            ...gal("Membre du CSE", 3),
+            imageUrl: "/card-covers/galadrim/membre-du-cse.webp",
+            attack: 1,
+            health: 3,
+        },
         {
             tags: ["SUPPORT"],
             passives: [actionPassive("DAMAGE", drawAction(1), null, selfMinion())],
@@ -298,7 +333,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         86,
-        { ...gal("Balin", 5), attack: 4, health: 7 },
+        {
+            ...gal("Balin", 5),
+            imageUrl: "/card-covers/galadrim/balin.webp",
+            attack: 4,
+            health: 7,
+        },
         {
             tags: ["SUPPORT"],
             minionPowers: {
@@ -308,7 +348,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         136,
-        { ...gal("Fanny", 12), attack: 8, health: 8 },
+        {
+            ...gal("Fanny", 12),
+            imageUrl: "/card-covers/galadrim/fanny.webp",
+            attack: 8,
+            health: 8,
+        },
         {
             tags: ["SUPPORT"],
             dynamicCost: { reductions: [{ source: "BOARD_MINION_COUNT", amountPer: 1 }] },
@@ -316,7 +361,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         138,
-        { ...gal("Vincent", 12), attack: 8, health: 8 },
+        {
+            ...gal("Vincent", 12),
+            imageUrl: "/card-covers/galadrim/vincent.webp",
+            attack: 8,
+            health: 8,
+        },
         {
             tags: ["PM"],
             dynamicCost: { reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }] },
@@ -421,7 +471,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     // --- play-card trigger minions ---
     defineMinion(
         115,
-        { ...gal("Commère de l'Open Space", 2), attack: 3, health: 2 },
+        {
+            ...gal("Commère de l'Open Space", 2),
+            imageUrl: "/card-covers/galadrim/commere-de-l-open-space.webp",
+            attack: 3,
+            health: 2,
+        },
         {
             passives: [
                 actionPassive(
@@ -436,7 +491,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         116,
-        { ...gal("Office Manager Dévoué", 3), attack: 3, health: 3 },
+        {
+            ...gal("Office Manager Dévoué", 3),
+            imageUrl: "/card-covers/galadrim/office-manager-devoue.webp",
+            attack: 3,
+            health: 3,
+        },
         {
             tags: ["SUPPORT"],
             passives: [
@@ -446,7 +506,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         117,
-        { ...gal("Alternant Surmotivé", 1), attack: 1, health: 2 },
+        {
+            ...gal("Alternant Surmotivé", 1),
+            imageUrl: "/card-covers/galadrim/alternant-surmotive.webp",
+            attack: 1,
+            health: 2,
+        },
         {
             passives: [
                 actionPassive(
@@ -459,7 +524,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         118,
-        { ...gal("Distributeur de Croquettes", 3), attack: 0, health: 4 },
+        {
+            ...gal("Distributeur de Croquettes", 3),
+            imageUrl: "/card-covers/galadrim/distributeur-de-croquettes-yomy.webp",
+            attack: 0,
+            health: 4,
+        },
         {
             passives: [
                 actionPassive("SUMMON", drawAction(1), null, null, minionDrawFilter(["PETS"])),
@@ -468,7 +538,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         119,
-        { ...gal("DevOps en Sueur", 2), attack: 3, health: 2 },
+        {
+            ...gal("DevOps en Sueur", 2),
+            imageUrl: "/card-covers/galadrim/devops-en-sueur.webp",
+            attack: 3,
+            health: 2,
+        },
         {
             passives: [
                 actionPassive("PLAY_CARD", damageAction(1, allMinions()), spellDrawFilter()),
@@ -477,7 +552,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         137,
-        { ...gal("Léo Pompier", 20), attack: 8, health: 8 },
+        {
+            ...gal("Léo Pompier", 20),
+            imageUrl: "/card-covers/galadrim/leo-pompier.webp",
+            attack: 8,
+            health: 8,
+        },
         {
             tags: ["DEVELOPPEUR"],
             dynamicCost: { reductions: [{ source: "HERO_MISSING_HEALTH", amountPer: 1 }] },
@@ -498,15 +578,38 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(102, gal("Burnout", 3), [
         destroyAction(targetedAnyMinionWithComparison(attackGreaterThan(4)), true),
     ]),
-    defineSpell(132, gal("Fin de Période d'Essai", 2), [
-        destroyAction(targetedAnyMinionWithComparison(costLessThan(4)), true),
-    ]),
-    defineSpell(133, gal("Licenciement pour Faute", 5), [destroyAction(targetedAnyMinion(), true)]),
-    defineSpell(134, gal("Licenciement collectif", 8), [destroyAction(allMinions())]),
-    defineSpell(135, gal("Optimisation Salariale", 1), [
-        destroyAction(targetedAllyMinion(), true),
-        drawAction(2),
-    ]),
+    defineSpell(
+        132,
+        {
+            ...gal("Fin de Période d'Essai", 2),
+            imageUrl: "/card-covers/galadrim/fin-de-periode-d-essai.webp",
+        },
+        [destroyAction(targetedAnyMinionWithComparison(costLessThan(4)), true)],
+    ),
+    defineSpell(
+        133,
+        {
+            ...gal("Licenciement pour Faute", 5),
+            imageUrl: "/card-covers/galadrim/licenciement-pour-faute.webp",
+        },
+        [destroyAction(targetedAnyMinion(), true)],
+    ),
+    defineSpell(
+        134,
+        {
+            ...gal("Licenciement collectif", 8),
+            imageUrl: "/card-covers/galadrim/licenciement-collectif.webp",
+        },
+        [destroyAction(allMinions())],
+    ),
+    defineSpell(
+        135,
+        {
+            ...gal("Optimisation Salariale", 1),
+            imageUrl: "/card-covers/galadrim/optimisation-salariale.webp",
+        },
+        [destroyAction(targetedAllyMinion(), true), drawAction(2)],
+    ),
     defineSpell(103, gal("Team Building", 3), [drawAction(2, minionDrawFilter())]),
     defineSpell(104, gal("Goodies Galadrim", 1), [healAction(5, targetedAllyMinion(), true)]),
     defineSpell(105, gal("Coupure Internet", 6), [damageAction(4, randomEnemyTargets(3))]),
@@ -520,34 +623,67 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(112, gal("Navigation Privée", 1), [
         boostAction(boostAttackWithStealth(1), targetedAnyMinion(), true),
     ]),
-    defineSpell(120, gal("Jet de Ducros", 2), [
-        damageAction(2, targetedAnyMinion(), true, {
-            onTargetResult: onTargetSurvivedWithHealth(healthEquals(1), drawAction(2)),
-        }),
-    ]),
-    defineSpell(122, gal("Doom scrolling", 4), [
-        reconversionToCardId(121, targetedAnyMinion(), true),
-    ]),
-    defineSpell(123, gal("Levée de Fonds", 1), [
-        relativeCostReconversion(1, targetedAllyMinion(), true),
-    ]),
-    defineSpell(124, gal("Coupe Budgétaire", 2), [relativeCostReconversion(-1, enemyMinions())]),
-    defineSpell(126, gal("Congrès Tech", 5), [
-        reconversionAction(
-            reconvertParameters({
-                tags: ["DEVELOPPEUR"],
-                comparison: costLessThan(4),
+    defineSpell(
+        120,
+        { ...gal("Jet de Ducros", 2), imageUrl: "/card-covers/galadrim/jet-de-ducros.webp" },
+        [
+            damageAction(2, targetedAnyMinion(), true, {
+                onTargetResult: onTargetSurvivedWithHealth(healthEquals(1), drawAction(2)),
             }),
-            allMinions(),
-        ),
-    ]),
-    defineSpell(127, gal("Contrat Freelance", 3), [
-        reconversionToCardId(125, targetedAnyMinion(), true),
-    ]),
-    defineSpell(128, gal("Débauchage", 8), [mindControlAction(targetedEnemyMinion(), true)]),
+        ],
+    ),
+    defineSpell(
+        122,
+        { ...gal("Doom scrolling", 4), imageUrl: "/card-covers/galadrim/doom-scrolling.webp" },
+        [reconversionToCardId(121, targetedAnyMinion(), true)],
+    ),
+    defineSpell(
+        123,
+        { ...gal("Levée de Fonds", 1), imageUrl: "/card-covers/galadrim/levee-de-fonds.webp" },
+        [relativeCostReconversion(1, targetedAllyMinion(), true)],
+    ),
+    defineSpell(
+        124,
+        {
+            ...gal("Coupe Budgétaire", 2),
+            imageUrl: "/card-covers/galadrim/coupe-budgetaire.webp",
+        },
+        [relativeCostReconversion(-1, enemyMinions())],
+    ),
+    defineSpell(
+        126,
+        { ...gal("Congrès Tech", 5), imageUrl: "/card-covers/galadrim/congres-tech.webp" },
+        [
+            reconversionAction(
+                reconvertParameters({
+                    tags: ["DEVELOPPEUR"],
+                    comparison: costLessThan(4),
+                }),
+                allMinions(),
+            ),
+        ],
+    ),
+    defineSpell(
+        127,
+        {
+            ...gal("Contrat Freelance", 3),
+            imageUrl: "/card-covers/galadrim/contrat-freelance.webp",
+        },
+        [reconversionToCardId(125, targetedAnyMinion(), true)],
+    ),
+    defineSpell(
+        128,
+        { ...gal("Débauchage", 8), imageUrl: "/card-covers/galadrim/debauchage.webp" },
+        [mindControlAction(targetedEnemyMinion(), true)],
+    ),
     defineMinion(
         129,
-        { ...gal("Chasseur de Têtes", 3), attack: 3, health: 3 },
+        {
+            ...gal("Chasseur de Têtes", 3),
+            imageUrl: "/card-covers/galadrim/chasseur-de-tetes.webp",
+            attack: 3,
+            health: 3,
+        },
         {
             tags: ["SUPPORT"],
             battlecryActions: [
@@ -585,10 +721,25 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [],
         { isCollectible: false },
     ),
-    defineMinion(121, { ...gal("Légume", 1), attack: 1, health: 1 }, {}, { isCollectible: false }),
+    defineMinion(
+        121,
+        {
+            ...gal("Légume", 1),
+            imageUrl: "/card-covers/galadrim/legume.webp",
+            attack: 1,
+            health: 1,
+        },
+        {},
+        { isCollectible: false },
+    ),
     defineMinion(
         125,
-        { ...gal("Freelance", 3), attack: 3, health: 3 },
+        {
+            ...gal("Freelance", 3),
+            imageUrl: "/card-covers/galadrim/freelance.webp",
+            attack: 3,
+            health: 3,
+        },
         {},
         { isCollectible: false },
     ),
