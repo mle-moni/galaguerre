@@ -67,6 +67,32 @@ test.group("resolveReconvertTemplate", () => {
         assert.include(expectedCardIds, template!.cardId);
     });
 
+    test("falls back to source cost when relative negative offset has no matches", ({ assert }) => {
+        const sourceCost = 1;
+        const expectedCardIds = getAllMinionCardTemplates()
+            .filter((template) => template.cost === sourceCost)
+            .map((template) => template.cardId);
+
+        assert.isAbove(expectedCardIds.length, 0);
+
+        const source = createMinionState(createMinionCard({ cost: sourceCost }));
+
+        const template = resolveReconvertTemplate(
+            createReconvertParametersSnapshot({
+                comparison: createComparisonSnapshot({
+                    costComparison: "=",
+                    cost: -1,
+                }),
+                relativeToSource: true,
+            }),
+            source,
+        );
+
+        assert.isDefined(template);
+        assert.include(expectedCardIds, template!.cardId);
+        assert.equal(template!.cost, sourceCost);
+    });
+
     test("returns undefined when no minion matches", ({ assert }) => {
         const source = createMinionState(createMinionCard({ cost: 3 }));
 

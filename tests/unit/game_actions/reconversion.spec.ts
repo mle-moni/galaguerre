@@ -466,6 +466,51 @@ test.group("RECONVERSION action", () => {
         assert.equal(game.data.playerTwo.board.SPOT_2!.originalCard.cost, 2);
     });
 
+    test("falls back to same cost when relative negative offset has no lower minions", ({
+        assert,
+    }) => {
+        const sourceCost = 1;
+        const expectedCardIds = getAllMinionCardTemplates()
+            .filter((template) => template.cost === sourceCost)
+            .map((template) => template.cardId);
+
+        const targetCard = createMinionCard({
+            uuid: "target",
+            cardId: 9999,
+            cost: sourceCost,
+            attack: 5,
+            health: 5,
+        });
+        const target = createMinionState(targetCard);
+
+        const game = createGame(
+            createGameData({
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            game,
+            game.data.playerTwo,
+            "SPOT_1",
+            createReconvertParametersSnapshot({
+                comparison: createComparisonSnapshot({
+                    costComparison: "=",
+                    cost: -1,
+                }),
+                relativeToSource: true,
+            }),
+            target,
+        );
+
+        const reconverted = game.data.playerTwo.board.SPOT_1!.originalCard;
+        assert.include(expectedCardIds, reconverted.cardId);
+        assert.equal(reconverted.cost, sourceCost);
+        assert.notEqual(reconverted.cardId, targetCard.cardId);
+    });
+
     test("does nothing when no catalog minion matches filter", ({ assert }) => {
         const targetCard = createMinionCard({ uuid: "target", cost: 2, attack: 2, health: 2 });
         const target = createMinionState(targetCard);
