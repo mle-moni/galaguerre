@@ -3,6 +3,23 @@
 	--spot-h: 156px;
 	--hand-gap: 20px;
 	--hand-height: 170px;
+	--hand-bottom-offset: 30px;
+	--hand-top-offset: 20px;
+	--hand-reserve-height: calc(var(--hand-height) + var(--hand-bottom-offset) + 16px);
+	--hand-reserve-top-height: calc(var(--hand-height) + var(--hand-top-offset) + 16px);
+}
+
+.desktop-hand-reserve {
+	flex-shrink: 0;
+	pointer-events: none;
+}
+
+.desktop-hand-reserve--bottom {
+	height: var(--hand-reserve-height);
+}
+
+.desktop-hand-reserve--top {
+	height: var(--hand-reserve-top-height);
 }
 
 @media (max-width: 640px) and (orientation: portrait) {

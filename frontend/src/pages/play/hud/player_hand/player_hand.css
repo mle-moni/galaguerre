@@ -1,9 +1,9 @@
 .player-hand {
-	bottom: 30px;
+	bottom: var(--hand-bottom-offset);
 }
 
 .opponent-hand {
-	top: -20px;
+	top: calc(-1 * var(--hand-top-offset));
 }
 
 .card-hand {

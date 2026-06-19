@@ -46,8 +46,18 @@ const DesktopGameLayout = observer<GameRendererProps>(({ game, user }) => {
                 <div className="flex justify-center w-[124px]">
                     <PlayersInfos me={me} opponent={opponent} />
                 </div>
-                <div className="bg-blue-400 flex-1">
-                    <Board />
+                <div className="bg-blue-400 flex-1 flex flex-col min-h-0">
+                    <div
+                        className="desktop-hand-reserve desktop-hand-reserve--top"
+                        aria-hidden="true"
+                    />
+                    <div className="flex-1 min-h-0">
+                        <Board />
+                    </div>
+                    <div
+                        className="desktop-hand-reserve desktop-hand-reserve--bottom"
+                        aria-hidden="true"
+                    />
                 </div>
                 <div className="flex justify-center w-[124px]">
                     <DecksInfos me={me} opponent={opponent} />
