@@ -166,6 +166,20 @@ export class GameStore {
         return this.isMyTurn && !this.isPassTurnPending;
     }
 
+    get isCardDetailHoverDisabled(): boolean {
+        const { cardDragStore, targetSelectionStore, minionDragStore, weaponDragStore } = this;
+
+        return (
+            cardDragStore.cardDragged !== null ||
+            cardDragStore.isShowingMinionPlayHint ||
+            targetSelectionStore.isArmed ||
+            targetSelectionStore.hasPendingSpellDrag ||
+            targetSelectionStore.isSelectingTarget ||
+            minionDragStore.isAttacking ||
+            weaponDragStore.isAttacking
+        );
+    }
+
     requestPassTurn() {
         if (!this.canPassTurn) return;
 

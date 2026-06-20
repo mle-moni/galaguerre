@@ -1,3 +1,4 @@
+import { playerHasBoardSpace } from "#api_types/board";
 import type { PlayerCard } from "#api_types/game.types";
 
 import clsx from "clsx";
@@ -35,6 +36,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
     const canPlay =
         store.isMyTurn &&
         card.cost <= store.me.mana &&
+        (card.type !== "MINION" || playerHasBoardSpace(store.me)) &&
         (card.type === "SPELL" || card.type === "MINION"
             ? !store.targetSelectionStore.requiresTarget(card) ||
               store.targetSelectionStore.hasPlayableTarget(card)
@@ -49,15 +51,20 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         (isArmed || isMinionHinted) && "playing-card--armed",
     );
 
-    const handleInsufficientMana = () => {
+    const handleUnplayableCardClick = () => {
         if (card.cost > store.me.mana) {
             notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            return;
+        }
+
+        if (card.type === "MINION" && !playerHasBoardSpace(store.me)) {
+            notifyError("Votre plateau est plein (7 serviteurs maximum)");
         }
     };
 
     const handlePlayableCardClick = () => {
         if (!canPlay) {
-            handleInsufficientMana();
+            handleUnplayableCardClick();
             return;
         }
 
@@ -68,7 +75,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
 
     const handleMinionClick = () => {
         if (!canPlay) {
-            handleInsufficientMana();
+            handleUnplayableCardClick();
             return;
         }
 
@@ -77,7 +84,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
 
     const handleTargetedSpellPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
         if (!canPlay) {
-            handleInsufficientMana();
+            handleUnplayableCardClick();
             return;
         }
 

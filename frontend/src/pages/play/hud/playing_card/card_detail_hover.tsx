@@ -21,14 +21,14 @@ export const CardDetailHover = observer(
         const [sheetOpened, setSheetOpened] = useState(false);
 
         const shouldShowInfoButton = isMobilePortrait && showDetailButton;
-        const isDraggingCard = store.cardDragStore.cardDragged !== null;
+        const isHoverDisabled = store.isCardDetailHoverDisabled;
 
         if (!isMobilePortrait) {
             return (
                 <CardDetailPopover
                     card={card}
                     spellPower={store.me.spellPower}
-                    disablePointerEvents={isDraggingCard}
+                    disabled={isHoverDisabled}
                     isSilenced={isSilenced}
                 >
                     {children}
