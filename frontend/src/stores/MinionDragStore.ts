@@ -32,6 +32,7 @@ export class MinionDragStore {
     }
 
     startAttack(minion: MinionState) {
+        if (this.gameStore.isInputBlocked) return;
         this.attackingMinion = minion;
     }
 

@@ -78,7 +78,19 @@
 }
 
 .game-animation-floating-text--mana {
-	color: #38bdf8;
+    color: #38bdf8;
+}
+
+.game-animation-source-pulse {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 18px rgba(250, 204, 21, 0.75);
+    pointer-events: none;
+}
+
+.game-animation-source-pulse--DEATHRATTLE {
+    box-shadow: 0 0 18px rgba(148, 163, 184, 0.85);
 }
 
 .game-animation-death {

@@ -13,6 +13,8 @@ import {
     revertPassiveAurasForSource,
 } from "../passive_engine/passive_aura.js";
 import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
+import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 
 export { playerHasBoardSpace } from "#api_types/board";
 
@@ -52,6 +54,16 @@ export const applyMindControlToMinion = (
     if (!inserted) return false;
 
     refreshAurasAfterMinionPlayed(game, controller, boardIndex);
+
+    withNarrativeRecorder((recorder) => {
+        recorder.recordEffect({
+            type: "MIND_CONTROL",
+            cardUuid: minion.uuid,
+            fromOwner: resolveSpotOwner(game, sourceOwner),
+            toOwner: resolveSpotOwner(game, controller),
+            boardIndex,
+        });
+    });
 
     return true;
 };

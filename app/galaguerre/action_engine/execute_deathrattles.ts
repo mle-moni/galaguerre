@@ -1,6 +1,9 @@
 import type { GamePlayer, MinionCard } from "#api_types/game.types";
 import type Game from "#models/game";
 import { recordDeathrattle } from "../game_log/record_game_log.js";
+import { beginLoggedBeat, endCurrentBeat } from "../game_narrative/narrative_beats.js";
+import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import { executeDeathrattleAction } from "./execute_deathrattle_action.js";
 
 const getOpponent = (game: Game, player: GamePlayer): GamePlayer => {
@@ -20,13 +23,31 @@ export const executeDeathrattles = (
 
     if ((card.deathrattleActions ?? []).length > 0) {
         recordDeathrattle(game, player, card);
+        const owner = resolveSpotOwner(game, player);
+
+        withNarrativeRecorder((recorder) => {
+            beginLoggedBeat(game, "TRIGGER");
+            recorder.recordEffect({
+                type: "TRIGGER",
+                cardUuid: card.uuid,
+                owner,
+                trigger: "DEATHRATTLE",
+            });
+        });
     }
 
     for (const action of card.deathrattleActions ?? []) {
         const result = executeDeathrattleAction(game, player, opponent, action);
         if (result.gameEnded || isGameOver(game)) {
+            if ((card.deathrattleActions ?? []).length > 0) {
+                endCurrentBeat(game);
+            }
             return { gameEnded: true };
         }
+    }
+
+    if ((card.deathrattleActions ?? []).length > 0) {
+        endCurrentBeat(game);
     }
 
     return { gameEnded: false };

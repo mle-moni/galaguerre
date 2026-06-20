@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import { clearAllGameTimers } from "../../galaguerre/timers/game_timers.js";
 import { sendGameUpdate } from "./send_game_update.js";
 
-export const terminateGame = async (game: Game) => {
+export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boolean }) => {
     if (game.isFinished) return;
 
     clearAllGameTimers(game.id);
@@ -20,12 +20,16 @@ export const terminateGame = async (game: Game) => {
         const winnerUserId = getWinnerUserId(game);
         game.winnerId = winnerUserId === TRAINING_AI_USER_ID ? null : winnerUserId;
         await game.save();
-        sendGameUpdate(game);
+        if (!options?.skipSendUpdate) {
+            sendGameUpdate(game);
+        }
         return;
     }
 
     await applyGameResult(game);
     await game.save();
 
-    sendGameUpdate(game);
+    if (!options?.skipSendUpdate) {
+        sendGameUpdate(game);
+    }
 };

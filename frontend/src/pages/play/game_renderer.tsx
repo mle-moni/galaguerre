@@ -9,7 +9,6 @@ import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 
 import { GameAnimationOverlay } from "./animations/game_animation_overlay.jsx";
-import { useGameAnimations } from "./animations/use_game_animations.js";
 import { AbandonGameControl } from "./hud/abandon_game/abandon_game_control.jsx";
 import { ArmedCardHint } from "./hud/armed_card_hint/armed_card_hint.jsx";
 import { ActionTimeline } from "./hud/action_timeline/action_timeline.jsx";
@@ -27,12 +26,11 @@ interface GameRendererProps {
     user: ApiUser;
 }
 
-const DesktopGameLayout = observer<GameRendererProps>(({ game, user }) => {
-    const { store } = useGameContext();
+const DesktopGameLayout = observer<GameRendererProps>(({ user }) => {
+    const { store, game } = useGameContext();
     useTargetSelectionCancel(store);
     useArmedCardInteraction(store);
     useTargetingArrow(store);
-    useGameAnimations(game, user.id);
 
     const me = game.data.playerOne.userId === user.id ? game.data.playerOne : game.data.playerTwo;
     const opponent =
@@ -79,8 +77,8 @@ export const GameRenderer = observer<GameRendererProps>(({ game, user }) => {
     const isMobilePortrait = useIsMobilePortrait();
 
     if (isMobilePortrait) {
-        return <MobileGameLayout game={game} user={user} />;
+        return <MobileGameLayout user={user} />;
     }
 
-    return <DesktopGameLayout game={game} user={user} />;
+    return <DesktopGameLayout user={user} />;
 });

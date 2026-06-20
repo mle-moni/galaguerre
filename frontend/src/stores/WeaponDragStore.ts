@@ -29,6 +29,7 @@ export class WeaponDragStore {
     }
 
     startAttack() {
+        if (this.gameStore.isInputBlocked) return;
         this.isAttacking = true;
     }
 

@@ -1,6 +1,9 @@
 import type { ActionTarget, GamePlayer, MinionCard } from "#api_types/game.types";
 import type Game from "#models/game";
 import { recordBattlecry } from "../game_log/record_game_log.js";
+import { beginLoggedBeat, endCurrentBeat } from "../game_narrative/narrative_beats.js";
+import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import { executeAction } from "./execute_action.js";
 import { findMinionOnPlayerBoard } from "./find_minion_on_board.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
@@ -28,6 +31,17 @@ export const executeBattlecries = (
     );
     if (hasValidBattlecry) {
         recordBattlecry(game, player, card);
+        const owner = resolveSpotOwner(game, player);
+
+        withNarrativeRecorder((recorder) => {
+            beginLoggedBeat(game, "TRIGGER");
+            recorder.recordEffect({
+                type: "TRIGGER",
+                cardUuid: card.uuid,
+                owner,
+                trigger: "BATTLECRY",
+            });
+        });
     }
 
     for (const action of card.battlecryActions ?? []) {
@@ -36,8 +50,15 @@ export const executeBattlecries = (
         executeAction(action, game, player, opponent, selectedTarget, 0, sourceMinion);
 
         if (isGameOver(game)) {
+            if (hasValidBattlecry) {
+                endCurrentBeat(game);
+            }
             return { gameEnded: true };
         }
+    }
+
+    if (hasValidBattlecry) {
+        endCurrentBeat(game);
     }
 
     return { gameEnded: false };

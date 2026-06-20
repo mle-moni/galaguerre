@@ -111,6 +111,8 @@ export class TargetSelectionStore {
     }
 
     handlePlayableCardClick(card: ArmedPlayableCard) {
+        if (this.gameStore.isInputBlocked) return;
+
         if (this.isCardArmed(card)) {
             if (card.type === "SPELL" && this.requiresTarget(card)) {
                 return;

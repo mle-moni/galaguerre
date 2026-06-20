@@ -2,6 +2,11 @@ import type { GamePlayer, MinionState } from "#api_types/game.types";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type Game from "#models/game";
 import { getActualDamage, recordDamageDealt } from "../game_stats/record_player_stats.js";
+import {
+    minionEntityRef,
+    recordStatChange,
+    resolveSpotOwner,
+} from "../game_narrative/narrative_effects.js";
 import { triggerDamagePassives } from "../passive_engine/trigger_damage_passives.js";
 import { killMinion } from "./kill_minion.js";
 
@@ -40,6 +45,7 @@ export const applyDamageToMinion = (
     minion: MinionState,
     damage: number,
     sourcePlayer: GamePlayer,
+    options?: { skipNarrative?: boolean },
 ): MinionDamageResult => {
     if (damage <= 0) {
         return { damageDealt: 0, killed: false, gameEnded: false };
@@ -53,6 +59,11 @@ export const applyDamageToMinion = (
     const damageDealt = getActualDamage(minion.health, damage);
     minion.health -= damage;
     recordDamageDealt(sourcePlayer, damageDealt);
+    if (!options?.skipNarrative) {
+        recordStatChange(minionEntityRef(minion, resolveSpotOwner(game, owner)), {
+            healthDelta: -damageDealt,
+        });
+    }
 
     if (damageDealt > 0) {
         const passiveResult = triggerDamagePassives(game, {

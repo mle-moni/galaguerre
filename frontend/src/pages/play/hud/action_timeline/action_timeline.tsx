@@ -10,11 +10,11 @@ import "./action_timeline.css";
 const COMPACT_ENTRY_COUNT = 3;
 
 export const ActionTimeline = observer(() => {
-    const { game } = useGameContext();
+    const { authoritativeGame } = useGameContext();
     const user = useUser();
     const [modalOpened, setModalOpened] = useState(false);
 
-    const actionLog = game.data.actionLog ?? [];
+    const actionLog = authoritativeGame.data.actionLog ?? [];
     const hasEntries = actionLog.length > 0;
     const {
         elementRef,
@@ -66,7 +66,7 @@ export const ActionTimeline = observer(() => {
                     <ActionLogEntry
                         key={entry.id}
                         entry={entry}
-                        game={game}
+                        game={authoritativeGame}
                         currentUserId={user.id}
                     />
                 ))}
@@ -85,7 +85,7 @@ export const ActionTimeline = observer(() => {
                 opened={modalOpened}
                 onClose={() => setModalOpened(false)}
                 entries={actionLog}
-                game={game}
+                game={authoritativeGame}
                 currentUserId={user.id}
             />
         </>

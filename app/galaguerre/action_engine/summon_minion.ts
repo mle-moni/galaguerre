@@ -14,6 +14,8 @@ import { randomUUID } from "node:crypto";
 import { instantiateMinion } from "../../controllers/games/play_card/instantiate_minion.js";
 import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
 import { resolveReconvertTemplate } from "./resolve_reconvert_template.js";
+import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 
 export { playerHasBoardSpace } from "#api_types/board";
 
@@ -112,7 +114,23 @@ export const summonMinionToBoard = (
     const boardIndex = countBoardMinionsOnBoard(owner.board);
 
     const card = cloneTemplateForSummon(template);
-    const { inserted } = insertMinionOnBoard(game, owner, boardIndex, card);
+    const { inserted, boardIndex: insertedIndex } = insertMinionOnBoard(
+        game,
+        owner,
+        boardIndex,
+        card,
+    );
+    if (inserted && insertedIndex !== null) {
+        const ownerSpot = resolveSpotOwner(game, owner);
+        withNarrativeRecorder((recorder) => {
+            recorder.recordEffect({
+                type: "SUMMON",
+                cardUuid: card.uuid,
+                owner: ownerSpot,
+                boardIndex: insertedIndex,
+            });
+        });
+    }
     return { summoned: inserted, summonedCard: inserted ? card : null };
 };
 
@@ -136,8 +154,22 @@ export const summonMinions = (
 
         const card = cloneTemplateForSummon(template);
         const boardIndex = countBoardMinionsOnBoard(owner.board);
-        const { inserted } = insertMinionOnBoard(game, owner, boardIndex, card);
+        const { inserted, boardIndex: insertedIndex } = insertMinionOnBoard(
+            game,
+            owner,
+            boardIndex,
+            card,
+        );
         if (inserted) {
+            const ownerSpot = resolveSpotOwner(game, owner);
+            withNarrativeRecorder((recorder) => {
+                recorder.recordEffect({
+                    type: "SUMMON",
+                    cardUuid: card.uuid,
+                    owner: ownerSpot,
+                    boardIndex: insertedIndex ?? boardIndex,
+                });
+            });
             summonedCards.push(card);
         }
     }

@@ -8,11 +8,17 @@ import {
 } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { requireMinionIndex } from "../../../galaguerre/action_engine/find_minion_on_board.js";
 import {
+    beginLoggedBeat,
+    endCurrentBeat,
+} from "../../../galaguerre/game_narrative/narrative_beats.js";
+import { minionEntityRef } from "../../../galaguerre/game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
+import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
+import {
     ensureValidAttackTarget,
     getMinionIsPoisonous,
     recordMinionAttack,
 } from "../game_utils.js";
-import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 
 export interface MinionActionOptions {
@@ -60,84 +66,134 @@ export const minionToMinionAction = async ({
 
     const attacker = minionInfos.minion;
 
-    recordAttack(game, player, attacker.originalCard, {
-        type: "MINION",
-        card: targetMinion.originalCard,
-    });
+    await runGameActionWithNarrative(game, async () => {
+        recordAttack(game, player, attacker.originalCard, {
+            type: "MINION",
+            card: targetMinion.originalCard,
+        });
 
-    const targetIsPoisonous = getMinionIsPoisonous(targetMinion);
-    const attackerIsPoisonous = getMinionIsPoisonous(attacker);
+        const targetIsPoisonous = getMinionIsPoisonous(targetMinion);
+        const attackerIsPoisonous = getMinionIsPoisonous(attacker);
 
-    const initiatorOwner = minionInfos.position.owner === "PLAYER" ? player : opponent;
-    const targetOwner = opponent;
-    const attackerBoardIndex = requireMinionIndex(initiatorOwner, attacker);
-    if (attackerBoardIndex === -1) return;
+        const initiatorOwner = minionInfos.position.owner === "PLAYER" ? player : opponent;
+        const targetOwner = opponent;
+        const attackerBoardIndex = requireMinionIndex(initiatorOwner, attacker);
+        if (attackerBoardIndex === -1) return;
 
-    if (targetIsPoisonous) {
-        const retaliationResult = applyPoisonousToMinion(
-            game,
-            initiatorOwner,
-            attackerBoardIndex,
-            attacker,
-            opponent,
-        );
-        if (retaliationResult.gameEnded) {
-            await terminateGame(game);
+        const attackerSpotOwner = minionInfos.position.owner;
+        const targetSpotOwner = owner;
+
+        beginLoggedBeat(game, "ATTACK");
+        withNarrativeRecorder((recorder) => {
+            recorder.recordEffect({
+                type: "ATTACK_LUNGE",
+                attackerCardUuid: attacker.uuid,
+                attackerOwner: attackerSpotOwner,
+                target: minionEntityRef(targetMinion, targetSpotOwner),
+            });
+        });
+
+        if (targetIsPoisonous) {
+            withNarrativeRecorder((recorder) => {
+                recorder.recordEffect({
+                    type: "COMBAT_DAMAGE",
+                    sourceCardUuid: targetMinion.uuid,
+                    target: minionEntityRef(attacker, attackerSpotOwner),
+                    amount: attacker.health,
+                });
+            });
+            const retaliationResult = applyPoisonousToMinion(
+                game,
+                initiatorOwner,
+                attackerBoardIndex,
+                attacker,
+                opponent,
+            );
+            if (retaliationResult.gameEnded) {
+                endCurrentBeat(game);
+                await terminateGame(game, { skipSendUpdate: true });
+                return;
+            }
+        } else if (targetMinion.attack > 0) {
+            withNarrativeRecorder((recorder) => {
+                recorder.recordEffect({
+                    type: "COMBAT_DAMAGE",
+                    sourceCardUuid: targetMinion.uuid,
+                    target: minionEntityRef(attacker, attackerSpotOwner),
+                    amount: targetMinion.attack,
+                });
+            });
+            const retaliationResult = applyDamageToMinion(
+                game,
+                initiatorOwner,
+                attackerBoardIndex,
+                attacker,
+                targetMinion.attack,
+                opponent,
+                { skipNarrative: true },
+            );
+            if (retaliationResult.gameEnded) {
+                endCurrentBeat(game);
+                await terminateGame(game, { skipSendUpdate: true });
+                return;
+            }
+        }
+
+        const currentTargetBoardIndex = requireMinionIndex(targetOwner, targetMinion);
+        if (currentTargetBoardIndex === -1) {
+            endCurrentBeat(game);
+            recordMinionAttack(minionInfos.minion, game.data.currentRound);
             return;
         }
-    } else {
-        const retaliationResult = applyDamageToMinion(
-            game,
-            initiatorOwner,
-            attackerBoardIndex,
-            attacker,
-            targetMinion.attack,
-            opponent,
-        );
-        if (retaliationResult.gameEnded) {
-            await terminateGame(game);
-            return;
-        }
-    }
 
-    const currentTargetBoardIndex = requireMinionIndex(targetOwner, targetMinion);
-    if (currentTargetBoardIndex === -1) {
+        if (attackerIsPoisonous) {
+            withNarrativeRecorder((recorder) => {
+                recorder.recordEffect({
+                    type: "COMBAT_DAMAGE",
+                    sourceCardUuid: attacker.uuid,
+                    target: minionEntityRef(targetMinion, targetSpotOwner),
+                    amount: targetMinion.health,
+                });
+            });
+            const attackResult = applyPoisonousToMinion(
+                game,
+                targetOwner,
+                currentTargetBoardIndex,
+                targetMinion,
+                player,
+            );
+            endCurrentBeat(game);
+            if (attackResult.gameEnded) {
+                await terminateGame(game, { skipSendUpdate: true });
+                return;
+            }
+        } else if (attacker.attack > 0) {
+            withNarrativeRecorder((recorder) => {
+                recorder.recordEffect({
+                    type: "COMBAT_DAMAGE",
+                    sourceCardUuid: attacker.uuid,
+                    target: minionEntityRef(targetMinion, targetSpotOwner),
+                    amount: attacker.attack,
+                });
+            });
+            const attackResult = applyDamageToMinion(
+                game,
+                targetOwner,
+                currentTargetBoardIndex,
+                targetMinion,
+                attacker.attack,
+                player,
+                { skipNarrative: true },
+            );
+            endCurrentBeat(game);
+            if (attackResult.gameEnded) {
+                await terminateGame(game, { skipSendUpdate: true });
+                return;
+            }
+        } else {
+            endCurrentBeat(game);
+        }
+
         recordMinionAttack(minionInfos.minion, game.data.currentRound);
-        await game.save();
-        sendGameUpdate(game);
-        return;
-    }
-
-    if (attackerIsPoisonous) {
-        const attackResult = applyPoisonousToMinion(
-            game,
-            targetOwner,
-            currentTargetBoardIndex,
-            targetMinion,
-            player,
-        );
-        if (attackResult.gameEnded) {
-            await terminateGame(game);
-            return;
-        }
-    } else {
-        const attackResult = applyDamageToMinion(
-            game,
-            targetOwner,
-            currentTargetBoardIndex,
-            targetMinion,
-            attacker.attack,
-            player,
-        );
-        if (attackResult.gameEnded) {
-            await terminateGame(game);
-            return;
-        }
-    }
-
-    recordMinionAttack(minionInfos.minion, game.data.currentRound);
-
-    await game.save();
-
-    sendGameUpdate(game);
+    });
 };

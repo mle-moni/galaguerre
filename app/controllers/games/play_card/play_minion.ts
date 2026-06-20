@@ -1,4 +1,4 @@
-import type { ActionTarget, MinionCard } from "#api_types/game.types";
+import type { ActionTarget, MinionCard, SpotOwner } from "#api_types/game.types";
 import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
 import { insertMinionOnBoard } from "../../../galaguerre/action_engine/summon_minion.js";
@@ -14,7 +14,12 @@ import { cardHasPlayableTarget } from "#api_types/target_matching";
 import { computeEffectiveCost } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { playerHasBoardSpace } from "../../../galaguerre/action_engine/apply_mind_control.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { sendGameUpdate } from "../send_game_update.js";
+import {
+    beginLoggedBeat,
+    endCurrentBeat,
+} from "../../../galaguerre/game_narrative/narrative_beats.js";
+import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
+import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
 import { terminateGame } from "../terminate_game.js";
 import type { PlayCardOptions } from "./game_play_card.js";
 
@@ -44,6 +49,11 @@ const validateActionTargetForCard = (
 const isValidBoardIndex = (boardIndex: number, minionCount: number): boolean => {
     return Number.isInteger(boardIndex) && boardIndex >= 0 && boardIndex <= minionCount;
 };
+
+const resolvePlayerOwner = (
+    game: PlayCardOptions["game"],
+    player: PlayCardOptions["player"],
+): SpotOwner => (player === game.data.playerOne ? "PLAYER" : "OPPONENT");
 
 export const playMinion = async ({
     card,
@@ -109,43 +119,54 @@ export const playMinion = async ({
 
     const effectiveCost = computeEffectiveCost(card, player, opponent);
     card.cost = effectiveCost;
+    const spotOwner = resolvePlayerOwner(game, player);
 
-    const { inserted } = insertMinionOnBoard(game, player, boardIndex, card);
-    if (!inserted) {
-        emitSocketEvent(
-            "notify_error",
-            { error: "Vous ne pouvez pas jouer cette carte ici" },
-            socketId,
+    await runGameActionWithNarrative(game, async () => {
+        const { inserted } = insertMinionOnBoard(game, player, boardIndex, card);
+        if (!inserted) {
+            emitSocketEvent(
+                "notify_error",
+                { error: "Vous ne pouvez pas jouer cette carte ici" },
+                socketId,
+            );
+            return;
+        }
+
+        player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
+        recordPlayCard(game, player, card);
+        player.mana -= effectiveCost;
+        recordManaSpent(player, effectiveCost);
+        recordMinionPlayed(player);
+
+        beginLoggedBeat(game, "PLAY_CARD");
+        withNarrativeRecorder((recorder) => {
+            recorder.recordEffect({
+                type: "MOVE_CARD",
+                cardUuid: card.uuid,
+                owner: spotOwner,
+                from: "HAND",
+                to: { type: "BOARD", owner: spotOwner, boardIndex },
+            });
+            recorder.recordEffect({ type: "SPEND_MANA", owner: spotOwner, amount: effectiveCost });
+        });
+        endCurrentBeat(game);
+
+        const { gameEnded: battlecryGameEnded } = executeBattlecries(
+            game,
+            player,
+            card,
+            actionTarget ?? undefined,
         );
-        return;
-    }
 
-    player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
-    recordPlayCard(game, player, card);
-    player.mana -= effectiveCost;
-    recordManaSpent(player, effectiveCost);
-    recordMinionPlayed(player);
+        if (battlecryGameEnded) {
+            await terminateGame(game, { skipSendUpdate: true });
+            return;
+        }
 
-    const { gameEnded: battlecryGameEnded } = executeBattlecries(
-        game,
-        player,
-        card,
-        actionTarget ?? undefined,
-    );
+        const { gameEnded: summonPassiveGameEnded } = triggerSummonPassives(game, player, card);
 
-    if (battlecryGameEnded) {
-        await terminateGame(game);
-        return;
-    }
-
-    const { gameEnded: summonPassiveGameEnded } = triggerSummonPassives(game, player, card);
-
-    if (summonPassiveGameEnded) {
-        await terminateGame(game);
-        return;
-    }
-
-    await game.save();
-
-    sendGameUpdate(game);
+        if (summonPassiveGameEnded) {
+            await terminateGame(game, { skipSendUpdate: true });
+        }
+    });
 };

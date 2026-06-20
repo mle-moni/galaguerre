@@ -8,6 +8,7 @@ import type {
     FloatingTextEvent,
     VisualAnimationEvent,
 } from "~/stores/AnimationStore";
+import { resolveAnimationCompletion } from "~/stores/AnimationStore";
 import { ANIMATION_STORE } from "~/stores/store_singletons";
 import { getRectCenter } from "./game_animation_snapshot.js";
 import "./game_animation_overlay.css";
@@ -57,6 +58,7 @@ const getAttackContactPosition = (fromRect: AnimationRect, toRect: AnimationRect
 
 const removeEvent = (id: string) => {
     ANIMATION_STORE.remove(id);
+    resolveAnimationCompletion(id);
 };
 
 const CardFlight = ({ event }: { event: CardFlightEvent }) => {
@@ -207,6 +209,34 @@ const TurnBanner = ({
     );
 };
 
+const SourcePulse = ({
+    event,
+}: {
+    event: Extract<VisualAnimationEvent, { type: "SOURCE_PULSE" }>;
+}) => {
+    const reduceMotion = useReducedMotion();
+    const center = getRectCenter(event.at);
+
+    return (
+        <motion.div
+            className={`game-animation-source-pulse game-animation-source-pulse--${event.trigger}`}
+            style={{
+                left: center.x - 24,
+                top: center.y - 24,
+                width: 48,
+                height: 48,
+            }}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{
+                opacity: [0, 1, 0],
+                scale: reduceMotion ? 1 : [0.85, 1.2, 1],
+            }}
+            transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: "easeOut" }}
+            onAnimationComplete={() => removeEvent(event.id)}
+        />
+    );
+};
+
 const AnimationEvent = ({ event }: { event: VisualAnimationEvent }) => {
     if (event.type === "CARD_FLIGHT") return <CardFlight event={event} />;
     if (event.type === "ATTACK") return <AttackFlight event={event} />;
@@ -214,6 +244,7 @@ const AnimationEvent = ({ event }: { event: VisualAnimationEvent }) => {
     if (event.type === "DEATH") return <DeathBurst event={event} />;
     if (event.type === "DRAW") return <DrawFlight event={event} />;
     if (event.type === "TURN_BANNER") return <TurnBanner event={event} />;
+    if (event.type === "SOURCE_PULSE") return <SourcePulse event={event} />;
 
     return null;
 };

@@ -6,6 +6,7 @@ import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { fetchCurrentUser } from "./fetch_current_user.js";
 import { queryClient } from "./query_client.js";
 import { notifyApiError, notifyError, notifySuccess } from "./toasts.js";
+import { GAME_STORE } from "~/stores/store_singletons";
 import {
     markSocketDisconnected,
     markSocketReconnecting,
@@ -98,7 +99,9 @@ export const setupEvents = (socket: Socket) => {
         });
     });
 
-    subscribeToSocketEvent("game:update", ({ game }) => {
+    subscribeToSocketEvent("game:update", ({ game, presentation }) => {
+        GAME_STORE.receiveUpdate(game, presentation);
+
         queryClient.setQueryData<ApiGame>(getGameStateQueryKey(game.id), (old) => {
             if (!old) return game;
             if (new Date(game.updatedAt).getTime() < new Date(old.updatedAt).getTime()) {

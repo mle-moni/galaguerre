@@ -49,6 +49,7 @@ export class CardDragStore {
     }
 
     showMinionPlayHint(cardId: string) {
+        if (this.gameStore.isInputBlocked) return;
         this.minionPlayHintCardId = cardId;
         this.gameStore.targetSelectionStore.disarm();
     }
@@ -60,6 +61,8 @@ export class CardDragStore {
     }
 
     setCardDragged(card: PlayerCard | null) {
+        if (card !== null && this.gameStore.isInputBlocked) return;
+
         if (card !== null) {
             this.gameStore.targetSelectionStore.disarm();
             this.clearMinionPlayHint();

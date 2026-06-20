@@ -2,6 +2,9 @@ import { removeMinionByUuid } from "#api_types/board";
 import type { GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
 import { recordMinionDeath } from "../game_log/record_game_log.js";
+import { beginLoggedBeat, endCurrentBeat } from "../game_narrative/narrative_beats.js";
+import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import {
     removeMinionFromAuraTracking,
     revertPassiveAurasForSource,
@@ -27,11 +30,22 @@ export const killMinion = (
 
     const card = minion.originalCard;
     const isSilenced = minion.isSilenced === true;
+    const ownerSpot = resolveSpotOwner(game, owner);
+
+    withNarrativeRecorder((recorder) => {
+        beginLoggedBeat(game, "MINION_DEATH");
+        recorder.recordEffect({ type: "KILL", cardUuid: minion.uuid, owner: ownerSpot });
+    });
+
     revertPassiveAurasForSource(game, owner, minion);
     removeMinionFromAuraTracking(game, minion);
     removeMinionByUuid(owner.board, minionUuid);
 
     recordMinionDeath(game, owner, card);
+
+    withNarrativeRecorder(() => {
+        endCurrentBeat(game);
+    });
     const { gameEnded } = isSilenced
         ? { gameEnded: false }
         : executeDeathrattles(game, owner, card);

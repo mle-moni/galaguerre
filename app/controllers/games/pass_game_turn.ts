@@ -2,23 +2,29 @@ import { recordPassTurn } from "../../galaguerre/game_log/record_game_log.js";
 import { triggerPassives } from "../../galaguerre/passive_engine/trigger_passives.js";
 import type { GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
+import {
+    beginLoggedBeat,
+    endCurrentBeat,
+} from "../../galaguerre/game_narrative/narrative_beats.js";
+import { runGameActionWithNarrative } from "../../galaguerre/game_narrative/run_game_action_with_narrative.js";
 import { ensureIsMyTurn, getGameActionInfos } from "./game_utils.js";
-import { sendGameUpdate } from "./send_game_update.js";
 import { setupNextGameTurn } from "./setup_next_game_turn.js";
 import { terminateGame } from "./terminate_game.js";
 
 export const performPassTurn = async (game: Game, activePlayer: GamePlayer): Promise<void> => {
-    recordPassTurn(game, activePlayer);
+    await runGameActionWithNarrative(game, async () => {
+        recordPassTurn(game, activePlayer);
+        beginLoggedBeat(game, "PASS_TURN");
+        endCurrentBeat(game);
 
-    const { gameEnded: turnEndGameEnded } = triggerPassives(game, "TURN_END", activePlayer);
+        const { gameEnded: turnEndGameEnded } = triggerPassives(game, "TURN_END", activePlayer);
 
-    if (turnEndGameEnded) {
-        await terminateGame(game);
-        return;
-    }
+        if (turnEndGameEnded) {
+            await terminateGame(game, { skipSendUpdate: true });
+        }
+    });
 
-    await game.save();
-    sendGameUpdate(game);
+    if (game.isFinished) return;
 
     await setupNextGameTurn(game);
 };

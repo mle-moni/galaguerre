@@ -1,8 +1,10 @@
+import type { GamePresentationUpdate } from "#api_types/game_narrative.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import { refreshGameDynamicCosts } from "../../galaguerre/dynamic_cost/compute_effective_cost.js";
+import { buildPresentationForUser } from "../../galaguerre/game_narrative/build_presentation_update.js";
 
 const getTrainingHumanUserId = (game: Game): number => {
     if (game.data.playerOne.userId === TRAINING_AI_USER_ID) {
@@ -12,32 +14,30 @@ const getTrainingHumanUserId = (game: Game): number => {
     return game.data.playerOne.userId;
 };
 
-export const sendGameUpdate = (game: Game) => {
+const emitForUser = (game: Game, userId: number, presentation?: GamePresentationUpdate) => {
+    const filteredPresentation = presentation
+        ? buildPresentationForUser(presentation, userId)
+        : undefined;
+
+    emitSocketEvent(
+        "game:update",
+        {
+            game: game.getApiJson(userId),
+            ...(filteredPresentation ? { presentation: filteredPresentation } : {}),
+        },
+        WsRooms.personalSocketRoom(userId),
+    );
+};
+
+export const sendGameUpdate = (game: Game, presentation?: GamePresentationUpdate) => {
     refreshGameDynamicCosts(game.data);
 
     if (game.data.isTraining) {
         const humanUserId = getTrainingHumanUserId(game);
-
-        emitSocketEvent(
-            "game:update",
-            { game: game.getApiJson(humanUserId) },
-            WsRooms.personalSocketRoom(humanUserId),
-        );
+        emitForUser(game, humanUserId, presentation);
         return;
     }
 
-    const p1 = game.data.playerOne;
-    const p2 = game.data.playerTwo;
-
-    emitSocketEvent(
-        "game:update",
-        { game: game.getApiJson(p1.userId) },
-        WsRooms.personalSocketRoom(p1.userId),
-    );
-
-    emitSocketEvent(
-        "game:update",
-        { game: game.getApiJson(p2.userId) },
-        WsRooms.personalSocketRoom(p2.userId),
-    );
+    emitForUser(game, game.data.playerOne.userId, presentation);
+    emitForUser(game, game.data.playerTwo.userId, presentation);
 };

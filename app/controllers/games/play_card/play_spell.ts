@@ -1,4 +1,4 @@
-import type { ActionTarget, SpellCard } from "#api_types/game.types";
+import type { ActionTarget, SpellCard, SpotOwner } from "#api_types/game.types";
 import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
 import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
@@ -12,7 +12,12 @@ import { cardHasPlayableTarget } from "#api_types/target_matching";
 import { computeEffectiveCost } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { playerHasBoardSpace } from "../../../galaguerre/action_engine/apply_mind_control.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { sendGameUpdate } from "../send_game_update.js";
+import {
+    beginLoggedBeat,
+    endCurrentBeat,
+} from "../../../galaguerre/game_narrative/narrative_beats.js";
+import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
+import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
 import { terminateGame } from "../terminate_game.js";
 import type { PlayCardOptions } from "./game_play_card.js";
 
@@ -24,6 +29,11 @@ interface PlaySpellOptions extends Omit<PlayCardOptions, "card"> {
 const getOpponent = (game: PlayCardOptions["game"], player: PlayCardOptions["player"]) => {
     return player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
 };
+
+const resolvePlayerOwner = (
+    game: PlayCardOptions["game"],
+    player: PlayCardOptions["player"],
+): SpotOwner => (player === game.data.playerOne ? "PLAYER" : "OPPONENT");
 
 const validateActionTargetForCard = (
     card: SpellCard,
@@ -85,33 +95,45 @@ export const playSpell = async ({
 
     const effectiveCost = computeEffectiveCost(card, player, opponent);
     card.cost = effectiveCost;
+    const spotOwner = resolvePlayerOwner(game, player);
 
-    player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
-    recordPlayCard(game, player, card);
-    player.mana -= effectiveCost;
-    recordManaSpent(player, effectiveCost);
-    recordSpellCast(player);
+    await runGameActionWithNarrative(game, async () => {
+        player.hand = player.hand.filter((handCard) => handCard.uuid !== card.uuid);
+        recordPlayCard(game, player, card);
+        player.mana -= effectiveCost;
+        recordManaSpent(player, effectiveCost);
+        recordSpellCast(player);
 
-    const { gameEnded: spellGameEnded } = executeSpellEffect(
-        game,
-        player,
-        card,
-        actionTarget ?? undefined,
-    );
+        withNarrativeRecorder((recorder) => {
+            beginLoggedBeat(game, "PLAY_CARD");
+            recorder.recordEffect({
+                type: "MOVE_CARD",
+                cardUuid: card.uuid,
+                owner: spotOwner,
+                from: "HAND",
+                to: { type: "DISCARD" },
+            });
+            recorder.recordEffect({ type: "SPEND_MANA", owner: spotOwner, amount: effectiveCost });
+        });
 
-    if (spellGameEnded) {
-        await terminateGame(game);
-        return;
-    }
+        const { gameEnded: spellGameEnded } = executeSpellEffect(
+            game,
+            player,
+            card,
+            actionTarget ?? undefined,
+        );
 
-    const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
+        endCurrentBeat(game);
 
-    if (playCardPassiveGameEnded) {
-        await terminateGame(game);
-        return;
-    }
+        if (spellGameEnded) {
+            await terminateGame(game, { skipSendUpdate: true });
+            return;
+        }
 
-    await game.save();
+        const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
 
-    sendGameUpdate(game);
+        if (playCardPassiveGameEnded) {
+            await terminateGame(game, { skipSendUpdate: true });
+        }
+    });
 };

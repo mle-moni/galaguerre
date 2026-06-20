@@ -26,10 +26,14 @@ export const GameStateContext = createContext<ApiGame | null>(null);
 
 export const useGameContext = () => {
     const user = useUser();
-    const game = useContext(GameStateContext);
+    const contextGame = useContext(GameStateContext);
 
-    _assert(game, "You must call this from within a GameStateContext provider");
+    _assert(contextGame, "You must call this from within a GameStateContext provider");
     _assert(user, "You must be authenticated to use this hook");
 
-    return { game, store: GAME_STORE };
+    return {
+        game: GAME_STORE.displayGame,
+        authoritativeGame: GAME_STORE.authoritativeGame,
+        store: GAME_STORE,
+    };
 };

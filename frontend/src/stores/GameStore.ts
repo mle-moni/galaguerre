@@ -1,11 +1,13 @@
 import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame, GamePlayer, SpotOwner } from "#api_types/game.types";
+import type { GamePresentationUpdate } from "#api_types/game_narrative.types";
 import { makeAutoObservable } from "mobx";
 import { _assert } from "~/helpers/assertions";
 import { notifyError } from "~/services/toasts";
 import { CLIENT_SOCKET, isSocketReady } from "~/services/ws_client";
 import { CardDragStore } from "./CardDragStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
+import { NarrativeDirector } from "./NarrativeDirector.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
 import { TargetSelectionStore } from "./TargetSelectionStore.js";
 import { TargetingArrowStore } from "./TargetingArrowStore.js";
@@ -28,9 +30,12 @@ export class GameStore {
     playerInfosStore = new PlayerInfosStore(this);
     targetSelectionStore = new TargetSelectionStore(this);
     targetingArrowStore = new TargetingArrowStore(this);
+    narrativeDirector = new NarrativeDirector(this);
 
-    private _game: ApiGame | null = null;
+    private _authoritativeGame: ApiGame | null = null;
+    private _displayGame: ApiGame | null = null;
     private _user: ApiUser | null = null;
+    isNarrativePlaying = false;
     mulliganSelectedCardIds: string[] = [];
     mulliganConfirmedLocally = false;
     private passTurnSubmittedAt: { state: ApiGame["data"]["state"]; round: number } | null = null;
@@ -39,9 +44,18 @@ export class GameStore {
         makeAutoObservable(this);
     }
 
+    get authoritativeGame() {
+        _assert(this._authoritativeGame, "GameStore not initialized");
+        return this._authoritativeGame;
+    }
+
+    get displayGame() {
+        _assert(this._displayGame ?? this._authoritativeGame, "GameStore not initialized");
+        return this._displayGame ?? this._authoritativeGame!;
+    }
+
     get game() {
-        _assert(this._game, "GameStore not initialized");
-        return this._game;
+        return this.displayGame;
     }
 
     get user() {
@@ -49,21 +63,75 @@ export class GameStore {
         return this._user;
     }
 
-    init(game: ApiGame, user: ApiUser): GameStore {
-        const isNewGame = this._game?.id !== game.id;
-        const leavingMulligan =
-            !isNewGame && this._game?.data.state === "MULLIGAN" && game.data.state !== "MULLIGAN";
+    get isInputBlocked() {
+        return this.isNarrativePlaying;
+    }
 
-        this._game = game;
+    setDisplayGame(game: ApiGame) {
+        this._displayGame = game;
+    }
+
+    setNarrativePlaying(isPlaying: boolean) {
+        this.isNarrativePlaying = isPlaying;
+    }
+
+    init(game: ApiGame, user: ApiUser): GameStore {
+        const isNewGame = this._authoritativeGame?.id !== game.id;
+        const leavingMulligan =
+            !isNewGame &&
+            this._authoritativeGame?.data.state === "MULLIGAN" &&
+            game.data.state !== "MULLIGAN";
+
         this._user = user;
 
         if (isNewGame || leavingMulligan) {
             this.mulliganSelectedCardIds = [];
             this.mulliganConfirmedLocally = false;
             this.passTurnSubmittedAt = null;
+            this.narrativeDirector.clear();
         }
 
+        this._authoritativeGame = game;
+        this._displayGame = game;
+        this.isNarrativePlaying = false;
         return this;
+    }
+
+    receiveUpdate(game: ApiGame, presentation?: GamePresentationUpdate) {
+        const isNewGame = this._authoritativeGame?.id !== game.id;
+        this._authoritativeGame = game;
+
+        if (presentation) {
+            this.narrativeDirector.enqueue(presentation, game);
+            return;
+        }
+
+        if (isNewGame) {
+            this.narrativeDirector.clear();
+            this._displayGame = game;
+            this.isNarrativePlaying = false;
+            return;
+        }
+
+        if (!this.isNarrativePlaying && !this.narrativeDirector.narrativePlaying) {
+            this._displayGame = game;
+        }
+    }
+
+    syncFromQuery(game: ApiGame, user: ApiUser) {
+        const isNewGame = this._authoritativeGame?.id !== game.id;
+        if (!this._user || isNewGame) {
+            this.init(game, user);
+            return;
+        }
+
+        this.receiveUpdate(game);
+    }
+
+    skipNarrative() {
+        this.narrativeDirector.skipCurrentScene();
+        this._displayGame = this._authoritativeGame;
+        this.isNarrativePlaying = false;
     }
 
     get isMulligan() {
@@ -71,7 +139,7 @@ export class GameStore {
     }
 
     get hasConfirmedMulligan() {
-        const mulligan = this.game.data.mulligan;
+        const mulligan = this.authoritativeGame.data.mulligan;
         if (!mulligan) return this.mulliganConfirmedLocally;
 
         if (this.me.userId === this.p1.userId) {
@@ -82,7 +150,7 @@ export class GameStore {
     }
 
     toggleMulliganCard(cardId: string) {
-        if (this.hasConfirmedMulligan) return;
+        if (this.hasConfirmedMulligan || this.isInputBlocked) return;
 
         if (this.mulliganSelectedCardIds.includes(cardId)) {
             this.mulliganSelectedCardIds = this.mulliganSelectedCardIds.filter(
@@ -138,9 +206,9 @@ export class GameStore {
     }
 
     get isMyTurn() {
-        const gameState = this.game.data.state;
-        const p1 = this.game.data.playerOne;
-        const p2 = this.game.data.playerTwo;
+        const gameState = this.authoritativeGame.data.state;
+        const p1 = this.authoritativeGame.data.playerOne;
+        const p2 = this.authoritativeGame.data.playerTwo;
 
         if (gameState === "PLAYER_ONE_TURN") {
             return p1.userId === this.user.id;
@@ -157,19 +225,20 @@ export class GameStore {
         if (!this.passTurnSubmittedAt) return false;
 
         return (
-            this.game.data.state === this.passTurnSubmittedAt.state &&
-            this.game.data.currentRound === this.passTurnSubmittedAt.round
+            this.authoritativeGame.data.state === this.passTurnSubmittedAt.state &&
+            this.authoritativeGame.data.currentRound === this.passTurnSubmittedAt.round
         );
     }
 
     get canPassTurn() {
-        return this.isMyTurn && !this.isPassTurnPending;
+        return this.isMyTurn && !this.isPassTurnPending && !this.isInputBlocked;
     }
 
     get isCardDetailHoverDisabled(): boolean {
         const { cardDragStore, targetSelectionStore, minionDragStore, weaponDragStore } = this;
 
         return (
+            this.isInputBlocked ||
             cardDragStore.cardDragged !== null ||
             cardDragStore.isShowingMinionPlayHint ||
             targetSelectionStore.isArmed ||
@@ -189,13 +258,15 @@ export class GameStore {
         }
 
         this.passTurnSubmittedAt = {
-            state: this.game.data.state,
-            round: this.game.data.currentRound,
+            state: this.authoritativeGame.data.state,
+            round: this.authoritativeGame.data.currentRound,
         };
         CLIENT_SOCKET.emit("pass_turn");
     }
 
     handleDrop(boardIndex: number | null, spotOwner: SpotOwner) {
+        if (this.isInputBlocked) return;
+
         const board = spotOwner === "OPPONENT" ? this.opponent.board : this.me.board;
         const actionTarget = {
             minionUuid: boardIndex === null ? null : board[boardIndex]?.uuid ?? null,
@@ -220,6 +291,8 @@ export class GameStore {
     }
 
     handleBoardIndexDrop(boardIndex: number, spotOwner: SpotOwner) {
+        if (this.isInputBlocked) return;
+
         const pendingMinion = this.cardDragStore.pendingMinionCard;
         if (pendingMinion) {
             this.cardDragStore.handleDrop(pendingMinion, boardIndex, spotOwner);

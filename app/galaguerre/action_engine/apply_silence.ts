@@ -8,6 +8,8 @@ import {
     revertPassiveAurasForSource,
 } from "../passive_engine/passive_aura.js";
 import { getTargetBoardEntries } from "./apply_mass_minion_effects.js";
+import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 
 const syncMinionCardEffects = (card: MinionCard): void => {
     card.effects = getMinionPowerEffects(card.minionPowers);
@@ -59,6 +61,14 @@ export const applySilenceToMinion = (game: Game, owner: GamePlayer, boardIndex: 
 
     resetMinionKeywordsOnSilence(minion);
     minion.isSilenced = true;
+
+    withNarrativeRecorder((recorder) => {
+        recorder.recordEffect({
+            type: "SILENCE",
+            cardUuid: minion.uuid,
+            owner: resolveSpotOwner(game, owner),
+        });
+    });
 
     applyExistingAurasToMinion(game, owner, boardIndex);
     recalculateMinionKeywords(game, minion);

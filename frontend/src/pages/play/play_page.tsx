@@ -28,7 +28,7 @@ const Game = ({ gameId, user }: GameProps) => {
     useEffect(() => {
         if (!gameQuery.data) return;
 
-        GAME_STORE.init(gameQuery.data, user);
+        GAME_STORE.syncFromQuery(gameQuery.data, user);
         setIsStoreInit(true);
     }, [gameQuery.data, user]);
 

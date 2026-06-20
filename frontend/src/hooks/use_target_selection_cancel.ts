@@ -4,6 +4,7 @@ import type { GameStore } from "~/stores/GameStore";
 
 export const useTargetSelectionCancel = (store: GameStore) => {
     const isCancelable =
+        store.isNarrativePlaying ||
         store.targetSelectionStore.isArmed ||
         store.targetSelectionStore.isSelectingTarget ||
         store.cardDragStore.isShowingMinionPlayHint ||
@@ -15,6 +16,11 @@ export const useTargetSelectionCancel = (store: GameStore) => {
 
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key !== "Escape") return;
+
+            if (store.isNarrativePlaying) {
+                store.skipNarrative();
+                return;
+            }
 
             cancelArrowTargeting(store);
         };

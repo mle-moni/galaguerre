@@ -7,11 +7,11 @@ import { ActionTimelineModal } from "./action_timeline_modal.jsx";
 import "../mobile/mobile.css";
 
 export const ActionTimelineFab = observer(() => {
-    const { game } = useGameContext();
+    const { authoritativeGame } = useGameContext();
     const user = useUser();
     const [modalOpened, setModalOpened] = useState(false);
 
-    const actionLog = game.data.actionLog ?? [];
+    const actionLog = authoritativeGame.data.actionLog ?? [];
     if (!user || actionLog.length === 0) return null;
 
     return (
@@ -29,7 +29,7 @@ export const ActionTimelineFab = observer(() => {
                 opened={modalOpened}
                 onClose={() => setModalOpened(false)}
                 entries={actionLog}
-                game={game}
+                game={authoritativeGame}
                 currentUserId={user.id}
             />
         </>

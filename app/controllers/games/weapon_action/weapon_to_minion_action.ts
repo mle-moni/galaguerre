@@ -5,8 +5,18 @@ import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import { applyDamageToHero } from "../../../galaguerre/action_engine/apply_damage_to_hero.js";
 import { applyDamageToMinion } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { requireMinionIndex } from "../../../galaguerre/action_engine/find_minion_on_board.js";
+import {
+    beginLoggedBeat,
+    endCurrentBeat,
+} from "../../../galaguerre/game_narrative/narrative_beats.js";
+import {
+    heroEntityRef,
+    minionEntityRef,
+    resolveSpotOwner,
+} from "../../../galaguerre/game_narrative/narrative_effects.js";
+import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
+import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
 import { ensureValidAttackTarget, recordHeroAttack } from "../game_utils.js";
-import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import { reduceWeaponDurability } from "./reduce_weapon_durability.js";
 
@@ -53,40 +63,75 @@ export const weaponToMinionAction = async ({
         return;
     }
 
-    recordAttack(game, player, weaponState.originalCard, {
-        type: "MINION",
-        card: targetMinion.originalCard,
+    const attackerOwner = resolveSpotOwner(game, player);
+
+    await runGameActionWithNarrative(game, async () => {
+        recordAttack(game, player, weaponState.originalCard, {
+            type: "MINION",
+            card: targetMinion.originalCard,
+        });
+
+        beginLoggedBeat(game, "ATTACK");
+        withNarrativeRecorder((recorder) => {
+            recorder.recordEffect({
+                type: "ATTACK_LUNGE",
+                attackerCardUuid: weaponState.originalCard.uuid,
+                attackerOwner,
+                target: minionEntityRef(targetMinion, owner),
+            });
+            recorder.recordEffect({
+                type: "COMBAT_DAMAGE",
+                sourceCardUuid: weaponState.originalCard.uuid,
+                target: minionEntityRef(targetMinion, owner),
+                amount: weaponState.damage,
+            });
+        });
+
+        const weaponDamageResult = applyDamageToMinion(
+            game,
+            opponent,
+            boardIndex,
+            targetMinion,
+            weaponState.damage,
+            player,
+            { skipNarrative: true },
+        );
+        if (weaponDamageResult.gameEnded) {
+            endCurrentBeat(game);
+            await terminateGame(game, { skipSendUpdate: true });
+            return;
+        }
+
+        if (targetMinion.attack > 0) {
+            withNarrativeRecorder((recorder) => {
+                recorder.recordEffect({
+                    type: "COMBAT_DAMAGE",
+                    sourceCardUuid: targetMinion.uuid,
+                    target: heroEntityRef(attackerOwner),
+                    amount: targetMinion.attack,
+                });
+            });
+        }
+
+        const { gameEnded: retaliationGameEnded } = applyDamageToHero(
+            game,
+            player,
+            targetMinion.attack,
+            opponent,
+            { skipNarrative: true },
+        );
+
+        endCurrentBeat(game);
+        recordHeroAttack(player, game.data.currentRound);
+
+        const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
+        if (
+            durabilityGameEnded ||
+            retaliationGameEnded ||
+            player.health <= 0 ||
+            opponent.health <= 0
+        ) {
+            await terminateGame(game, { skipSendUpdate: true });
+        }
     });
-
-    const weaponDamageResult = applyDamageToMinion(
-        game,
-        opponent,
-        boardIndex,
-        targetMinion,
-        weaponState.damage,
-        player,
-    );
-    if (weaponDamageResult.gameEnded) {
-        await terminateGame(game);
-        return;
-    }
-
-    const { gameEnded: retaliationGameEnded } = applyDamageToHero(
-        game,
-        player,
-        targetMinion.attack,
-        opponent,
-    );
-
-    recordHeroAttack(player, game.data.currentRound);
-
-    const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
-    if (durabilityGameEnded || retaliationGameEnded || player.health <= 0 || opponent.health <= 0) {
-        await terminateGame(game);
-        return;
-    }
-
-    await game.save();
-
-    sendGameUpdate(game);
 };
