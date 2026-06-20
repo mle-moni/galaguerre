@@ -16,6 +16,14 @@ export const beginLoggedBeat = (game: GameDataHolder, kind: NarrativeBeatKind): 
     });
 };
 
+/** Starts a beat only when none is open — keeps resolution chains in one scene. */
+export const beginLoggedBeatIfNone = (game: GameDataHolder, kind: NarrativeBeatKind): void => {
+    withNarrativeRecorder((recorder) => {
+        if (recorder.hasCurrentBeat()) return;
+        recorder.beginBeat(kind, { logEntryId: getLastLogEntryId(game) });
+    });
+};
+
 export const endCurrentBeat = (game: GameDataHolder): void => {
     withNarrativeRecorder((recorder) => {
         if (!recorder.hasCurrentBeat()) return;

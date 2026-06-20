@@ -52,12 +52,12 @@ export const weaponToHeroAction = async ({
                 type: "ATTACK_LUNGE",
                 attackerCardUuid: weaponState.originalCard.uuid,
                 attackerOwner,
-                target: heroEntityRef(owner),
+                target: heroEntityRef(resolveSpotOwner(game, opponent)),
             });
             recorder.recordEffect({
                 type: "COMBAT_DAMAGE",
                 sourceCardUuid: weaponState.originalCard.uuid,
-                target: heroEntityRef(owner),
+                target: heroEntityRef(resolveSpotOwner(game, opponent)),
                 amount: weaponState.damage,
             });
         });

@@ -1,4 +1,5 @@
 import { DEFAULT_HERO_HEALTH, MinionCard } from "#api_types/game.types";
+import type { SocketEventByKey } from "#api_types/socket_events";
 import { test } from "@japa/runner";
 import {
     assertBoardIndex,
@@ -17,7 +18,14 @@ import {
     runMinionActionInMemory,
     runMinionActionOnGameInMemory,
 } from "#tests/helpers/game/run_minion_action_in_memory";
-import { assertError } from "#tests/helpers/game/socket_event_collector";
+import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
+import { minionToHeroAction } from "#controllers/games/minion_action/minion_to_hero_action";
+import {
+    assertError,
+    getEmittedEvents,
+    installSocketCollector,
+    restoreSocketCollector,
+} from "#tests/helpers/game/socket_event_collector";
 
 test.group("minion combat", () => {
     test("normal minion vs minion combat subtracts health from both", async ({ assert }) => {
@@ -122,6 +130,70 @@ test.group("minion combat", () => {
             health: 1,
             attacksThisRound: 1,
         });
+    });
+
+    test("hero attack narrative targets opponent hero for player two", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 2,
+            health: 2,
+        });
+        const gameData = createGameData({
+            isTraining: false,
+            state: "PLAYER_TWO_TURN",
+            playerTwo: {
+                board: placeMinion(
+                    createGameData().playerTwo.board,
+                    0,
+                    createMinionState(attackerCard),
+                ),
+            },
+        });
+        const game = createInMemoryGame(gameData);
+        const minion = game.data.playerTwo.board[0]!;
+
+        installSocketCollector();
+        try {
+            await minionToHeroAction({
+                minionInfos: {
+                    minion,
+                    position: { boardIndex: 0, owner: "PLAYER" },
+                },
+                game,
+                player: game.data.playerTwo,
+                opponent: game.data.playerOne,
+                owner: "OPPONENT",
+                socketId: "test-socket",
+            });
+        } finally {
+            restoreSocketCollector();
+        }
+
+        const viewerUpdate = getEmittedEvents().find(
+            (event) => event.event === "game:update" && event.rooms === "users:2",
+        );
+        assert.isDefined(viewerUpdate);
+
+        const presentation = (viewerUpdate!.data as SocketEventByKey["game:update"]).presentation;
+        assert.isDefined(presentation);
+
+        const attackBeat = presentation!.beats.find((beat) => beat.kind === "ATTACK");
+        assert.isDefined(attackBeat);
+
+        const combatDamage = attackBeat!.effects.find((effect) => effect.type === "COMBAT_DAMAGE");
+        assert.isDefined(combatDamage);
+        if (combatDamage?.type !== "COMBAT_DAMAGE") {
+            throw new Error("Expected COMBAT_DAMAGE effect");
+        }
+        assert.equal(combatDamage.target.type, "HERO");
+        assert.equal(combatDamage.target.owner, "OPPONENT");
+
+        const attackLunge = attackBeat!.effects.find((effect) => effect.type === "ATTACK_LUNGE");
+        assert.isDefined(attackLunge);
+        if (attackLunge?.type !== "ATTACK_LUNGE") {
+            throw new Error("Expected ATTACK_LUNGE effect");
+        }
+        assert.equal(attackLunge.target.owner, "OPPONENT");
     });
 
     test("charge allows attack on the turn the minion was placed", async ({ assert }) => {

@@ -68,7 +68,8 @@ export const readGameAnimationSnapshot = (): GameAnimationSnapshot => {
         if (owner !== "PLAYER" && owner !== "OPPONENT") continue;
 
         const boardIndexAttr = element.getAttribute("data-board-index");
-        if (boardIndexAttr === "hero") {
+        const spotId = element.getAttribute("data-spot-id");
+        if (boardIndexAttr === "hero" || spotId === "hero") {
             heroes.set(owner, readRect(element));
             continue;
         }

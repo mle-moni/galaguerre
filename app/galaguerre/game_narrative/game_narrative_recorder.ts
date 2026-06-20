@@ -7,6 +7,7 @@ import type {
 } from "#api_types/game_narrative.types";
 import { randomUUID } from "node:crypto";
 import { cloneGameData } from "./clone_game_data.js";
+import { compactPresentationBeats } from "./compact_presentation_beats.js";
 
 export class GameNarrativeRecorder {
     private stateBefore: GameData | null = null;
@@ -82,10 +83,12 @@ export class GameNarrativeRecorder {
         return {
             updateId: resolvedUpdateId ?? String(Date.now()),
             stateBefore: this.stateBefore,
-            beats: this.beats.map((beat) => ({
-                ...beat,
-                stateAfter: cloneGameData(beat.stateAfter),
-            })),
+            beats: compactPresentationBeats(
+                this.beats.map((beat) => ({
+                    ...beat,
+                    stateAfter: cloneGameData(beat.stateAfter),
+                })),
+            ),
             stateAfter: cloneGameData(game.data),
         };
     }

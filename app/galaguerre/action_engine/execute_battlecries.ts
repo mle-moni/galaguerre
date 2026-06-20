@@ -1,7 +1,7 @@
 import type { ActionTarget, GamePlayer, MinionCard } from "#api_types/game.types";
 import type Game from "#models/game";
 import { recordBattlecry } from "../game_log/record_game_log.js";
-import { beginLoggedBeat, endCurrentBeat } from "../game_narrative/narrative_beats.js";
+import { beginLoggedBeatIfNone, endCurrentBeat } from "../game_narrative/narrative_beats.js";
 import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import { executeAction } from "./execute_action.js";
@@ -29,12 +29,16 @@ export const executeBattlecries = (
     const hasValidBattlecry = (card.battlecryActions ?? []).some(
         (action) => isV1Action(action) || isTargetedV1Action(action),
     );
+    let openedTriggerBeat = false;
     if (hasValidBattlecry) {
         recordBattlecry(game, player, card);
         const owner = resolveSpotOwner(game, player);
 
         withNarrativeRecorder((recorder) => {
-            beginLoggedBeat(game, "TRIGGER");
+            if (!recorder.hasCurrentBeat()) {
+                beginLoggedBeatIfNone(game, "TRIGGER");
+                openedTriggerBeat = true;
+            }
             recorder.recordEffect({
                 type: "TRIGGER",
                 cardUuid: card.uuid,
@@ -50,14 +54,14 @@ export const executeBattlecries = (
         executeAction(action, game, player, opponent, selectedTarget, 0, sourceMinion);
 
         if (isGameOver(game)) {
-            if (hasValidBattlecry) {
+            if (openedTriggerBeat) {
                 endCurrentBeat(game);
             }
             return { gameEnded: true };
         }
     }
 
-    if (hasValidBattlecry) {
+    if (openedTriggerBeat) {
         endCurrentBeat(game);
     }
 

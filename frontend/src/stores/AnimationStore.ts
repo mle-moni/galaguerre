@@ -78,20 +78,16 @@ export type DrawEvent = DrawEventInput & BaseVisualEvent;
 export type TurnBannerEvent = TurnBannerEventInput & BaseVisualEvent;
 export type SourcePulseEvent = SourcePulseEventInput & BaseVisualEvent;
 
+import { getShotDurationMs } from "~/pages/play/animations/shot_durations.js";
+
 let nextAnimationId = 0;
-let pendingCompletionResolvers = new Map<string, () => void>();
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const withAnimationId = (event: VisualAnimationEventInput): VisualAnimationEvent => ({
     ...event,
     id: `animation-${nextAnimationId++}`,
 });
-
-export const resolveAnimationCompletion = (id: string) => {
-    const resolve = pendingCompletionResolvers.get(id);
-    if (!resolve) return;
-    pendingCompletionResolvers.delete(id);
-    resolve();
-};
 
 export class AnimationStore {
     events: VisualAnimationEvent[] = [];
@@ -105,14 +101,38 @@ export class AnimationStore {
         this.events.push(...events.map(withAnimationId));
     }
 
-    async playSequential(events: VisualAnimationEventInput[]): Promise<void> {
+    async playSequential(
+        events: VisualAnimationEventInput[],
+        reducedMotion = false,
+    ): Promise<void> {
         for (const event of events) {
-            const animated = withAnimationId(event);
-            await new Promise<void>((resolve) => {
-                pendingCompletionResolvers.set(animated.id, resolve);
-                this.events.push(animated);
-            });
+            await this.playOne(event, reducedMotion);
         }
+    }
+
+    async playParallel(events: VisualAnimationEventInput[], reducedMotion = false): Promise<void> {
+        if (events.length === 0) return;
+
+        const animated = events.map((event) => withAnimationId(event));
+        this.events.push(...animated);
+
+        const duration = Math.max(
+            ...events.map((event) => getShotDurationMs(event, reducedMotion)),
+        );
+        await wait(duration);
+
+        for (const event of animated) {
+            this.remove(event.id);
+        }
+    }
+
+    private async playOne(event: VisualAnimationEventInput, reducedMotion: boolean): Promise<void> {
+        const animated = withAnimationId(event);
+        this.events.push(animated);
+
+        await wait(getShotDurationMs(event, reducedMotion));
+
+        this.remove(animated.id);
     }
 
     remove(id: string) {

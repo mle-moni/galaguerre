@@ -8,10 +8,14 @@ import type {
     FloatingTextEvent,
     VisualAnimationEvent,
 } from "~/stores/AnimationStore";
-import { resolveAnimationCompletion } from "~/stores/AnimationStore";
 import { ANIMATION_STORE } from "~/stores/store_singletons";
 import { getRectCenter } from "./game_animation_snapshot.js";
+import { getShotDurationSec } from "./shot_durations.js";
 import "./game_animation_overlay.css";
+
+const removeEvent = (id: string) => {
+    ANIMATION_STORE.remove(id);
+};
 
 const clampVisualSize = (rect: AnimationRect) => ({
     width: Math.min(Math.max(rect.width, 54), 96),
@@ -56,11 +60,6 @@ const getAttackContactPosition = (fromRect: AnimationRect, toRect: AnimationRect
     };
 };
 
-const removeEvent = (id: string) => {
-    ANIMATION_STORE.remove(id);
-    resolveAnimationCompletion(id);
-};
-
 const CardFlight = ({ event }: { event: CardFlightEvent }) => {
     const reduceMotion = useReducedMotion();
     const size = clampVisualSize(event.from);
@@ -73,7 +72,10 @@ const CardFlight = ({ event }: { event: CardFlightEvent }) => {
             style={{ width: size.width, height: size.height }}
             initial={{ x: from.x, y: from.y, opacity: 0.75, scale: reduceMotion ? 1 : 0.92 }}
             animate={{ x: to.x, y: to.y, opacity: [0.75, 1, 0], scale: reduceMotion ? 1 : 1.06 }}
-            transition={{ duration: reduceMotion ? 0.16 : 0.42, ease: "easeOut" }}
+            transition={{
+                duration: getShotDurationSec("CARD_FLIGHT", reduceMotion ?? false),
+                ease: "easeOut",
+            }}
             onAnimationComplete={() => removeEvent(event.id)}
         >
             <img src={event.card.imageUrl} alt="" draggable={false} />
@@ -93,7 +95,11 @@ const DrawFlight = ({ event }: { event: DrawEvent }) => {
             className="game-animation-draw-card"
             initial={{ x: from.x, y: from.y, opacity: 0, scale: reduceMotion ? 1 : 0.85 }}
             animate={{ x: to.x, y: to.y, opacity: [0, 1, 0], scale: reduceMotion ? 1 : 1 }}
-            transition={{ duration: reduceMotion ? 0.16 : 0.38, ease: "easeOut", delay }}
+            transition={{
+                duration: getShotDurationSec("DRAW", reduceMotion ?? false),
+                ease: "easeOut",
+                delay,
+            }}
             onAnimationComplete={() => removeEvent(event.id)}
         />
     );
@@ -133,7 +139,7 @@ const AttackFlight = ({ event }: { event: AttackEvent }) => {
                 rotate: reduceMotion ? 0 : [0, tilt, -tilt * 0.4, 0],
             }}
             transition={{
-                duration: reduceMotion ? 0.22 : 0.46,
+                duration: getShotDurationSec("ATTACK", reduceMotion ?? false),
                 ease: "easeOut",
                 times: reduceMotion ? [0, 0.5, 1] : [0, 0.54, 0.68, 1],
             }}
@@ -158,7 +164,10 @@ const FloatingText = ({ event }: { event: FloatingTextEvent }) => {
                 opacity: [0, 1, 1, 0],
                 scale: reduceMotion ? 1 : [0.8, 1.15, 1],
             }}
-            transition={{ duration: reduceMotion ? 0.4 : 0.78, ease: "easeOut" }}
+            transition={{
+                duration: getShotDurationSec("FLOATING_TEXT", reduceMotion ?? false),
+                ease: "easeOut",
+            }}
             onAnimationComplete={() => removeEvent(event.id)}
         >
             {event.label}
@@ -181,7 +190,10 @@ const DeathBurst = ({ event }: { event: Extract<VisualAnimationEvent, { type: "D
                 opacity: 0,
                 scale: reduceMotion ? 1 : 0.72,
             }}
-            transition={{ duration: reduceMotion ? 0.22 : 0.46, ease: "easeOut" }}
+            transition={{
+                duration: getShotDurationSec("DEATH", reduceMotion ?? false),
+                ease: "easeOut",
+            }}
             onAnimationComplete={() => removeEvent(event.id)}
         />
     );
@@ -201,7 +213,10 @@ const TurnBanner = ({
             style={{ left: center.x, top: center.y }}
             initial={{ y: reduceMotion ? 0 : -10, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: [0, 1, 1, 0], scale: reduceMotion ? 1 : 1 }}
-            transition={{ duration: reduceMotion ? 0.7 : 1.15, ease: "easeOut" }}
+            transition={{
+                duration: getShotDurationSec("TURN_BANNER", reduceMotion ?? false),
+                ease: "easeOut",
+            }}
             onAnimationComplete={() => removeEvent(event.id)}
         >
             {event.label}
@@ -231,7 +246,10 @@ const SourcePulse = ({
                 opacity: [0, 1, 0],
                 scale: reduceMotion ? 1 : [0.85, 1.2, 1],
             }}
-            transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: "easeOut" }}
+            transition={{
+                duration: getShotDurationSec("SOURCE_PULSE", reduceMotion ?? false),
+                ease: "easeOut",
+            }}
             onAnimationComplete={() => removeEvent(event.id)}
         />
     );
