@@ -4,6 +4,7 @@ import { UserContext, useUserQuery } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/error_404_page.jsx";
 import { DeckBuilderPage } from "./pages/decks/deck_builder_page.jsx";
 import { DecksPage } from "./pages/decks/decks_page.jsx";
+import { BoardMinionStylesPage } from "./pages/dev/board_minion_styles_page.jsx";
 import { HomePage } from "./pages/home/home_page.jsx";
 import { LoginPage } from "./pages/login/login_page.jsx";
 import { MatchmakingPage } from "./pages/matchmaking/match_making_page.jsx";
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
     {
         path: "/game-history/:userId/:gameId",
         element: <GameHistoryDetailPage />,
+    },
+    {
+        path: "/dev/board-minion-styles",
+        element: <BoardMinionStylesPage />,
     },
     {
         path: "/login",

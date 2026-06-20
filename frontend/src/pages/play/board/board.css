@@ -6,6 +6,10 @@
 	min-height: calc(var(--board-minion-h) + 0.5rem);
 }
 
+.board-minion-variant--rect .board-row--centered {
+	gap: var(--board-minion-gap);
+}
+
 .board-minion-group {
 	display: flex;
 	align-items: center;
@@ -130,6 +134,10 @@
 	border: 2px solid transparent;
 	border-radius: 999px;
 	transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.board-minion-variant--rect .board-minion-slot__frame {
+	border-radius: calc(var(--gg-radius-sm) + 2px);
 }
 
 .board-placement-ghost {

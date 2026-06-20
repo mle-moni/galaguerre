@@ -123,3 +123,51 @@
 .board-minion-token--ghost {
 	border-style: dashed;
 }
+
+/* Rectangle 8:5 — scope with .board-minion-variant--rect on a parent */
+.board-minion-variant--rect {
+	--board-minion-w: 120px;
+	--board-minion-h: calc(var(--board-minion-w) * 5 / 8);
+	--board-stat-badge: 26px;
+	--board-minion-gap: 0.75rem;
+}
+
+.board-minion-variant--rect .board-minion-token {
+	aspect-ratio: 8 / 5;
+	height: auto;
+	border-radius: var(--gg-radius-sm);
+}
+
+.board-minion-variant--rect .board-minion-token__art {
+	inset: 0;
+	border-radius: calc(var(--gg-radius-sm) - 3px);
+}
+
+.board-minion-variant--rect .board-minion-token__image {
+	object-fit: contain;
+}
+
+.board-minion-variant--rect .board-minion-token__stat--attack {
+	left: -6px;
+	bottom: -4px;
+}
+
+.board-minion-variant--rect .board-minion-token__stat--health {
+	right: -6px;
+	bottom: -4px;
+}
+
+.board-minion-variant--rect .board-minion-token__effects {
+	bottom: -6px;
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+	.board-minion-variant--rect {
+		--board-minion-w: clamp(80px, 24vw, 104px);
+		--board-minion-h: calc(var(--board-minion-w) * 5 / 8);
+		--board-stat-badge: clamp(18px, 5vw, 24px);
+		--board-minion-gap: 0.5rem;
+		--spot-w: calc(var(--board-minion-w) + 6px);
+		--spot-h: calc(var(--board-minion-h) + 6px);
+	}
+}

@@ -46,6 +46,7 @@ export const useArmedCardInteraction = (store: GameStore) => {
 
             if (target.closest("[data-playing-card]")) return;
             if (target.closest("[data-target-zone]")) return;
+            if (target.closest("[data-board-insertion-zone]")) return;
 
             cancelArrowTargeting(store);
         };

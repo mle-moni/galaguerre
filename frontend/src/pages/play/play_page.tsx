@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
 import { ConnectionBanner } from "~/components/connection_banner";
+import { useBoardMinionVariant } from "~/hooks/use_board_minion_variant";
 import { GameStateContext, useGameState } from "~/hooks/use_game_state";
 import { useIsSocketReady } from "~/hooks/use_socket_connection";
 import { useUser } from "~/hooks/use_user";
@@ -44,6 +45,7 @@ const Game = ({ gameId, user }: GameProps) => {
 
 export const PlayPage = () => {
     const user = useUser();
+    const boardMinionVariant = useBoardMinionVariant();
 
     useEffect(() => {
         document.documentElement.classList.add("play-page-active");
@@ -56,7 +58,12 @@ export const PlayPage = () => {
     if (!user.currentGameId) return <Navigate to="/matchmaking" />;
 
     return (
-        <div className="play-page">
+        <div
+            className={clsx(
+                "play-page",
+                boardMinionVariant === "rect" && "board-minion-variant--rect",
+            )}
+        >
             <ConnectionBanner />
             <Game user={user} gameId={user.currentGameId} />
         </div>

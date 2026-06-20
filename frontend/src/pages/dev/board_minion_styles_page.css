@@ -1,0 +1,64 @@
+.board-minion-styles {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.board-minion-styles__intro {
+	margin: 0;
+	color: rgba(255, 255, 255, 0.75);
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+
+.board-minion-styles__link {
+	color: var(--gg-gold);
+	font-weight: 600;
+}
+
+.board-minion-styles__section {
+	padding: 1.25rem;
+	border-radius: var(--gg-radius);
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.board-minion-styles__title {
+	margin: 0 0 0.35rem;
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--gg-text-on-dark);
+}
+
+.board-minion-styles__description {
+	margin: 0 0 1rem;
+	font-size: 0.85rem;
+	color: rgba(255, 255, 255, 0.6);
+}
+
+.board-minion-styles__row {
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	margin-bottom: 1.5rem;
+}
+
+.board-minion-styles__status-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.5rem;
+}
+
+.board-minion-styles__status-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.board-minion-styles__status-label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.55);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
