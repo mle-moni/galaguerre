@@ -1,9 +1,10 @@
-import type { GameData, MinionSpotId, SpotOwner } from "#api_types/game.types";
+import type { GameData, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
     canWeaponAttack,
     ensureIsMyTurn,
+    findMinionInBoard,
     getHeroAttacksThisRound,
     whichPlayerAmI,
 } from "#controllers/games/game_utils";
@@ -21,7 +22,7 @@ const TEST_SOCKET_ID = "test-socket";
 export type PlayerKey = "playerOne" | "playerTwo";
 
 export interface WeaponActionInMemoryAction {
-    spotId: MinionSpotId | null;
+    minionUuid: string | null;
     owner: SpotOwner;
 }
 
@@ -67,7 +68,7 @@ export const runWeaponActionInMemory = async (
             return { game, errors: getErrors() };
         }
 
-        if (action.spotId === null) {
+        if (action.minionUuid === null) {
             await weaponToHeroAction({
                 weaponState,
                 game,
@@ -77,13 +78,28 @@ export const runWeaponActionInMemory = async (
                 socketId: TEST_SOCKET_ID,
             });
         } else {
+            const targetBoard = action.owner === "PLAYER" ? player.board : opponent.board;
+            const targetMinionInfos = findMinionInBoard(
+                targetBoard,
+                action.minionUuid,
+                action.owner,
+            );
+            if (!targetMinionInfos) {
+                emitSocketEvent(
+                    "notify_error",
+                    { error: "Vous ne pouvez pas attaquer ce serviteur ici" },
+                    TEST_SOCKET_ID,
+                );
+                return { game, errors: getErrors() };
+            }
+
             await weaponToMinionAction({
                 weaponState,
                 game,
                 player,
                 opponent,
                 owner: action.owner,
-                spotId: action.spotId,
+                targetMinion: targetMinionInfos.minion,
                 socketId: TEST_SOCKET_ID,
             });
         }

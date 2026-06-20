@@ -1,4 +1,5 @@
-import { MINION_SPOT_IDS, SPOT_OWNERS } from "#api_types/game.types";
+import { MAX_BOARD_MINIONS } from "#api_types/board";
+import { SPOT_OWNERS } from "#api_types/game.types";
 import { joinAuthRestrictedEvents } from "#controllers/auth/socket/auth_restricted_events";
 import { addSocketData, removeSocketData } from "#services/sockets/sockets_data";
 import vine from "@vinejs/vine";
@@ -84,7 +85,7 @@ export const runInvalidPlayCardPayload = async (payload: unknown): Promise<strin
 export const minionActionVineSchema = vine.compile(
     vine.object({
         minionId: vine.string(),
-        spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+        minionUuid: vine.string().nullable(),
         owner: vine.enum(SPOT_OWNERS),
     }),
 );
@@ -92,11 +93,11 @@ export const minionActionVineSchema = vine.compile(
 export const playCardVineSchema = vine.compile(
     vine.object({
         cardId: vine.string(),
-        spotId: vine.enum(MINION_SPOT_IDS),
+        boardIndex: vine.number().min(0).max(MAX_BOARD_MINIONS).nullable(),
         owner: vine.enum(SPOT_OWNERS),
         actionTarget: vine
             .object({
-                spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+                minionUuid: vine.string().nullable(),
                 owner: vine.enum(SPOT_OWNERS),
             })
             .optional(),

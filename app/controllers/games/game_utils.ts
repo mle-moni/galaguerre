@@ -1,15 +1,14 @@
 import {
     type BoardState,
     type GamePlayer,
-    MINION_SPOT_IDS,
     type MinionPosition,
-    type MinionSpotId,
     type MinionState,
     type PlayerCard,
     type PlayerNumber,
     type SpotOwner,
     type WeaponState,
 } from "#api_types/game.types";
+import { migrateGameBoards } from "#api_types/board";
 import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
@@ -51,6 +50,10 @@ export const getGameActionInfos = async (socketId: string) => {
     if (!currentGame) {
         emitSocketEvent("notify_error", { error: "Vous n'êtes pas en jeu" }, socketId);
         return null;
+    }
+
+    if (migrateGameBoards(currentGame.data.playerOne, currentGame.data.playerTwo)) {
+        await currentGame.save();
     }
 
     return {
@@ -124,16 +127,13 @@ export const findMinionInBoard = (
     minionId: string,
     owner: SpotOwner,
 ): MinionPosition | null => {
-    for (const spotId of MINION_SPOT_IDS) {
-        const minion = board[spotId];
-        if (minion?.uuid === minionId)
-            return {
-                position: { spotId, owner },
-                minion,
-            };
-    }
+    const boardIndex = board.findIndex((minion) => minion.uuid === minionId);
+    if (boardIndex === -1) return null;
 
-    return null;
+    return {
+        position: { boardIndex, owner },
+        minion: board[boardIndex],
+    };
 };
 
 export const ensureMinionFoundInBoard = (
@@ -205,19 +205,13 @@ export const canMinionAttack = (minion: MinionState, currentRound: number): bool
 };
 
 export const boardHasTaunt = (board: BoardState): boolean => {
-    return MINION_SPOT_IDS.some((spotId) => {
-        const minion = board[spotId];
-        return minion !== null && getMinionHasTaunt(minion);
-    });
+    return board.some((minion) => getMinionHasTaunt(minion));
 };
 
 export const boardHasAttackableTaunt = (board: BoardState): boolean => {
-    return MINION_SPOT_IDS.some((spotId) => {
-        const minion = board[spotId];
-        return (
-            minion !== null && getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion)
-        );
-    });
+    return board.some(
+        (minion) => getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion),
+    );
 };
 
 export const getHeroAttacksThisRound = (player: GamePlayer, currentRound: number): number => {
@@ -250,13 +244,12 @@ export const canWeaponAttack = (
 
 export const ensureValidAttackTarget = (
     opponentBoard: BoardState,
-    spotId: MinionSpotId | null,
     owner: SpotOwner,
     targetMinion: MinionState | null,
     socketId: string,
 ): boolean => {
     if (boardHasAttackableTaunt(opponentBoard)) {
-        if (spotId === null || owner !== "OPPONENT") {
+        if (!targetMinion || owner !== "OPPONENT") {
             emitSocketEvent(
                 "notify_error",
                 { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
@@ -265,7 +258,7 @@ export const ensureValidAttackTarget = (
             return false;
         }
 
-        if (!targetMinion || !getMinionHasTaunt(targetMinion)) {
+        if (!getMinionHasTaunt(targetMinion)) {
             emitSocketEvent(
                 "notify_error",
                 { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
@@ -275,12 +268,7 @@ export const ensureValidAttackTarget = (
         }
     }
 
-    if (
-        spotId !== null &&
-        owner === "OPPONENT" &&
-        targetMinion &&
-        !canOpponentDirectlyTargetMinion(targetMinion)
-    ) {
+    if (targetMinion && owner === "OPPONENT" && !canOpponentDirectlyTargetMinion(targetMinion)) {
         emitSocketEvent("notify_error", { error: "Ce serviteur ne peut pas être ciblé" }, socketId);
         return false;
     }

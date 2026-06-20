@@ -1,6 +1,6 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
     createBoostSnapshot,
@@ -43,7 +43,7 @@ test.group("play card rules", () => {
 
         assert.equal(game.data.playerOne.mana, 2);
         assert.equal(game.data.playerOne.hand.length, 0);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2, health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 2, health: 3 });
     });
 
     test("sets placedAtRound to current round for summoning sickness", async ({ assert }) => {
@@ -65,7 +65,7 @@ test.group("play card rules", () => {
             handCard,
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { placedAtRound: 5 });
+        assertBoardIndex(assert, game, "playerOne", 0, { placedAtRound: 5 });
     });
 
     test("equips a weapon from hand", async ({ assert }) => {
@@ -190,7 +190,7 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
             },
         );
@@ -203,7 +203,7 @@ test.group("play card rules", () => {
     test("rejects play when card is not in hand", async ({ assert }) => {
         const { errors } = await runPlayCardInMemory(createGameData(), "playerOne", {
             cardId: "missing-card",
-            spotId: "SPOT_1",
+            boardIndex: 0,
             owner: "PLAYER",
         });
 
@@ -211,21 +211,23 @@ test.group("play card rules", () => {
         assert.equal(errors[0], "Cette carte n'est pas dans votre main (gros con)");
     });
 
-    test("rejects play on an occupied spot", async ({ assert }) => {
+    test("inserts a minion before existing board minions", async ({ assert }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 1,
+            attack: 1,
+            health: 1,
         });
-        const existing = createMinionCard({ uuid: "existing-minion" });
+        const existing = createMinionCard({ uuid: "existing-minion", attack: 4, health: 5 });
 
-        await runPlayCardInMemory(
+        const { game } = await runPlayCardInMemory(
             createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
                     board: placeMinion(
                         createGameData().playerOne.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(existing),
                     ),
                 },
@@ -233,7 +235,66 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
+                owner: "PLAYER",
+            },
+        );
+
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 1, health: 1 });
+        assertBoardIndex(assert, game, "playerOne", 1, { attack: 4, health: 5 });
+    });
+
+    test("rejects play when board is full", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 1,
+        });
+        let board = createGameData().playerOne.board;
+
+        for (let index = 0; index < 7; index++) {
+            board = placeMinion(
+                board,
+                index,
+                createMinionState(createMinionCard({ uuid: `filler-${index}` })),
+            );
+        }
+
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board,
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                boardIndex: 7,
+                owner: "PLAYER",
+            },
+        );
+
+        assertError(assert, "Vous ne pouvez pas jouer cette carte ici");
+    });
+
+    test("rejects invalid board index", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            cost: 1,
+        });
+
+        await runPlayCardInMemory(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                },
+            }),
+            "playerOne",
+            {
+                cardId: CARD_IDS.handMinion,
+                boardIndex: 2,
                 owner: "PLAYER",
             },
         );
@@ -257,7 +318,7 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "OPPONENT",
             },
         );
@@ -278,7 +339,7 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.spell,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
             },
         );
@@ -311,7 +372,7 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.spell,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
             },
         );
@@ -336,7 +397,7 @@ test.group("play card rules", () => {
             "playerTwo",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
             },
         );
@@ -366,7 +427,7 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
             },
         );
@@ -405,7 +466,7 @@ test.group("play card rules", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_2",
+                        1,
                         createMinionState(targetCard),
                     ),
                 },
@@ -413,9 +474,9 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
-                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+                actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" },
             },
         );
 
@@ -452,7 +513,7 @@ test.group("play card rules", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_2",
+                        1,
                         createMinionState(targetCard, { attack: 1 }),
                     ),
                 },
@@ -460,9 +521,9 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
-                actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" },
+                actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" },
             },
         );
 
@@ -490,7 +551,7 @@ test.group("play card rules", () => {
             "playerOne",
             {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
             },
         );

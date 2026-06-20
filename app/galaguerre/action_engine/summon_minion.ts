@@ -1,7 +1,11 @@
+import {
+    countBoardMinionsOnBoard,
+    insertMinionAtIndex,
+    playerHasBoardSpace,
+} from "#api_types/board";
 import type {
     GamePlayer,
     MinionCard,
-    MinionSpotId,
     MinionState,
     ReconvertParametersSnapshot,
 } from "#api_types/game.types";
@@ -9,8 +13,9 @@ import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
 import { instantiateMinion } from "../../controllers/games/play_card/instantiate_minion.js";
 import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
-import { findFirstEmptyBoardSpot } from "./apply_mind_control.js";
 import { resolveReconvertTemplate } from "./resolve_reconvert_template.js";
+
+export { playerHasBoardSpace } from "#api_types/board";
 
 const getOpponent = (game: Game, player: GamePlayer): GamePlayer => {
     return player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
@@ -75,20 +80,22 @@ const createDefaultSourceMinion = (): MinionState => ({
     isSilenced: false,
 });
 
-export const summonMinionAtSpot = (
+export const insertMinionOnBoard = (
     game: Game,
     owner: GamePlayer,
-    spotId: MinionSpotId,
+    boardIndex: number,
     card: MinionCard,
-): { summoned: boolean } => {
-    if (owner.board[spotId] !== null) {
-        return { summoned: false };
+): { inserted: boolean; boardIndex: number | null } => {
+    const minion = instantiateMinion(card, game.data.currentRound);
+    const { inserted } = insertMinionAtIndex(owner.board, boardIndex, minion);
+
+    if (!inserted) {
+        return { inserted: false, boardIndex: null };
     }
 
-    owner.board[spotId] = instantiateMinion(card, game.data.currentRound);
-    refreshAurasAfterMinionPlayed(game, owner, spotId);
+    refreshAurasAfterMinionPlayed(game, owner, boardIndex);
 
-    return { summoned: true };
+    return { inserted: true, boardIndex };
 };
 
 export const summonMinionToBoard = (
@@ -98,14 +105,15 @@ export const summonMinionToBoard = (
     template: MinionCard,
 ): { summoned: boolean; summonedCard: MinionCard | null } => {
     const owner = targetTeam === "PLAYER" ? controller : getOpponent(game, controller);
-    const spotId = findFirstEmptyBoardSpot(owner.board);
-    if (!spotId) {
+    if (!playerHasBoardSpace(owner)) {
         return { summoned: false, summonedCard: null };
     }
 
+    const boardIndex = countBoardMinionsOnBoard(owner.board);
+
     const card = cloneTemplateForSummon(template);
-    const { summoned } = summonMinionAtSpot(game, owner, spotId, card);
-    return { summoned, summonedCard: summoned ? card : null };
+    const { inserted } = insertMinionOnBoard(game, owner, boardIndex, card);
+    return { summoned: inserted, summonedCard: inserted ? card : null };
 };
 
 export const summonMinions = (
@@ -121,15 +129,15 @@ export const summonMinions = (
     const sourceForTemplate = sourceMinion ?? createDefaultSourceMinion();
 
     for (let i = 0; i < count; i++) {
-        const spotId = findFirstEmptyBoardSpot(owner.board);
-        if (!spotId) break;
+        if (!playerHasBoardSpace(owner)) break;
 
         const template = resolveReconvertTemplate(parameters, sourceForTemplate);
         if (!template) break;
 
         const card = cloneTemplateForSummon(template);
-        const { summoned } = summonMinionAtSpot(game, owner, spotId, card);
-        if (summoned) {
+        const boardIndex = countBoardMinionsOnBoard(owner.board);
+        const { inserted } = insertMinionOnBoard(game, owner, boardIndex, card);
+        if (inserted) {
             summonedCards.push(card);
         }
     }

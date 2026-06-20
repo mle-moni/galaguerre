@@ -1,6 +1,6 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     createGameData,
     createMinionCard,
@@ -28,7 +28,7 @@ test.group("weapon combat", () => {
                     weaponState: createWeaponState(weaponCard),
                 },
             }),
-            { spotId: null },
+            { heroAttack: true },
         );
 
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
@@ -53,15 +53,15 @@ test.group("weapon combat", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(targetCard),
                     ),
                 },
             }),
-            { spotId: "SPOT_1" },
+            { targetIndex: 0 },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 1 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 2);
         assert.equal(game.data.playerOne.weaponState!.durability, 1);
     });
@@ -75,7 +75,7 @@ test.group("weapon combat", () => {
                     weaponState: createWeaponState(weaponCard),
                 },
             }),
-            { spotId: null },
+            { heroAttack: true },
         );
 
         assert.isNull(game.data.playerOne.weaponState);
@@ -114,7 +114,7 @@ test.group("weapon combat", () => {
         assert.equal(playGame.data.playerOne.heroAttacksThisRound, 0);
         assert.equal(playGame.data.playerOne.weaponState!.damage, 4);
 
-        const { game: attackGame } = await runWeaponCombatOnGame(playGame, { spotId: null });
+        const { game: attackGame } = await runWeaponCombatOnGame(playGame, { heroAttack: true });
 
         assertPlayerHealth(assert, attackGame, "playerTwo", DEFAULT_HERO_HEALTH - 4);
         assert.equal(attackGame.data.playerOne.heroAttacksThisRound, 1);
@@ -134,7 +134,7 @@ test.group("weapon combat", () => {
                 },
             }),
             "playerOne",
-            { spotId: null, owner: "OPPONENT" },
+            { minionUuid: null, owner: "OPPONENT" },
         );
 
         assertError(assert, "Vous avez déjà attaqué avec votre arme ce tour");
@@ -161,7 +161,7 @@ test.group("weapon combat", () => {
                 },
             }),
             "playerOne",
-            { spotId: null, owner: "OPPONENT" },
+            { minionUuid: null, owner: "OPPONENT" },
         );
 
         assert.isNull(firstAttack.game.data.playerOne.weaponState);
@@ -170,7 +170,7 @@ test.group("weapon combat", () => {
         await runPlayWeaponOnGame(firstAttack.game, newWeapon);
 
         await runWeaponActionOnGameInMemory(firstAttack.game, "playerOne", {
-            spotId: null,
+            minionUuid: null,
             owner: "OPPONENT",
         });
 
@@ -193,13 +193,13 @@ test.group("weapon combat", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(tauntCard),
                     ),
                 },
             }),
             "playerOne",
-            { spotId: null, owner: "OPPONENT" },
+            { minionUuid: null, owner: "OPPONENT" },
         );
 
         assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
@@ -223,13 +223,13 @@ test.group("weapon combat", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(stealthTauntCard),
                     ),
                 },
             }),
             "playerOne",
-            { spotId: null, owner: "OPPONENT" },
+            { minionUuid: null, owner: "OPPONENT" },
         );
 
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
@@ -237,7 +237,7 @@ test.group("weapon combat", () => {
 
     test("rejects weapon action when no weapon equipped", async ({ assert }) => {
         await runWeaponActionInMemory(createGameData(), "playerOne", {
-            spotId: null,
+            minionUuid: null,
             owner: "OPPONENT",
         });
 

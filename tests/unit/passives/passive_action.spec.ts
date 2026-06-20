@@ -14,7 +14,7 @@ import {
     createPassiveSnapshot,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 
 const createGame = (data: ReturnType<typeof createGameData>) => ({ data }) as Game;
 
@@ -39,7 +39,7 @@ test.group("passive ACTION triggers", () => {
             state: "PLAYER_ONE_TURN",
             currentRound: 1,
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         });
@@ -70,7 +70,7 @@ test.group("passive ACTION triggers", () => {
         const data = createGameData({
             state: "PLAYER_ONE_TURN",
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
                 deckCards: [deckCard],
                 hand: [],
             },
@@ -102,7 +102,7 @@ test.group("passive ACTION triggers", () => {
         const data = createGameData({
             playerOne: {
                 health: 10,
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         });
@@ -146,8 +146,8 @@ test.group("passive ACTION triggers", () => {
             currentRound: 1,
             playerOne: {
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+                    1,
                     createMinionState(allyMinion),
                 ),
             },
@@ -157,8 +157,8 @@ test.group("passive ACTION triggers", () => {
         const { gameEnded } = triggerPassives(game, "TURN_END", game.data.playerOne);
 
         assert.isFalse(gameEnded);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 3 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 2 });
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 2 });
     });
 
     test("TURN_END passive with onlySelf boosts only the source minion", ({ assert }) => {
@@ -185,8 +185,8 @@ test.group("passive ACTION triggers", () => {
             currentRound: 1,
             playerOne: {
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+                    1,
                     createMinionState(allyMinion),
                 ),
             },
@@ -196,8 +196,8 @@ test.group("passive ACTION triggers", () => {
         const { gameEnded } = triggerPassives(game, "TURN_END", game.data.playerOne);
 
         assert.isFalse(gameEnded);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2, health: 2 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 2, health: 2 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 2, health: 2 });
+        assertBoardIndex(assert, game, "playerOne", 1, { attack: 2, health: 2 });
     });
 
     test("TURN_END passive without excludeSelf damages all allied minions", ({ assert }) => {
@@ -223,8 +223,8 @@ test.group("passive ACTION triggers", () => {
             currentRound: 1,
             playerOne: {
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+                    1,
                     createMinionState(allyMinion),
                 ),
             },
@@ -234,8 +234,8 @@ test.group("passive ACTION triggers", () => {
         const { gameEnded } = triggerPassives(game, "TURN_END", game.data.playerOne);
 
         assert.isFalse(gameEnded);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 2 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 2 });
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 2 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 2 });
     });
 
     test("TURN_BEGIN passive can end the game", ({ assert }) => {
@@ -257,7 +257,7 @@ test.group("passive ACTION triggers", () => {
         const data = createGameData({
             state: "PLAYER_ONE_TURN",
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 10 },
         });
@@ -290,8 +290,8 @@ test.group("passive ACTION triggers", () => {
         const data = createGameData({
             playerOne: {
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+                    1,
                     createMinionState(allyMinion),
                 ),
             },
@@ -309,11 +309,11 @@ test.group("passive ACTION triggers", () => {
             game,
             game.data.playerOne,
             game.data.playerTwo,
-            { spotId: "SPOT_2", owner: "PLAYER" },
+            { minionUuid: "ally-minion", owner: "PLAYER" },
         );
 
         assertPlayerHealth(assert, game, "playerTwo", 14);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 3 });
     });
 
     test("DAMAGE passive with onlySelf triggers when the source minion takes damage", ({
@@ -338,7 +338,7 @@ test.group("passive ACTION triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         });
@@ -354,11 +354,11 @@ test.group("passive ACTION triggers", () => {
             game,
             game.data.playerOne,
             game.data.playerTwo,
-            { spotId: "SPOT_1", owner: "PLAYER" },
+            { minionUuid: "passive-minion", owner: "PLAYER" },
         );
 
         assertPlayerHealth(assert, game, "playerTwo", 14);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 3 });
     });
 
     test("DAMAGE passive with filter does not trigger on non-matching target", ({ assert }) => {
@@ -380,7 +380,7 @@ test.group("passive ACTION triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         });
@@ -426,8 +426,8 @@ test.group("passive ACTION triggers", () => {
             playerOne: {
                 health: 10,
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+                    1,
                     createMinionState(allyMinion, { health: 2 }),
                 ),
             },
@@ -446,7 +446,7 @@ test.group("passive ACTION triggers", () => {
             game.data.playerTwo,
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 4 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 4 });
         assertPlayerHealth(assert, game, "playerTwo", 14);
     });
 
@@ -472,8 +472,8 @@ test.group("passive ACTION triggers", () => {
             playerOne: {
                 health: 10,
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+                    1,
                     createMinionState(allyMinion, { health: 2 }),
                 ),
             },
@@ -492,7 +492,7 @@ test.group("passive ACTION triggers", () => {
             game.data.playerTwo,
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 4 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 4 });
         assertPlayerHealth(assert, game, "playerTwo", 15);
     });
 });

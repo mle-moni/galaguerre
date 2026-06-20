@@ -7,7 +7,7 @@ import {
     getMinionCardMaxAttacks,
     type MinionAttackStatus,
 } from "~/helpers/minion_combat";
-import { CardEffectSymbols } from "./card_effect_symbols.jsx";
+import { BoardMinionEffectIcons } from "./board_minion_effect_icons.jsx";
 import "./board_minion_token.css";
 
 interface BoardMinionTokenProps {
@@ -59,7 +59,7 @@ export const BoardMinionToken = ({
             onPointerDown={onPointerDown}
             onClick={onClick}
         >
-            <CardEffectSymbols card={card} />
+            <BoardMinionEffectIcons card={card} />
             {attackStatus === "sleeping" && (
                 <span className="board-minion-token__sleep-icon" aria-hidden>
                     💤
@@ -73,21 +73,17 @@ export const BoardMinionToken = ({
                     draggable={false}
                 />
             </div>
-            <div className="board-minion-token__stats">
-                <div className="relative">
-                    <span className="board-minion-token__stat board-minion-token__stat--attack">
-                        {attack}
-                    </span>
-                    {showWindfuryBadge && (
-                        <span className="board-minion-token__attacks-remaining">
-                            {remainingAttacks}/{maxAttacks}
-                        </span>
-                    )}
-                </div>
-                <span className="board-minion-token__stat board-minion-token__stat--health">
-                    {health}
+            <span className="board-minion-token__stat board-minion-token__stat--attack">
+                {attack}
+            </span>
+            <span className="board-minion-token__stat board-minion-token__stat--health">
+                {health}
+            </span>
+            {showWindfuryBadge && (
+                <span className="board-minion-token__attacks-remaining">
+                    {remainingAttacks}/{maxAttacks}
                 </span>
-            </div>
+            )}
         </div>
     );
 

@@ -1,10 +1,4 @@
-import type {
-    ActionTarget,
-    GameData,
-    MinionCard,
-    MinionSpotId,
-    PlayerCard,
-} from "#api_types/game.types";
+import type { ActionTarget, GameData, MinionCard, PlayerCard } from "#api_types/game.types";
 import type Game from "#models/game";
 import { playMinion } from "#controllers/games/play_card/play_minion";
 import { playSpell } from "#controllers/games/play_card/play_spell";
@@ -19,24 +13,26 @@ const withTrainingGame = (data: GameData): Game =>
 export type PlayerKey = "playerOne" | "playerTwo";
 
 export interface PlayMinionOptions {
-    spotId?: MinionSpotId;
+    boardIndex?: number;
     actionTarget?: ActionTarget;
     actor?: PlayerKey;
 }
+
+const resolveBoardIndex = (options: PlayMinionOptions): number => options.boardIndex ?? 0;
 
 export const runPlayMinion = async (
     data: GameData,
     card: MinionCard,
     options: PlayMinionOptions = {},
 ): Promise<{ game: Game }> => {
-    const spotId = options.spotId ?? "SPOT_1";
+    const boardIndex = resolveBoardIndex(options);
     const actor = options.actor ?? "playerOne";
     const game = withTrainingGame(data);
     const player = game.data[actor];
 
     await playMinion({
         card,
-        spotId,
+        boardIndex,
         owner: "PLAYER",
         player,
         game,
@@ -52,13 +48,13 @@ export const runPlayMinionOnGame = async (
     card: MinionCard,
     options: PlayMinionOptions = {},
 ): Promise<{ game: Game }> => {
-    const spotId = options.spotId ?? "SPOT_1";
+    const boardIndex = resolveBoardIndex(options);
     const actor = options.actor ?? "playerOne";
     const player = game.data[actor];
 
     await playMinion({
         card,
-        spotId,
+        boardIndex,
         owner: "PLAYER",
         player,
         game,
@@ -81,7 +77,7 @@ export const runPlayWeaponOnGame = async (
         player,
         game,
         socketId: TEST_SOCKET_ID,
-        spotId: null,
+        boardIndex: null,
         owner: "PLAYER",
     });
 
@@ -103,7 +99,7 @@ export const runPlaySpell = async (
         game,
         socketId: TEST_SOCKET_ID,
         owner: "PLAYER",
-        spotId: null,
+        boardIndex: null,
         actionTarget,
     });
 
@@ -123,7 +119,7 @@ export const runPlayWeapon = async (
         player,
         game,
         socketId: TEST_SOCKET_ID,
-        spotId: null,
+        boardIndex: null,
         owner: "PLAYER",
     });
 

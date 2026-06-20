@@ -38,11 +38,11 @@ test.group("dynamic cost play card", () => {
                 },
             }),
             "playerOne",
-            { cardId: giant.uuid, spotId: "SPOT_1", owner: "PLAYER" },
+            { cardId: giant.uuid, boardIndex: 0, owner: "PLAYER" },
         );
 
         assert.deepEqual(errors, []);
-        assert.isNotNull(game.data.playerOne.board.SPOT_1);
+        assert.isNotNull(game.data.playerOne.board[0]);
         assert.equal(game.data.playerOne.mana, 0);
     });
 
@@ -56,19 +56,19 @@ test.group("dynamic cost play card", () => {
                 playerOne: {
                     mana: 8,
                     hand: [giant],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_1", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", enemyMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 1, enemyMinion),
                 },
             }),
             "playerOne",
-            { cardId: giant.uuid, spotId: "SPOT_3", owner: "PLAYER" },
+            { cardId: giant.uuid, boardIndex: 1, owner: "PLAYER" },
         );
 
         assert.deepEqual(errors, []);
         assert.equal(game.data.playerOne.mana, 0);
-        assert.equal(game.data.playerOne.board.SPOT_3!.originalCard.cost, 8);
+        assert.equal(game.data.playerOne.board[1]!.originalCard.cost, 8);
     });
 
     test("giant cost is reduced by missing hero health", async ({ assert }) => {
@@ -83,12 +83,12 @@ test.group("dynamic cost play card", () => {
                 },
             }),
             "playerOne",
-            { cardId: giant.uuid, spotId: "SPOT_1", owner: "PLAYER" },
+            { cardId: giant.uuid, boardIndex: 0, owner: "PLAYER" },
         );
 
         assert.deepEqual(errors, []);
         assert.equal(game.data.playerOne.mana, 0);
-        assert.equal(game.data.playerOne.board.SPOT_1!.originalCard.cost, 0);
+        assert.equal(game.data.playerOne.board[0]!.originalCard.cost, 0);
         assert.equal(game.data.playerOne.health, 20);
         assert.equal(DEFAULT_HERO_HEALTH - game.data.playerOne.health, 10);
     });
@@ -107,12 +107,12 @@ test.group("dynamic cost play card", () => {
                 },
             }),
             "playerOne",
-            { cardId: giant.uuid, spotId: "SPOT_1", owner: "PLAYER" },
+            { cardId: giant.uuid, boardIndex: 0, owner: "PLAYER" },
         );
 
         assert.deepEqual(errors, []);
         assert.equal(game.data.playerOne.mana, 1);
-        assert.equal(game.data.playerOne.board.SPOT_1!.originalCard.cost, 5);
+        assert.equal(game.data.playerOne.board[0]!.originalCard.cost, 5);
         assert.equal(game.data.playerOne.stats.manaSpent, 5);
     });
 });

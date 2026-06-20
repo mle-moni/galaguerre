@@ -37,15 +37,15 @@ test.group("passive BOOST auras", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(auraSource)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(auraSource)),
             },
         });
 
         const game = createGame(data);
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_1");
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 0);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 1);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 4);
+        assert.equal(game.data.playerOne.board[0]!.attack, 1);
+        assert.equal(game.data.playerOne.board[0]!.health, 4);
     });
 
     test("aura with excludeSelf buffs other allied minions only", ({ assert }) => {
@@ -70,18 +70,18 @@ test.group("passive BOOST auras", () => {
         const data = createGameData({
             playerOne: {
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(ally)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(ally)),
+                    1,
                     createMinionState(auraSource),
                 ),
             },
         });
 
         const game = createGame(data);
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_2");
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
-        assert.equal(game.data.playerOne.board.SPOT_2!.attack, 1);
+        assert.equal(game.data.playerOne.board[0]!.attack, 3);
+        assert.equal(game.data.playerOne.board[1]!.attack, 1);
     });
 
     test("aura gives +1/+1 to allied minions when played", ({ assert }) => {
@@ -103,17 +103,17 @@ test.group("passive BOOST auras", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(ally)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(ally)),
             },
         });
 
         const game = createGame(data);
-        game.data.playerOne.board.SPOT_2 = createMinionState(auraSource);
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_2");
+        game.data.playerOne.board[1] = createMinionState(auraSource);
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 3);
-        assert.equal(game.data.playerOne.board.SPOT_1!.maxHealth, 3);
+        assert.equal(game.data.playerOne.board[0]!.attack, 3);
+        assert.equal(game.data.playerOne.board[0]!.health, 3);
+        assert.equal(game.data.playerOne.board[0]!.maxHealth, 3);
     });
 
     test("tagged aura does not revert from a different minion at the same spot", ({ assert }) => {
@@ -149,26 +149,26 @@ test.group("passive BOOST auras", () => {
         const data = createGameData({
             playerOne: {
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(murloc)),
-                    "SPOT_3",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(murloc)),
+                    1,
                     createMinionState(warleader),
                 ),
             },
         });
 
         const game = createGame(data);
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_3");
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
+        assert.equal(game.data.playerOne.board[0]!.attack, 3);
 
-        killMinion(game, game.data.playerOne, "SPOT_1");
+        killMinion(game, game.data.playerOne, "murloc-minion");
 
-        game.data.playerOne.board.SPOT_1 = createMinionState(stormwindKnight);
+        game.data.playerOne.board[0] = createMinionState(stormwindKnight);
 
-        killMinion(game, game.data.playerOne, "SPOT_3");
+        killMinion(game, game.data.playerOne, warleader.uuid);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 2);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 5);
+        assert.equal(game.data.playerOne.board[0]!.attack, 2);
+        assert.equal(game.data.playerOne.board[0]!.health, 5);
     });
 
     test("aura stats are reverted when source minion dies", ({ assert }) => {
@@ -191,23 +191,23 @@ test.group("passive BOOST auras", () => {
         const data = createGameData({
             playerOne: {
                 board: placeMinion(
-                    placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(ally)),
-                    "SPOT_2",
+                    placeMinion(createEmptyBoard(), 0, createMinionState(ally)),
+                    1,
                     createMinionState(auraSource),
                 ),
             },
         });
 
         const game = createGame(data);
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_2");
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
+        assert.equal(game.data.playerOne.board[0]!.attack, 3);
 
-        killMinion(game, game.data.playerOne, "SPOT_2");
+        killMinion(game, game.data.playerOne, "aura-source");
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 2);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 2);
-        assert.equal(game.data.playerOne.board.SPOT_1!.maxHealth, 2);
+        assert.equal(game.data.playerOne.board[0]!.attack, 2);
+        assert.equal(game.data.playerOne.board[0]!.health, 2);
+        assert.equal(game.data.playerOne.board[0]!.maxHealth, 2);
     });
 
     test("hero spell power aura is reverted when source minion dies", ({ assert }) => {
@@ -229,16 +229,16 @@ test.group("passive BOOST auras", () => {
         const data = createGameData({
             playerOne: {
                 spellPower: 0,
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(auraSource)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(auraSource)),
             },
         });
 
         const game = createGame(data);
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_1");
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 0);
 
         assert.equal(game.data.playerOne.spellPower, 2);
 
-        killMinion(game, game.data.playerOne, "SPOT_1");
+        killMinion(game, game.data.playerOne, "aura-source");
 
         assert.equal(game.data.playerOne.spellPower, 0);
     });

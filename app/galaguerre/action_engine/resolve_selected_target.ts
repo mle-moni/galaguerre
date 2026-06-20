@@ -1,10 +1,5 @@
-import type {
-    ActionTarget,
-    BoardState,
-    GamePlayer,
-    MinionSpotId,
-    MinionState,
-} from "#api_types/game.types";
+import type { ActionTarget, GamePlayer, MinionState } from "#api_types/game.types";
+import { findMinionInBoard } from "#controllers/games/game_utils";
 
 export type ResolvedHeroTarget = {
     type: "HERO";
@@ -13,8 +8,7 @@ export type ResolvedHeroTarget = {
 
 export type ResolvedMinionTarget = {
     type: "MINION";
-    board: BoardState;
-    spotId: MinionSpotId;
+    owner: GamePlayer;
     minion: MinionState;
 };
 
@@ -25,19 +19,24 @@ export const resolveSelectedTarget = (
     player: GamePlayer,
     opponent: GamePlayer,
 ): ResolvedTarget | null => {
-    if (selectedTarget.spotId === null) {
+    if (selectedTarget.minionUuid === null) {
         const targetPlayer = selectedTarget.owner === "PLAYER" ? player : opponent;
         return { type: "HERO", player: targetPlayer };
     }
 
     const board = selectedTarget.owner === "PLAYER" ? player.board : opponent.board;
-    const minion = board[selectedTarget.spotId];
-    if (!minion) return null;
+    const minionPosition = findMinionInBoard(
+        board,
+        selectedTarget.minionUuid,
+        selectedTarget.owner,
+    );
+    if (!minionPosition) return null;
+
+    const owner = selectedTarget.owner === "PLAYER" ? player : opponent;
 
     return {
         type: "MINION",
-        board,
-        spotId: selectedTarget.spotId,
-        minion,
+        owner,
+        minion: minionPosition.minion,
     };
 };

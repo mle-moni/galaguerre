@@ -1,4 +1,4 @@
-import type { ActionTarget, ApiGame, MinionSpotId, SpotOwner } from "./game.types.js";
+import type { ActionTarget, ApiGame, SpotOwner } from "./game.types.js";
 
 export interface SocketEventByKey {
     notify_error: { error: string };
@@ -14,12 +14,12 @@ export type SocketEventKey = keyof SocketEventByKey;
 export interface ClientSocketEventByKey {
     "game:play_card": {
         cardId: string;
-        spotId: MinionSpotId | null;
+        boardIndex: number | null;
         owner: SpotOwner;
         actionTarget?: ActionTarget | null;
     };
-    "game:minion_action": { minionId: string; spotId: MinionSpotId | null; owner: SpotOwner };
-    "game:weapon_action": { spotId: MinionSpotId | null; owner: SpotOwner };
+    "game:minion_action": { minionId: string; minionUuid: string | null; owner: SpotOwner };
+    "game:weapon_action": { minionUuid: string | null; owner: SpotOwner };
     "game:abandon": Record<string, never>;
     "game:mulligan": { cardIds: string[] };
 }

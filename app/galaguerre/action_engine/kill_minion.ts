@@ -1,4 +1,5 @@
-import type { GamePlayer, MinionSpotId } from "#api_types/game.types";
+import { removeMinionByUuid } from "#api_types/board";
+import type { GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
 import { recordMinionDeath } from "../game_log/record_game_log.js";
 import {
@@ -14,13 +15,13 @@ const isGameOver = (game: Game): boolean => {
 export const killMinion = (
     game: Game,
     owner: GamePlayer,
-    spotId: MinionSpotId,
+    minionUuid: string,
 ): { gameEnded: boolean } => {
-    const minion = owner.board[spotId];
+    const minion = owner.board.find((entry) => entry.uuid === minionUuid);
     if (!minion) return { gameEnded: false };
 
     if (minion.originalCard.type !== "MINION") {
-        owner.board[spotId] = null;
+        removeMinionByUuid(owner.board, minionUuid);
         return { gameEnded: false };
     }
 
@@ -28,7 +29,7 @@ export const killMinion = (
     const isSilenced = minion.isSilenced === true;
     revertPassiveAurasForSource(game, owner, minion);
     removeMinionFromAuraTracking(game, minion);
-    owner.board[spotId] = null;
+    removeMinionByUuid(owner.board, minionUuid);
 
     recordMinionDeath(game, owner, card);
     const { gameEnded } = isSilenced

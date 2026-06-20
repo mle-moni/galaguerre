@@ -1,5 +1,4 @@
 import {
-    MINION_SPOT_IDS,
     type GamePlayer,
     type MinionCard,
     type PassiveSnapshot,
@@ -18,7 +17,7 @@ export interface PassiveTriggerEntry {
     passive: PassiveSnapshot;
     owner: GamePlayer;
     sourceOwner: SpotOwner;
-    sourceSpotId: (typeof MINION_SPOT_IDS)[number];
+    sourceBoardIndex: number;
 }
 
 const collectFromBoard = (
@@ -33,9 +32,9 @@ const collectFromBoard = (
 ): PassiveTriggerEntry[] => {
     const entries: PassiveTriggerEntry[] = [];
 
-    for (const spotId of MINION_SPOT_IDS) {
-        const minion = board[spotId];
-        if (!minion || minion.originalCard.type !== "MINION" || minion.isSilenced) continue;
+    for (let boardIndex = 0; boardIndex < board.length; boardIndex++) {
+        const minion = board[boardIndex];
+        if (minion.originalCard.type !== "MINION" || minion.isSilenced) continue;
 
         const card = minion.originalCard as MinionCard;
         for (const passive of card.passives ?? []) {
@@ -86,7 +85,7 @@ const collectFromBoard = (
                 passive,
                 owner,
                 sourceOwner,
-                sourceSpotId: spotId,
+                sourceBoardIndex: boardIndex,
             });
         }
     }

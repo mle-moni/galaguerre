@@ -14,7 +14,7 @@ export const weaponToHeroAction = async ({
     game,
     owner,
     socketId,
-}: Omit<WeaponActionOptions, "spotId">) => {
+}: Omit<WeaponActionOptions, "targetMinion">) => {
     if (owner !== "OPPONENT") {
         emitSocketEvent(
             "notify_error",
@@ -26,7 +26,7 @@ export const weaponToHeroAction = async ({
         return;
     }
 
-    const isValidTarget = ensureValidAttackTarget(opponent.board, null, owner, null, socketId);
+    const isValidTarget = ensureValidAttackTarget(opponent.board, owner, null, socketId);
     if (!isValidTarget) return;
 
     recordAttack(game, player, weaponState.originalCard, {

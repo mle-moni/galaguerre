@@ -1,7 +1,7 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import {
-    assertBoardSpot,
+    assertBoardIndex,
     assertGameState,
     assertIsFinished,
     assertPlayerHealth,
@@ -359,7 +359,7 @@ test.group("battlecries", () => {
                 playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             handCard,
-            { actionTarget: { spotId: null, owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: null, owner: "OPPONENT" } },
         );
 
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 5);
@@ -390,14 +390,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 1 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
     });
 
     test("targeted DAMAGE kills opponent minion", ({ assert }) => {
@@ -425,14 +425,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_3", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_3", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_3", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
     });
 
     test("targeted HEAL heals ally minion", ({ assert }) => {
@@ -461,14 +461,14 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "PLAYER" } },
+            { actionTarget: { minionUuid: MINION_IDS.attacker, owner: "PLAYER" } },
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 3 });
     });
 
     test("targeted HEAL caps minion health at original card max", ({ assert }) => {
@@ -497,14 +497,14 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "PLAYER" } },
+            { actionTarget: { minionUuid: MINION_IDS.attacker, owner: "PLAYER" } },
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 3 });
     });
 
     test("targeted HEAL does not overheal minion already at max PDV", ({ assert }) => {
@@ -533,14 +533,14 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "PLAYER" } },
+            { actionTarget: { minionUuid: MINION_IDS.attacker, owner: "PLAYER" } },
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 3 });
     });
 
     test("targeted DAMAGE with ALL type can damage hero", ({ assert }) => {
@@ -563,7 +563,7 @@ test.group("battlecries", () => {
                 playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
             handCard,
-            { actionTarget: { spotId: null, owner: "PLAYER" } },
+            { actionTarget: { minionUuid: null, owner: "PLAYER" } },
         );
 
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 1);
@@ -605,11 +605,11 @@ test.group("battlecries", () => {
                     mana: 10,
                     health: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
                 playerTwo: {
                     health: 12,
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_1", enemyMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, enemyMinion),
                 },
             }),
             handCard,
@@ -617,9 +617,9 @@ test.group("battlecries", () => {
 
         assertPlayerHealth(assert, game, "playerOne", 13);
         assertPlayerHealth(assert, game, "playerTwo", 15);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 3 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 4 });
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 4 });
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 4 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 4 });
     });
 
     test("targeted DAMAGE with comparison filter hits valid minion", ({ assert }) => {
@@ -652,14 +652,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
     });
 
     test("targeted DAMAGE accepts buffed minion matching current attack comparison", ({
@@ -694,14 +694,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
     });
 
     test("targeted DAMAGE with cost comparison filter hits valid minion", ({ assert }) => {
@@ -735,14 +735,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 1 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
     });
 
     test("targeted DAMAGE with health comparison filter hits valid minion", ({ assert }) => {
@@ -775,14 +775,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 1 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
     });
 
     test("targeted DAMAGE with tag filter hits matching minion", ({ assert }) => {
@@ -811,14 +811,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
     });
 
     test("targeted BOOST gives +2/+2 to ally minion", ({ assert }) => {
@@ -847,14 +847,14 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "PLAYER" } },
+            { actionTarget: { minionUuid: MINION_IDS.attacker, owner: "PLAYER" } },
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 4, health: 5 });
+        assertBoardIndex(assert, game, "playerOne", 1, { attack: 4, health: 5 });
     });
 
     test("mass BOOST gives +1/+1 to all ally minions", ({ assert }) => {
@@ -889,8 +889,8 @@ test.group("battlecries", () => {
                     mana: 10,
                     hand: [handCard],
                     board: placeMinion(
-                        placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion1),
-                        "SPOT_3",
+                        placeMinion(createGameData().playerOne.board, 0, allyMinion1),
+                        1,
                         allyMinion2,
                     ),
                 },
@@ -898,9 +898,9 @@ test.group("battlecries", () => {
             handCard,
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2, health: 2 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 2, health: 3 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_3", { attack: 3, health: 4 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 2, health: 2 });
+        assertBoardIndex(assert, game, "playerOne", 1, { attack: 2, health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 2, { attack: 3, health: 4 });
     });
 
     test("mass BOOST with excludeSelf skips the battlecry minion", ({ assert }) => {
@@ -937,8 +937,8 @@ test.group("battlecries", () => {
                     mana: 10,
                     hand: [handCard],
                     board: placeMinion(
-                        placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion1),
-                        "SPOT_3",
+                        placeMinion(createGameData().playerOne.board, 0, allyMinion1),
+                        1,
                         allyMinion2,
                     ),
                 },
@@ -946,9 +946,9 @@ test.group("battlecries", () => {
             handCard,
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 1, health: 1 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 2, health: 3 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_3", { attack: 3, health: 4 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 1, health: 1 });
+        assertBoardIndex(assert, game, "playerOne", 1, { attack: 2, health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 2, { attack: 3, health: 4 });
     });
 
     test("mass BOOST gives +1/+1 to all minions on both teams", ({ assert }) => {
@@ -982,18 +982,18 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", enemyMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, enemyMinion),
                 },
             }),
             handCard,
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2, health: 2 });
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 2, health: 3 });
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { attack: 3, health: 4 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 2, health: 2 });
+        assertBoardIndex(assert, game, "playerOne", 1, { attack: 2, health: 3 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { attack: 3, health: 4 });
     });
 
     test("mass DAMAGE battlecry kills all matching enemy minions", ({ assert }) => {
@@ -1020,16 +1020,16 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
                 playerTwo: {
                     board: placeMinion(
                         placeMinion(
                             createGameData().playerTwo.board,
-                            "SPOT_1",
+                            0,
                             createMinionState(victimOne),
                         ),
-                        "SPOT_2",
+                        1,
                         createMinionState(victimTwo),
                     ),
                 },
@@ -1037,9 +1037,9 @@ test.group("battlecries", () => {
             handCard,
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", null);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 3 });
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
+        assertBoardIndex(assert, game, "playerTwo", 1, null);
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 3 });
     });
 
     test("targeted DAMAGE with ALL can damage opponent minion", ({ assert }) => {
@@ -1067,14 +1067,14 @@ test.group("battlecries", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createGameData().playerTwo.board, "SPOT_2", targetMinion),
+                    board: placeMinion(createGameData().playerTwo.board, 0, targetMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { health: 1 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
     });
 
     test("targeted DAMAGE with ALL can damage ally minion", ({ assert }) => {
@@ -1103,14 +1103,14 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "PLAYER" } },
+            { actionTarget: { minionUuid: MINION_IDS.attacker, owner: "PLAYER" } },
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 1 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 1 });
     });
 
     test("targeted BOOST grants taunt to ally minion", ({ assert }) => {
@@ -1146,14 +1146,14 @@ test.group("battlecries", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createGameData().playerOne.board, "SPOT_2", allyMinion),
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_2", owner: "PLAYER" } },
+            { actionTarget: { minionUuid: MINION_IDS.attacker, owner: "PLAYER" } },
         );
 
-        const boosted = game.data.playerOne.board.SPOT_2;
+        const boosted = game.data.playerOne.board[1];
         const boostedCard = boosted?.originalCard;
         assert.isTrue(boostedCard?.type === "MINION" && boostedCard.minionPowers.hasTaunt);
         if (boostedCard?.type === "MINION") {

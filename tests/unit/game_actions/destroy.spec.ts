@@ -2,7 +2,7 @@ import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import { executeAction } from "#galaguerre/action_engine/execute_action";
 import { applySilenceToMinion } from "#galaguerre/action_engine/apply_silence";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     createCardActionSnapshot,
     createEmptyBoard,
@@ -31,17 +31,17 @@ test.group("DESTROY action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
                 },
             }),
         );
 
         executeAction(destroyEnemyMinion, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: "SPOT_1",
+            minionUuid: "target",
             owner: "OPPONENT",
         });
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
     });
 
     test("kills a 15-health minion", ({ assert }) => {
@@ -51,7 +51,7 @@ test.group("DESTROY action", () => {
                 playerTwo: {
                     board: placeMinion(
                         createEmptyBoard(),
-                        "SPOT_1",
+                        0,
                         createMinionState(targetCard, { health: 15, maxHealth: 15 }),
                     ),
                 },
@@ -59,11 +59,11 @@ test.group("DESTROY action", () => {
         );
 
         executeAction(destroyEnemyMinion, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: "SPOT_1",
+            minionUuid: "target",
             owner: "OPPONENT",
         });
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
     });
 
     test("kills a minion with divine shield", ({ assert }) => {
@@ -77,17 +77,17 @@ test.group("DESTROY action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
                 },
             }),
         );
 
         executeAction(destroyEnemyMinion, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: "SPOT_1",
+            minionUuid: "target",
             owner: "OPPONENT",
         });
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
     });
 
     test("does not trigger DAMAGE passives", ({ assert }) => {
@@ -113,15 +113,15 @@ test.group("DESTROY action", () => {
             createGameData({
                 playerOne: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+                        1,
                         createMinionState(allyMinion),
                     ),
                 },
                 playerTwo: {
                     board: placeMinion(
                         createEmptyBoard(),
-                        "SPOT_1",
+                        0,
                         createMinionState(targetCard, { health: 10, maxHealth: 10 }),
                     ),
                 },
@@ -129,13 +129,13 @@ test.group("DESTROY action", () => {
         );
 
         executeAction(destroyEnemyMinion, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: "SPOT_1",
+            minionUuid: "target",
             owner: "OPPONENT",
         });
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { health: 5 });
+        assertBoardIndex(assert, game, "playerOne", 1, { health: 5 });
     });
 
     test("triggers deathrattle of destroyed minion", ({ assert }) => {
@@ -156,7 +156,7 @@ test.group("DESTROY action", () => {
                 playerTwo: {
                     board: placeMinion(
                         createEmptyBoard(),
-                        "SPOT_1",
+                        0,
                         createMinionState(targetCard, { health: 10, maxHealth: 10 }),
                     ),
                 },
@@ -164,11 +164,11 @@ test.group("DESTROY action", () => {
         );
 
         executeAction(destroyEnemyMinion, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: "SPOT_1",
+            minionUuid: "target",
             owner: "OPPONENT",
         });
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 3);
     });
 
@@ -189,19 +189,19 @@ test.group("DESTROY action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerTwo, 0);
 
         executeAction(destroyEnemyMinion, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: "SPOT_1",
+            minionUuid: "target",
             owner: "OPPONENT",
         });
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH);
     });
 
@@ -213,12 +213,12 @@ test.group("DESTROY action", () => {
         const game = createGame(
             createGameData({
                 playerOne: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(ally)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(ally)),
                 },
                 playerTwo: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(victimOne)),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, createMinionState(victimOne)),
+                        1,
                         createMinionState(victimTwo, { health: 10, maxHealth: 10 }),
                     ),
                 },
@@ -235,9 +235,9 @@ test.group("DESTROY action", () => {
             game.data.playerTwo,
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", null);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 4 });
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
+        assertBoardIndex(assert, game, "playerTwo", 1, null);
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 4 });
     });
 
     test("chained mass destroy deathrattles do not recurse infinitely", ({ assert }) => {
@@ -269,24 +269,24 @@ test.group("DESTROY action", () => {
             createGameData({
                 playerOne: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(survivorCard)),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, createMinionState(survivorCard)),
+                        1,
                         createMinionState(mirrorCard),
                     ),
                 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(dyingCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(dyingCard)),
                 },
             }),
         );
 
         executeAction(destroyEnemyMinion, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: "SPOT_1",
+            minionUuid: "dying",
             owner: "OPPONENT",
         });
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", null);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
+        assertBoardIndex(assert, game, "playerOne", 1, null);
+        assertBoardIndex(assert, game, "playerOne", 0, null);
     });
 });

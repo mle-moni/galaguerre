@@ -5,6 +5,7 @@ import {
     canMinionAttack,
     ensureIsMyTurn,
     ensureMinionFoundInBoard,
+    findMinionInBoard,
     getGameActionInfos,
     getMinionAttacksThisRound,
     getMinionHasCharge,
@@ -16,7 +17,7 @@ import { minionToMinionAction } from "./minion_to_minion_action.js";
 
 export const gameMinionAction = async (
     socketId: string,
-    { minionId, owner, spotId }: ClientSocketEventByKey["game:minion_action"],
+    { minionId, owner, minionUuid }: ClientSocketEventByKey["game:minion_action"],
 ) => {
     const gameInfos = await getGameActionInfos(socketId);
     if (!gameInfos) return;
@@ -40,7 +41,7 @@ export const gameMinionAction = async (
         return;
     }
 
-    if (spotId === null) {
+    if (minionUuid === null) {
         return minionToHeroAction({
             minionInfos,
             game: currentGame,
@@ -51,13 +52,24 @@ export const gameMinionAction = async (
         });
     }
 
+    const targetBoard = owner === "PLAYER" ? player.board : opponent.board;
+    const targetMinionInfos = findMinionInBoard(targetBoard, minionUuid, owner);
+    if (!targetMinionInfos) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous ne pouvez pas jouer ce serviteur ici" },
+            socketId,
+        );
+        return;
+    }
+
     return minionToMinionAction({
         minionInfos,
         game: currentGame,
         player,
         opponent,
         owner,
-        spotId,
+        targetMinion: targetMinionInfos.minion,
         socketId,
     });
 };

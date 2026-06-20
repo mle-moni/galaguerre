@@ -14,19 +14,18 @@ import {
     createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot } from "#tests/helpers/game/assertions";
+import { assertBoardIndex } from "#tests/helpers/game/assertions";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import { runBattlecry } from "#tests/helpers/game/run_battlecry";
 import { runPlayCardInMemory } from "#tests/helpers/game/run_play_card_in_memory";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 import { assertError } from "#tests/helpers/game/socket_event_collector";
-import { MINION_SPOT_IDS } from "#api_types/game.types";
+import { MAX_BOARD_MINIONS } from "#api_types/board";
 import { cardHasPlayableTarget } from "#api_types/target_matching";
 
 const createGame = (data: ReturnType<typeof createGameData>) => createInMemoryGame(data);
 
-const countBoardMinions = (board: ReturnType<typeof createEmptyBoard>) =>
-    Object.values(board).filter((minion) => minion !== null).length;
+const countBoardMinions = (board: ReturnType<typeof createEmptyBoard>) => board.length;
 
 test.group("MIND_CONTROL action", () => {
     test("targeted spell steals enemy minion to controller board", ({ assert }) => {
@@ -46,20 +45,16 @@ test.group("MIND_CONTROL action", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [spell] },
                 playerTwo: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_2",
-                        createMinionState(enemyMinion),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(enemyMinion)),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_2", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.isNull(game.data.playerTwo.board.SPOT_2);
+        assert.equal(game.data.playerTwo.board.length, 0);
         assert.equal(countBoardMinions(game.data.playerOne.board), 1);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerOne", 0, {
             attack: 4,
             health: 5,
         });
@@ -87,30 +82,26 @@ test.group("MIND_CONTROL action", () => {
                     hand: [spell],
                     board: (() => {
                         let board = createEmptyBoard();
-                        for (const spotId of MINION_SPOT_IDS) {
+                        for (let boardIndex = 0; boardIndex < MAX_BOARD_MINIONS; boardIndex++) {
                             board = placeMinion(
                                 board,
-                                spotId,
-                                createMinionState(createMinionCard({ uuid: `ally-${spotId}` })),
+                                boardIndex,
+                                createMinionState(createMinionCard({ uuid: `ally-${boardIndex}` })),
                             );
                         }
                         return board;
                     })(),
                 },
                 playerTwo: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(enemyMinion),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(enemyMinion)),
                 },
             }),
             "playerOne",
             {
                 cardId: spell.uuid,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
-                actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" },
+                actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" },
             },
         );
 
@@ -132,13 +123,29 @@ test.group("MIND_CONTROL action", () => {
         const enemyMinion = createMinionState(createMinionCard({ uuid: "enemy" }));
         const allyMinion = createMinionState(createMinionCard({ uuid: "ally" }));
 
-        const playerBoard = placeMinion(createEmptyBoard(), "SPOT_1", allyMinion);
-        playerBoard.SPOT_2 = createMinionState(createMinionCard({ uuid: "ally-2" }));
-        playerBoard.SPOT_3 = createMinionState(createMinionCard({ uuid: "ally-3" }));
-        playerBoard.SPOT_4 = createMinionState(createMinionCard({ uuid: "ally-4" }));
-        playerBoard.SPOT_5 = createMinionState(createMinionCard({ uuid: "ally-5" }));
+        let playerBoard = placeMinion(createEmptyBoard(), 0, allyMinion);
+        playerBoard = placeMinion(
+            playerBoard,
+            1,
+            createMinionState(createMinionCard({ uuid: "ally-2" })),
+        );
+        playerBoard = placeMinion(
+            playerBoard,
+            2,
+            createMinionState(createMinionCard({ uuid: "ally-3" })),
+        );
+        playerBoard = placeMinion(
+            playerBoard,
+            3,
+            createMinionState(createMinionCard({ uuid: "ally-4" })),
+        );
+        playerBoard = placeMinion(
+            playerBoard,
+            4,
+            createMinionState(createMinionCard({ uuid: "ally-5" })),
+        );
 
-        const opponentBoard = placeMinion(createEmptyBoard(), "SPOT_1", enemyMinion);
+        const opponentBoard = placeMinion(createEmptyBoard(), 0, enemyMinion);
 
         assert.isFalse(cardHasPlayableTarget(spell, playerBoard, opponentBoard, false));
     });
@@ -159,11 +166,11 @@ test.group("MIND_CONTROL action", () => {
         });
 
         let opponentBoard = createEmptyBoard();
-        for (const spotId of MINION_SPOT_IDS.slice(0, 4)) {
+        for (let boardIndex = 0; boardIndex < 4; boardIndex++) {
             opponentBoard = placeMinion(
                 opponentBoard,
-                spotId,
-                createMinionState(createMinionCard({ uuid: `enemy-${spotId}` })),
+                boardIndex,
+                createMinionState(createMinionCard({ uuid: `enemy-${boardIndex}` })),
             );
         }
 
@@ -172,7 +179,7 @@ test.group("MIND_CONTROL action", () => {
                 playerTwo: { board: opponentBoard },
             }),
             hunter,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
         assert.equal(countBoardMinions(game.data.playerOne.board), 2);
@@ -198,7 +205,7 @@ test.group("MIND_CONTROL action", () => {
 
         const opponentBoard = placeMinion(
             createEmptyBoard(),
-            "SPOT_1",
+            0,
             createMinionState(createMinionCard({ uuid: "enemy-1" })),
         );
 
@@ -207,7 +214,7 @@ test.group("MIND_CONTROL action", () => {
                 playerTwo: { board: opponentBoard },
             }),
             hunter,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
         assert.equal(countBoardMinions(game.data.playerOne.board), 1);
@@ -232,20 +239,20 @@ test.group("MIND_CONTROL action", () => {
         });
 
         let playerBoard = createEmptyBoard();
-        for (const spotId of MINION_SPOT_IDS.slice(0, 4)) {
+        for (let boardIndex = 0; boardIndex < 6; boardIndex++) {
             playerBoard = placeMinion(
                 playerBoard,
-                spotId,
-                createMinionState(createMinionCard({ uuid: `ally-${spotId}` })),
+                boardIndex,
+                createMinionState(createMinionCard({ uuid: `ally-${boardIndex}` })),
             );
         }
 
         let opponentBoard = createEmptyBoard();
-        for (const spotId of MINION_SPOT_IDS.slice(0, 4)) {
+        for (let boardIndex = 0; boardIndex < 4; boardIndex++) {
             opponentBoard = placeMinion(
                 opponentBoard,
-                spotId,
-                createMinionState(createMinionCard({ uuid: `enemy-${spotId}` })),
+                boardIndex,
+                createMinionState(createMinionCard({ uuid: `enemy-${boardIndex}` })),
             );
         }
 
@@ -255,10 +262,10 @@ test.group("MIND_CONTROL action", () => {
                 playerTwo: { board: opponentBoard },
             }),
             hunter,
-            { spotId: "SPOT_5" },
+            { boardIndex: 6 },
         );
 
-        assert.equal(countBoardMinions(game.data.playerOne.board), 5);
+        assert.equal(countBoardMinions(game.data.playerOne.board), 7);
         assert.equal(countBoardMinions(game.data.playerTwo.board), 4);
     });
 
@@ -281,21 +288,22 @@ test.group("MIND_CONTROL action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: {
-                        ...placeMinion(
+                    board: placeMinion(
+                        placeMinion(
                             createEmptyBoard(),
-                            "SPOT_1",
+                            0,
                             createMinionState(auraSourceCard, { uuid: "aura-source" }),
                         ),
-                        SPOT_2: stolen,
-                    },
+                        1,
+                        stolen,
+                    ),
                 },
             }),
         );
 
-        refreshAurasAfterMinionPlayed(game, game.data.playerTwo, "SPOT_1");
+        refreshAurasAfterMinionPlayed(game, game.data.playerTwo, 0);
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { attack: 4, health: 5 });
+        assertBoardIndex(assert, game, "playerTwo", 1, { attack: 4, health: 5 });
 
         executeAction(
             createCardActionSnapshot({
@@ -306,10 +314,10 @@ test.group("MIND_CONTROL action", () => {
             game,
             game.data.playerOne,
             game.data.playerTwo,
-            { spotId: "SPOT_2", owner: "OPPONENT" },
+            { minionUuid: "stolen", owner: "OPPONENT" },
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2, health: 3 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 2, health: 3 });
     });
 
     test("stealth minion cannot be targeted by mind control spell", ({ assert }) => {
@@ -331,7 +339,7 @@ test.group("MIND_CONTROL action", () => {
             cardHasPlayableTarget(
                 spell,
                 createEmptyBoard(),
-                placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(stealthCard)),
+                placeMinion(createEmptyBoard(), 0, createMinionState(stealthCard)),
                 true,
             ),
         );
@@ -361,22 +369,19 @@ test.group("MIND_CONTROL action", () => {
         const { game } = runBattlecry(
             createGameData({
                 playerTwo: {
-                    board: {
-                        ...placeMinion(
-                            createEmptyBoard(),
-                            "SPOT_1",
-                            createMinionState(stealthCard),
-                        ),
-                        SPOT_2: createMinionState(visibleCard),
-                    },
+                    board: placeMinion(
+                        placeMinion(createEmptyBoard(), 0, createMinionState(stealthCard)),
+                        1,
+                        createMinionState(visibleCard),
+                    ),
                 },
             }),
             hunter,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
-        assert.isNotNull(game.data.playerOne.board.SPOT_2);
-        assert.equal(game.data.playerOne.board.SPOT_2?.uuid, "visible");
-        assert.isNotNull(game.data.playerTwo.board.SPOT_1);
+        assert.isNotNull(game.data.playerOne.board[1]);
+        assert.equal(game.data.playerOne.board[1]?.uuid, "visible");
+        assert.isNotNull(game.data.playerTwo.board[0]);
     });
 });

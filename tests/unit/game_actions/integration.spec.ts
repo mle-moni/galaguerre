@@ -1,7 +1,7 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import {
-    assertBoardSpot,
+    assertBoardIndex,
     assertGameState,
     assertIsFinished,
     assertPlayerHealth,
@@ -53,14 +53,14 @@ test.group("game scenarios", () => {
             handCard,
         );
 
-        assertBoardSpot(assert, playGame, "playerOne", "SPOT_1", { health: 2 });
+        assertBoardIndex(assert, playGame, "playerOne", 0, { health: 2 });
 
         const { game: attackGame, errors: attackErrors } = await runMinionActionOnGameInMemory(
             playGame,
             "playerOne",
             {
                 minionId: CARD_IDS.handMinion,
-                spotId: null,
+                minionUuid: null,
                 owner: "OPPONENT",
             },
         );
@@ -73,11 +73,11 @@ test.group("game scenarios", () => {
         assertGameState(assert, passGame, "PLAYER_TWO_TURN");
 
         const { game: opponentPlayGame } = await runPlayMinionOnGame(passGame, opponentHandCard, {
-            spotId: "SPOT_2",
+            boardIndex: 0,
             actor: "playerTwo",
         });
 
-        assertBoardSpot(assert, opponentPlayGame, "playerTwo", "SPOT_2", { health: 1 });
+        assertBoardIndex(assert, opponentPlayGame, "playerTwo", 0, { health: 1 });
     });
 
     test("win by combat: charge minion attacks hero and finishes the game", async ({ assert }) => {
@@ -103,7 +103,7 @@ test.group("game scenarios", () => {
 
         const { game: attackGame } = await runMinionActionOnGameInMemory(playGame, "playerOne", {
             minionId: CARD_IDS.handMinion,
-            spotId: null,
+            minionUuid: null,
             owner: "OPPONENT",
         });
 
@@ -169,20 +169,21 @@ test.group("game scenarios", () => {
             createGameData({
                 currentRound: 4,
                 playerOne: {
-                    board: {
-                        ...placeMinion(
+                    board: placeMinion(
+                        placeMinion(
                             createGameData().playerOne.board,
-                            "SPOT_1",
+                            0,
                             createMinionState(attackerCard),
                         ),
-                        SPOT_2: createMinionState(finisherCard, { placedAtRound: 4 }),
-                    },
+                        1,
+                        createMinionState(finisherCard, { placedAtRound: 4 }),
+                    ),
                     hand: [],
                 },
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(tauntCard),
                     ),
                 },
@@ -190,7 +191,7 @@ test.group("game scenarios", () => {
             "playerOne",
             {
                 minionId: MINION_IDS.attacker,
-                spotId: null,
+                minionUuid: null,
                 owner: "OPPONENT",
             },
         );
@@ -200,16 +201,16 @@ test.group("game scenarios", () => {
 
         const killTaunt = await runMinionActionOnGameInMemory(blocked.game, "playerOne", {
             minionId: MINION_IDS.attacker,
-            spotId: "SPOT_1",
+            minionUuid: MINION_IDS.taunt,
             owner: "OPPONENT",
         });
 
         assert.equal(killTaunt.errors.length, 0);
-        assertBoardSpot(assert, killTaunt.game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, killTaunt.game, "playerTwo", 0, null);
 
         const heroAttack = await runMinionActionOnGameInMemory(killTaunt.game, "playerOne", {
             minionId: "minion-finisher",
-            spotId: null,
+            minionUuid: null,
             owner: "OPPONENT",
         });
 

@@ -17,7 +17,7 @@ import {
     createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import { runPlayMinion, runPlaySpell } from "#tests/helpers/game/run_play_minion";
 
 const createGame = (data: ReturnType<typeof createGameData>) => ({ data }) as Game;
@@ -48,10 +48,10 @@ test.group("passive PLAY_CARD triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(boardMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(boardMinion)),
             },
         });
 
@@ -60,7 +60,7 @@ test.group("passive PLAY_CARD triggers", () => {
 
         triggerPlayCardPassives(game, game.data.playerOne, spell);
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
     });
 
     test("MINION PLAY_CARD filter does not trigger on minion summon (uses SUMMON trigger instead)", ({
@@ -84,7 +84,7 @@ test.group("passive PLAY_CARD triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         });
@@ -118,7 +118,7 @@ test.group("passive PLAY_CARD triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         });
@@ -148,7 +148,7 @@ test.group("passive PLAY_CARD triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         });
@@ -183,7 +183,7 @@ test.group("passive PLAY_CARD triggers", () => {
         const data = createGameData({
             playerOne: { health: 15 },
             playerTwo: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
         });
 
@@ -216,7 +216,7 @@ test.group("passive PLAY_CARD triggers", () => {
 
         const baseData = {
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(passiveMinion)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
             },
             playerTwo: { health: 15 },
         };
@@ -249,7 +249,7 @@ test.group("passive PLAY_CARD triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", {
+                board: placeMinion(createEmptyBoard(), 0, {
                     ...createMinionState(passiveMinion),
                     isSilenced: true,
                 }),
@@ -273,14 +273,14 @@ test.group("passive PLAY_CARD triggers", () => {
 
         const data = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(alternant)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(alternant)),
             },
         });
 
         const game = createGame(data);
         triggerPlayCardPassives(game, game.data.playerOne, createSpellCard({ cost: 0 }));
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 2 });
     });
 
     test("Alternant Surmotivé gains +1 attack through playSpell flow", async ({ assert }) => {
@@ -293,13 +293,13 @@ test.group("passive PLAY_CARD triggers", () => {
                 playerOne: {
                     mana: 10,
                     hand: [spell],
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(alternant)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(alternant)),
                 },
             }),
             spell,
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { attack: 2 });
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 2 });
     });
 
     test("SUMMON passive does not trigger on self when played from hand", async ({ assert }) => {
@@ -315,7 +315,7 @@ test.group("passive PLAY_CARD triggers", () => {
                 },
             }),
             officeManager,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
         assertPlayerHealth(assert, game, "playerOne", 10);
@@ -332,15 +332,11 @@ test.group("passive PLAY_CARD triggers", () => {
                     mana: 10,
                     health: 10,
                     hand: [playedMinion],
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_2",
-                        createMinionState(officeManager),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 1, createMinionState(officeManager)),
                 },
             }),
             playedMinion,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
         assertPlayerHealth(assert, game, "playerOne", 12);
@@ -356,14 +352,14 @@ test.group("passive PLAY_CARD triggers", () => {
                 playerOne: {
                     mana: 10,
                     hand: [playedMinion],
-                    board: placeMinion(createEmptyBoard(), "SPOT_2", createMinionState(alternant)),
+                    board: placeMinion(createEmptyBoard(), 1, createMinionState(alternant)),
                 },
             }),
             playedMinion,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_2", { attack: 1 });
+        assertBoardIndex(assert, game, "playerOne", 1, { attack: 1 });
     });
 
     test("triggers after spell effect when playing a spell", async ({ assert }) => {
@@ -400,21 +396,17 @@ test.group("passive PLAY_CARD triggers", () => {
                 playerOne: {
                     mana: 10,
                     hand: [spell],
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(watcher)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(watcher)),
                 },
                 playerTwo: {
                     health: 20,
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(boardMinion),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(boardMinion)),
                 },
             }),
             spell,
         );
 
         assertPlayerHealth(assert, game, "playerTwo", 18);
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
     });
 });

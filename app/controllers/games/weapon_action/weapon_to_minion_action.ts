@@ -1,9 +1,10 @@
-import type { GamePlayer, MinionSpotId, SpotOwner, WeaponState } from "#api_types/game.types";
+import type { GamePlayer, MinionState, SpotOwner, WeaponState } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import { applyDamageToHero } from "../../../galaguerre/action_engine/apply_damage_to_hero.js";
 import { applyDamageToMinion } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
+import { requireMinionIndex } from "../../../galaguerre/action_engine/find_minion_on_board.js";
 import { ensureValidAttackTarget, recordHeroAttack } from "../game_utils.js";
 import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
@@ -15,30 +16,19 @@ export interface WeaponActionOptions {
     player: GamePlayer;
     opponent: GamePlayer;
     owner: SpotOwner;
-    spotId: MinionSpotId;
+    targetMinion: MinionState;
     socketId: string;
 }
 
 export const weaponToMinionAction = async ({
     weaponState,
     opponent,
-    spotId,
+    targetMinion,
     owner,
     player,
     game,
     socketId,
 }: WeaponActionOptions) => {
-    const targetBoard = owner === "PLAYER" ? player.board : opponent.board;
-    const targetMinion = targetBoard[spotId];
-    if (!targetMinion) {
-        emitSocketEvent(
-            "notify_error",
-            { error: "Vous ne pouvez pas attaquer ce serviteur ici" },
-            socketId,
-        );
-        return;
-    }
-
     if (owner === "PLAYER") {
         emitSocketEvent(
             "notify_error",
@@ -50,14 +40,18 @@ export const weaponToMinionAction = async ({
         return;
     }
 
-    const isValidTarget = ensureValidAttackTarget(
-        opponent.board,
-        spotId,
-        owner,
-        targetMinion,
-        socketId,
-    );
+    const isValidTarget = ensureValidAttackTarget(opponent.board, owner, targetMinion, socketId);
     if (!isValidTarget) return;
+
+    const boardIndex = requireMinionIndex(opponent, targetMinion);
+    if (boardIndex === -1) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous ne pouvez pas attaquer ce serviteur ici" },
+            socketId,
+        );
+        return;
+    }
 
     recordAttack(game, player, weaponState.originalCard, {
         type: "MINION",
@@ -67,7 +61,7 @@ export const weaponToMinionAction = async ({
     const weaponDamageResult = applyDamageToMinion(
         game,
         opponent,
-        spotId,
+        boardIndex,
         targetMinion,
         weaponState.damage,
         player,

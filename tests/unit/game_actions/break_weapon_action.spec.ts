@@ -105,7 +105,7 @@ test.group("BREAK_WEAPON action", () => {
         );
 
         executeAction(targetedBreakOpponentWeapon, game, game.data.playerOne, game.data.playerTwo, {
-            spotId: null,
+            minionUuid: null,
             owner: "OPPONENT",
         });
 

@@ -1,9 +1,4 @@
-import type { ActionTarget, MinionSpotId, SpotOwner } from "#api_types/game.types";
-import { MINION_SPOT_IDS } from "#api_types/game.types";
-
-const isMinionSpotId = (value: string): value is MinionSpotId => {
-    return MINION_SPOT_IDS.includes(value as MinionSpotId);
-};
+import type { ActionTarget, SpotOwner } from "#api_types/game.types";
 
 const isSpotOwner = (value: string): value is SpotOwner => {
     return value === "PLAYER" || value === "OPPONENT";
@@ -19,14 +14,12 @@ export const resolveTargetFromPoint = (x: number, y: number): ActionTarget | nul
     const ownerAttr = zone.getAttribute("data-spot-owner");
     if (!ownerAttr || !isSpotOwner(ownerAttr)) return null;
 
-    const spotIdAttr = zone.getAttribute("data-spot-id");
-    if (spotIdAttr === "hero" || spotIdAttr === null) {
-        return { spotId: null, owner: ownerAttr };
+    const minionUuidAttr = zone.getAttribute("data-minion-uuid");
+    if (minionUuidAttr === "hero" || minionUuidAttr === null) {
+        return { minionUuid: null, owner: ownerAttr };
     }
 
-    if (!isMinionSpotId(spotIdAttr)) return null;
-
-    return { spotId: spotIdAttr, owner: ownerAttr };
+    return { minionUuid: minionUuidAttr, owner: ownerAttr };
 };
 
 export const getElementCenter = (element: Element): { x: number; y: number } => {
@@ -37,11 +30,57 @@ export const getElementCenter = (element: Element): { x: number; y: number } => 
     };
 };
 
-export const getMinionSpotElement = (
-    spotId: MinionSpotId,
+export const getInsertionZoneElement = (
+    boardIndex: number,
     spotOwner: SpotOwner,
 ): Element | null => {
     return document.querySelector(
-        `[data-target-zone][data-spot-id="${spotId}"][data-spot-owner="${spotOwner}"]`,
+        `[data-board-insertion-zone][data-board-index="${boardIndex}"][data-spot-owner="${spotOwner}"]`,
+    );
+};
+
+export const resolveBoardInsertIndexFromPoint = (
+    clientX: number,
+    spotOwner: SpotOwner,
+): number | null => {
+    const zones = document.querySelectorAll<HTMLElement>(
+        `[data-board-insertion-zone][data-spot-owner="${spotOwner}"]`,
+    );
+    if (zones.length === 0) return null;
+
+    for (const zone of zones) {
+        const rect = zone.getBoundingClientRect();
+        if (clientX >= rect.left && clientX <= rect.right) {
+            const index = zone.getAttribute("data-board-index");
+            return index !== null ? Number(index) : null;
+        }
+    }
+
+    let bestIndex: number | null = null;
+    let bestDistance = Infinity;
+
+    for (const zone of zones) {
+        const rect = zone.getBoundingClientRect();
+        const indexAttr = zone.getAttribute("data-board-index");
+        if (indexAttr === null) continue;
+
+        const index = Number(indexAttr);
+        if (!Number.isInteger(index)) continue;
+
+        const centerX = rect.left + rect.width / 2;
+        const distance = Math.abs(clientX - centerX);
+
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            bestIndex = index;
+        }
+    }
+
+    return bestIndex;
+};
+
+export const getMinionBoardElement = (boardIndex: number, spotOwner: SpotOwner): Element | null => {
+    return document.querySelector(
+        `[data-target-zone][data-board-index="${boardIndex}"][data-spot-owner="${spotOwner}"]`,
     );
 };

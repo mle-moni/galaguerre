@@ -2,15 +2,19 @@
 	position: relative;
 	width: var(--board-minion-w);
 	height: var(--board-minion-h);
-	border-radius: 6px;
-	background-color: #1e3a5f;
-	overflow: hidden;
+	border-radius: 50% / 46%;
+	background: linear-gradient(180deg, #2a4f7a 0%, #14263d 100%);
+	border: 3px solid #8f9db3;
+	overflow: visible;
 	touch-action: manipulation;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .board-minion-token__art {
-	height: calc(var(--board-minion-h) * 0.62);
+	position: absolute;
+	inset: 8% 10% 22%;
 	overflow: hidden;
+	border-radius: 50% / 45%;
 }
 
 .board-minion-token__image {
@@ -20,35 +24,56 @@
 	display: block;
 }
 
-.board-minion-token__stats {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0 2px 2px;
-	height: calc(var(--board-minion-h) * 0.38);
-}
-
 .board-minion-token__stat {
+	position: absolute;
 	width: var(--board-stat-badge);
 	height: var(--board-stat-badge);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: calc(var(--board-stat-badge) * 0.5);
+	font-size: calc(var(--board-stat-badge) * 0.48);
 	font-weight: bold;
-	border: 1px solid #000;
+	border: 2px solid #111;
 	flex-shrink: 0;
+	z-index: 2;
 }
 
 .board-minion-token__stat--attack {
-	background-color: #e32a2a;
-	color: #000;
+	left: -4px;
+	bottom: 2px;
+	background: linear-gradient(180deg, #f0d44b 0%, #c9a318 100%);
+	color: #111;
 }
 
 .board-minion-token__stat--health {
-	background-color: #2ae32a;
-	color: #000;
+	right: -4px;
+	bottom: 2px;
+	background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+	color: #fff;
+}
+
+.board-minion-token__effects {
+	position: absolute;
+	left: 50%;
+	bottom: -2px;
+	transform: translateX(-50%);
+	display: flex;
+	gap: 2px;
+	z-index: 3;
+}
+
+.board-minion-token__effect {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: rgba(10, 16, 28, 0.85);
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 8px;
+	line-height: 1;
 }
 
 .board-minion-token__sleep-icon {
@@ -74,32 +99,27 @@
 	border-radius: 3px;
 	padding: 0 2px;
 	line-height: 1.2;
-}
-
-.board-minion-token .card-symbol-stack {
-	top: 1px;
-	right: 1px;
-}
-
-.board-minion-token .card-symbol {
-	width: 14px;
-	height: 14px;
-	font-size: 8px;
-	border-width: 1px;
+	z-index: 3;
 }
 
 .board-minion-token.minion-card-face--ready {
-	box-shadow: 0 0 6px 1px rgba(46, 227, 42, 0.7);
-	border: 2px solid #2ae32a;
+	box-shadow:
+		0 0 8px 2px rgba(46, 227, 42, 0.65),
+		inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+	border-color: #2ae32a;
 	cursor: grab;
 }
 
 .board-minion-token.minion-card-face--sleeping {
 	filter: brightness(0.75);
-	border: 2px solid #64748b;
+	border-color: #64748b;
 }
 
 .board-minion-token.minion-card-face--exhausted {
 	filter: grayscale(60%);
 	opacity: 0.7;
+}
+
+.board-minion-token--ghost {
+	border-style: dashed;
 }

@@ -1,10 +1,9 @@
-import {
-    MINION_SPOT_IDS,
-    type ActionTarget,
-    type GamePlayer,
-    type MinionState,
-    type SpotOwner,
-    type TargetSnapshot,
+import type {
+    ActionTarget,
+    GamePlayer,
+    MinionState,
+    SpotOwner,
+    TargetSnapshot,
 } from "#api_types/game.types";
 import {
     hasRandomLimitedTarget,
@@ -26,10 +25,10 @@ const collectHeroActionTargets = (
     const results: ActionTarget[] = [];
 
     if (heroMatchesTarget(target, false)) {
-        results.push({ spotId: null, owner: "PLAYER" });
+        results.push({ minionUuid: null, owner: "PLAYER" });
     }
     if (heroMatchesTarget(target, true)) {
-        results.push({ spotId: null, owner: "OPPONENT" });
+        results.push({ minionUuid: null, owner: "OPPONENT" });
     }
 
     return results;
@@ -46,14 +45,12 @@ const collectMinionActionTargets = (
     for (const { board, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
         const owner: SpotOwner = isOpponent ? "OPPONENT" : "PLAYER";
 
-        for (const spotId of MINION_SPOT_IDS) {
-            const minion = board[spotId];
-            if (!minion) continue;
+        for (const minion of board) {
             if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
             if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) continue;
 
-            results.push({ spotId, owner });
+            results.push({ minionUuid: minion.uuid, owner });
         }
     }
 

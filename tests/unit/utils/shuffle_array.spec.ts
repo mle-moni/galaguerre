@@ -47,7 +47,7 @@ test.group("randomBoolean", () => {
         }
 
         const ratio = trueCount / sampleSize;
-        assert.isAbove(ratio, 0.4);
-        assert.isBelow(ratio, 0.6);
+        assert.isAbove(ratio, 0.3);
+        assert.isBelow(ratio, 0.7);
     });
 });

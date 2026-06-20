@@ -16,7 +16,7 @@ import {
     createPassiveSnapshot,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot } from "#tests/helpers/game/assertions";
+import { assertBoardIndex } from "#tests/helpers/game/assertions";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import { runBattlecry } from "#tests/helpers/game/run_battlecry";
 
@@ -31,7 +31,7 @@ test.group("SILENCE action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -46,12 +46,12 @@ test.group("SILENCE action", () => {
             game.data.playerTwo,
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerTwo", 0, {
             attack: 2,
             health: 3,
             maxHealth: 3,
         });
-        assert.isTrue(game.data.playerTwo.board.SPOT_1!.isSilenced);
+        assert.isTrue(game.data.playerTwo.board[0]!.isSilenced);
     });
 
     test("preserves damage on unbuffed minion", ({ assert }) => {
@@ -61,14 +61,14 @@ test.group("SILENCE action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerTwo, 0);
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerTwo", 0, {
             attack: 4,
             health: 3,
             maxHealth: 5,
@@ -86,14 +86,14 @@ test.group("SILENCE action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerTwo, 0);
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerTwo", 0, {
             attack: 1,
             health: 1,
             maxHealth: 1,
@@ -113,14 +113,14 @@ test.group("SILENCE action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerTwo, 0);
 
-        const card = game.data.playerTwo.board.SPOT_1!.originalCard;
+        const card = game.data.playerTwo.board[0]!.originalCard;
         assert.isFalse(card.type === "MINION" && card.minionPowers.hasTaunt);
     });
 
@@ -142,14 +142,14 @@ test.group("SILENCE action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerTwo, 0);
 
-        const card = game.data.playerTwo.board.SPOT_1!.originalCard;
+        const card = game.data.playerTwo.board[0]!.originalCard;
         assert.isFalse(card.type === "MINION" && card.minionPowers.hasTaunt);
     });
 
@@ -172,12 +172,12 @@ test.group("SILENCE action", () => {
             createGameData({
                 playerOne: { health: 30 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        killMinion(game, game.data.playerTwo, "SPOT_1");
+        killMinion(game, game.data.playerTwo, target.uuid);
 
         assert.equal(game.data.playerOne.health, 30);
     });
@@ -204,7 +204,7 @@ test.group("SILENCE action", () => {
                 playerTwo: {
                     board: placeMinion(
                         createEmptyBoard(),
-                        "SPOT_1",
+                        0,
                         createMinionState(passiveMinionCard, { isSilenced: true }),
                     ),
                 },
@@ -236,21 +236,21 @@ test.group("SILENCE action", () => {
             createGameData({
                 playerOne: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(ally)),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, createMinionState(ally)),
+                        1,
                         createMinionState(auraSource),
                     ),
                 },
             }),
         );
 
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_2");
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
+        assert.equal(game.data.playerOne.board[0]!.attack, 3);
 
-        applySilenceToMinion(game, game.data.playerOne, "SPOT_2");
+        applySilenceToMinion(game, game.data.playerOne, 1);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 2);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 2);
+        assert.equal(game.data.playerOne.board[0]!.attack, 2);
+        assert.equal(game.data.playerOne.board[0]!.health, 2);
     });
 
     test("external aura survives silence on target", ({ assert }) => {
@@ -273,26 +273,26 @@ test.group("SILENCE action", () => {
             createGameData({
                 playerOne: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(target)),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, createMinionState(target)),
+                        1,
                         createMinionState(auraSource),
                     ),
                 },
             }),
         );
 
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_2");
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
         applyBoostToMinion(
-            game.data.playerOne.board.SPOT_1!,
+            game.data.playerOne.board[0]!,
             createBoostSnapshot({ attack: 5, health: 5 }),
         );
-        game.data.playerOne.board.SPOT_1!.attack = 8;
-        game.data.playerOne.board.SPOT_1!.health = 6;
-        game.data.playerOne.board.SPOT_1!.maxHealth = 6;
+        game.data.playerOne.board[0]!.attack = 8;
+        game.data.playerOne.board[0]!.health = 6;
+        game.data.playerOne.board[0]!.maxHealth = 6;
 
-        applySilenceToMinion(game, game.data.playerOne, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerOne, 0);
 
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerOne", 0, {
             attack: 3,
             health: 1,
             maxHealth: 1,
@@ -312,11 +312,7 @@ test.group("SILENCE action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", minion1),
-                        "SPOT_2",
-                        minion2,
-                    ),
+                    board: placeMinion(placeMinion(createEmptyBoard(), 0, minion1), 1, minion2),
                 },
             }),
         );
@@ -331,10 +327,10 @@ test.group("SILENCE action", () => {
             game.data.playerTwo,
         );
 
-        assert.isTrue(game.data.playerTwo.board.SPOT_1!.isSilenced);
-        assert.isTrue(game.data.playerTwo.board.SPOT_2!.isSilenced);
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { attack: 2, health: 2 });
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_2", { attack: 3, health: 3 });
+        assert.isTrue(game.data.playerTwo.board[0]!.isSilenced);
+        assert.isTrue(game.data.playerTwo.board[1]!.isSilenced);
+        assertBoardIndex(assert, game, "playerTwo", 0, { attack: 2, health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 1, { attack: 3, health: 3 });
     });
 
     test("double silence is idempotent", ({ assert }) => {
@@ -346,15 +342,15 @@ test.group("SILENCE action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerTwo, 0);
+        applySilenceToMinion(game, game.data.playerTwo, 0);
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerTwo", 0, {
             attack: 2,
             health: 2,
             maxHealth: 2,
@@ -382,18 +378,18 @@ test.group("SILENCE action", () => {
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", enemyMinion),
+                    board: placeMinion(createEmptyBoard(), 0, enemyMinion),
                 },
             }),
             handCard,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy", owner: "OPPONENT" } },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerTwo", 0, {
             attack: 1,
             health: 1,
             maxHealth: 1,
         });
-        assert.isTrue(game.data.playerTwo.board.SPOT_1!.isSilenced);
+        assert.isTrue(game.data.playerTwo.board[0]!.isSilenced);
     });
 });

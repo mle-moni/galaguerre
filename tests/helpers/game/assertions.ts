@@ -1,14 +1,14 @@
-import type { GameData, MinionSpotId } from "#api_types/game.types";
+import type { GameData } from "#api_types/game.types";
 import type Game from "#models/game";
 import type { Assert } from "@japa/assert";
 
 type PlayerKey = "playerOne" | "playerTwo";
 
-export const assertBoardSpot = (
+export const assertBoardIndex = (
     assert: Assert,
     game: Game,
     player: PlayerKey,
-    spotId: MinionSpotId,
+    boardIndex: number,
     expected: null | {
         health?: number;
         maxHealth?: number;
@@ -18,14 +18,15 @@ export const assertBoardSpot = (
         lastActionAtRound?: number;
     },
 ): void => {
-    const minion = game.data[player].board[spotId];
+    const board = game.data[player].board;
+    const minion = boardIndex >= board.length ? null : board[boardIndex];
 
     if (expected === null) {
-        assert.isNull(minion, `Expected ${player}.${spotId} to be empty`);
+        assert.isNull(minion, `Expected ${player}.board[${boardIndex}] to be empty`);
         return;
     }
 
-    assert.isNotNull(minion, `Expected ${player}.${spotId} to have a minion`);
+    assert.isNotNull(minion, `Expected ${player}.board[${boardIndex}] to have a minion`);
     if (expected.health !== undefined) assert.equal(minion!.health, expected.health);
     if (expected.maxHealth !== undefined) assert.equal(minion!.maxHealth, expected.maxHealth);
     if (expected.attack !== undefined) assert.equal(minion!.attack, expected.attack);
@@ -39,6 +40,9 @@ export const assertBoardSpot = (
         assert.equal(minion!.lastActionAtRound, expected.lastActionAtRound);
     }
 };
+
+/** @deprecated Use assertBoardIndex */
+export const assertBoardSpot = assertBoardIndex;
 
 export const assertPlayerHealth = (
     assert: Assert,

@@ -1,4 +1,5 @@
-import { MINION_SPOT_IDS, SPOT_OWNERS } from "#api_types/game.types";
+import { MAX_BOARD_MINIONS } from "#api_types/board";
+import { SPOT_OWNERS } from "#api_types/game.types";
 import { abandonGame } from "#controllers/games/abandon_game";
 import { gameMulligan } from "#controllers/games/mulligan/game_mulligan";
 import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
@@ -23,15 +24,15 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         (data) => gamePlayCard(socket.id, data),
         vine.object({
             cardId: vine.string(),
-            spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+            boardIndex: vine.number().withoutDecimals().min(0).max(MAX_BOARD_MINIONS).nullable(),
             owner: vine.enum(SPOT_OWNERS),
             actionTarget: vine
                 .object({
-                    spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+                    minionUuid: vine.string().nullable(),
                     owner: vine.enum(SPOT_OWNERS),
                 })
                 .optional(),
-        }),
+        }) as Parameters<typeof subscribeToClientSocketEvent<"game:play_card">>[3],
     );
 
     subscribeToClientSocketEvent(
@@ -40,7 +41,7 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         (data) => gameMinionAction(socket.id, data),
         vine.object({
             minionId: vine.string(),
-            spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+            minionUuid: vine.string().nullable(),
             owner: vine.enum(SPOT_OWNERS),
         }),
     );
@@ -50,7 +51,7 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         "game:weapon_action",
         (data) => gameWeaponAction(socket.id, data),
         vine.object({
-            spotId: vine.enum(MINION_SPOT_IDS).nullable(),
+            minionUuid: vine.string().nullable(),
             owner: vine.enum(SPOT_OWNERS),
         }),
     );

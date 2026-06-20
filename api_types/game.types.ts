@@ -47,7 +47,7 @@ export interface PlayerCardBase {
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 
 export interface ActionTarget {
-    spotId: MinionSpotId | null;
+    minionUuid: string | null;
     owner: SpotOwner;
 }
 
@@ -62,7 +62,6 @@ export type PassiveTriggersOn =
 
 export interface AuraAppliedTarget {
     owner: SpotOwner;
-    spotId: MinionSpotId;
     minionUuid: string;
 }
 
@@ -152,7 +151,7 @@ export interface MinionPosition {
 }
 
 export interface BoardTargetPosition {
-    spotId: MinionSpotId;
+    boardIndex: number;
     owner: SpotOwner;
 }
 
@@ -160,13 +159,9 @@ export const SPOT_OWNERS = ["PLAYER", "OPPONENT"] as const;
 
 export type SpotOwner = (typeof SPOT_OWNERS)[number];
 
-export const MINION_SPOT_IDS = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"] as const;
+export { MAX_BOARD_MINIONS, createEmptyBoard } from "./board.js";
 
-export type MinionSpotId = (typeof MINION_SPOT_IDS)[number];
-
-export type BoardState = {
-    [K in MinionSpotId]: MinionState | null;
-};
+export type BoardState = MinionState[];
 
 export interface GamePlayerStats {
     manaSpent: number;

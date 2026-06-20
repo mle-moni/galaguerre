@@ -53,12 +53,12 @@ test.group("computeEffectiveCost", () => {
         const minion = createMinionState(createMinionCard({ uuid: "board-minion" }));
         const player = createGamePlayer(1, {
             hand: [giant],
-            board: placeMinion(createGamePlayer(1).board, "SPOT_1", minion),
+            board: placeMinion(createGamePlayer(1).board, 0, minion),
         });
         const opponent = createGamePlayer(2, {
             board: placeMinion(
                 createGamePlayer(2).board,
-                "SPOT_2",
+                1,
                 createMinionState(createMinionCard({ uuid: "enemy-minion" })),
             ),
         });
@@ -90,7 +90,7 @@ test.group("computeEffectiveCost", () => {
             health: DEFAULT_HERO_HEALTH - 5,
             board: placeMinion(
                 createGamePlayer(1).board,
-                "SPOT_1",
+                0,
                 createMinionState(createMinionCard({ uuid: "ally" })),
             ),
         });

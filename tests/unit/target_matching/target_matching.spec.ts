@@ -173,7 +173,7 @@ test.group("target_matching", () => {
         });
         const stealthMinion = createMinionState(stealthCard);
         const playerBoard = createEmptyBoard();
-        const opponentBoard = { ...createEmptyBoard(), SPOT_1: stealthMinion };
+        const opponentBoard = placeMinion(createEmptyBoard(), 0, stealthMinion);
         const action = createCardActionSnapshot({
             isTargeted: true,
             target: createMinionTargetSnapshot("OPPONENT"),
@@ -181,7 +181,7 @@ test.group("target_matching", () => {
 
         assert.isFalse(
             selectedTargetMatchesAction(
-                { spotId: "SPOT_1", owner: "OPPONENT" },
+                { minionUuid: "stealth-minion", owner: "OPPONENT" },
                 action,
                 playerBoard,
                 opponentBoard,
@@ -195,7 +195,7 @@ test.group("target_matching", () => {
             minionPowers: { hasStealth: true },
         });
         const stealthMinion = createMinionState(stealthCard);
-        const playerBoard = { ...createEmptyBoard(), SPOT_1: stealthMinion };
+        const playerBoard = placeMinion(createEmptyBoard(), 0, stealthMinion);
         const opponentBoard = createEmptyBoard();
         const action = createCardActionSnapshot({
             isTargeted: true,
@@ -204,7 +204,7 @@ test.group("target_matching", () => {
 
         assert.isTrue(
             selectedTargetMatchesAction(
-                { spotId: "SPOT_1", owner: "PLAYER" },
+                { minionUuid: "stealth-minion", owner: "PLAYER" },
                 action,
                 playerBoard,
                 opponentBoard,
@@ -222,6 +222,56 @@ test.group("target_matching", () => {
 
         assert.isTrue(minionMatchesTarget(stealthMinion, target, true));
     });
+
+    test("selectedTargetMatchesAction finds minion by uuid regardless of board index", ({
+        assert,
+    }) => {
+        const targetCard = createMinionCard({ uuid: "compact-target", attack: 2, health: 3 });
+        const targetMinion = createMinionState(targetCard);
+        const playerBoard = createEmptyBoard();
+        const opponentBoard = placeMinion(
+            placeMinion(
+                createEmptyBoard(),
+                0,
+                createMinionState(createMinionCard({ uuid: "left" })),
+            ),
+            1,
+            targetMinion,
+        );
+
+        const action = createCardActionSnapshot({
+            isTargeted: true,
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.isTrue(
+            selectedTargetMatchesAction(
+                { minionUuid: "compact-target", owner: "OPPONENT" },
+                action,
+                playerBoard,
+                opponentBoard,
+            ),
+        );
+        assert.equal(opponentBoard[1]?.uuid, "compact-target");
+    });
+
+    test("selectedTargetMatchesAction rejects dead minion uuid", ({ assert }) => {
+        const playerBoard = createEmptyBoard();
+        const opponentBoard = createEmptyBoard();
+        const action = createCardActionSnapshot({
+            isTargeted: true,
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.isFalse(
+            selectedTargetMatchesAction(
+                { minionUuid: "gone-minion", owner: "OPPONENT" },
+                action,
+                playerBoard,
+                opponentBoard,
+            ),
+        );
+    });
 });
 
 test.group("passiveTriggerEventMatchesFilter", () => {
@@ -229,14 +279,14 @@ test.group("passiveTriggerEventMatchesFilter", () => {
         const data = createGameData();
         const allyMinion = createMinionState(createMinionCard({ uuid: "ally-minion" }));
         const passiveSource = createMinionState(createMinionCard({ uuid: "passive-minion" }));
-        data.playerOne.board = placeMinion(createEmptyBoard(), "SPOT_1", passiveSource);
-        data.playerOne.board = placeMinion(data.playerOne.board, "SPOT_2", allyMinion);
+        data.playerOne.board = placeMinion(createEmptyBoard(), 0, passiveSource);
+        data.playerOne.board = placeMinion(data.playerOne.board, 1, allyMinion);
 
         const filter = createMinionTargetSnapshot("PLAYER");
         const event = {
             type: "MINION" as const,
             owner: data.playerOne,
-            spotId: "SPOT_2" as const,
+            boardIndex: 1 as const,
             minion: allyMinion,
         };
 
@@ -248,7 +298,7 @@ test.group("passiveTriggerEventMatchesFilter", () => {
     test("matches hero damage event for HERO filter", ({ assert }) => {
         const data = createGameData();
         const passiveSource = createMinionState(createMinionCard({ uuid: "passive-minion" }));
-        data.playerOne.board = placeMinion(createEmptyBoard(), "SPOT_1", passiveSource);
+        data.playerOne.board = placeMinion(createEmptyBoard(), 0, passiveSource);
 
         const filter = createHeroTargetSnapshot("PLAYER");
         const event = { type: "HERO" as const, affectedPlayer: data.playerOne };
@@ -262,20 +312,20 @@ test.group("passiveTriggerEventMatchesFilter", () => {
         const data = createGameData();
         const passiveSource = createMinionState(createMinionCard({ uuid: "passive-minion" }));
         const allyMinion = createMinionState(createMinionCard({ uuid: "ally-minion" }));
-        data.playerOne.board = placeMinion(createEmptyBoard(), "SPOT_1", passiveSource);
-        data.playerOne.board = placeMinion(data.playerOne.board, "SPOT_2", allyMinion);
+        data.playerOne.board = placeMinion(createEmptyBoard(), 0, passiveSource);
+        data.playerOne.board = placeMinion(data.playerOne.board, 1, allyMinion);
 
         const filter = createMinionTargetSnapshot("PLAYER", { onlySelf: true });
         const selfEvent = {
             type: "MINION" as const,
             owner: data.playerOne,
-            spotId: "SPOT_1" as const,
+            boardIndex: 0 as const,
             minion: passiveSource,
         };
         const allyEvent = {
             type: "MINION" as const,
             owner: data.playerOne,
-            spotId: "SPOT_2" as const,
+            boardIndex: 1 as const,
             minion: allyMinion,
         };
 

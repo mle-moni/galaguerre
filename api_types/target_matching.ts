@@ -4,12 +4,10 @@ import type {
     CardActionSnapshot,
     GamePlayer,
     MinionCard,
-    MinionSpotId,
     MinionState,
     SpellCard,
     TargetSnapshot,
 } from "./game.types.js";
-import { MINION_SPOT_IDS } from "./game.types.js";
 import { getActionTarget } from "./action_fields_utils.js";
 import { getBoardMinionStats, matchesComparison } from "./comparison_matching.js";
 
@@ -83,7 +81,7 @@ export const minionMatchesTarget = (
 
 export type PassiveTriggerEvent =
     | { type: "HERO"; affectedPlayer: GamePlayer }
-    | { type: "MINION"; owner: GamePlayer; spotId: MinionSpotId; minion: MinionState };
+    | { type: "MINION"; owner: GamePlayer; boardIndex: number; minion: MinionState };
 
 export type PassiveTriggerGameContext = {
     playerOne: GamePlayer;
@@ -156,10 +154,7 @@ export const cardHasPlayableTarget = (
     for (const isOpponent of [true, false] as const) {
         const board = isOpponent ? opponentBoard : playerBoard;
 
-        for (const spotId of MINION_SPOT_IDS) {
-            const minion = board[spotId];
-            if (!minion) continue;
-
+        for (const minion of board) {
             const minionValid = targetedActions.every((action) => {
                 const target = getActionTarget(action);
                 if (!target) return false;
@@ -191,12 +186,13 @@ export const selectedTargetMatchesAction = (
 
     const isOpponent = selectedTarget.owner === "OPPONENT";
 
-    if (selectedTarget.spotId === null) {
+    if (selectedTarget.minionUuid === null) {
         return heroMatchesTarget(target, isOpponent);
     }
 
     const board = isOpponent ? opponentBoard : playerBoard;
-    const minion = board[selectedTarget.spotId];
+    const minion = board.find((candidate) => candidate.uuid === selectedTarget.minionUuid) ?? null;
+
     if (!minion) return false;
 
     if (!minionMatchesTarget(minion, target, isOpponent)) return false;

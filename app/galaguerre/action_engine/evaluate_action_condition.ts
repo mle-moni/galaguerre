@@ -1,9 +1,9 @@
 import type { GamePlayer } from "#api_types/game.types";
 import type { ActionConditionSnapshot } from "#api_types/card.types";
-import { MINION_SPOT_IDS } from "#api_types/game.types";
+import { countBoardMinionsOnBoard } from "#api_types/board";
 
 export const countBoardMinions = (player: GamePlayer): number => {
-    return MINION_SPOT_IDS.filter((spotId) => player.board[spotId] !== null).length;
+    return countBoardMinionsOnBoard(player.board);
 };
 
 export const evaluateActionCondition = (

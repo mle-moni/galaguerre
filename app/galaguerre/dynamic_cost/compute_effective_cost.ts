@@ -1,6 +1,5 @@
 import {
     DEFAULT_HERO_HEALTH,
-    MINION_SPOT_IDS,
     type BoardState,
     type GameData,
     type GamePlayer,
@@ -8,14 +7,7 @@ import {
 } from "#api_types/game.types";
 
 const countBoardMinions = (playerBoard: BoardState, opponentBoard: BoardState): number => {
-    let count = 0;
-
-    for (const spotId of MINION_SPOT_IDS) {
-        if (playerBoard[spotId] !== null) count++;
-        if (opponentBoard[spotId] !== null) count++;
-    }
-
-    return count;
+    return playerBoard.length + opponentBoard.length;
 };
 
 const computeReduction = (card: PlayerCard, owner: GamePlayer, opponent: GamePlayer): number => {

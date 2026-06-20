@@ -3,10 +3,9 @@ import type {
     CardActionSnapshot,
     GamePlayer,
     MinionCard,
-    MinionSpotId,
     SpellCard,
 } from "#api_types/game.types";
-import { MINION_SPOT_IDS } from "#api_types/game.types";
+import { countBoardMinionsOnBoard } from "#api_types/board";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import { getActionTarget } from "#api_types/action_fields_utils";
 import {
@@ -48,17 +47,14 @@ const enumerateHeroAndMinionTargets = (
         });
 
         if (heroValid) {
-            targets.push({ spotId: null, owner: isOpponent ? "OPPONENT" : "PLAYER" });
+            targets.push({ minionUuid: null, owner: isOpponent ? "OPPONENT" : "PLAYER" });
         }
     }
 
     for (const isOpponent of [true, false] as const) {
         const board = isOpponent ? opponent.board : player.board;
 
-        for (const spotId of MINION_SPOT_IDS) {
-            const minion = board[spotId];
-            if (!minion) continue;
-
+        for (const minion of board) {
             const minionValid = targetedActions.every((action) => {
                 const target = getActionTarget(action);
                 if (!target) return false;
@@ -66,7 +62,10 @@ const enumerateHeroAndMinionTargets = (
             });
 
             if (minionValid) {
-                targets.push({ spotId, owner: isOpponent ? "OPPONENT" : "PLAYER" });
+                targets.push({
+                    minionUuid: minion.uuid,
+                    owner: isOpponent ? "OPPONENT" : "PLAYER",
+                });
             }
         }
     }
@@ -117,26 +116,25 @@ const targetMatchesAllActions = (
 const enumerateAttackTargets = (
     opponentBoard: GamePlayer["board"],
     hasAttackableTaunt: boolean,
-): Array<{ spotId: MinionSpotId | null; owner: "OPPONENT" }> => {
+): Array<{ minionUuid: string | null; owner: "OPPONENT" }> => {
     if (hasAttackableTaunt) {
-        return MINION_SPOT_IDS.filter((spotId) => {
-            const minion = opponentBoard[spotId];
-            return (
-                minion !== null &&
-                getMinionHasTaunt(minion) &&
-                canOpponentDirectlyTargetMinion(minion)
-            );
-        }).map((spotId) => ({ spotId, owner: "OPPONENT" as const }));
+        return opponentBoard
+            .filter(
+                (minion) => getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion),
+            )
+            .map((minion) => ({
+                minionUuid: minion.uuid,
+                owner: "OPPONENT" as const,
+            }));
     }
 
-    const targets: Array<{ spotId: MinionSpotId | null; owner: "OPPONENT" }> = [
-        { spotId: null, owner: "OPPONENT" },
+    const targets: Array<{ minionUuid: string | null; owner: "OPPONENT" }> = [
+        { minionUuid: null, owner: "OPPONENT" },
     ];
 
-    for (const spotId of MINION_SPOT_IDS) {
-        const minion = opponentBoard[spotId];
-        if (minion !== null && canOpponentDirectlyTargetMinion(minion)) {
-            targets.push({ spotId, owner: "OPPONENT" });
+    for (const minion of opponentBoard) {
+        if (canOpponentDirectlyTargetMinion(minion)) {
+            targets.push({ minionUuid: minion.uuid, owner: "OPPONENT" });
         }
     }
 
@@ -154,10 +152,10 @@ const enumerateWeaponAttacks = (game: Game, player: GamePlayer, opponent: GamePl
     const hasAttackableTaunt = boardHasAttackableTaunt(opponent.board);
     const targets = enumerateAttackTargets(opponent.board, hasAttackableTaunt);
 
-    for (const { spotId, owner } of targets) {
+    for (const { minionUuid, owner } of targets) {
         moves.push({
             type: "weapon_action",
-            action: { spotId, owner },
+            action: { minionUuid, owner },
         });
     }
 
@@ -170,16 +168,15 @@ const enumerateMinionAttacks = (game: Game, player: GamePlayer, opponent: GamePl
     const hasAttackableTaunt = boardHasAttackableTaunt(opponent.board);
     const targets = enumerateAttackTargets(opponent.board, hasAttackableTaunt);
 
-    for (const spotId of MINION_SPOT_IDS) {
-        const minion = player.board[spotId];
-        if (!minion || !canMinionAttack(minion, currentRound)) continue;
+    for (const minion of player.board) {
+        if (!canMinionAttack(minion, currentRound)) continue;
 
         for (const target of targets) {
             moves.push({
                 type: "minion_action",
                 action: {
                     minionId: minion.uuid,
-                    spotId: target.spotId,
+                    minionUuid: target.minionUuid,
                     owner: target.owner,
                 },
             });
@@ -197,47 +194,47 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
 
     for (const card of playableCards) {
         if (card.type === "MINION") {
-            for (const spotId of MINION_SPOT_IDS) {
-                if (player.board[spotId] !== null) continue;
+            if (!playerHasBoardSpace(player)) continue;
 
-                if (actionRequiresTarget(card)) {
-                    if (
-                        !cardHasPlayableTarget(
-                            card,
-                            player.board,
-                            opponent.board,
-                            playerHasBoardSpace(player),
-                        )
-                    ) {
+            const boardIndex = countBoardMinionsOnBoard(player.board);
+
+            if (actionRequiresTarget(card)) {
+                if (
+                    !cardHasPlayableTarget(
+                        card,
+                        player.board,
+                        opponent.board,
+                        playerHasBoardSpace(player),
+                    )
+                ) {
+                    continue;
+                }
+
+                const targets = enumerateTargetsForCard(card, player, opponent);
+                for (const actionTarget of targets) {
+                    if (!targetMatchesAllActions(actionTarget, card, player, opponent)) {
                         continue;
                     }
 
-                    const targets = enumerateTargetsForCard(card, player, opponent);
-                    for (const actionTarget of targets) {
-                        if (!targetMatchesAllActions(actionTarget, card, player, opponent)) {
-                            continue;
-                        }
-
-                        moves.push({
-                            type: "play_card",
-                            action: {
-                                cardId: card.uuid,
-                                spotId,
-                                owner: "PLAYER",
-                                actionTarget,
-                            },
-                        });
-                    }
-                } else {
                     moves.push({
                         type: "play_card",
                         action: {
                             cardId: card.uuid,
-                            spotId,
+                            boardIndex,
                             owner: "PLAYER",
+                            actionTarget,
                         },
                     });
                 }
+            } else {
+                moves.push({
+                    type: "play_card",
+                    action: {
+                        cardId: card.uuid,
+                        boardIndex,
+                        owner: "PLAYER",
+                    },
+                });
             }
         } else if (card.type === "SPELL") {
             if (actionRequiresTarget(card)) {
@@ -262,7 +259,7 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
                         type: "play_card",
                         action: {
                             cardId: card.uuid,
-                            spotId: null,
+                            boardIndex: null,
                             owner: "PLAYER",
                             actionTarget,
                         },
@@ -273,7 +270,7 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
                     type: "play_card",
                     action: {
                         cardId: card.uuid,
-                        spotId: null,
+                        boardIndex: null,
                         owner: "PLAYER",
                     },
                 });
@@ -283,7 +280,7 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
                 type: "play_card",
                 action: {
                     cardId: card.uuid,
-                    spotId: null,
+                    boardIndex: null,
                     owner: "PLAYER",
                 },
             });

@@ -1,9 +1,4 @@
-import {
-    DEFAULT_HERO_HEALTH,
-    type GamePlayer,
-    type MinionSpotId,
-    type MinionState,
-} from "#api_types/game.types";
+import { DEFAULT_HERO_HEALTH, type GamePlayer, type MinionState } from "#api_types/game.types";
 import type Game from "#models/game";
 import { getActualHeal, recordHealingDone } from "../game_stats/record_player_stats.js";
 import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
@@ -28,7 +23,7 @@ export const applyHealToHero = (
 export const applyHealToMinion = (
     game: Game,
     owner: GamePlayer,
-    spotId: MinionSpotId,
+    boardIndex: number,
     minion: MinionState,
     healAmount: number,
     sourcePlayer: GamePlayer,
@@ -43,7 +38,7 @@ export const applyHealToMinion = (
     return triggerHealPassives(game, {
         type: "MINION",
         owner,
-        spotId,
+        boardIndex,
         minion,
     });
 };

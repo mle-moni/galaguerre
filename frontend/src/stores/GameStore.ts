@@ -1,5 +1,5 @@
 import type { ApiUser } from "#api_types/auth.types";
-import type { ApiGame, GamePlayer, MinionSpotId, SpotOwner } from "#api_types/game.types";
+import type { ApiGame, GamePlayer, SpotOwner } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
 import { _assert } from "~/helpers/assertions";
 import { notifyError } from "~/services/toasts";
@@ -181,68 +181,70 @@ export class GameStore {
         CLIENT_SOCKET.emit("pass_turn");
     }
 
-    handleDrop(spotId: MinionSpotId | null, spotOwner: SpotOwner) {
-        if (this.targetSelectionStore.tryConfirmArmedTarget({ spotId, owner: spotOwner })) {
+    handleDrop(boardIndex: number | null, spotOwner: SpotOwner) {
+        const board = spotOwner === "OPPONENT" ? this.opponent.board : this.me.board;
+        const actionTarget = {
+            minionUuid: boardIndex === null ? null : board[boardIndex]?.uuid ?? null,
+            owner: spotOwner,
+        };
+
+        if (this.targetSelectionStore.tryConfirmArmedTarget(actionTarget)) {
             return;
         }
 
         if (this.targetSelectionStore.isSelectingTarget) {
-            return this.targetSelectionStore.confirmTarget({ spotId, owner: spotOwner });
+            return this.targetSelectionStore.confirmTarget(actionTarget);
         }
 
         if (this.minionDragStore.isAttacking) {
-            return this.minionDragStore.confirmTarget({ spotId, owner: spotOwner });
+            return this.minionDragStore.confirmTarget(actionTarget);
         }
 
         if (this.weaponDragStore.isAttacking) {
-            return this.weaponDragStore.confirmTarget({ spotId, owner: spotOwner });
-        }
-
-        const pendingMinion = this.cardDragStore.pendingMinionCard;
-        if (pendingMinion && spotId !== null) {
-            this.cardDragStore.handleDrop(pendingMinion, spotId, spotOwner);
-            return;
-        }
-
-        if (this.cardDragStore.cardDragged && spotId !== null) {
-            return this.cardDragStore.handleDrop(this.cardDragStore.cardDragged, spotId, spotOwner);
+            return this.weaponDragStore.confirmTarget(actionTarget);
         }
     }
 
-    getMinionSpotBackgroundColor(spotId: MinionSpotId, spotOwner: SpotOwner) {
+    handleBoardIndexDrop(boardIndex: number, spotOwner: SpotOwner) {
+        const pendingMinion = this.cardDragStore.pendingMinionCard;
+        if (pendingMinion) {
+            this.cardDragStore.handleDrop(pendingMinion, boardIndex, spotOwner);
+            return;
+        }
+
+        if (this.cardDragStore.cardDragged) {
+            this.cardDragStore.handleDrop(this.cardDragStore.cardDragged, boardIndex, spotOwner);
+        }
+    }
+
+    getMinionBoardBackgroundColor(boardIndex: number, spotOwner: SpotOwner) {
         if (this.targetSelectionStore.isHighlightingTargets) {
-            return this.targetSelectionStore.getMinionSpotBorderColor(
-                spotId,
+            return this.targetSelectionStore.getMinionBoardBorderColor(
+                boardIndex,
                 spotOwner === "OPPONENT",
             );
         }
 
-        if (this.cardDragStore.activeMinionCard) {
-            if (spotOwner === "OPPONENT")
-                return this.cardDragStore.opponentSlotsBorderColor[spotId];
-            return this.cardDragStore.mySlotsBorderColor[spotId];
-        }
-
         if (this.minionDragStore.isAttacking) {
             if (spotOwner === "OPPONENT")
-                return this.minionDragStore.opponentSlotsBorderColor[spotId];
-            return this.minionDragStore.mySlotsBorderColor[spotId];
+                return this.minionDragStore.opponentSlotsBorderColor[boardIndex];
+            return this.minionDragStore.mySlotsBorderColor[boardIndex];
         }
 
         if (this.weaponDragStore.isAttacking) {
             if (spotOwner === "OPPONENT")
-                return this.weaponDragStore.opponentSlotsBorderColor[spotId];
+                return this.weaponDragStore.opponentSlotsBorderColor[boardIndex];
             return "black";
         }
 
         return "black";
     }
 
-    getMinionSpotTargetHighlight(spotId: MinionSpotId, spotOwner: SpotOwner): TargetHighlight {
+    getMinionBoardTargetHighlight(boardIndex: number, spotOwner: SpotOwner): TargetHighlight {
         if (this.targetSelectionStore.isHighlightingTargets) {
             return colorToTargetHighlight(
-                this.targetSelectionStore.getMinionSpotBorderColor(
-                    spotId,
+                this.targetSelectionStore.getMinionBoardBorderColor(
+                    boardIndex,
                     spotOwner === "OPPONENT",
                 ),
             );
@@ -251,13 +253,15 @@ export class GameStore {
         if (this.minionDragStore.isAttacking) {
             const color =
                 spotOwner === "OPPONENT"
-                    ? this.minionDragStore.opponentSlotsBorderColor[spotId]
-                    : this.minionDragStore.mySlotsBorderColor[spotId];
+                    ? this.minionDragStore.opponentSlotsBorderColor[boardIndex]
+                    : this.minionDragStore.mySlotsBorderColor[boardIndex];
             return colorToTargetHighlight(color);
         }
 
         if (this.weaponDragStore.isAttacking && spotOwner === "OPPONENT") {
-            return colorToTargetHighlight(this.weaponDragStore.opponentSlotsBorderColor[spotId]);
+            return colorToTargetHighlight(
+                this.weaponDragStore.opponentSlotsBorderColor[boardIndex],
+            );
         }
 
         return "none";

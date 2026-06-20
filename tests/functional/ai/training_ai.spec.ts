@@ -19,6 +19,7 @@ import { getActiveCardSetId } from "#tests/helpers/card_set";
 import { bindUserIds, createTestGame } from "#tests/helpers/game/game_factory";
 import {
     createGameData,
+    createEmptyBoard,
     createMinionCard,
     createMinionState,
     placeMinion,
@@ -178,7 +179,7 @@ test.group("training:ai", (group) => {
                     hand: [createMinionCard({ uuid: "too-expensive", cost: 10 })],
                     board: placeMinion(
                         createEmptyBoardFromFixture(),
-                        "SPOT_1",
+                        0,
                         createMinionState(attackerCard, {
                             uuid: "attacker-minion",
                             placedAtRound: 3,
@@ -188,7 +189,7 @@ test.group("training:ai", (group) => {
                 playerOne: {
                     board: placeMinion(
                         createEmptyBoardFromFixture(),
-                        "SPOT_2",
+                        1,
                         createMinionState(tauntCard, { uuid: "taunt-minion" }),
                     ),
                 },
@@ -205,7 +206,7 @@ test.group("training:ai", (group) => {
             minionAttacks.every(
                 (move) =>
                     move.type === "minion_action" &&
-                    move.action.spotId === "SPOT_2" &&
+                    move.action.minionUuid === "taunt-minion" &&
                     move.action.owner === "OPPONENT",
             ),
         );
@@ -237,7 +238,7 @@ test.group("training:ai", (group) => {
                 type: "play_card",
                 action: {
                     cardId: "missing-card",
-                    spotId: "SPOT_1",
+                    boardIndex: 0,
                     owner: "PLAYER",
                 },
             });
@@ -389,10 +390,4 @@ test.group("training:ai", (group) => {
     });
 });
 
-const createEmptyBoardFromFixture = () => ({
-    SPOT_1: null,
-    SPOT_2: null,
-    SPOT_3: null,
-    SPOT_4: null,
-    SPOT_5: null,
-});
+const createEmptyBoardFromFixture = () => createEmptyBoard();

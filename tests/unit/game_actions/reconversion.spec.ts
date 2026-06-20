@@ -21,7 +21,7 @@ import {
     createReconvertParametersSnapshot,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot } from "#tests/helpers/game/assertions";
+import { assertBoardIndex } from "#tests/helpers/game/assertions";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 
 const createGame = (data: ReturnType<typeof createGameData>) => createInMemoryGame(data);
@@ -33,10 +33,10 @@ const legumeParameters = () => createReconvertParametersSnapshot({ cardId: LEGUM
 const applyLegumeReconversion = (
     game: ReturnType<typeof createInMemoryGame>,
     owner: "playerOne" | "playerTwo",
-    spotId: "SPOT_1" | "SPOT_2" | "SPOT_3" | "SPOT_4" | "SPOT_5",
+    boardIndex: 0 | 1 | 2 | 3 | 4,
     sourceMinion: ReturnType<typeof createMinionState>,
 ) => {
-    applyReconversionToMinion(game, game.data[owner], spotId, legumeParameters(), sourceMinion);
+    applyReconversionToMinion(game, game.data[owner], boardIndex, legumeParameters(), sourceMinion);
 };
 
 test.group("RECONVERSION action", () => {
@@ -48,21 +48,21 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applyLegumeReconversion(game, "playerTwo", "SPOT_1", target);
+        applyLegumeReconversion(game, "playerTwo", 0, target);
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerTwo", 0, {
             attack: 1,
             health: 1,
             maxHealth: 1,
         });
-        assert.equal(game.data.playerTwo.board.SPOT_1!.originalCard.cardId, LEGUME_CARD_ID);
-        assert.equal(game.data.playerTwo.board.SPOT_1!.originalCard.label, "Légume");
-        assert.equal(game.data.playerTwo.board.SPOT_1!.uuid, "target");
+        assert.equal(game.data.playerTwo.board[0]!.originalCard.cardId, LEGUME_CARD_ID);
+        assert.equal(game.data.playerTwo.board[0]!.originalCard.label, "Légume");
+        assert.equal(game.data.playerTwo.board[0]!.uuid, "target");
     });
 
     test("reconverted minion keeps all effects of the new card form", ({ assert }) => {
@@ -73,7 +73,7 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -81,12 +81,12 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerTwo,
-            "SPOT_1",
+            0,
             createReconvertParametersSnapshot({ cardId: DIRECTEUR_COMMERCIAL_CARD_ID }),
             target,
         );
 
-        const minion = game.data.playerTwo.board.SPOT_1!;
+        const minion = game.data.playerTwo.board[0]!;
         const card = minion.originalCard;
         assert.isFalse(minion.isSilenced);
         assert.equal(card.type === "MINION" ? card.cardId : -1, DIRECTEUR_COMMERCIAL_CARD_ID);
@@ -111,15 +111,15 @@ test.group("RECONVERSION action", () => {
             createGameData({
                 playerTwo: {
                     deckCards: [createMinionCard({ uuid: "deck-1" })],
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applyLegumeReconversion(game, "playerTwo", "SPOT_1", target);
+        applyLegumeReconversion(game, "playerTwo", 0, target);
 
         assert.equal(game.data.playerTwo.deckCards.length, 1);
-        assert.isNotNull(game.data.playerTwo.board.SPOT_1);
+        assert.isNotNull(game.data.playerTwo.board[0]);
     });
 
     test("reconverted minion does not trigger original deathrattle on kill", ({ assert }) => {
@@ -141,13 +141,13 @@ test.group("RECONVERSION action", () => {
             createGameData({
                 playerOne: { health: 30 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applyLegumeReconversion(game, "playerTwo", "SPOT_1", target);
-        killMinion(game, game.data.playerTwo, "SPOT_1");
+        applyLegumeReconversion(game, "playerTwo", 0, target);
+        killMinion(game, game.data.playerTwo, target.uuid);
 
         assert.equal(game.data.playerOne.health, 30);
     });
@@ -173,21 +173,21 @@ test.group("RECONVERSION action", () => {
             createGameData({
                 playerOne: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(ally)),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, createMinionState(ally)),
+                        1,
                         auraSourceState,
                     ),
                 },
             }),
         );
 
-        refreshAurasAfterMinionPlayed(game, game.data.playerOne, "SPOT_2");
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
+        assert.equal(game.data.playerOne.board[0]!.attack, 3);
 
-        applyLegumeReconversion(game, "playerOne", "SPOT_2", auraSourceState);
+        applyLegumeReconversion(game, "playerOne", 1, auraSourceState);
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 2);
-        assert.equal(game.data.playerOne.board.SPOT_2!.attack, 1);
+        assert.equal(game.data.playerOne.board[0]!.attack, 2);
+        assert.equal(game.data.playerOne.board[1]!.attack, 1);
     });
 
     test("reconverted minion keeps innate keyword effects from new form", ({ assert }) => {
@@ -199,7 +199,7 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -207,12 +207,12 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerTwo,
-            "SPOT_1",
+            0,
             createReconvertParametersSnapshot({ cardId: DEV_AIGRI_CARD_ID }),
             target,
         );
 
-        const minion = game.data.playerTwo.board.SPOT_1!;
+        const minion = game.data.playerTwo.board[0]!;
         const card = minion.originalCard;
         assert.equal(card.type === "MINION" ? card.cardId : -1, DEV_AIGRI_CARD_ID);
         assert.isTrue(card.type === "MINION" && card.minionPowers.hasTaunt);
@@ -234,7 +234,7 @@ test.group("RECONVERSION action", () => {
             createGameData({
                 playerOne: { health: 30 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -242,11 +242,11 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerTwo,
-            "SPOT_1",
+            0,
             createReconvertParametersSnapshot({ cardId: DIRECTEUR_COMMERCIAL_CARD_ID }),
             target,
         );
-        killMinion(game, game.data.playerTwo, "SPOT_1");
+        killMinion(game, game.data.playerTwo, target.uuid);
 
         assert.equal(game.data.playerOne.health, 25);
     });
@@ -267,8 +267,8 @@ test.group("RECONVERSION action", () => {
             createGameData({
                 playerOne: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(devAlly)),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, createMinionState(devAlly)),
+                        1,
                         target,
                     ),
                 },
@@ -278,13 +278,13 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerOne,
-            "SPOT_2",
+            1,
             createReconvertParametersSnapshot({ cardId: SCRUM_MASTER_CARD_ID }),
             target,
         );
 
-        assert.equal(game.data.playerOne.board.SPOT_1!.attack, 3);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 3);
+        assert.equal(game.data.playerOne.board[0]!.attack, 3);
+        assert.equal(game.data.playerOne.board[0]!.health, 3);
     });
 
     test("removes divine shield and taunt from reconverted minion", ({ assert }) => {
@@ -306,14 +306,14 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        applyLegumeReconversion(game, "playerTwo", "SPOT_1", target);
+        applyLegumeReconversion(game, "playerTwo", 0, target);
 
-        const card = game.data.playerTwo.board.SPOT_1!.originalCard;
+        const card = game.data.playerTwo.board[0]!.originalCard;
         assert.isFalse(card.type === "MINION" && card.minionPowers.hasTaunt);
         assert.isFalse(card.type === "MINION" && card.minionPowers.hasDivineShield);
     });
@@ -325,7 +325,7 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -340,15 +340,15 @@ test.group("RECONVERSION action", () => {
             game,
             game.data.playerOne,
             game.data.playerTwo,
-            { spotId: "SPOT_1", owner: "OPPONENT" },
+            { minionUuid: "target", owner: "OPPONENT" },
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerTwo", 0, {
             attack: 1,
             health: 1,
             maxHealth: 1,
         });
-        assert.equal(game.data.playerTwo.board.SPOT_1!.originalCard.cardId, LEGUME_CARD_ID);
+        assert.equal(game.data.playerTwo.board[0]!.originalCard.cardId, LEGUME_CARD_ID);
     });
 
     test("reconverts into a random minion matching absolute cost filter", ({ assert }) => {
@@ -363,7 +363,7 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -371,7 +371,7 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerTwo,
-            "SPOT_1",
+            0,
             createReconvertParametersSnapshot({
                 comparison: createComparisonSnapshot({
                     costComparison: "=",
@@ -381,7 +381,7 @@ test.group("RECONVERSION action", () => {
             target,
         );
 
-        const reconverted = game.data.playerTwo.board.SPOT_1!.originalCard;
+        const reconverted = game.data.playerTwo.board[0]!.originalCard;
         assert.include(expectedCardIds, reconverted.cardId);
         assert.equal(reconverted.cost, targetCost);
     });
@@ -404,7 +404,7 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -412,7 +412,7 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerTwo,
-            "SPOT_1",
+            0,
             createReconvertParametersSnapshot({
                 comparison: createComparisonSnapshot({
                     costComparison: "=",
@@ -423,7 +423,7 @@ test.group("RECONVERSION action", () => {
             target,
         );
 
-        const reconverted = game.data.playerTwo.board.SPOT_1!.originalCard;
+        const reconverted = game.data.playerTwo.board[0]!.originalCard;
         assert.include(expectedCardIds, reconverted.cardId);
         assert.equal(reconverted.cost, expectedCost);
     });
@@ -440,8 +440,8 @@ test.group("RECONVERSION action", () => {
             createGameData({
                 playerTwo: {
                     board: placeMinion(
-                        placeMinion(createEmptyBoard(), "SPOT_1", minionFive),
-                        "SPOT_2",
+                        placeMinion(createEmptyBoard(), 0, minionFive),
+                        1,
                         minionThree,
                     ),
                 },
@@ -462,8 +462,8 @@ test.group("RECONVERSION action", () => {
             }),
         );
 
-        assert.equal(game.data.playerTwo.board.SPOT_1!.originalCard.cost, 4);
-        assert.equal(game.data.playerTwo.board.SPOT_2!.originalCard.cost, 2);
+        assert.equal(game.data.playerTwo.board[0]!.originalCard.cost, 4);
+        assert.equal(game.data.playerTwo.board[1]!.originalCard.cost, 2);
     });
 
     test("falls back to same cost when relative negative offset has no lower minions", ({
@@ -486,7 +486,7 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -494,7 +494,7 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerTwo,
-            "SPOT_1",
+            0,
             createReconvertParametersSnapshot({
                 comparison: createComparisonSnapshot({
                     costComparison: "=",
@@ -505,7 +505,7 @@ test.group("RECONVERSION action", () => {
             target,
         );
 
-        const reconverted = game.data.playerTwo.board.SPOT_1!.originalCard;
+        const reconverted = game.data.playerTwo.board[0]!.originalCard;
         assert.include(expectedCardIds, reconverted.cardId);
         assert.equal(reconverted.cost, sourceCost);
         assert.notEqual(reconverted.cardId, targetCard.cardId);
@@ -518,7 +518,7 @@ test.group("RECONVERSION action", () => {
         const game = createGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
@@ -526,7 +526,7 @@ test.group("RECONVERSION action", () => {
         applyReconversionToMinion(
             game,
             game.data.playerTwo,
-            "SPOT_1",
+            0,
             createReconvertParametersSnapshot({
                 comparison: createComparisonSnapshot({
                     costComparison: "=",
@@ -536,7 +536,7 @@ test.group("RECONVERSION action", () => {
             target,
         );
 
-        assert.equal(game.data.playerTwo.board.SPOT_1!.originalCard.cardId, targetCard.cardId);
-        assert.equal(game.data.playerTwo.board.SPOT_1!.attack, 2);
+        assert.equal(game.data.playerTwo.board[0]!.originalCard.cardId, targetCard.cardId);
+        assert.equal(game.data.playerTwo.board[0]!.attack, 2);
     });
 });

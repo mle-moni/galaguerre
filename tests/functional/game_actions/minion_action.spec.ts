@@ -23,7 +23,7 @@ test.group("game:minion_action socket layer", (group) => {
             actor: "playerOne",
             action: {
                 minionId: MINION_IDS.attacker,
-                spotId: null,
+                minionUuid: null,
                 owner: "OPPONENT",
             },
             expect: { error: "Vous n'êtes pas en jeu" },
@@ -45,7 +45,7 @@ test.group("game:minion_action socket layer", (group) => {
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(attackerCard),
                     ),
                 },
@@ -53,7 +53,7 @@ test.group("game:minion_action socket layer", (group) => {
             actor: "playerOne",
             action: {
                 minionId: MINION_IDS.attacker,
-                spotId: null,
+                minionUuid: null,
                 owner: "OPPONENT",
             },
             expect: {
@@ -80,7 +80,7 @@ test.group("game:minion_action socket layer", (group) => {
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(attackerCard),
                     ),
                 },
@@ -88,7 +88,7 @@ test.group("game:minion_action socket layer", (group) => {
             actor: "playerOne",
             action: {
                 minionId: MINION_IDS.attacker,
-                spotId: null,
+                minionUuid: null,
                 owner: "OPPONENT",
             },
             expect: { error: "Vous n'êtes pas en jeu" },
@@ -101,8 +101,8 @@ test.group("game:minion_action socket layer", (group) => {
     test("rejects invalid minion action payload", async ({ assert }) => {
         const errors = await runInvalidMinionActionPayload({
             minionId: "minion-1",
-            spotId: "INVALID_SPOT",
-            owner: "OPPONENT",
+            minionUuid: null,
+            owner: "INVALID",
         });
 
         assert.equal(errors.length, 1);
@@ -122,7 +122,7 @@ test.group("game:minion_action socket layer", (group) => {
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(attackerCard),
                     ),
                     hand: [hiddenCard],
@@ -134,7 +134,7 @@ test.group("game:minion_action socket layer", (group) => {
             actor: "playerOne",
             action: {
                 minionId: MINION_IDS.attacker,
-                spotId: null,
+                minionUuid: null,
                 owner: "OPPONENT",
             },
             expect: { error: null },

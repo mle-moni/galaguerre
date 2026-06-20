@@ -1,6 +1,9 @@
 :root {
 	--spot-w: 126px;
 	--spot-h: 156px;
+	--board-minion-w: 78px;
+	--board-minion-h: calc(var(--board-minion-w) * 1.35);
+	--board-stat-badge: 22px;
 	--hand-gap: 20px;
 	--hand-height: 170px;
 	--hand-bottom-offset: 30px;

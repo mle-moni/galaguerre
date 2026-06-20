@@ -1,4 +1,4 @@
-import type { GamePlayer, MinionPosition, MinionSpotId, SpotOwner } from "#api_types/game.types";
+import type { GamePlayer, MinionPosition, MinionState, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
@@ -6,6 +6,7 @@ import {
     applyDamageToMinion,
     applyPoisonousToMinion,
 } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
+import { requireMinionIndex } from "../../../galaguerre/action_engine/find_minion_on_board.js";
 import {
     ensureValidAttackTarget,
     getMinionIsPoisonous,
@@ -20,30 +21,19 @@ export interface MinionActionOptions {
     player: GamePlayer;
     opponent: GamePlayer;
     owner: SpotOwner;
-    spotId: MinionSpotId;
+    targetMinion: MinionState;
     socketId: string;
 }
 
 export const minionToMinionAction = async ({
     minionInfos,
     opponent,
-    spotId,
+    targetMinion,
     owner,
     player,
     game,
     socketId,
 }: MinionActionOptions) => {
-    const targetBoard = owner === "PLAYER" ? player.board : opponent.board;
-    const targetMinion = targetBoard[spotId];
-    if (!targetMinion) {
-        emitSocketEvent(
-            "notify_error",
-            { error: "Vous ne pouvez pas jouer ce serviteur ici" },
-            socketId,
-        );
-        return;
-    }
-
     if (owner === "PLAYER") {
         emitSocketEvent(
             "notify_error",
@@ -55,14 +45,18 @@ export const minionToMinionAction = async ({
         return;
     }
 
-    const isValidTarget = ensureValidAttackTarget(
-        opponent.board,
-        spotId,
-        owner,
-        targetMinion,
-        socketId,
-    );
+    const isValidTarget = ensureValidAttackTarget(opponent.board, owner, targetMinion, socketId);
     if (!isValidTarget) return;
+
+    const targetBoardIndex = requireMinionIndex(opponent, targetMinion);
+    if (targetBoardIndex === -1) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous ne pouvez pas jouer ce serviteur ici" },
+            socketId,
+        );
+        return;
+    }
 
     const attacker = minionInfos.minion;
 
@@ -76,13 +70,14 @@ export const minionToMinionAction = async ({
 
     const initiatorOwner = minionInfos.position.owner === "PLAYER" ? player : opponent;
     const targetOwner = opponent;
-    const attackerSpotId = minionInfos.position.spotId;
+    const attackerBoardIndex = requireMinionIndex(initiatorOwner, attacker);
+    if (attackerBoardIndex === -1) return;
 
     if (targetIsPoisonous) {
         const retaliationResult = applyPoisonousToMinion(
             game,
             initiatorOwner,
-            attackerSpotId,
+            attackerBoardIndex,
             attacker,
             opponent,
         );
@@ -94,7 +89,7 @@ export const minionToMinionAction = async ({
         const retaliationResult = applyDamageToMinion(
             game,
             initiatorOwner,
-            attackerSpotId,
+            attackerBoardIndex,
             attacker,
             targetMinion.attack,
             opponent,
@@ -105,11 +100,19 @@ export const minionToMinionAction = async ({
         }
     }
 
+    const currentTargetBoardIndex = requireMinionIndex(targetOwner, targetMinion);
+    if (currentTargetBoardIndex === -1) {
+        recordMinionAttack(minionInfos.minion, game.data.currentRound);
+        await game.save();
+        sendGameUpdate(game);
+        return;
+    }
+
     if (attackerIsPoisonous) {
         const attackResult = applyPoisonousToMinion(
             game,
             targetOwner,
-            spotId,
+            currentTargetBoardIndex,
             targetMinion,
             player,
         );
@@ -121,7 +124,7 @@ export const minionToMinionAction = async ({
         const attackResult = applyDamageToMinion(
             game,
             targetOwner,
-            spotId,
+            currentTargetBoardIndex,
             targetMinion,
             attacker.attack,
             player,

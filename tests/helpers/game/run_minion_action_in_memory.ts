@@ -1,10 +1,11 @@
-import type { GameData, MinionSpotId, MinionState, SpotOwner } from "#api_types/game.types";
+import type { GameData, MinionState, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
     canMinionAttack,
     ensureIsMyTurn,
     ensureMinionFoundInBoard,
+    findMinionInBoard,
     getMinionAttacksThisRound,
     getMinionHasCharge,
     getMinionMaxAttacks,
@@ -25,7 +26,7 @@ export type PlayerKey = "playerOne" | "playerTwo";
 
 export interface MinionActionInMemoryAction {
     minionId: string;
-    spotId: MinionSpotId | null;
+    minionUuid: string | null;
     owner: SpotOwner;
 }
 
@@ -83,7 +84,7 @@ export const runMinionActionInMemory = async (
             return { game, errors: getErrors() };
         }
 
-        if (action.spotId === null) {
+        if (action.minionUuid === null) {
             await minionToHeroAction({
                 minionInfos,
                 game,
@@ -93,13 +94,28 @@ export const runMinionActionInMemory = async (
                 socketId: TEST_SOCKET_ID,
             });
         } else {
+            const targetBoard = action.owner === "PLAYER" ? player.board : opponent.board;
+            const targetMinionInfos = findMinionInBoard(
+                targetBoard,
+                action.minionUuid,
+                action.owner,
+            );
+            if (!targetMinionInfos) {
+                emitSocketEvent(
+                    "notify_error",
+                    { error: "Vous ne pouvez pas jouer ce serviteur ici" },
+                    TEST_SOCKET_ID,
+                );
+                return { game, errors: getErrors() };
+            }
+
             await minionToMinionAction({
                 minionInfos,
                 game,
                 player,
                 opponent,
                 owner: action.owner,
-                spotId: action.spotId,
+                targetMinion: targetMinionInfos.minion,
                 socketId: TEST_SOCKET_ID,
             });
         }

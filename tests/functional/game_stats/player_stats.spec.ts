@@ -34,7 +34,7 @@ test.group("player stats", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
             },
             expect: { error: null },
@@ -54,7 +54,7 @@ test.group("player stats", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.spell,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
             },
             expect: { error: null },
@@ -74,7 +74,7 @@ test.group("player stats", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.weapon,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
             },
             expect: { error: null },
@@ -105,7 +105,7 @@ test.group("player stats", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.spell,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
             },
             expect: { error: null },
@@ -134,7 +134,7 @@ test.group("player stats", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.spell,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
             },
             expect: { error: null },
@@ -161,7 +161,7 @@ test.group("player stats", (group) => {
                 playerOne: {
                     board: placeMinion(
                         createGameData().playerOne.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(attackerCard, {
                             placedAtRound: 1,
                             lastActionAtRound: 0,
@@ -172,7 +172,7 @@ test.group("player stats", (group) => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(targetCard),
                     ),
                 },
@@ -180,7 +180,7 @@ test.group("player stats", (group) => {
             actor: "playerOne",
             action: {
                 minionId: MINION_IDS.attacker,
-                spotId: "SPOT_1",
+                minionUuid: MINION_IDS.target,
                 owner: "OPPONENT",
             },
             expect: { error: null },
@@ -219,7 +219,7 @@ test.group("player stats", (group) => {
             }),
             actor: "playerOne",
             action: {
-                spotId: null,
+                minionUuid: null,
                 owner: "OPPONENT",
             },
             expect: { error: null },
@@ -235,7 +235,7 @@ test.group("player stats", (group) => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(createMinionCard({ attack: 0, health: 2 })),
                     ),
                 },

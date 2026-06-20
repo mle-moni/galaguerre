@@ -1,26 +1,33 @@
-import type { MinionSpotId, PlayerCard, SpotOwner } from "#api_types/game.types";
+import type { PlayerCard, SpotOwner } from "#api_types/game.types";
+import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
 
 import { makeAutoObservable } from "mobx";
-import { getElementCenter, getMinionSpotElement } from "~/helpers/resolve_target_from_point";
+import {
+    getElementCenter,
+    getInsertionZoneElement,
+    getMinionBoardElement,
+} from "~/helpers/resolve_target_from_point";
 import { notifyError } from "~/services/toasts";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
 
-export type SlotsBorderColor = {
-    [K in MinionSpotId]: string;
-};
+export type SlotsBorderColor = Record<number, string>;
 
-export const spotsToSameColor = (color: string) => ({
-    SPOT_1: color,
-    SPOT_2: color,
-    SPOT_3: color,
-    SPOT_4: color,
-    SPOT_5: color,
-});
+const BOARD_INDICES = Array.from({ length: MAX_BOARD_MINIONS }, (_, index) => index);
+
+export const spotsToSameColor = (color: string): SlotsBorderColor =>
+    Object.fromEntries(BOARD_INDICES.map((boardIndex) => [boardIndex, color]));
+
+export const buildSlotsBorderColor = (
+    colorForIndex: (boardIndex: number) => string,
+): SlotsBorderColor =>
+    Object.fromEntries(BOARD_INDICES.map((boardIndex) => [boardIndex, colorForIndex(boardIndex)]));
 
 export class CardDragStore {
     public cardDragged: PlayerCard | null = null;
     public minionPlayHintCardId: string | null = null;
+    public previewInsertIndex: number | null = null;
+    public isOverMinionDropZone = false;
 
     constructor(protected gameStore: GameStore) {
         makeAutoObservable(this);
@@ -48,81 +55,80 @@ export class CardDragStore {
 
     clearMinionPlayHint() {
         this.minionPlayHintCardId = null;
+        this.previewInsertIndex = null;
+        this.isOverMinionDropZone = false;
     }
 
     setCardDragged(card: PlayerCard | null) {
         if (card !== null) {
             this.gameStore.targetSelectionStore.disarm();
             this.clearMinionPlayHint();
+        } else {
+            this.previewInsertIndex = null;
+            this.isOverMinionDropZone = false;
         }
 
         this.cardDragged = card;
     }
 
-    get opponentSlotsBorderColor(): SlotsBorderColor {
-        const card = this.activeMinionCard;
-        if (!card) return spotsToSameColor("black");
-
-        return {
-            SPOT_1: this.canPlayCard("SPOT_1", card, "OPPONENT") ? "green" : "red",
-            SPOT_2: this.canPlayCard("SPOT_2", card, "OPPONENT") ? "green" : "red",
-            SPOT_3: this.canPlayCard("SPOT_3", card, "OPPONENT") ? "green" : "red",
-            SPOT_4: this.canPlayCard("SPOT_4", card, "OPPONENT") ? "green" : "red",
-            SPOT_5: this.canPlayCard("SPOT_5", card, "OPPONENT") ? "green" : "red",
-        };
+    enterMinionDropZone() {
+        this.isOverMinionDropZone = true;
     }
 
-    get mySlotsBorderColor(): SlotsBorderColor {
-        const card = this.activeMinionCard;
-        if (!card) return spotsToSameColor("black");
-
-        return {
-            SPOT_1: this.canPlayCard("SPOT_1", card, "PLAYER") ? "green" : "red",
-            SPOT_2: this.canPlayCard("SPOT_2", card, "PLAYER") ? "green" : "red",
-            SPOT_3: this.canPlayCard("SPOT_3", card, "PLAYER") ? "green" : "red",
-            SPOT_4: this.canPlayCard("SPOT_4", card, "PLAYER") ? "green" : "red",
-            SPOT_5: this.canPlayCard("SPOT_5", card, "PLAYER") ? "green" : "red",
-        };
+    leaveMinionDropZone() {
+        this.isOverMinionDropZone = false;
+        this.previewInsertIndex = null;
     }
 
-    canPlayMinionOnSpot(spotId: MinionSpotId, spotOwner: SpotOwner) {
-        // cannot play a minion on an opponent spot
-        if (spotOwner === "OPPONENT") return false;
-        // allow to play a minion on a spot if it's empty
-        return this.gameStore.me.board[spotId] === null;
+    setPreviewInsertIndex(boardIndex: number | null) {
+        if (!this.isOverMinionDropZone) return;
+        this.previewInsertIndex = boardIndex;
     }
 
-    canPlayCard(spotId: MinionSpotId, card: PlayerCard, spotOwner: SpotOwner): boolean {
+    canPlayAtIndex(boardIndex: number): boolean {
         if (!this.gameStore.isMyTurn) return false;
-        if (card.cost > this.gameStore.me.mana) return false;
-        if (card.type === "MINION") return this.canPlayMinionOnSpot(spotId, spotOwner);
 
-        return false;
+        const card = this.activeMinionCard;
+        if (!card || card.type !== "MINION") return false;
+        if (card.cost > this.gameStore.me.mana) return false;
+
+        const minionCount = countBoardMinionsOnBoard(this.gameStore.me.board);
+        if (minionCount >= MAX_BOARD_MINIONS) return false;
+
+        return Number.isInteger(boardIndex) && boardIndex >= 0 && boardIndex <= minionCount;
     }
 
     handleDrop(
         card: PlayerCard,
-        spotId: MinionSpotId,
+        boardIndex: number,
         spotOwner: SpotOwner,
         cursor?: { x: number; y: number },
     ) {
+        this.previewInsertIndex = null;
+        this.isOverMinionDropZone = false;
+
+        if (spotOwner !== "PLAYER") {
+            notifyError("Vous ne pouvez pas jouer cette carte ici");
+            return;
+        }
+
         if (card.cost > this.gameStore.me.mana) {
             notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
             return;
         }
 
-        const canPlayCard = this.canPlayCard(spotId, card, spotOwner);
-
-        if (!canPlayCard) {
+        if (!this.canPlayAtIndex(boardIndex)) {
             notifyError("Vous ne pouvez pas jouer cette carte ici");
             return;
         }
 
         if (card.type === "MINION" && this.gameStore.targetSelectionStore.requiresTarget(card)) {
             this.clearMinionPlayHint();
-            this.gameStore.targetSelectionStore.startTargetSelection(card, spotId, spotOwner);
+            this.gameStore.targetSelectionStore.startTargetSelection(card, boardIndex, spotOwner);
 
-            const spotElement = getMinionSpotElement(spotId, spotOwner);
+            const spotElement =
+                getInsertionZoneElement(boardIndex, spotOwner) ??
+                getMinionBoardElement(boardIndex, spotOwner);
             if (spotElement) {
                 const origin = getElementCenter(spotElement);
                 requestAnimationFrame(() => {
@@ -135,10 +141,11 @@ export class CardDragStore {
 
         emitSocketEventToServer("game:play_card", {
             cardId: card.uuid,
-            spotId,
+            boardIndex,
             owner: spotOwner,
         });
 
         this.clearMinionPlayHint();
+        this.setCardDragged(null);
     }
 }

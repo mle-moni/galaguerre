@@ -1,4 +1,4 @@
-import type { MinionSpotId, SpotOwner } from "#api_types/game.types";
+import type { SpotOwner } from "#api_types/game.types";
 import type { AnimationRect } from "~/stores/AnimationStore";
 
 export interface GameAnimationSnapshot {
@@ -10,7 +10,7 @@ export interface GameAnimationSnapshot {
     hands: Map<SpotOwner, AnimationRect>;
 }
 
-export const getSpotKey = (owner: SpotOwner, spotId: MinionSpotId) => `${owner}:${spotId}`;
+export const getBoardKey = (owner: SpotOwner, boardIndex: number) => `${owner}:${boardIndex}`;
 
 const readRect = (element: Element): AnimationRect => {
     const rect = element.getBoundingClientRect();
@@ -67,14 +67,14 @@ export const readGameAnimationSnapshot = (): GameAnimationSnapshot => {
         const owner = element.getAttribute("data-spot-owner");
         if (owner !== "PLAYER" && owner !== "OPPONENT") continue;
 
-        const spotId = element.getAttribute("data-spot-id");
-        if (spotId === "hero") {
+        const boardIndexAttr = element.getAttribute("data-board-index");
+        if (boardIndexAttr === "hero") {
             heroes.set(owner, readRect(element));
             continue;
         }
 
-        if (spotId) {
-            spots.set(getSpotKey(owner, spotId as MinionSpotId), readRect(element));
+        if (boardIndexAttr !== null) {
+            spots.set(getBoardKey(owner, Number(boardIndexAttr)), readRect(element));
         }
     }
 

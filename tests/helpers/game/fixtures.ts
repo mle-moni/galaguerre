@@ -1,6 +1,7 @@
 import {
     DEFAULT_HERO_HEALTH,
     DEFAULT_PLAYER_STATS,
+    type ActionTarget,
     type BoardState,
     type BoostSnapshot,
     type CardActionSnapshot,
@@ -10,12 +11,12 @@ import {
     type GamePlayer,
     type MinionCard,
     type MinionPowerSnapshot,
-    type MinionSpotId,
     type MinionState,
     type PassiveSnapshot,
     type PlayerCard,
     type ReconvertParametersSnapshot,
     type SpellCard,
+    type SpotOwner,
     type TargetSnapshot,
     type WeaponCard,
     type WeaponState,
@@ -34,13 +35,7 @@ export const CARD_IDS = {
     weapon: "card-weapon",
 } as const;
 
-export const createEmptyBoard = (): BoardState => ({
-    SPOT_1: null,
-    SPOT_2: null,
-    SPOT_3: null,
-    SPOT_4: null,
-    SPOT_5: null,
-});
+export const createEmptyBoard = (): BoardState => [];
 
 export const createComparisonSnapshot = (
     overrides: Partial<ComparisonSnapshot> = {},
@@ -429,11 +424,21 @@ export const createGameData = (
 
 export const placeMinion = (
     board: BoardState,
-    spotId: MinionSpotId,
+    boardIndex: number,
     minion: MinionState,
-): BoardState => ({
-    ...board,
-    [spotId]: minion,
+): BoardState => {
+    const next = [...board];
+    next.splice(boardIndex, 0, minion);
+    return next;
+};
+
+export const actionTargetAtIndex = (
+    board: BoardState,
+    boardIndex: number,
+    owner: SpotOwner,
+): ActionTarget => ({
+    owner,
+    minionUuid: board[boardIndex]!.uuid,
 });
 
 export const createSpellCard = (

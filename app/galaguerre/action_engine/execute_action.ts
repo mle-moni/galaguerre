@@ -42,15 +42,7 @@ import { resolveHeroTargets } from "./resolve_hero_target.js";
 import { resolveSelectedTarget, type ResolvedTarget } from "./resolve_selected_target.js";
 import { summonMinions } from "./summon_minion.js";
 import { triggerSummonPassivesForCards } from "../passive_engine/trigger_summon_passives.js";
-
-const getMinionOwner = (
-    board: GamePlayer["board"],
-    _spotId: NonNullable<ActionTarget["spotId"]>,
-    player: GamePlayer,
-    opponent: GamePlayer,
-): GamePlayer => {
-    return board === player.board ? player : opponent;
-};
+import { requireMinionIndex } from "./find_minion_on_board.js";
 
 const applyEffectToResolvedTarget = (
     resolved: ResolvedTarget,
@@ -68,11 +60,14 @@ const applyEffectToResolvedTarget = (
                 return { gameEnded };
             }
 
-            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            const owner = resolved.owner;
+            const boardIndex = requireMinionIndex(owner, resolved.minion);
+            if (boardIndex === -1) return { gameEnded: false };
+
             const result = applyDamageToMinion(
                 game,
                 owner,
-                resolved.spotId,
+                boardIndex,
                 resolved.minion,
                 damage,
                 player,
@@ -89,11 +84,14 @@ const applyEffectToResolvedTarget = (
                 return { gameEnded };
             }
 
-            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            const owner = resolved.owner;
+            const boardIndex = requireMinionIndex(owner, resolved.minion);
+            if (boardIndex === -1) return { gameEnded: false };
+
             const { gameEnded } = applyHealToMinion(
                 game,
                 owner,
-                resolved.spotId,
+                boardIndex,
                 resolved.minion,
                 action.heal!,
                 player,
@@ -111,14 +109,16 @@ const applyEffectToResolvedTarget = (
         }
         case "SILENCE": {
             if (resolved.type !== "MINION") return { gameEnded: false };
-            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
-            applySilenceToMinion(game, owner, resolved.spotId);
+            const owner = resolved.owner;
+            const boardIndex = requireMinionIndex(owner, resolved.minion);
+            if (boardIndex === -1) return { gameEnded: false };
+            applySilenceToMinion(game, owner, boardIndex);
             return { gameEnded: false };
         }
         case "DESTROY": {
             if (resolved.type !== "MINION") return { gameEnded: false };
-            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
-            return killMinion(game, owner, resolved.spotId);
+            const owner = resolved.owner;
+            return killMinion(game, owner, resolved.minion.uuid);
         }
         case "BREAK_WEAPON": {
             if (resolved.type !== "HERO") return { gameEnded: false };
@@ -128,11 +128,14 @@ const applyEffectToResolvedTarget = (
             if (resolved.type !== "MINION" || action.reconvertParameters === null) {
                 return { gameEnded: false };
             }
-            const owner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
+            const owner = resolved.owner;
+            const boardIndex = requireMinionIndex(owner, resolved.minion);
+            if (boardIndex === -1) return { gameEnded: false };
+
             applyReconversionToMinion(
                 game,
                 owner,
-                resolved.spotId,
+                boardIndex,
                 action.reconvertParameters,
                 resolved.minion,
             );
@@ -143,11 +146,13 @@ const applyEffectToResolvedTarget = (
             if (!evaluateActionCondition(action.actionCondition, player, opponent)) {
                 return { gameEnded: false };
             }
-            const sourceOwner = getMinionOwner(resolved.board, resolved.spotId, player, opponent);
-            if (!canMindControlTarget(player, sourceOwner, resolved.spotId)) {
+            const sourceOwner = resolved.owner;
+            if (!canMindControlTarget(player, sourceOwner, resolved.minion.uuid)) {
                 return { gameEnded: false };
             }
-            applyMindControlToMinion(game, player, sourceOwner, resolved.spotId);
+            const boardIndex = requireMinionIndex(sourceOwner, resolved.minion);
+            if (boardIndex === -1) return { gameEnded: false };
+            applyMindControlToMinion(game, player, sourceOwner, boardIndex);
             return { gameEnded: false };
         }
         default:

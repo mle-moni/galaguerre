@@ -13,7 +13,7 @@ test.group("game:play_card socket layer", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
             },
             expect: { error: "Vous n'êtes pas en jeu" },
@@ -39,7 +39,7 @@ test.group("game:play_card socket layer", (group) => {
             actor: "playerOne",
             action: {
                 cardId: CARD_IDS.handMinion,
-                spotId: "SPOT_1",
+                boardIndex: 0,
                 owner: "PLAYER",
             },
             expect: {
@@ -56,7 +56,7 @@ test.group("game:play_card socket layer", (group) => {
     test("rejects invalid play card payload", async ({ assert }) => {
         const errors = await runInvalidPlayCardPayload({
             cardId: "card-1",
-            spotId: "BAD_SPOT",
+            boardIndex: 99,
             owner: "PLAYER",
         });
 

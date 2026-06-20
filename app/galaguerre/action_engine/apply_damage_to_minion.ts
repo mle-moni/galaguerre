@@ -1,4 +1,4 @@
-import type { GamePlayer, MinionSpotId, MinionState } from "#api_types/game.types";
+import type { GamePlayer, MinionState } from "#api_types/game.types";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type Game from "#models/game";
 import { getActualDamage, recordDamageDealt } from "../game_stats/record_player_stats.js";
@@ -36,7 +36,7 @@ export const popStealth = (minion: MinionState): void => {
 export const applyDamageToMinion = (
     game: Game,
     owner: GamePlayer,
-    spotId: MinionSpotId,
+    boardIndex: number,
     minion: MinionState,
     damage: number,
     sourcePlayer: GamePlayer,
@@ -58,7 +58,7 @@ export const applyDamageToMinion = (
         const passiveResult = triggerDamagePassives(game, {
             type: "MINION",
             owner,
-            spotId,
+            boardIndex,
             minion,
         });
         if (passiveResult.gameEnded) {
@@ -67,7 +67,7 @@ export const applyDamageToMinion = (
     }
 
     if (minion.health <= 0) {
-        const { gameEnded } = killMinion(game, owner, spotId);
+        const { gameEnded } = killMinion(game, owner, minion.uuid);
         return { damageDealt, killed: true, gameEnded };
     }
 
@@ -77,7 +77,7 @@ export const applyDamageToMinion = (
 export const applyPoisonousToMinion = (
     game: Game,
     owner: GamePlayer,
-    spotId: MinionSpotId,
+    boardIndex: number,
     minion: MinionState,
     sourcePlayer: GamePlayer,
 ): MinionDamageResult => {
@@ -94,7 +94,7 @@ export const applyPoisonousToMinion = (
         const passiveResult = triggerDamagePassives(game, {
             type: "MINION",
             owner,
-            spotId,
+            boardIndex,
             minion,
         });
         if (passiveResult.gameEnded) {
@@ -102,6 +102,6 @@ export const applyPoisonousToMinion = (
         }
     }
 
-    const { gameEnded } = killMinion(game, owner, spotId);
+    const { gameEnded } = killMinion(game, owner, minion.uuid);
     return { damageDealt, killed: true, gameEnded };
 };

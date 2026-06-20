@@ -1,11 +1,10 @@
 import type {
     MinionCard,
-    MinionSpotId,
     MinionState,
     ReconvertParametersSnapshot,
     TargetSnapshot,
 } from "#api_types/game.types";
-import { MINION_SPOT_IDS, type GamePlayer } from "#api_types/game.types";
+import { type GamePlayer } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
 import {
@@ -62,10 +61,10 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
 export const applyReconversionWithTemplate = (
     game: Game,
     owner: GamePlayer,
-    spotId: MinionSpotId,
+    boardIndex: number,
     template: MinionCard,
 ): void => {
-    const minion = owner.board[spotId];
+    const minion = owner.board[boardIndex];
     if (!minion || minion.originalCard.type !== "MINION") return;
 
     revertPassiveAurasForSource(game, owner, minion);
@@ -90,24 +89,24 @@ export const applyReconversionWithTemplate = (
     minion.permanentKeywords = emptyPermanentKeywords();
     minion.isSilenced = false;
 
-    refreshAurasAfterMinionPlayed(game, owner, spotId);
+    refreshAurasAfterMinionPlayed(game, owner, boardIndex);
     recalculateMinionKeywords(game, minion);
 };
 
 export const applyReconversionToMinion = (
     game: Game,
     owner: GamePlayer,
-    spotId: MinionSpotId,
+    boardIndex: number,
     parameters: ReconvertParametersSnapshot,
     sourceMinionForRelative: MinionState,
 ): void => {
-    const minion = owner.board[spotId];
+    const minion = owner.board[boardIndex];
     if (!minion || minion.originalCard.type !== "MINION") return;
 
     const template = resolveReconvertTemplate(parameters, sourceMinionForRelative);
     if (!template) return;
 
-    applyReconversionWithTemplate(game, owner, spotId, template);
+    applyReconversionWithTemplate(game, owner, boardIndex, template);
 };
 
 export const applyReconversionToAllMinions = (
@@ -119,13 +118,12 @@ export const applyReconversionToAllMinions = (
     sourceMinion?: MinionState,
 ): void => {
     for (const { board, owner, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
-        for (const spotId of MINION_SPOT_IDS) {
-            const minion = board[spotId];
-            if (!minion) continue;
+        for (let boardIndex = 0; boardIndex < board.length; boardIndex++) {
+            const minion = board[boardIndex];
             if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
-            applyReconversionToMinion(game, owner, spotId, parameters, minion);
+            applyReconversionToMinion(game, owner, boardIndex, parameters, minion);
         }
     }
 };

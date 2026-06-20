@@ -1,11 +1,12 @@
 import {
-    MINION_SPOT_IDS,
-    type ActionTarget,
-    type BoardState,
-    type GamePlayer,
-    type MinionSpotId,
-} from "#api_types/game.types";
+    countBoardMinionsOnBoard,
+    insertMinionAtIndex,
+    playerHasBoardSpace,
+    removeMinionByUuid,
+} from "#api_types/board";
+import type { GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
+import { findMinionIndexOnBoard } from "./find_minion_on_board.js";
 import {
     removeMinionFromAuraTracking,
     revertAurasReceivedByMinion,
@@ -13,17 +14,7 @@ import {
 } from "../passive_engine/passive_aura.js";
 import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
 
-export const findFirstEmptyBoardSpot = (board: BoardState): MinionSpotId | null => {
-    for (const spotId of MINION_SPOT_IDS) {
-        if (board[spotId] === null) return spotId;
-    }
-
-    return null;
-};
-
-export const playerHasBoardSpace = (player: GamePlayer): boolean => {
-    return findFirstEmptyBoardSpot(player.board) !== null;
-};
+export { playerHasBoardSpace } from "#api_types/board";
 
 export const canMindControlWithBoardSpace = (controller: GamePlayer): boolean => {
     return playerHasBoardSpace(controller);
@@ -32,33 +23,35 @@ export const canMindControlWithBoardSpace = (controller: GamePlayer): boolean =>
 export const canMindControlTarget = (
     controller: GamePlayer,
     sourceOwner: GamePlayer,
-    sourceSpotId: NonNullable<ActionTarget["spotId"]>,
+    minionUuid: string,
 ): boolean => {
     if (!playerHasBoardSpace(controller)) return false;
 
-    return sourceOwner.board[sourceSpotId] !== null;
+    return findMinionIndexOnBoard(sourceOwner, minionUuid) !== -1;
 };
 
 export const applyMindControlToMinion = (
     game: Game,
     controller: GamePlayer,
     sourceOwner: GamePlayer,
-    sourceSpotId: MinionSpotId,
+    sourceBoardIndex: number,
 ): boolean => {
-    const destinationSpotId = findFirstEmptyBoardSpot(controller.board);
-    if (!destinationSpotId) return false;
+    if (!playerHasBoardSpace(controller)) return false;
 
-    const minion = sourceOwner.board[sourceSpotId];
+    const minion = sourceOwner.board[sourceBoardIndex];
     if (!minion) return false;
 
     revertPassiveAurasForSource(game, sourceOwner, minion);
     revertAurasReceivedByMinion(game, minion);
     removeMinionFromAuraTracking(game, minion);
 
-    sourceOwner.board[sourceSpotId] = null;
-    controller.board[destinationSpotId] = minion;
+    removeMinionByUuid(sourceOwner.board, minion.uuid);
 
-    refreshAurasAfterMinionPlayed(game, controller, destinationSpotId);
+    const boardIndex = countBoardMinionsOnBoard(controller.board);
+    const { inserted } = insertMinionAtIndex(controller.board, boardIndex, minion);
+    if (!inserted) return false;
+
+    refreshAurasAfterMinionPlayed(game, controller, boardIndex);
 
     return true;
 };

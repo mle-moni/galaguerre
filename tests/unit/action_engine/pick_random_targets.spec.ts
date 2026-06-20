@@ -49,8 +49,8 @@ test.group("pick_random_targets", () => {
         const allyMinion = createMinionState(createMinionCard({ uuid: "ally" }));
         const enemyMinion = createMinionState(createMinionCard({ uuid: "enemy" }));
 
-        data.playerOne.board = placeMinion(data.playerOne.board, "SPOT_1", allyMinion);
-        data.playerTwo.board = placeMinion(data.playerTwo.board, "SPOT_2", enemyMinion);
+        data.playerOne.board = placeMinion(data.playerOne.board, 0, allyMinion);
+        data.playerTwo.board = placeMinion(data.playerTwo.board, 1, enemyMinion);
 
         const target = createMinionTargetSnapshot("OPPONENT", {
             maxTargets: 1,
@@ -59,7 +59,7 @@ test.group("pick_random_targets", () => {
 
         const eligible = collectEligibleActionTargets(target, data.playerOne, data.playerTwo);
 
-        assert.deepEqual(eligible, [{ spotId: "SPOT_2", owner: "OPPONENT" }]);
+        assert.deepEqual(eligible, [{ minionUuid: "enemy", owner: "OPPONENT" }]);
     });
 
     test("collectEligibleActionTargets excludes source minion when excludeSelf is true", ({
@@ -70,8 +70,8 @@ test.group("pick_random_targets", () => {
         const allyMinion = createMinionState(createMinionCard({ uuid: "ally" }));
 
         data.playerOne.board = placeMinion(
-            placeMinion(data.playerOne.board, "SPOT_1", sourceMinion),
-            "SPOT_2",
+            placeMinion(data.playerOne.board, 0, sourceMinion),
+            1,
             allyMinion,
         );
 
@@ -88,7 +88,7 @@ test.group("pick_random_targets", () => {
             sourceMinion,
         );
 
-        assert.deepEqual(eligible, [{ spotId: "SPOT_2", owner: "PLAYER" }]);
+        assert.deepEqual(eligible, [{ minionUuid: "ally", owner: "PLAYER" }]);
     });
 
     test("pickRandomLimitedTargets returns all eligible when maxTargets exceeds pool size", ({
@@ -99,8 +99,8 @@ test.group("pick_random_targets", () => {
         const enemyMinion2 = createMinionState(createMinionCard({ uuid: "enemy-2" }));
 
         data.playerTwo.board = placeMinion(
-            placeMinion(data.playerTwo.board, "SPOT_1", enemyMinion1),
-            "SPOT_2",
+            placeMinion(data.playerTwo.board, 0, enemyMinion1),
+            1,
             enemyMinion2,
         );
 
@@ -139,8 +139,8 @@ test.group("pick_random_targets", () => {
         );
 
         data.playerTwo.board = placeMinion(
-            placeMinion(data.playerTwo.board, "SPOT_1", visibleMinion),
-            "SPOT_2",
+            placeMinion(data.playerTwo.board, 0, visibleMinion),
+            1,
             stealthMinion,
         );
 
@@ -151,6 +151,6 @@ test.group("pick_random_targets", () => {
 
         const eligible = collectEligibleActionTargets(target, data.playerOne, data.playerTwo);
 
-        assert.deepEqual(eligible, [{ spotId: "SPOT_1", owner: "OPPONENT" }]);
+        assert.deepEqual(eligible, [{ minionUuid: "visible", owner: "OPPONENT" }]);
     });
 });

@@ -1,7 +1,6 @@
 import type {
     ApiGame,
     GamePlayer,
-    MinionSpotId,
     MinionState,
     PlayerCard,
     SpotOwner,
@@ -9,7 +8,7 @@ import type {
 import type { AnimationRect, VisualAnimationEventInput } from "~/stores/AnimationStore";
 import {
     getFallbackRect,
-    getSpotKey,
+    getBoardKey,
     type GameAnimationSnapshot,
 } from "./game_animation_snapshot.js";
 
@@ -45,15 +44,15 @@ const getBoardMinions = (
 
     for (const owner of OWNERS) {
         const player = getPlayerForOwner(game, userId, owner);
-        for (const [spotId, minion] of Object.entries(player.board)) {
-            if (!minion) continue;
+        for (let boardIndex = 0; boardIndex < player.board.length; boardIndex++) {
+            const minion = player.board[boardIndex];
 
             minions.set(minion.uuid, {
                 minion,
                 owner,
                 rect:
                     snapshot.cards.get(minion.uuid) ??
-                    snapshot.spots.get(getSpotKey(owner, spotId as MinionSpotId)),
+                    snapshot.spots.get(getBoardKey(owner, boardIndex)),
             });
         }
     }

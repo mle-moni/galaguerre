@@ -1,10 +1,4 @@
-import type {
-    ActionTarget,
-    GamePlayer,
-    MinionSpotId,
-    PlayerCard,
-    SpotOwner,
-} from "#api_types/game.types";
+import type { ActionTarget, GamePlayer, PlayerCard, SpotOwner } from "#api_types/game.types";
 import type { ClientSocketEventByKey } from "#api_types/socket_events";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
@@ -24,7 +18,7 @@ import { playWeapon } from "./play_weapon.js";
 
 export const gamePlayCard = async (
     socketId: string,
-    { cardId, owner, spotId, actionTarget }: ClientSocketEventByKey["game:play_card"],
+    { cardId, owner, boardIndex, actionTarget }: ClientSocketEventByKey["game:play_card"],
 ) => {
     const gameInfos = await getGameActionInfos(socketId);
     if (!gameInfos) return;
@@ -38,7 +32,7 @@ export const gamePlayCard = async (
     const card = ensureCardFoundInHand(player.hand, cardId, socketId);
     if (!card) return;
 
-    return playCard({ card, game: currentGame, player, owner, spotId, socketId, actionTarget });
+    return playCard({ card, game: currentGame, player, owner, boardIndex, socketId, actionTarget });
 };
 
 export interface PlayCardOptions {
@@ -46,7 +40,7 @@ export interface PlayCardOptions {
     game: Game;
     player: GamePlayer;
     owner: SpotOwner;
-    spotId: MinionSpotId | null;
+    boardIndex: number | null;
     socketId: string;
     actionTarget?: ActionTarget | null;
 }
@@ -68,7 +62,7 @@ const playCard = async (opts: PlayCardOptions) => {
     }
 
     if (card.type === "MINION") {
-        if (!opts.spotId) {
+        if (opts.boardIndex === null) {
             emitSocketEvent(
                 "notify_error",
                 { error: "Vous ne pouvez pas jouer cette carte ici" },
@@ -76,7 +70,7 @@ const playCard = async (opts: PlayCardOptions) => {
             );
             return;
         }
-        return playMinion({ ...opts, card, spotId: opts.spotId });
+        return playMinion({ ...opts, card, boardIndex: opts.boardIndex });
     }
     if (card.type === "SPELL") return playSpell({ ...opts, card });
     if (card.type === "WEAPON") return playWeapon({ ...opts, card });

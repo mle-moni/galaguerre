@@ -17,7 +17,7 @@ import {
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot } from "#tests/helpers/game/assertions";
+import { assertBoardIndex } from "#tests/helpers/game/assertions";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import { runMinionCombat } from "#tests/helpers/game/run_minion_combat";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
@@ -44,20 +44,16 @@ test.group("divine shield", () => {
         const { game } = await runMinionCombat(
             createGameData({
                 playerOne: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(attackerCard),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(attackerCard)),
                 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
                 },
             }),
         );
 
-        const attacker = game.data.playerOne.board.SPOT_1!;
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 3 });
+        const attacker = game.data.playerOne.board[0]!;
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 3 });
         assert.isTrue(getMinionHasDivineShield(attacker));
         assert.equal(attacker.originalCard.type, "MINION");
         assert.include((attacker.originalCard as MinionCard).effects, "Immunité");
@@ -80,20 +76,16 @@ test.group("divine shield", () => {
         const { game } = await runMinionCombat(
             createGameData({
                 playerOne: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(attackerCard),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(attackerCard)),
                 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
                 },
             }),
         );
 
-        const target = game.data.playerTwo.board.SPOT_1!;
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 1 });
+        const target = game.data.playerTwo.board[0]!;
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
         assert.isFalse(getMinionHasDivineShield(target));
         assert.equal(target.originalCard.type, "MINION");
         assert.notInclude((target.originalCard as MinionCard).effects, "Immunité");
@@ -115,18 +107,18 @@ test.group("divine shield", () => {
 
         const initialData = createGameData({
             playerOne: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(attackerCard)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(attackerCard)),
             },
             playerTwo: {
-                board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
             },
         });
 
         const { game: gameAfterFirstHit } = await runMinionCombat(initialData);
-        assertBoardSpot(assert, gameAfterFirstHit, "playerTwo", "SPOT_1", { health: 1 });
+        assertBoardIndex(assert, gameAfterFirstHit, "playerTwo", 0, { health: 1 });
 
         const { game: gameAfterSecondHit } = await runMinionCombat(gameAfterFirstHit.data);
-        assertBoardSpot(assert, gameAfterSecondHit, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, gameAfterSecondHit, "playerTwo", 0, null);
     });
 
     test("poisonous attacker pops divine shield without killing target", async ({ assert }) => {
@@ -148,20 +140,16 @@ test.group("divine shield", () => {
         const { game } = await runMinionCombat(
             createGameData({
                 playerOne: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(attackerCard),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(attackerCard)),
                 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
                 },
             }),
         );
 
-        const target = game.data.playerTwo.board.SPOT_1!;
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 9 });
+        const target = game.data.playerTwo.board[0]!;
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 9 });
         assert.isFalse(getMinionHasDivineShield(target));
     });
 
@@ -192,15 +180,15 @@ test.group("divine shield", () => {
                     hand: [spell],
                 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: MINION_IDS.target, owner: "OPPONENT" } },
         );
 
-        const target = game.data.playerTwo.board.SPOT_1!;
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 4 });
+        const target = game.data.playerTwo.board[0]!;
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 4 });
         assert.isFalse(getMinionHasDivineShield(target));
     });
 
@@ -234,23 +222,19 @@ test.group("divine shield", () => {
                 playerOne: {
                     mana: 10,
                     hand: [spell],
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(shieldedCard),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(shieldedCard)),
                 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(normalCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(normalCard)),
                 },
             }),
             spell,
         );
 
-        const shielded = game.data.playerOne.board.SPOT_1!;
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", { health: 2 });
+        const shielded = game.data.playerOne.board[0]!;
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 2 });
         assert.isFalse(getMinionHasDivineShield(shielded));
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", null);
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
     });
 
     test("boost grants divine shield to minion without it", ({ assert }) => {
@@ -291,19 +275,15 @@ test.group("divine shield", () => {
         const { game } = await runMinionCombat(
             createGameData({
                 playerOne: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(attackerCard),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(attackerCard)),
                 },
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", target),
+                    board: placeMinion(createEmptyBoard(), 0, target),
                 },
             }),
         );
 
-        const minion = game.data.playerTwo.board.SPOT_1!;
+        const minion = game.data.playerTwo.board[0]!;
         assert.isFalse(getMinionHasDivineShield(minion));
 
         applyBoostToMinion(
@@ -329,14 +309,14 @@ test.group("divine shield", () => {
         const game = createInMemoryGame(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(targetCard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
                 },
             }),
         );
 
-        applySilenceToMinion(game, game.data.playerTwo, "SPOT_1");
+        applySilenceToMinion(game, game.data.playerTwo, 0);
 
-        const minion = game.data.playerTwo.board.SPOT_1!;
+        const minion = game.data.playerTwo.board[0]!;
         assert.isFalse(getMinionHasDivineShield(minion));
         assert.equal(minion.originalCard.type, "MINION");
         assert.notInclude((minion.originalCard as MinionCard).effects, "Immunité");

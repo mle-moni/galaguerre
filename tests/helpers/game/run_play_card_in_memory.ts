@@ -1,4 +1,4 @@
-import type { ActionTarget, GameData, MinionSpotId, SpotOwner } from "#api_types/game.types";
+import type { ActionTarget, GameData, SpotOwner } from "#api_types/game.types";
 import type Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
@@ -26,7 +26,7 @@ export type PlayerKey = "playerOne" | "playerTwo";
 
 export interface PlayCardInMemoryAction {
     cardId: string;
-    spotId: MinionSpotId | null;
+    boardIndex: number | null;
     owner: SpotOwner;
     actionTarget?: ActionTarget | null;
 }
@@ -69,7 +69,7 @@ export const runPlayCardInMemory = async (
         }
 
         if (card.type === "MINION") {
-            if (!action.spotId) {
+            if (action.boardIndex === null) {
                 emitSocketEvent(
                     "notify_error",
                     { error: "Vous ne pouvez pas jouer cette carte ici" },
@@ -80,7 +80,7 @@ export const runPlayCardInMemory = async (
 
             await playMinion({
                 card,
-                spotId: action.spotId,
+                boardIndex: action.boardIndex,
                 owner: action.owner,
                 player,
                 game,
@@ -94,7 +94,7 @@ export const runPlayCardInMemory = async (
                 game,
                 socketId: TEST_SOCKET_ID,
                 owner: action.owner,
-                spotId: action.spotId,
+                boardIndex: action.boardIndex,
                 actionTarget: action.actionTarget,
             });
         } else if (card.type === "WEAPON") {
@@ -104,7 +104,7 @@ export const runPlayCardInMemory = async (
                 game,
                 socketId: TEST_SOCKET_ID,
                 owner: action.owner,
-                spotId: action.spotId,
+                boardIndex: action.boardIndex,
             });
         }
 

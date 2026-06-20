@@ -1,11 +1,4 @@
-import {
-    MINION_SPOT_IDS,
-    type GamePlayer,
-    type MinionCard,
-    type MinionSpotId,
-    type MinionState,
-    type TargetSnapshot,
-} from "#api_types/game.types";
+import type { GamePlayer, MinionCard, MinionState, TargetSnapshot } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
 import { getMinionPowerEffects } from "../minion_card_metadata.js";
@@ -52,8 +45,8 @@ const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
     syncMinionCardEffects(card);
 };
 
-export const applySilenceToMinion = (game: Game, owner: GamePlayer, spotId: MinionSpotId): void => {
-    const minion = owner.board[spotId];
+export const applySilenceToMinion = (game: Game, owner: GamePlayer, boardIndex: number): void => {
+    const minion = owner.board[boardIndex];
     if (!minion || minion.originalCard.type !== "MINION" || minion.isSilenced) return;
 
     const card = minion.originalCard;
@@ -67,7 +60,7 @@ export const applySilenceToMinion = (game: Game, owner: GamePlayer, spotId: Mini
     resetMinionKeywordsOnSilence(minion);
     minion.isSilenced = true;
 
-    applyExistingAurasToMinion(game, owner, spotId);
+    applyExistingAurasToMinion(game, owner, boardIndex);
     recalculateMinionKeywords(game, minion);
 };
 
@@ -79,13 +72,12 @@ export const applySilenceToAllMinions = (
     sourceMinion?: MinionState,
 ): void => {
     for (const { board, owner, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
-        for (const spotId of MINION_SPOT_IDS) {
-            const minion = board[spotId];
-            if (!minion) continue;
+        for (let boardIndex = 0; boardIndex < board.length; boardIndex++) {
+            const minion = board[boardIndex];
             if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
-            applySilenceToMinion(game, owner, spotId);
+            applySilenceToMinion(game, owner, boardIndex);
         }
     }
 };

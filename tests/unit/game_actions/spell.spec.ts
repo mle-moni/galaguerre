@@ -11,7 +11,7 @@ import {
     createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot } from "#tests/helpers/game/assertions";
+import { assertBoardIndex } from "#tests/helpers/game/assertions";
 import { runPlayCardInMemory } from "#tests/helpers/game/run_play_card_in_memory";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 import { assertError } from "#tests/helpers/game/socket_event_collector";
@@ -60,16 +60,16 @@ test.group("spell effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.isNull(game.data.playerTwo.board.SPOT_1);
+        assert.equal(game.data.playerTwo.board.length, 0);
     });
 
     test("draw spell adds card to hand", ({ assert }) => {
@@ -155,14 +155,14 @@ test.group("spell effects", () => {
                     hand: [spell],
                     board: placeMinion(
                         createGameData().playerOne.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(allyMinion),
                     ),
                 },
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
@@ -172,8 +172,8 @@ test.group("spell effects", () => {
 
         assert.equal(game.data.playerOne.health, DEFAULT_HERO_HEALTH - 2);
         assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 3);
-        assert.equal(game.data.playerTwo.board.SPOT_1!.health, 3);
+        assert.equal(game.data.playerOne.board[0]!.health, 3);
+        assert.equal(game.data.playerTwo.board[0]!.health, 3);
     });
 
     test("mass ALL damage spell with OPPONENT team only hits opponent characters", ({ assert }) => {
@@ -198,14 +198,14 @@ test.group("spell effects", () => {
                     hand: [spell],
                     board: placeMinion(
                         createGameData().playerOne.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(allyMinion),
                     ),
                 },
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
@@ -215,8 +215,8 @@ test.group("spell effects", () => {
 
         assert.equal(game.data.playerOne.health, DEFAULT_HERO_HEALTH);
         assert.equal(game.data.playerTwo.health, DEFAULT_HERO_HEALTH - 2);
-        assert.equal(game.data.playerOne.board.SPOT_1!.health, 5);
-        assert.equal(game.data.playerTwo.board.SPOT_1!.health, 3);
+        assert.equal(game.data.playerOne.board[0]!.health, 5);
+        assert.equal(game.data.playerTwo.board[0]!.health, 3);
     });
 
     test("random damage spell hits one enemy minion", ({ assert }) => {
@@ -247,10 +247,10 @@ test.group("spell effects", () => {
                     board: placeMinion(
                         placeMinion(
                             createGameData().playerTwo.board,
-                            "SPOT_1",
+                            0,
                             createMinionState(enemyMinion1),
                         ),
-                        "SPOT_2",
+                        1,
                         createMinionState(enemyMinion2),
                     ),
                 },
@@ -259,8 +259,8 @@ test.group("spell effects", () => {
         );
 
         const board = game.data.playerTwo.board;
-        const damagedCount = ["SPOT_1", "SPOT_2", "SPOT_3", "SPOT_4", "SPOT_5"].filter(
-            (spotId) => board[spotId as keyof typeof board]?.health === 4,
+        const damagedCount = [0, 1, 2, 3, 4].filter(
+            (boardIndex) => board[boardIndex]?.health === 4,
         ).length;
         assert.equal(damagedCount, 1);
     });
@@ -327,16 +327,16 @@ test.group("spell effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(tauntMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "taunt-minion", owner: "OPPONENT" } },
         );
 
-        assert.isNull(game.data.playerTwo.board.SPOT_1);
+        assert.equal(game.data.playerTwo.board.length, 0);
     });
 
     test("silence then damage removes native taunt when minion survives", ({ assert }) => {
@@ -373,18 +373,18 @@ test.group("spell effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(tauntMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "taunt-minion", owner: "OPPONENT" } },
         );
 
-        const card = game.data.playerTwo.board.SPOT_1!.originalCard;
+        const card = game.data.playerTwo.board[0]!.originalCard;
         assert.isFalse(card.type === "MINION" && card.minionPowers.hasTaunt);
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
     });
 
     test("applies spellPower bonus to each damage action", ({ assert }) => {
@@ -452,7 +452,7 @@ test.group("spell effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(stealthMinion),
                     ),
                 },
@@ -460,14 +460,14 @@ test.group("spell effects", () => {
             "playerOne",
             {
                 cardId: "targeted-spell",
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
-                actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" },
+                actionTarget: { minionUuid: "stealth-minion", owner: "OPPONENT" },
             },
         );
 
         assertError(assert, "Aucune cible valide pour cette carte");
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 4 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 4 });
     });
 
     test("aoe spell damages stealth minion", ({ assert }) => {
@@ -498,7 +498,7 @@ test.group("spell effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(stealthMinion),
                     ),
                 },
@@ -506,6 +506,6 @@ test.group("spell effects", () => {
             spell,
         );
 
-        assertBoardSpot(assert, game, "playerTwo", "SPOT_1", { health: 2 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
     });
 });

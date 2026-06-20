@@ -1,6 +1,7 @@
-import type { ActionTarget, MinionCard, MinionSpotId } from "#api_types/game.types";
+import type { ActionTarget, MinionCard } from "#api_types/game.types";
+import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
-import { summonMinionAtSpot } from "../../../galaguerre/action_engine/summon_minion.js";
+import { insertMinionOnBoard } from "../../../galaguerre/action_engine/summon_minion.js";
 import { triggerSummonPassives } from "../../../galaguerre/passive_engine/trigger_summon_passives.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
@@ -17,9 +18,9 @@ import { sendGameUpdate } from "../send_game_update.js";
 import { terminateGame } from "../terminate_game.js";
 import type { PlayCardOptions } from "./game_play_card.js";
 
-interface PlayMinionOptions extends Omit<PlayCardOptions, "card" | "spotId"> {
+interface PlayMinionOptions extends Omit<PlayCardOptions, "card" | "boardIndex"> {
     card: MinionCard;
-    spotId: MinionSpotId;
+    boardIndex: number;
     actionTarget?: ActionTarget | null;
 }
 
@@ -40,17 +41,26 @@ const validateActionTargetForCard = (
     );
 };
 
+const isValidBoardIndex = (boardIndex: number, minionCount: number): boolean => {
+    return Number.isInteger(boardIndex) && boardIndex >= 0 && boardIndex <= minionCount;
+};
+
 export const playMinion = async ({
     card,
-    spotId,
+    boardIndex,
     owner,
     player,
     game,
     socketId,
     actionTarget,
 }: PlayMinionOptions) => {
-    const spotIsEmpty = player.board[spotId] === null;
-    if (owner === "OPPONENT" || !spotIsEmpty) {
+    const minionCount = countBoardMinionsOnBoard(player.board);
+
+    if (
+        owner === "OPPONENT" ||
+        !isValidBoardIndex(boardIndex, minionCount) ||
+        minionCount >= MAX_BOARD_MINIONS
+    ) {
         emitSocketEvent(
             "notify_error",
             { error: "Vous ne pouvez pas jouer cette carte ici" },
@@ -100,8 +110,8 @@ export const playMinion = async ({
     const effectiveCost = computeEffectiveCost(card, player, opponent);
     card.cost = effectiveCost;
 
-    const { summoned } = summonMinionAtSpot(game, player, spotId, card);
-    if (!summoned) {
+    const { inserted } = insertMinionOnBoard(game, player, boardIndex, card);
+    if (!inserted) {
         emitSocketEvent(
             "notify_error",
             { error: "Vous ne pouvez pas jouer cette carte ici" },

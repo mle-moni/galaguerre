@@ -70,16 +70,16 @@ test.group("onTargetResult effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.equal(game.data.playerTwo.board.SPOT_1?.health, 1);
+        assert.equal(game.data.playerTwo.board[0]?.health, 1);
         assert.isTrue(game.data.playerOne.hand.some((card) => card.uuid === "deck-1"));
         assert.isTrue(game.data.playerOne.hand.some((card) => card.uuid === "deck-2"));
         assert.equal(game.data.playerOne.deckCards.length, 1);
@@ -106,16 +106,16 @@ test.group("onTargetResult effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.isNull(game.data.playerTwo.board.SPOT_1);
+        assert.equal(game.data.playerTwo.board.length, 0);
         assert.isFalse(game.data.playerOne.hand.some((card) => card.uuid === "deck-1"));
         assert.equal(game.data.playerOne.deckCards.length, 2);
     });
@@ -141,16 +141,16 @@ test.group("onTargetResult effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.equal(game.data.playerTwo.board.SPOT_1?.health, 2);
+        assert.equal(game.data.playerTwo.board[0]?.health, 2);
         assert.isFalse(game.data.playerOne.hand.some((card) => card.uuid === "deck-1"));
         assert.equal(game.data.playerOne.deckCards.length, 2);
     });
@@ -180,17 +180,17 @@ test.group("onTargetResult effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.equal(game.data.playerTwo.board.SPOT_1?.health, 3);
-        assert.isFalse(getMinionHasDivineShield(game.data.playerTwo.board.SPOT_1!));
+        assert.equal(game.data.playerTwo.board[0]?.health, 3);
+        assert.isFalse(getMinionHasDivineShield(game.data.playerTwo.board[0]!));
         assert.isFalse(game.data.playerOne.hand.some((card) => card.uuid === "deck-1"));
         assert.equal(game.data.playerOne.deckCards.length, 2);
     });
@@ -213,16 +213,16 @@ test.group("onTargetResult effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.isNull(game.data.playerTwo.board.SPOT_1);
+        assert.equal(game.data.playerTwo.board.length, 0);
         assert.isTrue(game.data.playerOne.hand.some((card) => card.uuid === "deck-1"));
         assert.equal(game.data.playerOne.deckCards.length, 0);
     });
@@ -245,16 +245,16 @@ test.group("onTargetResult effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.equal(game.data.playerTwo.board.SPOT_1?.health, 2);
+        assert.equal(game.data.playerTwo.board[0]?.health, 2);
         assert.isFalse(game.data.playerOne.hand.some((card) => card.uuid === "deck-1"));
         assert.equal(game.data.playerOne.deckCards.length, 1);
     });
@@ -281,16 +281,16 @@ test.group("onTargetResult effects", () => {
                 playerTwo: {
                     board: placeMinion(
                         createGameData().playerTwo.board,
-                        "SPOT_1",
+                        0,
                         createMinionState(enemyMinion),
                     ),
                 },
             }),
             spell,
-            { actionTarget: { spotId: "SPOT_1", owner: "OPPONENT" } },
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
         );
 
-        assert.isNull(game.data.playerTwo.board.SPOT_1);
+        assert.equal(game.data.playerTwo.board.length, 0);
         assert.isFalse(game.data.playerOne.hand.some((card) => card.uuid === "deck-1"));
         assert.equal(game.data.playerOne.deckCards.length, 2);
     });

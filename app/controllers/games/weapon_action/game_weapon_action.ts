@@ -3,6 +3,7 @@ import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
     canWeaponAttack,
     ensureIsMyTurn,
+    findMinionInBoard,
     getGameActionInfos,
     getHeroAttacksThisRound,
     whichPlayerAmI,
@@ -12,7 +13,7 @@ import { weaponToMinionAction } from "./weapon_to_minion_action.js";
 
 export const gameWeaponAction = async (
     socketId: string,
-    { spotId, owner }: ClientSocketEventByKey["game:weapon_action"],
+    { minionUuid, owner }: ClientSocketEventByKey["game:weapon_action"],
 ) => {
     const gameInfos = await getGameActionInfos(socketId);
     if (!gameInfos) return;
@@ -41,7 +42,7 @@ export const gameWeaponAction = async (
         return;
     }
 
-    if (spotId === null) {
+    if (minionUuid === null) {
         return weaponToHeroAction({
             weaponState,
             game: currentGame,
@@ -52,13 +53,24 @@ export const gameWeaponAction = async (
         });
     }
 
+    const targetBoard = owner === "PLAYER" ? player.board : opponent.board;
+    const targetMinionInfos = findMinionInBoard(targetBoard, minionUuid, owner);
+    if (!targetMinionInfos) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Vous ne pouvez pas attaquer ce serviteur ici" },
+            socketId,
+        );
+        return;
+    }
+
     return weaponToMinionAction({
         weaponState,
         game: currentGame,
         player,
         opponent,
         owner,
-        spotId,
+        targetMinion: targetMinionInfos.minion,
         socketId,
     });
 };

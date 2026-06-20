@@ -2,7 +2,6 @@ import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties, MouseEvent, PointerEvent, ReactNode } from "react";
 import { BoardMinionToken } from "~/components/cards/board_minion_token";
-import { MinionCardFace } from "~/components/cards/minion_card_face";
 import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
@@ -82,29 +81,17 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
         </CardDetailHover>
     );
 
-    const baseProps = {
-        card,
-        attack: state.attack,
-        health: state.health,
-        style,
-        attackStatus: isOwnMinion ? attackStatus : undefined,
-        remainingAttacks,
-        wrapper,
-    };
-
-    if (isMobilePortrait) {
-        return (
-            <BoardMinionToken
-                {...baseProps}
-                onClick={canStartAttack ? handleAttackClick : undefined}
-            />
-        );
-    }
-
     return (
-        <MinionCardFace
-            {...baseProps}
+        <BoardMinionToken
+            card={card}
+            attack={state.attack}
+            health={state.health}
+            style={style}
+            attackStatus={isOwnMinion ? attackStatus : undefined}
+            remainingAttacks={remainingAttacks}
+            wrapper={wrapper}
             onPointerDown={canStartAttack ? handleAttackPointerDown : undefined}
+            onClick={isMobilePortrait && canStartAttack ? handleAttackClick : undefined}
         />
     );
 });

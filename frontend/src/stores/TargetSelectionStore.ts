@@ -1,8 +1,9 @@
 import type {
     ActionTarget,
+    BoardState,
     CardActionSnapshot,
     MinionCard,
-    MinionSpotId,
+    MinionState,
     SpellCard,
     SpotOwner,
     WeaponCard,
@@ -14,7 +15,7 @@ import {
     heroMatchesTarget,
     minionMatchesTarget,
 } from "#api_types/target_matching";
-import { MINION_SPOT_IDS } from "#api_types/game.types";
+import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS, playerHasBoardSpace } from "#api_types/board";
 
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import { makeAutoObservable } from "mobx";
@@ -28,7 +29,7 @@ export type TargetValidity = "valid" | "invalid" | "none";
 export type ArmedPlayableCard = SpellCard | WeaponCard;
 
 export type PendingPlay =
-    | { kind: "MINION"; card: MinionCard; spotId: MinionSpotId; owner: SpotOwner }
+    | { kind: "MINION"; card: MinionCard; boardIndex: number; owner: SpotOwner }
     | { kind: "SPELL"; card: SpellCard };
 
 type Point = { x: number; y: number };
@@ -79,7 +80,7 @@ export class TargetSelectionStore {
             card,
             this.gameStore.me.board,
             this.gameStore.opponent.board,
-            MINION_SPOT_IDS.some((spotId) => this.gameStore.me.board[spotId] === null),
+            playerHasBoardSpace(this.gameStore.me),
         );
     }
 
@@ -90,7 +91,7 @@ export class TargetSelectionStore {
     }
 
     private playerBoardHasSpaceForMindControl(): boolean {
-        return MINION_SPOT_IDS.some((spotId) => this.gameStore.me.board[spotId] === null);
+        return countBoardMinionsOnBoard(this.gameStore.me.board) < MAX_BOARD_MINIONS;
     }
 
     isCardArmed(card: ArmedPlayableCard): boolean {
@@ -129,7 +130,7 @@ export class TargetSelectionStore {
 
         emitSocketEventToServer("game:play_card", {
             cardId: card.uuid,
-            spotId: null,
+            boardIndex: null,
             owner: "PLAYER",
         });
 
@@ -147,7 +148,7 @@ export class TargetSelectionStore {
 
         emitSocketEventToServer("game:play_card", {
             cardId: this.armedCard.uuid,
-            spotId: null,
+            boardIndex: null,
             owner: "PLAYER",
             actionTarget,
         });
@@ -156,8 +157,8 @@ export class TargetSelectionStore {
         return true;
     }
 
-    startTargetSelection(card: MinionCard, spotId: MinionSpotId, owner: SpotOwner) {
-        this.pendingPlay = { kind: "MINION", card, spotId, owner };
+    startTargetSelection(card: MinionCard, boardIndex: number, owner: SpotOwner) {
+        this.pendingPlay = { kind: "MINION", card, boardIndex, owner };
         this.gameStore.cardDragStore.setCardDragged(null);
     }
 
@@ -220,7 +221,7 @@ export class TargetSelectionStore {
             return false;
         }
 
-        if (actionTarget.spotId === null) {
+        if (actionTarget.minionUuid === null) {
             return targetedActions.every((action) => {
                 if (!action.target) return false;
                 return heroMatchesTarget(action.target, actionTarget.owner === "OPPONENT");
@@ -231,7 +232,7 @@ export class TargetSelectionStore {
             actionTarget.owner === "OPPONENT"
                 ? this.gameStore.opponent.board
                 : this.gameStore.me.board;
-        const minion = board[actionTarget.spotId];
+        const minion = this.findMinionOnBoard(board, actionTarget.minionUuid);
         if (!minion) return false;
 
         if (actionTarget.owner === "OPPONENT" && !canOpponentDirectlyTargetMinion(minion)) {
@@ -254,7 +255,34 @@ export class TargetSelectionStore {
         });
     }
 
-    canSelectMinion(spotId: MinionSpotId, isOpponent: boolean): boolean {
+    canSelectMinion(boardIndex: number, isOpponent: boolean): boolean {
+        const board = isOpponent ? this.gameStore.opponent.board : this.gameStore.me.board;
+        const minion = board[boardIndex];
+        if (!minion) return false;
+
+        return this.canSelectMinionByState(minion, isOpponent);
+    }
+
+    private findMinionOnBoard(board: BoardState, minionUuid: string) {
+        return board.find((minion) => minion.uuid === minionUuid) ?? null;
+    }
+
+    canSelectTarget(actionTarget: ActionTarget): boolean {
+        if (actionTarget.minionUuid === null) {
+            return this.canSelectHero(actionTarget.owner === "OPPONENT");
+        }
+
+        const board =
+            actionTarget.owner === "OPPONENT"
+                ? this.gameStore.opponent.board
+                : this.gameStore.me.board;
+        const minion = this.findMinionOnBoard(board, actionTarget.minionUuid);
+        if (!minion) return false;
+
+        return this.canSelectMinionByState(minion, actionTarget.owner === "OPPONENT");
+    }
+
+    private canSelectMinionByState(minion: MinionState, isOpponent: boolean): boolean {
         const targetedActions = this.getTargetedActions();
         if (targetedActions.length === 0) return false;
 
@@ -265,24 +293,12 @@ export class TargetSelectionStore {
             return false;
         }
 
-        const board = isOpponent ? this.gameStore.opponent.board : this.gameStore.me.board;
-        const minion = board[spotId];
-        if (!minion) return false;
-
         if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) return false;
 
         return targetedActions.every((action) => {
             if (!action.target) return false;
             return minionMatchesTarget(minion, action.target, isOpponent);
         });
-    }
-
-    canSelectTarget(actionTarget: ActionTarget): boolean {
-        if (actionTarget.spotId === null) {
-            return this.canSelectHero(actionTarget.owner === "OPPONENT");
-        }
-
-        return this.canSelectMinion(actionTarget.spotId, actionTarget.owner === "OPPONENT");
     }
 
     getTargetValidityAtPoint(x: number, y: number): TargetValidity {
@@ -305,16 +321,16 @@ export class TargetSelectionStore {
         if (this.pendingPlay.kind === "SPELL") {
             emitSocketEventToServer("game:play_card", {
                 cardId: this.pendingPlay.card.uuid,
-                spotId: null,
+                boardIndex: null,
                 owner: "PLAYER",
                 actionTarget,
             });
         } else {
-            const { card, spotId, owner } = this.pendingPlay;
+            const { card, boardIndex, owner } = this.pendingPlay;
 
             emitSocketEventToServer("game:play_card", {
                 cardId: card.uuid,
-                spotId,
+                boardIndex,
                 owner,
                 actionTarget,
             });
@@ -330,9 +346,9 @@ export class TargetSelectionStore {
         return this.canSelectHero(isOpponent) ? "green" : "red";
     }
 
-    getMinionSpotBorderColor(spotId: MinionSpotId, isOpponent: boolean): string {
+    getMinionBoardBorderColor(boardIndex: number, isOpponent: boolean): string {
         if (!this.isHighlightingTargets) return "black";
 
-        return this.canSelectMinion(spotId, isOpponent) ? "green" : "red";
+        return this.canSelectMinion(boardIndex, isOpponent) ? "green" : "red";
     }
 }

@@ -13,7 +13,7 @@ export const minionToHeroAction = async ({
     game,
     owner,
     socketId,
-}: Omit<MinionActionOptions, "spotId">) => {
+}: Omit<MinionActionOptions, "targetMinion">) => {
     if (owner !== "OPPONENT") {
         emitSocketEvent(
             "notify_error",
@@ -25,7 +25,7 @@ export const minionToHeroAction = async ({
         return;
     }
 
-    const isValidTarget = ensureValidAttackTarget(opponent.board, null, owner, null, socketId);
+    const isValidTarget = ensureValidAttackTarget(opponent.board, owner, null, socketId);
     if (!isValidTarget) return;
 
     recordAttack(game, player, minionInfos.minion.originalCard, {

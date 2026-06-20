@@ -1,4 +1,4 @@
-import { MINION_SPOT_IDS } from "#api_types/game.types";
+import { MAX_BOARD_MINIONS } from "#api_types/board";
 import { test } from "@japa/runner";
 import type Game from "#models/game";
 import { executeAction } from "#galaguerre/action_engine/execute_action";
@@ -19,7 +19,7 @@ import {
     createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardSpot, assertPlayerHealth } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import { runPlayMinion } from "#tests/helpers/game/run_play_minion";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 
@@ -41,7 +41,7 @@ test.group("SUMMON action", () => {
         );
 
         assert.lengthOf(summonedCards, 1);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", {
+        assertBoardIndex(assert, game, "playerOne", 0, {
             attack: template.attack,
             health: template.health,
         });
@@ -65,13 +65,17 @@ test.group("SUMMON action", () => {
         executeAction(action, game, game.data.playerOne, game.data.playerTwo);
 
         assertPlayerHealth(assert, game, "playerTwo", 20);
-        assert.isNotNull(game.data.playerOne.board.SPOT_1);
+        assert.isNotNull(game.data.playerOne.board[0]);
     });
 
     test("fails silently when board is full", ({ assert }) => {
-        const board = createEmptyBoard();
-        for (const spotId of MINION_SPOT_IDS) {
-            board[spotId] = createMinionState(createMinionCard({ uuid: `filler-${spotId}` }));
+        let board = createEmptyBoard();
+        for (let boardIndex = 0; boardIndex < MAX_BOARD_MINIONS; boardIndex++) {
+            board = placeMinion(
+                board,
+                boardIndex,
+                createMinionState(createMinionCard({ uuid: `filler-${boardIndex}` })),
+            );
         }
 
         const juggler = createMinionCard({
@@ -89,7 +93,7 @@ test.group("SUMMON action", () => {
                 }),
             ],
         });
-        board.SPOT_1 = createMinionState(juggler);
+        board[0] = createMinionState(juggler);
 
         const game = createGame(
             createGameData({
@@ -127,8 +131,8 @@ test.group("SUMMON action", () => {
 
         executeAction(action, game, game.data.playerOne, game.data.playerTwo);
 
-        assert.isNotNull(game.data.playerTwo.board.SPOT_1);
-        assert.isNull(game.data.playerOne.board.SPOT_1);
+        assert.isNotNull(game.data.playerTwo.board[0]);
+        assert.equal(game.data.playerOne.board.length, 0);
     });
 
     test("multi-summon places all minions then triggers passives", ({ assert }) => {
@@ -151,7 +155,7 @@ test.group("SUMMON action", () => {
         const game = createGame(
             createGameData({
                 playerOne: {
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(juggler)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(juggler)),
                 },
                 playerTwo: { health: 20 },
             }),
@@ -166,10 +170,7 @@ test.group("SUMMON action", () => {
 
         executeAction(action, game, game.data.playerOne, game.data.playerTwo);
 
-        assert.lengthOf(
-            MINION_SPOT_IDS.filter((spotId) => game.data.playerOne.board[spotId] !== null),
-            4,
-        );
+        assert.equal(game.data.playerOne.board.length, 4);
         assertPlayerHealth(assert, game, "playerTwo", 17);
     });
 
@@ -196,7 +197,7 @@ test.group("SUMMON action", () => {
                 playerOne: {
                     mana: 10,
                     hand: [spell],
-                    board: placeMinion(createEmptyBoard(), "SPOT_1", createMinionState(filler)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(filler)),
                 },
             }),
             spell,
@@ -204,8 +205,8 @@ test.group("SUMMON action", () => {
 
         const template = getMinionCardTemplateById(121)!;
 
-        assert.isNotNull(game.data.playerOne.board.SPOT_1);
-        assertBoardSpot(assert, game, "playerOne", "SPOT_1", {
+        assert.isNotNull(game.data.playerOne.board[0]);
+        assertBoardIndex(assert, game, "playerOne", 0, {
             attack: template.attack,
             health: template.health,
         });
@@ -248,12 +249,12 @@ test.group("SUMMON action", () => {
                 playerOne: {
                     mana: 10,
                     hand: [summoner],
-                    board: placeMinion(createEmptyBoard(), "SPOT_2", createMinionState(juggler)),
+                    board: placeMinion(createEmptyBoard(), 1, createMinionState(juggler)),
                 },
                 playerTwo: { health: 20 },
             }),
             summoner,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
         assertPlayerHealth(assert, game, "playerTwo", 18);
@@ -281,11 +282,7 @@ test.group("SUMMON passive triggers", () => {
         const game = createGame(
             createGameData({
                 playerOne: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        "SPOT_1",
-                        createMinionState(passiveMinion),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
                 },
                 playerTwo: { health: 15 },
             }),
@@ -333,12 +330,12 @@ test.group("SUMMON passive triggers", () => {
                 playerOne: {
                     mana: 10,
                     hand: [battlecryMinion],
-                    board: placeMinion(createEmptyBoard(), "SPOT_2", createMinionState(watcher)),
+                    board: placeMinion(createEmptyBoard(), 1, createMinionState(watcher)),
                 },
                 playerTwo: { health: 20 },
             }),
             battlecryMinion,
-            { spotId: "SPOT_1" },
+            { boardIndex: 0 },
         );
 
         assertPlayerHealth(assert, game, "playerTwo", 17);

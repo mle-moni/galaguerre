@@ -1,3 +1,4 @@
+import { createEmptyBoard } from "#api_types/board";
 import { DEFAULT_HERO_HEALTH, DEFAULT_PLAYER_STATS, type GameData } from "#api_types/game.types";
 import { deckCardsToEntries } from "#controllers/decks/deck_utils";
 import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
@@ -76,14 +77,6 @@ export const createGame = async ({ playerOne, playerTwo, isTraining }: CreateGam
 
 const PLAYER_ONE_HAND_SIZE = 3;
 const PLAYER_TWO_HAND_SIZE = 4;
-
-const createEmptyBoard = () => ({
-    SPOT_1: null,
-    SPOT_2: null,
-    SPOT_3: null,
-    SPOT_4: null,
-    SPOT_5: null,
-});
 
 const createGamePlayer = (
     userId: number,
