@@ -12,7 +12,7 @@ const EFFECT_SYMBOLS: Record<string, string> = {
     Immunité: "🛡️",
 };
 
-const EFFECT_SYMBOLS_EXTENDED: Record<string, string> = {
+export const EFFECT_SYMBOLS_EXTENDED: Record<string, string> = {
     ...EFFECT_SYMBOLS,
     "Dernier souffle": "💀",
 };

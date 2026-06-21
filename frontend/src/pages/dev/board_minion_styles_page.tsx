@@ -7,7 +7,7 @@ import { AppLayout } from "~/components/layout/app_layout";
 import "~/pages/play/game_layout.css";
 import "./board_minion_styles_page.css";
 
-const SAMPLE_CARD_IDS = [62, 63, 64, 65, 66, 113] as const;
+const SAMPLE_CARD_IDS = [62, 63, 64, 65, 66, 78, 87, 111, 113] as const;
 
 const SAMPLE_STATUSES = [
     { label: "Prêt", attackStatus: "ready" as const },
