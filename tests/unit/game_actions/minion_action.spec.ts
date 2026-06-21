@@ -103,6 +103,79 @@ test.group("minion combat", () => {
         assertBoardIndex(assert, game, "playerOne", 0, null);
     });
 
+    test("poisonous kill records pulse trigger on attacker before target death", async ({
+        assert,
+    }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 1,
+            health: 1,
+            minionPowers: { isPoisonous: true },
+            effects: ["Toxique"],
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 9,
+        });
+
+        installSocketCollector();
+        try {
+            await runMinionCombat(
+                createGameData({
+                    playerOne: {
+                        board: placeMinion(
+                            createGameData().playerOne.board,
+                            0,
+                            createMinionState(attackerCard),
+                        ),
+                    },
+                    playerTwo: {
+                        board: placeMinion(
+                            createGameData().playerTwo.board,
+                            0,
+                            createMinionState(targetCard),
+                        ),
+                    },
+                }),
+            );
+        } finally {
+            restoreSocketCollector();
+        }
+
+        const viewerUpdate = getEmittedEvents().find(
+            (event) => event.event === "game:update" && event.rooms === "users:1",
+        );
+        assert.isDefined(viewerUpdate);
+
+        const presentation = (viewerUpdate!.data as SocketEventByKey["game:update"]).presentation;
+        assert.isDefined(presentation);
+
+        const attackBeat = presentation!.beats.find((beat) => beat.kind === "ATTACK");
+        assert.isDefined(attackBeat);
+
+        const effects = attackBeat!.effects;
+        const combatDamageIndex = effects.findIndex((effect) => effect.type === "COMBAT_DAMAGE");
+        const poisonousPulseIndex = effects.findIndex(
+            (effect) => effect.type === "TRIGGER" && effect.trigger === "POISONOUS",
+        );
+        const killIndex = effects.findIndex(
+            (effect) => effect.type === "KILL" && effect.cardUuid === MINION_IDS.target,
+        );
+
+        assert.isTrue(combatDamageIndex >= 0);
+        assert.isTrue(poisonousPulseIndex > combatDamageIndex);
+        assert.isTrue(killIndex > poisonousPulseIndex);
+
+        const poisonousPulse = effects[poisonousPulseIndex];
+        if (poisonousPulse?.type !== "TRIGGER") {
+            throw new Error("Expected TRIGGER effect");
+        }
+        assert.equal(poisonousPulse.trigger, "POISONOUS");
+        assert.equal(poisonousPulse.cardUuid, MINION_IDS.attacker);
+        assert.equal(poisonousPulse.owner, "PLAYER");
+    });
+
     test("poisonous minion deals normal damage to hero", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,

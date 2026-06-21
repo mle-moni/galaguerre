@@ -1,4 +1,5 @@
 import type { PlayerCard, SpotOwner } from "#api_types/game.types";
+import type { NarrativeTriggerKind } from "#api_types/game_narrative.types";
 import { makeAutoObservable } from "mobx";
 
 export interface AnimationRect {
@@ -57,7 +58,7 @@ export interface TurnBannerEventInput {
 export interface SourcePulseEventInput {
     type: "SOURCE_PULSE";
     at: AnimationRect;
-    trigger: "BATTLECRY" | "DEATHRATTLE" | "PASSIVE";
+    trigger: NarrativeTriggerKind;
 }
 
 export type VisualAnimationEventInput =

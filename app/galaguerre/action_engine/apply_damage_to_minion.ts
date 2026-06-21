@@ -1,4 +1,4 @@
-import type { GamePlayer, MinionState } from "#api_types/game.types";
+import type { GamePlayer, MinionState, SpotOwner } from "#api_types/game.types";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type Game from "#models/game";
 import { getActualDamage, recordDamageDealt } from "../game_stats/record_player_stats.js";
@@ -8,7 +8,13 @@ import {
     resolveSpotOwner,
 } from "../game_narrative/narrative_effects.js";
 import { triggerDamagePassives } from "../passive_engine/trigger_damage_passives.js";
+import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import { killMinion } from "./kill_minion.js";
+
+export type PoisonousSource = {
+    cardUuid: string;
+    owner: SpotOwner;
+};
 
 export type MinionDamageResult = {
     damageDealt: number;
@@ -91,6 +97,7 @@ export const applyPoisonousToMinion = (
     boardIndex: number,
     minion: MinionState,
     sourcePlayer: GamePlayer,
+    poisonousSource: PoisonousSource,
 ): MinionDamageResult => {
     if (getMinionHasDivineShield(minion)) {
         popDivineShield(minion);
@@ -112,6 +119,15 @@ export const applyPoisonousToMinion = (
             return { damageDealt, killed: false, gameEnded: true };
         }
     }
+
+    withNarrativeRecorder((recorder) => {
+        recorder.recordEffect({
+            type: "TRIGGER",
+            cardUuid: poisonousSource.cardUuid,
+            owner: poisonousSource.owner,
+            trigger: "POISONOUS",
+        });
+    });
 
     const { gameEnded } = killMinion(game, owner, minion.uuid);
     return { damageDealt, killed: true, gameEnded };

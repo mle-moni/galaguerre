@@ -15,7 +15,12 @@ export const NARRATIVE_BEAT_KINDS = [
 
 export type NarrativeBeatKind = (typeof NARRATIVE_BEAT_KINDS)[number];
 
-export const NARRATIVE_TRIGGER_KINDS = ["BATTLECRY", "DEATHRATTLE", "PASSIVE"] as const;
+export const NARRATIVE_TRIGGER_KINDS = [
+    "BATTLECRY",
+    "DEATHRATTLE",
+    "PASSIVE",
+    "POISONOUS",
+] as const;
 
 export type NarrativeTriggerKind = (typeof NARRATIVE_TRIGGER_KINDS)[number];
 

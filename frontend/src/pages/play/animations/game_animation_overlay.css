@@ -93,6 +93,11 @@
     box-shadow: 0 0 18px rgba(148, 163, 184, 0.85);
 }
 
+.game-animation-source-pulse--POISONOUS {
+    border-color: rgba(74, 222, 128, 0.9);
+    box-shadow: 0 0 18px rgba(34, 197, 94, 0.85);
+}
+
 .game-animation-death {
 	border-radius: 8px;
 	background: rgba(255, 255, 255, 0.08);

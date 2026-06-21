@@ -1,10 +1,14 @@
 import type { VisualAnimationEventInput } from "~/stores/AnimationStore";
 
+const isPoisonousPulseShot = (shot: VisualAnimationEventInput) =>
+    shot.type === "SOURCE_PULSE" && shot.trigger === "POISONOUS";
+
 const isLeadShot = (shot: VisualAnimationEventInput) =>
     shot.type === "CARD_FLIGHT" ||
     shot.type === "DRAW" ||
     shot.type === "ATTACK" ||
-    shot.type === "TURN_BANNER";
+    shot.type === "TURN_BANNER" ||
+    isPoisonousPulseShot(shot);
 
 /**
  * Groups shots into phases: lead moments play alone, impacts play together.

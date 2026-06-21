@@ -53,6 +53,8 @@ export const applyMindControlToMinion = (
     const { inserted } = insertMinionAtIndex(controller.board, boardIndex, minion);
     if (!inserted) return false;
 
+    minion.placedAtRound = game.data.currentRound;
+
     refreshAurasAfterMinionPlayed(game, controller, boardIndex);
 
     withNarrativeRecorder((recorder) => {

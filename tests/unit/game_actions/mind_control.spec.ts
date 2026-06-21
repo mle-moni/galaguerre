@@ -1,4 +1,5 @@
 import { test } from "@japa/runner";
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { executeAction } from "#galaguerre/action_engine/execute_action";
 import { refreshAurasAfterMinionPlayed } from "#galaguerre/passive_engine/refresh_passive_auras";
 import {
@@ -14,9 +15,10 @@ import {
     createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardIndex } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import { runBattlecry } from "#tests/helpers/game/run_battlecry";
+import { runMinionActionOnGameInMemory } from "#tests/helpers/game/run_minion_action_in_memory";
 import { runPlayCardInMemory } from "#tests/helpers/game/run_play_card_in_memory";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 import { assertError } from "#tests/helpers/game/socket_event_collector";
@@ -26,6 +28,43 @@ import { cardHasPlayableTarget } from "#api_types/target_matching";
 const createGame = (data: ReturnType<typeof createGameData>) => createInMemoryGame(data);
 
 const countBoardMinions = (board: ReturnType<typeof createEmptyBoard>) => board.length;
+
+const createMindControlSpell = () =>
+    createSpellCard({
+        cost: 8,
+        spellActions: [
+            createCardActionSnapshot({
+                type: "MIND_CONTROL",
+                target: createMinionTargetSnapshot("OPPONENT"),
+                isTargeted: true,
+            }),
+        ],
+    });
+
+const stealEnemyMinion = (
+    enemyMinion: ReturnType<typeof createMinionCard>,
+    options: { placedAtRound?: number; currentRound?: number } = {},
+) => {
+    const currentRound = options.currentRound ?? 3;
+    const placedAtRound = options.placedAtRound ?? 1;
+    const spell = createMindControlSpell();
+
+    return runSpellEffect(
+        createGameData({
+            currentRound,
+            playerOne: { mana: 10, hand: [spell] },
+            playerTwo: {
+                board: placeMinion(
+                    createEmptyBoard(),
+                    0,
+                    createMinionState(enemyMinion, { placedAtRound }),
+                ),
+            },
+        }),
+        spell,
+        { actionTarget: { minionUuid: enemyMinion.uuid, owner: "OPPONENT" } },
+    );
+};
 
 test.group("MIND_CONTROL action", () => {
     test("targeted spell steals enemy minion to controller board", ({ assert }) => {
@@ -383,5 +422,127 @@ test.group("MIND_CONTROL action", () => {
         assert.isNotNull(game.data.playerOne.board[1]);
         assert.equal(game.data.playerOne.board[1]?.uuid, "visible");
         assert.isNotNull(game.data.playerTwo.board[0]);
+    });
+});
+
+test.group("MIND_CONTROL summoning sickness", () => {
+    test("sets placedAtRound to current round after mind control", ({ assert }) => {
+        const enemyMinion = createMinionCard({ uuid: "enemy-minion", attack: 4, health: 5 });
+
+        const { game } = stealEnemyMinion(enemyMinion);
+
+        assertBoardIndex(assert, game, "playerOne", 0, { placedAtRound: 3 });
+    });
+
+    test("stolen minion without charge cannot attack hero same turn", async ({ assert }) => {
+        const enemyMinion = createMinionCard({ uuid: "stolen-minion", attack: 4, health: 5 });
+
+        const { game: gameAfterSteal } = stealEnemyMinion(enemyMinion);
+
+        const { game } = await runMinionActionOnGameInMemory(gameAfterSteal, "playerOne", {
+            minionId: "stolen-minion",
+            minionUuid: null,
+            owner: "OPPONENT",
+        });
+
+        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
+
+    test("stolen minion without charge cannot attack minion same turn", async ({ assert }) => {
+        const enemyMinion = createMinionCard({ uuid: "stolen-minion", attack: 4, health: 5 });
+        const defenderCard = createMinionCard({ uuid: "defender", attack: 1, health: 3 });
+
+        const spell = createMindControlSpell();
+
+        const { game: gameAfterSteal } = runSpellEffect(
+            createGameData({
+                currentRound: 3,
+                playerOne: { mana: 10, hand: [spell] },
+                playerTwo: {
+                    board: placeMinion(
+                        placeMinion(
+                            createEmptyBoard(),
+                            0,
+                            createMinionState(enemyMinion, { placedAtRound: 1 }),
+                        ),
+                        1,
+                        createMinionState(defenderCard),
+                    ),
+                },
+            }),
+            spell,
+            { actionTarget: { minionUuid: "stolen-minion", owner: "OPPONENT" } },
+        );
+
+        await runMinionActionOnGameInMemory(gameAfterSteal, "playerOne", {
+            minionId: "stolen-minion",
+            minionUuid: "defender",
+            owner: "OPPONENT",
+        });
+
+        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertBoardIndex(assert, gameAfterSteal, "playerOne", 0, { health: 5 });
+        assertBoardIndex(assert, gameAfterSteal, "playerTwo", 0, { health: 3 });
+    });
+
+    test("stolen minion with charge can attack hero same turn", async ({ assert }) => {
+        const enemyMinion = createMinionCard({
+            uuid: "stolen-charge",
+            attack: 4,
+            health: 5,
+            minionPowers: { hasCharge: true },
+        });
+
+        const { game: gameAfterSteal } = stealEnemyMinion(enemyMinion);
+
+        const { game } = await runMinionActionOnGameInMemory(gameAfterSteal, "playerOne", {
+            minionId: "stolen-charge",
+            minionUuid: null,
+            owner: "OPPONENT",
+        });
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 4);
+    });
+
+    test("stolen minion with charge can attack minion same turn", async ({ assert }) => {
+        const enemyMinion = createMinionCard({
+            uuid: "stolen-charge",
+            attack: 4,
+            health: 5,
+            minionPowers: { hasCharge: true },
+        });
+        const defenderCard = createMinionCard({ uuid: "defender", attack: 1, health: 3 });
+
+        const spell = createMindControlSpell();
+
+        const { game: gameAfterSteal } = runSpellEffect(
+            createGameData({
+                currentRound: 3,
+                playerOne: { mana: 10, hand: [spell] },
+                playerTwo: {
+                    board: placeMinion(
+                        placeMinion(
+                            createEmptyBoard(),
+                            0,
+                            createMinionState(enemyMinion, { placedAtRound: 1 }),
+                        ),
+                        1,
+                        createMinionState(defenderCard),
+                    ),
+                },
+            }),
+            spell,
+            { actionTarget: { minionUuid: "stolen-charge", owner: "OPPONENT" } },
+        );
+
+        const { game } = await runMinionActionOnGameInMemory(gameAfterSteal, "playerOne", {
+            minionId: "stolen-charge",
+            minionUuid: "defender",
+            owner: "OPPONENT",
+        });
+
+        assertBoardIndex(assert, game, "playerOne", 0, { health: 4 });
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
     });
 });

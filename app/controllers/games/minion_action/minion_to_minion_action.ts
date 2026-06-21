@@ -108,6 +108,7 @@ export const minionToMinionAction = async ({
                 attackerBoardIndex,
                 attacker,
                 opponent,
+                { cardUuid: targetMinion.uuid, owner: targetSpotOwner },
             );
             if (retaliationResult.gameEnded) {
                 endCurrentBeat(game);
@@ -161,6 +162,7 @@ export const minionToMinionAction = async ({
                 currentTargetBoardIndex,
                 targetMinion,
                 player,
+                { cardUuid: attacker.uuid, owner: attackerSpotOwner },
             );
             endCurrentBeat(game);
             if (attackResult.gameEnded) {
