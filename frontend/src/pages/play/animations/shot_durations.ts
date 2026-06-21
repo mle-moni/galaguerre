@@ -19,12 +19,18 @@ export const getShotDurationSec = (
     return reducedMotion ? timing.reduced : timing.normal;
 };
 
+export const FLOATING_TEXT_STACK_DELAY_MS = 120;
+
 export const getShotDurationMs = (
     event: VisualAnimationEventInput,
     reducedMotion: boolean,
 ): number => {
     const baseMs = Math.round(getShotDurationSec(event.type, reducedMotion) * 1000);
     const drawDelayMs = event.type === "DRAW" && !reducedMotion ? event.delayMs ?? 0 : 0;
+    const floatingTextDelayMs =
+        event.type === "FLOATING_TEXT" && !reducedMotion
+            ? (event.stackIndex ?? 0) * FLOATING_TEXT_STACK_DELAY_MS
+            : 0;
 
-    return baseMs + drawDelayMs;
+    return baseMs + drawDelayMs + floatingTextDelayMs;
 };

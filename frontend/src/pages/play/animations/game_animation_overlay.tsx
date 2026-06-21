@@ -10,7 +10,7 @@ import type {
 } from "~/stores/AnimationStore";
 import { ANIMATION_STORE } from "~/stores/store_singletons";
 import { getRectCenter } from "./game_animation_snapshot.js";
-import { getShotDurationSec } from "./shot_durations.js";
+import { FLOATING_TEXT_STACK_DELAY_MS, getShotDurationSec } from "./shot_durations.js";
 import "./game_animation_overlay.css";
 
 const removeEvent = (id: string) => {
@@ -151,22 +151,33 @@ const AttackFlight = ({ event }: { event: AttackEvent }) => {
     );
 };
 
+const FLOATING_TEXT_STACK_OFFSET_Y = 22;
+
 const FloatingText = ({ event }: { event: FloatingTextEvent }) => {
     const reduceMotion = useReducedMotion();
     const center = getRectCenter(event.at);
+    const stackIndex = event.stackIndex ?? 0;
+    const stackOffsetY = stackIndex * FLOATING_TEXT_STACK_OFFSET_Y;
+    const delay = reduceMotion ? 0 : (stackIndex * FLOATING_TEXT_STACK_DELAY_MS) / 1000;
 
     return (
         <motion.div
             className={`game-animation-floating-text game-animation-floating-text--${event.tone}`}
-            initial={{ x: center.x - 18, y: center.y - 14, opacity: 0, scale: 0.8 }}
+            initial={{
+                x: center.x - 18,
+                y: center.y - 14 - stackOffsetY,
+                opacity: 0,
+                scale: 0.8,
+            }}
             animate={{
-                y: reduceMotion ? center.y - 26 : center.y - 54,
+                y: reduceMotion ? center.y - 26 - stackOffsetY : center.y - 54 - stackOffsetY,
                 opacity: [0, 1, 1, 0],
                 scale: reduceMotion ? 1 : [0.8, 1.15, 1],
             }}
             transition={{
                 duration: getShotDurationSec("FLOATING_TEXT", reduceMotion ?? false),
                 ease: "easeOut",
+                delay,
             }}
             onAnimationComplete={() => removeEvent(event.id)}
         >

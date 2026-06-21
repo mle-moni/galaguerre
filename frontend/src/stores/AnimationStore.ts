@@ -34,6 +34,8 @@ export interface FloatingTextEventInput {
     at: AnimationRect;
     label: string;
     tone: FloatingTone;
+    /** Stagger concurrent numbers on the same target so they remain readable. */
+    stackIndex?: number;
 }
 
 export interface DeathEventInput {

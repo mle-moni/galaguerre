@@ -10,7 +10,13 @@ import {
     resolveHandRect,
     resolveHeroRect,
 } from "./resolve_rects.js";
-import type { VisualAnimationEventInput } from "~/stores/AnimationStore";
+import type {
+    AnimationRect,
+    FloatingTone,
+    VisualAnimationEventInput,
+} from "~/stores/AnimationStore";
+
+const floatingTextTargetKey = (at: AnimationRect) => `${at.x},${at.y},${at.width},${at.height}`;
 
 const findCardInGame = (gameData: GameData, cardUuid: string): PlayerCard | undefined => {
     for (const player of [gameData.playerOne, gameData.playerTwo]) {
@@ -73,6 +79,14 @@ export const effectsToShots = (
 ): VisualAnimationEventInput[] => {
     const shots: VisualAnimationEventInput[] = [];
     const gameData = displayGame.data;
+    const floatingTextStacks = new Map<string, number>();
+
+    const pushFloatingText = (at: AnimationRect, label: string, tone: FloatingTone) => {
+        const targetKey = floatingTextTargetKey(at);
+        const stackIndex = floatingTextStacks.get(targetKey) ?? 0;
+        floatingTextStacks.set(targetKey, stackIndex + 1);
+        shots.push({ type: "FLOATING_TEXT", at, label, tone, stackIndex });
+    };
 
     for (const effect of effects) {
         switch (effect.type) {
@@ -86,22 +100,12 @@ export const effectsToShots = (
             }
             case "SPEND_MANA": {
                 const hero = resolveHeroRect(effect.owner, snapshot);
-                shots.push({
-                    type: "FLOATING_TEXT",
-                    at: hero,
-                    label: `-${effect.amount}`,
-                    tone: "mana",
-                });
+                pushFloatingText(hero, `-${effect.amount}`, "mana");
                 break;
             }
             case "GAIN_MANA": {
                 const hero = resolveHeroRect(effect.owner, snapshot);
-                shots.push({
-                    type: "FLOATING_TEXT",
-                    at: hero,
-                    label: `+${effect.amount}`,
-                    tone: "mana",
-                });
+                pushFloatingText(hero, `+${effect.amount}`, "mana");
                 break;
             }
             case "ATTACK_LUNGE": {
@@ -125,12 +129,11 @@ export const effectsToShots = (
                 const attackDelta = effect.type === "STAT_CHANGE" ? effect.attackDelta : undefined;
 
                 if (healthDelta !== undefined && healthDelta !== 0) {
-                    shots.push({
-                        type: "FLOATING_TEXT",
+                    pushFloatingText(
                         at,
-                        label: healthDelta > 0 ? `+${healthDelta}` : `${healthDelta}`,
-                        tone: healthDelta < 0 ? "damage" : "heal",
-                    });
+                        healthDelta > 0 ? `+${healthDelta}` : `${healthDelta}`,
+                        healthDelta < 0 ? "damage" : "heal",
+                    );
                 }
 
                 if (attackDelta !== undefined && attackDelta !== 0) {
@@ -142,12 +145,7 @@ export const effectsToShots = (
                             : attackDelta > 0
                               ? `+${attackDelta}`
                               : `${attackDelta}`;
-                    shots.push({
-                        type: "FLOATING_TEXT",
-                        at,
-                        label: boostLabel,
-                        tone: "boost",
-                    });
+                    pushFloatingText(at, boostLabel, "boost");
                 }
                 break;
             }
@@ -171,12 +169,7 @@ export const effectsToShots = (
             }
             case "FATIGUE": {
                 const hero = resolveHeroRect(effect.owner, snapshot);
-                shots.push({
-                    type: "FLOATING_TEXT",
-                    at: hero,
-                    label: `-${effect.amount}`,
-                    tone: "damage",
-                });
+                pushFloatingText(hero, `-${effect.amount}`, "damage");
                 break;
             }
             case "TURN_BANNER": {
