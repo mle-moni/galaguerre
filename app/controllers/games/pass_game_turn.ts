@@ -15,9 +15,8 @@ export const performPassTurn = async (game: Game, activePlayer: GamePlayer): Pro
     await runGameActionWithNarrative(game, async () => {
         recordPassTurn(game, activePlayer);
         beginLoggedBeat(game, "PASS_TURN");
-        endCurrentBeat(game);
-
         const { gameEnded: turnEndGameEnded } = triggerPassives(game, "TURN_END", activePlayer);
+        endCurrentBeat(game);
 
         if (turnEndGameEnded) {
             await terminateGame(game, { skipSendUpdate: true });

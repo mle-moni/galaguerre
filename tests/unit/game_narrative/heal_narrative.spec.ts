@@ -5,11 +5,18 @@ import { buildPresentationForUser } from "#galaguerre/game_narrative/build_prese
 import { createGameNarrativeRecorder } from "#galaguerre/game_narrative/game_narrative_recorder";
 import { runWithNarrativeRecorder } from "#galaguerre/game_narrative/narrative_context";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
+import { triggerPassives } from "#galaguerre/passive_engine/trigger_passives";
+import { beginLoggedBeat, endCurrentBeat } from "#galaguerre/game_narrative/narrative_beats";
 import {
     createCardActionSnapshot,
+    createEmptyBoard,
     createGameData,
     createHeroTargetSnapshot,
     createMinionCard,
+    createMinionState,
+    createMinionTargetSnapshot,
+    createPassiveSnapshot,
+    placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import { runPlayMinion } from "#tests/helpers/game/run_play_minion";
@@ -144,5 +151,71 @@ test.group("heal narrative", () => {
 
         assert.equal(healEffect.target.type, "HERO");
         assert.equal(healEffect.target.owner, "PLAYER");
+    });
+
+    test("records TURN_END passive heal in pass turn presentation", async ({ assert }) => {
+        const healerCard = createMinionCard({
+            uuid: "healer",
+            passives: [
+                createPassiveSnapshot({
+                    triggersOn: "TURN_END",
+                    action: createCardActionSnapshot({
+                        type: "HEAL",
+                        heal: 2,
+                        target: createMinionTargetSnapshot("PLAYER", { excludeSelf: true }),
+                    }),
+                }),
+            ],
+        });
+        const allyCard = createMinionCard({ uuid: "ally", health: 3 });
+
+        const recorder = createGameNarrativeRecorder();
+        const game = createInMemoryGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                playerOne: {
+                    board: placeMinion(
+                        placeMinion(createEmptyBoard(), 0, createMinionState(healerCard)),
+                        1,
+                        createMinionState(allyCard, { health: 1, maxHealth: 3 }),
+                    ),
+                },
+            }),
+        );
+
+        recorder.reset(game.data);
+
+        runWithNarrativeRecorder(recorder, () => {
+            beginLoggedBeat(game, "PASS_TURN");
+            triggerPassives(game, "TURN_END", game.data.playerOne);
+            endCurrentBeat(game);
+        });
+
+        const presentation = recorder.build(game, "update-1");
+        assert.isNotNull(presentation);
+
+        const passTurnBeat = presentation!.beats.find((beat) => beat.kind === "PASS_TURN");
+        assert.isDefined(passTurnBeat);
+
+        const triggerEffect = passTurnBeat!.effects.find((effect) => effect.type === "TRIGGER");
+        assert.isDefined(triggerEffect);
+        if (triggerEffect?.type !== "TRIGGER") {
+            throw new Error("Expected TRIGGER effect");
+        }
+        assert.equal(triggerEffect.trigger, "PASSIVE");
+        assert.equal(triggerEffect.cardUuid, "healer");
+
+        const healEffect = passTurnBeat!.effects.find(
+            (effect) => effect.type === "STAT_CHANGE" && effect.healthDelta === 2,
+        );
+        assert.isDefined(healEffect);
+        if (healEffect?.type !== "STAT_CHANGE") {
+            throw new Error("Expected STAT_CHANGE effect");
+        }
+        assert.equal(healEffect.target.type, "MINION");
+        if (healEffect.target.type !== "MINION") {
+            throw new Error("Expected minion heal target");
+        }
+        assert.equal(healEffect.target.cardUuid, "ally");
     });
 });

@@ -13,6 +13,10 @@ const TRIGGERED_PASSIVE_LABELS: Record<string, string> = {
 export const BoardMinionEffectIcons = ({ card }: { card: MinionCard }) => {
     const icons: { key: string; symbol: string; title: string }[] = [];
 
+    if (card.minionPowers?.isPoisonous) {
+        icons.push({ key: "poisonous", symbol: "🐍", title: "Toxique" });
+    }
+
     if (card.deathrattleActions?.length) {
         icons.push({ key: "deathrattle", symbol: "💀", title: "Dernier souffle" });
     }

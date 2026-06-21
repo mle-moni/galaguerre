@@ -2,11 +2,7 @@ import type { MinionCard } from "#api_types/game.types";
 import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
-import {
-    getMinionAttackStatusLabel,
-    getMinionCardMaxAttacks,
-    type MinionAttackStatus,
-} from "~/helpers/minion_combat";
+import { getMinionCardMaxAttacks, type MinionAttackStatus } from "~/helpers/minion_combat";
 import { BoardMinionEffectIcons } from "./board_minion_effect_icons.jsx";
 import { BoardMinionTauntOutline } from "./board_minion_taunt_outline.jsx";
 import "./board_minion_token.css";
@@ -42,9 +38,6 @@ export const BoardMinionToken = ({
         attackStatus !== "idle" &&
         card.minionPowers?.hasWindfury &&
         remainingAttacks !== undefined;
-    const statusLabel = attackStatus
-        ? getMinionAttackStatusLabel(attackStatus, maxAttacks)
-        : undefined;
     const hasTaunt = card.minionPowers?.hasTaunt === true;
 
     const content = (
@@ -58,7 +51,6 @@ export const BoardMinionToken = ({
                 attackStatus && `minion-card-face--${attackStatus}`,
                 className,
             )}
-            title={statusLabel ?? card.label}
             onPointerDown={onPointerDown}
             onClick={onClick}
         >

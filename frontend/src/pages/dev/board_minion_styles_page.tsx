@@ -1,4 +1,5 @@
 import { getMinionCardTemplateById } from "#api_types/card_preview";
+import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type { MinionCard } from "#api_types/game.types";
 import clsx from "clsx";
 import { BoardMinionToken } from "~/components/cards/board_minion_token";
@@ -6,7 +7,7 @@ import { AppLayout } from "~/components/layout/app_layout";
 import "~/pages/play/game_layout.css";
 import "./board_minion_styles_page.css";
 
-const SAMPLE_CARD_IDS = [62, 63, 64, 65, 113] as const;
+const SAMPLE_CARD_IDS = [62, 63, 64, 65, 66, 113] as const;
 
 const SAMPLE_STATUSES = [
     { label: "Prêt", attackStatus: "ready" as const },
@@ -14,10 +15,35 @@ const SAMPLE_STATUSES = [
     { label: "Épuisé", attackStatus: "exhausted" as const },
 ] as const;
 
-const getSampleCards = (): MinionCard[] =>
-    SAMPLE_CARD_IDS.map((id) => getMinionCardTemplateById(id)).filter(
+const getToxicDeathrattleSample = (): MinionCard | undefined => {
+    const toxic = getMinionCardTemplateById(66);
+    const deathrattle = getMinionCardTemplateById(64);
+    if (!toxic || !deathrattle) return undefined;
+
+    const minionPowers = { ...toxic.minionPowers, isPoisonous: true };
+
+    return {
+        ...toxic,
+        uuid: "preview-toxic-deathrattle",
+        label: "Toxique + Dernier souffle",
+        minionPowers,
+        effects: getMinionPowerEffects(minionPowers),
+        deathrattleActions: deathrattle.deathrattleActions,
+    };
+};
+
+const getSampleCards = (): MinionCard[] => {
+    const cards = SAMPLE_CARD_IDS.map((id) => getMinionCardTemplateById(id)).filter(
         (card): card is MinionCard => card !== undefined,
     );
+
+    const toxicDeathrattle = getToxicDeathrattleSample();
+    if (toxicDeathrattle) {
+        cards.push(toxicDeathrattle);
+    }
+
+    return cards;
+};
 
 interface StyleSectionProps {
     title: string;
@@ -39,7 +65,7 @@ const StyleSection = ({ title, description, variant, cards }: StyleSectionProps)
         <div className="board-minion-styles__row board-row--centered">
             {cards.map((card) => (
                 <BoardMinionToken
-                    key={card.cardId}
+                    key={card.uuid}
                     card={card}
                     attack={card.attack}
                     health={card.health}
