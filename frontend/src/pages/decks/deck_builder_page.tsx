@@ -11,6 +11,7 @@ import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/ico
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { CardArtworkModal } from "~/components/cards/card_artwork_modal";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
@@ -71,6 +72,7 @@ export const DeckBuilderPage = observer(() => {
     const [costFilter, setCostFilter] = useState<string | null>(null);
     const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
     const [showManaCurve, setShowManaCurve] = useState(false);
+    const [artworkCard, setArtworkCard] = useState<ApiCatalogCard | null>(null);
 
     const catalog = cardsQuery.data ?? [];
     const cardSets = cardSetsQuery.data ?? [];
@@ -221,6 +223,8 @@ export const DeckBuilderPage = observer(() => {
                                 count={currentComposition.get(card.id) ?? 0}
                                 canAdd={canAddCard(card.id)}
                                 onAdd={() => addCard(card.id)}
+                                onRemove={() => removeCard(card.id)}
+                                onViewArtwork={() => setArtworkCard(card)}
                             />
                         ))
                     )}
@@ -276,7 +280,8 @@ export const DeckBuilderPage = observer(() => {
                 </div>
                 {compositionEntries.length === 0 ? (
                     <p className="text-white/60 text-sm m-0">
-                        Cliquez sur des cartes du catalogue pour les ajouter.
+                        Cliquez sur + pour ajouter une carte, ou sur une carte pour voir
+                        l&apos;illustration.
                     </p>
                 ) : (
                     <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
@@ -430,6 +435,12 @@ export const DeckBuilderPage = observer(() => {
                     </div>
                 )}
             </div>
+
+            <CardArtworkModal
+                card={artworkCard}
+                opened={artworkCard !== null}
+                onClose={() => setArtworkCard(null)}
+            />
         </AppLayout>
     );
 });
@@ -439,26 +450,59 @@ interface CatalogCardItemProps {
     count: number;
     canAdd: boolean;
     onAdd: () => void;
+    onRemove: () => void;
+    onViewArtwork: () => void;
 }
 
-const CatalogCardItem = ({ card, count, canAdd, onAdd }: CatalogCardItemProps) => (
-    <div
-        className={`gg-catalog-card-slot ${canAdd ? "gg-catalog-card-slot--interactive" : "gg-catalog-card-slot--disabled"}`}
-        onClick={canAdd ? onAdd : undefined}
-        role={canAdd ? "button" : undefined}
-        tabIndex={canAdd ? 0 : undefined}
-        onKeyDown={
-            canAdd
-                ? (e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          onAdd();
-                      }
-                  }
-                : undefined
-        }
-    >
-        <CatalogCardDisplay card={card} showDetailOnHover />
+const CatalogCardItem = ({
+    card,
+    count,
+    canAdd,
+    onAdd,
+    onRemove,
+    onViewArtwork,
+}: CatalogCardItemProps) => (
+    <div className="gg-catalog-card-slot">
+        <div
+            className="gg-catalog-card-slot__preview"
+            onClick={onViewArtwork}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onViewArtwork();
+                }
+            }}
+        >
+            <CatalogCardDisplay card={card} showDetailOnHover />
+        </div>
+        {count > 0 && (
+            <button
+                type="button"
+                className="gg-catalog-card-slot__action gg-catalog-card-slot__action--remove"
+                aria-label={`Retirer ${card.label} du deck`}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove();
+                }}
+            >
+                <IconMinus size={16} stroke={2.5} />
+            </button>
+        )}
+        {canAdd && (
+            <button
+                type="button"
+                className="gg-catalog-card-slot__action gg-catalog-card-slot__action--add"
+                aria-label={`Ajouter ${card.label} au deck`}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onAdd();
+                }}
+            >
+                <IconPlus size={16} stroke={2.5} />
+            </button>
+        )}
         {count > 0 && <span className="gg-catalog-card-slot__count">{count}</span>}
     </div>
 );

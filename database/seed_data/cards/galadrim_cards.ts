@@ -167,7 +167,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     // --- PM minions ---
     defineMinion(
         70,
-        { ...gal("PM Junior", 1), attack: 1, health: 2 },
+        {
+            ...gal("PM Junior", 1),
+            imageUrl: "/card-covers/galadrim/pm-junior.webp",
+            attack: 1,
+            health: 2,
+        },
         {
             tags: ["PM"],
             battlecryActions: [boostAction(boostAttack(1), targetedAllyMinion(), true)],
@@ -207,7 +212,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         75,
-        { ...gal("Agiliste Convaincu", 2), attack: 1, health: 4 },
+        {
+            ...gal("Agiliste Convaincu", 2),
+            imageUrl: "/card-covers/galadrim/agiliste-convaincu.webp",
+            attack: 1,
+            health: 4,
+        },
         {
             tags: ["PM"],
             passives: [actionPassive("TURN_END", healAction(2, otherAllyMinions()))],
@@ -217,7 +227,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     // --- sales / support minions ---
     defineMinion(
         76,
-        { ...gal("BizDev Débutant", 1), attack: 1, health: 3 },
+        {
+            ...gal("BizDev Débutant", 1),
+            imageUrl: "/card-covers/galadrim/bizdev-debutant.webp",
+            attack: 1,
+            health: 3,
+        },
         {
             tags: ["SALES"],
             passives: [actionPassive("TURN_END", damageAction(1, enemyHero()))],
@@ -225,7 +240,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         77,
-        { ...gal("Sales Charismatique", 2), attack: 2, health: 3 },
+        {
+            ...gal("Sales Charismatique", 2),
+            imageUrl: "/card-covers/galadrim/sales-charismatique.webp",
+            attack: 2,
+            health: 3,
+        },
         {
             tags: ["SALES"],
             battlecryActions: [drawAction(1), enemyDrawAction(1)],
@@ -233,7 +253,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         78,
-        { ...gal("Closer Affamé", 3), attack: 3, health: 2 },
+        {
+            ...gal("Closer Affamé", 3),
+            imageUrl: "/card-covers/galadrim/closer-affame.webp",
+            attack: 3,
+            health: 2,
+        },
         {
             tags: ["SALES"],
             minionPowers: {
@@ -270,7 +295,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
 
     defineMinion(
         82,
-        { ...gal("Agent Support", 1), attack: 1, health: 3 },
+        {
+            ...gal("Agent Support", 1),
+            imageUrl: "/card-covers/galadrim/agent-support.webp",
+            attack: 1,
+            health: 3,
+        },
         {
             tags: ["SUPPORT"],
             minionPowers: {
@@ -280,7 +310,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         83,
-        { ...gal("Happiness Manager", 2), attack: 2, health: 3 },
+        {
+            ...gal("Happiness Manager", 2),
+            imageUrl: "/card-covers/galadrim/happiness-manager.webp",
+            attack: 2,
+            health: 3,
+        },
         {
             tags: ["SUPPORT"],
             battlecryActions: [healAction(4, allyHero())],
@@ -376,7 +411,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     // --- regional / pets minions ---
     defineMinion(
         87,
-        { ...gal("Parisien Pressé", 2), attack: 3, health: 1 },
+        {
+            ...gal("Parisien Pressé", 2),
+            imageUrl: "/card-covers/galadrim/parisien-presse.webp",
+            attack: 3,
+            health: 1,
+        },
         {
             tags: ["PARISIEN"],
             minionPowers: {
@@ -386,7 +426,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         88,
-        { ...gal("Bobo Parisien", 3), attack: 2, health: 3 },
+        {
+            ...gal("Bobo Parisien", 3),
+            imageUrl: "/card-covers/galadrim/bobo-parisien.webp",
+            attack: 2,
+            health: 3,
+        },
         {
             tags: ["PARISIEN"],
             battlecryActions: [drawAction(1, spellDrawFilter())],
@@ -411,7 +456,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         92,
-        { ...gal("Mascotte du Bureau", 1), attack: 1, health: 1 },
+        {
+            ...gal("Mascotte du Bureau", 1),
+            imageUrl: "/card-covers/galadrim/mascotte-du-bureau.webp",
+            attack: 1,
+            health: 1,
+        },
         {
             tags: ["PETS"],
             passives: [boostPassive(boostBoth(1, 1), otherAllyMinionsWithTag("PETS"))],
@@ -419,7 +469,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         93,
-        { ...gal("Chat sur le Clavier", 2), attack: 1, health: 2 },
+        {
+            ...gal("Chat sur le Clavier", 2),
+            imageUrl: "/card-covers/galadrim/chat-sur-le-clavier.webp",
+            attack: 1,
+            health: 2,
+        },
         {
             tags: ["PETS"],
             minionPowers: {
@@ -430,7 +485,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         94,
-        { ...gal("Chien Foufou", 3), attack: 3, health: 2 },
+        {
+            ...gal("Chien Foufou", 3),
+            imageUrl: "/card-covers/galadrim/chien-foufou.webp",
+            attack: 3,
+            health: 2,
+        },
         {
             tags: ["PETS"],
             minionPowers: {
@@ -440,7 +500,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         95,
-        { ...gal("Plante Verte", 1), attack: 0, health: 4 },
+        {
+            ...gal("Plante Verte", 1),
+            imageUrl: "/card-covers/galadrim/plante-verte.webp",
+            attack: 0,
+            health: 4,
+        },
         {
             minionPowers: {
                 hasTaunt: true,
@@ -565,19 +630,43 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
 
     // --- spells ---
-    defineSpell(96, gal("Pause Café", 2), [boostAction(boostBoth(1, 1), allyMinions())]),
+    defineSpell(
+        96,
+        {
+            ...gal("Pause Café", 2),
+            imageUrl: "/card-covers/galadrim/pause-cafe.webp",
+        },
+        [boostAction(boostBoth(1, 1), allyMinions())],
+    ),
     defineSpell(97, gal("Bug en Prod", 4), [damageAction(3, allMinions())]),
-    defineSpell(98, gal("Déploiement Réussi", 3), [drawAction(2)]),
+    defineSpell(
+        98,
+        {
+            ...gal("Déploiement Réussi", 3),
+            imageUrl: "/card-covers/galadrim/deploiement-reussi.webp",
+        },
+        [drawAction(2)],
+    ),
     defineSpell(99, gal("Réunion Interminable", 3), [damageAction(3, enemyMinions())]),
     defineSpell(100, gal("Sprint Review", 4), [
         boostAction(boostBothWithTaunt(3, 3), targetedAllyMinion(), true),
     ]),
-    defineSpell(101, gal("Heures Sup'", 3), [
-        boostAction(boostAttackWithCharge(3), targetedAllyMinion(), true),
-    ]),
-    defineSpell(102, gal("Burnout", 3), [
-        destroyAction(targetedAnyMinionWithComparison(attackGreaterThan(4)), true),
-    ]),
+    defineSpell(
+        101,
+        {
+            ...gal("Heures Sup'", 3),
+            imageUrl: "/card-covers/galadrim/heures-sup.webp",
+        },
+        [boostAction(boostAttackWithCharge(3), targetedAllyMinion(), true)],
+    ),
+    defineSpell(
+        102,
+        {
+            ...gal("Burnout", 3),
+            imageUrl: "/card-covers/galadrim/burnout.webp",
+        },
+        [destroyAction(targetedAnyMinionWithComparison(attackGreaterThan(4)), true)],
+    ),
     defineSpell(
         132,
         {
@@ -611,18 +700,39 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [destroyAction(targetedAllyMinion(), true), drawAction(2)],
     ),
     defineSpell(103, gal("Team Building", 3), [drawAction(2, minionDrawFilter())]),
-    defineSpell(104, gal("Goodies Galadrim", 1), [healAction(5, targetedAllyMinion(), true)]),
+    defineSpell(
+        104,
+        {
+            ...gal("Goodies Galadrim", 1),
+            imageUrl: "/card-covers/galadrim/goodies-galadrim.webp",
+        },
+        [healAction(5, targetedAllyMinion(), true)],
+    ),
     defineSpell(105, gal("Coupure Internet", 6), [damageAction(4, randomEnemyTargets(3))]),
-    defineSpell(109, gal("Lendemain de soirée", 1), [
-        silenceAction(targetedAnyMinion(), true),
-        damageAction(1, targetedAnyMinion(), true),
-    ]),
-    defineSpell(110, gal("Casque à Réduction de Bruit", 1), [
-        boostAction(boostDivineShield(), targetedAllyMinion(), true),
-    ]),
-    defineSpell(112, gal("Navigation Privée", 1), [
-        boostAction(boostAttackWithStealth(1), targetedAnyMinion(), true),
-    ]),
+    defineSpell(
+        109,
+        {
+            ...gal("Lendemain de soirée", 1),
+            imageUrl: "/card-covers/galadrim/lendemain-de-soiree.webp",
+        },
+        [silenceAction(targetedAnyMinion(), true), damageAction(1, targetedAnyMinion(), true)],
+    ),
+    defineSpell(
+        110,
+        {
+            ...gal("Casque à Réduction de Bruit", 1),
+            imageUrl: "/card-covers/galadrim/casque-reduction-bruit.webp",
+        },
+        [boostAction(boostDivineShield(), targetedAllyMinion(), true)],
+    ),
+    defineSpell(
+        112,
+        {
+            ...gal("Navigation Privée", 1),
+            imageUrl: "/card-covers/galadrim/navigation-privee.webp",
+        },
+        [boostAction(boostAttackWithStealth(1), targetedAnyMinion(), true)],
+    ),
     defineSpell(
         120,
         { ...gal("Jet de Ducros", 2), imageUrl: "/card-covers/galadrim/jet-de-ducros.webp" },
@@ -695,10 +805,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
 
     // --- weapons ---
-    defineWeapon(106, { ...gal("Tasse à Café Ébréchée", 1), damage: 1, durability: 4 }),
+    defineWeapon(106, {
+        ...gal("Tasse à Café Ébréchée", 1),
+        imageUrl: "/card-covers/galadrim/tasse-a-cafe-ebrechee.webp",
+        damage: 1,
+        durability: 4,
+    }),
     defineWeapon(
         107,
-        { ...gal("Clavier Mécanique", 2), damage: 2, durability: 2 },
+        {
+            ...gal("Clavier Mécanique", 2),
+            imageUrl: "/card-covers/galadrim/clavier-mecanique.webp",
+            damage: 2,
+            durability: 2,
+        },
         { deathrattleActions: [drawAction(1)] },
     ),
     defineWeapon(

@@ -66,24 +66,92 @@
         background-color 0.15s ease;
 }
 
-.gg-catalog-card-slot--interactive {
-    cursor: pointer;
-}
-
-.gg-catalog-card-slot--interactive:hover {
+.gg-catalog-card-slot:hover {
     background: rgba(42, 79, 122, 0.55);
     border-color: rgba(240, 184, 64, 0.65);
     transform: translateY(-3px);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
-.gg-catalog-card-slot--interactive:active {
+.gg-catalog-card-slot:active {
     transform: translateY(-1px);
 }
 
-.gg-catalog-card-slot--disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+.gg-catalog-card-slot__preview {
+    cursor: zoom-in;
+}
+
+.gg-catalog-card-slot__preview:focus-visible {
+    outline: 2px solid var(--gg-gold);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+.gg-catalog-card-slot__action {
+    position: absolute;
+    bottom: 10px;
+    z-index: 3;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid var(--gg-navy);
+    background-color: var(--gg-gold);
+    color: var(--gg-navy);
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.85);
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        background-color 0.15s ease;
+    touch-action: manipulation;
+    padding: 0;
+}
+
+.gg-catalog-card-slot__action--add {
+    right: 10px;
+}
+
+.gg-catalog-card-slot__action--remove {
+    left: 10px;
+}
+
+.gg-catalog-card-slot__action:hover {
+    background-color: #ffe08a;
+}
+
+.gg-catalog-card-slot__action:focus-visible {
+    opacity: 1;
+    transform: scale(1);
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+@media (hover: hover) {
+    .gg-catalog-card-slot:hover .gg-catalog-card-slot__action {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (hover: none) {
+    .gg-catalog-card-slot__action {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.card-artwork-modal__image {
+    display: block;
+    max-width: min(90vw, 560px);
+    max-height: 75vh;
+    width: auto;
+    height: auto;
+    border-radius: var(--gg-radius-sm);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
 .gg-catalog-card-slot__count {
