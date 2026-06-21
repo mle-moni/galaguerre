@@ -2,6 +2,7 @@ import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties, MouseEvent, PointerEvent, ReactNode } from "react";
 import { BoardMinionToken } from "~/components/cards/board_minion_token";
+import { findAuthoritativeMinion } from "~/helpers/combat_target_validation";
 import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
@@ -25,13 +26,22 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
     if (!card) return null;
 
     const isOwnMinion = spotOwner === "PLAYER";
-    const currentRound = store.game.data.currentRound;
-    const attackStatus = getMinionAttackStatus(state, currentRound, isOwnMinion && store.isMyTurn);
-    const canAttack = attackStatus === "ready";
+    const authoritativeMinion = isOwnMinion
+        ? findAuthoritativeMinion(store, state.uuid)
+        : undefined;
+    const combatState = authoritativeMinion ?? state;
+    const currentRound = store.authoritativeGame.data.currentRound;
+    const attackStatus = getMinionAttackStatus(
+        combatState,
+        currentRound,
+        isOwnMinion && store.isMyTurn,
+    );
+    const isReserved = isOwnMinion && store.combatActionQueue.isMinionReserved(state.uuid);
+    const canAttack = attackStatus === "ready" && !isReserved;
     const isSelectingBattlecryOrSpellTarget = store.targetSelectionStore.isHighlightingTargets;
     const canStartAttack = canAttack && !isSelectingBattlecryOrSpellTarget;
     const remainingAttacks = isOwnMinion
-        ? getMinionRemainingAttacks(state, currentRound)
+        ? getMinionRemainingAttacks(combatState, currentRound)
         : undefined;
 
     const disarmOtherModes = () => {

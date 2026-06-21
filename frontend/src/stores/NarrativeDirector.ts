@@ -170,6 +170,8 @@ export class NarrativeDirector {
             this.isPlaying = false;
             this.skipRequested = false;
 
+            this.gameStore.combatActionQueue.flush();
+
             if (this.queue.length > 0) {
                 void this.processQueue();
             }

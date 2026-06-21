@@ -17,12 +17,20 @@ export const useTargetSelectionCancel = (store: GameStore) => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key !== "Escape") return;
 
-            if (store.isNarrativePlaying) {
-                store.skipNarrative();
+            if (
+                store.minionDragStore.isAttacking ||
+                store.weaponDragStore.isAttacking ||
+                store.targetSelectionStore.isArmed ||
+                store.targetSelectionStore.isSelectingTarget ||
+                store.cardDragStore.isShowingMinionPlayHint
+            ) {
+                cancelArrowTargeting(store);
                 return;
             }
 
-            cancelArrowTargeting(store);
+            if (store.isNarrativePlaying) {
+                store.skipNarrative();
+            }
         };
 
         document.addEventListener("keydown", handleKeyDown);

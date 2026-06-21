@@ -1,24 +1,16 @@
-import type { ActionTarget, BoardState, MinionState, SpotOwner } from "#api_types/game.types";
-import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
-
+import type { ActionTarget, MinionState, SpotOwner } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
+import {
+    canMinionAttackBoardIndex,
+    canMinionAttackTarget,
+    findAuthoritativeMinion,
+    opponentBoardHasAttackableTaunt,
+} from "~/helpers/combat_target_validation";
 import { canMinionAttack } from "~/helpers/minion_combat";
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
-import { emitSocketEventToServer } from "~/services/ws_client";
-import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
 import type { TargetValidity } from "./TargetSelectionStore.js";
-
-const getMinionHasTaunt = (minion: MinionState): boolean => {
-    if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.minionPowers?.hasTaunt ?? false;
-};
-
-const boardHasAttackableTaunt = (board: BoardState): boolean => {
-    return board.some(
-        (minion) => getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion),
-    );
-};
+import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 
 export class MinionDragStore {
     public attackingMinion: MinionState | null = null;
@@ -32,7 +24,8 @@ export class MinionDragStore {
     }
 
     startAttack(minion: MinionState) {
-        if (this.gameStore.isInputBlocked) return;
+        if (!this.gameStore.canPlanCombatAction) return;
+        if (this.gameStore.combatActionQueue.isMinionReserved(minion.uuid)) return;
         this.attackingMinion = minion;
     }
 
@@ -45,7 +38,9 @@ export class MinionDragStore {
         if (!this.attackingMinion) return spotsToSameColor("black");
 
         return buildSlotsBorderColor((boardIndex) =>
-            this.canPlayMinion(boardIndex, this.attackingMinion!, "OPPONENT") ? "green" : "red",
+            canMinionAttackBoardIndex(this.gameStore, this.attackingMinion!, boardIndex, "OPPONENT")
+                ? "green"
+                : "red",
         );
     }
 
@@ -53,7 +48,9 @@ export class MinionDragStore {
         if (!this.attackingMinion) return spotsToSameColor("black");
 
         return buildSlotsBorderColor((boardIndex) =>
-            this.canPlayMinion(boardIndex, this.attackingMinion!, "PLAYER") ? "green" : "red",
+            canMinionAttackBoardIndex(this.gameStore, this.attackingMinion!, boardIndex, "PLAYER")
+                ? "green"
+                : "red",
         );
     }
 
@@ -64,23 +61,7 @@ export class MinionDragStore {
     }
 
     canPlayMinion(boardIndex: number | null, minion: MinionState, spotOwner: SpotOwner): boolean {
-        if (!this.gameStore.isMyTurn) return false;
-        if (spotOwner === "PLAYER") return false;
-        if (!canMinionAttack(minion, this.gameStore.game.data.currentRound)) return false;
-
-        const opponentBoard = this.gameStore.opponent.board;
-        const hasAttackableTaunt = boardHasAttackableTaunt(opponentBoard);
-
-        if (boardIndex === null) return !hasAttackableTaunt;
-
-        if (!this.canPlayMinionOnIndex(boardIndex, spotOwner)) return false;
-
-        const targetMinion = opponentBoard[boardIndex];
-        if (!targetMinion || !canOpponentDirectlyTargetMinion(targetMinion)) return false;
-
-        if (!hasAttackableTaunt) return true;
-
-        return getMinionHasTaunt(targetMinion);
+        return canMinionAttackBoardIndex(this.gameStore, minion, boardIndex, spotOwner);
     }
 
     canPlayMinionByUuid(
@@ -92,7 +73,7 @@ export class MinionDragStore {
             return this.canPlayMinion(null, minion, spotOwner);
         }
 
-        const opponentBoard = this.gameStore.opponent.board;
+        const opponentBoard = this.gameStore.authoritativeOpponent.board;
         const boardIndex = opponentBoard.findIndex((entry) => entry.uuid === minionUuid);
         if (boardIndex === -1) return false;
 
@@ -102,11 +83,10 @@ export class MinionDragStore {
     canSelectTarget(actionTarget: ActionTarget): boolean {
         if (!this.attackingMinion) return false;
 
-        return this.canPlayMinionByUuid(
-            actionTarget.minionUuid,
-            this.attackingMinion,
-            actionTarget.owner,
-        );
+        const minion = findAuthoritativeMinion(this.gameStore, this.attackingMinion.uuid);
+        if (!minion) return false;
+
+        return canMinionAttackTarget(this.gameStore, minion, actionTarget);
     }
 
     getTargetValidityAtPoint(x: number, y: number): TargetValidity {
@@ -126,11 +106,10 @@ export class MinionDragStore {
             return;
         }
 
-        emitSocketEventToServer("game:minion_action", {
-            minionId: this.attackingMinion.uuid,
-            minionUuid: actionTarget.minionUuid,
-            owner: actionTarget.owner,
-        });
+        this.gameStore.combatActionQueue.enqueueMinionAction(
+            this.attackingMinion.uuid,
+            actionTarget,
+        );
 
         this.attackingMinion = null;
         this.gameStore.targetingArrowStore.endDrag();
@@ -141,10 +120,16 @@ export class MinionDragStore {
 
         if (!this.gameStore.isMyTurn || this.attackingMinion === null) return transparent;
         if (!isOpponent) return transparent;
-        if (!canMinionAttack(this.attackingMinion, this.gameStore.game.data.currentRound))
+        if (
+            !canMinionAttack(
+                this.attackingMinion,
+                this.gameStore.authoritativeGame.data.currentRound,
+            )
+        ) {
             return transparent;
+        }
 
-        if (boardHasAttackableTaunt(this.gameStore.opponent.board)) return "red";
+        if (opponentBoardHasAttackableTaunt(this.gameStore)) return "red";
 
         return "green";
     }

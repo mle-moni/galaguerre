@@ -1,25 +1,15 @@
-import type { ActionTarget, BoardState, SpotOwner } from "#api_types/game.types";
-import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
-
+import type { ActionTarget, SpotOwner } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
+import {
+    canWeaponAttackBoardIndex,
+    canWeaponAttackTarget,
+    opponentBoardHasAttackableTaunt,
+} from "~/helpers/combat_target_validation";
 import { canWeaponAttack } from "~/helpers/weapon_combat";
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
-import { emitSocketEventToServer } from "~/services/ws_client";
 import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
 import type { TargetValidity } from "./TargetSelectionStore.js";
-import type { MinionState } from "#api_types/game.types";
-
-const getMinionHasTaunt = (minion: MinionState): boolean => {
-    if (minion.originalCard.type !== "MINION") return false;
-    return minion.originalCard.minionPowers?.hasTaunt ?? false;
-};
-
-const boardHasAttackableTaunt = (board: BoardState): boolean => {
-    return board.some(
-        (minion) => getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion),
-    );
-};
 
 export class WeaponDragStore {
     public isAttacking = false;
@@ -29,7 +19,7 @@ export class WeaponDragStore {
     }
 
     startAttack() {
-        if (this.gameStore.isInputBlocked) return;
+        if (!this.gameStore.canPlanCombatAction) return;
         this.isAttacking = true;
     }
 
@@ -42,40 +32,12 @@ export class WeaponDragStore {
         if (!this.isAttacking) return spotsToSameColor("black");
 
         return buildSlotsBorderColor((boardIndex) =>
-            this.canAttack(boardIndex, "OPPONENT") ? "green" : "red",
+            canWeaponAttackBoardIndex(this.gameStore, boardIndex, "OPPONENT") ? "green" : "red",
         );
     }
 
-    canAttackOnIndex(boardIndex: number, spotOwner: SpotOwner): boolean {
-        const board =
-            spotOwner === "PLAYER" ? this.gameStore.me.board : this.gameStore.opponent.board;
-        return board[boardIndex] !== undefined;
-    }
-
     canAttack(boardIndex: number | null, spotOwner: SpotOwner): boolean {
-        if (!this.gameStore.isMyTurn) return false;
-        if (!this.isAttacking) return false;
-
-        const weaponState = this.gameStore.me.weaponState;
-        if (!weaponState) return false;
-        if (!canWeaponAttack(this.gameStore.me, weaponState, this.gameStore.game.data.currentRound))
-            return false;
-
-        if (spotOwner === "PLAYER") return false;
-
-        const opponentBoard = this.gameStore.opponent.board;
-        const hasAttackableTaunt = boardHasAttackableTaunt(opponentBoard);
-
-        if (boardIndex === null) return !hasAttackableTaunt;
-
-        if (!this.canAttackOnIndex(boardIndex, spotOwner)) return false;
-
-        const targetMinion = opponentBoard[boardIndex];
-        if (!targetMinion || !canOpponentDirectlyTargetMinion(targetMinion)) return false;
-
-        if (!hasAttackableTaunt) return true;
-
-        return getMinionHasTaunt(targetMinion);
+        return canWeaponAttackBoardIndex(this.gameStore, boardIndex, spotOwner);
     }
 
     canAttackByUuid(minionUuid: string | null, spotOwner: SpotOwner): boolean {
@@ -83,7 +45,7 @@ export class WeaponDragStore {
             return this.canAttack(null, spotOwner);
         }
 
-        const opponentBoard = this.gameStore.opponent.board;
+        const opponentBoard = this.gameStore.authoritativeOpponent.board;
         const boardIndex = opponentBoard.findIndex((entry) => entry.uuid === minionUuid);
         if (boardIndex === -1) return false;
 
@@ -93,7 +55,7 @@ export class WeaponDragStore {
     canSelectTarget(actionTarget: ActionTarget): boolean {
         if (!this.isAttacking) return false;
 
-        return this.canAttackByUuid(actionTarget.minionUuid, actionTarget.owner);
+        return canWeaponAttackTarget(this.gameStore, actionTarget);
     }
 
     getTargetValidityAtPoint(x: number, y: number): TargetValidity {
@@ -113,10 +75,7 @@ export class WeaponDragStore {
             return;
         }
 
-        emitSocketEventToServer("game:weapon_action", {
-            minionUuid: actionTarget.minionUuid,
-            owner: actionTarget.owner,
-        });
+        this.gameStore.combatActionQueue.enqueueWeaponAction(actionTarget);
 
         this.isAttacking = false;
         this.gameStore.targetingArrowStore.endDrag();
@@ -128,26 +87,34 @@ export class WeaponDragStore {
         if (!this.gameStore.isMyTurn || !this.isAttacking) return transparent;
         if (!isOpponent) return transparent;
 
-        const weaponState = this.gameStore.me.weaponState;
+        const weaponState = this.gameStore.authoritativeMe.weaponState;
         if (!weaponState) return transparent;
-        if (!canWeaponAttack(this.gameStore.me, weaponState, this.gameStore.game.data.currentRound))
+        if (
+            !canWeaponAttack(
+                this.gameStore.authoritativeMe,
+                weaponState,
+                this.gameStore.authoritativeGame.data.currentRound,
+            )
+        ) {
             return transparent;
+        }
 
-        if (boardHasAttackableTaunt(this.gameStore.opponent.board)) return "red";
+        if (opponentBoardHasAttackableTaunt(this.gameStore)) return "red";
 
         return "green";
     }
 
     get canAttackWithWeapon(): boolean {
         if (!this.gameStore.isMyTurn) return false;
+        if (this.gameStore.combatActionQueue.isWeaponReserved()) return false;
 
-        const weaponState = this.gameStore.me.weaponState;
+        const weaponState = this.gameStore.authoritativeMe.weaponState;
         if (!weaponState) return false;
 
         return canWeaponAttack(
-            this.gameStore.me,
+            this.gameStore.authoritativeMe,
             weaponState,
-            this.gameStore.game.data.currentRound,
+            this.gameStore.authoritativeGame.data.currentRound,
         );
     }
 }

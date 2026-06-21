@@ -4,8 +4,9 @@ import type { GamePresentationUpdate } from "#api_types/game_narrative.types";
 import { makeAutoObservable } from "mobx";
 import { _assert } from "~/helpers/assertions";
 import { notifyError } from "~/services/toasts";
-import { CLIENT_SOCKET, isSocketReady } from "~/services/ws_client";
+import { isSocketReady } from "~/services/ws_client";
 import { CardDragStore } from "./CardDragStore.js";
+import { CombatActionQueueStore } from "./CombatActionQueueStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
 import { NarrativeDirector } from "./NarrativeDirector.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
@@ -30,6 +31,7 @@ export class GameStore {
     playerInfosStore = new PlayerInfosStore(this);
     targetSelectionStore = new TargetSelectionStore(this);
     targetingArrowStore = new TargetingArrowStore(this);
+    combatActionQueue = new CombatActionQueueStore(this);
     narrativeDirector = new NarrativeDirector(this);
 
     private _authoritativeGame: ApiGame | null = null;
@@ -67,6 +69,24 @@ export class GameStore {
         return this.isNarrativePlaying;
     }
 
+    get canPlanCombatAction() {
+        return this.isMyTurn;
+    }
+
+    get isCombatTargeting() {
+        return this.minionDragStore.isAttacking || this.weaponDragStore.isAttacking;
+    }
+
+    get authoritativeMe(): GamePlayer {
+        const { playerOne, playerTwo } = this.authoritativeGame.data;
+        return playerOne.userId === this.user.id ? playerOne : playerTwo;
+    }
+
+    get authoritativeOpponent(): GamePlayer {
+        const { playerOne, playerTwo } = this.authoritativeGame.data;
+        return playerOne.userId === this.user.id ? playerTwo : playerOne;
+    }
+
     setDisplayGame(game: ApiGame) {
         this._displayGame = game;
     }
@@ -89,6 +109,7 @@ export class GameStore {
             this.mulliganConfirmedLocally = false;
             this.passTurnSubmittedAt = null;
             this.narrativeDirector.clear();
+            this.combatActionQueue.clear();
         }
 
         this._authoritativeGame = game;
@@ -100,6 +121,7 @@ export class GameStore {
     receiveUpdate(game: ApiGame, presentation?: GamePresentationUpdate) {
         const isNewGame = this._authoritativeGame?.id !== game.id;
         this._authoritativeGame = game;
+        this.combatActionQueue.resetInFlight();
 
         if (presentation) {
             this.narrativeDirector.enqueue(presentation, game);
@@ -108,6 +130,7 @@ export class GameStore {
 
         if (isNewGame) {
             this.narrativeDirector.clear();
+            this.combatActionQueue.clear();
             this._displayGame = game;
             this.isNarrativePlaying = false;
             return;
@@ -132,6 +155,7 @@ export class GameStore {
         this.narrativeDirector.skipCurrentScene();
         this._displayGame = this._authoritativeGame;
         this.isNarrativePlaying = false;
+        this.combatActionQueue.flush();
     }
 
     get isMulligan() {
@@ -222,6 +246,7 @@ export class GameStore {
     }
 
     get isPassTurnPending() {
+        if (this.combatActionQueue.isPassTurnReserved()) return true;
         if (!this.passTurnSubmittedAt) return false;
 
         return (
@@ -231,14 +256,21 @@ export class GameStore {
     }
 
     get canPassTurn() {
-        return this.isMyTurn && !this.isPassTurnPending && !this.isInputBlocked;
+        return this.isMyTurn && !this.isPassTurnPending;
+    }
+
+    markPassTurnSubmitted() {
+        this.passTurnSubmittedAt = {
+            state: this.authoritativeGame.data.state,
+            round: this.authoritativeGame.data.currentRound,
+        };
     }
 
     get isCardDetailHoverDisabled(): boolean {
         const { cardDragStore, targetSelectionStore, minionDragStore, weaponDragStore } = this;
 
         return (
-            this.isInputBlocked ||
+            (this.isInputBlocked && !this.isCombatTargeting) ||
             cardDragStore.cardDragged !== null ||
             cardDragStore.isShowingMinionPlayHint ||
             targetSelectionStore.isArmed ||
@@ -257,15 +289,11 @@ export class GameStore {
             return;
         }
 
-        this.passTurnSubmittedAt = {
-            state: this.authoritativeGame.data.state,
-            round: this.authoritativeGame.data.currentRound,
-        };
-        CLIENT_SOCKET.emit("pass_turn");
+        this.combatActionQueue.enqueuePassTurn();
     }
 
     handleDrop(boardIndex: number | null, spotOwner: SpotOwner) {
-        if (this.isInputBlocked) return;
+        if (this.isInputBlocked && !this.isCombatTargeting) return;
 
         const board = spotOwner === "OPPONENT" ? this.opponent.board : this.me.board;
         const actionTarget = {

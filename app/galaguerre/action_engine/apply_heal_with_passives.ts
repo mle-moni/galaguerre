@@ -1,5 +1,11 @@
 import { DEFAULT_HERO_HEALTH, type GamePlayer, type MinionState } from "#api_types/game.types";
 import type Game from "#models/game";
+import {
+    heroEntityRef,
+    minionEntityRef,
+    recordStatChange,
+    resolveSpotOwner,
+} from "../game_narrative/narrative_effects.js";
 import { getActualHeal, recordHealingDone } from "../game_stats/record_player_stats.js";
 import { triggerHealPassives } from "../passive_engine/trigger_heal_passives.js";
 import { applyHeal, getMinionMaxHealth } from "./apply_heal.js";
@@ -14,6 +20,12 @@ export const applyHealToHero = (
     const actualHeal = getActualHeal(target.health, healAmount, maxHealth);
     target.health = applyHeal(target.health, healAmount, maxHealth);
     recordHealingDone(sourcePlayer, actualHeal);
+
+    if (actualHeal > 0) {
+        recordStatChange(heroEntityRef(resolveSpotOwner(game, target)), {
+            healthDelta: actualHeal,
+        });
+    }
 
     if (actualHeal <= 0) return { gameEnded: false };
 
@@ -32,6 +44,12 @@ export const applyHealToMinion = (
     const actualHeal = getActualHeal(minion.health, healAmount, maxHealth);
     minion.health = applyHeal(minion.health, healAmount, maxHealth);
     recordHealingDone(sourcePlayer, actualHeal);
+
+    if (actualHeal > 0) {
+        recordStatChange(minionEntityRef(minion, resolveSpotOwner(game, owner)), {
+            healthDelta: actualHeal,
+        });
+    }
 
     if (actualHeal <= 0) return { gameEnded: false };
 
