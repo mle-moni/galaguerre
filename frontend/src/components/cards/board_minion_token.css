@@ -10,6 +10,17 @@
 	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
+.board-minion-token__taunt-outline {
+	position: absolute;
+	inset: -9px;
+	width: calc(100% + 18px);
+	height: calc(100% + 18px);
+	color: #a855f7;
+	pointer-events: none;
+	z-index: 1;
+	filter: drop-shadow(0 0 3px rgba(168, 85, 247, 0.75));
+}
+
 .board-minion-token__art {
 	position: absolute;
 	inset: 8% 10% 22%;

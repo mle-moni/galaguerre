@@ -8,6 +8,7 @@ import {
     type MinionAttackStatus,
 } from "~/helpers/minion_combat";
 import { BoardMinionEffectIcons } from "./board_minion_effect_icons.jsx";
+import { BoardMinionTauntOutline } from "./board_minion_taunt_outline.jsx";
 import "./board_minion_token.css";
 
 interface BoardMinionTokenProps {
@@ -44,6 +45,7 @@ export const BoardMinionToken = ({
     const statusLabel = attackStatus
         ? getMinionAttackStatusLabel(attackStatus, maxAttacks)
         : undefined;
+    const hasTaunt = card.minionPowers?.hasTaunt === true;
 
     const content = (
         <div
@@ -52,6 +54,7 @@ export const BoardMinionToken = ({
             style={style}
             className={clsx(
                 "board-minion-token",
+                hasTaunt && "board-minion-token--taunt",
                 attackStatus && `minion-card-face--${attackStatus}`,
                 className,
             )}
@@ -59,6 +62,7 @@ export const BoardMinionToken = ({
             onPointerDown={onPointerDown}
             onClick={onClick}
         >
+            {hasTaunt && <BoardMinionTauntOutline />}
             <BoardMinionEffectIcons card={card} />
             {attackStatus === "sleeping" && (
                 <span className="board-minion-token__sleep-icon" aria-hidden>
