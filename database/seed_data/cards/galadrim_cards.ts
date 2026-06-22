@@ -131,7 +131,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         66,
-        { ...gal("QA Testeur Impitoyable", 3), attack: 1, health: 4 },
+        {
+            ...gal("QA Testeur Impitoyable", 3),
+            imageUrl: "/card-covers/galadrim/qa-testeur-impitoyable.webp",
+            attack: 1,
+            health: 4,
+        },
         {
             tags: ["DEVELOPPEUR"],
             minionPowers: {
@@ -141,7 +146,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         67,
-        { ...gal("Dev Aguerri", 4), attack: 4, health: 5 },
+        {
+            ...gal("Dev Aguerri", 4),
+            imageUrl: "/card-covers/galadrim/dev-aguerri.webp",
+            attack: 4,
+            health: 5,
+        },
         {
             tags: ["DEVELOPPEUR"],
             passives: [boostPassive(boostSpellPower(1), allyHero())],
@@ -149,7 +159,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         68,
-        { ...gal("Dev Insomniaque", 5), attack: 4, health: 5 },
+        {
+            ...gal("Dev Insomniaque", 5),
+            imageUrl: "/card-covers/galadrim/dev-insomniaque.webp",
+            attack: 4,
+            health: 5,
+        },
         {
             tags: ["DEVELOPPEUR"],
             passives: [actionPassive("DRAW", damageAction(2, enemyHero()))],
@@ -157,7 +172,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         69,
-        { ...gal("Architecte Système", 7), attack: 6, health: 6 },
+        {
+            ...gal("Architecte Système", 7),
+            imageUrl: "/card-covers/galadrim/architecte-systeme.webp",
+            attack: 6,
+            health: 6,
+        },
         {
             tags: ["DEVELOPPEUR"],
             battlecryActions: [damageAction(3, enemyMinions())],
@@ -180,7 +200,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         71,
-        { ...gal("Scrum Master", 3), attack: 2, health: 4 },
+        {
+            ...gal("Scrum Master", 3),
+            imageUrl: "/card-covers/galadrim/scrum-master.webp",
+            attack: 2,
+            health: 4,
+        },
         {
             tags: ["PM"],
             passives: [boostPassive(boostBoth(1, 1), otherAllyMinionsWithTag("DEVELOPPEUR"))],
@@ -188,7 +213,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         72,
-        { ...gal("PM Stressé", 3), attack: 3, health: 2 },
+        {
+            ...gal("PM Stressé", 3),
+            imageUrl: "/card-covers/galadrim/pm-stresse.webp",
+            attack: 3,
+            health: 2,
+        },
         {
             tags: ["PM"],
             battlecryActions: [boostAction(boostCharge(), targetedAllyMinion(), true)],
@@ -196,7 +226,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         73,
-        { ...gal("Product Owner", 4), attack: 3, health: 4 },
+        {
+            ...gal("Product Owner", 4),
+            imageUrl: "/card-covers/galadrim/product-owner.webp",
+            attack: 3,
+            health: 4,
+        },
         {
             tags: ["PM"],
             passives: [actionPassive("TURN_BEGIN", drawAction(1))],
@@ -204,7 +239,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         74,
-        { ...gal("Directeur de Projet", 5), attack: 4, health: 4 },
+        {
+            ...gal("Directeur de Projet", 5),
+            imageUrl: "/card-covers/galadrim/directeur-de-projet.webp",
+            attack: 4,
+            health: 4,
+        },
         {
             tags: ["PM"],
             battlecryActions: [boostAction(boostBothWithTaunt(2, 2), targetedAllyMinion(), true)],
@@ -268,7 +308,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         79,
-        { ...gal("Négociateur", 4), attack: 4, health: 4 },
+        {
+            ...gal("Négociateur", 4),
+            imageUrl: "/card-covers/galadrim/negociateur.webp",
+            attack: 4,
+            health: 4,
+        },
         {
             tags: ["SALES"],
             battlecryActions: [damageAction(4, enemyHero())],
@@ -276,7 +321,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         80,
-        { ...gal("Key Account Manager", 6), attack: 6, health: 2 },
+        {
+            ...gal("Key Account Manager", 6),
+            imageUrl: "/card-covers/galadrim/key-account-manager.webp",
+            attack: 6,
+            health: 2,
+        },
         {
             tags: ["SALES"],
             minionPowers: {
@@ -286,7 +336,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         81,
-        { ...gal("Directeur Commercial", 6), attack: 5, health: 5 },
+        {
+            ...gal("Directeur Commercial", 6),
+            imageUrl: "/card-covers/galadrim/directeur-commercial.webp",
+            attack: 5,
+            health: 5,
+        },
         {
             tags: ["SALES"],
             deathrattleActions: [damageAction(5, enemyHero())],
@@ -323,7 +378,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         84,
-        { ...gal("Recruteur RH", 3), attack: 2, health: 4 },
+        {
+            ...gal("Recruteur RH", 3),
+            imageUrl: "/card-covers/galadrim/recruteur-rh.webp",
+            attack: 2,
+            health: 4,
+        },
         {
             tags: ["SUPPORT"],
             battlecryActions: [drawAction(1, minionDrawFilter([], costLessThan(4)))],
@@ -357,7 +417,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         85,
-        { ...gal("Manager Bienveillant", 4), attack: 3, health: 5 },
+        {
+            ...gal("Manager Bienveillant", 4),
+            imageUrl: "/card-covers/galadrim/manager-bienveillant.webp",
+            attack: 3,
+            health: 5,
+        },
         {
             tags: ["SUPPORT"],
             minionPowers: {
@@ -437,10 +502,24 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             battlecryActions: [drawAction(1, spellDrawFilter())],
         },
     ),
-    defineMinion(89, { ...gal("Nantais Détendu", 3), attack: 3, health: 4 }, { tags: ["NANTAIS"] }),
+    defineMinion(
+        89,
+        {
+            ...gal("Nantais Détendu", 3),
+            imageUrl: "/card-covers/galadrim/nantais-detendu.webp",
+            attack: 3,
+            health: 4,
+        },
+        { tags: ["NANTAIS"] },
+    ),
     defineMinion(
         90,
-        { ...gal("Nantais Créatif", 4), attack: 3, health: 3 },
+        {
+            ...gal("Nantais Créatif", 4),
+            imageUrl: "/card-covers/galadrim/nantais-creatif.webp",
+            attack: 3,
+            health: 3,
+        },
         {
             tags: ["NANTAIS"],
             passives: [actionPassive("TURN_END", drawAction(1))],
@@ -448,7 +527,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         91,
-        { ...gal("Lyonnais Gourmand", 4), attack: 4, health: 5 },
+        {
+            ...gal("Lyonnais Gourmand", 4),
+            imageUrl: "/card-covers/galadrim/lyonnais-gourmand.webp",
+            attack: 4,
+            health: 5,
+        },
         {
             tags: ["LYONNAIS"],
             deathrattleActions: [healAction(4, allyHero())],
@@ -514,7 +598,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         111,
-        { ...gal("PM en télétravail", 3), attack: 3, health: 1 },
+        {
+            ...gal("PM en télétravail", 3),
+            imageUrl: "/card-covers/galadrim/pm-en-teletravail.webp",
+            attack: 3,
+            health: 1,
+        },
         {
             tags: ["PM"],
             minionPowers: {
@@ -524,7 +613,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineMinion(
         114,
-        { ...gal("Télétravailleur Injoignable", 3), attack: 1, health: 1 },
+        {
+            ...gal("Télétravailleur Injoignable", 3),
+            imageUrl: "/card-covers/galadrim/teletravailleur-injoignable.webp",
+            attack: 1,
+            health: 1,
+        },
         {
             minionPowers: {
                 hasStealth: true,
@@ -638,7 +732,14 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         [boostAction(boostBoth(1, 1), allyMinions())],
     ),
-    defineSpell(97, gal("Bug en Prod", 4), [damageAction(3, allMinions())]),
+    defineSpell(
+        97,
+        {
+            ...gal("Bug en Prod", 4),
+            imageUrl: "/card-covers/galadrim/bug-en-prod.webp",
+        },
+        [damageAction(3, allMinions())],
+    ),
     defineSpell(
         98,
         {
@@ -647,10 +748,22 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         [drawAction(2)],
     ),
-    defineSpell(99, gal("Réunion Interminable", 3), [damageAction(3, enemyMinions())]),
-    defineSpell(100, gal("Sprint Review", 4), [
-        boostAction(boostBothWithTaunt(3, 3), targetedAllyMinion(), true),
-    ]),
+    defineSpell(
+        99,
+        {
+            ...gal("Réunion Interminable", 3),
+            imageUrl: "/card-covers/galadrim/reunion-interminable.webp",
+        },
+        [damageAction(3, enemyMinions())],
+    ),
+    defineSpell(
+        100,
+        {
+            ...gal("Sprint Review", 4),
+            imageUrl: "/card-covers/galadrim/sprint-review.webp",
+        },
+        [boostAction(boostBothWithTaunt(3, 3), targetedAllyMinion(), true)],
+    ),
     defineSpell(
         101,
         {
@@ -699,7 +812,14 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         [destroyAction(targetedAllyMinion(), true), drawAction(2)],
     ),
-    defineSpell(103, gal("Team Building", 3), [drawAction(2, minionDrawFilter())]),
+    defineSpell(
+        103,
+        {
+            ...gal("Team Building", 3),
+            imageUrl: "/card-covers/galadrim/team-building.webp",
+        },
+        [drawAction(2, minionDrawFilter())],
+    ),
     defineSpell(
         104,
         {
@@ -708,7 +828,14 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         [healAction(5, targetedAllyMinion(), true)],
     ),
-    defineSpell(105, gal("Coupure Internet", 6), [damageAction(4, randomEnemyTargets(3))]),
+    defineSpell(
+        105,
+        {
+            ...gal("Coupure Internet", 6),
+            imageUrl: "/card-covers/galadrim/coupure-internet.webp",
+        },
+        [damageAction(4, randomEnemyTargets(3))],
+    ),
     defineSpell(
         109,
         {
@@ -823,7 +950,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineWeapon(
         108,
-        { ...gal("Câble Réseau", 4), damage: 4, durability: 2 },
+        {
+            ...gal("Câble Réseau", 4),
+            imageUrl: "/card-covers/galadrim/cable-reseau.webp",
+            damage: 4,
+            durability: 2,
+        },
         { deathrattleActions: [damageAction(2, enemyMinions())] },
     ),
 
