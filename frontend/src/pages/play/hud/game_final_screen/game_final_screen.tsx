@@ -1,10 +1,14 @@
-import { Button, Modal, Stack, Text } from "@mantine/core";
+import type { ApiUser } from "#api_types/auth.types";
+import { Button, Group, Modal, Stack, Text } from "@mantine/core";
+import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { LEADERBOARD_QUERY_KEY, AI_SPEEDRUN_LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
+import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
+import { privateAxios } from "~/services/axios";
 import { queryClient } from "~/services/query_client";
 import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
 import { GameFinalStatsTable } from "./game_final_stats_table.tsx";
@@ -15,15 +19,46 @@ export const GameFinalScreen = observer(() => {
     const { store } = useGameContext();
     const navigate = useNavigate();
     const isMobilePortrait = useIsMobilePortrait();
+    const { startSearch, isStarting: isStartingSearch } = useMatchmaking();
     const isTraining = store.game.data.isTraining ?? false;
 
-    const handleClose = () => {
+    const invalidatePostGameQueries = () => {
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
         queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY });
         if (isTraining && store.isUserWinner) {
             queryClient.invalidateQueries({ queryKey: AI_SPEEDRUN_LEADERBOARD_QUERY_KEY });
         }
+    };
+
+    const startTrainingMutation = useMutation({
+        mutationFn: async () => {
+            const response = await privateAxios.post<{ gameId: number }>("/api/games/training");
+            return response.data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
+                if (!oldUser) return oldUser;
+                return { ...oldUser, currentGameId: data.gameId };
+            });
+            navigate("/play");
+        },
+    });
+
+    const handleClose = () => {
+        invalidatePostGameQueries();
         navigate(isTraining ? "/" : "/matchmaking");
+    };
+
+    const handleReplay = () => {
+        invalidatePostGameQueries();
+
+        if (isTraining) {
+            startTrainingMutation.mutate();
+            return;
+        }
+
+        startSearch();
+        navigate("/matchmaking");
     };
 
     const ratingResult = store.game.data.ratingResult;
@@ -37,6 +72,7 @@ export const GameFinalScreen = observer(() => {
             fullScreen={isMobilePortrait}
             opened={store.isFinished}
             onClose={handleClose}
+            closeOnClickOutside={false}
             title={`Partie terminée - ${store.isUserWinner ? "Victoire" : "Défaite"}`}
             size="lg"
         >
@@ -67,9 +103,17 @@ export const GameFinalScreen = observer(() => {
                     winnerUserId={store.winner.userId}
                 />
 
-                <Button onClick={handleClose} mt="sm">
-                    {isTraining ? "Retour à l'accueil" : "Retour au matchmaking"}
-                </Button>
+                <Group mt="sm" grow={isMobilePortrait}>
+                    <Button
+                        onClick={handleReplay}
+                        loading={startTrainingMutation.isPending || isStartingSearch}
+                    >
+                        Rejouer
+                    </Button>
+                    <Button variant="default" onClick={handleClose}>
+                        {isTraining ? "Retour à l'accueil" : "Retour au matchmaking"}
+                    </Button>
+                </Group>
             </Stack>
         </Modal>
     );

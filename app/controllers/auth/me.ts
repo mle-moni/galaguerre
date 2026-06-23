@@ -1,5 +1,6 @@
 import type { ApiUser } from "#api_types/auth.types";
 import Game from "#models/game";
+import { findQueueItemByUserId } from "#services/sockets/matchmaking";
 import { randomUUID } from "node:crypto";
 import type { HttpContext } from "@adonisjs/core/http";
 
@@ -18,12 +19,15 @@ export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | voi
 
     await user.save();
 
+    const queueItem = findQueueItemByUserId(user.id);
+
     return {
         id: user.id,
         pseudo: user.pseudo,
         email: user.email,
         socketToken: user.socketToken,
         currentGameId: currentGame?.id ?? null,
+        matchmakingSearchSessionId: queueItem?.searchSessionId ?? null,
         elo: user.elo,
         wins: user.wins,
         losses: user.losses,

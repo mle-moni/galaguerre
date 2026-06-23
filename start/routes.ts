@@ -47,6 +47,8 @@ router
         router.post("/decks/:id/select", [DecksController, "select"]);
         router.resource("decks", DecksController).apiOnly();
         router.post("/games/training", [GamesController, "training"]);
+        router.delete("/games/search", [GamesController, "cancelSearch"]);
+        router.post("/games/search/heartbeat", [GamesController, "searchHeartbeat"]);
         router.resource("games", GamesController).apiOnly();
     })
     .use(middleware.auth())

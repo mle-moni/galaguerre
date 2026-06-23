@@ -46,6 +46,15 @@ const Game = ({ gameId, user }: GameProps) => {
 export const PlayPage = () => {
     const user = useUser();
     const boardMinionVariant = useBoardMinionVariant();
+    const [activeGameId, setActiveGameId] = useState<number | null>(
+        () => user?.currentGameId ?? null,
+    );
+
+    useEffect(() => {
+        if (user?.currentGameId) {
+            setActiveGameId(user.currentGameId);
+        }
+    }, [user?.currentGameId]);
 
     useEffect(() => {
         document.documentElement.classList.add("play-page-active");
@@ -55,7 +64,7 @@ export const PlayPage = () => {
     }, []);
 
     if (!user) return <Navigate to="/login" />;
-    if (!user.currentGameId) return <Navigate to="/matchmaking" />;
+    if (!activeGameId) return <Navigate to="/matchmaking" />;
 
     return (
         <div
@@ -65,7 +74,7 @@ export const PlayPage = () => {
             )}
         >
             <ConnectionBanner />
-            <Game user={user} gameId={user.currentGameId} />
+            <Game user={user} gameId={activeGameId} />
         </div>
     );
 };

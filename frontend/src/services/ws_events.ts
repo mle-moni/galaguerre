@@ -95,7 +95,11 @@ export const setupEvents = (socket: Socket) => {
     subscribeToSocketEvent("game:created", ({ gameId }) => {
         queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
             if (!oldUser) return oldUser;
-            return { ...oldUser, currentGameId: gameId };
+            return {
+                ...oldUser,
+                currentGameId: gameId,
+                matchmakingSearchSessionId: null,
+            };
         });
     });
 

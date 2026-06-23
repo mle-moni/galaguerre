@@ -1,4 +1,5 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { AppShell } from "./components/layout/app_shell.jsx";
 import { CenteredLoader } from "./components/centered_loader.jsx";
 import { UserContext, useUserQuery } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/error_404_page.jsx";
@@ -13,60 +14,70 @@ import { TrainingPage } from "./pages/training/training_page.jsx";
 import { GameHistoryDetailPage } from "./pages/game_history/game_history_detail_page.jsx";
 import { GameHistoryListPage } from "./pages/game_history/game_history_list_page.jsx";
 import { LeaderboardPage } from "./pages/leaderboard/leaderboard_page.jsx";
+import { OnboardingPage } from "./pages/onboarding/onboarding_page.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 
 const router = createBrowserRouter([
     {
-        path: "/",
-        element: <HomePage />,
-    },
-    {
-        path: "/play",
-        element: <PlayPage />,
-    },
-    {
-        path: "/decks",
-        element: <DecksPage />,
-    },
-    {
-        path: "/decks/:id",
-        element: <DeckBuilderPage />,
-    },
-    {
-        path: "/matchmaking",
-        element: <MatchmakingPage />,
-    },
-    {
-        path: "/training",
-        element: <TrainingPage />,
-    },
-    {
-        path: "/leaderboard",
-        element: <LeaderboardPage />,
-    },
-    {
-        path: "/game-history/:userId",
-        element: <GameHistoryListPage />,
-    },
-    {
-        path: "/game-history/:userId/:gameId",
-        element: <GameHistoryDetailPage />,
-    },
-    {
-        path: "/dev/board-minion-styles",
-        element: <BoardMinionStylesPage />,
-    },
-    {
-        path: "/login",
-        element: <LoginPage />,
-    },
-    {
-        path: "/register",
-        element: <RegisterPage />,
-    },
-    {
-        path: "*",
-        element: <Error404Page />,
+        element: <AppShell />,
+        children: [
+            {
+                path: "/",
+                element: <HomePage />,
+            },
+            {
+                path: "/play",
+                element: <PlayPage />,
+            },
+            {
+                path: "/decks",
+                element: <DecksPage />,
+            },
+            {
+                path: "/decks/:id",
+                element: <DeckBuilderPage />,
+            },
+            {
+                path: "/matchmaking",
+                element: <MatchmakingPage />,
+            },
+            {
+                path: "/training",
+                element: <TrainingPage />,
+            },
+            {
+                path: "/onboarding",
+                element: <OnboardingPage />,
+            },
+            {
+                path: "/leaderboard",
+                element: <LeaderboardPage />,
+            },
+            {
+                path: "/game-history/:userId",
+                element: <GameHistoryListPage />,
+            },
+            {
+                path: "/game-history/:userId/:gameId",
+                element: <GameHistoryDetailPage />,
+            },
+            {
+                path: "/dev/board-minion-styles",
+                element: <BoardMinionStylesPage />,
+            },
+            {
+                path: "/login",
+                element: <LoginPage />,
+            },
+            {
+                path: "/register",
+                element: <RegisterPage />,
+            },
+            {
+                path: "*",
+                element: <Error404Page />,
+            },
+        ],
     },
 ]);
 

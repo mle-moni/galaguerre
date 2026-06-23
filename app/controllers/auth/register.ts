@@ -3,6 +3,7 @@ import vine, { SimpleMessagesProvider } from "@vinejs/vine";
 
 import { DEFAULT_MESSAGE_PROVIDER_CONFIG } from "#adomin/validation/default_validator";
 import User from "#models/user";
+import { createStarterDeckForUser } from "#services/decks/create_starter_deck_for_user";
 
 const registerSchema = vine.compile(
     vine.object({
@@ -37,6 +38,8 @@ export const register = async ({ request, response }: HttpContext) => {
         pseudo,
         password,
     });
+
+    await createStarterDeckForUser(createdUser.id);
 
     const token = await User.accessTokens.create(createdUser);
 

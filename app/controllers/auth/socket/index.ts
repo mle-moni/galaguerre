@@ -4,6 +4,6 @@ import { socketLogout } from "./socket_logout.js";
 
 export function initSockerAuthController(socket: Socket) {
     socket.on("auth", (dto: unknown) => socketAuth(socket, dto));
-    socket.on("logout", () => socketLogout(socket));
+    socket.on("logout", () => socketLogout(socket, { immediate: true }));
     socket.on("disconnect", () => socketLogout(socket));
 }

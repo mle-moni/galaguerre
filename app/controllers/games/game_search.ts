@@ -1,7 +1,12 @@
 import Deck from "#models/deck";
 import type User from "#models/user";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
-import { MATCHMAKING_QUEUE, addMatchmakingQueueItem } from "#services/sockets/matchmaking";
+import {
+    addMatchmakingQueueItem,
+    claimOpponent,
+    findQueueItemByUserId,
+    removeMatchmakingQueueItem,
+} from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import type { HttpContext } from "@adonisjs/core/http";
 import { preloadDeckCardSet } from "#controllers/decks/deck_utils";
@@ -28,19 +33,39 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         });
     }
 
-    if (MATCHMAKING_QUEUE.length === 0) {
-        addMatchmakingQueueItem(user.id);
-        return { message: "Waiting for an opponent to join..." };
+    const existingQueueItem = findQueueItemByUserId(user.id);
+    if (existingQueueItem) {
+        existingQueueItem.lastHeartbeatAt = Date.now();
+        return {
+            message: "Waiting for an opponent to join...",
+            searchSessionId: existingQueueItem.searchSessionId,
+        };
     }
 
-    const opponent = MATCHMAKING_QUEUE.shift()!;
+    const opponent = claimOpponent(user.id);
+
+    if (!opponent) {
+        const searchSessionId = addMatchmakingQueueItem(user.id);
+        return { message: "Waiting for an opponent to join...", searchSessionId };
+    }
 
     const opponentDeck = await Deck.query()
         .where("userId", opponent.userId)
         .andWhere("selected", true)
         .preload("cards", preloadDeckCardSet)
         .preload("user")
-        .firstOrFail();
+        .first();
+
+    if (!opponentDeck) {
+        const searchSessionId = addMatchmakingQueueItem(user.id);
+        return { message: "Waiting for an opponent to join...", searchSessionId };
+    }
+
+    const opponentSerializedDeck = serializeDeck(opponentDeck);
+    if (!opponentSerializedDeck.valid) {
+        const searchSessionId = addMatchmakingQueueItem(user.id);
+        return { message: "Waiting for an opponent to join...", searchSessionId };
+    }
 
     let game;
     try {
@@ -62,14 +87,15 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         game = await createGame({ playerOne, playerTwo });
     } catch (error) {
         if (error instanceof DeckValidationError) {
-            return response.badRequest({
-                error: "Invalid cards in deck",
-                details: error.errors,
-            });
+            const searchSessionId = addMatchmakingQueueItem(user.id);
+            return { message: "Waiting for an opponent to join...", searchSessionId };
         }
 
         throw error;
     }
+
+    removeMatchmakingQueueItem(user.id);
+    removeMatchmakingQueueItem(opponent.userId);
 
     const rooms = [
         WsRooms.personalSocketRoom(opponent.userId),

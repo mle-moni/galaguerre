@@ -12,6 +12,7 @@ export const RegisterPage = observer(() => {
     const user = useUser();
     const queryClient = useQueryClient();
     const [passwordConfirm, setPasswordConfirm] = useState("");
+    const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
     const registerMutation = useMutation({
         mutationFn: async (data: FormData) => {
@@ -21,6 +22,7 @@ export const RegisterPage = observer(() => {
         onSuccess: async (data) => {
             setToken(data.token);
             await queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+            setRedirectTo("/onboarding");
         },
     });
 
@@ -37,7 +39,8 @@ export const RegisterPage = observer(() => {
         registerMutation.mutate(formData);
     };
 
-    if (user) return <Navigate to="/" />;
+    if (redirectTo) return <Navigate to={redirectTo} replace />;
+    if (user) return <Navigate to="/" replace />;
 
     return (
         <AuthLayout
