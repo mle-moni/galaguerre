@@ -67,6 +67,36 @@ test.group("resolveReconvertTemplate", () => {
         assert.include(expectedCardIds, template!.cardId);
     });
 
+    test("resolves relative cost from base cost when effective cost was reduced", ({ assert }) => {
+        const baseCost = 6;
+        const effectiveCost = 3;
+        const expectedCost = baseCost - 1;
+        const expectedCardIds = getAllMinionCardTemplates()
+            .filter((template) => template.cost === expectedCost)
+            .map((template) => template.cardId);
+
+        assert.isAbove(expectedCardIds.length, 0);
+
+        const source = createMinionState(
+            createMinionCard({ baseCost, cost: effectiveCost, attack: 4, health: 4 }),
+        );
+
+        const template = resolveReconvertTemplate(
+            createReconvertParametersSnapshot({
+                comparison: createComparisonSnapshot({
+                    costComparison: "=",
+                    cost: -1,
+                }),
+                relativeToSource: true,
+            }),
+            source,
+        );
+
+        assert.isDefined(template);
+        assert.include(expectedCardIds, template!.cardId);
+        assert.equal(template!.cost, expectedCost);
+    });
+
     test("falls back to source cost when relative negative offset has no matches", ({ assert }) => {
         const sourceCost = 1;
         const expectedCardIds = getAllMinionCardTemplates()

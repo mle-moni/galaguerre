@@ -111,6 +111,17 @@ test.group("comparison_matching", () => {
         });
     });
 
+    test("getBoardMinionStats uses base cost over effective cost", ({ assert }) => {
+        const card = createMinionCard({ baseCost: 12, cost: 5, attack: 8, health: 8 });
+        const minion = createMinionState(card);
+
+        assert.deepEqual(getBoardMinionStats(minion), {
+            cost: 12,
+            attack: 8,
+            health: 8,
+        });
+    });
+
     test("getDeckCardStats uses printed minion stats", ({ assert }) => {
         const card = createMinionCard({ cost: 3, attack: 2, health: 4 });
 

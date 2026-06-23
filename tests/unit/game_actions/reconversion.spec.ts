@@ -428,6 +428,52 @@ test.group("RECONVERSION action", () => {
         assert.equal(reconverted.cost, expectedCost);
     });
 
+    test("reconverts using base cost when effective cost was reduced", ({ assert }) => {
+        const baseCost = 6;
+        const effectiveCost = 3;
+        const expectedCost = baseCost - 1;
+        const expectedCardIds = getAllMinionCardTemplates()
+            .filter((template) => template.cost === expectedCost)
+            .map((template) => template.cardId);
+
+        assert.isAbove(expectedCardIds.length, 0);
+
+        const targetCard = createMinionCard({
+            uuid: "giant",
+            baseCost,
+            cost: effectiveCost,
+            attack: 4,
+            health: 4,
+        });
+        const target = createMinionState(targetCard);
+
+        const game = createGame(
+            createGameData({
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, target),
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            game,
+            game.data.playerTwo,
+            0,
+            createReconvertParametersSnapshot({
+                comparison: createComparisonSnapshot({
+                    costComparison: "=",
+                    cost: -1,
+                }),
+                relativeToSource: true,
+            }),
+            target,
+        );
+
+        const reconverted = game.data.playerTwo.board[0]!.originalCard;
+        assert.include(expectedCardIds, reconverted.cardId);
+        assert.equal(reconverted.cost, expectedCost);
+    });
+
     test("mass reconversion applies relative cost per minion", ({ assert }) => {
         const minionFive = createMinionState(
             createMinionCard({ uuid: "cost-5", cost: 5, attack: 5, health: 5 }),

@@ -45,7 +45,7 @@ export const matchesComparison = (
 };
 
 export const getBoardMinionStats = (minion: MinionState): ComparableStats => ({
-    cost: minion.originalCard.cost,
+    cost: minion.originalCard.baseCost ?? minion.originalCard.cost,
     attack: minion.attack,
     health: minion.health,
 });
