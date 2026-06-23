@@ -61,7 +61,9 @@ export const RulesPage = observer(() => {
                             to={user.onboardingCompletedAt ? "/" : "/onboarding"}
                             className="text-gg-gold text-sm font-medium no-underline hover:underline"
                         >
-                            {user.onboardingCompletedAt ? "Retour à l'accueil" : "Continuer l'introduction →"}
+                            {user.onboardingCompletedAt
+                                ? "Retour à l'accueil"
+                                : "Continuer l'introduction →"}
                         </Link>
                     </div>
                 </div>

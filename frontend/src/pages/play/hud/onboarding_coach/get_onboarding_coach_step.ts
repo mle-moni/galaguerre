@@ -69,8 +69,7 @@ const ONBOARDING_COACH_STEPS: Array<{
     },
     {
         id: "taunt",
-        getMessage: () =>
-            "Provocation : vous devez attaquer ce serviteur avant les autres cibles.",
+        getMessage: () => "Provocation : vous devez attaquer ce serviteur avant les autres cibles.",
         isActive: (store) =>
             store.isMyTurn && opponentHasTaunt(store) && hasAttackableMinion(store),
     },

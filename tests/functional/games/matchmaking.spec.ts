@@ -258,7 +258,9 @@ test.group("matchmaking api", (group) => {
         assert.equal(MATCHMAKING_QUEUE.length, 0);
     });
 
-    test("gameSearch skips queued opponents who already have an active game", async ({ assert }) => {
+    test("gameSearch skips queued opponents who already have an active game", async ({
+        assert,
+    }) => {
         const busyPlayer = await createUser("busy");
         const joiner = await createUser("joiner");
         const opponent = await createUser("opponent");
@@ -270,11 +272,7 @@ test.group("matchmaking api", (group) => {
         await Game.create({
             playerOneId: busyPlayer.id,
             playerTwoId: opponent.id,
-            data: bindUserIds(
-                createGameData({ state: "MULLIGAN" }),
-                busyPlayer.id,
-                opponent.id,
-            ),
+            data: bindUserIds(createGameData({ state: "MULLIGAN" }), busyPlayer.id, opponent.id),
             isFinished: false,
         });
 

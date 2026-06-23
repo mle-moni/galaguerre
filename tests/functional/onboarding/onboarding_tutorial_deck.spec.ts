@@ -7,9 +7,7 @@ import { GALADRIM_AGGRO_DECK_RECIPE } from "#database/seed_data/balanced_decks";
 import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
 import { createStarterDeckForUser } from "#services/decks/create_starter_deck_for_user";
-import {
-    ONBOARDING_HUMAN_OPENING_HAND_CARD_IDS,
-} from "#services/onboarding/arrange_onboarding_tutorial_deck";
+import { ONBOARDING_HUMAN_OPENING_HAND_CARD_IDS } from "#services/onboarding/arrange_onboarding_tutorial_deck";
 import User from "#models/user";
 
 test.group("onboarding tutorial game setup", (group) => {

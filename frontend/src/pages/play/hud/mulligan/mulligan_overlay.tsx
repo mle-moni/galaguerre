@@ -76,8 +76,8 @@ export const MulliganOverlay = observer(() => {
 
                 {isOnboardingGame ? (
                     <Text size="sm" c="dimmed">
-                        Conseil : gardez les cartes à 1 mana (Stagiaire Dev) ; échangez les cartes
-                        à 3+ mana que vous ne pouvez pas jouer ce tour.
+                        Conseil : gardez les cartes à 1 mana (Stagiaire Dev) ; échangez les cartes à
+                        3+ mana que vous ne pouvez pas jouer ce tour.
                     </Text>
                 ) : null}
 
