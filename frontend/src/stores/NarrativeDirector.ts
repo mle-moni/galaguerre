@@ -61,7 +61,7 @@ export class NarrativeDirector {
 
     clear() {
         this.queue = [];
-        this.skipRequested = false;
+        this.skipRequested = true;
         this.isPlaying = false;
         ANIMATION_STORE.clear();
     }
@@ -161,10 +161,10 @@ export class NarrativeDirector {
                 await wait(beatGap);
             }
 
-            this.gameStore.setDisplayGame(authoritativeGame);
+            this.gameStore.setDisplayGame(this.gameStore.authoritativeGame);
         } catch (error) {
             console.error("NarrativeDirector failed to play scene", error);
-            this.gameStore.setDisplayGame(authoritativeGame);
+            this.gameStore.setDisplayGame(this.gameStore.authoritativeGame);
         } finally {
             this.gameStore.setNarrativePlaying(false);
             this.isPlaying = false;

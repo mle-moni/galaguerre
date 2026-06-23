@@ -95,6 +95,25 @@ export class GameStore {
         this.isNarrativePlaying = isPlaying;
     }
 
+    private resetMulliganLocalState() {
+        this.mulliganSelectedCardIds = [];
+        this.mulliganConfirmedLocally = false;
+    }
+
+    private syncMulliganLocalStateFromServer(game: ApiGame) {
+        if (!this._user || game.data.state !== "MULLIGAN") return;
+
+        const mulligan = game.data.mulligan;
+        if (!mulligan) return;
+
+        const isPlayerOne = game.data.playerOne.userId === this._user.id;
+        const serverDone = isPlayerOne ? mulligan.playerOneDone : mulligan.playerTwoDone;
+
+        if (!serverDone) {
+            this.mulliganConfirmedLocally = false;
+        }
+    }
+
     init(game: ApiGame, user: ApiUser): GameStore {
         const isNewGame = this._authoritativeGame?.id !== game.id;
         const leavingMulligan =
@@ -105,11 +124,12 @@ export class GameStore {
         this._user = user;
 
         if (isNewGame || leavingMulligan) {
-            this.mulliganSelectedCardIds = [];
-            this.mulliganConfirmedLocally = false;
+            this.resetMulliganLocalState();
             this.passTurnSubmittedAt = null;
             this.narrativeDirector.clear();
             this.combatActionQueue.clear();
+        } else if (game.data.state === "MULLIGAN") {
+            this.syncMulliganLocalStateFromServer(game);
         }
 
         this._authoritativeGame = game;
@@ -123,12 +143,20 @@ export class GameStore {
         this._authoritativeGame = game;
         this.combatActionQueue.resetInFlight();
 
+        if (game.data.state === "FINISHED") {
+            this.narrativeDirector.clear();
+            this._displayGame = game;
+            this.isNarrativePlaying = false;
+            return;
+        }
+
         if (presentation) {
             this.narrativeDirector.enqueue(presentation, game);
             return;
         }
 
         if (isNewGame) {
+            this.resetMulliganLocalState();
             this.narrativeDirector.clear();
             this.combatActionQueue.clear();
             this._displayGame = game;
@@ -137,6 +165,11 @@ export class GameStore {
         }
 
         if (!this.isNarrativePlaying && !this.narrativeDirector.narrativePlaying) {
+            this._displayGame = game;
+            return;
+        }
+
+        if (game.data.state === "MULLIGAN") {
             this._displayGame = game;
         }
     }
@@ -159,18 +192,19 @@ export class GameStore {
     }
 
     get isMulligan() {
-        return this.game.data.state === "MULLIGAN";
+        return this.authoritativeGame.data.state === "MULLIGAN";
     }
 
     get hasConfirmedMulligan() {
         const mulligan = this.authoritativeGame.data.mulligan;
         if (!mulligan) return this.mulliganConfirmedLocally;
 
-        if (this.me.userId === this.p1.userId) {
-            return mulligan.playerOneDone || this.mulliganConfirmedLocally;
-        }
+        const isPlayerOne = this.authoritativeGame.data.playerOne.userId === this.user.id;
 
-        return mulligan.playerTwoDone || this.mulliganConfirmedLocally;
+        return (
+            (isPlayerOne ? mulligan.playerOneDone : mulligan.playerTwoDone) ||
+            this.mulliganConfirmedLocally
+        );
     }
 
     toggleMulliganCard(cardId: string) {
@@ -192,7 +226,7 @@ export class GameStore {
     }
 
     get isFinished() {
-        return this.game.data.state === "FINISHED";
+        return this.authoritativeGame.data.state === "FINISHED";
     }
 
     get p1() {

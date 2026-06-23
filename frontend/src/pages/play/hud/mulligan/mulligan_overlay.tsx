@@ -81,7 +81,10 @@ export const MulliganOverlay = observer(() => {
                     </Text>
                 ) : null}
 
-                <CountdownTimer endsAt={store.game.data.mulliganEndsAt} label="Temps restant :" />
+                <CountdownTimer
+                    endsAt={store.authoritativeGame.data.mulliganEndsAt}
+                    label="Temps restant :"
+                />
 
                 {store.hasConfirmedMulligan ? (
                     <Text ta="center" fw={600}>
@@ -90,7 +93,7 @@ export const MulliganOverlay = observer(() => {
                 ) : (
                     <>
                         <div className="mulligan-overlay__cards">
-                            {store.me.hand.map((card) => {
+                            {store.authoritativeMe.hand.map((card) => {
                                 const isSelected = store.mulliganSelectedCardIds.includes(
                                     card.uuid,
                                 );
