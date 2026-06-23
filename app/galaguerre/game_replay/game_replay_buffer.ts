@@ -22,20 +22,26 @@ export const appendReplayStep = (game: Game, presentation: GamePresentationUpdat
 };
 
 export const flushReplayToDatabase = async (game: Game): Promise<void> => {
-    const replay = activeReplays.get(game.id);
+    const gameId = game.id;
+    const replay = activeReplays.get(gameId);
     if (!replay || replay.steps.length === 0) {
-        activeReplays.delete(game.id);
+        activeReplays.delete(gameId);
+        return;
+    }
+
+    if (!("$isPersisted" in game)) {
+        activeReplays.delete(gameId);
         return;
     }
 
     await GameReplay.updateOrCreate(
-        { gameId: game.id },
+        { gameId },
         {
             data: replay,
         },
     );
 
-    activeReplays.delete(game.id);
+    activeReplays.delete(gameId);
 };
 
 export const gameHasReplayRecord = async (gameId: number): Promise<boolean> => {
