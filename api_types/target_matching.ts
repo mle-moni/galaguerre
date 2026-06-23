@@ -129,6 +129,18 @@ const getCardActions = (card: MinionCard | SpellCard): CardActionSnapshot[] => {
     return card.battlecryActions ?? [];
 };
 
+export const minionNeedsTargetSelection = (
+    card: MinionCard,
+    playerBoard: BoardState,
+    opponentBoard: BoardState,
+    playerHasSpace = true,
+): boolean => {
+    return (
+        actionRequiresTarget(card) &&
+        cardHasPlayableTarget(card, playerBoard, opponentBoard, playerHasSpace)
+    );
+};
+
 export const cardHasPlayableTarget = (
     card: MinionCard | SpellCard,
     playerBoard: BoardState,

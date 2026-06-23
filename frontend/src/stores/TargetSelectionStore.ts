@@ -14,6 +14,7 @@ import {
     cardHasPlayableTarget,
     heroMatchesTarget,
     minionMatchesTarget,
+    minionNeedsTargetSelection,
 } from "#api_types/target_matching";
 import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS, playerHasBoardSpace } from "#api_types/board";
 
@@ -77,6 +78,15 @@ export class TargetSelectionStore {
 
     hasPlayableTarget(card: MinionCard | SpellCard): boolean {
         return cardHasPlayableTarget(
+            card,
+            this.gameStore.me.board,
+            this.gameStore.opponent.board,
+            playerHasBoardSpace(this.gameStore.me),
+        );
+    }
+
+    minionNeedsTargetSelection(card: MinionCard): boolean {
+        return minionNeedsTargetSelection(
             card,
             this.gameStore.me.board,
             this.gameStore.opponent.board,

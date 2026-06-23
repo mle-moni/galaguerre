@@ -18,7 +18,7 @@ export const GALADRIM_AGGRO_DECK_RECIPE: DeckRecipeEntry[] = [
     { label: "Tasse à Café Ébréchée", copies: 2, cardId: 106 },
     { label: "Clavier Mécanique", copies: 2, cardId: 107 },
     { label: "Heures Sup'", copies: 2, cardId: 101 },
-    { label: "Goodies Galadrim", copies: 2, cardId: 104 },
+    { label: "Lendemain de soirée", copies: 2, cardId: 109 },
     { label: "Dev Insomniaque", copies: 2, cardId: 68 },
     { label: "Pause Café", copies: 2, cardId: 96 },
     { label: "Key Account Manager", copies: 1, cardId: 80 },

@@ -1,6 +1,5 @@
 import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
 import type { ActionTarget, MinionCard, SpotOwner } from "#api_types/game.types";
-import { actionRequiresTarget } from "#api_types/target_matching";
 import { makeAutoObservable } from "mobx";
 import {
     canMinionAttackTarget,
@@ -234,7 +233,7 @@ export class CombatActionQueueStore {
             const card = this.findMinionCardInHand(action.cardId);
             if (!card) return;
 
-            if (actionRequiresTarget(card)) {
+            if (this.gameStore.targetSelectionStore.minionNeedsTargetSelection(card)) {
                 this.gameStore.targetSelectionStore.startTargetSelection(
                     card,
                     action.boardIndex,

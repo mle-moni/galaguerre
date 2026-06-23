@@ -37,7 +37,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         store.isMyTurn &&
         card.cost <= store.me.mana &&
         (card.type !== "MINION" || playerHasBoardSpace(store.me)) &&
-        (card.type === "SPELL" || card.type === "MINION"
+        (card.type === "SPELL"
             ? !store.targetSelectionStore.requiresTarget(card) ||
               store.targetSelectionStore.hasPlayableTarget(card)
             : true);

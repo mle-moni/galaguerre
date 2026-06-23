@@ -129,7 +129,10 @@ export class CardDragStore {
             return;
         }
 
-        if (card.type === "MINION" && this.gameStore.targetSelectionStore.requiresTarget(card)) {
+        if (
+            card.type === "MINION" &&
+            this.gameStore.targetSelectionStore.minionNeedsTargetSelection(card)
+        ) {
             this.clearMinionPlayHint();
             this.gameStore.targetSelectionStore.startTargetSelection(card, boardIndex, spotOwner);
 

@@ -81,20 +81,14 @@ export const playMinion = async ({
 
     const requiresTarget = cardRequiresActionTarget(card);
     const opponent = getOpponent(game, player);
+    const hasPlayableTarget = cardHasPlayableTarget(
+        card,
+        player.board,
+        opponent.board,
+        playerHasBoardSpace(player),
+    );
 
-    if (
-        requiresTarget &&
-        !cardHasPlayableTarget(card, player.board, opponent.board, playerHasBoardSpace(player))
-    ) {
-        emitSocketEvent(
-            "notify_error",
-            { error: "Aucune cible valide pour cette carte" },
-            socketId,
-        );
-        return;
-    }
-
-    if (requiresTarget && !actionTarget) {
+    if (requiresTarget && hasPlayableTarget && !actionTarget) {
         emitSocketEvent(
             "notify_error",
             { error: "Vous devez choisir une cible pour cette carte" },

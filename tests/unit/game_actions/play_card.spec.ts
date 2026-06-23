@@ -480,7 +480,7 @@ test.group("play card rules", () => {
             },
         );
 
-        assertError(assert, "Aucune cible valide pour cette carte");
+        assertError(assert, "Cible invalide pour cette carte");
     });
 
     test("rejects targeted minion when current attack fails comparison", async ({ assert }) => {
@@ -527,13 +527,17 @@ test.group("play card rules", () => {
             },
         );
 
-        assertError(assert, "Aucune cible valide pour cette carte");
+        assertError(assert, "Cible invalide pour cette carte");
     });
 
-    test("rejects targeted BOOST battlecry without actionTarget", async ({ assert }) => {
+    test("plays targeted BOOST battlecry without target when no valid targets exist", async ({
+        assert,
+    }) => {
         const handCard = createMinionCard({
             uuid: CARD_IDS.handMinion,
             cost: 2,
+            attack: 1,
+            health: 2,
             battlecryActions: [
                 createCardActionSnapshot({
                     type: "BOOST",
@@ -544,7 +548,7 @@ test.group("play card rules", () => {
             ],
         });
 
-        await runPlayCardInMemory(
+        const { game } = await runPlayCardInMemory(
             createGameData({
                 playerOne: { mana: 10, hand: [handCard] },
             }),
@@ -556,6 +560,7 @@ test.group("play card rules", () => {
             },
         );
 
-        assertError(assert, "Aucune cible valide pour cette carte");
+        assert.equal(game.data.playerOne.hand.length, 0);
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 1, health: 2 });
     });
 });

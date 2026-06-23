@@ -207,6 +207,14 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
                         playerHasBoardSpace(player),
                     )
                 ) {
+                    moves.push({
+                        type: "play_card",
+                        action: {
+                            cardId: card.uuid,
+                            boardIndex,
+                            owner: "PLAYER",
+                        },
+                    });
                     continue;
                 }
 
