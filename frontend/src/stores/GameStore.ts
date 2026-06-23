@@ -270,7 +270,6 @@ export class GameStore {
         const { cardDragStore, targetSelectionStore, minionDragStore, weaponDragStore } = this;
 
         return (
-            (this.isInputBlocked && !this.isCombatTargeting) ||
             cardDragStore.cardDragged !== null ||
             cardDragStore.isShowingMinionPlayHint ||
             targetSelectionStore.isArmed ||
