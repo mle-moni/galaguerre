@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { observer } from "mobx-react-lite";
 import type {
     AnimationRect,
@@ -12,10 +12,6 @@ import { ANIMATION_STORE } from "~/stores/store_singletons";
 import { getRectCenter } from "./game_animation_snapshot.js";
 import { FLOATING_TEXT_STACK_DELAY_MS, getShotDurationSec } from "./shot_durations.js";
 import "./game_animation_overlay.css";
-
-const removeEvent = (id: string) => {
-    ANIMATION_STORE.remove(id);
-};
 
 const clampVisualSize = (rect: AnimationRect) => ({
     width: Math.min(Math.max(rect.width, 54), 96),
@@ -76,7 +72,6 @@ const CardFlight = ({ event }: { event: CardFlightEvent }) => {
                 duration: getShotDurationSec("CARD_FLIGHT", reduceMotion ?? false),
                 ease: "easeOut",
             }}
-            onAnimationComplete={() => removeEvent(event.id)}
         >
             <img src={event.card.imageUrl} alt="" draggable={false} />
             <span className="game-animation-card-flight__label">{event.card.label}</span>
@@ -100,7 +95,6 @@ const DrawFlight = ({ event }: { event: DrawEvent }) => {
                 ease: "easeOut",
                 delay,
             }}
-            onAnimationComplete={() => removeEvent(event.id)}
         />
     );
 };
@@ -143,7 +137,6 @@ const AttackFlight = ({ event }: { event: AttackEvent }) => {
                 ease: "easeOut",
                 times: reduceMotion ? [0, 0.5, 1] : [0, 0.54, 0.68, 1],
             }}
-            onAnimationComplete={() => removeEvent(event.id)}
         >
             <img src={event.card.imageUrl} alt="" draggable={false} />
             <span className="game-animation-card-flight__label">{event.card.label}</span>
@@ -179,7 +172,6 @@ const FloatingText = ({ event }: { event: FloatingTextEvent }) => {
                 ease: "easeOut",
                 delay,
             }}
-            onAnimationComplete={() => removeEvent(event.id)}
         >
             {event.label}
         </motion.div>
@@ -205,7 +197,6 @@ const DeathBurst = ({ event }: { event: Extract<VisualAnimationEvent, { type: "D
                 duration: getShotDurationSec("DEATH", reduceMotion ?? false),
                 ease: "easeOut",
             }}
-            onAnimationComplete={() => removeEvent(event.id)}
         />
     );
 };
@@ -228,7 +219,6 @@ const TurnBanner = ({
                 duration: getShotDurationSec("TURN_BANNER", reduceMotion ?? false),
                 ease: "easeOut",
             }}
-            onAnimationComplete={() => removeEvent(event.id)}
         >
             {event.label}
         </motion.div>
@@ -261,7 +251,6 @@ const SourcePulse = ({
                 duration: getShotDurationSec("SOURCE_PULSE", reduceMotion ?? false),
                 ease: "easeOut",
             }}
-            onAnimationComplete={() => removeEvent(event.id)}
         />
     );
 };
@@ -281,11 +270,9 @@ const AnimationEvent = ({ event }: { event: VisualAnimationEvent }) => {
 export const GameAnimationOverlay = observer(() => {
     return (
         <div className="game-animation-overlay" aria-hidden>
-            <AnimatePresence>
-                {ANIMATION_STORE.events.map((event) => (
-                    <AnimationEvent key={event.id} event={event} />
-                ))}
-            </AnimatePresence>
+            {ANIMATION_STORE.events.map((event) => (
+                <AnimationEvent key={event.id} event={event} />
+            ))}
         </div>
     );
 });

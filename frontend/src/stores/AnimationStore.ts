@@ -124,9 +124,13 @@ export class AnimationStore {
         );
         await wait(duration);
 
-        for (const event of animated) {
-            this.remove(event.id);
-        }
+        this.removeMany(animated.map((event) => event.id));
+    }
+
+    private removeMany(ids: string[]) {
+        if (ids.length === 0) return;
+        const idSet = new Set(ids);
+        this.events = this.events.filter((event) => !idSet.has(event.id));
     }
 
     private async playOne(event: VisualAnimationEventInput, reducedMotion: boolean): Promise<void> {
