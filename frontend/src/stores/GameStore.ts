@@ -318,8 +318,6 @@ export class GameStore {
     }
 
     handleBoardIndexDrop(boardIndex: number, spotOwner: SpotOwner) {
-        if (this.isInputBlocked) return;
-
         const pendingMinion = this.cardDragStore.pendingMinionCard;
         if (pendingMinion) {
             this.cardDragStore.handleDrop(pendingMinion, boardIndex, spotOwner);

@@ -46,9 +46,11 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         store.targetSelectionStore.isCardArmed(card);
     const isMinionHinted =
         card.type === "MINION" && store.cardDragStore.minionPlayHintCardId === card.uuid;
+    const isCardQueued =
+        card.type === "MINION" && store.combatActionQueue.isCardReserved(card.uuid);
     const cardClassName = clsx(
-        canPlay ? "cursor-pointer" : "cursor-not-allowed opacity-60",
-        (isArmed || isMinionHinted) && "playing-card--armed",
+        canPlay && !isCardQueued ? "cursor-pointer" : "cursor-not-allowed opacity-60",
+        (isArmed || isMinionHinted || isCardQueued) && "playing-card--armed",
     );
 
     const handleUnplayableCardClick = () => {
@@ -74,6 +76,8 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
     };
 
     const handleMinionClick = () => {
+        if (isCardQueued) return;
+
         if (!canPlay) {
             handleUnplayableCardClick();
             return;
@@ -148,7 +152,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
             health={card.health}
             style={style}
             className={cardClassName}
-            draggable={canPlay}
+            draggable={canPlay && !isCardQueued}
             onClick={handleMinionClick}
             onDragStart={() => store.cardDragStore.setCardDragged(card)}
             onDragEnd={() => store.cardDragStore.setCardDragged(null)}

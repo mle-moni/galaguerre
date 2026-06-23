@@ -49,7 +49,6 @@ export class CardDragStore {
     }
 
     showMinionPlayHint(cardId: string) {
-        if (this.gameStore.isInputBlocked) return;
         this.minionPlayHintCardId = cardId;
         this.gameStore.targetSelectionStore.disarm();
     }
@@ -61,8 +60,6 @@ export class CardDragStore {
     }
 
     setCardDragged(card: PlayerCard | null) {
-        if (card !== null && this.gameStore.isInputBlocked) return;
-
         if (card !== null) {
             this.gameStore.targetSelectionStore.disarm();
             this.clearMinionPlayHint();
@@ -122,6 +119,13 @@ export class CardDragStore {
 
         if (!this.canPlayAtIndex(boardIndex)) {
             notifyError("Vous ne pouvez pas jouer cette carte ici");
+            return;
+        }
+
+        if (this.gameStore.isInputBlocked) {
+            this.gameStore.combatActionQueue.enqueuePlayMinion(card.uuid, boardIndex, spotOwner);
+            this.clearMinionPlayHint();
+            this.setCardDragged(null);
             return;
         }
 

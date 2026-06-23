@@ -1,4 +1,6 @@
-import type { ActionTarget } from "#api_types/game.types";
+import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
+import type { ActionTarget, MinionCard, SpotOwner } from "#api_types/game.types";
+import { actionRequiresTarget } from "#api_types/target_matching";
 import { makeAutoObservable } from "mobx";
 import {
     canMinionAttackTarget,
@@ -25,11 +27,23 @@ export type QueuedPassTurnAction = {
     type: "pass_turn";
 };
 
-export type QueuedCombatAction = QueuedMinionAction | QueuedWeaponAction | QueuedPassTurnAction;
+export type QueuedPlayMinionAction = {
+    type: "play_minion";
+    cardId: string;
+    boardIndex: number;
+    owner: SpotOwner;
+};
+
+export type QueuedCombatAction =
+    | QueuedMinionAction
+    | QueuedWeaponAction
+    | QueuedPassTurnAction
+    | QueuedPlayMinionAction;
 
 export class CombatActionQueueStore {
     queue: QueuedCombatAction[] = [];
     private inFlightMinionIds = new Set<string>();
+    private inFlightPlayCardIds = new Set<string>();
     private inFlightWeaponAttack = false;
     private inFlightPassTurn = false;
 
@@ -40,12 +54,14 @@ export class CombatActionQueueStore {
     clear() {
         this.queue = [];
         this.inFlightMinionIds.clear();
+        this.inFlightPlayCardIds.clear();
         this.inFlightWeaponAttack = false;
         this.inFlightPassTurn = false;
     }
 
     resetInFlight() {
         this.inFlightMinionIds.clear();
+        this.inFlightPlayCardIds.clear();
         this.inFlightWeaponAttack = false;
         this.inFlightPassTurn = false;
     }
@@ -65,6 +81,13 @@ export class CombatActionQueueStore {
     isWeaponReserved() {
         if (this.inFlightWeaponAttack) return true;
         return this.queue.some((action) => action.type === "weapon");
+    }
+
+    isCardReserved(cardId: string) {
+        if (this.inFlightPlayCardIds.has(cardId)) return true;
+        return this.queue.some(
+            (action) => action.type === "play_minion" && action.cardId === cardId,
+        );
     }
 
     enqueuePassTurn() {
@@ -107,6 +130,18 @@ export class CombatActionQueueStore {
         this.flush();
     }
 
+    enqueuePlayMinion(cardId: string, boardIndex: number, owner: SpotOwner) {
+        if (!this.gameStore.isMyTurn) return;
+        if (this.isPassTurnReserved()) return;
+        if (this.isCardReserved(cardId)) return;
+
+        const card = this.findMinionCardInHand(cardId);
+        if (!card || !this.canPlayMinionAtIndex(card, boardIndex)) return;
+
+        this.queue.push({ type: "play_minion", cardId, boardIndex, owner });
+        this.flush();
+    }
+
     flush() {
         if (!this.gameStore.isMyTurn) return;
         if (
@@ -146,10 +181,34 @@ export class CombatActionQueueStore {
             });
         }
 
+        if (action.type === "play_minion") {
+            const card = this.findMinionCardInHand(action.cardId);
+            if (!card) return false;
+
+            return this.canPlayMinionAtIndex(card, action.boardIndex);
+        }
+
         return canWeaponAttackTarget(this.gameStore, {
             minionUuid: action.minionUuid,
             owner: action.owner,
         });
+    }
+
+    private findMinionCardInHand(cardId: string): MinionCard | null {
+        const card = this.gameStore.authoritativeMe.hand.find((entry) => entry.uuid === cardId);
+        if (!card || card.type !== "MINION") return null;
+
+        return card;
+    }
+
+    private canPlayMinionAtIndex(card: MinionCard, boardIndex: number): boolean {
+        const me = this.gameStore.authoritativeMe;
+        if (card.cost > me.mana) return false;
+
+        const minionCount = countBoardMinionsOnBoard(me.board);
+        if (minionCount >= MAX_BOARD_MINIONS) return false;
+
+        return Number.isInteger(boardIndex) && boardIndex >= 0 && boardIndex <= minionCount;
     }
 
     private sendAction(action: QueuedCombatAction) {
@@ -166,6 +225,28 @@ export class CombatActionQueueStore {
             emitSocketEventToServer("game:minion_action", {
                 minionId: action.minionId,
                 minionUuid: action.minionUuid,
+                owner: action.owner,
+            });
+            return;
+        }
+
+        if (action.type === "play_minion") {
+            const card = this.findMinionCardInHand(action.cardId);
+            if (!card) return;
+
+            if (actionRequiresTarget(card)) {
+                this.gameStore.targetSelectionStore.startTargetSelection(
+                    card,
+                    action.boardIndex,
+                    action.owner,
+                );
+                return;
+            }
+
+            this.inFlightPlayCardIds.add(action.cardId);
+            emitSocketEventToServer("game:play_card", {
+                cardId: action.cardId,
+                boardIndex: action.boardIndex,
                 owner: action.owner,
             });
             return;
