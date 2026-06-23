@@ -8,6 +8,22 @@ import { createGameData, createMinionCard } from "#tests/helpers/game/fixtures";
 import { runPassTurnOnGame, runSetupNextTurn } from "#tests/helpers/game/run_setup_next_turn";
 
 test.group("pass turn rules", () => {
+    test("setupNextGameTurn sets turnEndsAt for the active turn", async ({ assert }) => {
+        const before = Date.now();
+
+        const { game } = await runSetupNextTurn(
+            createGameData({
+                state: "MULLIGAN",
+                currentRound: 0,
+                mulligan: { playerOneDone: true, playerTwoDone: true },
+            }),
+        );
+
+        assert.isDefined(game.data.turnEndsAt);
+        assert.isAbove(game.data.turnEndsAt!, before);
+        assert.isBelow(game.data.turnEndsAt!, before + 106_000);
+    });
+
     test("setupNextGameTurn transitions MULLIGAN to PLAYER_ONE_TURN", async ({ assert }) => {
         const { game } = await runSetupNextTurn(
             createGameData({

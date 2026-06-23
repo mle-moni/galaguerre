@@ -57,13 +57,14 @@ export const setupNextGameTurn = async (game: Game) => {
 
         if (turnBeginGameEnded || p1.health <= 0 || p2.health <= 0) {
             await terminateGame(game, { skipSendUpdate: true });
+            return;
         }
+
+        clearTurnTimer(game.id);
+        startTurnTimer(game);
     });
 
     if (game.isFinished) return;
-
-    clearTurnTimer(game.id);
-    startTurnTimer(game);
 
     scheduleAiTurnIfNeeded(game);
 };
