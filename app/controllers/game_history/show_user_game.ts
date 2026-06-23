@@ -3,6 +3,7 @@ import Game from "#models/game";
 import User from "#models/user";
 import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
+import { gameHasReplayRecord } from "#galaguerre/game_replay/game_replay_buffer";
 import {
     getGameResult,
     getOpponentUserId,
@@ -59,5 +60,6 @@ export const showUserGame = async ({
         roundCount: game.data.currentRound,
         createdAt: game.createdAt.toISO()!,
         finishedAt: getGameFinishedAtIso(game),
+        hasReplay: await gameHasReplayRecord(game.id),
     };
 };

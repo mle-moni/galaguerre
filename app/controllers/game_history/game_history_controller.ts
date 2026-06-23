@@ -1,5 +1,6 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import { listUserGames } from "./list_user_games.js";
+import { showGameReplay } from "./show_game_replay.js";
 import { showUserGame } from "./show_user_game.js";
 
 export default class GameHistoryController {
@@ -9,5 +10,9 @@ export default class GameHistoryController {
 
     async show(ctx: HttpContext) {
         return showUserGame(ctx);
+    }
+
+    async replay(ctx: HttpContext) {
+        return showGameReplay(ctx);
     }
 }

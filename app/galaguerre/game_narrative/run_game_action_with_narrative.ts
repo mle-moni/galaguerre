@@ -2,6 +2,7 @@ import type { SpotOwner, GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
 import { sendGameUpdate } from "#controllers/games/send_game_update";
 import { buildPresentationUpdate } from "./build_presentation_update.js";
+import { appendReplayStep } from "../game_replay/game_replay_buffer.js";
 import { cloneGameData } from "./clone_game_data.js";
 import {
     createGameNarrativeRecorder,
@@ -24,9 +25,11 @@ export const runGameActionWithNarrative = async (
         await action(recorder);
     });
 
-    await game.save();
-
     const presentation = buildPresentationUpdate(game, recorder);
+    if (presentation) {
+        appendReplayStep(game, presentation);
+    }
     recorder.clear();
+    await game.save();
     sendGameUpdate(game, presentation ?? undefined);
 };

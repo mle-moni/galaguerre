@@ -6,9 +6,10 @@
         "jsx": "preserve",
         "paths": {
             "~/*": ["./src/*.js"],
-            "#api_types/*": ["../api_types/*.js"]
+            "#api_types/*": ["../api_types/*.js"],
+            "#shared/*": ["../shared/*.js"]
         }
     },
-    "include": ["./src/**/*.ts", "./src/**/*.tsx", "../api_types/**/*.ts"],
+    "include": ["./src/**/*.ts", "./src/**/*.tsx", "../api_types/**/*.ts", "../shared/**/*.ts"],
     "exclude": ["node_modules", "build"]
 }

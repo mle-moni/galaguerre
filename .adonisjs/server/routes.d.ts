@@ -14,6 +14,10 @@ export type ScannedRoutes = {
             paramsTuple: [ParamValue, ParamValue];
             params: { userId: ParamValue; gameId: ParamValue };
         };
+        "game_history.replay": {
+            paramsTuple: [ParamValue, ParamValue];
+            params: { userId: ParamValue; gameId: ParamValue };
+        };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
@@ -40,6 +44,10 @@ export type ScannedRoutes = {
             paramsTuple: [ParamValue, ParamValue];
             params: { userId: ParamValue; gameId: ParamValue };
         };
+        "game_history.replay": {
+            paramsTuple: [ParamValue, ParamValue];
+            params: { userId: ParamValue; gameId: ParamValue };
+        };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
@@ -53,6 +61,10 @@ export type ScannedRoutes = {
         "leaderboard.ai_speedrun": { paramsTuple?: []; params?: {} };
         "game_history.index": { paramsTuple: [ParamValue]; params: { userId: ParamValue } };
         "game_history.show": {
+            paramsTuple: [ParamValue, ParamValue];
+            params: { userId: ParamValue; gameId: ParamValue };
+        };
+        "game_history.replay": {
             paramsTuple: [ParamValue, ParamValue];
             params: { userId: ParamValue; gameId: ParamValue };
         };

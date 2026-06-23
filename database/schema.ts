@@ -114,6 +114,19 @@ export class DeckSchema extends BaseModel {
     declare userId: number;
 }
 
+export class GameReplaySchema extends BaseModel {
+    static $columns = ["createdAt", "data", "gameId", "id"] as const;
+    $columns = GameReplaySchema.$columns;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime;
+    @column()
+    declare data: any;
+    @column()
+    declare gameId: number;
+    @column({ isPrimary: true })
+    declare id: number;
+}
+
 export class GameSchema extends BaseModel {
     static $columns = [
         "createdAt",

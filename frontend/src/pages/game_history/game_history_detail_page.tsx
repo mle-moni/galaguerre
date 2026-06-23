@@ -1,7 +1,7 @@
 import type { GameHistoryResult } from "#api_types/game_history.types";
-import { Stack, Text } from "@mantine/core";
+import { Button, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { GameStatsTable } from "~/components/game_stats_table";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
@@ -125,6 +125,17 @@ export const GameHistoryDetailPage = observer(() => {
                             linkToHistory
                             onDarkBackground
                         />
+
+                        {detail.hasReplay && (
+                            <Button
+                                component={Link}
+                                to={`/game-history/${userId}/${gameId}/replay`}
+                                variant="light"
+                                mt="sm"
+                            >
+                                Voir le replay
+                            </Button>
+                        )}
                     </Stack>
                 </div>
             </div>

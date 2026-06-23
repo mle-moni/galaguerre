@@ -48,4 +48,5 @@ export interface ApiGameHistoryDetail {
     roundCount: number;
     createdAt: string;
     finishedAt: string;
+    hasReplay: boolean;
 }

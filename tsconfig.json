@@ -22,6 +22,7 @@
             "#config/*": ["./config/*.js"],
             "#adomin/*": ["./app/adomin/*.js"],
             "#api_types/*": ["./api_types/*.js"],
+            "#shared/*": ["./shared/*.js"],
             "#galaguerre/*": ["./app/galaguerre/*.js"]
         }
     },

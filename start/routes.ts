@@ -35,6 +35,7 @@ router
         router.get("/leaderboard/ai-speedrun", [LeaderboardController, "aiSpeedrun"]);
         router.get("/game-history/:userId", [GameHistoryController, "index"]);
         router.get("/game-history/:userId/:gameId", [GameHistoryController, "show"]);
+        router.get("/game-history/:userId/:gameId/replay", [GameHistoryController, "replay"]);
     })
     .prefix("/api");
 

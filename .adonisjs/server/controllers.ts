@@ -34,6 +34,7 @@ export const controllers = {
         GameHistory: () => import("#controllers/game_history/game_history_controller"),
         ListUserGames: () => import("#controllers/game_history/list_user_games"),
         SerializeGameHistory: () => import("#controllers/game_history/serialize_game_history"),
+        ShowGameReplay: () => import("#controllers/game_history/show_game_replay"),
         ShowUserGame: () => import("#controllers/game_history/show_user_game"),
     },
     games: {

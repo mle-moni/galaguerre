@@ -37,6 +37,7 @@
         "#policies/*": "./app/policies/*.js",
         "#abilities/*": "./app/abilities/*.js",
         "#database/*": "./database/*.js",
+        "#shared/*": "./shared/*.js",
         "#galaguerre/*": "./app/galaguerre/*.js",
         "#start/*": "./start/*.js",
         "#tests/*": "./tests/*.js",
