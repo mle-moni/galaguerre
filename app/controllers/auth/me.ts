@@ -31,5 +31,6 @@ export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | voi
         elo: user.elo,
         wins: user.wins,
         losses: user.losses,
+        onboardingCompletedAt: user.onboardingCompletedAt?.toISO() ?? null,
     };
 };

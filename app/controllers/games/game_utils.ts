@@ -14,6 +14,13 @@ import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { getSocketDataFromSocketId } from "#services/sockets/sockets_data";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { popStealth } from "../../galaguerre/action_engine/apply_damage_to_minion.js";
+
+export const findActiveGameForUser = async (userId: number) => {
+    return Game.query()
+        .where((q) => q.where("playerOneId", userId).orWhere("playerTwoId", userId))
+        .andWhere("isFinished", false)
+        .first();
+};
 import { recordHeroAttack as recordHeroAttackStat } from "../../galaguerre/game_stats/record_player_stats.js";
 import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 

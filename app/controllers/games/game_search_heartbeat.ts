@@ -1,5 +1,5 @@
 import type { GameSearchHeartbeatResponse } from "#api_types/matchmaking.types";
-import Game from "#models/game";
+import { findActiveGameForUser } from "#controllers/games/game_utils";
 import { findQueueItemByUserId, touchHeartbeat } from "#services/sockets/matchmaking";
 import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
@@ -9,13 +9,6 @@ const heartbeatSchema = vine.compile(
         searchSessionId: vine.string(),
     }),
 );
-
-const findActiveGameForUser = async (userId: number) => {
-    return Game.query()
-        .where((q) => q.where("playerOneId", userId).orWhere("playerTwoId", userId))
-        .andWhere("isFinished", false)
-        .first();
-};
 
 export const gameSearchHeartbeat = async ({ auth, request, response }: HttpContext) => {
     const user = auth.user!;

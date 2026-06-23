@@ -1,3 +1,4 @@
+import { findActiveGameForUser } from "#controllers/games/game_utils";
 import Deck from "#models/deck";
 import type User from "#models/user";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
@@ -17,6 +18,12 @@ import { createGame } from "./create_game.js";
 
 export const gameSearch = async ({ auth, response }: HttpContext) => {
     const user = auth.user!;
+
+    const activeGame = await findActiveGameForUser(user.id);
+    if (activeGame) {
+        return response.badRequest({ error: "Vous avez déjà une partie en cours" });
+    }
+
     const deck = await Deck.query()
         .where("userId", user.id)
         .andWhere("selected", true)
@@ -42,7 +49,14 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         };
     }
 
-    const opponent = claimOpponent(user.id);
+    let opponent = claimOpponent(user.id);
+
+    while (opponent) {
+        const opponentActiveGame = await findActiveGameForUser(opponent.userId);
+        if (!opponentActiveGame) break;
+
+        opponent = claimOpponent(user.id);
+    }
 
     if (!opponent) {
         const searchSessionId = addMatchmakingQueueItem(user.id);

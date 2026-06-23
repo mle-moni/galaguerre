@@ -16,6 +16,7 @@ import { GameHistoryListPage } from "./pages/game_history/game_history_list_page
 import { LeaderboardPage } from "./pages/leaderboard/leaderboard_page.jsx";
 import { OnboardingPage } from "./pages/onboarding/onboarding_page.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
+import { RulesPage } from "./pages/rules/rules_page.jsx";
 
 const router = createBrowserRouter([
     {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
             {
                 path: "/training",
                 element: <TrainingPage />,
+            },
+            {
+                path: "/rules",
+                element: <RulesPage />,
             },
             {
                 path: "/onboarding",

@@ -41,6 +41,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     @column()
     declare losses: number;
 
+    @column.dateTime()
+    declare onboardingCompletedAt: DateTime | null;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

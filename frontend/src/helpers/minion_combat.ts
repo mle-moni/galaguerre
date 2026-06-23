@@ -1,5 +1,11 @@
 import type { MinionCard, MinionState } from "#api_types/game.types";
 
+export const getMinionHasTaunt = (minion: MinionState): boolean => {
+    if (minion.isSilenced) return false;
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.minionPowers?.hasTaunt ?? false;
+};
+
 export const getMinionHasCharge = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
     return minion.originalCard.minionPowers?.hasCharge ?? false;

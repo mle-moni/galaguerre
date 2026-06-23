@@ -1,8 +1,9 @@
 import { preloadDeckCardSet } from "#controllers/decks/deck_utils";
 import { serializeDeck } from "#controllers/decks/serialize_deck";
+import { findActiveGameForUser } from "#controllers/games/game_utils";
 import Deck from "#models/deck";
-import Game from "#models/game";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { removeMatchmakingImmediately } from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
@@ -14,14 +15,13 @@ import { createGame } from "./create_game.js";
 export const createTrainingGame = async ({ auth, response }: HttpContext) => {
     const user = auth.user!;
 
-    const activeGame = await Game.query()
-        .where((q) => q.where("playerOneId", user.id).orWhere("playerTwoId", user.id))
-        .andWhere("isFinished", false)
-        .first();
+    const activeGame = await findActiveGameForUser(user.id);
 
     if (activeGame) {
         return response.badRequest({ error: "Vous avez déjà une partie en cours" });
     }
+
+    removeMatchmakingImmediately(user.id);
 
     const deck = await Deck.query()
         .where("userId", user.id)
@@ -41,6 +41,8 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
 
     const botCards = await loadTrainingBotCards();
 
+    const isOnboardingTutorial = !user.onboardingCompletedAt;
+
     const humanPlayer = {
         userId: user.id,
         pseudo: user.pseudo ?? user.email.split("@")[0],
@@ -53,13 +55,18 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
         cards: botCards,
     };
 
-    const swapSeats = randomBoolean();
+    const swapSeats = isOnboardingTutorial ? false : randomBoolean();
     const playerOne = swapSeats ? aiPlayer : humanPlayer;
     const playerTwo = swapSeats ? humanPlayer : aiPlayer;
 
     let game;
     try {
-        game = await createGame({ playerOne, playerTwo, isTraining: true });
+        game = await createGame({
+            playerOne,
+            playerTwo,
+            isTraining: true,
+            isOnboardingTutorial,
+        });
     } catch (error) {
         if (error instanceof DeckValidationError) {
             return response.badRequest({

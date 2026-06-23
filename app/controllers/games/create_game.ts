@@ -9,6 +9,12 @@ import type Deck from "#models/deck";
 import Game from "#models/game";
 import { confirmAiMulliganIfNeeded } from "../../galaguerre/ai/schedule_ai_mulligan.js";
 import { startMulliganTimer } from "../../galaguerre/timers/game_timers.js";
+import {
+    arrangeOnboardingTutorialDeck,
+    ONBOARDING_AI_OPENING_HAND_CARD_IDS,
+    ONBOARDING_HUMAN_MULLIGAN_TOP_CARD_IDS,
+    ONBOARDING_HUMAN_OPENING_HAND_CARD_IDS,
+} from "#services/onboarding/arrange_onboarding_tutorial_deck";
 import { generatePlayerCards } from "./generate_player_cards.js";
 import { sendGameUpdate } from "./send_game_update.js";
 
@@ -28,6 +34,7 @@ interface CreateGameOptions {
     playerOne: HumanPlayer | AiPlayer;
     playerTwo: HumanPlayer | AiPlayer;
     isTraining?: boolean;
+    isOnboardingTutorial?: boolean;
 }
 
 export const isAiPlayer = (player: HumanPlayer | AiPlayer): player is AiPlayer => "cards" in player;
@@ -46,7 +53,12 @@ const assertDeckPlayable = (deck: Deck) => {
     assertDeckValid(deck);
 };
 
-export const createGame = async ({ playerOne, playerTwo, isTraining }: CreateGameOptions) => {
+export const createGame = async ({
+    playerOne,
+    playerTwo,
+    isTraining,
+    isOnboardingTutorial,
+}: CreateGameOptions) => {
     if (!isAiPlayer(playerOne)) {
         assertDeckPlayable(playerOne.deck);
     }
@@ -54,7 +66,12 @@ export const createGame = async ({ playerOne, playerTwo, isTraining }: CreateGam
         assertDeckPlayable(playerTwo.deck);
     }
 
-    const gameData: GameData = getDefaultGameData({ playerOne, playerTwo, isTraining });
+    const gameData: GameData = getDefaultGameData({
+        playerOne,
+        playerTwo,
+        isTraining,
+        isOnboardingTutorial,
+    });
 
     const game = await Game.create({
         playerOneId: isAiPlayer(playerOne) ? null : playerOne.userId,
@@ -108,12 +125,19 @@ export const getDefaultGameData = ({
     playerOne,
     playerTwo,
     isTraining,
+    isOnboardingTutorial,
 }: CreateGameOptions): GameData => {
     const p1Source = isAiPlayer(playerOne) ? playerOne.cards : playerOne.deck;
     const p2Source = isAiPlayer(playerTwo) ? playerTwo.cards : playerTwo.deck;
 
-    const p1Deck = generatePlayerCards(p1Source);
-    const p2Deck = generatePlayerCards(p2Source);
+    const p1Deck = buildPlayerDeckOrder(p1Source, {
+        isOnboardingTutorial,
+        isHuman: !isAiPlayer(playerOne),
+    });
+    const p2Deck = buildPlayerDeckOrder(p2Source, {
+        isOnboardingTutorial,
+        isHuman: !isAiPlayer(playerTwo),
+    });
 
     return {
         state: "MULLIGAN",
@@ -136,5 +160,30 @@ export const getDefaultGameData = ({
         ),
         actionLog: [],
         ...(isTraining ? { isTraining: true } : {}),
+        ...(isOnboardingTutorial ? { isOnboardingTutorial: true } : {}),
     };
+};
+
+const buildPlayerDeckOrder = (
+    source: Deck | Card[],
+    options: {
+        isOnboardingTutorial?: boolean;
+        isHuman: boolean;
+    },
+): ReturnType<typeof generatePlayerCards> => {
+    if (!options.isOnboardingTutorial) {
+        return generatePlayerCards(source);
+    }
+
+    const cards = generatePlayerCards(source, { shuffle: false });
+
+    if (options.isHuman) {
+        return arrangeOnboardingTutorialDeck(
+            cards,
+            ONBOARDING_HUMAN_OPENING_HAND_CARD_IDS,
+            ONBOARDING_HUMAN_MULLIGAN_TOP_CARD_IDS,
+        );
+    }
+
+    return arrangeOnboardingTutorialDeck(cards, ONBOARDING_AI_OPENING_HAND_CARD_IDS, []);
 };

@@ -1,5 +1,7 @@
-import type Game from "#models/game";
+import Game from "#models/game";
 import { applyGameResult, getWinnerUserId } from "#services/elo";
+import { completeOnboardingIfNeeded } from "#services/onboarding/complete_onboarding_if_needed";
+import { getTrainingGameHumanUserId } from "#services/onboarding/get_training_game_human_user_id";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { DateTime } from "luxon";
 import { clearAllGameTimers } from "../../galaguerre/timers/game_timers.js";
@@ -20,6 +22,12 @@ export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boo
         const winnerUserId = getWinnerUserId(game);
         game.winnerId = winnerUserId === TRAINING_AI_USER_ID ? null : winnerUserId;
         await game.save();
+
+        const humanUserId = getTrainingGameHumanUserId(game);
+        if (humanUserId !== null && game instanceof Game) {
+            await completeOnboardingIfNeeded(humanUserId);
+        }
+
         if (!options?.skipSendUpdate) {
             sendGameUpdate(game);
         }

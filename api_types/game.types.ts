@@ -228,6 +228,7 @@ export interface GameData {
     mulliganEndsAt?: number;
     ratingResult?: GameRatingResult;
     isTraining?: boolean;
+    isOnboardingTutorial?: boolean;
 }
 
 export interface ApiGame {

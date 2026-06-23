@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import type { ReactNode } from "react";
 import { CoinCardLink } from "~/components/cards/coin_card_link";
 import { useGameContext } from "~/hooks/use_game_state";
+import { useOnboardingGame } from "~/hooks/use_onboarding_game";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { MinionCardFace } from "~/components/cards/minion_card_face";
 import { SpellCardFace } from "~/components/cards/spell_card_face";
@@ -36,6 +37,7 @@ const renderCardFace = (card: PlayerCard) => {
 
 export const MulliganOverlay = observer(() => {
     const { store } = useGameContext();
+    const isOnboardingGame = useOnboardingGame();
 
     if (!store.isMulligan) return null;
 
@@ -71,6 +73,13 @@ export const MulliganOverlay = observer(() => {
                 <Text size="sm" c="dimmed">
                     Cliquez sur les cartes à échanger — elles seront barrées en rouge.
                 </Text>
+
+                {isOnboardingGame ? (
+                    <Text size="sm" c="dimmed">
+                        Conseil : gardez les cartes à 1 mana (Stagiaire Dev) ; échangez les cartes
+                        à 3+ mana que vous ne pouvez pas jouer ce tour.
+                    </Text>
+                ) : null}
 
                 <CountdownTimer endsAt={store.game.data.mulliganEndsAt} label="Temps restant :" />
 

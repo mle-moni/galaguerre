@@ -20,7 +20,7 @@ type CardSource = Deck | Card[];
 const getSourceCards = (source: CardSource): Card[] =>
     Array.isArray(source) ? source : source.cards;
 
-export const generatePlayerCards = (source: CardSource) => {
+export const generatePlayerCards = (source: CardSource, options?: { shuffle?: boolean }) => {
     const cards: PlayerCard[] = getSourceCards(source).map((card) => {
         const base: PlayerCardBase = {
             uuid: randomUUID(),
@@ -89,6 +89,10 @@ export const generatePlayerCards = (source: CardSource) => {
             }
         }
     });
+
+    if (options?.shuffle === false) {
+        return cards;
+    }
 
     return shuffleArray(cards);
 };

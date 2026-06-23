@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
 import { ConnectionBanner } from "~/components/connection_banner";
+import { OnboardingGameProvider } from "~/hooks/use_onboarding_game";
 import { useBoardMinionVariant } from "~/hooks/use_board_minion_variant";
 import { GameStateContext, useGameState } from "~/hooks/use_game_state";
 import { useIsSocketReady } from "~/hooks/use_socket_connection";
@@ -34,12 +35,17 @@ const Game = ({ gameId, user }: GameProps) => {
 
     if (gameQuery.isLoading || !gameQuery.data || !isStoreInit) return <CenteredLoader absolute />;
 
+    const isOnboardingGame =
+        (gameQuery.data.data.isTraining ?? false) && !user.onboardingCompletedAt;
+
     return (
-        <GameStateContext.Provider value={gameQuery.data}>
-            <div className={clsx("h-full", !isSocketReady && "play-page--offline")}>
-                <GameRenderer game={gameQuery.data} user={user} />
-            </div>
-        </GameStateContext.Provider>
+        <OnboardingGameProvider value={isOnboardingGame}>
+            <GameStateContext.Provider value={gameQuery.data}>
+                <div className={clsx("h-full", !isSocketReady && "play-page--offline")}>
+                    <GameRenderer game={gameQuery.data} user={user} />
+                </div>
+            </GameStateContext.Provider>
+        </OnboardingGameProvider>
     );
 };
 

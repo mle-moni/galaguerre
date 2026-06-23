@@ -8,4 +8,5 @@ export interface ApiUser {
     elo: number;
     wins: number;
     losses: number;
+    onboardingCompletedAt: string | null;
 }

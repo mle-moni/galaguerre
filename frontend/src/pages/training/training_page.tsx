@@ -1,4 +1,3 @@
-import type { ApiUser } from "#api_types/auth.types";
 import { Button, Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -8,8 +7,9 @@ import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
-import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
+import { useUser } from "~/hooks/use_user";
 import { privateAxios } from "~/services/axios";
+import { applyTrainingGameStarted } from "~/services/apply_training_game_started";
 
 export const TrainingPage = observer(() => {
     const user = useUser();
@@ -24,10 +24,7 @@ export const TrainingPage = observer(() => {
             return response.data;
         },
         onSuccess: (data) => {
-            queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
-                if (!oldUser) return oldUser;
-                return { ...oldUser, currentGameId: data.gameId };
-            });
+            applyTrainingGameStarted(queryClient, data.gameId);
             navigate("/play");
         },
     });

@@ -1,0 +1,33 @@
+.onboarding-coach {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    z-index: 25;
+    width: min(36rem, calc(100% - 2rem));
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: rgba(15, 35, 65, 0.95);
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    color: #fff;
+}
+
+.onboarding-coach__message {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.onboarding-coach__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+    .mobile-game-layout .onboarding-coach {
+        bottom: calc(7.5rem + env(safe-area-inset-bottom, 0px));
+    }
+}
