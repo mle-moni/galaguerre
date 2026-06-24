@@ -437,7 +437,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Balin", 5),
             imageUrl: "/card-covers/galadrim/balin.webp",
             attack: 4,
-            health: 7,
+            health: 6,
         },
         {
             tags: ["SUPPORT"],
@@ -951,7 +951,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineWeapon(
         108,
         {
-            ...gal("Câble Réseau", 4),
+            ...gal("Câble Réseau", 5),
             imageUrl: "/card-covers/galadrim/cable-reseau.webp",
             damage: 4,
             durability: 2,
