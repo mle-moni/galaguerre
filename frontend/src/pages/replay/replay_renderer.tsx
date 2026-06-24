@@ -7,6 +7,7 @@ import { GameAnimationOverlay } from "../play/animations/game_animation_overlay.
 import { Board } from "../play/board/board.jsx";
 import { DecksInfos } from "../play/hud/decks_infos/decks_infos.jsx";
 import { PlayerHand } from "../play/hud/player_hand/player_hand.jsx";
+import { PlayedCardReveal } from "../play/hud/played_card_reveal/played_card_reveal.jsx";
 import { PlayersInfos } from "../play/hud/players_infos/players_infos.jsx";
 import { ReplayStoreContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
@@ -22,10 +23,11 @@ const DesktopReplayLayout = observer(() => {
     return (
         <div className="h-full relative">
             <div className="flex h-full">
-                <div className="flex justify-center w-[124px]">
+                <div className="flex justify-center w-[124px] shrink-0">
                     <PlayersInfos me={me} opponent={opponent} />
                 </div>
-                <div className="bg-blue-400 flex-1 flex flex-col min-h-0">
+                <div className="bg-blue-400 flex-1 flex flex-col min-h-0 relative">
+                    <PlayedCardReveal />
                     <div
                         className="desktop-hand-reserve desktop-hand-reserve--top"
                         aria-hidden="true"

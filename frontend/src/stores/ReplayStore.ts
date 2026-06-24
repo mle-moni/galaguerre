@@ -10,6 +10,7 @@ import { CardDragStore } from "./CardDragStore.js";
 import { CombatActionQueueStore } from "./CombatActionQueueStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
 import { NarrativeDirector } from "./NarrativeDirector.js";
+import { PlayedCardRevealStore } from "./PlayedCardRevealStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
 import { TargetSelectionStore } from "./TargetSelectionStore.js";
 import { TargetingArrowStore } from "./TargetingArrowStore.js";
@@ -37,6 +38,7 @@ export class ReplayStore {
     minionDragStore: MinionDragStore;
     weaponDragStore: WeaponDragStore;
     playerInfosStore: PlayerInfosStore;
+    playedCardRevealStore: PlayedCardRevealStore;
     targetSelectionStore: TargetSelectionStore;
     targetingArrowStore: TargetingArrowStore;
     combatActionQueue: CombatActionQueueStore;
@@ -57,6 +59,7 @@ export class ReplayStore {
         this.minionDragStore = new MinionDragStore(gameStoreRef);
         this.weaponDragStore = new WeaponDragStore(gameStoreRef);
         this.playerInfosStore = new PlayerInfosStore(gameStoreRef);
+        this.playedCardRevealStore = new PlayedCardRevealStore();
         this.targetSelectionStore = new TargetSelectionStore(gameStoreRef);
         this.targetingArrowStore = new TargetingArrowStore(gameStoreRef);
         this.combatActionQueue = new CombatActionQueueStore(gameStoreRef);

@@ -78,7 +78,7 @@ export const GameFinalScreen = observer(() => {
         <Modal
             centered={!isMobilePortrait}
             fullScreen={isMobilePortrait}
-            opened={store.isFinished}
+            opened={store.showFinalScreen}
             onClose={handleClose}
             closeOnClickOutside={false}
             title={`Partie terminée - ${store.isUserWinner ? "Victoire" : "Défaite"}`}

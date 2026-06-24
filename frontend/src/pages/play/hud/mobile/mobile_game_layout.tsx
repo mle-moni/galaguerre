@@ -13,6 +13,7 @@ import { ArmedCardHint } from "../armed_card_hint/armed_card_hint.jsx";
 import { GameFinalScreen } from "../game_final_screen/game_final_screen.jsx";
 import { MulliganOverlay } from "../mulligan/mulligan_overlay.jsx";
 import { OnboardingCoach } from "../onboarding_coach/onboarding_coach.jsx";
+import { PlayedCardReveal } from "../played_card_reveal/played_card_reveal.jsx";
 import { PlayerHand } from "../player_hand/player_hand.jsx";
 import { MobileOpponentBar } from "./mobile_opponent_bar.jsx";
 import { MobilePlayerBar } from "./mobile_player_bar.jsx";
@@ -38,6 +39,7 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(({ user }) => {
             <ActionTimelineFab />
             <MobileOpponentBar opponent={opponent} />
             <div className="mobile-game-layout__board">
+                <PlayedCardReveal />
                 <Board />
             </div>
             <MobilePlayerBar me={me} />

@@ -18,6 +18,7 @@ import { DecksInfos } from "./hud/decks_infos/decks_infos.jsx";
 import { GameFinalScreen } from "./hud/game_final_screen/game_final_screen.jsx";
 import { MulliganOverlay } from "./hud/mulligan/mulligan_overlay.jsx";
 import { OnboardingCoach } from "./hud/onboarding_coach/onboarding_coach.jsx";
+import { PlayedCardReveal } from "./hud/played_card_reveal/played_card_reveal.jsx";
 import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
 import { PlayersInfos } from "./hud/players_infos/players_infos.jsx";
 import "./game_layout.css";
@@ -42,10 +43,11 @@ const DesktopGameLayout = observer<GameRendererProps>(({ user }) => {
             <AbandonGameControl />
             <ActionTimeline />
             <div className="flex h-full">
-                <div className="flex justify-center w-[124px]">
+                <div className="flex justify-center w-[124px] shrink-0">
                     <PlayersInfos me={me} opponent={opponent} />
                 </div>
-                <div className="bg-blue-400 flex-1 flex flex-col min-h-0">
+                <div className="bg-blue-400 flex-1 flex flex-col min-h-0 relative">
+                    <PlayedCardReveal />
                     <div
                         className="desktop-hand-reserve desktop-hand-reserve--top"
                         aria-hidden="true"

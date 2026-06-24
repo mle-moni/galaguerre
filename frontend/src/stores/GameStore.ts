@@ -9,6 +9,7 @@ import { CardDragStore } from "./CardDragStore.js";
 import { CombatActionQueueStore } from "./CombatActionQueueStore.js";
 import { MinionDragStore } from "./MinionDragStore.js";
 import { NarrativeDirector } from "./NarrativeDirector.js";
+import { PlayedCardRevealStore } from "./PlayedCardRevealStore.js";
 import { PlayerInfosStore } from "./PlayerInfosStore.js";
 import { TargetSelectionStore } from "./TargetSelectionStore.js";
 import { TargetingArrowStore } from "./TargetingArrowStore.js";
@@ -29,6 +30,7 @@ export class GameStore {
     minionDragStore = new MinionDragStore(this);
     weaponDragStore = new WeaponDragStore(this);
     playerInfosStore = new PlayerInfosStore(this);
+    playedCardRevealStore = new PlayedCardRevealStore();
     targetSelectionStore = new TargetSelectionStore(this);
     targetingArrowStore = new TargetingArrowStore(this);
     combatActionQueue = new CombatActionQueueStore(this);
@@ -143,15 +145,15 @@ export class GameStore {
         this._authoritativeGame = game;
         this.combatActionQueue.resetInFlight();
 
+        if (presentation) {
+            this.narrativeDirector.enqueue(presentation, game);
+            return;
+        }
+
         if (game.data.state === "FINISHED") {
             this.narrativeDirector.clear();
             this._displayGame = game;
             this.isNarrativePlaying = false;
-            return;
-        }
-
-        if (presentation) {
-            this.narrativeDirector.enqueue(presentation, game);
             return;
         }
 
@@ -227,6 +229,12 @@ export class GameStore {
 
     get isFinished() {
         return this.authoritativeGame.data.state === "FINISHED";
+    }
+
+    get showFinalScreen() {
+        return (
+            this.isFinished && !this.isNarrativePlaying && !this.narrativeDirector.narrativePlaying
+        );
     }
 
     get p1() {
