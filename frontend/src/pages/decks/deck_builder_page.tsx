@@ -147,6 +147,7 @@ export const DeckBuilderPage = observer(() => {
             costFilter={costFilter}
             onCostFilterChange={setCostFilter}
             ownedCounts={ownedCounts}
+            ownedOnly
             className="lg:col-span-2 flex flex-col flex-1 min-h-0 lg:h-full"
         />
     );
@@ -247,6 +248,7 @@ export const DeckBuilderPage = observer(() => {
                                                 <CatalogCardDisplay card={card} variant="artwork" />
                                             </div>
                                         </CatalogCardHoverPreview>
+                                        <span className="gg-catalog-card-slot__count">{count}</span>
                                     </div>
                                     <div className="gg-composition-row__actions">
                                         {isInactiveSet && (
@@ -263,19 +265,6 @@ export const DeckBuilderPage = observer(() => {
                                             >
                                                 <IconMinus size={14} />
                                             </Button>
-                                            <NumberInput
-                                                value={count}
-                                                readOnly
-                                                hideControls
-                                                className="w-14"
-                                                styles={{
-                                                    input: {
-                                                        textAlign: "center",
-                                                        height: 36,
-                                                        minHeight: 36,
-                                                    },
-                                                }}
-                                            />
                                             <Button
                                                 size="sm"
                                                 variant="outline"

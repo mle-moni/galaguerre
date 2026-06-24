@@ -84,6 +84,7 @@
 }
 
 .gg-catalog-card-slot__preview {
+    position: relative;
     cursor: zoom-in;
 }
 
@@ -180,6 +181,14 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
+.gg-catalog-card-slot__count--owned {
+    top: auto;
+    right: auto;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 .gg-catalog-card-slot--unowned {
     opacity: 0.45;
 }
@@ -217,12 +226,14 @@
 }
 
 .gg-composition-row__thumb-wrap {
+    position: relative;
     flex-shrink: 0;
     display: flex;
     align-items: center;
 }
 
 .gg-composition-row__thumb {
+    position: relative;
     flex-shrink: 0;
     line-height: 0;
 }

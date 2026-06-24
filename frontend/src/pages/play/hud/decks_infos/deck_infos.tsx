@@ -1,7 +1,7 @@
 import type { GamePlayer } from "#api_types/game.types";
 import { Button, Stack } from "@mantine/core";
-import { IconPlayCard } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
+import { CARD_BACK_IMAGE_URL } from "~/components/cards/card_back_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
 
@@ -24,7 +24,13 @@ export const DeckInfos = observer(({ player, isOpponent }: DeckInfosProps) => {
                 data-animation-owner={animationOwner}
             >
                 <p className="flex-1 mr-2 text-right text-xl">{numberOfCards}</p>
-                <IconPlayCard className="flex-1" size={iconSize} />
+                <img
+                    className="rounded object-cover shrink-0"
+                    src={CARD_BACK_IMAGE_URL}
+                    alt=""
+                    draggable={false}
+                    style={{ height: iconSize, aspectRatio: "5 / 7" }}
+                />
             </div>
             {!isOpponent && (
                 <div className="h-[80px] flex justify-center">

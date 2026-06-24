@@ -1,7 +1,7 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
-import { Button, NumberInput, Select, Switch, TextInput } from "@mantine/core";
-import { IconMinus, IconPlus } from "@tabler/icons-react";
+import { Button, Collapse, SegmentedControl, Select, TextInput, Tooltip } from "@mantine/core";
+import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -15,6 +15,12 @@ import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 
 type CardTypeFilter = "ALL" | "MINION" | "SPELL" | "WEAPON";
+
+const CARD_TYPE_FILTER_LABELS: Record<Exclude<CardTypeFilter, "ALL">, string> = {
+    MINION: "Serviteurs",
+    SPELL: "Sorts",
+    WEAPON: "Armes",
+};
 
 const normalizeForSearch = (value: string) =>
     value
@@ -41,6 +47,7 @@ export interface CatalogueProps {
     costFilter?: string | null;
     onCostFilterChange?: (cost: string | null) => void;
     ownedCounts?: Map<number, number>;
+    ownedOnly?: boolean;
     showOwnedOnly?: boolean;
     onShowOwnedOnlyChange?: (value: boolean) => void;
 }
@@ -56,15 +63,38 @@ interface CatalogCardItemProps {
     onViewArtwork: () => void;
     isNarrowScreen: boolean;
     isMobilePortrait: boolean;
+    showOwnedCount: boolean;
 }
 
-const catalogRowControlsInputStyles = {
-    input: {
-        textAlign: "center" as const,
+const catalogueOwnershipFilterStyles = {
+    root: {
+        backgroundColor: "white",
+        border: "1px solid var(--mantine-color-gray-4)",
+        padding: 4,
         height: 36,
-        minHeight: 36,
+        boxSizing: "border-box",
+        alignItems: "center",
+    },
+    label: {
+        fontWeight: 600,
+        fontSize: 14,
+        lineHeight: "26px",
+        padding: "0 12px",
+        color: "#1e3a5f",
+    },
+    indicator: {
+        backgroundColor: "#f0b840",
+        boxShadow: "none",
     },
 };
+
+const OwnedCountBadge = ({ count }: { count: number }) => (
+    <Tooltip label="Nombre d'exemplaires possédé" withArrow>
+        <span className="gg-catalog-card-slot__count gg-catalog-card-slot__count--owned">
+            ×{count}
+        </span>
+    </Tooltip>
+);
 
 const CatalogCardItem = ({
     card,
@@ -77,10 +107,11 @@ const CatalogCardItem = ({
     onViewArtwork,
     isNarrowScreen,
     isMobilePortrait,
+    showOwnedCount,
 }: CatalogCardItemProps) => {
     const thumbOpensArtworkModal = !interactive && !isMobilePortrait;
     const isUnowned = ownedCount !== null && ownedCount === 0;
-    const showOwnedBadge = ownedCount !== null && ownedCount > 0 && !interactive;
+    const showOwnedBadge = ownedCount !== null && ownedCount > 0 && showOwnedCount;
 
     if (isNarrowScreen) {
         return (
@@ -104,8 +135,12 @@ const CatalogCardItem = ({
                             }
                         >
                             <CatalogCardDisplay card={card} variant="artwork" />
+                            {showOwnedBadge && <OwnedCountBadge count={ownedCount} />}
                         </div>
                     </CatalogCardHoverPreview>
+                    {interactive && count > 0 && (
+                        <span className="gg-catalog-card-slot__count">{count}</span>
+                    )}
                 </div>
                 {interactive && (
                     <div className="gg-composition-row__actions">
@@ -120,15 +155,6 @@ const CatalogCardItem = ({
                                 >
                                     <IconMinus size={14} />
                                 </Button>
-                            )}
-                            {count > 0 && (
-                                <NumberInput
-                                    value={count}
-                                    readOnly
-                                    hideControls
-                                    className="w-14"
-                                    styles={catalogRowControlsInputStyles}
-                                />
                             )}
                             {canAdd && onAdd && (
                                 <Button
@@ -163,6 +189,7 @@ const CatalogCardItem = ({
                 }}
             >
                 <CatalogCardDisplay card={card} />
+                {showOwnedBadge && <OwnedCountBadge count={ownedCount} />}
             </div>
             {interactive && count > 0 && onRemove && (
                 <button
@@ -193,7 +220,6 @@ const CatalogCardItem = ({
             {interactive && count > 0 && (
                 <span className="gg-catalog-card-slot__count">{count}</span>
             )}
-            {showOwnedBadge && <span className="gg-catalog-card-slot__count">×{ownedCount}</span>}
         </div>
     );
 };
@@ -210,6 +236,7 @@ export const Catalogue = observer(
         costFilter: controlledCostFilter,
         onCostFilterChange,
         ownedCounts,
+        ownedOnly = false,
         showOwnedOnly = false,
         onShowOwnedOnlyChange,
     }: CatalogueProps) => {
@@ -223,6 +250,7 @@ export const Catalogue = observer(
         const [internalCostFilter, setInternalCostFilter] = useState<string | null>(null);
         const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
         const [artworkCard, setArtworkCard] = useState<ApiCatalogCard | null>(null);
+        const [showFilters, setShowFilters] = useState(false);
 
         const isControlledCostFilter = onCostFilterChange !== undefined;
         const costFilter = isControlledCostFilter
@@ -249,7 +277,9 @@ export const Catalogue = observer(
             if (search && !cardMatchesSearch(card, search)) return false;
             if (typeFilter !== "ALL" && card.type !== typeFilter) return false;
             if (costFilter !== null && card.cost !== Number(costFilter)) return false;
-            if (showOwnedOnly && (ownedCounts?.get(card.id) ?? 0) === 0) return false;
+            if ((ownedOnly || showOwnedOnly) && (ownedCounts?.get(card.id) ?? 0) === 0) {
+                return false;
+            }
             return true;
         });
 
@@ -265,6 +295,55 @@ export const Catalogue = observer(
             label: set.name,
         }));
 
+        const filterControls = (
+            <div className="flex flex-wrap gap-3 items-end">
+                <Select
+                    label="Set de cartes"
+                    value={selectedSetId ?? ""}
+                    onChange={(value) => setSelectedSetId(value || null)}
+                    data={cardSetOptions}
+                    className="w-full sm:w-[180px]"
+                    styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
+                    disabled={cardSetOptions.length === 0}
+                />
+                <TextInput
+                    placeholder="Rechercher une carte..."
+                    value={search}
+                    onChange={(e) => setSearch(e.currentTarget.value)}
+                    className="w-full sm:flex-1 sm:min-w-[180px]"
+                />
+                <Select
+                    value={typeFilter}
+                    onChange={(v) => setTypeFilter((v as CardTypeFilter) ?? "ALL")}
+                    data={[
+                        { value: "ALL", label: "Tous types" },
+                        { value: "MINION", label: CARD_TYPE_FILTER_LABELS.MINION },
+                        { value: "SPELL", label: CARD_TYPE_FILTER_LABELS.SPELL },
+                        { value: "WEAPON", label: CARD_TYPE_FILTER_LABELS.WEAPON },
+                    ]}
+                    className="w-full sm:w-[140px]"
+                />
+                <Select
+                    value={costFilter ?? ""}
+                    onChange={(v) => setCostFilter(v || null)}
+                    data={costOptions}
+                    className="w-full sm:w-[140px]"
+                />
+                {ownedCounts !== undefined && onShowOwnedOnlyChange && !ownedOnly && (
+                    <SegmentedControl
+                        value={showOwnedOnly ? "owned" : "all"}
+                        onChange={(value) => onShowOwnedOnlyChange(value === "owned")}
+                        data={[
+                            { value: "all", label: "Toutes" },
+                            { value: "owned", label: "Possédées" },
+                        ]}
+                        className="w-full sm:w-auto"
+                        styles={catalogueOwnershipFilterStyles}
+                    />
+                )}
+            </div>
+        );
+
         return (
             <>
                 <div
@@ -277,47 +356,30 @@ export const Catalogue = observer(
                         <div className="gg-panel-header shrink-0">{headerTitle}</div>
                     )}
                     <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
-                        <div className="flex flex-wrap gap-3 items-end mb-4 shrink-0">
-                            <Select
-                                label="Set de cartes"
-                                value={selectedSetId ?? ""}
-                                onChange={(value) => setSelectedSetId(value || null)}
-                                data={cardSetOptions}
-                                className="w-full sm:w-[180px]"
-                                styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
-                                disabled={cardSetOptions.length === 0}
-                            />
-                            <TextInput
-                                placeholder="Rechercher une carte..."
-                                value={search}
-                                onChange={(e) => setSearch(e.currentTarget.value)}
-                                className="w-full sm:flex-1 sm:min-w-[180px]"
-                            />
-                            <Select
-                                value={typeFilter}
-                                onChange={(v) => setTypeFilter((v as CardTypeFilter) ?? "ALL")}
-                                data={[
-                                    { value: "ALL", label: "Tous types" },
-                                    { value: "MINION", label: "Serviteurs" },
-                                    { value: "SPELL", label: "Sorts" },
-                                    { value: "WEAPON", label: "Armes" },
-                                ]}
-                                className="w-full sm:w-[140px]"
-                            />
-                            <Select
-                                value={costFilter ?? ""}
-                                onChange={(v) => setCostFilter(v || null)}
-                                data={costOptions}
-                                className="w-full sm:w-[140px]"
-                            />
-                            {ownedCounts !== undefined && onShowOwnedOnlyChange && (
-                                <Switch
-                                    label="Cartes possédées uniquement"
-                                    checked={showOwnedOnly}
-                                    onChange={(e) => onShowOwnedOnlyChange(e.currentTarget.checked)}
-                                    className="w-full sm:w-auto"
-                                    styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
-                                />
+                        <div className="shrink-0 mb-4">
+                            {isNarrowScreen ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="gg-mana-curve-toggle"
+                                        onClick={() => setShowFilters((visible) => !visible)}
+                                        aria-expanded={showFilters}
+                                    >
+                                        <span className="truncate min-w-0 flex-1 text-left">
+                                            Filtres
+                                        </span>
+                                        {showFilters ? (
+                                            <IconChevronUp size={16} aria-hidden />
+                                        ) : (
+                                            <IconChevronDown size={16} aria-hidden />
+                                        )}
+                                    </button>
+                                    <Collapse in={showFilters}>
+                                        <div className="pt-1">{filterControls}</div>
+                                    </Collapse>
+                                </>
+                            ) : (
+                                filterControls
                             )}
                         </div>
                         <div
@@ -349,6 +411,7 @@ export const Catalogue = observer(
                                         onViewArtwork={() => setArtworkCard(card)}
                                         isNarrowScreen={isNarrowScreen}
                                         isMobilePortrait={isMobilePortrait}
+                                        showOwnedCount={ownedOnly || !interactive}
                                     />
                                 ))
                             )}

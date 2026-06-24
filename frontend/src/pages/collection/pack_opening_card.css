@@ -1,0 +1,70 @@
+.pack-opening-card {
+    --card-w: 150px;
+    --card-h: calc(var(--card-w) * 1.4);
+    --stat-badge: 14px;
+
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: default;
+    perspective: 1000px;
+}
+
+.pack-opening-card--full {
+    --card-w: var(--card-w-full);
+    --card-h: var(--card-h-full);
+    --stat-badge: var(--stat-badge-full);
+}
+
+.pack-opening-card--can-flip {
+    cursor: pointer;
+}
+
+.pack-opening-card--can-flip:focus-visible {
+    outline: 2px solid var(--gg-navy);
+    outline-offset: 4px;
+}
+
+.pack-opening-card--can-flip .pack-opening-card__back {
+    box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.35);
+}
+
+.pack-opening-card--previewable {
+    cursor: zoom-in;
+}
+
+.pack-opening-card--inactive {
+    pointer-events: none;
+    cursor: default;
+}
+
+.pack-opening-card[aria-disabled="true"] {
+    opacity: 1;
+}
+
+.pack-opening-card__inner {
+    position: relative;
+    width: var(--card-w);
+    height: var(--card-h);
+    transform-style: preserve-3d;
+    transition: transform 0.55s ease;
+}
+
+.pack-opening-card--flipped .pack-opening-card__inner {
+    transform: rotateY(180deg);
+}
+
+.pack-opening-card__face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.pack-opening-card__back {
+    transform: translateZ(1px);
+}
+
+.pack-opening-card__front {
+    transform: rotateY(180deg) translateZ(1px);
+}

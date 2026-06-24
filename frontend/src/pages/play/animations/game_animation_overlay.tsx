@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { observer } from "mobx-react-lite";
+import { CARD_BACK_IMAGE_URL } from "~/components/cards/card_back_face";
 import type {
     AnimationRect,
     AttackEvent,
@@ -95,7 +96,9 @@ const DrawFlight = ({ event }: { event: DrawEvent }) => {
                 ease: "easeOut",
                 delay,
             }}
-        />
+        >
+            <img src={CARD_BACK_IMAGE_URL} alt="" draggable={false} />
+        </motion.div>
     );
 };
 

@@ -1,12 +1,33 @@
+.pack-opening__stage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
+    .pack-opening__stage {
+        justify-content: safe center;
+    }
+}
+
 .pack-opening__idle,
 .pack-opening__reveal {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
-    flex: 1;
-    justify-content: center;
+    padding-block: 1rem;
     text-align: center;
+}
+
+@media (min-width: 640px) {
+    .pack-opening__idle,
+    .pack-opening__reveal {
+        padding-block: 2rem;
+    }
 }
 
 .pack-opening__message {
@@ -21,11 +42,17 @@
     gap: 1rem;
     width: 100%;
     max-width: 48rem;
+    justify-items: center;
+}
+
+.pack-opening__cards--full {
+    grid-template-columns: repeat(5, var(--card-w-full));
+    max-width: calc(5 * var(--card-w-full) + 4 * 1rem);
+    justify-content: center;
 }
 
 .pack-opening__card {
     opacity: 0;
-    transform: translateY(16px) scale(0.95);
     animation: pack-card-reveal 0.45s ease forwards;
 }
 
@@ -39,6 +66,9 @@
 @keyframes pack-card-reveal {
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
     }
+}
+
+.pack-opening__container--full {
+    max-width: calc(5 * var(--card-w-full) + 4 * 1rem);
 }

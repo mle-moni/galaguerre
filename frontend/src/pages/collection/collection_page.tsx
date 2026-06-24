@@ -12,7 +12,7 @@ export const CollectionPage = observer(() => {
     const user = useUser();
     const collectionQuery = useCollectionQuery();
     const packsQuery = usePacksQuery();
-    const [showOwnedOnly, setShowOwnedOnly] = useState(false);
+    const [showOwnedOnly, setShowOwnedOnly] = useState(true);
 
     const ownedCounts = useMemo(
         () => entriesToOwnedCounts(collectionQuery.data ?? []),

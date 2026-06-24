@@ -4,6 +4,7 @@ import type { PlayerCard } from "#api_types/game.types";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
+import { CardBackFace } from "~/components/cards/card_back_face";
 import { CardHoverPreview } from "~/components/cards/card_hover_preview";
 import { CardMobilePreviewButton } from "~/components/cards/card_mobile_preview_button";
 import { PlayerCardFace } from "~/components/cards/player_card_face";
@@ -24,14 +25,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
     const isMobilePortrait = useIsMobilePortrait();
 
     if (isOpponent) {
-        return (
-            <div
-                data-playing-card
-                data-playing-card-id={card.uuid}
-                style={style}
-                className={clsx("playing-card-face rounded bg-[#1e3a5f] cursor-pointer")}
-            />
-        );
+        return <CardBackFace cardUuid={card.uuid} style={style} className="cursor-pointer" />;
     }
 
     const canPlay =
