@@ -14,6 +14,7 @@
 }
 
 .pack-opening__idle,
+.pack-opening__pack-ready,
 .pack-opening__reveal {
     display: flex;
     flex-direction: column;
@@ -25,9 +26,44 @@
 
 @media (min-width: 640px) {
     .pack-opening__idle,
+    .pack-opening__pack-ready,
     .pack-opening__reveal {
         padding-block: 2rem;
     }
+}
+
+.pack-opening__pack {
+    border: none;
+    background: none;
+    padding: 0;
+    line-height: 0;
+    transition: transform 0.2s ease;
+}
+
+.pack-opening__pack--ready {
+    cursor: pointer;
+}
+
+.pack-opening__pack--ready:hover {
+    transform: scale(1.05);
+}
+
+.pack-opening__pack--ready:active {
+    transform: scale(0.98);
+}
+
+.pack-opening__pack--opening {
+    cursor: default;
+    pointer-events: none;
+    animation: pack-tear-open 0.7s ease forwards;
+}
+
+.pack-opening__packs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    max-width: 36rem;
 }
 
 .pack-opening__message {
@@ -66,6 +102,23 @@
 @keyframes pack-card-reveal {
     to {
         opacity: 1;
+    }
+}
+
+@keyframes pack-tear-open {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+
+    35% {
+        opacity: 1;
+        transform: scale(1.08) rotate(-4deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.25) rotate(8deg);
     }
 }
 

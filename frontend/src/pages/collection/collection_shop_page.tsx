@@ -3,10 +3,11 @@ import {
     GOLD_COINS_PER_PACK,
     GOLD_COINS_PER_VICTORY,
 } from "#api_types/rewards.types";
-import { Button, Group, Paper, Stack, Text } from "@mantine/core";
+import { Button, Center, Group, Paper, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { Navigate } from "react-router-dom";
 import { GoldCoinAmount, GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
+import { PackIcon } from "~/components/rewards/pack_icon";
 import { AppLayout } from "~/components/layout/app_layout";
 import { useBuyPackMutation } from "~/hooks/use_collection";
 import { useUser } from "~/hooks/use_user";
@@ -44,6 +45,9 @@ export const CollectionShopPage = observer(() => {
 
                     <Paper withBorder p="lg" radius="md">
                         <Stack gap="sm">
+                            <Center>
+                                <PackIcon width={120} />
+                            </Center>
                             <Text fw={600}>Paquet de cartes</Text>
                             <Text size="sm" c="dimmed">
                                 5 cartes aléatoires pour enrichir votre collection.
@@ -78,9 +82,12 @@ export const CollectionShopPage = observer(() => {
                                 <span>+{GOLD_COINS_PER_DEFEAT}</span>
                             </Group>
                         </Text>
-                        <Text size="sm" c="dimmed">
-                            Première victoire du jour : +1 paquet bonus
-                        </Text>
+                        <Group gap={6} wrap="nowrap">
+                            <PackIcon width={16} />
+                            <Text size="sm" c="dimmed">
+                                Première victoire du jour : +1 paquet bonus
+                            </Text>
+                        </Group>
                     </Stack>
                 </Stack>
             </div>

@@ -1,4 +1,5 @@
-import { Button, Modal, Stack, Text } from "@mantine/core";
+import { Button, Center, Modal, Stack, Text } from "@mantine/core";
+import { PackIcon } from "~/components/rewards/pack_icon";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
@@ -45,6 +46,9 @@ export const DailyPackModal = observer(() => {
             centered
         >
             <Stack gap="md">
+                <Center>
+                    <PackIcon width={100} />
+                </Center>
                 <Text size="sm">Venez chaque jour pour récupérer votre paquet offert.</Text>
                 <Button
                     onClick={() => claimMutation.mutate()}

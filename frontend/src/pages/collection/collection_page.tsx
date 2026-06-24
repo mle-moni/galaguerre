@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Catalogue } from "~/components/catalogue/catalogue";
 import { GoldCoinAmount } from "~/components/rewards/gold_coin_icon";
+import { PackIcon } from "~/components/rewards/pack_icon";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { entriesToOwnedCounts, useCollectionQuery, usePacksQuery } from "~/hooks/use_collection";
@@ -47,6 +48,7 @@ export const CollectionPage = observer(() => {
                             to="/collection/packs"
                             className="gg-btn-primary flex-1 sm:flex-none"
                             disabled={unopenedCount === 0}
+                            leftSection={<PackIcon width={18} />}
                         >
                             Ouvrir des paquets ({unopenedCount})
                         </Button>

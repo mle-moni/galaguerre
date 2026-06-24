@@ -1,6 +1,7 @@
 import type { GameRewardPlayerResult } from "#api_types/rewards.types";
 import { Paper, Stack, Text } from "@mantine/core";
 import { GoldCoinAmount } from "~/components/rewards/gold_coin_icon";
+import { PackAmount } from "~/components/rewards/pack_icon";
 
 interface GameLootSectionProps {
     reward: GameRewardPlayerResult;
@@ -18,7 +19,9 @@ export const GameLootSection = ({ reward }: GameLootSectionProps) => {
                 {reward.goldCoins > 0 ? (
                     <GoldCoinAmount amount={reward.goldCoins} prefix="+" iconSize={20} />
                 ) : null}
-                {reward.packs > 0 ? <Text size="sm">+{reward.packs} Paquet</Text> : null}
+                {reward.packs > 0 ? (
+                    <PackAmount amount={reward.packs} prefix="+" iconWidth={20} />
+                ) : null}
             </Stack>
         </Paper>
     );
