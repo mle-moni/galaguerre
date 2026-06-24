@@ -2,9 +2,10 @@ import type { ApiCatalogCard } from "#api_types/deck.types";
 import type { PlayerCard } from "#api_types/game.types";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
-import { PlayerCardFace } from "./player_card_face.jsx";
+import { PlayerCardFace, type CardFaceSize } from "./player_card_face.jsx";
+import "./catalog_card_display.css";
 
-const toPlayerCard = (card: ApiCatalogCard): PlayerCard => {
+export const catalogCardToPlayerCard = (card: ApiCatalogCard): PlayerCard => {
     const base = {
         uuid: `catalog-${card.id}`,
         cardId: card.id,
@@ -40,6 +41,8 @@ const toPlayerCard = (card: ApiCatalogCard): PlayerCard => {
 
 interface CatalogCardDisplayProps {
     card: ApiCatalogCard;
+    variant?: "face" | "artwork";
+    size?: CardFaceSize;
     className?: string;
     style?: CSSProperties;
     onClick?: () => void;
@@ -48,12 +51,27 @@ interface CatalogCardDisplayProps {
 
 export const CatalogCardDisplay = ({
     card,
+    variant = "face",
+    size,
     className,
     style,
     onClick,
     overlay,
 }: CatalogCardDisplayProps) => {
-    const playerCard = toPlayerCard(card);
+    if (variant === "artwork") {
+        return (
+            <div
+                onClick={onClick}
+                className={clsx("catalog-card-artwork", onClick && "cursor-pointer", className)}
+                style={style}
+            >
+                <img src={card.imageUrl} alt={card.label} draggable={false} />
+                {overlay}
+            </div>
+        );
+    }
+
+    const playerCard = catalogCardToPlayerCard(card);
 
     const wrapper = (content: ReactNode) => (
         <div className="relative">
@@ -66,6 +84,7 @@ export const CatalogCardDisplay = ({
         <div onClick={onClick} className={clsx(onClick && "cursor-pointer")}>
             <PlayerCardFace
                 card={playerCard}
+                size={size}
                 attack={card.type === "MINION" ? card.attack : undefined}
                 health={card.type === "MINION" ? card.health : undefined}
                 style={style}

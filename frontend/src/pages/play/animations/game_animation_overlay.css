@@ -9,7 +9,8 @@
 .game-animation-card-flight,
 .game-animation-draw-card,
 .game-animation-floating-text,
-.game-animation-death {
+.game-animation-death,
+.game-animation-hero-explosion {
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -102,6 +103,55 @@
 	border-radius: 8px;
 	background: rgba(255, 255, 255, 0.08);
 	border: 2px solid rgba(255, 255, 255, 0.42);
+}
+
+.game-animation-hero-explosion {
+	overflow: visible;
+}
+
+.game-animation-hero-explosion__glow {
+	position: absolute;
+	inset: -8%;
+	border-radius: 12px;
+	background: radial-gradient(
+		circle at center,
+		rgba(239, 68, 68, 0.45) 0%,
+		rgba(239, 68, 68, 0.15) 50%,
+		rgba(239, 68, 68, 0) 75%
+	);
+}
+
+.game-animation-hero-explosion__flash {
+	position: absolute;
+	inset: 0;
+	border-radius: 8px;
+	background: radial-gradient(
+		circle at center,
+		rgba(255, 220, 120, 0.95) 0%,
+		rgba(239, 68, 68, 0.75) 35%,
+		rgba(239, 68, 68, 0) 70%
+	);
+}
+
+.game-animation-hero-explosion__ring {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 40%;
+	height: 40%;
+	margin-left: -20%;
+	margin-top: -20%;
+	border-radius: 50%;
+	border: 3px solid rgba(255, 200, 100, 0.9);
+	box-shadow:
+		0 0 20px rgba(239, 68, 68, 0.8),
+		inset 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.game-animation-hero-explosion__ring--outer {
+	border-width: 2px;
+	border-color: rgba(255, 140, 60, 0.7);
+	box-shadow: 0 0 28px rgba(239, 68, 68, 0.6);
 }
 
 .game-animation-turn-banner {

@@ -201,6 +201,82 @@ const DeathBurst = ({ event }: { event: Extract<VisualAnimationEvent, { type: "D
     );
 };
 
+const HeroExplosion = ({
+    event,
+}: {
+    event: Extract<VisualAnimationEvent, { type: "HERO_EXPLOSION" }>;
+}) => {
+    const reduceMotion = useReducedMotion();
+    const duration = getShotDurationSec("HERO_EXPLOSION", reduceMotion ?? false);
+    const flashDelay = reduceMotion ? duration * 0.4 : duration * 0.55;
+    const flashDuration = reduceMotion ? duration * 0.5 : duration * 0.4;
+    const ringDelay = reduceMotion ? duration * 0.5 : duration * 0.62;
+    const ringDuration = reduceMotion ? duration * 0.45 : duration * 0.35;
+
+    return (
+        <motion.div
+            className="game-animation-hero-explosion"
+            style={{ width: event.at.width, height: event.at.height }}
+            initial={{ x: event.at.x, y: event.at.y, opacity: 1 }}
+            animate={{ x: event.at.x, y: event.at.y, opacity: [1, 1, 0] }}
+            transition={{
+                duration,
+                ease: "easeOut",
+                times: [0, 0.85, 1],
+            }}
+        >
+            <motion.div
+                className="game-animation-hero-explosion__glow"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{
+                    opacity: reduceMotion ? [0, 0.6, 0] : [0, 0.35, 0.55, 0],
+                    scale: reduceMotion ? [1, 1.1, 1] : [0.9, 1, 1.15, 1.3],
+                }}
+                transition={{ duration, ease: "easeInOut" }}
+            />
+            <motion.div
+                className="game-animation-hero-explosion__flash"
+                initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.5 }}
+                animate={{
+                    opacity: [0, 0, 1, 0.8, 0],
+                    scale: reduceMotion ? [1, 1.2, 1] : [0.5, 0.5, 1.5, 2, 2.2],
+                }}
+                transition={{
+                    duration: flashDuration,
+                    delay: flashDelay,
+                    ease: "easeOut",
+                }}
+            />
+            <motion.div
+                className="game-animation-hero-explosion__ring"
+                initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.4 }}
+                animate={{
+                    opacity: [0, 0, 1, 0],
+                    scale: reduceMotion ? [1, 2, 2.5] : [0.4, 0.4, 2.5, 4],
+                }}
+                transition={{
+                    duration: ringDuration,
+                    delay: ringDelay,
+                    ease: "easeOut",
+                }}
+            />
+            <motion.div
+                className="game-animation-hero-explosion__ring game-animation-hero-explosion__ring--outer"
+                initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.3 }}
+                animate={{
+                    opacity: [0, 0, 0.8, 0],
+                    scale: reduceMotion ? [1, 2.2, 3] : [0.3, 0.3, 3, 5],
+                }}
+                transition={{
+                    duration: ringDuration,
+                    delay: ringDelay + (reduceMotion ? 0.08 : 0.15),
+                    ease: "easeOut",
+                }}
+            />
+        </motion.div>
+    );
+};
+
 const TurnBanner = ({
     event,
 }: {
@@ -260,6 +336,7 @@ const AnimationEvent = ({ event }: { event: VisualAnimationEvent }) => {
     if (event.type === "ATTACK") return <AttackFlight event={event} />;
     if (event.type === "FLOATING_TEXT") return <FloatingText event={event} />;
     if (event.type === "DEATH") return <DeathBurst event={event} />;
+    if (event.type === "HERO_EXPLOSION") return <HeroExplosion event={event} />;
     if (event.type === "DRAW") return <DrawFlight event={event} />;
     if (event.type === "TURN_BANNER") return <TurnBanner event={event} />;
     if (event.type === "SOURCE_PULSE") return <SourcePulse event={event} />;

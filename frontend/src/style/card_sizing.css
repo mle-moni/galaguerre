@@ -16,6 +16,12 @@
     --stat-badge: var(--stat-badge-hand);
 }
 
+.card-composition {
+    --card-w: 150px;
+    --card-h: calc(var(--card-w) * 1.4);
+    --stat-badge: 14px;
+}
+
 @media (max-width: 639px) {
     :root {
         --card-w-full: clamp(160px, 42vw, 200px);

@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { CardArtworkModal } from "~/components/cards/card_artwork_modal";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
+import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
@@ -210,7 +211,11 @@ export const DeckBuilderPage = observer(() => {
                         className="w-full sm:w-[140px]"
                     />
                 </div>
-                <div className="gg-catalog-grid">
+                <div
+                    className={
+                        isNarrowScreen ? "gg-catalog-grid gg-catalog-grid--list" : "gg-catalog-grid"
+                    }
+                >
                     {filteredCatalog.length === 0 ? (
                         <p className="text-white/50 text-sm m-0 w-full text-center py-8">
                             Aucune carte ne correspond à vos filtres.
@@ -225,6 +230,7 @@ export const DeckBuilderPage = observer(() => {
                                 onAdd={() => addCard(card.id)}
                                 onRemove={() => removeCard(card.id)}
                                 onViewArtwork={() => setArtworkCard(card)}
+                                isNarrowScreen={isNarrowScreen}
                             />
                         ))
                     )}
@@ -290,15 +296,17 @@ export const DeckBuilderPage = observer(() => {
                             if (!card) {
                                 return (
                                     <div key={cardId} className="gg-composition-row">
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-white text-sm font-medium m-0 truncate">
-                                                Carte non collectionnable (#{cardId})
-                                            </p>
-                                            <p className="text-red-300 text-xs m-0">
-                                                Cette carte ne peut pas figurer dans un deck
-                                            </p>
+                                        <div className="gg-composition-row__actions">
+                                            <div className="flex-1 min-w-0 w-full text-center">
+                                                <p className="text-white text-sm font-medium m-0 truncate">
+                                                    Carte non collectionnable (#{cardId})
+                                                </p>
+                                                <p className="text-red-300 text-xs m-0">
+                                                    Cette carte ne peut pas figurer dans un deck
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-1">
+                                        <div className="gg-composition-row__controls">
                                             <Button
                                                 size="xs"
                                                 variant="outline"
@@ -321,45 +329,51 @@ export const DeckBuilderPage = observer(() => {
                             const isInactiveSet = !activeSetIds.has(card.cardSetId);
                             return (
                                 <div key={cardId} className="gg-composition-row">
-                                    <div className="gg-composition-row__thumb">
-                                        <CatalogCardDisplay card={card} />
+                                    <div className="gg-composition-row__thumb-wrap">
+                                        <CatalogCardHoverPreview card={card}>
+                                            <div className="gg-composition-row__thumb card-composition">
+                                                <CatalogCardDisplay card={card} variant="artwork" />
+                                            </div>
+                                        </CatalogCardHoverPreview>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-white text-sm font-medium m-0 truncate">
-                                            {card.label}
-                                        </p>
-                                        <p className="text-white/50 text-xs m-0">
-                                            {card.cost} mana
-                                            {isInactiveSet && (
-                                                <span className="text-red-300"> — set inactif</span>
-                                            )}
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Button
-                                            size="xs"
-                                            variant="outline"
-                                            color="gold"
-                                            onClick={() => removeCard(cardId)}
-                                        >
-                                            <IconMinus size={12} />
-                                        </Button>
-                                        <NumberInput
-                                            value={count}
-                                            readOnly
-                                            hideControls
-                                            className="w-12"
-                                            styles={{ input: { textAlign: "center" } }}
-                                        />
-                                        <Button
-                                            size="xs"
-                                            variant="outline"
-                                            color="gold"
-                                            onClick={() => addCard(cardId)}
-                                            disabled={!canAddCard(cardId)}
-                                        >
-                                            <IconPlus size={12} />
-                                        </Button>
+                                    <div className="gg-composition-row__actions">
+                                        {isInactiveSet && (
+                                            <span className="gg-composition-row__warning">
+                                                Set inactif
+                                            </span>
+                                        )}
+                                        <div className="gg-composition-row__controls">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                color="gold"
+                                                onClick={() => removeCard(cardId)}
+                                            >
+                                                <IconMinus size={14} />
+                                            </Button>
+                                            <NumberInput
+                                                value={count}
+                                                readOnly
+                                                hideControls
+                                                className="w-14"
+                                                styles={{
+                                                    input: {
+                                                        textAlign: "center",
+                                                        height: 36,
+                                                        minHeight: 36,
+                                                    },
+                                                }}
+                                            />
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                color="gold"
+                                                onClick={() => addCard(cardId)}
+                                                disabled={!canAddCard(cardId)}
+                                            >
+                                                <IconPlus size={14} />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -452,7 +466,16 @@ interface CatalogCardItemProps {
     onAdd: () => void;
     onRemove: () => void;
     onViewArtwork: () => void;
+    isNarrowScreen: boolean;
 }
+
+const catalogRowControlsInputStyles = {
+    input: {
+        textAlign: "center" as const,
+        height: 36,
+        minHeight: 36,
+    },
+};
 
 const CatalogCardItem = ({
     card,
@@ -461,48 +484,100 @@ const CatalogCardItem = ({
     onAdd,
     onRemove,
     onViewArtwork,
-}: CatalogCardItemProps) => (
-    <div className="gg-catalog-card-slot">
-        <div
-            className="gg-catalog-card-slot__preview"
-            onClick={onViewArtwork}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onViewArtwork();
-                }
-            }}
-        >
-            <CatalogCardDisplay card={card} />
+    isNarrowScreen,
+}: CatalogCardItemProps) => {
+    if (isNarrowScreen) {
+        return (
+            <div className="gg-composition-row">
+                <div className="gg-composition-row__thumb-wrap">
+                    <CatalogCardHoverPreview card={card}>
+                        <div className="gg-composition-row__thumb card-composition">
+                            <CatalogCardDisplay card={card} variant="artwork" />
+                        </div>
+                    </CatalogCardHoverPreview>
+                </div>
+                <div className="gg-composition-row__actions">
+                    <div className="gg-composition-row__controls">
+                        {count > 0 && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                color="gold"
+                                onClick={onRemove}
+                                aria-label={`Retirer ${card.label} du deck`}
+                            >
+                                <IconMinus size={14} />
+                            </Button>
+                        )}
+                        {count > 0 && (
+                            <NumberInput
+                                value={count}
+                                readOnly
+                                hideControls
+                                className="w-14"
+                                styles={catalogRowControlsInputStyles}
+                            />
+                        )}
+                        {canAdd && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                color="gold"
+                                onClick={onAdd}
+                                aria-label={`Ajouter ${card.label} au deck`}
+                            >
+                                <IconPlus size={14} />
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="gg-catalog-card-slot">
+            <div
+                className="gg-catalog-card-slot__preview"
+                onClick={onViewArtwork}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onViewArtwork();
+                    }
+                }}
+            >
+                <CatalogCardDisplay card={card} />
+            </div>
+            {count > 0 && (
+                <button
+                    type="button"
+                    className="gg-catalog-card-slot__action gg-catalog-card-slot__action--remove"
+                    aria-label={`Retirer ${card.label} du deck`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onRemove();
+                    }}
+                >
+                    <IconMinus size={16} stroke={2.5} />
+                </button>
+            )}
+            {canAdd && (
+                <button
+                    type="button"
+                    className="gg-catalog-card-slot__action gg-catalog-card-slot__action--add"
+                    aria-label={`Ajouter ${card.label} au deck`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onAdd();
+                    }}
+                >
+                    <IconPlus size={16} stroke={2.5} />
+                </button>
+            )}
+            {count > 0 && <span className="gg-catalog-card-slot__count">{count}</span>}
         </div>
-        {count > 0 && (
-            <button
-                type="button"
-                className="gg-catalog-card-slot__action gg-catalog-card-slot__action--remove"
-                aria-label={`Retirer ${card.label} du deck`}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onRemove();
-                }}
-            >
-                <IconMinus size={16} stroke={2.5} />
-            </button>
-        )}
-        {canAdd && (
-            <button
-                type="button"
-                className="gg-catalog-card-slot__action gg-catalog-card-slot__action--add"
-                aria-label={`Ajouter ${card.label} au deck`}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onAdd();
-                }}
-            >
-                <IconPlus size={16} stroke={2.5} />
-            </button>
-        )}
-        {count > 0 && <span className="gg-catalog-card-slot__count">{count}</span>}
-    </div>
-);
+    );
+};

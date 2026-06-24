@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
 import "~/components/targeting/targeting.css";
+import "~/pages/play/animations/hero_death_animations.css";
 import { MobileStatBadge } from "./mobile_stat_badge.jsx";
 import "./mobile.css";
 
@@ -38,6 +39,9 @@ export const MobileHeroStrip = observer(
             store.targetSelectionStore.isHighlightingTargets ||
             store.minionDragStore.isAttacking ||
             store.weaponDragStore.isAttacking;
+
+        const heroSpotOwner = isOpponent ? "OPPONENT" : "PLAYER";
+        const isDying = store.narrativeDirector.dyingHeroOwners.includes(heroSpotOwner);
 
         const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
             if (event.target instanceof Element && event.target.closest("[data-stat-badge]")) {
@@ -78,6 +82,7 @@ export const MobileHeroStrip = observer(
                         "mobile-bar__hero-target--interactive",
                     heroHighlight === "valid" && "target-zone--valid",
                     heroHighlight === "invalid" && "target-zone--invalid",
+                    isDying && "hero-target--dying",
                 )}
                 style={{ borderColor: dropZoneBorderColor }}
                 onDragOver={handleDragOver}

@@ -1,9 +1,10 @@
-import type { ApiGame } from "#api_types/game.types";
+import type { ApiGame, SpotOwner } from "#api_types/game.types";
 import type { GamePresentationUpdate, NarrativeBeat } from "#api_types/game_narrative.types";
 import { makeAutoObservable } from "mobx";
 import { choreographShots, isCombatLungePhase } from "~/pages/play/animations/choreograph_shots.js";
 import { effectsToShots } from "~/pages/play/animations/effects_to_shots.js";
 import { readGameAnimationSnapshot } from "~/pages/play/animations/game_animation_snapshot.js";
+import { resolveHeroRect } from "~/pages/play/animations/resolve_rects.js";
 import { extractPlayedCardFromBeat } from "~/pages/play/hud/played_card_reveal/extract_played_card_from_beat.js";
 import { ANIMATION_STORE } from "./store_singletons.js";
 import type { GameStore } from "./GameStore.js";
@@ -32,6 +33,21 @@ const waitForLayout = () =>
 const prefersReducedMotion = () =>
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+const getDeadHeroOwners = (game: ApiGame, userId: number): SpotOwner[] => {
+    const { playerOne, playerTwo } = game.data;
+    const owners: SpotOwner[] = [];
+
+    if (playerOne.health <= 0) {
+        owners.push(playerOne.userId === userId ? "PLAYER" : "OPPONENT");
+    }
+
+    if (playerTwo.health <= 0) {
+        owners.push(playerTwo.userId === userId ? "PLAYER" : "OPPONENT");
+    }
+
+    return owners;
+};
+
 interface QueuedScene {
     presentation: GamePresentationUpdate;
     authoritativeGame: ApiGame;
@@ -41,6 +57,8 @@ export class NarrativeDirector {
     private queue: QueuedScene[] = [];
     private isPlaying = false;
     private skipRequested = false;
+    isGameEndAnimationPlaying = false;
+    dyingHeroOwners: SpotOwner[] = [];
 
     constructor(private readonly gameStore: GameStore) {
         makeAutoObservable(this);
@@ -55,8 +73,53 @@ export class NarrativeDirector {
         void this.processQueue();
     }
 
+    async playGameEndExplosions(game: ApiGame): Promise<void> {
+        const deadOwners = getDeadHeroOwners(game, this.gameStore.user.id);
+        if (deadOwners.length === 0) return;
+
+        const managesNarrative = !this.isPlaying;
+
+        if (managesNarrative) {
+            this.skipRequested = false;
+        } else if (this.skipRequested) {
+            return;
+        }
+
+        this.dyingHeroOwners = deadOwners;
+        this.isGameEndAnimationPlaying = true;
+
+        if (managesNarrative) {
+            this.gameStore.setNarrativePlaying(true);
+        }
+
+        try {
+            await waitForLayout();
+
+            if (this.skipRequested) return;
+
+            const snapshot = readGameAnimationSnapshot();
+            const events = deadOwners.map((owner) => ({
+                type: "HERO_EXPLOSION" as const,
+                at: resolveHeroRect(owner, snapshot),
+                owner,
+            }));
+
+            const reducedMotion = prefersReducedMotion();
+            await ANIMATION_STORE.playParallel(events, reducedMotion);
+        } finally {
+            this.dyingHeroOwners = [];
+            this.isGameEndAnimationPlaying = false;
+
+            if (managesNarrative) {
+                this.gameStore.setNarrativePlaying(false);
+            }
+        }
+    }
+
     skipCurrentScene() {
         this.skipRequested = true;
+        this.isGameEndAnimationPlaying = false;
+        this.dyingHeroOwners = [];
         ANIMATION_STORE.clear();
     }
 
@@ -64,6 +127,8 @@ export class NarrativeDirector {
         this.queue = [];
         this.skipRequested = true;
         this.isPlaying = false;
+        this.isGameEndAnimationPlaying = false;
+        this.dyingHeroOwners = [];
         ANIMATION_STORE.clear();
         this.gameStore.playedCardRevealStore.clear();
     }
@@ -176,6 +241,10 @@ export class NarrativeDirector {
             }
 
             this.gameStore.setDisplayGame(this.gameStore.authoritativeGame);
+
+            if (authoritativeGame.data.state === "FINISHED" && !this.skipRequested) {
+                await this.playGameEndExplosions(authoritativeGame);
+            }
         } catch (error) {
             console.error("NarrativeDirector failed to play scene", error);
             this.gameStore.setDisplayGame(this.gameStore.authoritativeGame);

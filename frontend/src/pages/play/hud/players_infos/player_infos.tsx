@@ -6,6 +6,7 @@ import { observer } from "mobx-react-lite";
 import type { PointerEvent } from "react";
 import { useGameContext } from "~/hooks/use_game_state";
 import "~/components/targeting/targeting.css";
+import "~/pages/play/animations/hero_death_animations.css";
 import "./player_infos.css";
 
 interface PlayerInfosProps {
@@ -69,6 +70,9 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
         store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
 
+    const heroSpotOwner = isOpponent ? "OPPONENT" : "PLAYER";
+    const isDying = store.narrativeDirector.dyingHeroOwners.includes(heroSpotOwner);
+
     return (
         <div
             data-target-zone
@@ -89,7 +93,11 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             onClick={handleClick}
         >
             <div
-                className={`hero-panel${canAttackWithWeapon ? " hero-panel--weapon-draggable" : ""}`}
+                className={clsx(
+                    "hero-panel",
+                    canAttackWithWeapon && "hero-panel--weapon-draggable",
+                    isDying && "hero-target--dying",
+                )}
                 style={{
                     borderColor: playerBorderColor,
                 }}

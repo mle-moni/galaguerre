@@ -43,6 +43,12 @@ export interface DeathEventInput {
     at: AnimationRect;
 }
 
+export interface HeroExplosionEventInput {
+    type: "HERO_EXPLOSION";
+    at: AnimationRect;
+    owner: SpotOwner;
+}
+
 export interface DrawEventInput {
     type: "DRAW";
     from: AnimationRect;
@@ -68,6 +74,7 @@ export type VisualAnimationEventInput =
     | AttackEventInput
     | FloatingTextEventInput
     | DeathEventInput
+    | HeroExplosionEventInput
     | DrawEventInput
     | TurnBannerEventInput
     | SourcePulseEventInput;
@@ -77,6 +84,7 @@ export type CardFlightEvent = CardFlightEventInput & BaseVisualEvent;
 export type AttackEvent = AttackEventInput & BaseVisualEvent;
 export type FloatingTextEvent = FloatingTextEventInput & BaseVisualEvent;
 export type DeathEvent = DeathEventInput & BaseVisualEvent;
+export type HeroExplosionEvent = HeroExplosionEventInput & BaseVisualEvent;
 export type DrawEvent = DrawEventInput & BaseVisualEvent;
 export type TurnBannerEvent = TurnBannerEventInput & BaseVisualEvent;
 export type SourcePulseEvent = SourcePulseEventInput & BaseVisualEvent;

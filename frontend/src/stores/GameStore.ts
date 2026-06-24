@@ -153,7 +153,7 @@ export class GameStore {
         if (game.data.state === "FINISHED") {
             this.narrativeDirector.clear();
             this._displayGame = game;
-            this.isNarrativePlaying = false;
+            void this.narrativeDirector.playGameEndExplosions(game);
             return;
         }
 
@@ -233,7 +233,10 @@ export class GameStore {
 
     get showFinalScreen() {
         return (
-            this.isFinished && !this.isNarrativePlaying && !this.narrativeDirector.narrativePlaying
+            this.isFinished &&
+            !this.isNarrativePlaying &&
+            !this.narrativeDirector.narrativePlaying &&
+            !this.narrativeDirector.isGameEndAnimationPlaying
         );
     }
 
