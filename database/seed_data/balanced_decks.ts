@@ -21,8 +21,7 @@ export const GALADRIM_AGGRO_DECK_RECIPE: DeckRecipeEntry[] = [
     { label: "Lendemain de soirée", copies: 2, cardId: 109 },
     { label: "Dev Insomniaque", copies: 2, cardId: 68 },
     { label: "Pause Café", copies: 2, cardId: 96 },
-    { label: "Key Account Manager", copies: 1, cardId: 80 },
-    { label: "Directeur Commercial", copies: 1, cardId: 81 },
+    { label: "Key Account Manager", copies: 2, cardId: 80 },
 ];
 
 export const GALADRIM_MIDRANGE_DECK_RECIPE: DeckRecipeEntry[] = [
