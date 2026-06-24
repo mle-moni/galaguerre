@@ -1,6 +1,6 @@
 import type { PlayerCard } from "#api_types/game.types";
 import { Drawer } from "@mantine/core";
-import { CardDetailContent } from "./card_detail_content.jsx";
+import { PlayerCardFace } from "./player_card_face.jsx";
 
 interface CardDetailSheetProps {
     card: PlayerCard;
@@ -8,6 +8,8 @@ interface CardDetailSheetProps {
     opened: boolean;
     onClose: () => void;
     isSilenced?: boolean;
+    attack?: number;
+    health?: number;
 }
 
 export const CardDetailSheet = ({
@@ -16,18 +18,29 @@ export const CardDetailSheet = ({
     opened,
     onClose,
     isSilenced,
+    attack,
+    health,
 }: CardDetailSheetProps) => {
     return (
         <Drawer
             opened={opened}
             onClose={onClose}
             position="bottom"
-            size="40vh"
+            size="auto"
             title={card.label}
             withinPortal
-            classNames={{ content: "card-detail-sheet-content" }}
+            classNames={{ content: "card-preview-sheet-content" }}
         >
-            <CardDetailContent card={card} spellPower={spellPower} isSilenced={isSilenced} />
+            <div className="card-preview-sheet__face">
+                <PlayerCardFace
+                    card={card}
+                    size="full"
+                    spellPower={spellPower}
+                    isSilenced={isSilenced}
+                    attack={attack}
+                    health={health}
+                />
+            </div>
         </Drawer>
     );
 };

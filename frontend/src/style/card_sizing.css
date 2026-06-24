@@ -1,14 +1,32 @@
 :root {
-    --card-w: 120px;
-    --card-h: 150px;
-    --stat-badge: 25px;
+    --card-w-full: 220px;
+    --card-h-full: 308px;
+    --card-w-hand: 88px;
+    --card-h-hand: 123px;
+    --stat-badge-full: 36px;
+    --stat-badge-hand: 16px;
+    --card-w: var(--card-w-full);
+    --card-h: var(--card-h-full);
+    --stat-badge: var(--stat-badge-full);
+}
+
+.card-hand {
+    --card-w: var(--card-w-hand);
+    --card-h: var(--card-h-hand);
+    --stat-badge: var(--stat-badge-hand);
 }
 
 @media (max-width: 639px) {
     :root {
-        --card-w: clamp(64px, 19vw, 80px);
-        --card-h: calc(var(--card-w) * 1.25);
-        --stat-badge: clamp(15px, 4vw, 18px);
+        --card-w-full: clamp(160px, 42vw, 200px);
+        --card-h-full: calc(var(--card-w-full) * 1.4);
+        --stat-badge-full: clamp(24px, 6vw, 32px);
+    }
+
+    .card-hand {
+        --card-w-hand: clamp(64px, 19vw, 80px);
+        --card-h-hand: calc(var(--card-w-hand) * 1.4);
+        --stat-badge-hand: clamp(14px, 3.5vw, 16px);
     }
 }
 
@@ -18,12 +36,10 @@
     touch-action: manipulation;
 }
 
-.playing-card-face__image-area {
-    height: calc(var(--card-h) * 0.5);
-}
-
-.playing-card-face__body {
-    height: calc(var(--card-h) * 0.5);
+.playing-card-face--full {
+    --card-w: var(--card-w-full);
+    --card-h: var(--card-h-full);
+    --stat-badge: var(--stat-badge-full);
 }
 
 .card-detail-info-button {
@@ -46,4 +62,10 @@
     cursor: pointer;
     touch-action: manipulation;
     padding: 0;
+}
+
+.card-preview-sheet__face {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0 1rem;
 }

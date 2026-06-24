@@ -13,6 +13,7 @@ import { useGameContext } from "~/hooks/use_game_state";
 import { resolveBoardInsertIndexFromPoint } from "~/helpers/resolve_target_from_point";
 import type { GameStore } from "~/stores/GameStore";
 import { RenderMinion } from "../hud/playing_card/render_minion.jsx";
+import { useTurnRopeProgress } from "./use_turn_rope_progress.js";
 
 const BOARD_SHIFT_PX = "calc(var(--board-minion-w) * 0.55)";
 
@@ -23,8 +24,32 @@ export const Board = observer(() => {
             data-animation-board
         >
             <BoardSide spotOwner="OPPONENT" />
-            <div className="board-divider border-2 border-dashed w-full flex-shrink-0" />
+            <BoardDivider />
             <BoardSide spotOwner="PLAYER" />
+        </div>
+    );
+});
+
+const BoardDivider = observer(() => {
+    const { store } = useGameContext();
+    const ropeProgress = useTurnRopeProgress(store.game.data.turnEndsAt);
+    const isRopeActive = ropeProgress > 0;
+
+    return (
+        <div
+            className={clsx(
+                "board-divider w-full flex-shrink-0",
+                isRopeActive && "board-divider--rope",
+            )}
+            style={
+                isRopeActive
+                    ? ({ "--board-divider-rope-progress": ropeProgress } as CSSProperties)
+                    : undefined
+            }
+            aria-hidden
+        >
+            <div className="board-divider__neutral" />
+            {isRopeActive && <div className="board-divider__rope" />}
         </div>
     );
 });

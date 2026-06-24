@@ -135,7 +135,7 @@ export class ReplayStore {
         return false;
     }
 
-    get isCardDetailHoverDisabled() {
+    get isCardHoverPreviewDisabled() {
         return true;
     }
 

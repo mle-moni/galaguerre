@@ -1,39 +1,13 @@
 import { Button, Modal, Stack, Text } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import type { ReactNode } from "react";
 import { CoinCardLink } from "~/components/cards/coin_card_link";
+import { PlayerCardFace } from "~/components/cards/player_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useOnboardingGame } from "~/hooks/use_onboarding_game";
 import { emitSocketEventToServer } from "~/services/ws_client";
-import { MinionCardFace } from "~/components/cards/minion_card_face";
-import { SpellCardFace } from "~/components/cards/spell_card_face";
-import { WeaponCardFace } from "~/components/cards/weapon_card_face";
-import type { PlayerCard } from "#api_types/game.types";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
-import { CardDetailHover } from "../playing_card/card_detail_hover.jsx";
 import "./mulligan_overlay.css";
-
-const renderCardFace = (card: PlayerCard) => {
-    const wrapper = (content: ReactNode) => (
-        <CardDetailHover card={card} showDetailButton>
-            {content}
-        </CardDetailHover>
-    );
-
-    if (card.type === "MINION") {
-        return (
-            <MinionCardFace
-                card={card}
-                attack={card.attack}
-                health={card.health}
-                wrapper={wrapper}
-            />
-        );
-    }
-    if (card.type === "SPELL") return <SpellCardFace card={card} wrapper={wrapper} />;
-    return <WeaponCardFace card={card} wrapper={wrapper} />;
-};
 
 export const MulliganOverlay = observer(() => {
     const { store } = useGameContext();
@@ -54,12 +28,13 @@ export const MulliganOverlay = observer(() => {
             onClose={() => {}}
             withCloseButton={false}
             centered
-            size="lg"
+            size="xl"
             title="Mulligan"
             overlayProps={{ backgroundOpacity: 0.75 }}
+            classNames={{ content: "mulligan-overlay__modal-content" }}
         >
             <Stack gap="md">
-                <Text ta="center" fw={600}>
+                <Text ta="center" fw={600} component="div">
                     {store.goesFirst ? (
                         "Vous commencez"
                     ) : (
@@ -112,7 +87,17 @@ export const MulliganOverlay = observer(() => {
                                         }
                                     >
                                         <div className="mulligan-overlay__card-face">
-                                            {renderCardFace(card)}
+                                            <PlayerCardFace
+                                                card={card}
+                                                size="full"
+                                                spellPower={store.me.spellPower}
+                                                attack={
+                                                    card.type === "MINION" ? card.attack : undefined
+                                                }
+                                                health={
+                                                    card.type === "MINION" ? card.health : undefined
+                                                }
+                                            />
                                         </div>
                                         {isSelected ? (
                                             <div

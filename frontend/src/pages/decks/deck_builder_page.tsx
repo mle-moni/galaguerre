@@ -322,7 +322,7 @@ export const DeckBuilderPage = observer(() => {
                             return (
                                 <div key={cardId} className="gg-composition-row">
                                     <div className="gg-composition-row__thumb">
-                                        <CatalogCardDisplay card={card} showDetailOnHover />
+                                        <CatalogCardDisplay card={card} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-white text-sm font-medium m-0 truncate">
@@ -475,7 +475,7 @@ const CatalogCardItem = ({
                 }
             }}
         >
-            <CatalogCardDisplay card={card} showDetailOnHover />
+            <CatalogCardDisplay card={card} />
         </div>
         {count > 0 && (
             <button

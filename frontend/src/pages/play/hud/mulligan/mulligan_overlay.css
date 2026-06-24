@@ -5,9 +5,24 @@
     gap: 12px;
 }
 
+@media (min-width: 641px) {
+    .mulligan-overlay__modal-content {
+        --modal-size: min(
+            calc(4 * var(--card-w-full) + 3 * 12px + 2 * var(--mantine-spacing-md)),
+            calc(100vw - 2rem)
+        );
+        flex: 0 0 var(--modal-size);
+        width: var(--modal-size);
+    }
+
+    .mulligan-overlay__cards {
+        flex-wrap: nowrap;
+    }
+}
+
 .mulligan-overlay__card {
     position: relative;
-    width: 120px;
+    width: var(--card-w-full);
     border: 3px solid transparent;
     border-radius: 8px;
     padding: 0;

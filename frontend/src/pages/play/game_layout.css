@@ -4,8 +4,8 @@
 	--board-minion-w: 78px;
 	--board-minion-h: calc(var(--board-minion-w) * 1.35);
 	--board-stat-badge: 22px;
-	--hand-gap: 20px;
-	--hand-height: 170px;
+	--hand-gap: 12px;
+	--hand-height: calc(var(--card-h-hand) + 24px);
 	--hand-bottom-offset: 30px;
 	--hand-top-offset: 20px;
 	--hand-reserve-height: calc(var(--hand-height) + var(--hand-bottom-offset) + 16px);
@@ -27,16 +27,13 @@
 
 @media (max-width: 640px) and (orientation: portrait) {
 	:root {
-		--card-w: clamp(64px, 19vw, 80px);
-		--card-h: calc(var(--card-w) * 1.25);
-		--stat-badge: clamp(15px, 4vw, 18px);
 		--board-minion-w: clamp(52px, 15vw, 66px);
 		--board-minion-h: calc(var(--board-minion-w) * 1.12);
 		--board-stat-badge: clamp(16px, 4.5vw, 20px);
 		--spot-w: calc(var(--board-minion-w) + 6px);
 		--spot-h: calc(var(--board-minion-h) + 6px);
 		--hand-gap: -10px;
-		--hand-height: calc(var(--card-h) + 32px);
+		--hand-height: calc(var(--card-h-hand) + 32px);
 	}
 }
 

@@ -1,8 +1,8 @@
 import type { PlayerCard } from "#api_types/game.types";
 import { type MouseEvent, type ReactNode, useState } from "react";
-import { CardDetailPopover } from "./card_detail_popover.jsx";
-import { CardDetailSheet } from "./card_detail_sheet.jsx";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
+import { CardHoverPreview } from "./card_hover_preview.jsx";
+import { CardPreviewSheet } from "./card_preview_sheet.jsx";
 import "./card_preview_link.css";
 
 interface CardPreviewLinkProps {
@@ -28,7 +28,7 @@ export const CardPreviewLink = ({ card, children, spellPower = 0 }: CardPreviewL
                 >
                     {children}
                 </button>
-                <CardDetailSheet
+                <CardPreviewSheet
                     card={card}
                     spellPower={spellPower}
                     opened={sheetOpened}
@@ -39,8 +39,8 @@ export const CardPreviewLink = ({ card, children, spellPower = 0 }: CardPreviewL
     }
 
     return (
-        <CardDetailPopover card={card} spellPower={spellPower}>
+        <CardHoverPreview card={card} spellPower={spellPower}>
             <span className="card-preview-link">{children}</span>
-        </CardDetailPopover>
+        </CardHoverPreview>
     );
 };

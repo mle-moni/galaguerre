@@ -44,12 +44,15 @@ export const PlayerHand = observer<PlayerHandProps>(({ player, isOpponent, isMob
                 }
 
                 return (
-                    <div key={card.uuid} className="card-hand__card">
+                    <div
+                        key={card.uuid}
+                        className="card-hand__card"
+                        style={{
+                            rotate: `${rotation}deg`,
+                            transform: `translate(0px, ${translationY}px)`,
+                        }}
+                    >
                         <PlayingCard
-                            style={{
-                                rotate: `${rotation}deg`,
-                                transform: `translate(0px, ${translationY}px)`,
-                            }}
                             card={card}
                             isOpponent={isOpponent}
                             showDetailButton={isMobile && !isOpponent}

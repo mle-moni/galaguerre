@@ -4,12 +4,12 @@ import type { PlayerCard } from "#api_types/game.types";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties } from "react";
-import { MinionCardFace } from "~/components/cards/minion_card_face";
-import { SpellCardFace } from "~/components/cards/spell_card_face";
-import { WeaponCardFace } from "~/components/cards/weapon_card_face";
+import { CardHoverPreview } from "~/components/cards/card_hover_preview";
+import { CardMobilePreviewButton } from "~/components/cards/card_mobile_preview_button";
+import { PlayerCardFace } from "~/components/cards/player_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
+import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { notifyError } from "~/services/toasts";
-import { CardDetailHover } from "./card_detail_hover.jsx";
 import "./playing_card.css";
 
 interface CardProps {
@@ -21,6 +21,7 @@ interface CardProps {
 
 export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton }: CardProps) => {
     const { store } = useGameContext();
+    const isMobilePortrait = useIsMobilePortrait();
 
     if (isOpponent) {
         return (
@@ -110,18 +111,46 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         );
     };
 
+    const wrapper = (content: React.ReactNode) => {
+        const attack = card.type === "MINION" ? card.attack : undefined;
+        const health = card.type === "MINION" ? card.health : undefined;
+
+        if (isMobilePortrait) {
+            return (
+                <CardMobilePreviewButton
+                    card={card}
+                    spellPower={store.me.spellPower}
+                    showDetailButton={showDetailButton}
+                    attack={attack}
+                    health={health}
+                >
+                    {content}
+                </CardMobilePreviewButton>
+            );
+        }
+
+        return (
+            <CardHoverPreview
+                card={card}
+                spellPower={store.me.spellPower}
+                disabled={store.isCardHoverPreviewDisabled}
+                attack={attack}
+                health={health}
+            >
+                {content}
+            </CardHoverPreview>
+        );
+    };
+
     if (card.type === "WEAPON") {
         return (
-            <WeaponCardFace
+            <PlayerCardFace
                 card={card}
                 style={style}
                 className={cardClassName}
+                spellPower={store.me.spellPower}
                 onClick={handlePlayableCardClick}
-                wrapper={(content) => (
-                    <CardDetailHover card={card} showDetailButton={showDetailButton}>
-                        {content}
-                    </CardDetailHover>
-                )}
+                wrapper={wrapper}
             />
         );
     }
@@ -130,37 +159,31 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         const isTargeted = store.targetSelectionStore.requiresTarget(card);
 
         return (
-            <SpellCardFace
+            <PlayerCardFace
                 card={card}
                 style={style}
                 className={cardClassName}
+                spellPower={store.me.spellPower}
                 onClick={handlePlayableCardClick}
                 onPointerDown={isTargeted && isArmed ? handleTargetedSpellPointerDown : undefined}
-                wrapper={(content) => (
-                    <CardDetailHover card={card} showDetailButton={showDetailButton}>
-                        {content}
-                    </CardDetailHover>
-                )}
+                wrapper={wrapper}
             />
         );
     }
 
     return (
-        <MinionCardFace
+        <PlayerCardFace
             card={card}
             attack={card.attack}
             health={card.health}
             style={style}
             className={cardClassName}
+            spellPower={store.me.spellPower}
             draggable={canPlay && !isCardQueued}
             onClick={handleMinionClick}
             onDragStart={() => store.cardDragStore.setCardDragged(card)}
             onDragEnd={() => store.cardDragStore.setCardDragged(null)}
-            wrapper={(content) => (
-                <CardDetailHover card={card} showDetailButton={showDetailButton}>
-                    {content}
-                </CardDetailHover>
-            )}
+            wrapper={wrapper}
         />
     );
 });

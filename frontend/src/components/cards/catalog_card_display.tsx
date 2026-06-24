@@ -1,11 +1,8 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
-import type { MinionCard, PlayerCard, SpellCard, WeaponCard } from "#api_types/game.types";
+import type { PlayerCard } from "#api_types/game.types";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
-import { CardDetailAdaptive } from "./card_detail_adaptive.jsx";
-import { MinionCardFace } from "./minion_card_face.jsx";
-import { SpellCardFace } from "./spell_card_face.jsx";
-import { WeaponCardFace } from "./weapon_card_face.jsx";
+import { PlayerCardFace } from "./player_card_face.jsx";
 
 const toPlayerCard = (card: ApiCatalogCard): PlayerCard => {
     const base = {
@@ -47,7 +44,6 @@ interface CatalogCardDisplayProps {
     style?: CSSProperties;
     onClick?: () => void;
     overlay?: React.ReactNode;
-    showDetailOnHover?: boolean;
 }
 
 export const CatalogCardDisplay = ({
@@ -56,53 +52,22 @@ export const CatalogCardDisplay = ({
     style,
     onClick,
     overlay,
-    showDetailOnHover = false,
 }: CatalogCardDisplayProps) => {
     const playerCard = toPlayerCard(card);
 
-    const wrapper = (content: ReactNode) => {
-        const inner = (
-            <div className="relative">
-                {content}
-                {overlay}
-            </div>
-        );
-
-        if (!showDetailOnHover) return inner;
-
-        return <CardDetailAdaptive card={playerCard}>{inner}</CardDetailAdaptive>;
-    };
-
-    if (card.type === "WEAPON") {
-        return (
-            <WeaponCardFace
-                card={playerCard as WeaponCard}
-                style={style}
-                className={clsx(className, onClick && "cursor-pointer")}
-                onClick={onClick}
-                wrapper={wrapper}
-            />
-        );
-    }
-
-    if (card.type === "SPELL") {
-        return (
-            <SpellCardFace
-                card={playerCard as SpellCard}
-                style={style}
-                className={clsx(className, onClick && "cursor-pointer")}
-                onClick={onClick}
-                wrapper={wrapper}
-            />
-        );
-    }
+    const wrapper = (content: ReactNode) => (
+        <div className="relative">
+            {content}
+            {overlay}
+        </div>
+    );
 
     return (
         <div onClick={onClick} className={clsx(onClick && "cursor-pointer")}>
-            <MinionCardFace
-                card={playerCard as MinionCard}
-                attack={card.attack}
-                health={card.health}
+            <PlayerCardFace
+                card={playerCard}
+                attack={card.type === "MINION" ? card.attack : undefined}
+                health={card.type === "MINION" ? card.health : undefined}
                 style={style}
                 className={className}
                 wrapper={wrapper}

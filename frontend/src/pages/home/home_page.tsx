@@ -16,7 +16,7 @@ export const HomePage = observer(() => {
 
     return (
         <AppLayout>
-            <div className="flex flex-col items-center py-6 pb-8 sm:py-0 sm:pb-0 gap-6 sm:gap-8 w-full sm:min-h-[calc(100dvh-3.5rem)] sm:justify-center">
+            <div className="flex flex-1 flex-col items-center justify-start sm:justify-center gap-6 sm:gap-8 w-full min-h-0">
                 <div className="text-center px-2">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gg-navy m-0">
                         Bienvenue, {user.pseudo ?? user.email.split("@")[0]}

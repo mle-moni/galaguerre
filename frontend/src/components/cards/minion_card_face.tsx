@@ -10,6 +10,7 @@ import {
 import "./card_faces.css";
 
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
+import { CardFaceDescription } from "./card_face_description.jsx";
 
 interface MinionCardFaceProps {
     card: MinionCard;
@@ -17,6 +18,8 @@ interface MinionCardFaceProps {
     health: number;
     className?: string;
     style?: CSSProperties;
+    spellPower?: number;
+    isSilenced?: boolean;
     attackStatus?: MinionAttackStatus;
     remainingAttacks?: number;
     draggable?: boolean;
@@ -33,6 +36,8 @@ export const MinionCardFace = ({
     health,
     className,
     style,
+    spellPower = 0,
+    isSilenced,
     attackStatus,
     remainingAttacks,
     draggable,
@@ -86,19 +91,26 @@ export const MinionCardFace = ({
                     draggable={false}
                 />
             </div>
-            <div className="flex flex-col playing-card-face__body justify-around">
-                <p className="text-center text-white m-0 text-xs px-1">{card.label}</p>
-                <div className="flex justify-between mx-1">
-                    <div className="relative">
-                        <div className="attack">{attack}</div>
-                        {showWindfuryBadge && (
-                            <span className="minion-card-face__attacks-remaining">
-                                {remainingAttacks}/{maxAttacks}
-                            </span>
-                        )}
-                    </div>
-                    <div className="health">{health}</div>
+            <div className="playing-card-face__body">
+                <div className="playing-card-face__text">
+                    <p className="playing-card-face__label">{card.label}</p>
+                    <CardFaceDescription
+                        card={card}
+                        spellPower={spellPower}
+                        isSilenced={isSilenced}
+                    />
                 </div>
+            </div>
+            <div className="playing-card-face__stats">
+                <div className="relative">
+                    <div className="attack">{attack}</div>
+                    {showWindfuryBadge && (
+                        <span className="minion-card-face__attacks-remaining">
+                            {remainingAttacks}/{maxAttacks}
+                        </span>
+                    )}
+                </div>
+                <div className="health">{health}</div>
             </div>
         </div>
     );

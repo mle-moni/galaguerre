@@ -132,6 +132,7 @@ const SpellDescription = ({
                     size="sm"
                     c="dimmed"
                     mb={index < card.spellActions.length - 1 ? 4 : 0}
+                    component="div"
                 >
                     <SpellEffectLine action={action} spellPower={spellPower} />
                 </Text>

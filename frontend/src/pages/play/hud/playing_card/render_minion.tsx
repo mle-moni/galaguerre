@@ -6,7 +6,8 @@ import { findAuthoritativeMinion } from "~/helpers/combat_target_validation";
 import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
-import { CardDetailHover } from "./card_detail_hover.jsx";
+import { CardHoverPreview } from "~/components/cards/card_hover_preview";
+import { CardMobilePreviewButton } from "~/components/cards/card_mobile_preview_button";
 
 interface MinionToRenderProps {
     state: MinionState;
@@ -81,15 +82,35 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
         store.minionDragStore.startAttack(state);
     };
 
-    const wrapper = (content: ReactNode) => (
-        <CardDetailHover
-            card={card}
-            showDetailButton={isMobilePortrait}
-            isSilenced={state.isSilenced === true}
-        >
-            {content}
-        </CardDetailHover>
-    );
+    const wrapper = (content: ReactNode) => {
+        if (isMobilePortrait) {
+            return (
+                <CardMobilePreviewButton
+                    card={card}
+                    spellPower={store.me.spellPower}
+                    isSilenced={state.isSilenced === true}
+                    showDetailButton
+                    attack={state.attack}
+                    health={state.health}
+                >
+                    {content}
+                </CardMobilePreviewButton>
+            );
+        }
+
+        return (
+            <CardHoverPreview
+                card={card}
+                spellPower={store.me.spellPower}
+                disabled={store.isCardHoverPreviewDisabled}
+                isSilenced={state.isSilenced === true}
+                attack={state.attack}
+                health={state.health}
+            >
+                {content}
+            </CardHoverPreview>
+        );
+    };
 
     return (
         <BoardMinionToken

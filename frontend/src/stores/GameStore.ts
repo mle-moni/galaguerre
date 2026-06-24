@@ -300,7 +300,7 @@ export class GameStore {
         };
     }
 
-    get isCardDetailHoverDisabled(): boolean {
+    get isCardHoverPreviewDisabled(): boolean {
         const { cardDragStore, targetSelectionStore, minionDragStore, weaponDragStore } = this;
 
         return (

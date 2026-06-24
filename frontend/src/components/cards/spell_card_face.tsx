@@ -4,11 +4,13 @@ import type { SpellCard } from "#api_types/game.types";
 import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
+import { CardFaceDescription } from "./card_face_description.jsx";
 
 interface SpellCardFaceProps {
     card: SpellCard;
     className?: string;
     style?: CSSProperties;
+    spellPower?: number;
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
@@ -18,6 +20,7 @@ export const SpellCardFace = ({
     card,
     className,
     style,
+    spellPower = 0,
     onClick,
     onPointerDown,
     wrapper = (content) => content,
@@ -42,8 +45,11 @@ export const SpellCardFace = ({
                     draggable={false}
                 />
             </div>
-            <div className="flex flex-col playing-card-face__body justify-center">
-                <p className="text-center text-white m-0 text-xs px-1">{card.label}</p>
+            <div className="playing-card-face__body playing-card-face__body--no-stats">
+                <div className="playing-card-face__text">
+                    <p className="playing-card-face__label">{card.label}</p>
+                    <CardFaceDescription card={card} spellPower={spellPower} />
+                </div>
             </div>
         </div>
     );

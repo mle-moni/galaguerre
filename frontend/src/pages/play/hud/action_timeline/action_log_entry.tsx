@@ -1,6 +1,6 @@
 import type { ApiGame, GameLogEntry, PlayerCard } from "#api_types/game.types";
 import { Text } from "@mantine/core";
-import { CardDetailPopover } from "~/components/cards/card_detail_popover";
+import { CardHoverPreview } from "~/components/cards/card_hover_preview";
 import "./action_timeline.css";
 
 interface ActionLogEntryProps {
@@ -22,9 +22,9 @@ interface CardLinkProps {
 }
 
 const CardLink = ({ card, spellPower }: CardLinkProps) => (
-    <CardDetailPopover card={card} spellPower={spellPower}>
+    <CardHoverPreview card={card} spellPower={spellPower}>
         <span className="action-timeline__card-link">{card.label}</span>
-    </CardDetailPopover>
+    </CardHoverPreview>
 );
 
 export const ActionLogEntry = ({ entry, game, currentUserId, className }: ActionLogEntryProps) => {
