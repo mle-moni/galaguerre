@@ -44,6 +44,15 @@ export default class User extends compose(BaseModel, AuthFinder) {
     @column.dateTime()
     declare onboardingCompletedAt: DateTime | null;
 
+    @column()
+    declare goldCoins: number;
+
+    @column.date()
+    declare lastDailyPackClaimedOn: DateTime | null;
+
+    @column.date()
+    declare lastVictoryPackGrantedOn: DateTime | null;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

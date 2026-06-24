@@ -1,5 +1,6 @@
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
+import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
 import { terminateGame } from "#controllers/games/terminate_game";
 import { applyGameResult, computeEloDeltas, DEFAULT_ELO, getWinnerUserId } from "#services/elo";
 import { createTestGame } from "#tests/helpers/game/game_factory";
@@ -136,5 +137,8 @@ test.group("elo", (group) => {
         assert.equal(playerTwo.wins, 1);
         assert.equal(playerOne.losses, 1);
         assert.exists(game.data.ratingResult);
+        assert.exists(game.data.rewardResult);
+        assert.equal(game.data.rewardResult!.playerTwo.goldCoins, GOLD_COINS_PER_VICTORY);
+        assert.equal(game.data.rewardResult!.playerOne.goldCoins, GOLD_COINS_PER_DEFEAT);
     });
 });

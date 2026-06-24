@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { LEADERBOARD_QUERY_KEY, AI_SPEEDRUN_LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
+import { PACKS_QUERY_KEY } from "~/hooks/use_collection";
 import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useOnboardingGame } from "~/hooks/use_onboarding_game";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
@@ -13,6 +14,7 @@ import { queryClient } from "~/services/query_client";
 import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
 import type { ApiUser } from "#api_types/auth.types";
 import { GameFinalStatsTable } from "./game_final_stats_table.tsx";
+import { GameLootSection } from "./game_loot_section.tsx";
 
 const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`);
 
@@ -26,6 +28,7 @@ export const GameFinalScreen = observer(() => {
 
     const invalidatePostGameQueries = () => {
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: PACKS_QUERY_KEY });
         queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY });
         if (isTraining && store.isUserWinner) {
             queryClient.invalidateQueries({ queryKey: AI_SPEEDRUN_LEADERBOARD_QUERY_KEY });
@@ -74,6 +77,11 @@ export const GameFinalScreen = observer(() => {
     const userRating =
         store.me.userId === store.p1.userId ? ratingResult?.playerOne : ratingResult?.playerTwo;
 
+    const userReward =
+        store.me.userId === store.p1.userId
+            ? store.game.data.rewardResult?.playerOne
+            : store.game.data.rewardResult?.playerTwo;
+
     return (
         <Modal
             centered={!isMobilePortrait}
@@ -117,6 +125,8 @@ export const GameFinalScreen = observer(() => {
                     opponent={store.opponent}
                     winnerUserId={store.winner.userId}
                 />
+
+                {userReward ? <GameLootSection reward={userReward} /> : null}
 
                 {isOnboardingGame ? (
                     <Stack gap="sm" mt="sm">

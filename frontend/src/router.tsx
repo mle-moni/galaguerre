@@ -4,6 +4,7 @@ import { CenteredLoader } from "./components/centered_loader.jsx";
 import { UserContext, useUserQuery } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/error_404_page.jsx";
 import { CollectionPage } from "./pages/collection/collection_page.jsx";
+import { CollectionShopPage } from "./pages/collection/collection_shop_page.jsx";
 import { PackOpeningPage } from "./pages/collection/pack_opening_page.jsx";
 import { DeckBuilderPage } from "./pages/decks/deck_builder_page.jsx";
 import { DecksPage } from "./pages/decks/decks_page.jsx";
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
             {
                 path: "/collection/packs",
                 element: <PackOpeningPage />,
+            },
+            {
+                path: "/collection/shop",
+                element: <CollectionShopPage />,
             },
             {
                 path: "/decks",

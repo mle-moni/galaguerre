@@ -24,6 +24,8 @@ export type ScannedRoutes = {
         "collection.index": { paramsTuple?: []; params?: {} };
         "collection.packs": { paramsTuple?: []; params?: {} };
         "collection.open_pack": { paramsTuple?: []; params?: {} };
+        "rewards.buy_pack": { paramsTuple?: []; params?: {} };
+        "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.store": { paramsTuple?: []; params?: {} };
@@ -88,6 +90,8 @@ export type ScannedRoutes = {
         "auth.register": { paramsTuple?: []; params?: {} };
         "auth.logout": { paramsTuple?: []; params?: {} };
         "collection.open_pack": { paramsTuple?: []; params?: {} };
+        "rewards.buy_pack": { paramsTuple?: []; params?: {} };
+        "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.store": { paramsTuple?: []; params?: {} };
         "games.training": { paramsTuple?: []; params?: {} };

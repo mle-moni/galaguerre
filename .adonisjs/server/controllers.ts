@@ -89,4 +89,7 @@ export const controllers = {
     leaderboard: {
         Leaderboard: () => import("#controllers/leaderboard/leaderboard_controller"),
     },
+    rewards: {
+        Rewards: () => import("#controllers/rewards/rewards_controller"),
+    },
 };

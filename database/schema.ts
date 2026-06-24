@@ -197,8 +197,11 @@ export class UserSchema extends BaseModel {
         "createdAt",
         "elo",
         "email",
+        "goldCoins",
         "id",
         "isSuperAdmin",
+        "lastDailyPackClaimedOn",
+        "lastVictoryPackGrantedOn",
         "losses",
         "onboardingCompletedAt",
         "password",
@@ -214,10 +217,16 @@ export class UserSchema extends BaseModel {
     declare elo: number;
     @column()
     declare email: string;
+    @column()
+    declare goldCoins: number;
     @column({ isPrimary: true })
     declare id: number;
     @column()
     declare isSuperAdmin: boolean | null;
+    @column.date()
+    declare lastDailyPackClaimedOn: DateTime | null;
+    @column.date()
+    declare lastVictoryPackGrantedOn: DateTime | null;
     @column()
     declare losses: number;
     @column.dateTime()

@@ -1,5 +1,6 @@
 import type { ApiUser } from "#api_types/auth.types";
 import Game from "#models/game";
+import { canClaimDailyPack } from "#services/rewards/claim_daily_pack";
 import { findQueueItemByUserId } from "#services/sockets/matchmaking";
 import { randomUUID } from "node:crypto";
 import type { HttpContext } from "@adonisjs/core/http";
@@ -32,5 +33,7 @@ export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | voi
         wins: user.wins,
         losses: user.losses,
         onboardingCompletedAt: user.onboardingCompletedAt?.toISO() ?? null,
+        goldCoins: user.goldCoins,
+        canClaimDailyPack: canClaimDailyPack(user),
     };
 };

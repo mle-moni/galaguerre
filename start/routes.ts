@@ -20,6 +20,7 @@ import DecksController from "#controllers/decks/decks_controller";
 import GameHistoryController from "#controllers/game_history/game_history_controller";
 import GamesController from "#controllers/games/games_controller";
 import LeaderboardController from "#controllers/leaderboard/leaderboard_controller";
+import RewardsController from "#controllers/rewards/rewards_controller";
 import { registerUploadRoute } from "../app/utils/files.js";
 import { middleware } from "./kernel.js";
 
@@ -49,6 +50,8 @@ router
         router.get("/collection", [CollectionController, "index"]);
         router.get("/packs", [CollectionController, "packs"]);
         router.post("/packs/open", [CollectionController, "openPack"]);
+        router.post("/packs/buy", [RewardsController, "buyPack"]);
+        router.post("/rewards/daily-pack", [RewardsController, "claimDailyPack"]);
         router.post("/decks/:id/select", [DecksController, "select"]);
         router.resource("decks", DecksController).apiOnly();
         router.post("/games/training", [GamesController, "training"]);

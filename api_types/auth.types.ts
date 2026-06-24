@@ -9,4 +9,6 @@ export interface ApiUser {
     wins: number;
     losses: number;
     onboardingCompletedAt: string | null;
+    goldCoins: number;
+    canClaimDailyPack: boolean;
 }

@@ -3,8 +3,10 @@ import type {
     ApiOpenPackResponse,
     ApiPacksResponse,
 } from "#api_types/collection.types";
+import type { ApiBuyPackResponse } from "#api_types/rewards.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { privateAxios } from "~/services/axios";
+import { USER_QUERY_KEY } from "~/hooks/use_user";
 
 export const COLLECTION_QUERY_KEY = ["collection"] as const;
 export const PACKS_QUERY_KEY = ["packs"] as const;
@@ -39,6 +41,21 @@ export const useOpenPackMutation = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: COLLECTION_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: PACKS_QUERY_KEY });
+        },
+    });
+};
+
+export const useBuyPackMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await privateAxios.post<ApiBuyPackResponse>("/api/packs/buy");
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
             queryClient.invalidateQueries({ queryKey: PACKS_QUERY_KEY });
         },
     });

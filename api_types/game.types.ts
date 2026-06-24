@@ -27,6 +27,7 @@ import type {
     MinionPowerSnapshot,
     PassiveSnapshot,
 } from "./card.types.js";
+import type { GameRewardResult } from "./rewards.types.js";
 
 export interface ComparableStats {
     cost: number;
@@ -212,6 +213,8 @@ export interface GameRatingResult {
     playerTwo: GameRatingPlayerResult;
 }
 
+export type { GameRewardPlayerResult, GameRewardResult } from "./rewards.types.js";
+
 export interface GameMulliganState {
     playerOneDone: boolean;
     playerTwoDone: boolean;
@@ -227,6 +230,7 @@ export interface GameData {
     turnEndsAt?: number;
     mulliganEndsAt?: number;
     ratingResult?: GameRatingResult;
+    rewardResult?: GameRewardResult;
     isTraining?: boolean;
     isOnboardingTutorial?: boolean;
 }
