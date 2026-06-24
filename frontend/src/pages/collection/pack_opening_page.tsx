@@ -132,13 +132,19 @@ export const PackOpeningPage = observer(() => {
                                     ? `Vous avez ${unopenedCount} paquet${unopenedCount > 1 ? "s" : ""} à ouvrir. Chaque paquet contient 5 cartes.`
                                     : "Vous n'avez plus de paquets à ouvrir."}
                             </p>
-                            <Button
-                                className="gg-btn-primary"
-                                disabled={unopenedCount === 0}
-                                onClick={handleStartOpening}
-                            >
-                                Ouvrir un paquet
-                            </Button>
+                            {unopenedCount > 0 ? (
+                                <Button className="gg-btn-primary" onClick={handleStartOpening}>
+                                    Ouvrir un paquet
+                                </Button>
+                            ) : (
+                                <Button
+                                    component={Link}
+                                    to="/collection/shop"
+                                    className="gg-btn-primary"
+                                >
+                                    Acheter un paquet
+                                </Button>
+                            )}
                         </div>
                     ) : null}
 
