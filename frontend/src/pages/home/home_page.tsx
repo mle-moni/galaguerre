@@ -67,6 +67,12 @@ export const HomePage = observer(() => {
                         </p>
                     </Link>
 
+                    <Link to="/collection" className="gg-mode-tile">
+                        <span className="gg-mode-tile__icon">📚</span>
+                        <h2 className="gg-mode-tile__title">Collection</h2>
+                        <p className="gg-mode-tile__subtitle">Parcourir toutes les cartes du jeu</p>
+                    </Link>
+
                     <Link to="/leaderboard" className="gg-mode-tile">
                         <span className="gg-mode-tile__icon">🏆</span>
                         <h2 className="gg-mode-tile__title">Classement</h2>

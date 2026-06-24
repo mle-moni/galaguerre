@@ -3,6 +3,7 @@ import { AppShell } from "./components/layout/app_shell.jsx";
 import { CenteredLoader } from "./components/centered_loader.jsx";
 import { UserContext, useUserQuery } from "./hooks/use_user.js";
 import { Error404Page } from "./pages/errors/error_404_page.jsx";
+import { CollectionPage } from "./pages/collection/collection_page.jsx";
 import { DeckBuilderPage } from "./pages/decks/deck_builder_page.jsx";
 import { DecksPage } from "./pages/decks/decks_page.jsx";
 import { BoardMinionStylesPage } from "./pages/dev/board_minion_styles_page.jsx";
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
             {
                 path: "/play",
                 element: <PlayPage />,
+            },
+            {
+                path: "/collection",
+                element: <CollectionPage />,
             },
             {
                 path: "/decks",

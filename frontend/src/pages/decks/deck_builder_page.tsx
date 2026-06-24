@@ -2,16 +2,14 @@ import {
     DECK_MAX_CARDS,
     DECK_MAX_COPIES_PER_CARD,
     DECK_MIN_CARDS,
-    type ApiCatalogCard,
     type ApiDeckCardEntry,
 } from "#api_types/deck.types";
-import { CARD_TAG_LABELS } from "#api_types/card.types";
-import { Button, Collapse, NumberInput, Select, Tabs, TextInput } from "@mantine/core";
+import { Button, Collapse, NumberInput, Tabs, TextInput } from "@mantine/core";
 import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { CardArtworkModal } from "~/components/cards/card_artwork_modal";
+import { Catalogue } from "~/components/catalogue/catalogue";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
@@ -23,8 +21,6 @@ import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
-
-type CardTypeFilter = "ALL" | "MINION" | "SPELL" | "WEAPON";
 
 const entriesToMap = (entries: ApiDeckCardEntry[]) => {
     const map = new Map<number, number>();
@@ -40,20 +36,6 @@ const mapToEntries = (map: Map<number, number>): ApiDeckCardEntry[] =>
 const getTotalCards = (map: Map<number, number>) =>
     [...map.values()].reduce((sum, count) => sum + count, 0);
 
-const normalizeForSearch = (value: string) =>
-    value
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/\p{Diacritic}/gu, "");
-
-const cardMatchesSearch = (card: ApiCatalogCard, query: string) => {
-    const normalizedQuery = normalizeForSearch(query);
-    if (normalizeForSearch(card.label).includes(normalizedQuery)) return true;
-    return card.tags.some((tag) =>
-        normalizeForSearch(CARD_TAG_LABELS[tag].label).includes(normalizedQuery),
-    );
-};
-
 export const DeckBuilderPage = observer(() => {
     const user = useUser();
     const navigate = useNavigate();
@@ -68,12 +50,8 @@ export const DeckBuilderPage = observer(() => {
 
     const [deckName, setDeckName] = useState<string | null>(null);
     const [composition, setComposition] = useState<Map<number, number> | null>(null);
-    const [search, setSearch] = useState("");
-    const [typeFilter, setTypeFilter] = useState<CardTypeFilter>("ALL");
     const [costFilter, setCostFilter] = useState<string | null>(null);
-    const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
     const [showManaCurve, setShowManaCurve] = useState(false);
-    const [artworkCard, setArtworkCard] = useState<ApiCatalogCard | null>(null);
 
     const catalog = cardsQuery.data ?? [];
     const cardSets = cardSetsQuery.data ?? [];
@@ -81,12 +59,6 @@ export const DeckBuilderPage = observer(() => {
 
     const catalogById = useMemo(() => new Map(catalog.map((card) => [card.id, card])), [catalog]);
     const activeSetIds = useMemo(() => new Set(cardSets.map((set) => set.id)), [cardSets]);
-
-    useEffect(() => {
-        if (selectedSetId === null && cardSets[0]) {
-            setSelectedSetId(String(cardSets[0].id));
-        }
-    }, [cardSets, selectedSetId]);
 
     if (!user) return <Navigate to="/login" />;
     if (!deckId || Number.isNaN(deckId)) return <Navigate to="/decks" />;
@@ -98,14 +70,6 @@ export const DeckBuilderPage = observer(() => {
     const currentName = deckName ?? deck.name;
     const currentComposition = composition ?? entriesToMap(deck.cards);
     const totalCards = getTotalCards(currentComposition);
-
-    const filteredCatalog = catalog.filter((card) => {
-        if (selectedSetId !== null && card.cardSetId !== Number(selectedSetId)) return false;
-        if (search && !cardMatchesSearch(card, search)) return false;
-        if (typeFilter !== "ALL" && card.type !== typeFilter) return false;
-        if (costFilter !== null && card.cost !== Number(costFilter)) return false;
-        return true;
-    });
 
     const canAddCard = (cardId: number) => {
         if (!catalogById.has(cardId)) return false;
@@ -161,82 +125,16 @@ export const DeckBuilderPage = observer(() => {
         setCostFilter(cost === null || costFilter === String(cost) ? null : String(cost));
     };
 
-    const costOptions = [
-        { value: "", label: "Tous les coûts" },
-        ...Array.from(new Set(catalog.map((c) => c.cost)))
-            .sort((a, b) => a - b)
-            .map((cost) => ({ value: String(cost), label: `${cost} mana` })),
-    ];
-
-    const cardSetOptions = cardSets.map((set) => ({
-        value: String(set.id),
-        label: set.name,
-    }));
-
     const catalogPanel = (
-        <div className="lg:col-span-2 gg-panel flex flex-col flex-1 min-h-0 lg:h-full overflow-hidden">
-            <div className="gg-panel-header shrink-0">Catalogue</div>
-            <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex flex-wrap gap-3 items-end mb-4 shrink-0">
-                    <Select
-                        label="Set de cartes"
-                        value={selectedSetId ?? ""}
-                        onChange={(value) => setSelectedSetId(value || null)}
-                        data={cardSetOptions}
-                        className="w-full sm:w-[180px]"
-                        styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
-                        disabled={cardSetOptions.length === 0}
-                    />
-                    <TextInput
-                        placeholder="Rechercher une carte..."
-                        value={search}
-                        onChange={(e) => setSearch(e.currentTarget.value)}
-                        className="w-full sm:flex-1 sm:min-w-[180px]"
-                    />
-                    <Select
-                        value={typeFilter}
-                        onChange={(v) => setTypeFilter((v as CardTypeFilter) ?? "ALL")}
-                        data={[
-                            { value: "ALL", label: "Tous types" },
-                            { value: "MINION", label: "Serviteurs" },
-                            { value: "SPELL", label: "Sorts" },
-                            { value: "WEAPON", label: "Armes" },
-                        ]}
-                        className="w-full sm:w-[140px]"
-                    />
-                    <Select
-                        value={costFilter ?? ""}
-                        onChange={(v) => setCostFilter(v || null)}
-                        data={costOptions}
-                        className="w-full sm:w-[140px]"
-                    />
-                </div>
-                <div
-                    className={
-                        isNarrowScreen ? "gg-catalog-grid gg-catalog-grid--list" : "gg-catalog-grid"
-                    }
-                >
-                    {filteredCatalog.length === 0 ? (
-                        <p className="text-white/50 text-sm m-0 w-full text-center py-8">
-                            Aucune carte ne correspond à vos filtres.
-                        </p>
-                    ) : (
-                        filteredCatalog.map((card) => (
-                            <CatalogCardItem
-                                key={card.id}
-                                card={card}
-                                count={currentComposition.get(card.id) ?? 0}
-                                canAdd={canAddCard(card.id)}
-                                onAdd={() => addCard(card.id)}
-                                onRemove={() => removeCard(card.id)}
-                                onViewArtwork={() => setArtworkCard(card)}
-                                isNarrowScreen={isNarrowScreen}
-                            />
-                        ))
-                    )}
-                </div>
-            </div>
-        </div>
+        <Catalogue
+            composition={currentComposition}
+            canAddCard={canAddCard}
+            onAdd={addCard}
+            onRemove={removeCard}
+            costFilter={costFilter}
+            onCostFilterChange={setCostFilter}
+            className="lg:col-span-2 flex flex-col flex-1 min-h-0 lg:h-full"
+        />
     );
 
     const compositionPanel = (
@@ -449,135 +347,6 @@ export const DeckBuilderPage = observer(() => {
                     </div>
                 )}
             </div>
-
-            <CardArtworkModal
-                card={artworkCard}
-                opened={artworkCard !== null}
-                onClose={() => setArtworkCard(null)}
-            />
         </AppLayout>
     );
 });
-
-interface CatalogCardItemProps {
-    card: ApiCatalogCard;
-    count: number;
-    canAdd: boolean;
-    onAdd: () => void;
-    onRemove: () => void;
-    onViewArtwork: () => void;
-    isNarrowScreen: boolean;
-}
-
-const catalogRowControlsInputStyles = {
-    input: {
-        textAlign: "center" as const,
-        height: 36,
-        minHeight: 36,
-    },
-};
-
-const CatalogCardItem = ({
-    card,
-    count,
-    canAdd,
-    onAdd,
-    onRemove,
-    onViewArtwork,
-    isNarrowScreen,
-}: CatalogCardItemProps) => {
-    if (isNarrowScreen) {
-        return (
-            <div className="gg-composition-row">
-                <div className="gg-composition-row__thumb-wrap">
-                    <CatalogCardHoverPreview card={card}>
-                        <div className="gg-composition-row__thumb card-composition">
-                            <CatalogCardDisplay card={card} variant="artwork" />
-                        </div>
-                    </CatalogCardHoverPreview>
-                </div>
-                <div className="gg-composition-row__actions">
-                    <div className="gg-composition-row__controls">
-                        {count > 0 && (
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                color="gold"
-                                onClick={onRemove}
-                                aria-label={`Retirer ${card.label} du deck`}
-                            >
-                                <IconMinus size={14} />
-                            </Button>
-                        )}
-                        {count > 0 && (
-                            <NumberInput
-                                value={count}
-                                readOnly
-                                hideControls
-                                className="w-14"
-                                styles={catalogRowControlsInputStyles}
-                            />
-                        )}
-                        {canAdd && (
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                color="gold"
-                                onClick={onAdd}
-                                aria-label={`Ajouter ${card.label} au deck`}
-                            >
-                                <IconPlus size={14} />
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="gg-catalog-card-slot">
-            <div
-                className="gg-catalog-card-slot__preview"
-                onClick={onViewArtwork}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onViewArtwork();
-                    }
-                }}
-            >
-                <CatalogCardDisplay card={card} />
-            </div>
-            {count > 0 && (
-                <button
-                    type="button"
-                    className="gg-catalog-card-slot__action gg-catalog-card-slot__action--remove"
-                    aria-label={`Retirer ${card.label} du deck`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onRemove();
-                    }}
-                >
-                    <IconMinus size={16} stroke={2.5} />
-                </button>
-            )}
-            {canAdd && (
-                <button
-                    type="button"
-                    className="gg-catalog-card-slot__action gg-catalog-card-slot__action--add"
-                    aria-label={`Ajouter ${card.label} au deck`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onAdd();
-                    }}
-                >
-                    <IconPlus size={16} stroke={2.5} />
-                </button>
-            )}
-            {count > 0 && <span className="gg-catalog-card-slot__count">{count}</span>}
-        </div>
-    );
-};
