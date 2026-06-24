@@ -10,7 +10,8 @@ export { deckCardsToEntries };
 
 export const serializeDeck = (deck: Deck): ApiDeck => {
     const cards = deckCardsToEntries(deck);
-    const composition = validateDeckComposition(cards);
+    const rarityByCardId = new Map(deck.cards.map((card) => [card.id, card.rarity]));
+    const composition = validateDeckComposition(cards, rarityByCardId);
     const cardValidation = validateDeck(deck);
     const cardSetValidation = validateDeckCardSets(deck.cards);
     const collectibleValidation = validateDeckCollectible(deck.cards);

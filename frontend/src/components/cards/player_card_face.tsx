@@ -25,6 +25,7 @@ interface PlayerCardFaceProps {
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
+    showLegendaryBadge?: boolean;
 }
 
 export const PlayerCardFace = ({
@@ -44,6 +45,7 @@ export const PlayerCardFace = ({
     onClick,
     onPointerDown,
     wrapper,
+    showLegendaryBadge = false,
 }: PlayerCardFaceProps) => {
     const sizeClassName = size === "full" ? "playing-card-face--full" : undefined;
     const mergedClassName = clsx(sizeClassName, className);
@@ -57,6 +59,7 @@ export const PlayerCardFace = ({
                 spellPower={spellPower}
                 onClick={onClick}
                 wrapper={wrapper}
+                showLegendaryBadge={showLegendaryBadge}
             />
         );
     }
@@ -71,6 +74,7 @@ export const PlayerCardFace = ({
                 onClick={onClick}
                 onPointerDown={onPointerDown}
                 wrapper={wrapper}
+                showLegendaryBadge={showLegendaryBadge}
             />
         );
     }
@@ -92,6 +96,7 @@ export const PlayerCardFace = ({
             onClick={onClick}
             onPointerDown={onPointerDown}
             wrapper={wrapper}
+            showLegendaryBadge={showLegendaryBadge}
         />
     );
 };

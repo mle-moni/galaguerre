@@ -80,6 +80,7 @@ export class CardSchema extends BaseModel {
         "data",
         "id",
         "isCollectible",
+        "rarity",
         "updatedAt",
     ] as const;
     $columns = CardSchema.$columns;
@@ -93,6 +94,8 @@ export class CardSchema extends BaseModel {
     declare id: number;
     @column()
     declare isCollectible: boolean;
+    @column()
+    declare rarity: string;
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     declare updatedAt: DateTime | null;
 }

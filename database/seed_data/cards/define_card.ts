@@ -1,3 +1,4 @@
+import type { CardRarity } from "#api_types/card_rarity.types";
 import type { CardTag } from "#galaguerre/card_tags";
 import type {
     CardActionDefinition,
@@ -27,6 +28,7 @@ import {
 } from "#galaguerre/card_definition.schema";
 export type CardSeedOptions = {
     isCollectible?: boolean;
+    rarity?: CardRarity;
 };
 
 export type CardSeedEntry = {
@@ -34,6 +36,7 @@ export type CardSeedEntry = {
     cardSetName: string;
     data: CardData;
     isCollectible?: boolean;
+    rarity?: CardRarity;
 };
 
 type CardSeedBase = {
@@ -633,6 +636,7 @@ export const defineMinion = (
         cardSetName: base.cardSetName,
         data,
         isCollectible: options.isCollectible,
+        rarity: options.rarity,
     };
 };
 
@@ -657,6 +661,7 @@ export const defineSpell = (
         cardSetName: base.cardSetName,
         data,
         isCollectible: options.isCollectible,
+        rarity: options.rarity,
     };
 };
 
@@ -681,6 +686,7 @@ export const defineWeapon = (
         cardSetName: base.cardSetName,
         data,
         isCollectible: options.isCollectible,
+        rarity: options.rarity,
     };
 };
 
@@ -688,4 +694,5 @@ export const buildCardInsert = (entry: CardSeedEntry, cardSetId: number) => ({
     cardSetId,
     data: parseCardData(entry.data),
     isCollectible: entry.isCollectible ?? true,
+    rarity: entry.rarity ?? "COMMON",
 });

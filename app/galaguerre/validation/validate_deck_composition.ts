@@ -1,3 +1,5 @@
+import type { CardRarity } from "#api_types/card_rarity.types";
+import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
 import {
     DECK_MAX_CARDS,
     DECK_MAX_COPIES_PER_CARD,
@@ -20,6 +22,7 @@ export type DeckCompositionResult = {
 
 export const validateDeckCompositionForSave = (
     cards: ApiDeckCardEntry[],
+    rarityByCardId: Map<number, CardRarity> = new Map(),
 ): DeckCompositionResult => {
     const errors: DeckCompositionError[] = [];
     let cardCount = 0;
@@ -33,10 +36,14 @@ export const validateDeckCompositionForSave = (
             continue;
         }
 
-        if (entry.count > DECK_MAX_COPIES_PER_CARD) {
+        const maxCopies = rarityByCardId.has(entry.cardId)
+            ? getMaxCopiesForRarity(rarityByCardId.get(entry.cardId)!)
+            : DECK_MAX_COPIES_PER_CARD;
+
+        if (entry.count > maxCopies) {
             errors.push({
                 cardId: entry.cardId,
-                reason: `Maximum ${DECK_MAX_COPIES_PER_CARD} exemplaires par carte`,
+                reason: `Maximum ${maxCopies} exemplaire(s) par carte`,
             });
         }
 
@@ -56,8 +63,11 @@ export const validateDeckCompositionForSave = (
     };
 };
 
-export const validateDeckComposition = (cards: ApiDeckCardEntry[]): DeckCompositionResult => {
-    const result = validateDeckCompositionForSave(cards);
+export const validateDeckComposition = (
+    cards: ApiDeckCardEntry[],
+    rarityByCardId: Map<number, CardRarity> = new Map(),
+): DeckCompositionResult => {
+    const result = validateDeckCompositionForSave(cards, rarityByCardId);
 
     if (result.cardCount < DECK_MIN_CARDS) {
         result.errors.push({

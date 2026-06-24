@@ -458,6 +458,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["SUPPORT"],
             dynamicCost: { reductions: [{ source: "BOARD_MINION_COUNT", amountPer: 1 }] },
         },
+        { rarity: "LEGENDARY" },
     ),
     defineMinion(
         138,
@@ -471,6 +472,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["PM"],
             dynamicCost: { reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }] },
         },
+        { rarity: "LEGENDARY" },
     ),
 
     // --- regional / pets minions ---
@@ -721,6 +723,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["DEVELOPPEUR"],
             dynamicCost: { reductions: [{ source: "HERO_MISSING_HEALTH", amountPer: 1 }] },
         },
+        { rarity: "LEGENDARY" },
     ),
 
     // --- spells ---

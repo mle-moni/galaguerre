@@ -1,3 +1,4 @@
+import type { CardRarity } from "#api_types/card_rarity.types";
 import type { CardData } from "#galaguerre/card_definition.schema";
 import { parseCardData } from "#galaguerre/card_definition.schema";
 import { BaseModel, beforeSave, belongsTo, column } from "@adonisjs/lucid/orm";
@@ -20,6 +21,9 @@ export default class Card extends BaseModel {
 
     @column()
     declare isCollectible: boolean;
+
+    @column()
+    declare rarity: CardRarity;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;

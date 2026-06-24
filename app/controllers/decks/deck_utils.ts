@@ -1,4 +1,5 @@
 import type { ApiDeckCardEntry } from "#api_types/deck.types";
+import type { CardRarity } from "#api_types/card_rarity.types";
 import Card from "#models/card";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
@@ -48,11 +49,16 @@ export const preloadDeckCards = async (deck: Deck) => {
 export const validateDeckCardEntries = async (entries: ApiDeckCardEntry[]) => {
     const cardIds = [...new Set(entries.map((entry) => entry.cardId))];
     if (cardIds.length === 0) {
-        return { valid: true, errors: [] };
+        return { valid: true, errors: [], rarityByCardId: new Map<number, CardRarity>() };
     }
 
     const found = await Card.query().whereIn("id", cardIds);
     const cardsById = new Map(found.map((card) => [card.id, card]));
+    const collectibleValidation = validateDeckEntriesCollectible(entries, cardsById);
+    const rarityByCardId = new Map(found.map((card) => [card.id, card.rarity]));
 
-    return validateDeckEntriesCollectible(entries, cardsById);
+    return {
+        ...collectibleValidation,
+        rarityByCardId,
+    };
 };

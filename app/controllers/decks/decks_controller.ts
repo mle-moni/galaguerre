@@ -74,19 +74,22 @@ export default class DecksController {
             messagesProvider,
         })) as UpdateDeckPayload;
 
-        const composition = validateDeckCompositionForSave(payload.cards);
-        if (!composition.valid) {
-            return response.badRequest({
-                error: "Composition de deck invalide",
-                details: composition.errors,
-            });
-        }
-
         const cardEntries = await validateDeckCardEntries(payload.cards);
         if (!cardEntries.valid) {
             return response.badRequest({
                 error: "Une ou plusieurs cartes sont invalides",
                 details: cardEntries.errors,
+            });
+        }
+
+        const composition = validateDeckCompositionForSave(
+            payload.cards,
+            cardEntries.rarityByCardId,
+        );
+        if (!composition.valid) {
+            return response.badRequest({
+                error: "Composition de deck invalide",
+                details: composition.errors,
             });
         }
 

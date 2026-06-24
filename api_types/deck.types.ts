@@ -1,3 +1,4 @@
+import type { CardRarity } from "./card_rarity.types.js";
 import type {
     CardActionSnapshot,
     CardTag,
@@ -28,6 +29,7 @@ export interface ApiCatalogCardBase {
     cost: number;
     cardSetId: number;
     tags: CardTag[];
+    rarity: CardRarity;
     description: string;
 }
 

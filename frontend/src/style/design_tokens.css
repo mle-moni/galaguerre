@@ -189,6 +189,13 @@
     transform: translateX(-50%);
 }
 
+.gg-catalog-card-slot__rarity {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 2;
+}
+
 .gg-catalog-card-slot--unowned {
     opacity: 0.45;
 }

@@ -11,6 +11,7 @@ import "./card_faces.css";
 
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
 import { CardFaceDescription } from "./card_face_description.jsx";
+import { CardLegendaryBadge } from "./card_legendary_badge.jsx";
 
 interface MinionCardFaceProps {
     card: MinionCard;
@@ -28,6 +29,7 @@ interface MinionCardFaceProps {
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
+    showLegendaryBadge?: boolean;
 }
 
 export const MinionCardFace = ({
@@ -46,6 +48,7 @@ export const MinionCardFace = ({
     onClick,
     onPointerDown,
     wrapper = (content) => content,
+    showLegendaryBadge = false,
 }: MinionCardFaceProps) => {
     const maxAttacks = getMinionCardMaxAttacks(card);
     const showWindfuryBadge =
@@ -93,6 +96,7 @@ export const MinionCardFace = ({
             </div>
             <div className="playing-card-face__body">
                 <div className="playing-card-face__text">
+                    {showLegendaryBadge && <CardLegendaryBadge />}
                     <p className="playing-card-face__label">{card.label}</p>
                     <CardFaceDescription
                         card={card}

@@ -1,9 +1,5 @@
-import {
-    DECK_MAX_CARDS,
-    DECK_MAX_COPIES_PER_CARD,
-    DECK_MIN_CARDS,
-    type ApiDeckCardEntry,
-} from "#api_types/deck.types";
+import { DECK_MAX_CARDS, DECK_MIN_CARDS, type ApiDeckCardEntry } from "#api_types/deck.types";
+import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
 import { Button, Collapse, NumberInput, Tabs, TextInput } from "@mantine/core";
 import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
@@ -84,10 +80,12 @@ export const DeckBuilderPage = observer(() => {
 
     const canAddCard = (cardId: number) => {
         if (!catalogById.has(cardId)) return false;
+        const card = catalogById.get(cardId)!;
         const count = currentComposition.get(cardId) ?? 0;
         const owned = ownedCounts.get(cardId) ?? 0;
         if (count >= owned) return false;
-        return count < DECK_MAX_COPIES_PER_CARD && totalCards < DECK_MAX_CARDS;
+        const maxCopies = getMaxCopiesForRarity(card.rarity);
+        return count < maxCopies && totalCards < DECK_MAX_CARDS;
     };
 
     const addCard = (cardId: number) => {

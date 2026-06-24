@@ -72,6 +72,7 @@ export const CatalogCardDisplay = ({
     }
 
     const playerCard = catalogCardToPlayerCard(card);
+    const showLegendaryBadge = card.rarity === "LEGENDARY";
 
     const wrapper = (content: ReactNode) => (
         <div className="relative">
@@ -90,6 +91,7 @@ export const CatalogCardDisplay = ({
                 style={style}
                 className={className}
                 wrapper={wrapper}
+                showLegendaryBadge={showLegendaryBadge}
             />
         </div>
     );

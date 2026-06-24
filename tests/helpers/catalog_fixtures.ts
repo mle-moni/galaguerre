@@ -1,3 +1,4 @@
+import type { CardRarity } from "#api_types/card_rarity.types";
 import Card from "#models/card";
 import type { CardData } from "#galaguerre/card_definition.schema";
 import { parseCardData } from "#galaguerre/card_definition.schema";
@@ -10,12 +11,14 @@ export const createTestCard = (overrides: {
     imageUrl?: string;
     cardSetId?: number;
     data?: CardData;
+    rarity?: CardRarity;
 }): Card => {
     const baseData = overrides.data ?? defaultMinionData();
 
     const card = new Card();
     card.id = overrides.id ?? 1;
     card.cardSetId = overrides.cardSetId ?? 1;
+    card.rarity = overrides.rarity ?? "COMMON";
     card.data = parseCardData({
         ...baseData,
         name: overrides.label ?? baseData.name,

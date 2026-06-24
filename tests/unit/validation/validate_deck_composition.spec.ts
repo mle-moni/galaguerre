@@ -31,6 +31,24 @@ test.group("validate_deck_composition", () => {
         assert.include(result.errors[0].reason, String(DECK_MAX_COPIES_PER_CARD));
     });
 
+    test("rejects more than one copy of a legendary card", ({ assert }) => {
+        const rarityByCardId = new Map([[42, "LEGENDARY" as const]]);
+
+        const result = validateDeckCompositionForSave([{ cardId: 42, count: 2 }], rarityByCardId);
+
+        assert.isFalse(result.valid);
+        assert.equal(result.errors[0].cardId, 42);
+        assert.include(result.errors[0].reason, "1 exemplaire");
+    });
+
+    test("accepts one copy of a legendary card", ({ assert }) => {
+        const rarityByCardId = new Map([[42, "LEGENDARY" as const]]);
+
+        const result = validateDeckCompositionForSave([{ cardId: 42, count: 1 }], rarityByCardId);
+
+        assert.isTrue(result.valid);
+    });
+
     test("rejects more than max total cards", ({ assert }) => {
         const entries = Array.from({ length: 16 }, (_, index) => ({
             cardId: index + 1,
