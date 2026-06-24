@@ -106,13 +106,27 @@ test.group("decks api", (group) => {
         assert.include(result.errors[0].reason, "n'est pas collectionnable");
     });
 
-    test("listCards excludes non-collectible cards", async ({ assert }) => {
+    test("listCards excludes non-collectible cards by default", async ({ assert }) => {
         await createMinionCard("Légume", false);
         const collectible = await createMinionCard("Lutin", true);
 
-        const cards = await listCards({} as never);
+        const cards = await listCards({
+            request: { input: () => undefined },
+        } as never);
 
         assert.isTrue(cards.some((card) => card.id === collectible.id));
         assert.isFalse(cards.some((card) => card.label === "Légume"));
+    });
+
+    test("listCards includes non-collectible cards when requested", async ({ assert }) => {
+        const nonCollectible = await createMinionCard("Légume", false);
+
+        const cards = await listCards({
+            request: {
+                input: (key: string) => (key === "includeNonCollectible" ? "true" : undefined),
+            },
+        } as never);
+
+        assert.isTrue(cards.some((card) => card.id === nonCollectible.id));
     });
 });

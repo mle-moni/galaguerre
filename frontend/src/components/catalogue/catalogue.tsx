@@ -33,6 +33,7 @@ const cardMatchesSearch = (card: ApiCatalogCard, query: string) => {
 export interface CatalogueProps {
     className?: string;
     headerTitle?: string | false;
+    includeNonCollectible?: boolean;
     composition?: Map<number, number>;
     canAddCard?: (cardId: number) => boolean;
     onAdd?: (cardId: number) => void;
@@ -193,6 +194,7 @@ export const Catalogue = observer(
     ({
         className,
         headerTitle = "Catalogue",
+        includeNonCollectible = false,
         composition,
         canAddCard,
         onAdd,
@@ -200,7 +202,7 @@ export const Catalogue = observer(
         costFilter: controlledCostFilter,
         onCostFilterChange,
     }: CatalogueProps) => {
-        const cardsQuery = useCardsQuery();
+        const cardsQuery = useCardsQuery({ includeNonCollectible });
         const cardSetsQuery = useCardSetsQuery();
         const isNarrowScreen = useIsNarrowScreen();
         const isMobilePortrait = useIsMobilePortrait();

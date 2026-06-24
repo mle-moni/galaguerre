@@ -40,7 +40,7 @@ export const MulliganOverlay = observer(() => {
                     ) : (
                         <>
                             Votre adversaire commence, vous recevrez{" "}
-                            <CoinCardLink>La Pièce</CoinCardLink> en contrepartie
+                            <CoinCardLink>un Ticket Restaurant</CoinCardLink> en contrepartie
                         </>
                     )}
                 </Text>

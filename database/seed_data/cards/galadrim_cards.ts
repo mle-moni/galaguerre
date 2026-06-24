@@ -963,10 +963,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(
         1,
         {
-            label: "La Pièce",
+            label: "Ticket Restaurant",
             cost: 0,
-            imageUrl:
-                "https://static.wikia.nocookie.net/hearthstone_gamepedia/images/8/8e/TheCoin.png",
+            imageUrl: "/card-covers/ticket-restaurant.webp",
             cardSetName: GALADRIM_CARD_SET_NAME,
         },
         [manaTemporaryChangeAction(1)],

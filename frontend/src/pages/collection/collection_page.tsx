@@ -13,7 +13,7 @@ export const CollectionPage = observer(() => {
         <AppLayout title="Collection" backTo="/" backLabel="Accueil" fillViewport>
             <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0 overflow-hidden">
                 <h1 className="text-2xl font-bold text-gg-navy m-0 mb-6 shrink-0">Collection</h1>
-                <Catalogue headerTitle={false} className="flex-1 min-h-0" />
+                <Catalogue headerTitle={false} includeNonCollectible className="flex-1 min-h-0" />
             </div>
         </AppLayout>
     );
