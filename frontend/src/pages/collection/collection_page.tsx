@@ -1,19 +1,53 @@
+import { Button } from "@mantine/core";
 import { observer } from "mobx-react-lite";
-import { Navigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import { Catalogue } from "~/components/catalogue/catalogue";
 import { AppLayout } from "~/components/layout/app_layout";
+import { CenteredLoader } from "~/components/centered_loader";
+import { entriesToOwnedCounts, useCollectionQuery, usePacksQuery } from "~/hooks/use_collection";
 import { useUser } from "~/hooks/use_user";
 
 export const CollectionPage = observer(() => {
     const user = useUser();
+    const collectionQuery = useCollectionQuery();
+    const packsQuery = usePacksQuery();
+    const [showOwnedOnly, setShowOwnedOnly] = useState(false);
+
+    const ownedCounts = useMemo(
+        () => entriesToOwnedCounts(collectionQuery.data ?? []),
+        [collectionQuery.data],
+    );
 
     if (!user) return <Navigate to="/login" />;
+    if (collectionQuery.isLoading || packsQuery.isLoading) {
+        return <CenteredLoader absolute />;
+    }
+
+    const unopenedCount = packsQuery.data?.unopenedCount ?? 0;
 
     return (
         <AppLayout title="Collection" backTo="/" backLabel="Accueil" fillViewport>
             <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0 overflow-hidden">
-                <h1 className="text-2xl font-bold text-gg-navy m-0 mb-6 shrink-0">Collection</h1>
-                <Catalogue headerTitle={false} includeNonCollectible className="flex-1 min-h-0" />
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 shrink-0">
+                    <h1 className="text-2xl font-bold text-gg-navy m-0">Collection</h1>
+                    <Button
+                        component={Link}
+                        to="/collection/packs"
+                        className="gg-btn-primary w-full sm:w-auto"
+                        disabled={unopenedCount === 0}
+                    >
+                        Ouvrir des paquets ({unopenedCount})
+                    </Button>
+                </div>
+                <Catalogue
+                    headerTitle={false}
+                    includeNonCollectible
+                    ownedCounts={ownedCounts}
+                    showOwnedOnly={showOwnedOnly}
+                    onShowOwnedOnlyChange={setShowOwnedOnly}
+                    className="flex-1 min-h-0"
+                />
             </div>
         </AppLayout>
     );

@@ -21,6 +21,9 @@ export type ScannedRoutes = {
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
+        "collection.index": { paramsTuple?: []; params?: {} };
+        "collection.packs": { paramsTuple?: []; params?: {} };
+        "collection.open_pack": { paramsTuple?: []; params?: {} };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.store": { paramsTuple?: []; params?: {} };
@@ -51,6 +54,8 @@ export type ScannedRoutes = {
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
+        "collection.index": { paramsTuple?: []; params?: {} };
+        "collection.packs": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "games.index": { paramsTuple?: []; params?: {} };
@@ -71,6 +76,8 @@ export type ScannedRoutes = {
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
+        "collection.index": { paramsTuple?: []; params?: {} };
+        "collection.packs": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "games.index": { paramsTuple?: []; params?: {} };
@@ -80,6 +87,7 @@ export type ScannedRoutes = {
         "auth.login": { paramsTuple?: []; params?: {} };
         "auth.register": { paramsTuple?: []; params?: {} };
         "auth.logout": { paramsTuple?: []; params?: {} };
+        "collection.open_pack": { paramsTuple?: []; params?: {} };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.store": { paramsTuple?: []; params?: {} };
         "games.training": { paramsTuple?: []; params?: {} };

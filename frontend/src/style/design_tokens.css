@@ -180,6 +180,27 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
+.gg-catalog-card-slot--unowned {
+    opacity: 0.45;
+}
+
+.gg-catalog-card-slot--unowned .gg-catalog-card-slot__preview {
+    filter: grayscale(1);
+}
+
+.gg-catalog-card-slot--unowned:hover {
+    transform: none;
+    opacity: 0.55;
+}
+
+.gg-composition-row--unowned {
+    opacity: 0.45;
+}
+
+.gg-composition-row--unowned .gg-composition-row__thumb {
+    filter: grayscale(1);
+}
+
 .gg-composition-row {
     display: flex;
     align-items: stretch;

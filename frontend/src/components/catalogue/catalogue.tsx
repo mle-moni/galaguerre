@@ -1,6 +1,6 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
-import { Button, NumberInput, Select, TextInput } from "@mantine/core";
+import { Button, NumberInput, Select, Switch, TextInput } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
@@ -40,11 +40,15 @@ export interface CatalogueProps {
     onRemove?: (cardId: number) => void;
     costFilter?: string | null;
     onCostFilterChange?: (cost: string | null) => void;
+    ownedCounts?: Map<number, number>;
+    showOwnedOnly?: boolean;
+    onShowOwnedOnlyChange?: (value: boolean) => void;
 }
 
 interface CatalogCardItemProps {
     card: ApiCatalogCard;
     count: number;
+    ownedCount: number | null;
     interactive: boolean;
     canAdd: boolean;
     onAdd?: () => void;
@@ -65,6 +69,7 @@ const catalogRowControlsInputStyles = {
 const CatalogCardItem = ({
     card,
     count,
+    ownedCount,
     interactive,
     canAdd,
     onAdd,
@@ -74,10 +79,12 @@ const CatalogCardItem = ({
     isMobilePortrait,
 }: CatalogCardItemProps) => {
     const thumbOpensArtworkModal = !interactive && !isMobilePortrait;
+    const isUnowned = ownedCount !== null && ownedCount === 0;
+    const showOwnedBadge = ownedCount !== null && ownedCount > 0 && !interactive;
 
     if (isNarrowScreen) {
         return (
-            <div className="gg-composition-row">
+            <div className={clsx("gg-composition-row", isUnowned && "gg-composition-row--unowned")}>
                 <div className="gg-composition-row__thumb-wrap">
                     <CatalogCardHoverPreview card={card}>
                         <div
@@ -142,7 +149,7 @@ const CatalogCardItem = ({
     }
 
     return (
-        <div className="gg-catalog-card-slot">
+        <div className={clsx("gg-catalog-card-slot", isUnowned && "gg-catalog-card-slot--unowned")}>
             <div
                 className="gg-catalog-card-slot__preview"
                 onClick={onViewArtwork}
@@ -186,6 +193,7 @@ const CatalogCardItem = ({
             {interactive && count > 0 && (
                 <span className="gg-catalog-card-slot__count">{count}</span>
             )}
+            {showOwnedBadge && <span className="gg-catalog-card-slot__count">×{ownedCount}</span>}
         </div>
     );
 };
@@ -201,6 +209,9 @@ export const Catalogue = observer(
         onRemove,
         costFilter: controlledCostFilter,
         onCostFilterChange,
+        ownedCounts,
+        showOwnedOnly = false,
+        onShowOwnedOnlyChange,
     }: CatalogueProps) => {
         const cardsQuery = useCardsQuery({ includeNonCollectible });
         const cardSetsQuery = useCardSetsQuery();
@@ -238,6 +249,7 @@ export const Catalogue = observer(
             if (search && !cardMatchesSearch(card, search)) return false;
             if (typeFilter !== "ALL" && card.type !== typeFilter) return false;
             if (costFilter !== null && card.cost !== Number(costFilter)) return false;
+            if (showOwnedOnly && (ownedCounts?.get(card.id) ?? 0) === 0) return false;
             return true;
         });
 
@@ -298,6 +310,15 @@ export const Catalogue = observer(
                                 data={costOptions}
                                 className="w-full sm:w-[140px]"
                             />
+                            {ownedCounts !== undefined && onShowOwnedOnlyChange && (
+                                <Switch
+                                    label="Cartes possédées uniquement"
+                                    checked={showOwnedOnly}
+                                    onChange={(e) => onShowOwnedOnlyChange(e.currentTarget.checked)}
+                                    className="w-full sm:w-auto"
+                                    styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
+                                />
+                            )}
                         </div>
                         <div
                             className={
@@ -316,6 +337,11 @@ export const Catalogue = observer(
                                         key={card.id}
                                         card={card}
                                         count={composition?.get(card.id) ?? 0}
+                                        ownedCount={
+                                            ownedCounts === undefined
+                                                ? null
+                                                : ownedCounts.get(card.id) ?? 0
+                                        }
                                         interactive={interactive}
                                         canAdd={canAddCard?.(card.id) ?? false}
                                         onAdd={onAdd ? () => onAdd(card.id) : undefined}

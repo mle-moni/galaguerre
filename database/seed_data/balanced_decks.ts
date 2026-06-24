@@ -45,7 +45,7 @@ export const GALADRIM_MIDRANGE_DECK_RECIPE: DeckRecipeEntry[] = [
 
 export const SEEDED_DECKS: { name: string; recipe: DeckRecipeEntry[]; selected: boolean }[] = [
     { name: "Deck aggro", recipe: GALADRIM_AGGRO_DECK_RECIPE, selected: true },
-    { name: "Deck midrange", recipe: GALADRIM_MIDRANGE_DECK_RECIPE, selected: false },
+    // { name: "Deck midrange", recipe: GALADRIM_MIDRANGE_DECK_RECIPE, selected: false },
 ];
 
 export const buildDeckCardIds = (recipe: DeckRecipeEntry[]): number[] =>

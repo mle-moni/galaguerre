@@ -7,6 +7,8 @@ import { parseMinionData } from "#galaguerre/card_definition.schema";
 import Card from "#models/card";
 import Deck from "#models/deck";
 import User from "#models/user";
+import UserCard from "#models/user_card";
+import { validateDeckOwnership } from "#services/collection/validate_deck_ownership";
 import { getActiveCardSetId } from "#tests/helpers/card_set";
 import { defaultMinionData } from "#database/seed_data/cards/define_card";
 
@@ -30,6 +32,24 @@ test.group("decks api", (group) => {
             isCollectible,
         });
     };
+
+    test("validateDeckOwnership rejects cards the user does not own", async ({ assert }) => {
+        const user = await createUser("ownership");
+        const ownedCard = await createMinionCard("Possédé");
+        const unownedCards = await Promise.all(
+            Array.from({ length: 28 }, (_, index) => createMinionCard(`Non possédé ${index}`)),
+        );
+
+        await UserCard.create({ userId: user.id, cardId: ownedCard.id, count: 2 });
+
+        const result = await validateDeckOwnership(user.id, [
+            { cardId: ownedCard.id, count: 2 },
+            ...unownedCards.map((card) => ({ cardId: card.id, count: 1 })),
+        ]);
+
+        assert.isFalse(result.valid);
+        assert.isNotEmpty(result.errors);
+    });
 
     test("serializeDeck groups duplicate cards and counts them", async ({ assert }) => {
         const user = await createUser("serialize");

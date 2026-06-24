@@ -43,6 +43,21 @@ export class AuthAccessTokenSchema extends BaseModel {
     declare updatedAt: DateTime | null;
 }
 
+export class CardPackSchema extends BaseModel {
+    static $columns = ["createdAt", "id", "openedAt", "updatedAt", "userId"] as const;
+    $columns = CardPackSchema.$columns;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime | null;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column.dateTime()
+    declare openedAt: DateTime | null;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime | null;
+    @column()
+    declare userId: number;
+}
+
 export class CardSetSchema extends BaseModel {
     static $columns = ["createdAt", "id", "isActive", "name", "updatedAt"] as const;
     $columns = CardSetSchema.$columns;
@@ -158,6 +173,23 @@ export class GameSchema extends BaseModel {
     declare updatedAt: DateTime;
     @column()
     declare winnerId: number | null;
+}
+
+export class UserCardSchema extends BaseModel {
+    static $columns = ["cardId", "count", "createdAt", "id", "updatedAt", "userId"] as const;
+    $columns = UserCardSchema.$columns;
+    @column()
+    declare cardId: number;
+    @column()
+    declare count: number;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime | null;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime | null;
+    @column()
+    declare userId: number;
 }
 
 export class UserSchema extends BaseModel {

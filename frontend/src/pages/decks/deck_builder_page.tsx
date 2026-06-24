@@ -16,6 +16,7 @@ import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
+import { entriesToOwnedCounts, useCollectionQuery } from "~/hooks/use_collection";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
@@ -44,6 +45,7 @@ export const DeckBuilderPage = observer(() => {
 
     const deckQuery = useDeckQuery(deckId);
     const cardsQuery = useCardsQuery();
+    const collectionQuery = useCollectionQuery();
     const cardSetsQuery = useCardSetsQuery();
     const updateMutation = useUpdateDeckMutation();
     const isNarrowScreen = useIsNarrowScreen();
@@ -58,11 +60,20 @@ export const DeckBuilderPage = observer(() => {
     const deck = deckQuery.data;
 
     const catalogById = useMemo(() => new Map(catalog.map((card) => [card.id, card])), [catalog]);
+    const ownedCounts = useMemo(
+        () => entriesToOwnedCounts(collectionQuery.data ?? []),
+        [collectionQuery.data],
+    );
     const activeSetIds = useMemo(() => new Set(cardSets.map((set) => set.id)), [cardSets]);
 
     if (!user) return <Navigate to="/login" />;
     if (!deckId || Number.isNaN(deckId)) return <Navigate to="/decks" />;
-    if (deckQuery.isLoading || cardsQuery.isLoading || cardSetsQuery.isLoading) {
+    if (
+        deckQuery.isLoading ||
+        cardsQuery.isLoading ||
+        collectionQuery.isLoading ||
+        cardSetsQuery.isLoading
+    ) {
         return <CenteredLoader absolute />;
     }
     if (!deck) return <Navigate to="/decks" />;
@@ -74,6 +85,8 @@ export const DeckBuilderPage = observer(() => {
     const canAddCard = (cardId: number) => {
         if (!catalogById.has(cardId)) return false;
         const count = currentComposition.get(cardId) ?? 0;
+        const owned = ownedCounts.get(cardId) ?? 0;
+        if (count >= owned) return false;
         return count < DECK_MAX_COPIES_PER_CARD && totalCards < DECK_MAX_CARDS;
     };
 
@@ -133,6 +146,7 @@ export const DeckBuilderPage = observer(() => {
             onRemove={removeCard}
             costFilter={costFilter}
             onCostFilterChange={setCostFilter}
+            ownedCounts={ownedCounts}
             className="lg:col-span-2 flex flex-col flex-1 min-h-0 lg:h-full"
         />
     );

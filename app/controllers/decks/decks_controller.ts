@@ -4,6 +4,7 @@ import Game from "#models/game";
 import type { HttpContext } from "@adonisjs/core/http";
 import vine, { SimpleMessagesProvider } from "@vinejs/vine";
 import { DEFAULT_MESSAGE_PROVIDER_CONFIG } from "#adomin/validation/default_validator";
+import { validateDeckOwnership } from "#services/collection/validate_deck_ownership";
 import { validateDeckCompositionForSave } from "../../galaguerre/validation/validate_deck_composition.js";
 import { serializeDeck } from "./serialize_deck.js";
 import {
@@ -86,6 +87,14 @@ export default class DecksController {
             return response.badRequest({
                 error: "Une ou plusieurs cartes sont invalides",
                 details: cardEntries.errors,
+            });
+        }
+
+        const ownership = await validateDeckOwnership(auth.user!.id, payload.cards);
+        if (!ownership.valid) {
+            return response.badRequest({
+                error: "Vous ne possédez pas toutes les cartes de ce deck",
+                details: ownership.errors,
             });
         }
 

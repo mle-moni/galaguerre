@@ -25,6 +25,9 @@ export const controllers = {
         Cards: () => import("#controllers/cards/cards_controller"),
         ListCards: () => import("#controllers/cards/list_cards"),
     },
+    collection: {
+        Collection: () => import("#controllers/collection/collection_controller"),
+    },
     decks: {
         DeckUtils: () => import("#controllers/decks/deck_utils"),
         Decks: () => import("#controllers/decks/decks_controller"),
