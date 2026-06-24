@@ -5,9 +5,21 @@ import {
 import UserCard from "#models/user_card";
 import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
-export const grantStarterCollectionForUser = async (userId: number): Promise<void> => {
+export const grantStarterCollectionForUser = async (
+    userId: number,
+    client?: TransactionClientContract,
+): Promise<void> => {
     for (const { cardId, copies } of STARTER_COLLECTION_RECIPE) {
-        await UserCard.updateOrCreate({ userId, cardId }, { userId, cardId, count: copies });
+        const existing = await UserCard.query({ client }).where({ userId, cardId }).first();
+
+        if (existing) {
+            existing.count = copies;
+            if (client) existing.useTransaction(client);
+            await existing.save();
+            continue;
+        }
+
+        await UserCard.create({ userId, cardId, count: copies }, { client });
     }
 };
 

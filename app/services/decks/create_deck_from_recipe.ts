@@ -8,14 +8,16 @@ import {
 import Card from "#models/card";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
+import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
 export const createDeckFromRecipe = async (params: {
     userId: number;
     name: string;
     recipe: DeckRecipeEntry[];
     selected: boolean;
+    client?: TransactionClientContract;
 }): Promise<Deck> => {
-    const { userId, name, recipe, selected } = params;
+    const { userId, name, recipe, selected, client } = params;
     const totalCards = recipeTotalCards(recipe);
 
     if (totalCards !== DECK_SIZE) {
@@ -39,11 +41,14 @@ export const createDeckFromRecipe = async (params: {
         }
     }
 
-    const deck = await Deck.create({
-        name,
-        userId,
-        selected,
-    });
+    const deck = await Deck.create(
+        {
+            name,
+            userId,
+            selected,
+        },
+        { client },
+    );
 
     const deckCardIds = buildDeckCardIds(recipe);
 
@@ -58,6 +63,7 @@ export const createDeckFromRecipe = async (params: {
             cardId,
             deckId: deck.id,
         })),
+        { client },
     );
 
     return deck;
