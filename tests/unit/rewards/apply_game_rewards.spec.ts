@@ -18,7 +18,7 @@ test.group("apply game rewards", (group) => {
     group.setup(() => testUtils.db().migrate());
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
-    test("winner gets victory grains and first victory pack of the day", async ({ assert }) => {
+    test("winner gets victory coins and first victory pack of the day", async ({ assert }) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
@@ -44,7 +44,7 @@ test.group("apply game rewards", (group) => {
         assert.equal(Number(winnerPacks[0].$extras.total), 1);
     });
 
-    test("loser gets defeat grains only", async ({ assert }) => {
+    test("loser gets defeat coins only", async ({ assert }) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
@@ -63,7 +63,7 @@ test.group("apply game rewards", (group) => {
         assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
     });
 
-    test("draw gives defeat grains to both players", async ({ assert }) => {
+    test("draw gives defeat coins to both players", async ({ assert }) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",

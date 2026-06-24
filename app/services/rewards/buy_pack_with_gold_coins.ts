@@ -6,7 +6,7 @@ import db from "@adonisjs/lucid/services/db";
 
 export class NotEnoughGoldCoinsError extends Error {
     constructor() {
-        super(`Il faut ${GOLD_COINS_PER_PACK} grains de café pour acheter un paquet.`);
+        super(`Il faut ${GOLD_COINS_PER_PACK} story points pour acheter un paquet.`);
         this.name = "NotEnoughGoldCoinsError";
     }
 }

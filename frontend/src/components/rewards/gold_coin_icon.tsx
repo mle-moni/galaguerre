@@ -1,7 +1,7 @@
 import { Group, Image, Text, Tooltip, type TextProps } from "@mantine/core";
 
-export const GOLD_COIN_IMAGE_URL = "/game/cofee-beans.webp";
-export const GOLD_COIN_TOOLTIP = "Grains de café";
+export const GOLD_COIN_IMAGE_URL = "/game/story-point.webp";
+export const GOLD_COIN_TOOLTIP = "Story points";
 
 interface GoldCoinIconProps {
     size?: number;
@@ -42,7 +42,7 @@ export const GoldCoinAmount = ({
         <Text size="sm" {...textProps}>
             {prefix}
             {amount}
-            {showLabel ? " Grains de café" : ""}
+            {showLabel ? " story points" : ""}
         </Text>
     </Group>
 );

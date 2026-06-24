@@ -63,7 +63,8 @@ const ONBOARDING_COACH_STEPS: Array<{
     },
     {
         id: "attack",
-        getMessage: () => "Glissez votre serviteur vers l'adversaire pour l'attaquer.",
+        getMessage: () =>
+            "Glissez votre serviteur vers l'adversaire (en haut à gauche) pour l'attaquer.",
         isActive: (store) =>
             store.isMyTurn && hasAttackableMinion(store) && !opponentHasTaunt(store),
     },

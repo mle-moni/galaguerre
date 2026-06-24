@@ -25,6 +25,7 @@ export const GameFinalScreen = observer(() => {
     const isOnboardingGame = useOnboardingGame();
     const { startSearch, isStarting: isStartingSearch } = useMatchmaking();
     const isTraining = store.game.data.isTraining ?? false;
+    const ButtonsLayout = isMobilePortrait ? Stack : Group;
 
     const invalidatePostGameQueries = () => {
         queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
@@ -54,6 +55,10 @@ export const GameFinalScreen = observer(() => {
         navigate(isTraining ? "/" : "/matchmaking");
     };
 
+    const handleReadRules = () => {
+        navigate("/rules");
+    };
+
     const handleReplay = () => {
         invalidatePostGameQueries();
 
@@ -62,12 +67,6 @@ export const GameFinalScreen = observer(() => {
             return;
         }
 
-        startSearch();
-        navigate("/matchmaking");
-    };
-
-    const handleStartRanked = () => {
-        invalidatePostGameQueries();
         startSearch();
         navigate("/matchmaking");
     };
@@ -129,15 +128,8 @@ export const GameFinalScreen = observer(() => {
                 {userReward ? <GameLootSection reward={userReward} /> : null}
 
                 {isOnboardingGame ? (
-                    <Stack gap="sm" mt="sm">
-                        <Button
-                            onClick={handleStartRanked}
-                            loading={isStartingSearch}
-                            fullWidth={isMobilePortrait}
-                        >
-                            Affronter un vrai joueur
-                        </Button>
-                        <Group grow={isMobilePortrait}>
+                    <Stack gap="sm" mt="sm" align="center">
+                        <ButtonsLayout gap="sm" w={isMobilePortrait ? "100%" : undefined}>
                             <Button
                                 variant="default"
                                 onClick={handleReplay}
@@ -148,15 +140,13 @@ export const GameFinalScreen = observer(() => {
                             <Button variant="subtle" onClick={handleClose}>
                                 Retour à l&apos;accueil
                             </Button>
-                        </Group>
-                        <Text size="sm" ta="center">
-                            <Link to="/rules" className="text-gg-gold">
+                            <Button variant="subtle" onClick={handleReadRules}>
                                 Relire les règles
-                            </Link>
-                        </Text>
+                            </Button>
+                        </ButtonsLayout>
                     </Stack>
                 ) : (
-                    <Group mt="sm" grow={isMobilePortrait}>
+                    <ButtonsLayout gap="sm" mt="sm" w={isMobilePortrait ? "100%" : undefined}>
                         <Button
                             onClick={handleReplay}
                             loading={startTrainingMutation.isPending || isStartingSearch}
@@ -166,7 +156,7 @@ export const GameFinalScreen = observer(() => {
                         <Button variant="default" onClick={handleClose}>
                             {isTraining ? "Retour à l'accueil" : "Retour au matchmaking"}
                         </Button>
-                    </Group>
+                    </ButtonsLayout>
                 )}
             </Stack>
         </Modal>

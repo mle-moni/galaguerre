@@ -40,27 +40,17 @@ export const CollectionShopPage = observer(() => {
                 <h1 className="text-2xl font-bold text-gg-navy mb-6">Boutique</h1>
 
                 <Stack gap="lg">
-                    <Group gap="xs" wrap="nowrap">
-                        <GoldCoinAmount
-                            amount={goldCoins}
-                            iconSize={32}
-                            textProps={{ size: "lg", fw: 600 }}
-                        />
-                        <ActionIcon
-                            variant="transparent"
-                            size="sm"
-                            className="text-gg-navy"
-                            aria-label="Comment gagner des grains"
-                            onClick={() => setHelpOpened(true)}
-                        >
-                            <IconQuestionMark size={18} />
-                        </ActionIcon>
+                    <Group gap="xs" wrap="nowrap" align="center">
+                        <GoldCoinIcon size={48} />
+                        <Text size="lg" fw={600}>
+                            x {goldCoins}
+                        </Text>
                     </Group>
 
                     <Modal
                         opened={helpOpened}
                         onClose={() => setHelpOpened(false)}
-                        title="Comment gagner des grains ?"
+                        title="Comment gagner des story points ?"
                         centered
                     >
                         <Stack gap="sm">
@@ -96,7 +86,22 @@ export const CollectionShopPage = observer(() => {
                             <Text size="sm" c="dimmed">
                                 5 cartes aléatoires pour enrichir votre collection.
                             </Text>
-                            <GoldCoinAmount amount={GOLD_COINS_PER_PACK} showLabel iconSize={20} />
+                            <Group gap="xs" wrap="nowrap" align="center">
+                                <GoldCoinAmount
+                                    amount={GOLD_COINS_PER_PACK}
+                                    showLabel
+                                    iconSize={20}
+                                />
+                                <ActionIcon
+                                    variant="transparent"
+                                    size="sm"
+                                    className="text-gg-navy"
+                                    aria-label="Comment gagner des story points"
+                                    onClick={() => setHelpOpened(true)}
+                                >
+                                    <IconQuestionMark size={18} />
+                                </ActionIcon>
+                            </Group>
                             <Button
                                 onClick={handleBuy}
                                 loading={buyPackMutation.isPending}
