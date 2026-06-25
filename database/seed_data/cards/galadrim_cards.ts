@@ -234,7 +234,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Product Owner", 4),
             imageUrl: "/card-covers/galadrim/product-owner.webp",
             attack: 3,
-            health: 4,
+            health: 5,
         },
         {
             tags: ["PM"],
@@ -865,7 +865,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Navigation Privée", 1),
             imageUrl: "/card-covers/galadrim/navigation-privee.webp",
         },
-        [boostAction(boostAttackWithStealth(1), targetedAnyMinion(), true)],
+        [boostAction(boostAttackWithStealth(3), targetedAnyMinion(), true)],
     ),
     defineSpell(
         120,
@@ -884,7 +884,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(
         123,
         { ...gal("Levée de Fonds", 1), imageUrl: "/card-covers/galadrim/levee-de-fonds.webp" },
-        [relativeCostReconversion(1, targetedAllyMinion(), true)],
+        [relativeCostReconversion(2, targetedAllyMinion(), true)],
     ),
     defineSpell(
         124,
