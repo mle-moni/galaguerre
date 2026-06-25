@@ -95,11 +95,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Dev Front-End", 2),
             imageUrl: "/card-covers/galadrim/dev-front-end.webp",
             attack: 2,
-            health: 3,
+            health: 2,
         },
         {
             tags: ["DEVELOPPEUR"],
-            battlecryActions: [healAction(5, allyHero())],
+            battlecryActions: [healAction(3, allyHero())],
         },
     ),
     defineMinion(
