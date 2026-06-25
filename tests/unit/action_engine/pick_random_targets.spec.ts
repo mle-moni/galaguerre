@@ -5,6 +5,7 @@ import {
     pickRandomLimitedTargets,
 } from "../../../app/galaguerre/action_engine/pick_random_targets.js";
 import {
+    createAllTargetSnapshot,
     createGameData,
     createMinionCard,
     createMinionState,
@@ -128,7 +129,9 @@ test.group("pick_random_targets", () => {
         assert.deepEqual(picks, []);
     });
 
-    test("collectEligibleActionTargets excludes opponent stealth minions", ({ assert }) => {
+    test("collectEligibleActionTargets includes opponent stealth minions for random effects", ({
+        assert,
+    }) => {
         const data = createGameData();
         const visibleMinion = createMinionState(createMinionCard({ uuid: "visible" }));
         const stealthMinion = createMinionState(
@@ -151,6 +154,55 @@ test.group("pick_random_targets", () => {
 
         const eligible = collectEligibleActionTargets(target, data.playerOne, data.playerTwo);
 
-        assert.deepEqual(eligible, [{ minionUuid: "visible", owner: "OPPONENT" }]);
+        assert.lengthOf(eligible, 2);
+        assert.isTrue(eligible.some((pick) => pick.minionUuid === "visible"));
+        assert.isTrue(eligible.some((pick) => pick.minionUuid === "stealth"));
+    });
+
+    test("collectEligibleActionTargets includes opponent hero and minions for ALL target", ({
+        assert,
+    }) => {
+        const data = createGameData();
+        const enemyMinion = createMinionState(createMinionCard({ uuid: "enemy" }));
+
+        data.playerTwo.board = placeMinion(data.playerTwo.board, 0, enemyMinion);
+
+        const target = createAllTargetSnapshot("OPPONENT", {
+            maxTargets: 3,
+            targetSelectionMode: "RANDOM",
+        });
+
+        const eligible = collectEligibleActionTargets(target, data.playerOne, data.playerTwo);
+
+        assert.lengthOf(eligible, 2);
+        assert.isTrue(
+            eligible.some((pick) => pick.minionUuid === null && pick.owner === "OPPONENT"),
+        );
+        assert.isTrue(eligible.some((pick) => pick.minionUuid === "enemy"));
+    });
+
+    test("pickRandomLimitedTargets never picks the same target twice", ({ assert }) => {
+        const data = createGameData();
+
+        for (let i = 0; i < 4; i++) {
+            data.playerTwo.board = placeMinion(
+                data.playerTwo.board,
+                i,
+                createMinionState(createMinionCard({ uuid: `enemy-${i}` })),
+            );
+        }
+
+        const target = createAllTargetSnapshot("OPPONENT", {
+            maxTargets: 3,
+            targetSelectionMode: "RANDOM",
+        });
+
+        for (let run = 0; run < 100; run++) {
+            const picks = pickRandomLimitedTargets(target, data.playerOne, data.playerTwo);
+
+            assert.lengthOf(picks, 3);
+            const keys = picks.map((pick) => pick.minionUuid ?? "hero");
+            assert.equal(new Set(keys).size, 3);
+        }
     });
 });

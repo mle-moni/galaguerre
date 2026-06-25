@@ -15,11 +15,11 @@ const RULE_SECTIONS = [
     },
     {
         title: "Jouer des cartes",
-        body: "Jouez des serviteurs sur votre plateau (7 maximum), des sorts à effet immédiat, ou des armes pour attaquer le héros adverse.",
+        body: "Jouez des monstres sur votre plateau (7 maximum), des sorts à effet immédiat, ou des armes pour attaquer le héros adverse.",
     },
     {
         title: "Combat",
-        body: "Vos serviteurs peuvent attaquer le tour suivant leur mise en jeu, sauf s'ils ont Charge. Un serviteur avec Provocation doit être attaqué en priorité.",
+        body: "Vos monstres peuvent attaquer le tour suivant leur mise en jeu, sauf s'ils ont Charge. Un monstre avec Provocation doit être attaqué en priorité.",
     },
     {
         title: "Fin de tour",

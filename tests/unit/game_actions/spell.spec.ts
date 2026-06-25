@@ -265,6 +265,115 @@ test.group("spell effects", () => {
         assert.equal(damagedCount, 1);
     });
 
+    test("Coupure Internet hits 3 distinct enemy characters for 4 damage each", ({ assert }) => {
+        const enemyMinions = [0, 1, 2, 3].map((index) =>
+            createMinionCard({ uuid: `enemy-${index}`, health: 10 }),
+        );
+        const spell = createSpellCard({
+            cost: 6,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 4,
+                    target: createAllTargetSnapshot("OPPONENT", {
+                        maxTargets: 3,
+                        targetSelectionMode: "RANDOM",
+                    }),
+                }),
+            ],
+        });
+
+        const initialHeroHealth = DEFAULT_HERO_HEALTH;
+        const allyMinion = createMinionState(createMinionCard({ uuid: "ally", health: 10 }));
+        const enemyBoard = enemyMinions.reduce(
+            (board, minion, index) => placeMinion(board, index, createMinionState(minion)),
+            createGameData().playerTwo.board,
+        );
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                    board: placeMinion(createGameData().playerOne.board, 0, allyMinion),
+                },
+                playerTwo: {
+                    health: initialHeroHealth,
+                    board: enemyBoard,
+                },
+            }),
+            spell,
+        );
+
+        assert.equal(game.data.playerOne.board[0]!.health, 10);
+
+        let damagedCount = 0;
+        if (game.data.playerTwo.health === initialHeroHealth - 4) {
+            damagedCount++;
+        } else {
+            assert.equal(game.data.playerTwo.health, initialHeroHealth);
+        }
+
+        for (const minion of game.data.playerTwo.board) {
+            if (minion.health === 6) {
+                damagedCount++;
+            } else {
+                assert.equal(minion.health, 10);
+            }
+        }
+
+        assert.equal(damagedCount, 3);
+    });
+
+    test("Coupure Internet hits every eligible enemy when fewer than 3 exist", ({ assert }) => {
+        const enemyMinion = createMinionCard({ uuid: "enemy-only", health: 10 });
+        const spell = createSpellCard({
+            cost: 6,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 4,
+                    target: createAllTargetSnapshot("OPPONENT", {
+                        maxTargets: 3,
+                        targetSelectionMode: "RANDOM",
+                    }),
+                }),
+            ],
+        });
+
+        const initialHeroHealth = DEFAULT_HERO_HEALTH;
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    health: initialHeroHealth,
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        0,
+                        createMinionState(enemyMinion),
+                    ),
+                },
+            }),
+            spell,
+        );
+
+        let damagedCount = 0;
+        if (game.data.playerTwo.health === initialHeroHealth - 4) {
+            damagedCount++;
+        }
+        if (game.data.playerTwo.board[0]!.health === 6) {
+            damagedCount++;
+        }
+
+        assert.equal(damagedCount, 2);
+    });
+
     test("random damage spell fizzles when no eligible minion exists", ({ assert }) => {
         const spell = createSpellCard({
             cost: 2,
@@ -468,6 +577,47 @@ test.group("spell effects", () => {
 
         assertError(assert, "Aucune cible valide pour cette carte");
         assertBoardIndex(assert, game, "playerTwo", 0, { health: 4 });
+    });
+
+    test("random multi-target spell can damage stealth minion", ({ assert }) => {
+        const stealthMinion = createMinionCard({
+            uuid: "stealth-minion",
+            health: 10,
+            minionPowers: { hasStealth: true },
+        });
+        const spell = createSpellCard({
+            cost: 6,
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DAMAGE",
+                    isTargeted: false,
+                    damage: 4,
+                    target: createAllTargetSnapshot("OPPONENT", {
+                        maxTargets: 3,
+                        targetSelectionMode: "RANDOM",
+                    }),
+                }),
+            ],
+        });
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        0,
+                        createMinionState(stealthMinion),
+                    ),
+                },
+            }),
+            spell,
+        );
+
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 6 });
     });
 
     test("aoe spell damages stealth minion", ({ assert }) => {

@@ -125,12 +125,12 @@ const formatMassMinionTeamLabel = (
     if (onlySelf) return "lui-même";
 
     if (targetTeam === "ALL") {
-        return excludeSelf ? "tous les autres serviteurs" : "tous les serviteurs";
+        return excludeSelf ? "tous les autres monstres" : "tous les monstres";
     }
     if (targetTeam === "PLAYER") {
-        return excludeSelf ? "vos autres serviteurs" : "vos serviteurs";
+        return excludeSelf ? "vos autres monstres" : "vos monstres";
     }
-    return excludeSelf ? "les autres serviteurs adverses" : "les serviteurs adverses";
+    return excludeSelf ? "les autres monstres adverses" : "les monstres adverses";
 };
 
 const formatRandomMinionLabel = (
@@ -139,15 +139,15 @@ const formatRandomMinionLabel = (
 ): string => {
     if (maxTargets === 1) {
         const teamLabel = formatSingleMinionTeamLabel(targetTeam);
-        return teamLabel ? `un serviteur ${teamLabel} aléatoire` : "un serviteur aléatoire";
+        return teamLabel ? `un monstre ${teamLabel} aléatoire` : "un monstre aléatoire";
     }
     if (targetTeam === "ALL") {
-        return `${maxTargets} serviteurs aléatoires`;
+        return `${maxTargets} monstres aléatoires différents`;
     }
     if (targetTeam === "PLAYER") {
-        return `${maxTargets} de vos serviteurs aléatoires`;
+        return `${maxTargets} de vos monstres aléatoires différents`;
     }
-    return `${maxTargets} serviteurs adverses aléatoires`;
+    return `${maxTargets} monstres adverses aléatoires différents`;
 };
 
 const formatRandomHeroLabel = (
@@ -158,12 +158,12 @@ const formatRandomHeroLabel = (
         return `au héros ${formatHeroTeamLabel(targetTeam)} aléatoire`;
     }
     if (targetTeam === "ALL") {
-        return `à ${maxTargets} héros aléatoires`;
+        return `à ${maxTargets} héros aléatoires différents`;
     }
     if (targetTeam === "PLAYER") {
-        return `à ${maxTargets} de vos héros aléatoires`;
+        return `à ${maxTargets} de vos héros aléatoires différents`;
     }
-    return `à ${maxTargets} héros adverses aléatoires`;
+    return `à ${maxTargets} héros adverses aléatoires différents`;
 };
 
 const formatRandomAllLabel = (
@@ -186,17 +186,17 @@ const formatRandomAllLabel = (
     }
     if (targetTeam === "ALL") {
         return excludeSelf
-            ? `${maxTargets} autres personnages aléatoires`
-            : `${maxTargets} personnages aléatoires`;
+            ? `${maxTargets} autres personnages aléatoires différents`
+            : `${maxTargets} personnages aléatoires différents`;
     }
     if (targetTeam === "PLAYER") {
         return excludeSelf
-            ? `${maxTargets} de vos autres personnages aléatoires`
-            : `${maxTargets} de vos personnages aléatoires`;
+            ? `${maxTargets} de vos autres personnages aléatoires différents`
+            : `${maxTargets} de vos personnages aléatoires différents`;
     }
     return excludeSelf
-        ? `${maxTargets} autres personnages adverses aléatoires`
-        : `${maxTargets} personnages adverses aléatoires`;
+        ? `${maxTargets} autres personnages adverses aléatoires différents`
+        : `${maxTargets} personnages adverses aléatoires différents`;
 };
 
 const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
@@ -239,7 +239,7 @@ export const formatPlayCardPassiveTriggerLabel = (
 export const formatSummonPassiveTriggerLabel = (
     summonFilter: CardFilterSnapshot | null,
 ): string => {
-    if (!summonFilter) return "serviteur invoqué";
+    if (!summonFilter) return "monstre invoqué";
 
     const parts: string[] = [CARD_TYPE_LABELS[summonFilter.type].toLowerCase()];
     if (summonFilter.tags.length > 0) {
@@ -320,7 +320,7 @@ const formatReconvertTargetLabel = (parameters: ReconvertParametersSnapshot | nu
         );
     }
 
-    let label = "un serviteur aléatoire";
+    let label = "un monstre aléatoire";
 
     if (parameters.relativeToSource) {
         label += formatRelativeReconvertSuffix(parameters);
@@ -459,7 +459,7 @@ const formatActionConditionPrefix = (action: CardActionSnapshot): string => {
     if (!action.actionCondition?.opponentMinionCountMin) return "";
 
     const count = action.actionCondition.opponentMinionCountMin;
-    return `Si votre adversaire a ${count} serviteurs ou plus, `;
+    return `Si votre adversaire a ${count} monstres ou plus, `;
 };
 
 export const formatActionDescription = (
@@ -496,7 +496,7 @@ export const formatActionDescription = (
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
                 return appendOnTargetResultClause(
-                    `${prefix} : Inflige ${damage} dégâts à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`,
+                    `${prefix} : Inflige ${damage} dégâts à un monstre${teamPart}${formatTargetFilterSuffix(action)}.`,
                     action,
                 );
             }
@@ -557,7 +557,7 @@ export const formatActionDescription = (
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : Rend ${action.heal} PV à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV à un monstre${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
@@ -611,7 +611,7 @@ export const formatActionDescription = (
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : Donne ${effectText} à un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} à un monstre${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "HERO") {
@@ -648,7 +648,7 @@ export const formatActionDescription = (
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : Réduit au silence un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Réduit au silence un monstre${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
@@ -659,7 +659,7 @@ export const formatActionDescription = (
                 return `${prefix} : Réduit au silence ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
-            return `${prefix} : Réduit au silence un serviteur.`;
+            return `${prefix} : Réduit au silence un monstre.`;
         }
         case "DESTROY": {
             if (action.target && hasRandomLimitedTarget(action.target)) {
@@ -673,7 +673,7 @@ export const formatActionDescription = (
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : Détruit un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Détruit un monstre${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
@@ -684,7 +684,7 @@ export const formatActionDescription = (
                 return `${prefix} : Détruit ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
-            return `${prefix} : Détruit un serviteur.`;
+            return `${prefix} : Détruit un monstre.`;
         }
         case "BREAK_WEAPON": {
             if (action.isTargeted && action.target?.type === "HERO") {
@@ -711,7 +711,7 @@ export const formatActionDescription = (
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : Reconvertit un serviteur${teamPart} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Reconvertit un monstre${teamPart} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
@@ -722,7 +722,7 @@ export const formatActionDescription = (
                 return `${prefix} : Reconvertit ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf)} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
             }
 
-            return `${prefix} : Reconvertit un serviteur en ${targetLabel}.`;
+            return `${prefix} : Reconvertit un monstre en ${targetLabel}.`;
         }
         case "MIND_CONTROL": {
             const conditionPrefix = formatActionConditionPrefix(action);
@@ -738,14 +738,14 @@ export const formatActionDescription = (
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : ${conditionPrefix}prend le contrôle d'un serviteur${teamPart}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : ${conditionPrefix}prend le contrôle d'un monstre${teamPart}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "MINION") {
                 return `${prefix} : ${conditionPrefix}prend le contrôle ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
             }
 
-            return `${prefix} : ${conditionPrefix}prend le contrôle d'un serviteur adverse.`;
+            return `${prefix} : ${conditionPrefix}prend le contrôle d'un monstre adverse.`;
         }
         case "SUMMON": {
             const count = action.summonCount ?? 1;
@@ -754,7 +754,7 @@ export const formatActionDescription = (
                 action.summonTargetTeam === "OPPONENT"
                     ? "sur le plateau adverse"
                     : "sur votre plateau";
-            const countLabel = count > 1 ? `${count} serviteurs` : "un serviteur";
+            const countLabel = count > 1 ? `${count} monstres` : "un monstre";
 
             return `${prefix} : Invoque ${countLabel} (${targetLabel}) ${boardLabel}.`;
         }

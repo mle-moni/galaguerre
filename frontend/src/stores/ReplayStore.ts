@@ -319,7 +319,7 @@ export class ReplayStore {
             PASS_TURN: "Fin de tour",
             TURN_BEGIN: "Début de tour",
             DRAW: "Pioche",
-            MINION_DEATH: "Mort de serviteur",
+            MINION_DEATH: "Mort de monstre",
             TRIGGER: "Effet",
         };
         return `Tour ${round} — ${kindLabels[kind] ?? kind}`;

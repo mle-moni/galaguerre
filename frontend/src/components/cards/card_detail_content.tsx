@@ -40,7 +40,7 @@ const renderReconversionCardLabel = (
 export const getCardDescription = (card: PlayerCard, spellPower = 0): string => {
     switch (card.type) {
         case "MINION":
-            return card.description || `Serviteur ${card.attack}/${card.health}.`;
+            return card.description || `Monstre ${card.attack}/${card.health}.`;
         case "SPELL": {
             const effectLines = card.spellActions
                 .map((action) => formatActionDescription(action, "Effet", spellPower))

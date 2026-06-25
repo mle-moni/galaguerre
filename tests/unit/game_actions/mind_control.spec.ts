@@ -384,8 +384,7 @@ test.group("MIND_CONTROL action", () => {
         );
     });
 
-    test("random mind control excludes stealth minions", ({ assert }) => {
-        const visibleCard = createMinionCard({ uuid: "visible" });
+    test("random mind control can target stealth minions", ({ assert }) => {
         const stealthCard = createMinionCard({
             uuid: "stealth",
             minionPowers: createMinionPowersSnapshot({ hasStealth: true }),
@@ -408,20 +407,15 @@ test.group("MIND_CONTROL action", () => {
         const { game } = runBattlecry(
             createGameData({
                 playerTwo: {
-                    board: placeMinion(
-                        placeMinion(createEmptyBoard(), 0, createMinionState(stealthCard)),
-                        1,
-                        createMinionState(visibleCard),
-                    ),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(stealthCard)),
                 },
             }),
             hunter,
             { boardIndex: 0 },
         );
 
-        assert.isNotNull(game.data.playerOne.board[1]);
-        assert.equal(game.data.playerOne.board[1]?.uuid, "visible");
-        assert.isNotNull(game.data.playerTwo.board[0]);
+        assert.equal(game.data.playerOne.board[1]?.uuid, "stealth");
+        assert.equal(game.data.playerTwo.board.length, 0);
     });
 });
 

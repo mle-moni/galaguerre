@@ -100,7 +100,7 @@ test.group("generatePlayerCards", () => {
         });
         assert.include(
             generated.description,
-            "Cri de guerre : Inflige 3 dégâts à un serviteur adverse attaque > 2.",
+            "Cri de guerre : Inflige 3 dégâts à un monstre adverse attaque > 2.",
         );
     });
 
@@ -133,7 +133,7 @@ test.group("generatePlayerCards", () => {
             spellPower: null,
             minionPowers: null,
         });
-        assert.include(generated.description, "Cri de guerre : Donne +2/+2 à un serviteur allié.");
+        assert.include(generated.description, "Cri de guerre : Donne +2/+2 à un monstre allié.");
     });
 
     test("embeds draw card filter from card data", ({ assert }) => {

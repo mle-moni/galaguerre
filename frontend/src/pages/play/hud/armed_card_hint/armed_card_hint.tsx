@@ -29,7 +29,7 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
             <div className={hintClassName} role="status">
                 <span>
                     {isMobile
-                        ? "Touchez le plateau pour choisir où placer le serviteur"
+                        ? "Touchez le plateau pour choisir où placer le monstre"
                         : "Glissez la carte vers le plateau pour la jouer · Échap pour annuler"}
                 </span>
                 {isMobile && (

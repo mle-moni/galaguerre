@@ -17,10 +17,10 @@ const PASSIVE_TRIGGER_LABELS: Record<
 };
 
 const EFFECT_DESCRIPTIONS: Record<string, string> = {
-    Provocation: "Les adversaires doivent attaquer ce serviteur avant les autres cibles.",
+    Provocation: "Les adversaires doivent attaquer ce monstre avant les autres cibles.",
     Charge: "Peut attaquer dès le tour où il est joué.",
     "Furie des vents": "Peut attaquer deux fois par tour.",
-    Toxique: "Détruit tout serviteur blessé par ce serviteur.",
+    Toxique: "Détruit tout monstre blessé par ce monstre.",
     Discrétion:
         "Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
     Immunité: "Bloque la première source de dégâts reçue.",
@@ -92,7 +92,7 @@ const DYNAMIC_COST_REDUCTION_LABELS: Record<
 > = {
     HAND_CARD_COUNT: (amountPer) => `Coût réduit de ${amountPer} pour chaque carte en main.`,
     BOARD_MINION_COUNT: (amountPer) =>
-        `Coût réduit de ${amountPer} pour chaque serviteur sur le plateau.`,
+        `Coût réduit de ${amountPer} pour chaque monstre sur le plateau.`,
     HERO_MISSING_HEALTH: (amountPer) =>
         `Coût réduit de ${amountPer} pour chaque point de vie manquant au héros.`,
 };
@@ -125,7 +125,7 @@ export const getMinionCardDescription = (
     dynamicCost: DynamicCostSnapshot | null = null,
 ): string => {
     const parts: string[] = [
-        `Serviteur ${attack}/${health}.`,
+        `Monstre ${attack}/${health}.`,
         ...getDynamicCostDescription(dynamicCost),
         ...effects.map(formatEffectLine),
         ...passiveLines,

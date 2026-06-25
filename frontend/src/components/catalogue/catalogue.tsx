@@ -18,7 +18,7 @@ import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 type CardTypeFilter = "ALL" | "MINION" | "SPELL" | "WEAPON";
 
 const CARD_TYPE_FILTER_LABELS: Record<Exclude<CardTypeFilter, "ALL">, string> = {
-    MINION: "Serviteurs",
+    MINION: "Monstres",
     SPELL: "Sorts",
     WEAPON: "Armes",
 };

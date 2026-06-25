@@ -10,7 +10,6 @@ import {
     heroMatchesTarget,
     minionMatchesTarget,
     shouldExcludeSourceMinion,
-    canOpponentDirectlyTargetMinion,
 } from "#api_types/target_matching";
 import { shuffleArray } from "../../utils/array.js";
 import { getTargetBoardEntries } from "./apply_mass_minion_effects.js";
@@ -48,7 +47,6 @@ const collectMinionActionTargets = (
         for (const minion of board) {
             if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
-            if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) continue;
 
             results.push({ minionUuid: minion.uuid, owner });
         }

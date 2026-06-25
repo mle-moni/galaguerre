@@ -55,7 +55,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         }
 
         if (card.type === "MINION" && !playerHasBoardSpace(store.me)) {
-            notifyError("Votre plateau est plein (7 serviteurs maximum)");
+            notifyError("Votre plateau est plein (7 monstres maximum)");
         }
     };
 

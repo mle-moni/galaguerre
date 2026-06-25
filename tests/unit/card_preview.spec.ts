@@ -38,7 +38,7 @@ test.group("format_action_description reconversion card label", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Reconvertit un serviteur en Légume.",
+            "Effet : Reconvertit un monstre en Légume.",
         );
     });
 });

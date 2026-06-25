@@ -44,7 +44,7 @@ const ONBOARDING_COACH_STEPS: Array<{
     {
         id: "first_turn",
         getMessage: (store) =>
-            `Vous avez ${store.me.mana} mana. Jouez un serviteur à faible coût pour prendre le plateau.`,
+            `Vous avez ${store.me.mana} mana. Jouez un monstre à faible coût pour prendre le plateau.`,
         isActive: (store) => {
             const round = store.authoritativeGame.data.currentRound;
             return (
@@ -64,13 +64,13 @@ const ONBOARDING_COACH_STEPS: Array<{
     {
         id: "attack",
         getMessage: () =>
-            "Glissez votre serviteur vers l'adversaire (en haut à gauche) pour l'attaquer.",
+            "Glissez votre monstre vers l'adversaire (en haut à gauche) pour l'attaquer.",
         isActive: (store) =>
             store.isMyTurn && hasAttackableMinion(store) && !opponentHasTaunt(store),
     },
     {
         id: "taunt",
-        getMessage: () => "Provocation : vous devez attaquer ce serviteur avant les autres cibles.",
+        getMessage: () => "Provocation : vous devez attaquer ce monstre avant les autres cibles.",
         isActive: (store) =>
             store.isMyTurn && opponentHasTaunt(store) && hasAttackableMinion(store),
     },

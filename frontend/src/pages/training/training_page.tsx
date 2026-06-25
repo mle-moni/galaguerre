@@ -50,8 +50,7 @@ export const TrainingPage = observer(() => {
                     <div className="gg-panel-header">Partie d'entraînement</div>
                     <div className="gg-panel-body flex flex-col gap-4">
                         <Text className="text-white/80" size="sm">
-                            Affrontez une IA avec un deck fixe de serviteurs. L'Elo n'est pas
-                            impacté.
+                            Affrontez une IA avec un deck fixe de monstres. L'Elo n'est pas impacté.
                         </Text>
 
                         {selectedDeck ? (

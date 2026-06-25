@@ -219,7 +219,7 @@ test.group("RECONVERSION action", () => {
         assert.isTrue(card.type === "MINION" && card.effects.includes("Provocation"));
         assert.include(
             card.type === "MINION" ? card.description : "",
-            "Provocation : Les adversaires doivent attaquer ce serviteur avant les autres cibles.",
+            "Provocation : Les adversaires doivent attaquer ce monstre avant les autres cibles.",
         );
         assert.isFalse(minion.isSilenced);
         assert.isAbove(card.type === "MINION" ? card.battlecryActions.length : 0, 0);

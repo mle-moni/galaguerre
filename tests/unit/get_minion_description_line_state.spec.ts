@@ -27,7 +27,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
     },
     effects: [],
     description:
-        "Serviteur 2/2.\nImmunité : Bloque la première source de dégâts reçue.\nDiscrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
+        "Monstre 2/2.\nImmunité : Bloque la première source de dégâts reçue.\nDiscrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
     battlecryActions: [],
     deathrattleActions: [],
     passives: [],
@@ -50,7 +50,7 @@ test.group("get_minion_description_line_state", () => {
 
         const activeEffects = getActiveMinionEffectNames(card);
 
-        assert.isFalse(isMinionDescriptionLineDisabled("Serviteur 2/2.", 0, activeEffects));
+        assert.isFalse(isMinionDescriptionLineDisabled("Monstre 2/2.", 0, activeEffects));
         assert.isTrue(
             isMinionDescriptionLineDisabled(
                 "Immunité : Bloque la première source de dégâts reçue.",

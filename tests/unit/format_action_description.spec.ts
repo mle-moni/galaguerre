@@ -8,6 +8,7 @@ import {
     createCardActionSnapshot,
     createCardFilterSnapshot,
     createComparisonSnapshot,
+    createAllTargetSnapshot,
     createHeroTargetSnapshot,
     createMinionTargetSnapshot,
     createReconvertParametersSnapshot,
@@ -75,7 +76,26 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Inflige 1 dégâts à un serviteur adverse aléatoire.",
+            "Effet : Inflige 1 dégâts à un monstre adverse aléatoire.",
+        );
+    });
+
+    test("formats random limited multi-target character damage as distinct targets", ({
+        assert,
+    }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: false,
+            damage: 4,
+            target: createAllTargetSnapshot("OPPONENT", {
+                maxTargets: 3,
+                targetSelectionMode: "RANDOM",
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Inflige 4 dégâts à 3 personnages adverses aléatoires différents.",
         );
     });
 
@@ -105,7 +125,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Inflige 6 dégâts à un serviteur.",
+            "Effet : Inflige 6 dégâts à un monstre.",
         );
     });
 
@@ -121,7 +141,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Cri de guerre"),
-            "Cri de guerre : Inflige 2 dégâts à un serviteur adverse 💻 Développeur.",
+            "Cri de guerre : Inflige 2 dégâts à un monstre adverse 💻 Développeur.",
         );
     });
 
@@ -135,7 +155,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Inflige 3 dégâts aux serviteurs adverses.",
+            "Effet : Inflige 3 dégâts aux monstres adverses.",
         );
     });
 
@@ -149,7 +169,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Rend 2 PV aux serviteurs adverses.",
+            "Effet : Rend 2 PV aux monstres adverses.",
         );
     });
 
@@ -206,7 +226,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Inflige 2 dégâts à un serviteur. Si la cible survit avec 1 PV, pioche 2 cartes.",
+            "Effet : Inflige 2 dégâts à un monstre. Si la cible survit avec 1 PV, pioche 2 cartes.",
         );
     });
 
@@ -223,7 +243,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Reconvertit les serviteurs adverses en un serviteur aléatoire coûtant 1 de moins que la cible.",
+            "Effet : Reconvertit les monstres adverses en un monstre aléatoire coûtant 1 de moins que la cible.",
         );
     });
 
@@ -240,7 +260,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Reconvertit un serviteur allié en un serviteur aléatoire coûtant 1 de plus que la cible.",
+            "Effet : Reconvertit un monstre allié en un monstre aléatoire coûtant 1 de plus que la cible.",
         );
     });
 
@@ -262,7 +282,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Inflige 1 dégâts à un serviteur. Si la cible est détruite, pioche 1 carte.",
+            "Effet : Inflige 1 dégâts à un monstre. Si la cible est détruite, pioche 1 carte.",
         );
     });
 
@@ -275,7 +295,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Détruit un serviteur adverse.",
+            "Effet : Détruit un monstre adverse.",
         );
     });
 
@@ -287,7 +307,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Détruit aux serviteurs adverses.",
+            "Effet : Détruit aux monstres adverses.",
         );
     });
 

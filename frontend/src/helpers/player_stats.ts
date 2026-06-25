@@ -5,7 +5,7 @@ export const getPlayerStats = (player: GamePlayer): GamePlayerStats =>
 
 export const STAT_ROWS: { key: keyof GamePlayerStats; label: string }[] = [
     { key: "manaSpent", label: "Mana dépensé" },
-    { key: "minionsPlayed", label: "Serviteurs joués" },
+    { key: "minionsPlayed", label: "Monstres joués" },
     { key: "spellsCast", label: "Sorts lancés" },
     { key: "weaponsPlayed", label: "Armes équipées" },
     { key: "damageDealt", label: "Dégâts infligés" },

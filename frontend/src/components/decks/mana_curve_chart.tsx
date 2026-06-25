@@ -20,7 +20,7 @@ const formatTooltip = (bucket: {
     if (bucket.total === 0) return "Aucune carte";
     const parts: string[] = [];
     if (bucket.minion > 0) {
-        parts.push(`${bucket.minion} serviteur${bucket.minion > 1 ? "s" : ""}`);
+        parts.push(`${bucket.minion} monstre${bucket.minion > 1 ? "s" : ""}`);
     }
     if (bucket.spell > 0) {
         parts.push(`${bucket.spell} sort${bucket.spell > 1 ? "s" : ""}`);
@@ -141,7 +141,7 @@ export const ManaCurveChart = ({
                 <div className="gg-mana-curve__legend" aria-hidden="true">
                     <span className="gg-mana-curve__legend-item">
                         <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--minion" />
-                        Serviteurs
+                        Monstres
                     </span>
                     <span className="gg-mana-curve__legend-item">
                         <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--spell" />

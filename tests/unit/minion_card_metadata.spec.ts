@@ -11,7 +11,7 @@ test.group("minion_card_metadata", () => {
 
         assert.equal(
             description,
-            "Serviteur 1/2.\nProvocation : Les adversaires doivent attaquer ce serviteur avant les autres cibles.",
+            "Monstre 1/2.\nProvocation : Les adversaires doivent attaquer ce monstre avant les autres cibles.",
         );
     });
 
@@ -25,7 +25,7 @@ test.group("minion_card_metadata", () => {
 
         assert.equal(
             description,
-            "Serviteur 2/2.\nCri de guerre : Inflige 2 dégâts au héros adverse.",
+            "Monstre 2/2.\nCri de guerre : Inflige 2 dégâts au héros adverse.",
         );
     });
 
@@ -42,14 +42,14 @@ test.group("minion_card_metadata", () => {
 
         assert.equal(
             description,
-            "Serviteur 4/4.\nProvocation : Les adversaires doivent attaquer ce serviteur avant les autres cibles.\nDernier souffle : Inflige 2 dégâts à tous les personnages.",
+            "Monstre 4/4.\nProvocation : Les adversaires doivent attaquer ce monstre avant les autres cibles.\nDernier souffle : Inflige 2 dégâts à tous les personnages.",
         );
     });
 
     test("getMinionCardDescription omits optional sections when empty", ({ assert }) => {
         const description = getMinionCardDescription(2, 1, [], []);
 
-        assert.equal(description, "Serviteur 2/1.");
+        assert.equal(description, "Monstre 2/1.");
     });
 
     test("getWeaponCardDescription puts deathrattle on a separate line", ({ assert }) => {
@@ -65,7 +65,7 @@ test.group("minion_card_metadata", () => {
             reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }],
         });
 
-        assert.equal(description, "Serviteur 8/8.\nCoût réduit de 1 pour chaque carte en main.");
+        assert.equal(description, "Monstre 8/8.\nCoût réduit de 1 pour chaque carte en main.");
     });
 
     test("getDynamicCostDescription supports all reduction sources", ({ assert }) => {
@@ -74,7 +74,7 @@ test.group("minion_card_metadata", () => {
             getDynamicCostDescription({
                 reductions: [{ source: "BOARD_MINION_COUNT", amountPer: 2 }],
             }),
-            ["Coût réduit de 2 pour chaque serviteur sur le plateau."],
+            ["Coût réduit de 2 pour chaque monstre sur le plateau."],
         );
         assert.deepEqual(
             getDynamicCostDescription({
