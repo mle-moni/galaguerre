@@ -83,12 +83,7 @@ export class GameNarrativeRecorder {
         return {
             updateId: resolvedUpdateId ?? String(Date.now()),
             stateBefore: this.stateBefore,
-            beats: compactPresentationBeats(
-                this.beats.map((beat) => ({
-                    ...beat,
-                    stateAfter: cloneGameData(beat.stateAfter),
-                })),
-            ),
+            beats: compactPresentationBeats(this.beats),
             stateAfter: cloneGameData(game.data),
         };
     }

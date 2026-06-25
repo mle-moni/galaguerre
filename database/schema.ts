@@ -132,9 +132,9 @@ export class DeckSchema extends BaseModel {
     declare userId: number;
 }
 
-export class GameReplaySchema extends BaseModel {
-    static $columns = ["createdAt", "data", "gameId", "id"] as const;
-    $columns = GameReplaySchema.$columns;
+export class GameReplayStepSchema extends BaseModel {
+    static $columns = ["createdAt", "data", "gameId", "id", "stepIndex"] as const;
+    $columns = GameReplayStepSchema.$columns;
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
     @column()
@@ -143,6 +143,21 @@ export class GameReplaySchema extends BaseModel {
     declare gameId: number;
     @column({ isPrimary: true })
     declare id: number;
+    @column()
+    declare stepIndex: number;
+}
+
+export class GameReplaySchema extends BaseModel {
+    static $columns = ["createdAt", "gameId", "id", "version"] as const;
+    $columns = GameReplaySchema.$columns;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime;
+    @column()
+    declare gameId: number;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column()
+    declare version: number;
 }
 
 export class GameSchema extends BaseModel {

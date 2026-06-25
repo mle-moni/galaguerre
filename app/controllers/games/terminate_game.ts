@@ -5,7 +5,7 @@ import { getTrainingGameHumanUserId } from "#services/onboarding/get_training_ga
 import { applyGameRewards } from "#services/rewards/apply_game_rewards";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { DateTime } from "luxon";
-import { flushReplayToDatabase } from "../../galaguerre/game_replay/game_replay_buffer.js";
+import { finalizeGameReplay } from "../../galaguerre/game_replay/game_replay_buffer.js";
 import { clearAllGameTimers } from "../../galaguerre/timers/game_timers.js";
 import { sendGameUpdate } from "./send_game_update.js";
 
@@ -19,7 +19,9 @@ export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boo
     game.data.state = "FINISHED";
     game.isFinished = true;
     game.endedAt = DateTime.now();
-    await flushReplayToDatabase(game);
+    void finalizeGameReplay(game.id).catch((err) =>
+        console.error(`Replay finalize failed for game ${game.id}`, err),
+    );
 
     if (game.data.isTraining) {
         const winnerUserId = getWinnerUserId(game);

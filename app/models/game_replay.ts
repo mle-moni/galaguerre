@@ -1,8 +1,9 @@
-import type { GameReplayData } from "#api_types/game_replay.types";
-import { BaseModel, belongsTo, column } from "@adonisjs/lucid/orm";
-import type { BelongsTo } from "@adonisjs/lucid/types/relations";
+import { REPLAY_FORMAT_VERSION } from "#api_types/game_replay.types";
+import { BaseModel, belongsTo, column, hasMany } from "@adonisjs/lucid/orm";
+import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import Game from "./game.js";
+import GameReplayStep from "./game_replay_step.js";
 
 export default class GameReplay extends BaseModel {
     static table = "game_replays";
@@ -17,12 +18,11 @@ export default class GameReplay extends BaseModel {
     declare game: BelongsTo<typeof Game>;
 
     @column()
-    declare data: GameReplayData;
+    declare version: typeof REPLAY_FORMAT_VERSION;
 
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 
-    toReplayData(): GameReplayData {
-        return this.data;
-    }
+    @hasMany(() => GameReplayStep, { foreignKey: "gameId", localKey: "gameId" })
+    declare steps: HasMany<typeof GameReplayStep>;
 }
