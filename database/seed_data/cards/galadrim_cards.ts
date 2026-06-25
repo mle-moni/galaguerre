@@ -70,7 +70,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         {
             tags: ["DEVELOPPEUR"],
-            battlecryActions: [drawAction(1, spellDrawFilter())],
+            deathrattleActions: [drawAction(1, spellDrawFilter())],
         },
     ),
     defineMinion(
@@ -150,7 +150,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Dev Aguerri", 4),
             imageUrl: "/card-covers/galadrim/dev-aguerri.webp",
             attack: 4,
-            health: 5,
+            health: 4,
         },
         {
             tags: ["DEVELOPPEUR"],
@@ -271,7 +271,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("BizDev Débutant", 1),
             imageUrl: "/card-covers/galadrim/bizdev-debutant.webp",
             attack: 1,
-            health: 3,
+            health: 2,
         },
         {
             tags: ["SALES"],
@@ -284,7 +284,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Sales Charismatique", 2),
             imageUrl: "/card-covers/galadrim/sales-charismatique.webp",
             attack: 2,
-            health: 3,
+            health: 2,
         },
         {
             tags: ["SALES"],
@@ -312,11 +312,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Négociateur", 4),
             imageUrl: "/card-covers/galadrim/negociateur.webp",
             attack: 4,
-            health: 4,
+            health: 2,
         },
         {
             tags: ["SALES"],
-            battlecryActions: [damageAction(4, enemyHero())],
+            battlecryActions: [damageAction(3, enemyHero())],
         },
     ),
     defineMinion(
@@ -481,7 +481,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Parisien Pressé", 2),
             imageUrl: "/card-covers/galadrim/parisien-presse.webp",
-            attack: 3,
+            attack: 2,
             health: 1,
         },
         {
@@ -532,7 +532,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Lyonnais Gourmand", 4),
             imageUrl: "/card-covers/galadrim/lyonnais-gourmand.webp",
-            attack: 4,
+            attack: 3,
             health: 5,
         },
         {
@@ -575,7 +575,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Chien Foufou", 3),
             imageUrl: "/card-covers/galadrim/chien-foufou.webp",
             attack: 3,
-            health: 2,
+            health: 1,
         },
         {
             tags: ["PETS"],
