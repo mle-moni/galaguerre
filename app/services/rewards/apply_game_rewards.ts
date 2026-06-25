@@ -9,6 +9,7 @@ import {
     isParisCalendarDateToday,
     parseParisCalendarDate,
 } from "#services/rewards/get_paris_calendar_date";
+import { gameQualifiesForRewards } from "#services/rewards/game_qualifies_for_rewards";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import db from "@adonisjs/lucid/services/db";
 
@@ -46,6 +47,18 @@ export const applyGameRewards = async (game: Game): Promise<void> => {
     );
 
     if (humanUserIds.length === 0) return;
+
+    if (!gameQualifiesForRewards(game)) {
+        game.data = {
+            ...game.data,
+            rewardResult: {
+                playerOne: EMPTY_REWARD,
+                playerTwo: EMPTY_REWARD,
+            },
+        };
+        await game.save();
+        return;
+    }
 
     const todayParis = getParisCalendarDate();
 

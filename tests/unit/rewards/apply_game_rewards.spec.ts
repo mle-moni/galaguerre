@@ -22,6 +22,7 @@ test.group("apply game rewards", (group) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
+                currentRound: 2,
                 playerOne: { health: 0 },
                 playerTwo: { health: 5 },
             }),
@@ -48,6 +49,7 @@ test.group("apply game rewards", (group) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
+                currentRound: 2,
                 playerOne: { health: 3 },
                 playerTwo: { health: 0 },
             }),
@@ -67,6 +69,7 @@ test.group("apply game rewards", (group) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
+                currentRound: 2,
                 playerOne: { health: 0 },
                 playerTwo: { health: 0 },
             }),
@@ -86,6 +89,7 @@ test.group("apply game rewards", (group) => {
         const { game, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
+                currentRound: 2,
                 playerOne: { health: 0 },
                 playerTwo: { health: 5 },
             }),
@@ -120,6 +124,7 @@ test.group("apply game rewards", (group) => {
         const data = bindUserIds(
             createGameData({
                 state: "PLAYER_ONE_TURN",
+                currentRound: 2,
                 isTraining: true,
                 playerOne: { health: 5 },
                 playerTwo: { health: 0 },
@@ -144,10 +149,57 @@ test.group("apply game rewards", (group) => {
         assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
     });
 
+    test("short game gives no story points", async ({ assert }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 1,
+                actionLog: [{ id: "1", roundNumber: 1, playerId: 1, type: "ABANDON" }],
+                playerOne: { health: 0 },
+                playerTwo: { health: 5 },
+            }),
+        );
+
+        await applyGameRewards(game);
+        await playerOne.refresh();
+        await playerTwo.refresh();
+
+        assert.equal(playerOne.goldCoins, 0);
+        assert.equal(playerTwo.goldCoins, 0);
+        assert.equal(game.data.rewardResult?.playerOne.goldCoins, 0);
+        assert.equal(game.data.rewardResult?.playerTwo.goldCoins, 0);
+        assert.equal(game.data.rewardResult?.playerOne.packs, 0);
+        assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
+    });
+
+    test("decisive turn-one game still earns story points", async ({ assert }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 1,
+                actionLog: [
+                    { id: "1", roundNumber: 1, playerId: 1, type: "PLAY_CARD" },
+                    { id: "2", roundNumber: 1, playerId: 1, type: "ATTACK" },
+                    { id: "3", roundNumber: 1, playerId: 1, type: "ATTACK" },
+                ],
+                playerOne: { health: 5 },
+                playerTwo: { health: 0 },
+            }),
+        );
+
+        await applyGameRewards(game);
+        await playerOne.refresh();
+        await playerTwo.refresh();
+
+        assert.equal(playerOne.goldCoins, GOLD_COINS_PER_VICTORY);
+        assert.equal(playerTwo.goldCoins, GOLD_COINS_PER_DEFEAT);
+    });
+
     test("terminateGame embeds rewardResult on ranked finish", async ({ assert }) => {
         const { game, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
+                currentRound: 2,
                 playerOne: { health: 0 },
                 playerTwo: { health: 3 },
             }),

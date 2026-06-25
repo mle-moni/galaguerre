@@ -1,3 +1,4 @@
+import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import Game from "#models/game";
@@ -42,10 +43,32 @@ test.group("game:abandon", (group) => {
         assert.isAbove(playerTwo.elo, DEFAULT_ELO);
         assert.equal(playerOne.losses, 1);
         assert.equal(playerTwo.wins, 1);
+        assert.equal(playerTwo.goldCoins, GOLD_COINS_PER_VICTORY);
+        assert.equal(playerOne.goldCoins, GOLD_COINS_PER_DEFEAT);
 
         const abandonEntry = result.game.data.actionLog.find((e) => e.type === "ABANDON");
         assert.isDefined(abandonEntry);
         assert.equal(abandonEntry!.playerId, result.actorUserId);
+    });
+
+    test("early abandon gives no story points", async ({ assert }) => {
+        const result = await runAbandonGame({
+            data: createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 1,
+                playerOne: { health: 20 },
+                playerTwo: { health: 15 },
+            }),
+            actor: "playerOne",
+            expect: { error: null, isFinished: true },
+        });
+
+        const playerOne = await User.findOrFail(result.game.playerOneId);
+        const playerTwo = await User.findOrFail(result.game.playerTwoId!);
+        assert.equal(playerOne.goldCoins, 0);
+        assert.equal(playerTwo.goldCoins, 0);
+        assert.equal(result.game.data.rewardResult?.playerOne.goldCoins, 0);
+        assert.equal(result.game.data.rewardResult?.playerTwo.goldCoins, 0);
     });
 
     test("player abandons on opponent turn — still finishes game", async ({ assert }) => {

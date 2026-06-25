@@ -119,6 +119,7 @@ test.group("elo", (group) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
+                currentRound: 2,
                 playerOne: { health: 0 },
                 playerTwo: { health: 3 },
             }),
