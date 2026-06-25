@@ -175,12 +175,12 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Architecte Système", 7),
             imageUrl: "/card-covers/galadrim/architecte-systeme.webp",
-            attack: 6,
-            health: 6,
+            attack: 5,
+            health: 5,
         },
         {
             tags: ["DEVELOPPEUR"],
-            battlecryActions: [damageAction(3, enemyMinions())],
+            battlecryActions: [damageAction(5, targetedEnemyMinion(), true)],
         },
     ),
 
@@ -754,7 +754,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(
         99,
         {
-            ...gal("Réunion Interminable", 3),
+            ...gal("Réunion Interminable", 5),
             imageUrl: "/card-covers/galadrim/reunion-interminable.webp",
         },
         [damageAction(3, enemyMinions())],
@@ -773,7 +773,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Heures Sup'", 3),
             imageUrl: "/card-covers/galadrim/heures-sup.webp",
         },
-        [boostAction(boostAttackWithCharge(3), targetedAllyMinion(), true)],
+        [boostAction(boostAttackWithCharge(2), targetedAllyMinion(), true)],
     ),
     defineSpell(
         102,
