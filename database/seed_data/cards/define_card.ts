@@ -364,6 +364,9 @@ export const comparison = (overrides: Partial<ComparisonDefinition>): Comparison
 export const attackGreaterThan = (attack: number): ComparisonDefinition =>
     comparison({ attackComparison: ">", attack });
 
+export const attackAtMost = (maxAttack: number): ComparisonDefinition =>
+    comparison({ attackComparison: "<", attack: maxAttack + 1 });
+
 export const healthLessThan = (health: number): ComparisonDefinition =>
     comparison({ healthComparison: "<", health });
 
@@ -444,6 +447,9 @@ export const targetedEnemyMinion = (): TargetDefinition =>
 
 export const targetedAllyMinion = (): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "PLAYER" });
+
+export const targetedAllyMinionWithComparison = (comp: ComparisonDefinition): TargetDefinition =>
+    baseTarget({ type: "MINION", targetTeam: "PLAYER", comparison: comp });
 
 export const targetedAnyMinion = (): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "ALL" });

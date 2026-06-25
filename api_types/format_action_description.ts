@@ -27,6 +27,12 @@ const formatTagChip = (tag: CardTag): string => {
 
 const formatTagList = (tags: CardTag[]): string => tags.map(formatTagChip).join(", ");
 
+const formatAttackComparisonLabel = (operator: "<" | ">" | "=", threshold: number): string => {
+    if (operator === "<") return `d'attaque ${threshold - 1} ou moins`;
+    if (operator === ">") return `d'attaque ${threshold + 1} ou plus`;
+    return `d'attaque ${threshold}`;
+};
+
 const withPrepositionA = (label: string): string => {
     if (label.startsWith("les ")) {
         return `aux ${label.slice(4)}`;
@@ -75,7 +81,7 @@ const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
     const comparison = action.target.comparison;
 
     if (comparison?.attackComparison && comparison.attack !== null) {
-        parts.push(`attaque ${comparison.attackComparison} ${comparison.attack}`);
+        parts.push(formatAttackComparisonLabel(comparison.attackComparison, comparison.attack));
     }
     if (comparison?.healthComparison && comparison.health !== null) {
         parts.push(`pv ${comparison.healthComparison} ${comparison.health}`);
@@ -206,7 +212,7 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     const comparison = filter.comparison;
 
     if (comparison?.attackComparison && comparison.attack !== null) {
-        parts.push(`attaque ${comparison.attackComparison} ${comparison.attack}`);
+        parts.push(formatAttackComparisonLabel(comparison.attackComparison, comparison.attack));
     }
     if (comparison?.healthComparison && comparison.health !== null) {
         parts.push(`pv ${comparison.healthComparison} ${comparison.health}`);

@@ -5,6 +5,7 @@ import {
     allyHero,
     allyMinions,
     allMinions,
+    attackAtMost,
     attackGreaterThan,
     boostAction,
     boostAttack,
@@ -44,6 +45,7 @@ import {
     silenceAction,
     spellDrawFilter,
     targetedAllyMinion,
+    targetedAllyMinionWithComparison,
     targetedAnyMinion,
     targetedAnyMinionWithComparison,
     targetedEnemyMinion,
@@ -118,7 +120,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Dev Aigri", 3),
             imageUrl: "/card-covers/galadrim/dev-aigri.webp",
-            attack: 2,
+            attack: 1,
             health: 3,
         },
         {
@@ -221,7 +223,9 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         {
             tags: ["PM"],
-            battlecryActions: [boostAction(boostCharge(), targetedAllyMinion(), true)],
+            battlecryActions: [
+                boostAction(boostCharge(), targetedAllyMinionWithComparison(attackAtMost(3)), true),
+            ],
         },
     ),
     defineMinion(
@@ -420,7 +424,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Manager Bienveillant", 4),
             imageUrl: "/card-covers/galadrim/manager-bienveillant.webp",
-            attack: 3,
+            attack: 2,
             health: 5,
         },
         {
@@ -944,7 +948,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineWeapon(
         107,
         {
-            ...gal("Clavier Mécanique", 2),
+            ...gal("Clavier Mécanique", 3),
             imageUrl: "/card-covers/galadrim/clavier-mecanique.webp",
             damage: 2,
             durability: 2,
