@@ -913,7 +913,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         128,
-        { ...gal("Débauchage", 8), imageUrl: "/card-covers/galadrim/debauchage.webp" },
+        { ...gal("Débauchage", 9), imageUrl: "/card-covers/galadrim/debauchage.webp" },
         [mindControlAction(targetedEnemyMinion(), true)],
     ),
     defineMinion(
