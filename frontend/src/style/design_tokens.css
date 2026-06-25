@@ -86,6 +86,21 @@
 .gg-catalog-card-slot__preview {
     position: relative;
     cursor: zoom-in;
+    container-type: inline-size;
+    width: 100%;
+}
+
+.gg-catalog-card-slot__preview > div,
+.gg-catalog-card-slot__preview .relative {
+    width: 100%;
+}
+
+.gg-catalog-card-slot__preview .playing-card-face {
+    width: 100%;
+    --card-w: 100cqw;
+    --card-h: calc(100cqw * 1.4);
+    --stat-badge: calc(100cqw * 0.1636);
+    height: var(--card-h);
 }
 
 .gg-catalog-card-slot__preview:focus-visible {
