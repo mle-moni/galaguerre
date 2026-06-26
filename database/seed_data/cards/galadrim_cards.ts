@@ -28,6 +28,7 @@ import {
     enemyMinions,
     healthEquals,
     onTargetSurvivedWithHealth,
+    handCardAddAction,
     healAction,
     minionDrawFilter,
     mindControlAction,
@@ -937,6 +938,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ],
         },
     ),
+    defineMinion(
+        139,
+        {
+            ...gal("Roi Mulak", 3),
+            imageUrl: "/card-covers/galadrim/roi-mulak.webp",
+            attack: 5,
+            health: 5,
+        },
+        {
+            battlecryActions: [handCardAddAction(140, 2, { targetTeam: "OPPONENT" })],
+        },
+        { rarity: "LEGENDARY" },
+    ),
 
     // --- weapons ---
     defineWeapon(106, {
@@ -999,6 +1013,16 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             health: 3,
         },
         {},
+        { isCollectible: false },
+    ),
+    defineSpell(
+        140,
+        {
+            ...gal("Bilan Carbone", 1),
+            imageUrl: "/card-covers/galadrim/bilan-carbone.webp",
+        },
+        [boostAction(boostBoth(1, 1), targetedAllyMinion(), true)],
+        [],
         { isCollectible: false },
     ),
 ];
