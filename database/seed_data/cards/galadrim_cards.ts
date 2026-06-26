@@ -33,6 +33,7 @@ import {
     minionDrawFilter,
     mindControlAction,
     manaTemporaryChangeAction,
+    manaTemporaryChangePerOpponentMinionAction,
     otherAllyMinions,
     otherAllyMinionsWithTag,
     randomEnemyCharacter,
@@ -948,6 +949,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         {
             battlecryActions: [handCardAddAction(140, 2, { targetTeam: "OPPONENT" })],
+        },
+        { rarity: "LEGENDARY" },
+    ),
+    defineMinion(
+        141,
+        {
+            ...gal("Benjamin Influenceur", 5),
+            imageUrl: "/card-covers/galadrim/benjamin-influenceur.webp",
+            attack: 3,
+            health: 4,
+        },
+        {
+            battlecryActions: [manaTemporaryChangePerOpponentMinionAction(1)],
         },
         { rarity: "LEGENDARY" },
     ),
