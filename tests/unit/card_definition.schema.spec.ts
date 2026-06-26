@@ -18,6 +18,7 @@ import {
     selfMinion,
     silenceAction,
     manaTemporaryChangeAction,
+    manaTemporaryChangePerOpponentMinionAction,
     reconversionAction,
     reconversionToCardId,
     reconvertParameters,
@@ -465,6 +466,22 @@ test.group("card_definition.schema", () => {
         if (data.spellActions[0]!.type === "MANA") {
             assert.equal(data.spellActions[0]!.subtype, "TEMPORARY_CHANGE");
             assert.equal(data.spellActions[0]!.amount, 2);
+            assert.isNull(data.spellActions[0]!.amountScale);
+        }
+    });
+
+    test("accepts spell with scaled MANA TEMPORARY_CHANGE action", ({ assert }) => {
+        const data = parseSpellData({
+            ...defaultSpellData(),
+            spellActions: [manaTemporaryChangePerOpponentMinionAction(1)],
+        });
+
+        assert.equal(data.spellActions[0]!.type, "MANA");
+        if (data.spellActions[0]!.type === "MANA") {
+            assert.deepEqual(data.spellActions[0]!.amountScale, {
+                source: "OPPONENT_MINION_COUNT",
+                amountPer: 1,
+            });
         }
     });
 
@@ -477,6 +494,26 @@ test.group("card_definition.schema", () => {
                     isTargeted: false,
                     subtype: "TEMPORARY_CHANGE",
                     amount: 0,
+                    amountScale: null,
+                    actionCondition: null,
+                    onTargetResult: null,
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("rejects MANA action with amountScale amountPer <= 0", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultSpellData(),
+            spellActions: [
+                {
+                    type: "MANA",
+                    isTargeted: false,
+                    subtype: "TEMPORARY_CHANGE",
+                    amount: 1,
+                    amountScale: { source: "OPPONENT_MINION_COUNT", amountPer: 0 },
                     actionCondition: null,
                     onTargetResult: null,
                 },

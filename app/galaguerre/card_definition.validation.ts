@@ -799,6 +799,16 @@ const validateNonTargetedAction = (
                 });
                 return;
             }
+            if (action.amountScale !== null) {
+                if (action.amountScale.amountPer <= 0) {
+                    ctx.addIssue({
+                        code: "custom",
+                        message: "MANA amountScale requires amountPer > 0",
+                        path: [...path, "amountScale", "amountPer"],
+                    });
+                }
+                break;
+            }
             if (action.amount <= 0) {
                 ctx.addIssue({
                     code: "custom",

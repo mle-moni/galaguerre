@@ -405,6 +405,24 @@ const formatManaTemporaryChange = (amount: number): string => {
     return `Ce tour-ci, gagnez ${amount} ${crystalLabel}.`;
 };
 
+const formatScaledManaTemporaryChange = (amountPer: number): string => {
+    const crystalLabel = amountPer === 1 ? "cristal de mana" : "cristaux de mana";
+    return `Ce tour-ci, gagnez ${amountPer} ${crystalLabel} pour chaque monstre adverse.`;
+};
+
+const formatManaActionText = (
+    action: Extract<CardActionFieldsSnapshot, { type: "MANA" }>,
+): string | null => {
+    if (action.subtype !== "TEMPORARY_CHANGE") return null;
+
+    if (action.amountScale) {
+        return formatScaledManaTemporaryChange(action.amountScale.amountPer);
+    }
+
+    if (action.amount <= 0) return null;
+    return formatManaTemporaryChange(action.amount);
+};
+
 const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | null => {
     switch (action.type) {
         case "DRAW": {
@@ -418,8 +436,9 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
             return `l'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}`;
         }
         case "MANA": {
-            if (action.subtype !== "TEMPORARY_CHANGE" || action.amount <= 0) return null;
-            return formatManaTemporaryChange(action.amount).replace(/\.$/, "").toLowerCase();
+            const text = formatManaActionText(action);
+            if (!text) return null;
+            return text.replace(/\.$/, "").toLowerCase();
         }
         default:
             return (
@@ -794,10 +813,9 @@ export const formatActionDescription = (
             return `${prefix} : Ajoute ${copies} ${formatHandCardAddLocation(action.handTargetTeam)}.`;
         }
         case "MANA": {
-            if (action.subtype !== "TEMPORARY_CHANGE" || action.amount <= 0) return null;
-            return prefix
-                ? `${prefix} : ${formatManaTemporaryChange(action.amount)}`
-                : formatManaTemporaryChange(action.amount);
+            const text = formatManaActionText(action);
+            if (!text) return null;
+            return prefix ? `${prefix} : ${text}` : text;
         }
         default:
             return null;

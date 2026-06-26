@@ -199,3 +199,18 @@ export const GALAGUERRE_DYNAMIC_COST_SOURCES_LABEL_OBJ: LabelObjectType<Galaguer
 export const GALAGUERRE_DYNAMIC_COST_SOURCES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_DYNAMIC_COST_SOURCES_LABEL_OBJ,
 );
+
+export const GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES = ["OPPONENT_MINION_COUNT"] as const;
+export type GalaguerreManaAmountScaleSource = GenerateTypeFromEnum<
+    typeof GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES
+>;
+export const GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES_OBJ = generateTypeObjectFromEnum(
+    GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES,
+);
+export const GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES_LABEL_OBJ: LabelObjectType<GalaguerreManaAmountScaleSource> =
+    {
+        OPPONENT_MINION_COUNT: "Opponent Minion Count",
+    };
+export const GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES_LABEL_OBJ,
+);

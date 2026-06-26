@@ -144,6 +144,7 @@ type CardActionSnapshotOverrides = {
     copyCount?: number | null;
     subtype?: "TEMPORARY_CHANGE";
     amount?: number;
+    amountScale?: { source: "OPPONENT_MINION_COUNT"; amountPer: number } | null;
     target?: TargetSnapshot | null;
     onTargetResult?: CardActionSnapshot["onTargetResult"];
     actionCondition?: CardActionSnapshot["actionCondition"];
@@ -283,6 +284,7 @@ export const createCardActionSnapshot = (
                 isTargeted: false,
                 subtype: overrides.subtype ?? "TEMPORARY_CHANGE",
                 amount: overrides.amount ?? 1,
+                amountScale: overrides.amountScale ?? null,
                 actionCondition,
                 onTargetResult,
             };

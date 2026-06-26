@@ -43,6 +43,8 @@ import { resolveSelectedTarget, type ResolvedTarget } from "./resolve_selected_t
 import { summonMinions } from "./summon_minion.js";
 import { triggerSummonPassivesForCards } from "../passive_engine/trigger_summon_passives.js";
 import { requireMinionIndex } from "./find_minion_on_board.js";
+import { resolveManaAmount } from "./resolve_mana_amount.js";
+import { recordGainMana, resolveSpotOwner } from "../game_narrative/narrative_effects.js";
 
 const applyEffectToResolvedTarget = (
     resolved: ResolvedTarget,
@@ -373,7 +375,9 @@ const executeNonTargetedV1Action = (
             break;
         case "MANA":
             if (action.subtype === "TEMPORARY_CHANGE") {
-                player.mana += action.amount;
+                const gain = resolveManaAmount(action, player, opponent);
+                player.mana += gain;
+                recordGainMana(resolveSpotOwner(game, player), gain);
             }
             break;
     }

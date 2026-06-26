@@ -133,6 +133,19 @@ export const manaTemporaryChangeAction = (amount: number): CardActionDefinition 
     isTargeted: false,
     subtype: "TEMPORARY_CHANGE",
     amount,
+    amountScale: null,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const manaTemporaryChangePerOpponentMinionAction = (
+    amountPer = 1,
+): CardActionDefinition => ({
+    type: "MANA",
+    isTargeted: false,
+    subtype: "TEMPORARY_CHANGE",
+    amount: amountPer,
+    amountScale: { source: "OPPONENT_MINION_COUNT", amountPer },
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
 });

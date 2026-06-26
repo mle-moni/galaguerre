@@ -10,6 +10,7 @@ import {
     GALAGUERRE_DECK_CARD_OPERATIONS,
     GALAGUERRE_DECK_PLACEMENTS,
     GALAGUERRE_MANA_SUBTYPES,
+    GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES,
     GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
     GALAGUERRE_PASSIVES_TYPES,
@@ -175,11 +176,17 @@ const handCardActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const manaAmountScaleSchema = z.object({
+    source: z.enum(GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES),
+    amountPer: z.number().positive().default(1),
+});
+
 const manaActionFieldsSchema = z.object({
     type: z.literal("MANA"),
     isTargeted: z.literal(false).default(false),
     subtype: z.enum(GALAGUERRE_MANA_SUBTYPES),
     amount: z.number().int().positive(),
+    amountScale: manaAmountScaleSchema.nullable().default(null),
     actionCondition: actionConditionSchema,
 });
 

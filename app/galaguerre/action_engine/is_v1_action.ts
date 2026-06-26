@@ -61,7 +61,10 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
         case "HAND_CARD":
             return action.copyCount > 0;
         case "MANA":
-            return action.subtype === "TEMPORARY_CHANGE" && action.amount > 0;
+            return (
+                action.subtype === "TEMPORARY_CHANGE" &&
+                (action.amount > 0 || action.amountScale !== null)
+            );
         default:
             return false;
     }
