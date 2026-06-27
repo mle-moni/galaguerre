@@ -1,7 +1,14 @@
-import type { CardActionSnapshot, DynamicCostSnapshot, PassiveSnapshot } from "./game.types.js";
+import type {
+    CardActionSnapshot,
+    DynamicCostSnapshot,
+    MinionCard,
+    PassiveSnapshot,
+} from "./game.types.js";
+import { getMinionPowerEffects } from "./get_minion_power_effects.js";
 import type { GalaguerreDynamicCostSource } from "../app/galaguerre/galaguerre.types.js";
 import {
     formatActionDescription,
+    formatGroupedActionDescriptions,
     formatHealDamagePassiveTriggerLabel,
     formatPlayCardPassiveTriggerLabel,
     formatSummonPassiveTriggerLabel,
@@ -28,21 +35,15 @@ const EFFECT_DESCRIPTIONS: Record<string, string> = {
 };
 
 export const getBattlecryDescription = (actions: CardActionSnapshot[]): string[] => {
-    return actions
-        .map((action) => formatActionDescription(action, "Cri de guerre"))
-        .filter((description): description is string => description !== null);
+    return formatGroupedActionDescriptions(actions, "Cri de guerre");
 };
 
 export const getDeathrattleDescription = (actions: CardActionSnapshot[]): string[] => {
-    return actions
-        .map((action) => formatActionDescription(action, "Dernier souffle"))
-        .filter((description): description is string => description !== null);
+    return formatGroupedActionDescriptions(actions, "Dernier souffle");
 };
 
 export const getSpellEffectDescription = (actions: CardActionSnapshot[]): string[] => {
-    return actions
-        .map((action) => formatActionDescription(action, "Effet"))
-        .filter((description): description is string => description !== null);
+    return formatGroupedActionDescriptions(actions, "Effet");
 };
 
 export const CAST_WHEN_DRAWN_LABEL = "Lancé quand pioché";
@@ -50,9 +51,19 @@ export const CAST_WHEN_DRAWN_LABEL = "Lancé quand pioché";
 const CAST_WHEN_DRAWN_DESCRIPTION =
     "Lancé quand pioché : Ce sort est lancé automatiquement lorsqu'il est pioché.";
 
+export const joinCardDescriptionParts = (parts: string[]): string => {
+    const normalized = parts
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0)
+        .map((part) => part.replace(/\.$/, ""));
+
+    if (normalized.length === 0) return "";
+    return `${normalized.join(". ")}.`;
+};
+
 export const getSpellCardDescription = (effectLines: string[], castsWhenDrawn = false): string => {
     const parts = castsWhenDrawn ? [CAST_WHEN_DRAWN_DESCRIPTION, ...effectLines] : effectLines;
-    return parts.join("\n");
+    return joinCardDescriptionParts(parts);
 };
 
 export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => {
@@ -120,9 +131,26 @@ export const getWeaponCardDescription = (
     durability: number,
     deathrattleLines: string[] = [],
 ): string => {
-    const parts: string[] = [`Arme ${damage}/${durability}.`, ...deathrattleLines];
+    return joinCardDescriptionParts([`Arme ${damage}/${durability}.`, ...deathrattleLines]);
+};
 
-    return parts.join("\n");
+export const buildMinionCardDescriptionParts = (
+    attack: number,
+    health: number,
+    effects: string[],
+    battlecryLines: string[] = [],
+    deathrattleLines: string[] = [],
+    passiveLines: string[] = [],
+    dynamicCost: DynamicCostSnapshot | null = null,
+): string[] => {
+    return [
+        `Monstre ${attack}/${health}.`,
+        ...getDynamicCostDescription(dynamicCost),
+        ...effects.map(formatEffectLine),
+        ...passiveLines,
+        ...battlecryLines,
+        ...deathrattleLines,
+    ];
 };
 
 export const getMinionCardDescription = (
@@ -134,14 +162,27 @@ export const getMinionCardDescription = (
     passiveLines: string[] = [],
     dynamicCost: DynamicCostSnapshot | null = null,
 ): string => {
-    const parts: string[] = [
-        `Monstre ${attack}/${health}.`,
-        ...getDynamicCostDescription(dynamicCost),
-        ...effects.map(formatEffectLine),
-        ...passiveLines,
-        ...battlecryLines,
-        ...deathrattleLines,
-    ];
+    return joinCardDescriptionParts(
+        buildMinionCardDescriptionParts(
+            attack,
+            health,
+            effects,
+            battlecryLines,
+            deathrattleLines,
+            passiveLines,
+            dynamicCost,
+        ),
+    );
+};
 
-    return parts.join("\n");
+export const getMinionDescriptionPartsFromCard = (card: MinionCard): string[] => {
+    return buildMinionCardDescriptionParts(
+        card.attack,
+        card.health,
+        card.effects?.length ? card.effects : getMinionPowerEffects(card.minionPowers),
+        getBattlecryDescription(card.battlecryActions),
+        getDeathrattleDescription(card.deathrattleActions),
+        getPassiveDescription(card.passives),
+        card.dynamicCost,
+    );
 };

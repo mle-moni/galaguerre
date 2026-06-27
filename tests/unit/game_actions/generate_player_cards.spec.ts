@@ -100,7 +100,7 @@ test.group("generatePlayerCards", () => {
         });
         assert.include(
             generated.description,
-            "Cri de guerre : Inflige 3 dégâts à un monstre adverse attaque > 2.",
+            "Cri de guerre : Inflige 3 dégâts à un monstre adverse d'attaque 3 ou plus.",
         );
     });
 
@@ -220,6 +220,6 @@ test.group("generatePlayerCards", () => {
 
         assert.equal(generated.spellActions.length, 2);
         assert.include(generated.description, "Effet :");
-        assert.include(generated.description, "\n");
+        assert.notInclude(generated.description, "\n");
     });
 });

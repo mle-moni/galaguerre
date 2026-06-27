@@ -1,14 +1,16 @@
 import type { CardActionSnapshot, MinionCard, PlayerCard } from "#api_types/game.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
 import { getCardPreviewById } from "#api_types/card_preview";
-import { formatActionDescription } from "#api_types/format_action_description";
-import { getDisplayedDamage } from "#api_types/get_effective_damage";
 import {
-    getActiveMinionEffectNames,
-    isMinionDescriptionLineDisabled,
-} from "#api_types/get_minion_description_line_state";
+    formatActionDescription,
+    formatGroupedActionDescriptions,
+} from "#api_types/format_action_description";
+import { getDisplayedDamage } from "#api_types/get_effective_damage";
+import { joinCardDescriptionParts } from "#api_types/minion_card_description";
 import { Text } from "@mantine/core";
+import { Fragment } from "react";
 import { CardPreviewLink } from "./card_preview_link.jsx";
+import { MinionDescriptionContent } from "./minion_description_content.jsx";
 import "./card_faces.css";
 
 const renderReconversionCardLabel = (
@@ -42,11 +44,13 @@ export const getCardDescription = (card: PlayerCard, spellPower = 0): string => 
         case "MINION":
             return card.description || `Monstre ${card.attack}/${card.health}.`;
         case "SPELL": {
-            const effectLines = card.spellActions
-                .map((action) => formatActionDescription(action, "Effet", spellPower))
-                .filter((description): description is string => description !== null);
+            const effectLines = formatGroupedActionDescriptions(
+                card.spellActions,
+                "Effet",
+                spellPower,
+            );
 
-            return effectLines.join("\n") || card.description || card.label;
+            return joinCardDescriptionParts(effectLines) || card.description || card.label;
         }
         case "WEAPON":
             return card.description || `Arme ${card.damage}/${card.durability}.`;
@@ -61,11 +65,14 @@ const getCardChips = (card: PlayerCard) => {
 const SpellEffectLine = ({
     action,
     spellPower,
+    stripTrailingPeriod = false,
 }: {
     action: CardActionSnapshot;
     spellPower: number;
+    stripTrailingPeriod?: boolean;
 }) => {
-    const description = formatActionDescription(action, "Effet", spellPower) ?? "";
+    const rawDescription = formatActionDescription(action, "Effet", spellPower) ?? "";
+    const description = stripTrailingPeriod ? rawDescription.replace(/\.$/, "") : rawDescription;
     const baseDamage = getDisplayedDamage(action);
     const effectiveDamage = getDisplayedDamage(action, spellPower);
     const hasSpellPowerBonus =
@@ -127,16 +134,12 @@ const SpellDescription = ({
     return (
         <div className="card-description">
             {card.spellActions.map((action, index) => (
-                <Text
-                    key={index}
-                    size="sm"
-                    c="dimmed"
-                    mb={index < card.spellActions.length - 1 ? 4 : 0}
-                    component="div"
-                >
-                    <SpellEffectLine action={action} spellPower={spellPower} />
-                </Text>
+                <Fragment key={index}>
+                    {index > 0 && ". "}
+                    <SpellEffectLine action={action} spellPower={spellPower} stripTrailingPeriod />
+                </Fragment>
             ))}
+            {card.spellActions.length > 0 && "."}
         </div>
     );
 };
@@ -148,24 +151,12 @@ const MinionDescription = ({
     card: MinionCard;
     isSilenced?: boolean;
 }) => {
-    const lines = getCardDescription(card).split("\n");
-    const activeEffects = getActiveMinionEffectNames(card);
-
     return (
-        <div className="card-description">
-            {lines.map((line, index) => (
-                <div
-                    key={index}
-                    className={
-                        isMinionDescriptionLineDisabled(line, index, activeEffects, isSilenced)
-                            ? "card-description-line--silenced"
-                            : undefined
-                    }
-                >
-                    {line}
-                </div>
-            ))}
-        </div>
+        <MinionDescriptionContent
+            card={card}
+            isSilenced={isSilenced}
+            className="card-description"
+        />
     );
 };
 

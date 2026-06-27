@@ -1,6 +1,7 @@
 import { test } from "@japa/runner";
 import {
     formatActionDescription,
+    formatGroupedActionDescriptions,
     formatPlayCardPassiveTriggerLabel,
 } from "#api_types/format_action_description";
 import { getDisplayedDamage, getEffectiveDamage } from "#api_types/get_effective_damage";
@@ -504,5 +505,53 @@ test.group("format_action_description", () => {
             formatActionDescription(action, "Effet"),
             "Effet : Ajoute 2 copies de Légume à chaque main.",
         );
+    });
+
+    test("merges consecutive HAND_CARD adds with the same target into one description", ({
+        assert,
+    }) => {
+        const actions = [
+            createCardActionSnapshot({
+                type: "HAND_CARD",
+                handTargetTeam: "PLAYER",
+                cardId: 144,
+                copyCount: 1,
+            }),
+            createCardActionSnapshot({
+                type: "HAND_CARD",
+                handTargetTeam: "PLAYER",
+                cardId: 145,
+                copyCount: 1,
+            }),
+            createCardActionSnapshot({
+                type: "HAND_CARD",
+                handTargetTeam: "PLAYER",
+                cardId: 146,
+                copyCount: 1,
+            }),
+        ];
+
+        assert.deepEqual(formatGroupedActionDescriptions(actions, "Cri de guerre"), [
+            "Cri de guerre : Ajoute 1 copie de mot blanc, 1 copie de mot rouge et 1 copie de mot bleu à votre main.",
+        ]);
+    });
+
+    test("does not merge HAND_CARD adds with different targets", ({ assert }) => {
+        const actions = [
+            createCardActionSnapshot({
+                type: "HAND_CARD",
+                handTargetTeam: "PLAYER",
+                cardId: 121,
+                copyCount: 1,
+            }),
+            createCardActionSnapshot({
+                type: "HAND_CARD",
+                handTargetTeam: "OPPONENT",
+                cardId: 121,
+                copyCount: 1,
+            }),
+        ];
+
+        assert.equal(formatGroupedActionDescriptions(actions, "Effet").length, 2);
     });
 });

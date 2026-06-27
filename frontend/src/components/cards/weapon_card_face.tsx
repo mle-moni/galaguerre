@@ -4,6 +4,7 @@ import type { WeaponCard } from "#api_types/game.types";
 import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
+import { CardFaceLabel } from "./card_face_label.jsx";
 import { CardFaceDescription } from "./card_face_description.jsx";
 import { CardLegendaryBadge } from "./card_legendary_badge.jsx";
 
@@ -48,7 +49,7 @@ export const WeaponCardFace = ({
             <div className="playing-card-face__body">
                 <div className="playing-card-face__text">
                     {showLegendaryBadge && <CardLegendaryBadge />}
-                    <p className="playing-card-face__label">{card.label}</p>
+                    <CardFaceLabel label={card.label} />
                     <CardFaceDescription card={card} spellPower={spellPower} />
                 </div>
             </div>

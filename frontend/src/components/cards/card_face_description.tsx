@@ -1,9 +1,8 @@
-import type { MinionCard, PlayerCard } from "#api_types/game.types";
-import {
-    getActiveMinionEffectNames,
-    isMinionDescriptionLineDisabled,
-} from "#api_types/get_minion_description_line_state";
+import type { PlayerCard } from "#api_types/game.types";
+import clsx from "clsx";
 import { getCardDescription } from "./card_detail_content.jsx";
+import { getCardFaceDescriptionSizeClass } from "./card_face_description_size.js";
+import { MinionDescriptionContent } from "./minion_description_content.jsx";
 import "./card_faces.css";
 
 interface CardFaceDescriptionProps {
@@ -18,28 +17,17 @@ export const CardFaceDescription = ({
     isSilenced = false,
 }: CardFaceDescriptionProps) => {
     const description = getCardDescription(card, spellPower);
+    const sizeClass = getCardFaceDescriptionSizeClass(description);
 
     if (card.type === "MINION") {
-        const lines = description.split("\n");
-        const activeEffects = getActiveMinionEffectNames(card);
-
         return (
-            <div className="card-face-description">
-                {lines.map((line, index) => (
-                    <div
-                        key={index}
-                        className={
-                            isMinionDescriptionLineDisabled(line, index, activeEffects, isSilenced)
-                                ? "card-description-line--silenced"
-                                : undefined
-                        }
-                    >
-                        {line}
-                    </div>
-                ))}
-            </div>
+            <MinionDescriptionContent
+                card={card}
+                isSilenced={isSilenced}
+                className={clsx("card-face-description", sizeClass)}
+            />
         );
     }
 
-    return <div className="card-face-description">{description}</div>;
+    return <div className={clsx("card-face-description", sizeClass)}>{description}</div>;
 };

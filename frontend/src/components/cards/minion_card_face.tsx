@@ -10,6 +10,7 @@ import {
 import "./card_faces.css";
 
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
+import { CardFaceLabel } from "./card_face_label.jsx";
 import { CardFaceDescription } from "./card_face_description.jsx";
 import { CardLegendaryBadge } from "./card_legendary_badge.jsx";
 
@@ -97,7 +98,7 @@ export const MinionCardFace = ({
             <div className="playing-card-face__body">
                 <div className="playing-card-face__text">
                     {showLegendaryBadge && <CardLegendaryBadge />}
-                    <p className="playing-card-face__label">{card.label}</p>
+                    <CardFaceLabel label={card.label} />
                     <CardFaceDescription
                         card={card}
                         spellPower={spellPower}

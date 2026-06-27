@@ -9,7 +9,7 @@ test.group("minion_card_metadata", () => {
     test("getMinionCardDescription includes minion power effect details", ({ assert }) => {
         const description = getMinionCardDescription(1, 2, ["Provocation"], []);
 
-        assert.equal(description, "Monstre 1/2.\nProvocation");
+        assert.equal(description, "Monstre 1/2. Provocation.");
     });
 
     test("getMinionCardDescription includes battlecry lines", ({ assert }) => {
@@ -22,11 +22,11 @@ test.group("minion_card_metadata", () => {
 
         assert.equal(
             description,
-            "Monstre 2/2.\nCri de guerre : Inflige 2 dégâts au héros adverse.",
+            "Monstre 2/2. Cri de guerre : Inflige 2 dégâts au héros adverse.",
         );
     });
 
-    test("getMinionCardDescription combines provocation and deathrattle on separate lines", ({
+    test("getMinionCardDescription combines provocation and deathrattle in one line", ({
         assert,
     }) => {
         const description = getMinionCardDescription(
@@ -39,7 +39,7 @@ test.group("minion_card_metadata", () => {
 
         assert.equal(
             description,
-            "Monstre 4/4.\nProvocation\nDernier souffle : Inflige 2 dégâts à tous les personnages.",
+            "Monstre 4/4. Provocation. Dernier souffle : Inflige 2 dégâts à tous les personnages.",
         );
     });
 
@@ -49,12 +49,12 @@ test.group("minion_card_metadata", () => {
         assert.equal(description, "Monstre 2/1.");
     });
 
-    test("getWeaponCardDescription puts deathrattle on a separate line", ({ assert }) => {
+    test("getWeaponCardDescription joins deathrattle on the same line", ({ assert }) => {
         const description = getWeaponCardDescription(3, 2, [
             "Dernier souffle : Inflige 1 dégât au héros adverse.",
         ]);
 
-        assert.equal(description, "Arme 3/2.\nDernier souffle : Inflige 1 dégât au héros adverse.");
+        assert.equal(description, "Arme 3/2. Dernier souffle : Inflige 1 dégât au héros adverse.");
     });
 
     test("getMinionCardDescription includes dynamic cost reductions", ({ assert }) => {
@@ -62,7 +62,7 @@ test.group("minion_card_metadata", () => {
             reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }],
         });
 
-        assert.equal(description, "Monstre 8/8.\nCoût réduit de 1 pour chaque carte en main.");
+        assert.equal(description, "Monstre 8/8. Coût réduit de 1 pour chaque carte en main.");
     });
 
     test("getDynamicCostDescription supports all reduction sources", ({ assert }) => {

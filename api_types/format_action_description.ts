@@ -487,6 +487,71 @@ const formatActionConditionPrefix = (action: CardActionSnapshot): string => {
     return `Si votre adversaire a ${count} monstres ou plus, `;
 };
 
+const formatFrenchList = (items: string[]): string => {
+    if (items.length === 0) return "";
+    if (items.length === 1) return items[0];
+    if (items.length === 2) return `${items[0]} et ${items[1]}`;
+    return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+};
+
+type HandCardAction = Extract<CardActionSnapshot, { type: "HAND_CARD" }>;
+
+const isSameHandCardGroup = (left: HandCardAction, right: HandCardAction): boolean =>
+    left.handTargetTeam === right.handTargetTeam && left.copyCount === right.copyCount;
+
+const formatMergedHandCardAddDescription = (actions: HandCardAction[], prefix: string): string => {
+    const copies = actions.map((action) =>
+        formatDeckCardAddCopies(action.copyCount, formatDeckCardName(action.cardId)),
+    );
+
+    return `${prefix} : Ajoute ${formatFrenchList(copies)} ${formatHandCardAddLocation(actions[0].handTargetTeam)}.`;
+};
+
+type ActionDescriptionGroup =
+    | { type: "hand_card"; actions: HandCardAction[] }
+    | { type: "single"; action: CardActionSnapshot };
+
+const groupActionDescriptions = (actions: CardActionSnapshot[]): ActionDescriptionGroup[] => {
+    const groups: ActionDescriptionGroup[] = [];
+
+    for (const action of actions) {
+        if (action.type === "HAND_CARD") {
+            const last = groups.at(-1);
+            if (last?.type === "hand_card" && isSameHandCardGroup(last.actions[0], action)) {
+                last.actions.push(action);
+                continue;
+            }
+
+            groups.push({ type: "hand_card", actions: [action] });
+            continue;
+        }
+
+        groups.push({ type: "single", action });
+    }
+
+    return groups;
+};
+
+export const formatGroupedActionDescriptions = (
+    actions: CardActionSnapshot[],
+    prefix: string,
+    spellPower?: number,
+): string[] => {
+    return groupActionDescriptions(actions)
+        .map((group) => {
+            if (group.type === "hand_card") {
+                if (group.actions.length === 1) {
+                    return formatActionDescription(group.actions[0], prefix, spellPower);
+                }
+
+                return formatMergedHandCardAddDescription(group.actions, prefix);
+            }
+
+            return formatActionDescription(group.action, prefix, spellPower);
+        })
+        .filter((description): description is string => description !== null);
+};
+
 export const formatActionDescription = (
     action: CardActionSnapshot,
     prefix = "Cri de guerre",

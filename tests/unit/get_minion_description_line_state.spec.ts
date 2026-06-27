@@ -27,7 +27,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
     },
     effects: [],
     description:
-        "Monstre 2/2.\nImmunité : Bloque la première source de dégâts reçue.\nDiscrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
+        "Monstre 2/2. Immunité : Bloque la première source de dégâts reçue. Discrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
     battlecryActions: [],
     deathrattleActions: [],
     passives: [],
