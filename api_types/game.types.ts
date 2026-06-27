@@ -97,6 +97,7 @@ export type GameLogEntryType =
     | "PASS_TURN"
     | "FATIGUE_DAMAGE"
     | "DRAW"
+    | "OVERDRAW"
     | "ATTACK"
     | "BATTLECRY"
     | "DEATHRATTLE"

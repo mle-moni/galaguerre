@@ -172,6 +172,16 @@ export const effectsToShots = (
                 pushFloatingText(hero, `-${effect.amount}`, "damage");
                 break;
             }
+            case "OVERDRAW": {
+                const from =
+                    effect.source === "DECK"
+                        ? resolveDeckRect(effect.owner, snapshot)
+                        : resolveHeroRect(effect.owner, snapshot);
+                const to = resolveBoardCenter(snapshot);
+                shots.push({ type: "CARD_FLIGHT", card: effect.card, from, to });
+                shots.push({ type: "DEATH", at: to });
+                break;
+            }
             case "TURN_BANNER": {
                 shots.push({
                     type: "TURN_BANNER",

@@ -319,6 +319,7 @@ export class ReplayStore {
             PASS_TURN: "Fin de tour",
             TURN_BEGIN: "Début de tour",
             DRAW: "Pioche",
+            OVERDRAW: "Surpioche",
             MINION_DEATH: "Mort de monstre",
             TRIGGER: "Effet",
         };

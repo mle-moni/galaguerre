@@ -8,6 +8,7 @@ import { triggerPassives } from "./passive_engine/trigger_passives.js";
 import { beginLoggedBeat, endCurrentBeat } from "./game_narrative/narrative_beats.js";
 import { resolveSpotOwner } from "./game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "./game_narrative/narrative_context.js";
+import { giveCardToHand } from "./give_card_to_hand.js";
 
 export const getFatigueDamage = (player: GamePlayer) => player.maxFatigueDamageTaken + 1;
 
@@ -34,6 +35,40 @@ const recordDrawBeat = (game: Game, player: GamePlayer, cardUuid?: string): void
     });
 };
 
+const applyFatigue = (player: GamePlayer, game?: Game): void => {
+    const fatigueDamage = getFatigueDamage(player);
+    player.maxFatigueDamageTaken = fatigueDamage;
+    if (game) {
+        recordFatigueDamage(game, player, fatigueDamage);
+        recordFatigueBeat(game, player, fatigueDamage);
+        applyDamageToHero(game, player, fatigueDamage, player);
+    } else {
+        player.health -= fatigueDamage;
+    }
+};
+
+const completeSuccessfulDraw = (
+    player: GamePlayer,
+    card: NonNullable<ReturnType<GamePlayer["deckCards"]["shift"]>>,
+    game?: Game,
+): void => {
+    recordCardDrawn(player);
+    if (game) recordCardDraw(game, player, card);
+    if (game) recordDrawBeat(game, player, card.uuid);
+    triggerDrawPassives(game, player);
+};
+
+const addDrawnCardToHand = (
+    player: GamePlayer,
+    card: NonNullable<ReturnType<GamePlayer["deckCards"]["shift"]>>,
+    game?: Game,
+): void => {
+    const result = giveCardToHand(player, card, game, { source: "DECK" });
+    if (result === "added") {
+        completeSuccessfulDraw(player, card, game);
+    }
+};
+
 export const drawOneCard = (
     player: GamePlayer,
     filter?: CardFilterSnapshot | null,
@@ -42,35 +77,15 @@ export const drawOneCard = (
     if (!filter) {
         const card = player.deckCards.shift();
         if (!card) {
-            const fatigueDamage = getFatigueDamage(player);
-            player.maxFatigueDamageTaken = fatigueDamage;
-            if (game) {
-                recordFatigueDamage(game, player, fatigueDamage);
-                recordFatigueBeat(game, player, fatigueDamage);
-                applyDamageToHero(game, player, fatigueDamage, player);
-            } else {
-                player.health -= fatigueDamage;
-            }
+            applyFatigue(player, game);
         } else {
-            player.hand.push(card);
-            recordCardDrawn(player);
-            if (game) recordCardDraw(game, player, card);
-            if (game) recordDrawBeat(game, player, card.uuid);
-            triggerDrawPassives(game, player);
+            addDrawnCardToHand(player, card, game);
         }
         return;
     }
 
     if (player.deckCards.length === 0) {
-        const fatigueDamage = getFatigueDamage(player);
-        player.maxFatigueDamageTaken = fatigueDamage;
-        if (game) {
-            recordFatigueDamage(game, player, fatigueDamage);
-            recordFatigueBeat(game, player, fatigueDamage);
-            applyDamageToHero(game, player, fatigueDamage, player);
-        } else {
-            player.health -= fatigueDamage;
-        }
+        applyFatigue(player, game);
         return;
     }
 
@@ -78,11 +93,7 @@ export const drawOneCard = (
     if (matchIndex === -1) return;
 
     const [card] = player.deckCards.splice(matchIndex, 1);
-    player.hand.push(card!);
-    recordCardDrawn(player);
-    if (game) recordCardDraw(game, player, card!);
-    if (game) recordDrawBeat(game, player, card!.uuid);
-    triggerDrawPassives(game, player);
+    addDrawnCardToHand(player, card!, game);
 };
 
 export const drawCards = (

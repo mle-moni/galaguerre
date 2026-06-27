@@ -1,5 +1,6 @@
 import { test } from "@japa/runner";
 import { addCardsToHand } from "../../../app/galaguerre/hand_card_operations.js";
+import { MAX_HAND_SIZE } from "../../../app/galaguerre/game_rules.js";
 import {
     createCardActionSnapshot,
     createGameData,
@@ -33,6 +34,18 @@ test.group("hand_card_operations", () => {
 
         assert.equal(added, 0);
         assert.equal(player.hand.length, 0);
+    });
+
+    test("addCardsToHand overdraws when hand is full", ({ assert }) => {
+        const hand = Array.from({ length: MAX_HAND_SIZE }, (_, index) =>
+            createMinionCard({ uuid: `hand-${index}` }),
+        );
+        const player = createGamePlayer(1, { deckCards: [], hand });
+
+        const added = addCardsToHand(player, LEGUME_CARD_ID, 1);
+
+        assert.equal(added, 0);
+        assert.equal(player.hand.length, MAX_HAND_SIZE);
     });
 });
 

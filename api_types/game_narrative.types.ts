@@ -1,10 +1,11 @@
-import type { GameData, SpotOwner } from "./game.types.js";
+import type { GameData, PlayerCard, SpotOwner } from "./game.types.js";
 
 export const NARRATIVE_BEAT_KINDS = [
     "PLAY_CARD",
     "ATTACK",
     "TRIGGER",
     "DRAW",
+    "OVERDRAW",
     "FATIGUE",
     "MINION_DEATH",
     "WEAPON_BREAK",
@@ -80,6 +81,12 @@ export type NarrativeEffect =
     | { type: "BREAK_WEAPON"; cardUuid: string; owner: SpotOwner }
     | { type: "TURN_BANNER"; owner: SpotOwner; label: string }
     | { type: "DRAW"; owner: SpotOwner; cardUuid?: string }
+    | {
+          type: "OVERDRAW";
+          owner: SpotOwner;
+          card: PlayerCard;
+          source: "DECK" | "GENERATED";
+      }
     | { type: "FATIGUE"; owner: SpotOwner; amount: number };
 
 export interface NarrativeBeat {

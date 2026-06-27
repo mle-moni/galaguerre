@@ -46,6 +46,15 @@ export const recordCardDraw = (game: Game, player: GamePlayer, card: PlayerCard)
     });
 };
 
+export const recordOverdraw = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "OVERDRAW",
+        card: structuredClone(card),
+    });
+};
+
 export const recordAttack = (
     game: Game,
     player: GamePlayer,

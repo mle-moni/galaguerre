@@ -75,6 +75,14 @@ export const ActionLogEntry = ({ entry, game, currentUserId, className }: Action
         );
     }
 
+    if (entry.type === "OVERDRAW" && entry.card) {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} : surpioche — <CardLink card={entry.card} spellPower={spellPower} />
+            </Text>
+        );
+    }
+
     if (entry.type === "FATIGUE_DAMAGE") {
         return (
             <Text className={entryClass} component="div">
