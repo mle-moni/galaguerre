@@ -93,7 +93,10 @@ export const effectsToShots = (
             case "MOVE_CARD": {
                 const card =
                     findCardInGame(gameData, effect.cardUuid) ?? getDummyCard(effect.cardUuid);
-                const from = resolveHandRect(effect.owner, snapshot);
+                const from =
+                    effect.from === "DECK"
+                        ? resolveDeckRect(effect.owner, snapshot)
+                        : resolveHandRect(effect.owner, snapshot);
                 const to = resolveDestinationRect(effect, snapshot);
                 shots.push({ type: "CARD_FLIGHT", card, from, to });
                 break;

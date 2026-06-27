@@ -20,6 +20,15 @@ export const recordPlayCard = (game: Game, player: GamePlayer, card: PlayerCard)
     });
 };
 
+export const recordCastWhenDrawn = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "CAST_WHEN_DRAWN",
+        card: structuredClone(card),
+    });
+};
+
 export const recordPassTurn = (game: Game, player: GamePlayer): void => {
     appendLogEntry(game, {
         roundNumber: game.data.currentRound,

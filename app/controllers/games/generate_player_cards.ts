@@ -52,12 +52,15 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
             }
             case "SPELL": {
                 const effectLines = getSpellEffectDescription(card.data.spellActions);
+                const castsWhenDrawn = card.data.castsWhenDrawn ?? false;
 
                 return {
                     ...base,
                     type: "SPELL",
-                    description: getSpellCardDescription(effectLines) || card.data.name,
+                    description:
+                        getSpellCardDescription(effectLines, castsWhenDrawn) || card.data.name,
                     spellActions: card.data.spellActions,
+                    castsWhenDrawn,
                 };
             }
             case "MINION": {

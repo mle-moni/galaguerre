@@ -18,6 +18,7 @@ import {
     boostSpellPower,
     costLessThan,
     damageAction,
+    deckCardAddAction,
     destroyAction,
     defineMinion,
     defineSpell,
@@ -48,6 +49,7 @@ import {
     spellDrawFilter,
     targetedAllyMinion,
     targetedAllyMinionWithComparison,
+    targetedAnyCharacter,
     targetedAnyMinion,
     targetedAnyMinionWithComparison,
     targetedEnemyMinion,
@@ -965,6 +967,18 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         { rarity: "LEGENDARY" },
     ),
+    defineMinion(
+        142,
+        {
+            ...gal("Arnaud", 5),
+            attack: 5,
+            health: 4,
+        },
+        {
+            battlecryActions: [deckCardAddAction(143)],
+        },
+        { rarity: "LEGENDARY" },
+    ),
 
     // --- weapons ---
     defineWeapon(106, {
@@ -1039,4 +1053,35 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [],
         { isCollectible: false },
     ),
+    defineMinion(
+        143,
+        {
+            ...gal("Boîte de Code Names", 1),
+            attack: 0,
+            health: 2,
+        },
+        {
+            minionPowers: {
+                hasTaunt: true,
+            },
+            deathrattleActions: [deckCardAddAction(142)],
+            battlecryActions: [
+                handCardAddAction(144),
+                handCardAddAction(145),
+                handCardAddAction(146),
+            ],
+        },
+        { isCollectible: false },
+    ),
+    defineSpell(144, { ...gal("mot blanc", 1) }, [drawAction(1)], [], { isCollectible: false }),
+    defineSpell(
+        145,
+        { ...gal("mot rouge", 2) },
+        [damageAction(2, targetedAnyCharacter(), true)],
+        [],
+        { isCollectible: false },
+    ),
+    defineSpell(146, { ...gal("mot bleu", 0) }, [healAction(2, targetedAnyCharacter(), true)], [], {
+        isCollectible: false,
+    }),
 ];

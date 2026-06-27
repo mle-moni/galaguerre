@@ -82,6 +82,7 @@ export type SpellCard = PlayerCardBase & {
     type: "SPELL";
     description: string;
     spellActions: CardActionSnapshot[];
+    castsWhenDrawn: boolean;
 };
 
 export type WeaponCard = PlayerCardBase & {
@@ -94,6 +95,7 @@ export type WeaponCard = PlayerCardBase & {
 
 export type GameLogEntryType =
     | "PLAY_CARD"
+    | "CAST_WHEN_DRAWN"
     | "PASS_TURN"
     | "FATIGUE_DAMAGE"
     | "DRAW"

@@ -454,7 +454,7 @@ export const createSpellCard = (
             target: createHeroTargetSnapshot("OPPONENT"),
         }),
     ];
-    const { spellActions = defaultSpellActions, ...rest } = overrides;
+    const { spellActions = defaultSpellActions, castsWhenDrawn = false, ...rest } = overrides;
     const cost = rest.cost ?? 2;
 
     return {
@@ -469,6 +469,7 @@ export const createSpellCard = (
         type: "SPELL",
         description: "Effet : Inflige 3 dégâts au héros adverse.",
         spellActions,
+        castsWhenDrawn,
         ...rest,
     };
 };

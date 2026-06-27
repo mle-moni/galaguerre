@@ -217,10 +217,7 @@ test.group("RECONVERSION action", () => {
         assert.equal(card.type === "MINION" ? card.cardId : -1, DEV_AIGRI_CARD_ID);
         assert.isTrue(card.type === "MINION" && card.minionPowers.hasTaunt);
         assert.isTrue(card.type === "MINION" && card.effects.includes("Provocation"));
-        assert.include(
-            card.type === "MINION" ? card.description : "",
-            "Provocation : Les adversaires doivent attaquer ce monstre avant les autres cibles.",
-        );
+        assert.include(card.type === "MINION" ? card.description : "", "Provocation");
         assert.isFalse(minion.isSilenced);
         assert.isAbove(card.type === "MINION" ? card.battlecryActions.length : 0, 0);
     });

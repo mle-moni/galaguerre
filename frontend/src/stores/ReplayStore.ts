@@ -315,6 +315,7 @@ export class ReplayStore {
         const kind = step.beats[0]?.kind ?? "ACTION";
         const kindLabels: Record<string, string> = {
             PLAY_CARD: "Carte jouée",
+            CAST_WHEN_DRAWN: "Lancé quand pioché",
             ATTACK: "Attaque",
             PASS_TURN: "Fin de tour",
             TURN_BEGIN: "Début de tour",

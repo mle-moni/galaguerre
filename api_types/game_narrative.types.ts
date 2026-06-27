@@ -2,6 +2,7 @@ import type { GameData, PlayerCard, SpotOwner } from "./game.types.js";
 
 export const NARRATIVE_BEAT_KINDS = [
     "PLAY_CARD",
+    "CAST_WHEN_DRAWN",
     "ATTACK",
     "TRIGGER",
     "DRAW",
@@ -39,7 +40,7 @@ export type NarrativeEffect =
           type: "MOVE_CARD";
           cardUuid: string;
           owner: SpotOwner;
-          from: "HAND";
+          from: "HAND" | "DECK";
           to: NarrativeCardDestination;
       }
     | { type: "SPEND_MANA"; owner: SpotOwner; amount: number }

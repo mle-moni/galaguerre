@@ -9,10 +9,7 @@ test.group("minion_card_metadata", () => {
     test("getMinionCardDescription includes minion power effect details", ({ assert }) => {
         const description = getMinionCardDescription(1, 2, ["Provocation"], []);
 
-        assert.equal(
-            description,
-            "Monstre 1/2.\nProvocation : Les adversaires doivent attaquer ce monstre avant les autres cibles.",
-        );
+        assert.equal(description, "Monstre 1/2.\nProvocation");
     });
 
     test("getMinionCardDescription includes battlecry lines", ({ assert }) => {
@@ -42,7 +39,7 @@ test.group("minion_card_metadata", () => {
 
         assert.equal(
             description,
-            "Monstre 4/4.\nProvocation : Les adversaires doivent attaquer ce monstre avant les autres cibles.\nDernier souffle : Inflige 2 dégâts à tous les personnages.",
+            "Monstre 4/4.\nProvocation\nDernier souffle : Inflige 2 dégâts à tous les personnages.",
         );
     });
 

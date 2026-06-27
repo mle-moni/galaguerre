@@ -46,6 +46,14 @@ export const ActionLogEntry = ({ entry, game, currentUserId, className }: Action
         );
     }
 
+    if (entry.type === "CAST_WHEN_DRAWN" && entry.card) {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} lance <CardLink card={entry.card} spellPower={spellPower} /> (pioché)
+            </Text>
+        );
+    }
+
     if (entry.type === "PASS_TURN") {
         return (
             <Text className={entryClass} component="div">

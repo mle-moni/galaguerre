@@ -342,6 +342,7 @@ export const defaultSpellData = (): SpellCardData => ({
     dynamicCost: null,
     imageUrl: "https://example.com/card.png",
     spellActions: [damageAction(1, enemyHero())],
+    castsWhenDrawn: false,
 });
 
 export const defaultWeaponData = (): WeaponCardData => ({
@@ -665,6 +666,7 @@ export const defineSpell = (
     spellActions: CardActionDefinition[],
     tags: CardTag[] = [],
     options: CardSeedOptions = {},
+    dataPartial: Partial<Omit<SpellCardData, "spellActions">> = {},
 ): CardSeedEntry => {
     const data = parseSpellData({
         ...defaultSpellData(),
@@ -673,6 +675,7 @@ export const defineSpell = (
         cost: base.cost,
         imageUrl: base.imageUrl,
         spellActions,
+        ...dataPartial,
     });
 
     return {

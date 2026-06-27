@@ -80,6 +80,7 @@ const buildSpellPreview = (entry: CardSeedEntry): SpellCard => {
     }
 
     const effectLines = getSpellEffectDescription(data.spellActions);
+    const castsWhenDrawn = data.castsWhenDrawn ?? false;
 
     return {
         uuid: `preview-${id}`,
@@ -91,8 +92,9 @@ const buildSpellPreview = (entry: CardSeedEntry): SpellCard => {
         dynamicCost: data.dynamicCost,
         tags: data.tags,
         type: "SPELL",
-        description: getSpellCardDescription(effectLines) || data.name,
+        description: getSpellCardDescription(effectLines, castsWhenDrawn) || data.name,
         spellActions: data.spellActions,
+        castsWhenDrawn,
     };
 };
 

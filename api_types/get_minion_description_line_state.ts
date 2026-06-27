@@ -12,7 +12,7 @@ const MINION_EFFECT_LINE_NAMES = [
 
 const getEffectNameFromLine = (line: string): string | null => {
     for (const name of MINION_EFFECT_LINE_NAMES) {
-        if (line.startsWith(`${name} : `)) return name;
+        if (line === name || line.startsWith(`${name} : `)) return name;
     }
     return null;
 };

@@ -16,8 +16,9 @@ const PASSIVE_TRIGGER_LABELS: Record<
     DRAW: "pioche",
 };
 
+const LABEL_ONLY_EFFECTS = new Set(["Provocation"]);
+
 const EFFECT_DESCRIPTIONS: Record<string, string> = {
-    Provocation: "Les adversaires doivent attaquer ce monstre avant les autres cibles.",
     Charge: "Peut attaquer dès le tour où il est joué.",
     "Furie des vents": "Peut attaquer deux fois par tour.",
     Toxique: "Détruit tout monstre blessé par ce monstre.",
@@ -44,7 +45,15 @@ export const getSpellEffectDescription = (actions: CardActionSnapshot[]): string
         .filter((description): description is string => description !== null);
 };
 
-export const getSpellCardDescription = (effectLines: string[]): string => effectLines.join("\n");
+export const CAST_WHEN_DRAWN_LABEL = "Lancé quand pioché";
+
+const CAST_WHEN_DRAWN_DESCRIPTION =
+    "Lancé quand pioché : Ce sort est lancé automatiquement lorsqu'il est pioché.";
+
+export const getSpellCardDescription = (effectLines: string[], castsWhenDrawn = false): string => {
+    const parts = castsWhenDrawn ? [CAST_WHEN_DRAWN_DESCRIPTION, ...effectLines] : effectLines;
+    return parts.join("\n");
+};
 
 export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => {
     return passives
@@ -82,6 +91,7 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
 };
 
 const formatEffectLine = (effect: string): string => {
+    if (LABEL_ONLY_EFFECTS.has(effect)) return effect;
     const description = EFFECT_DESCRIPTIONS[effect] ?? effect;
     return `${effect} : ${description}`;
 };

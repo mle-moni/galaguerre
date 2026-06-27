@@ -37,6 +37,14 @@ const burnCardFromHandAttempt = (
     }
 };
 
+export const burnDrawnCard = (
+    player: GamePlayer,
+    card: PlayerCard,
+    game: Game | undefined,
+): void => {
+    burnCardFromHandAttempt(player, card, game, "DECK");
+};
+
 export const giveCardToHand = (
     player: GamePlayer,
     card: PlayerCard,
