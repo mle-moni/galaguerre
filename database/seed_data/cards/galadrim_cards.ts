@@ -971,6 +971,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         142,
         {
             ...gal("Arnaud", 5),
+            imageUrl: "/card-covers/galadrim/arnaud.webp",
             attack: 5,
             health: 4,
         },
@@ -1057,6 +1058,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         143,
         {
             ...gal("Boîte de Code Names", 1),
+            imageUrl: "/card-covers/galadrim/boite-de-code-names.webp",
             attack: 0,
             health: 2,
         },
@@ -1073,15 +1075,25 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         { isCollectible: false },
     ),
-    defineSpell(144, { ...gal("mot blanc", 1) }, [drawAction(1)], [], { isCollectible: false }),
+    defineSpell(
+        144,
+        { ...gal("mot blanc", 1), imageUrl: "/card-covers/galadrim/mot-blanc.webp" },
+        [drawAction(1)],
+        [],
+        { isCollectible: false },
+    ),
     defineSpell(
         145,
-        { ...gal("mot rouge", 2) },
+        { ...gal("mot rouge", 2), imageUrl: "/card-covers/galadrim/mot-rouge.webp" },
         [damageAction(2, targetedAnyCharacter(), true)],
         [],
         { isCollectible: false },
     ),
-    defineSpell(146, { ...gal("mot bleu", 0) }, [healAction(2, targetedAnyCharacter(), true)], [], {
-        isCollectible: false,
-    }),
+    defineSpell(
+        146,
+        { ...gal("mot bleu", 0), imageUrl: "/card-covers/galadrim/mot-bleu.webp" },
+        [healAction(2, targetedAnyCharacter(), true)],
+        [],
+        { isCollectible: false },
+    ),
 ];
