@@ -1,6 +1,6 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { CardBackFace } from "~/components/cards/card_back_face";
 import { CardPreviewSheet } from "~/components/cards/card_preview_sheet";
 import {
@@ -27,7 +27,9 @@ export const PackOpeningCard = ({
 }: PackOpeningCardProps) => {
     const useFullSize = usePackOpeningFullSize();
     const [previewOpened, setPreviewOpened] = useState(false);
+    const [showRarityHint, setShowRarityHint] = useState(false);
     const canPreview = !useFullSize && isFlipped;
+    const canPeekRarity = canFlip && !isFlipped;
     const isInteractive = canFlip || canPreview;
 
     const handleClick = () => {
@@ -38,6 +40,22 @@ export const PackOpeningCard = ({
 
         if (canPreview) {
             setPreviewOpened(true);
+        }
+    };
+
+    const handleTouchStart = () => {
+        if (canPeekRarity) {
+            setShowRarityHint(true);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setShowRarityHint(false);
+    };
+
+    const handleContextMenu = (event: MouseEvent<HTMLButtonElement>) => {
+        if (canPeekRarity) {
+            event.preventDefault();
         }
     };
 
@@ -52,9 +70,14 @@ export const PackOpeningCard = ({
                         isFlipped && "pack-opening-card--flipped",
                         canFlip && "pack-opening-card--can-flip",
                         canPreview && "pack-opening-card--previewable",
+                        showRarityHint && "pack-opening-card--rarity-hint",
                         !isInteractive && "pack-opening-card--inactive",
                     )}
                     onClick={handleClick}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchEnd}
+                    onContextMenu={handleContextMenu}
                     aria-disabled={!isInteractive}
                     aria-label={
                         canFlip
@@ -65,7 +88,13 @@ export const PackOpeningCard = ({
                     }
                 >
                     <div className="pack-opening-card__inner">
-                        <div className="pack-opening-card__face pack-opening-card__back">
+                        <div
+                            className={clsx(
+                                "pack-opening-card__face pack-opening-card__back",
+                                !isFlipped &&
+                                    `pack-opening-card__back--${card.rarity.toLowerCase()}`,
+                            )}
+                        >
                             <CardBackFace
                                 className={useFullSize ? "playing-card-face--full" : undefined}
                             />

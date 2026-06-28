@@ -18,6 +18,8 @@
 
 .pack-opening-card--can-flip {
     cursor: pointer;
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 
 .pack-opening-card--can-flip:focus-visible {
@@ -67,4 +69,46 @@
 
 .pack-opening-card__front {
     transform: rotateY(180deg) translateZ(1px);
+}
+
+.pack-opening-card--can-flip.pack-opening-card--rarity-hint .pack-opening-card__back--legendary {
+    box-shadow: none;
+}
+
+.pack-opening-card--can-flip.pack-opening-card--rarity-hint
+    .pack-opening-card__back--legendary
+    .playing-card-face {
+    animation: pack-opening-legendary-glow-pulse 1.8s ease-in-out infinite;
+}
+
+@media (hover: hover) {
+    .pack-opening-card--can-flip:hover .pack-opening-card__back--legendary,
+    .pack-opening-card--can-flip:focus-visible .pack-opening-card__back--legendary {
+        box-shadow: none;
+    }
+
+    .pack-opening-card--can-flip:hover .pack-opening-card__back--legendary .playing-card-face,
+    .pack-opening-card--can-flip:focus-visible
+        .pack-opening-card__back--legendary
+        .playing-card-face {
+        animation: pack-opening-legendary-glow-pulse 1.8s ease-in-out infinite;
+    }
+}
+
+@keyframes pack-opening-legendary-glow-pulse {
+    0%,
+    100% {
+        box-shadow:
+            0 0 8px rgba(240, 184, 64, 0.65),
+            0 0 18px rgba(240, 184, 64, 0.4);
+        filter: brightness(1.04);
+    }
+
+    50% {
+        box-shadow:
+            0 0 12px rgba(240, 184, 64, 0.85),
+            0 0 28px rgba(240, 184, 64, 0.55),
+            0 0 40px rgba(201, 162, 39, 0.25);
+        filter: brightness(1.08);
+    }
 }
