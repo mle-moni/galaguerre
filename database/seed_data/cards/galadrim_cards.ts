@@ -870,7 +870,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             ...gal("Navigation Privée", 1),
             imageUrl: "/card-covers/galadrim/navigation-privee.webp",
         },
-        [boostAction(boostAttackWithStealth(3), targetedAnyMinion(), true)],
+        [boostAction(boostAttackWithStealth(2), targetedAnyMinion(), true)],
     ),
     defineSpell(
         120,
