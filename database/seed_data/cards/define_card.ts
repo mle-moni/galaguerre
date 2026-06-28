@@ -138,6 +138,16 @@ export const manaTemporaryChangeAction = (amount: number): CardActionDefinition 
     onTargetResult: null,
 });
 
+export const defeatAction = (
+    targetTeam: GalaguerreTargetTeam = "OPPONENT",
+): CardActionDefinition => ({
+    type: "DEFEAT",
+    isTargeted: false,
+    targetTeam,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const manaTemporaryChangePerOpponentMinionAction = (
     amountPer = 1,
 ): CardActionDefinition => ({

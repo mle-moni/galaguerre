@@ -190,6 +190,13 @@ const manaActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const defeatActionSchema = z.object({
+    type: z.literal("DEFEAT"),
+    isTargeted: z.literal(false).default(false),
+    targetTeam: z.enum(GALAGUERRE_TARGET_TEAMS),
+    actionCondition: actionConditionSchema,
+});
+
 const cardActionFieldsSchema = z.discriminatedUnion("type", [
     damageActionFieldsSchema,
     healActionFieldsSchema,
@@ -205,6 +212,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     deckCardActionFieldsSchema,
     handCardActionFieldsSchema,
     manaActionFieldsSchema,
+    defeatActionSchema,
 ]);
 
 export const onTargetResultSchema = z
@@ -249,6 +257,7 @@ export const cardActionSchema = z
         deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         handCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         manaActionFieldsSchema.extend(cardActionOnTargetResultField),
+        defeatActionSchema.extend(cardActionOnTargetResultField),
     ])
     .superRefine((action, ctx) => {
         validateCardAction(action, ctx, [], { allowTargeted: true });

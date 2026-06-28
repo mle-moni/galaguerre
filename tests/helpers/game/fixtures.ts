@@ -140,6 +140,7 @@ type CardActionSnapshotOverrides = {
     deckPlacement?: "TOP" | "BOTTOM" | "RANDOM" | null;
     deckTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
     handTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
+    targetTeam?: "PLAYER" | "OPPONENT" | "ALL";
     cardId?: number;
     copyCount?: number | null;
     subtype?: "TEMPORARY_CHANGE";
@@ -285,6 +286,14 @@ export const createCardActionSnapshot = (
                 subtype: overrides.subtype ?? "TEMPORARY_CHANGE",
                 amount: overrides.amount ?? 1,
                 amountScale: overrides.amountScale ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "DEFEAT":
+            return {
+                type: "DEFEAT",
+                isTargeted: false,
+                targetTeam: overrides.targetTeam ?? "OPPONENT",
                 actionCondition,
                 onTargetResult,
             };

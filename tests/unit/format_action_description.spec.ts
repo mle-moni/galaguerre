@@ -554,4 +554,31 @@ test.group("format_action_description", () => {
 
         assert.equal(formatGroupedActionDescriptions(actions, "Effet").length, 2);
     });
+
+    test("formats DEFEAT opponent", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DEFEAT",
+            targetTeam: "OPPONENT",
+        });
+
+        assert.equal(formatActionDescription(action, "Effet"), "Effet : Défaite l'adversaire.");
+    });
+
+    test("formats DEFEAT self", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DEFEAT",
+            targetTeam: "PLAYER",
+        });
+
+        assert.equal(formatActionDescription(action, "Effet"), "Effet : Défaite votre héros.");
+    });
+
+    test("formats DEFEAT both players", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DEFEAT",
+            targetTeam: "ALL",
+        });
+
+        assert.equal(formatActionDescription(action, "Effet"), "Effet : Défaite les deux joueurs.");
+    });
 });

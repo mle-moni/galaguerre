@@ -65,6 +65,8 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
                 action.subtype === "TEMPORARY_CHANGE" &&
                 (action.amount > 0 || action.amountScale !== null)
             );
+        case "DEFEAT":
+            return true;
         default:
             return false;
     }

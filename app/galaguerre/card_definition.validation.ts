@@ -818,6 +818,8 @@ const validateNonTargetedAction = (
             }
             break;
         }
+        case "DEFEAT":
+            break;
     }
 
     if ("onTargetResult" in action && action.onTargetResult != null) {

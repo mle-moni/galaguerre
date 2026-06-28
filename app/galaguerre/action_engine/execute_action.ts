@@ -17,6 +17,7 @@ import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applyDamageToHero } from "./apply_damage_to_hero.js";
 import { applySilenceToAllMinions, applySilenceToMinion } from "./apply_silence.js";
 import { applyDestroyToAllMinions } from "./apply_destroy.js";
+import { applyDefeat } from "./apply_defeat.js";
 import { killMinion } from "./kill_minion.js";
 import { applyReconversionToAllMinions, applyReconversionToMinion } from "./apply_reconversion.js";
 import { applyHealToHero, applyHealToMinion } from "./apply_heal_with_passives.js";
@@ -380,6 +381,11 @@ const executeNonTargetedV1Action = (
                 recordGainMana(resolveSpotOwner(game, player), gain);
             }
             break;
+        case "DEFEAT": {
+            const { gameEnded } = applyDefeat(game, player, opponent, action.targetTeam);
+            if (gameEnded) return;
+            break;
+        }
     }
 };
 

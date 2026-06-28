@@ -400,6 +400,17 @@ const formatHandCardAddLocation = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): s
     }
 };
 
+const formatDefeatTargetLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+    switch (targetTeam) {
+        case "OPPONENT":
+            return "l'adversaire";
+        case "ALL":
+            return "les deux joueurs";
+        default:
+            return "votre héros";
+    }
+};
+
 const formatManaTemporaryChange = (amount: number): string => {
     const crystalLabel = amount === 1 ? "cristal de mana" : "cristaux de mana";
     return `Ce tour-ci, gagnez ${amount} ${crystalLabel}.`;
@@ -882,6 +893,8 @@ export const formatActionDescription = (
             if (!text) return null;
             return prefix ? `${prefix} : ${text}` : text;
         }
+        case "DEFEAT":
+            return `${prefix} : Défaite ${formatDefeatTargetLabel(action.targetTeam)}.`;
         default:
             return null;
     }
