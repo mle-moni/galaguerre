@@ -7,7 +7,7 @@ import type {
 import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import { getBoardMinionStats, resolveRelativeComparison } from "#api_types/comparison_matching";
 import { randomIntInRange } from "../../utils/random.js";
-import { getAllMinionCardTemplates, getMinionCardTemplateById } from "../card_catalog.js";
+import { getCollectibleMinionCardTemplates, getMinionCardTemplateById } from "../card_catalog.js";
 
 const filterMinionTemplates = (
     parameters: ReconvertParametersSnapshot,
@@ -19,7 +19,7 @@ const filterMinionTemplates = (
         tags: parameters.tags,
     };
 
-    return getAllMinionCardTemplates().filter((template) =>
+    return getCollectibleMinionCardTemplates().filter((template) =>
         deckCardMatchesFilter(template, filter),
     );
 };

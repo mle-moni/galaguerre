@@ -1,6 +1,7 @@
 import { test } from "@japa/runner";
 import { resolveReconvertTemplate } from "#galaguerre/action_engine/resolve_reconvert_template";
-import { getAllMinionCardTemplates } from "#galaguerre/card_catalog";
+import { getCollectibleMinionCardTemplates } from "#galaguerre/card_catalog";
+import { isMinionCardCollectible } from "#api_types/card_preview";
 import {
     createComparisonSnapshot,
     createMinionCard,
@@ -25,7 +26,7 @@ test.group("resolveReconvertTemplate", () => {
     test("filters catalog by absolute cost", ({ assert }) => {
         const source = createMinionState(createMinionCard({ cost: 8 }));
         const targetCost = 2;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === targetCost)
             .map((template) => template.cardId);
 
@@ -46,7 +47,7 @@ test.group("resolveReconvertTemplate", () => {
     test("resolves relative cost from source minion stats", ({ assert }) => {
         const sourceCost = 5;
         const expectedCost = sourceCost - 1;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === expectedCost)
             .map((template) => template.cardId);
 
@@ -71,7 +72,7 @@ test.group("resolveReconvertTemplate", () => {
         const baseCost = 6;
         const effectiveCost = 3;
         const expectedCost = baseCost - 1;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === expectedCost)
             .map((template) => template.cardId);
 
@@ -99,7 +100,7 @@ test.group("resolveReconvertTemplate", () => {
 
     test("falls back to source cost when relative negative offset has no matches", ({ assert }) => {
         const sourceCost = 1;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === sourceCost)
             .map((template) => template.cardId);
 
@@ -141,7 +142,7 @@ test.group("resolveReconvertTemplate", () => {
 
     test("filters catalog by tag only without cost comparison", ({ assert }) => {
         const source = createMinionState(createMinionCard({ cost: 6 }));
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.tags.includes("PM"))
             .map((template) => template.cardId);
 
@@ -155,5 +156,24 @@ test.group("resolveReconvertTemplate", () => {
         assert.isDefined(template);
         assert.include(expectedCardIds, template!.cardId);
         assert.isTrue(template!.tags.includes("PM"));
+    });
+
+    test("excludes non-collectible minions from random reconversion pools", ({ assert }) => {
+        const source = createMinionState(createMinionCard({ cost: 1 }));
+
+        const template = resolveReconvertTemplate(
+            createReconvertParametersSnapshot({
+                comparison: createComparisonSnapshot({
+                    costComparison: "=",
+                    cost: 1,
+                }),
+            }),
+            source,
+        );
+
+        assert.isDefined(template);
+        assert.isTrue(isMinionCardCollectible(template!.cardId));
+        assert.notEqual(template!.cardId, 121);
+        assert.notEqual(template!.cardId, 143);
     });
 });

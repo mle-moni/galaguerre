@@ -7,7 +7,7 @@ import {
 } from "#galaguerre/action_engine/apply_reconversion";
 import { applyBoostToMinion } from "#galaguerre/action_engine/apply_boost";
 import { refreshAurasAfterMinionPlayed } from "#galaguerre/passive_engine/refresh_passive_auras";
-import { getAllMinionCardTemplates } from "#galaguerre/card_catalog";
+import { getCollectibleMinionCardTemplates } from "#galaguerre/card_catalog";
 import {
     createBoostSnapshot,
     createCardActionSnapshot,
@@ -350,7 +350,7 @@ test.group("RECONVERSION action", () => {
 
     test("reconverts into a random minion matching absolute cost filter", ({ assert }) => {
         const targetCost = 4;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === targetCost)
             .map((template) => template.cardId);
 
@@ -386,7 +386,7 @@ test.group("RECONVERSION action", () => {
     test("reconverts with relative cost offset from targeted minion", ({ assert }) => {
         const sourceCost = 5;
         const expectedCost = sourceCost - 1;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === expectedCost)
             .map((template) => template.cardId);
 
@@ -429,7 +429,7 @@ test.group("RECONVERSION action", () => {
         const baseCost = 6;
         const effectiveCost = 3;
         const expectedCost = baseCost - 1;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === expectedCost)
             .map((template) => template.cardId);
 
@@ -513,7 +513,7 @@ test.group("RECONVERSION action", () => {
         assert,
     }) => {
         const sourceCost = 1;
-        const expectedCardIds = getAllMinionCardTemplates()
+        const expectedCardIds = getCollectibleMinionCardTemplates()
             .filter((template) => template.cost === sourceCost)
             .map((template) => template.cardId);
 

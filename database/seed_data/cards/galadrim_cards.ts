@@ -19,6 +19,7 @@ import {
     costLessThan,
     damageAction,
     deckCardAddAction,
+    defeatAction,
     destroyAction,
     defineMinion,
     defineSpell,
@@ -980,6 +981,22 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         { rarity: "LEGENDARY" },
     ),
+    defineMinion(
+        148,
+        {
+            ...gal("Joseph", 4),
+            imageUrl: "/card-covers/galadrim/joseph.webp",
+            attack: 2,
+            health: 8,
+        },
+        {
+            minionPowers: {
+                hasTaunt: true,
+            },
+            battlecryActions: [deckCardAddAction(147, 1, { placement: "BOTTOM" })],
+        },
+        { rarity: "LEGENDARY" },
+    ),
 
     // --- weapons ---
     defineWeapon(106, {
@@ -1095,5 +1112,13 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [healAction(2, targetedAnyCharacter(), true)],
         [],
         { isCollectible: false },
+    ),
+    defineSpell(
+        147,
+        { ...gal("mot noir", 0), imageUrl: "/card-covers/galadrim/mot-noir.webp" },
+        [defeatAction("PLAYER")],
+        [],
+        { isCollectible: false },
+        { castsWhenDrawn: true },
     ),
 ];
