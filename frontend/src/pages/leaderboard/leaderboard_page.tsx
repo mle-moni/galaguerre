@@ -1,11 +1,13 @@
-import { Table, Tabs } from "@mantine/core";
+import { Badge, Table, Tabs } from "@mantine/core";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { FriendActionButton } from "~/components/friends/friend_action_button";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { ResponsiveTable } from "~/components/responsive_table";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { formatDurationSeconds } from "~/helpers/format_game_duration";
+import { useFriendsQuery } from "~/hooks/use_friends";
 import { useAiSpeedrunLeaderboardQuery, useLeaderboardQuery } from "~/hooks/use_leaderboard";
 import { useUser } from "~/hooks/use_user";
 
@@ -25,6 +27,11 @@ export const LeaderboardPage = observer(() => {
     const [activeTab, setActiveTab] = useState<LeaderboardTab>("elo");
     const leaderboardQuery = useLeaderboardQuery();
     const speedrunQuery = useAiSpeedrunLeaderboardQuery(activeTab === "ai-speedrun");
+    const friendsQuery = useFriendsQuery();
+    const friendIds = useMemo(
+        () => new Set((friendsQuery.data ?? []).map((friend) => friend.userId)),
+        [friendsQuery.data],
+    );
 
     const isLoading = activeTab === "elo" ? leaderboardQuery.isLoading : speedrunQuery.isLoading;
 
@@ -62,7 +69,7 @@ export const LeaderboardPage = observer(() => {
                             </div>
                         ) : (
                             <div className="gg-panel overflow-hidden">
-                                <ResponsiveTable minWidth={400}>
+                                <ResponsiveTable minWidth={520}>
                                     <Table
                                         striped
                                         stripedColor="rgba(255, 255, 255, 0.06)"
@@ -79,11 +86,13 @@ export const LeaderboardPage = observer(() => {
                                                 <Table.Th className="hidden sm:table-cell">
                                                     V / D
                                                 </Table.Th>
+                                                <Table.Th ta="right">Ami</Table.Th>
                                             </Table.Tr>
                                         </Table.Thead>
                                         <Table.Tbody>
                                             {eloEntries.map((entry) => {
                                                 const isCurrentUser = user?.id === entry.userId;
+                                                const isFriend = friendIds.has(entry.userId);
 
                                                 return (
                                                     <Table.Tr
@@ -96,20 +105,37 @@ export const LeaderboardPage = observer(() => {
                                                     >
                                                         <Table.Td>#{entry.rank}</Table.Td>
                                                         <Table.Td>
-                                                            <PlayerNameLink
-                                                                pseudo={entry.pseudo}
-                                                                userId={entry.userId}
-                                                                className="text-white no-underline hover:underline"
-                                                            />
-                                                            {isCurrentUser && (
-                                                                <span className="text-gg-gold text-xs ml-2">
-                                                                    (vous)
-                                                                </span>
-                                                            )}
+                                                            <span className="inline-flex items-center gap-2">
+                                                                <PlayerNameLink
+                                                                    pseudo={entry.pseudo}
+                                                                    userId={entry.userId}
+                                                                    className="text-white no-underline hover:underline"
+                                                                />
+                                                                {isFriend && (
+                                                                    <Badge
+                                                                        color="gold"
+                                                                        size="xs"
+                                                                        variant="light"
+                                                                    >
+                                                                        Ami
+                                                                    </Badge>
+                                                                )}
+                                                                {isCurrentUser && (
+                                                                    <span className="text-gg-gold text-xs">
+                                                                        (vous)
+                                                                    </span>
+                                                                )}
+                                                            </span>
                                                         </Table.Td>
                                                         <Table.Td>{entry.elo}</Table.Td>
                                                         <Table.Td className="hidden sm:table-cell">
                                                             {entry.wins} / {entry.losses}
+                                                        </Table.Td>
+                                                        <Table.Td ta="right">
+                                                            <FriendActionButton
+                                                                userId={entry.userId}
+                                                                isFriend={isFriend}
+                                                            />
                                                         </Table.Td>
                                                     </Table.Tr>
                                                 );
@@ -130,7 +156,7 @@ export const LeaderboardPage = observer(() => {
                             </div>
                         ) : (
                             <div className="gg-panel overflow-hidden">
-                                <ResponsiveTable minWidth={400}>
+                                <ResponsiveTable minWidth={520}>
                                     <Table
                                         striped
                                         stripedColor="rgba(255, 255, 255, 0.06)"
@@ -147,11 +173,13 @@ export const LeaderboardPage = observer(() => {
                                                 <Table.Th className="hidden sm:table-cell">
                                                     Tours
                                                 </Table.Th>
+                                                <Table.Th ta="right">Ami</Table.Th>
                                             </Table.Tr>
                                         </Table.Thead>
                                         <Table.Tbody>
                                             {speedrunEntries.map((entry) => {
                                                 const isCurrentUser = user?.id === entry.userId;
+                                                const isFriend = friendIds.has(entry.userId);
 
                                                 return (
                                                     <Table.Tr
@@ -164,16 +192,27 @@ export const LeaderboardPage = observer(() => {
                                                     >
                                                         <Table.Td>#{entry.rank}</Table.Td>
                                                         <Table.Td>
-                                                            <PlayerNameLink
-                                                                pseudo={entry.pseudo}
-                                                                userId={entry.userId}
-                                                                className="text-white no-underline hover:underline"
-                                                            />
-                                                            {isCurrentUser && (
-                                                                <span className="text-gg-gold text-xs ml-2">
-                                                                    (vous)
-                                                                </span>
-                                                            )}
+                                                            <span className="inline-flex items-center gap-2">
+                                                                <PlayerNameLink
+                                                                    pseudo={entry.pseudo}
+                                                                    userId={entry.userId}
+                                                                    className="text-white no-underline hover:underline"
+                                                                />
+                                                                {isFriend && (
+                                                                    <Badge
+                                                                        color="gold"
+                                                                        size="xs"
+                                                                        variant="light"
+                                                                    >
+                                                                        Ami
+                                                                    </Badge>
+                                                                )}
+                                                                {isCurrentUser && (
+                                                                    <span className="text-gg-gold text-xs">
+                                                                        (vous)
+                                                                    </span>
+                                                                )}
+                                                            </span>
                                                         </Table.Td>
                                                         <Table.Td>
                                                             {formatDurationSeconds(
@@ -182,6 +221,12 @@ export const LeaderboardPage = observer(() => {
                                                         </Table.Td>
                                                         <Table.Td className="hidden sm:table-cell">
                                                             {entry.roundCount} tours
+                                                        </Table.Td>
+                                                        <Table.Td ta="right">
+                                                            <FriendActionButton
+                                                                userId={entry.userId}
+                                                                isFriend={isFriend}
+                                                            />
                                                         </Table.Td>
                                                     </Table.Tr>
                                                 );

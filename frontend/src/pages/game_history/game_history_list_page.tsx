@@ -1,11 +1,14 @@
 import type { ApiGameHistoryEntry, GameHistoryResult } from "#api_types/game_history.types";
 import { Badge, Table } from "@mantine/core";
 import { observer } from "mobx-react-lite";
+import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { FriendActionButton } from "~/components/friends/friend_action_button";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { ResponsiveTable } from "~/components/responsive_table";
 import { PlayerNameLink } from "~/components/player_name_link";
+import { useFriendsQuery } from "~/hooks/use_friends";
 import { useGameHistoryListQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
 
@@ -43,9 +46,11 @@ const ResultBadge = ({ result }: { result: GameHistoryResult }) => (
 
 const GameHistoryRow = ({
     entry,
+    friendIds,
     onSelect,
 }: {
     entry: ApiGameHistoryEntry;
+    friendIds: Set<number>;
     onSelect: (gameId: number) => void;
 }) => (
     <Table.Tr style={{ cursor: "pointer" }} onClick={() => onSelect(entry.gameId)}>
@@ -57,6 +62,10 @@ const GameHistoryRow = ({
                     userId={entry.opponentUserId}
                     className="text-white no-underline hover:underline"
                     stopPropagation
+                />
+                <FriendActionButton
+                    userId={entry.opponentUserId}
+                    isFriend={friendIds.has(entry.opponentUserId)}
                 />
             </span>
         </Table.Td>
@@ -74,6 +83,11 @@ export const GameHistoryListPage = observer(() => {
     const userId = Number(userIdParam);
     const currentUser = useUser();
     const historyQuery = useGameHistoryListQuery(userId);
+    const friendsQuery = useFriendsQuery();
+    const friendIds = useMemo(
+        () => new Set((friendsQuery.data ?? []).map((friend) => friend.userId)),
+        [friendsQuery.data],
+    );
 
     if (!Number.isFinite(userId) || userId <= 0) {
         return (
@@ -107,15 +121,26 @@ export const GameHistoryListPage = observer(() => {
             backLabel={isOwnHistory ? "Accueil" : "Classement"}
         >
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-xl sm:text-2xl font-bold text-gg-navy m-0 mb-2">
-                    Historique de{" "}
-                    <PlayerNameLink
-                        pseudo={user.pseudo}
-                        userId={user.userId}
-                        className="text-gg-navy no-underline hover:underline"
-                    />
-                    {isOwnHistory && <span className="text-gg-gold text-base ml-2">(vous)</span>}
-                </h1>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gg-navy m-0">
+                        Historique de{" "}
+                        <PlayerNameLink
+                            pseudo={user.pseudo}
+                            userId={user.userId}
+                            className="text-gg-navy no-underline hover:underline"
+                        />
+                        {isOwnHistory && (
+                            <span className="text-gg-gold text-base ml-2">(vous)</span>
+                        )}
+                    </h1>
+                    {!isOwnHistory && (
+                        <FriendActionButton
+                            userId={user.userId}
+                            isFriend={friendIds.has(user.userId)}
+                            size="md"
+                        />
+                    )}
+                </div>
                 <p className="text-gg-navy/70 m-0 mb-6">
                     Elo : {user.elo} — {user.wins}V / {user.losses}D
                 </p>
@@ -152,6 +177,7 @@ export const GameHistoryListPage = observer(() => {
                                         <GameHistoryRow
                                             key={entry.gameId}
                                             entry={entry}
+                                            friendIds={friendIds}
                                             onSelect={(gameId) =>
                                                 navigate(`/game-history/${userId}/${gameId}`)
                                             }
