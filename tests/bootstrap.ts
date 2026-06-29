@@ -13,7 +13,7 @@ export const runnerHooks: Required<Pick<Config, "setup" | "teardown">> = {
 };
 
 export const configureSuite: Config["configureSuite"] = (suite) => {
-    if (suite.name === "functional") {
+    if (["unit", "functional"].includes(suite.name)) {
         suite.setup(() => testUtils.db().migrate());
     }
 

@@ -14,7 +14,6 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 
 test.group("sell duplicate cards", (group) => {
-    group.setup(() => testUtils.db().migrate());
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
     test("preview lists only excess copies above deck max", async ({ assert }) => {

@@ -15,7 +15,6 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 
 test.group("apply game rewards", (group) => {
-    group.setup(() => testUtils.db().migrate());
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
     test("winner gets victory coins and first victory pack of the day", async ({ assert }) => {

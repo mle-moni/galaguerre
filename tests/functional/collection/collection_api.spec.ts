@@ -28,7 +28,6 @@ const createAuthContext = (user: User, body: Record<string, unknown> = {}) => ({
 });
 
 test.group("collection api", (group) => {
-    group.setup(() => testUtils.db().migrate());
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
     test("getUserCollectionEntries returns owned cards", async ({ assert }) => {

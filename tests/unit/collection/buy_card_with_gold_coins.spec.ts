@@ -11,7 +11,6 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 
 test.group("buy card with gold coins", (group) => {
-    group.setup(() => testUtils.db().migrate());
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
     test("buys a missing common card", async ({ assert }) => {

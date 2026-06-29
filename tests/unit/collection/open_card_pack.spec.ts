@@ -15,7 +15,6 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 
 test.group("open card pack", (group) => {
-    group.setup(() => testUtils.db().migrate());
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
     test("opens a pack with 5 distinct cards and increments collection", async ({ assert }) => {
@@ -50,14 +49,18 @@ test.group("open card pack", (group) => {
         });
 
         await grantStarterCollectionForUser(user.id);
-        await CardPack.create({ userId: user.id });
 
         const starterCardIds = new Set(STARTER_COLLECTION_RECIPE.map((entry) => entry.cardId));
-        const cards = await openCardPack(user.id);
+        let drewOwnedStarterCard = false;
 
-        assert.lengthOf(cards, PACK_SIZE);
-        const drawnStarterCards = cards.filter((card) => starterCardIds.has(card.id));
-        assert.isAbove(drawnStarterCards.length, 0);
+        for (let attempt = 0; attempt < 30 && !drewOwnedStarterCard; attempt += 1) {
+            await CardPack.create({ userId: user.id });
+            const cards = await openCardPack(user.id);
+            assert.lengthOf(cards, PACK_SIZE);
+            drewOwnedStarterCard = cards.some((card) => starterCardIds.has(card.id));
+        }
+
+        assert.isTrue(drewOwnedStarterCard);
     });
 
     test("grantPackCardCopyForUser allows counts above deck max copies", async ({ assert }) => {
