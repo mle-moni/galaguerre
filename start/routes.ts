@@ -17,6 +17,7 @@ import CardsController from "#controllers/cards/cards_controller";
 import CardSetsController from "#controllers/card_sets/card_sets_controller";
 import CollectionController from "#controllers/collection/collection_controller";
 import DecksController from "#controllers/decks/decks_controller";
+import FriendsController from "#controllers/friends/friends_controller";
 import GameHistoryController from "#controllers/game_history/game_history_controller";
 import GamesController from "#controllers/games/games_controller";
 import LeaderboardController from "#controllers/leaderboard/leaderboard_controller";
@@ -55,6 +56,10 @@ router
         router.post("/packs/open", [CollectionController, "openPack"]);
         router.post("/packs/buy", [RewardsController, "buyPack"]);
         router.post("/rewards/daily-pack", [RewardsController, "claimDailyPack"]);
+        router.get("/friends", [FriendsController, "index"]);
+        router.get("/friends/search", [FriendsController, "search"]);
+        router.post("/friends", [FriendsController, "store"]);
+        router.delete("/friends/:friendUserId", [FriendsController, "destroy"]);
         router.post("/decks/:id/select", [DecksController, "select"]);
         router.resource("decks", DecksController).apiOnly();
         router.post("/games/training", [GamesController, "training"]);
