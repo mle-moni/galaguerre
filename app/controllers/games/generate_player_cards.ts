@@ -31,6 +31,7 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
             cost: card.data.cost,
             dynamicCost: card.data.dynamicCost,
             tags: card.data.tags,
+            rarity: card.rarity,
         };
 
         switch (card.data.type) {

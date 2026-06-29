@@ -27,6 +27,7 @@ import type {
     MinionPowerSnapshot,
     PassiveSnapshot,
 } from "./card.types.js";
+import type { CardRarity } from "./card_rarity.types.js";
 import type { GameRewardResult } from "./rewards.types.js";
 
 export interface ComparableStats {
@@ -44,6 +45,7 @@ export interface PlayerCardBase {
     cost: number;
     dynamicCost: DynamicCostSnapshot | null;
     tags: CardTag[];
+    rarity: CardRarity;
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 

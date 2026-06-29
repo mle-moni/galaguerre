@@ -211,6 +211,20 @@
     z-index: 2;
 }
 
+.catalog-card-artwork .gg-catalog-card-slot__rarity {
+    top: 4px;
+    left: 4px;
+    max-width: calc(100% - 8px);
+    font-size: clamp(0.45rem, calc(var(--card-w, 72px) * 0.058), 0.6rem);
+    padding: 1px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.catalog-card-artwork .gg-catalog-card-slot__count--owned {
+    bottom: 4px;
+}
+
 .gg-catalog-card-slot--unowned {
     opacity: 0.45;
 }

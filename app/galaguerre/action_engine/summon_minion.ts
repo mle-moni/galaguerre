@@ -62,6 +62,7 @@ const createDefaultSourceMinion = (): MinionState => ({
         cost: 0,
         dynamicCost: null,
         tags: [],
+        rarity: "COMMON",
         type: "MINION",
         health: 1,
         attack: 0,

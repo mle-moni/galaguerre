@@ -15,7 +15,6 @@ interface WeaponCardFaceProps {
     spellPower?: number;
     onClick?: () => void;
     wrapper?: (content: ReactNode) => ReactNode;
-    showLegendaryBadge?: boolean;
 }
 
 export const WeaponCardFace = ({
@@ -25,7 +24,6 @@ export const WeaponCardFace = ({
     spellPower = 0,
     onClick,
     wrapper = (content) => content,
-    showLegendaryBadge = false,
 }: WeaponCardFaceProps) => {
     const content = (
         <div
@@ -48,7 +46,7 @@ export const WeaponCardFace = ({
             </div>
             <div className="playing-card-face__body">
                 <div className="playing-card-face__text">
-                    {showLegendaryBadge && <CardLegendaryBadge />}
+                    {card.rarity === "LEGENDARY" && <CardLegendaryBadge />}
                     <CardFaceLabel label={card.label} />
                     <CardFaceDescription card={card} spellPower={spellPower} />
                 </div>

@@ -30,7 +30,6 @@ interface MinionCardFaceProps {
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
-    showLegendaryBadge?: boolean;
 }
 
 export const MinionCardFace = ({
@@ -49,7 +48,6 @@ export const MinionCardFace = ({
     onClick,
     onPointerDown,
     wrapper = (content) => content,
-    showLegendaryBadge = false,
 }: MinionCardFaceProps) => {
     const maxAttacks = getMinionCardMaxAttacks(card);
     const showWindfuryBadge =
@@ -97,7 +95,7 @@ export const MinionCardFace = ({
             </div>
             <div className="playing-card-face__body">
                 <div className="playing-card-face__text">
-                    {showLegendaryBadge && <CardLegendaryBadge />}
+                    {card.rarity === "LEGENDARY" && <CardLegendaryBadge />}
                     <CardFaceLabel label={card.label} />
                     <CardFaceDescription
                         card={card}

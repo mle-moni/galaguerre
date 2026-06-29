@@ -15,6 +15,7 @@ export const catalogCardToPlayerCard = (card: ApiCatalogCard): PlayerCard => {
         cost: card.cost,
         dynamicCost: card.dynamicCost,
         tags: card.tags,
+        rarity: card.rarity,
     };
 
     if (card.type === "MINION") {
@@ -72,7 +73,6 @@ export const CatalogCardDisplay = ({
     }
 
     const playerCard = catalogCardToPlayerCard(card);
-    const showLegendaryBadge = card.rarity === "LEGENDARY";
 
     const wrapper = (content: ReactNode) => (
         <div className="relative">
@@ -91,7 +91,6 @@ export const CatalogCardDisplay = ({
                 style={style}
                 className={className}
                 wrapper={wrapper}
-                showLegendaryBadge={showLegendaryBadge}
             />
         </div>
     );

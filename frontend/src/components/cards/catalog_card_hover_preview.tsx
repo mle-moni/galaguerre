@@ -84,7 +84,7 @@ export const CatalogCardHoverPreview = ({
             <>
                 <button
                     type="button"
-                    className="border-0 bg-transparent p-0 cursor-pointer"
+                    className="border-0 bg-transparent p-0 cursor-pointer block"
                     onClick={(event: MouseEvent<HTMLButtonElement>) => {
                         event.stopPropagation();
                         setSheetOpened(true);

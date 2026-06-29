@@ -20,6 +20,7 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     imageUrl: "https://picsum.photos/seed/dummy_card/200/300",
     uuid: card.uuid,
     cardId: 0,
+    rarity: "COMMON",
 });
 
 const hideActionLogForUser = (actionLog: GameLogEntry[], forUserId: number): GameLogEntry[] =>

@@ -46,6 +46,7 @@ const getDummyCard = (cardUuid: string): PlayerCard => ({
     cost: 0,
     dynamicCost: null,
     tags: [],
+    rarity: "COMMON",
     attack: 0,
     health: 0,
     minionPowers: {},

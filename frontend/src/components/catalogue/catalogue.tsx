@@ -121,28 +121,35 @@ const CatalogCardItem = ({
         return (
             <div className={clsx("gg-composition-row", isUnowned && "gg-composition-row--unowned")}>
                 <div className="gg-composition-row__thumb-wrap">
-                    <CatalogCardHoverPreview card={card}>
-                        <div
-                            className="gg-composition-row__thumb card-composition"
-                            onClick={thumbOpensArtworkModal ? onViewArtwork : undefined}
-                            role={thumbOpensArtworkModal ? "button" : undefined}
-                            tabIndex={thumbOpensArtworkModal ? 0 : undefined}
-                            onKeyDown={
-                                thumbOpensArtworkModal
-                                    ? (e) => {
-                                          if (e.key === "Enter" || e.key === " ") {
-                                              e.preventDefault();
-                                              onViewArtwork();
-                                          }
+                    <div
+                        className="gg-composition-row__thumb card-composition"
+                        onClick={thumbOpensArtworkModal ? onViewArtwork : undefined}
+                        role={thumbOpensArtworkModal ? "button" : undefined}
+                        tabIndex={thumbOpensArtworkModal ? 0 : undefined}
+                        onKeyDown={
+                            thumbOpensArtworkModal
+                                ? (e) => {
+                                      if (e.key === "Enter" || e.key === " ") {
+                                          e.preventDefault();
+                                          onViewArtwork();
                                       }
-                                    : undefined
-                            }
-                        >
-                            <CatalogCardDisplay card={card} variant="artwork" />
-                            {showLegendaryBadge && <LegendaryRarityBadge />}
-                            {showOwnedBadge && <OwnedCountBadge count={ownedCount} />}
-                        </div>
-                    </CatalogCardHoverPreview>
+                                  }
+                                : undefined
+                        }
+                    >
+                        <CatalogCardHoverPreview card={card}>
+                            <CatalogCardDisplay
+                                card={card}
+                                variant="artwork"
+                                overlay={
+                                    <>
+                                        {showLegendaryBadge && <LegendaryRarityBadge />}
+                                        {showOwnedBadge && <OwnedCountBadge count={ownedCount} />}
+                                    </>
+                                }
+                            />
+                        </CatalogCardHoverPreview>
+                    </div>
                     {interactive && count > 0 && (
                         <span className="gg-catalog-card-slot__count">{count}</span>
                     )}

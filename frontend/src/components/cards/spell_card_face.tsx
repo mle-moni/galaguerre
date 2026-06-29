@@ -16,7 +16,6 @@ interface SpellCardFaceProps {
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
-    showLegendaryBadge?: boolean;
 }
 
 export const SpellCardFace = ({
@@ -27,7 +26,6 @@ export const SpellCardFace = ({
     onClick,
     onPointerDown,
     wrapper = (content) => content,
-    showLegendaryBadge = false,
 }: SpellCardFaceProps) => {
     const content = (
         <div
@@ -51,7 +49,7 @@ export const SpellCardFace = ({
             </div>
             <div className="playing-card-face__body playing-card-face__body--no-stats">
                 <div className="playing-card-face__text">
-                    {showLegendaryBadge && <CardLegendaryBadge />}
+                    {card.rarity === "LEGENDARY" && <CardLegendaryBadge />}
                     <CardFaceLabel label={card.label} />
                     <CardFaceDescription card={card} spellPower={spellPower} />
                 </div>
