@@ -12,7 +12,7 @@ export const ReplayStoreContext = createContext<ReplayStore | null>(null);
 
 export const getGameStateQueryKey = (gameId: number) => ["gameState", gameId];
 
-export const useGameState = (gameId: number) => {
+export const useGameState = (gameId: number, options: { refetchInterval?: number } = {}) => {
     const query = useQuery({
         queryKey: getGameStateQueryKey(gameId),
         queryFn: async () => {
@@ -20,6 +20,7 @@ export const useGameState = (gameId: number) => {
 
             return response.data;
         },
+        refetchInterval: options.refetchInterval,
         refetchOnWindowFocus: true,
     });
 

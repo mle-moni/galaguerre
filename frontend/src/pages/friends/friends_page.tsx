@@ -1,10 +1,10 @@
 import type { ApiFriend, ApiFriendSearchResult } from "#api_types/friend.types";
-import { Badge, Table, TextInput } from "@mantine/core";
+import { ActionIcon, Badge, Table, TextInput, Tooltip } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { IconSearch } from "@tabler/icons-react";
+import { IconEye, IconSearch } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { FriendActionButton } from "~/components/friends/friend_action_button";
 import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
@@ -27,9 +27,11 @@ const FriendStats = ({ user }: { user: ApiFriend }) => (
 const FriendRow = ({
     entry,
     isFriend,
+    onSpectate,
 }: {
     entry: ApiFriend | ApiFriendSearchResult;
     isFriend: boolean;
+    onSpectate: (gameId: number) => void;
 }) => (
     <Table.Tr>
         <Table.Td>
@@ -45,18 +47,40 @@ const FriendRow = ({
                             Ami
                         </Badge>
                     )}
+                    {isFriend && entry.currentGameId && (
+                        <Badge color="green" size="xs" variant="light">
+                            En partie
+                        </Badge>
+                    )}
                 </span>
                 <FriendStats user={entry} />
             </div>
         </Table.Td>
         <Table.Td ta="right">
-            <FriendActionButton userId={entry.userId} isFriend={isFriend} />
+            <span className="inline-flex items-center justify-end gap-2">
+                {isFriend && entry.currentGameId && (
+                    <Tooltip label="Regarder la partie" withArrow>
+                        <ActionIcon
+                            aria-label="Regarder la partie"
+                            color="navy"
+                            onClick={() => {
+                                if (entry.currentGameId) onSpectate(entry.currentGameId);
+                            }}
+                            variant="filled"
+                        >
+                            <IconEye size={16} />
+                        </ActionIcon>
+                    </Tooltip>
+                )}
+                <FriendActionButton userId={entry.userId} isFriend={isFriend} />
+            </span>
         </Table.Td>
     </Table.Tr>
 );
 
 export const FriendsPage = observer(() => {
     const user = useUser();
+    const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebouncedValue(search.trim(), 250);
     const friendsQuery = useFriendsQuery();
@@ -110,6 +134,9 @@ export const FriendsPage = observer(() => {
                                                             entry.isFriend ||
                                                             friendIds.has(entry.userId)
                                                         }
+                                                        onSpectate={(gameId) =>
+                                                            navigate(`/spectate/${gameId}`)
+                                                        }
                                                     />
                                                 ))}
                                             </Table.Tbody>
@@ -149,6 +176,7 @@ export const FriendsPage = observer(() => {
                                             key={friend.userId}
                                             entry={friend}
                                             isFriend={friendIds.has(friend.userId)}
+                                            onSpectate={(gameId) => navigate(`/spectate/${gameId}`)}
                                         />
                                     ))}
                                 </Table.Tbody>

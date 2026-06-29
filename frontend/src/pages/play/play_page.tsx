@@ -3,6 +3,8 @@ import "./game_layout.css";
 
 import type { ApiUser } from "#api_types/auth.types";
 
+import { Alert } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons-react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
@@ -19,19 +21,31 @@ import { GameRenderer } from "./game_renderer.js";
 interface GameProps {
     user: ApiUser;
     gameId: number;
+    spectating?: boolean;
+    refetchInterval?: number;
 }
 
-const Game = ({ gameId, user }: GameProps) => {
-    const gameQuery = useGameState(gameId);
+export const Game = ({ gameId, user, spectating = false, refetchInterval }: GameProps) => {
+    const gameQuery = useGameState(gameId, { refetchInterval });
     const isSocketReady = useIsSocketReady();
     const [isStoreInit, setIsStoreInit] = useState(false);
 
     useEffect(() => {
         if (!gameQuery.data) return;
 
-        GAME_STORE.syncFromQuery(gameQuery.data, user);
+        GAME_STORE.syncFromQuery(gameQuery.data, user, { spectating });
         setIsStoreInit(true);
-    }, [gameQuery.data, user]);
+    }, [gameQuery.data, spectating, user]);
+
+    if (gameQuery.isError) {
+        return (
+            <div className="flex h-full items-center justify-center p-4">
+                <Alert color="red" icon={<IconAlertCircle size={18} />}>
+                    Impossible de charger cette partie.
+                </Alert>
+            </div>
+        );
+    }
 
     if (gameQuery.isLoading || !gameQuery.data || !isStoreInit) return <CenteredLoader absolute />;
 
@@ -41,8 +55,13 @@ const Game = ({ gameId, user }: GameProps) => {
     return (
         <OnboardingGameProvider value={isOnboardingGame}>
             <GameStateContext.Provider value={gameQuery.data}>
-                <div className={clsx("h-full", !isSocketReady && "play-page--offline")}>
-                    <GameRenderer game={gameQuery.data} user={user} />
+                <div
+                    className={clsx(
+                        "h-full",
+                        !spectating && !isSocketReady && "play-page--offline",
+                    )}
+                >
+                    <GameRenderer game={gameQuery.data} user={user} spectating={spectating} />
                 </div>
             </GameStateContext.Provider>
         </OnboardingGameProvider>

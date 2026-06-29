@@ -39,6 +39,7 @@ export class GameStore {
     private _authoritativeGame: ApiGame | null = null;
     private _displayGame: ApiGame | null = null;
     private _user: ApiUser | null = null;
+    private _isSpectating = false;
     isNarrativePlaying = false;
     mulliganSelectedCardIds: string[] = [];
     mulliganConfirmedLocally = false;
@@ -68,11 +69,11 @@ export class GameStore {
     }
 
     get isInputBlocked() {
-        return this.isNarrativePlaying;
+        return this.isNarrativePlaying || this.isSpectating;
     }
 
     get canPlanCombatAction() {
-        return this.isMyTurn;
+        return this.isMyTurn && !this.isSpectating;
     }
 
     get isCombatTargeting() {
@@ -116,7 +117,7 @@ export class GameStore {
         }
     }
 
-    init(game: ApiGame, user: ApiUser): GameStore {
+    init(game: ApiGame, user: ApiUser, options: { spectating?: boolean } = {}): GameStore {
         const isNewGame = this._authoritativeGame?.id !== game.id;
         const leavingMulligan =
             !isNewGame &&
@@ -124,6 +125,7 @@ export class GameStore {
             game.data.state !== "MULLIGAN";
 
         this._user = user;
+        this._isSpectating = options.spectating ?? false;
 
         if (isNewGame || leavingMulligan) {
             this.resetMulliganLocalState();
@@ -176,10 +178,11 @@ export class GameStore {
         }
     }
 
-    syncFromQuery(game: ApiGame, user: ApiUser) {
+    syncFromQuery(game: ApiGame, user: ApiUser, options: { spectating?: boolean } = {}) {
         const isNewGame = this._authoritativeGame?.id !== game.id;
+        this._isSpectating = options.spectating ?? false;
         if (!this._user || isNewGame) {
-            this.init(game, user);
+            this.init(game, user, options);
             return;
         }
 
@@ -197,7 +200,17 @@ export class GameStore {
         return this.authoritativeGame.data.state === "MULLIGAN";
     }
 
+    get isSpectating() {
+        return this._isSpectating || !this.isUserParticipant;
+    }
+
+    get isUserParticipant() {
+        return this.p1.userId === this.user.id || this.p2.userId === this.user.id;
+    }
+
     get hasConfirmedMulligan() {
+        if (this.isSpectating) return false;
+
         const mulligan = this.authoritativeGame.data.mulligan;
         if (!mulligan) return this.mulliganConfirmedLocally;
 
@@ -250,14 +263,16 @@ export class GameStore {
 
     get opponent(): GamePlayer {
         if (this.p1.userId === this.user.id) return this.p2;
+        if (this.p2.userId === this.user.id) return this.p1;
 
-        return this.p1;
+        return this.p2;
     }
 
     get me(): GamePlayer {
         if (this.p1.userId === this.user.id) return this.p1;
+        if (this.p2.userId === this.user.id) return this.p2;
 
-        return this.p2;
+        return this.p1;
     }
 
     get goesFirst() {
@@ -271,10 +286,14 @@ export class GameStore {
     }
 
     get isUserWinner() {
+        if (this.isSpectating) return false;
+
         return this.winner.userId === this.user.id;
     }
 
     get isMyTurn() {
+        if (this.isSpectating) return false;
+
         const gameState = this.authoritativeGame.data.state;
         const p1 = this.authoritativeGame.data.playerOne;
         const p2 = this.authoritativeGame.data.playerTwo;
