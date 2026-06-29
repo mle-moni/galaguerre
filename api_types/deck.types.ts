@@ -33,6 +33,7 @@ export interface ApiCatalogCardBase {
     tags: CardTag[];
     rarity: CardRarity;
     description: string;
+    isCollectible: boolean;
 }
 
 export type ApiCatalogMinionCard = ApiCatalogCardBase & {

@@ -1,8 +1,19 @@
-import { PACK_DRAW_WEIGHT_BY_RARITY } from "#api_types/card_rarity.types";
-import { drawWeightedPackCardsWithoutReplacement } from "#services/collection/draw_weighted_pack_cards";
+import {
+    drawPackCardsWithoutReplacement,
+    type PackDrawRandom,
+} from "#services/collection/draw_weighted_pack_cards";
 import { test } from "@japa/runner";
 
-test.group("draw weighted pack cards", () => {
+const sequentialPackDrawRandom = (legendaryRolls: boolean[], indices: number[]): PackDrawRandom => {
+    let legendaryIndex = 0;
+    let pickIndexCounter = 0;
+    return {
+        rollLegendarySlot: () => legendaryRolls[legendaryIndex++],
+        pickIndex: () => indices[pickIndexCounter++],
+    };
+};
+
+test.group("draw pack cards", () => {
     test("draws without replacement", ({ assert }) => {
         const cards = [
             { id: 1, rarity: "COMMON" as const },
@@ -10,31 +21,70 @@ test.group("draw weighted pack cards", () => {
             { id: 3, rarity: "LEGENDARY" as const },
         ];
 
-        const drawn = drawWeightedPackCardsWithoutReplacement(cards, 3, () => 0);
+        const drawn = drawPackCardsWithoutReplacement(
+            cards,
+            3,
+            sequentialPackDrawRandom([false, false, false], [0, 0, 0]),
+        );
 
         assert.deepEqual(drawn, [1, 2, 3]);
         assert.equal(new Set(drawn).size, 3);
     });
 
-    test("favors common cards over legendary cards with equal pool sizes", ({ assert }) => {
+    test("draws a legendary card on a legendary roll", ({ assert }) => {
         const cards = [
             { id: 1, rarity: "COMMON" as const },
             { id: 2, rarity: "LEGENDARY" as const },
         ];
 
-        const commonWeight = PACK_DRAW_WEIGHT_BY_RARITY.COMMON;
-        const legendaryWeight = PACK_DRAW_WEIGHT_BY_RARITY.LEGENDARY;
-        const totalWeight = commonWeight + legendaryWeight;
-        const legendaryRandom = commonWeight / totalWeight + 0.01;
-
-        const drawnAsCommonFirst = drawWeightedPackCardsWithoutReplacement(cards, 1, () => 0);
-        assert.deepEqual(drawnAsCommonFirst, [1]);
-
-        const drawnAsLegendaryFirst = drawWeightedPackCardsWithoutReplacement(
+        const drawn = drawPackCardsWithoutReplacement(
             cards,
             1,
-            () => legendaryRandom,
+            sequentialPackDrawRandom([true], [0]),
         );
-        assert.deepEqual(drawnAsLegendaryFirst, [2]);
+
+        assert.deepEqual(drawn, [2]);
+    });
+
+    test("draws a common card on a common roll", ({ assert }) => {
+        const cards = [
+            { id: 1, rarity: "COMMON" as const },
+            { id: 2, rarity: "LEGENDARY" as const },
+        ];
+
+        const drawn = drawPackCardsWithoutReplacement(
+            cards,
+            1,
+            sequentialPackDrawRandom([false], [0]),
+        );
+
+        assert.deepEqual(drawn, [1]);
+    });
+
+    test("falls back to common when legendary roll hits an empty legendary pool", ({ assert }) => {
+        const cards = [
+            { id: 1, rarity: "COMMON" as const },
+            { id: 2, rarity: "COMMON" as const },
+        ];
+
+        const drawn = drawPackCardsWithoutReplacement(
+            cards,
+            1,
+            sequentialPackDrawRandom([true], [0]),
+        );
+
+        assert.deepEqual(drawn, [1]);
+    });
+
+    test("falls back to legendary when common roll hits an empty common pool", ({ assert }) => {
+        const cards = [{ id: 1, rarity: "LEGENDARY" as const }];
+
+        const drawn = drawPackCardsWithoutReplacement(
+            cards,
+            1,
+            sequentialPackDrawRandom([false], [0]),
+        );
+
+        assert.deepEqual(drawn, [1]);
     });
 });

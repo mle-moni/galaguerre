@@ -7,6 +7,7 @@ import User from "#models/user";
 import UserCard from "#models/user_card";
 import {
     grantCardCopiesForUser,
+    grantPackCardCopyForUser,
     grantStarterCollectionForUser,
 } from "#services/collection/grant_starter_collection_for_user";
 import { openCardPack } from "#services/collection/open_card_pack";
@@ -17,9 +18,7 @@ test.group("open card pack", (group) => {
     group.setup(() => testUtils.db().migrate());
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
-    test("opens a pack with 5 distinct eligible cards and increments collection", async ({
-        assert,
-    }) => {
+    test("opens a pack with 5 distinct cards and increments collection", async ({ assert }) => {
         await syncCards();
 
         const user = await User.create({
@@ -37,23 +36,16 @@ test.group("open card pack", (group) => {
         const drawnIds = cards.map((card) => card.id);
         assert.equal(new Set(drawnIds).size, PACK_SIZE);
 
-        const ownedAfter = await UserCard.query().where("userId", user.id);
-        const cardsById = new Map((await Card.query()).map((card) => [card.id, card]));
-        for (const row of ownedAfter) {
-            const maxCopies = getMaxCopiesForRarity(cardsById.get(row.cardId)!.rarity);
-            assert.isAtMost(row.count, maxCopies);
-        }
-
         const openedPack = await CardPack.query().where("userId", user.id).firstOrFail();
         assert.isNotNull(openedPack.openedAt);
     });
 
-    test("never draws cards already owned at max copies", async ({ assert }) => {
+    test("can draw cards already owned at max deck copies", async ({ assert }) => {
         await syncCards();
 
         const user = await User.create({
-            email: "pack-eligible@test.fr",
-            pseudo: "pack-eligible",
+            email: "pack-duplicates@test.fr",
+            pseudo: "pack-duplicates",
             password: "test",
         });
 
@@ -63,41 +55,34 @@ test.group("open card pack", (group) => {
         const starterCardIds = new Set(STARTER_COLLECTION_RECIPE.map((entry) => entry.cardId));
         const cards = await openCardPack(user.id);
 
-        for (const card of cards) {
-            assert.notInclude([...starterCardIds], card.id);
-        }
+        assert.lengthOf(cards, PACK_SIZE);
+        const drawnStarterCards = cards.filter((card) => starterCardIds.has(card.id));
+        assert.isAbove(drawnStarterCards.length, 0);
     });
 
-    test("never draws legendary cards already owned at max copies", async ({ assert }) => {
+    test("grantPackCardCopyForUser allows counts above deck max copies", async ({ assert }) => {
         await syncCards();
 
         const user = await User.create({
-            email: "pack-legendary@test.fr",
-            pseudo: "pack-legendary",
+            email: "grant-pack-copy@test.fr",
+            pseudo: "grant-pack-copy",
             password: "test",
         });
 
-        await grantStarterCollectionForUser(user.id);
+        const fanny = await Card.findByOrFail("id", 136);
 
-        const legendaryCards = await Card.query()
-            .where("isCollectible", true)
-            .where("rarity", "LEGENDARY");
+        await grantPackCardCopyForUser(user.id, fanny.id);
+        await grantPackCardCopyForUser(user.id, fanny.id);
 
-        for (const card of legendaryCards) {
-            await grantCardCopiesForUser(user.id, card.id, 1);
-        }
+        const owned = await UserCard.query()
+            .where("userId", user.id)
+            .where("cardId", fanny.id)
+            .firstOrFail();
 
-        await CardPack.create({ userId: user.id });
-
-        const cards = await openCardPack(user.id);
-        const drawnIds = new Set(cards.map((card) => card.id));
-
-        for (const legendary of legendaryCards) {
-            assert.notInclude([...drawnIds], legendary.id);
-        }
+        assert.equal(owned.count, 2);
     });
 
-    test("caps legendary cards at one copy when granting", async ({ assert }) => {
+    test("grantCardCopiesForUser still caps legendary cards at one copy", async ({ assert }) => {
         await syncCards();
 
         const user = await User.create({
@@ -131,7 +116,7 @@ test.group("open card pack", (group) => {
         await assert.rejects(() => openCardPack(user.id), /Aucun paquet/);
     });
 
-    test("throws when not enough eligible cards remain", async ({ assert }) => {
+    test("opens a pack when collection is complete at deck max copies", async ({ assert }) => {
         await syncCards();
 
         const user = await User.create({
@@ -148,6 +133,18 @@ test.group("open card pack", (group) => {
 
         await CardPack.create({ userId: user.id });
 
-        await assert.rejects(() => openCardPack(user.id), /Collection complète/);
+        const ownedBefore = (await UserCard.query().where("userId", user.id)).reduce(
+            (sum, row) => sum + row.count,
+            0,
+        );
+
+        const cards = await openCardPack(user.id);
+        assert.lengthOf(cards, PACK_SIZE);
+
+        const ownedAfter = (await UserCard.query().where("userId", user.id)).reduce(
+            (sum, row) => sum + row.count,
+            0,
+        );
+        assert.equal(ownedAfter, ownedBefore + PACK_SIZE);
     });
 });

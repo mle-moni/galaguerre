@@ -46,3 +46,20 @@ export const grantCardCopiesForUser = async (
 
     await UserCard.create({ userId, cardId, count: newCount }, { client });
 };
+
+export const grantPackCardCopyForUser = async (
+    userId: number,
+    cardId: number,
+    client?: TransactionClientContract,
+): Promise<void> => {
+    const existing = await UserCard.query({ client }).where({ userId, cardId }).first();
+
+    if (existing) {
+        existing.count += 1;
+        if (client) existing.useTransaction(client);
+        await existing.save();
+        return;
+    }
+
+    await UserCard.create({ userId, cardId, count: 1 }, { client });
+};

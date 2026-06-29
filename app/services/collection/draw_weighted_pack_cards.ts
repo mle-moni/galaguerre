@@ -1,35 +1,58 @@
 import type { CardRarity } from "#api_types/card_rarity.types";
-import { PACK_DRAW_WEIGHT_BY_RARITY } from "#api_types/card_rarity.types";
+import { PACK_LEGENDARY_DROP_CHANCE } from "#api_types/card_rarity.types";
+import { randomInt } from "node:crypto";
+import { randomIntInRange } from "../../utils/random.js";
 
 export type WeightedPackCard = {
     id: number;
     rarity: CardRarity;
 };
 
-const getPackDrawWeight = (rarity: CardRarity): number => PACK_DRAW_WEIGHT_BY_RARITY[rarity];
+const PACK_LEGENDARY_ROLL_SCALE = 10_000;
 
-export const drawWeightedPackCardsWithoutReplacement = (
+export type PackDrawRandom = {
+    rollLegendarySlot: () => boolean;
+    pickIndex: (max: number) => number;
+};
+
+export const createPackDrawRandom = (): PackDrawRandom => ({
+    rollLegendarySlot: () =>
+        randomInt(PACK_LEGENDARY_ROLL_SCALE) <
+        PACK_LEGENDARY_DROP_CHANCE * PACK_LEGENDARY_ROLL_SCALE,
+    pickIndex: (max) => randomIntInRange(0, max),
+});
+
+const pickUniform = <T>(items: T[], pickIndex: (max: number) => number): T => {
+    return items[pickIndex(items.length - 1)];
+};
+
+export const drawPackCardsWithoutReplacement = (
     cards: WeightedPackCard[],
     count: number,
-    random: () => number = Math.random,
+    random: PackDrawRandom = createPackDrawRandom(),
 ): number[] => {
     const pool = [...cards];
     const drawn: number[] = [];
 
     for (let slot = 0; slot < count; slot += 1) {
-        const totalWeight = pool.reduce((sum, card) => sum + getPackDrawWeight(card.rarity), 0);
-        let roll = random() * totalWeight;
+        const legendaries = pool.filter((card) => card.rarity === "LEGENDARY");
+        const commons = pool.filter((card) => card.rarity === "COMMON");
 
-        let selectedIndex = 0;
-        for (let index = 0; index < pool.length; index += 1) {
-            roll -= getPackDrawWeight(pool[index].rarity);
-            if (roll <= 0) {
-                selectedIndex = index;
-                break;
-            }
+        const isLegendarySlot = random.rollLegendarySlot();
+
+        let candidates: WeightedPackCard[];
+        if (isLegendarySlot && legendaries.length > 0) {
+            candidates = legendaries;
+        } else if (commons.length > 0) {
+            candidates = commons;
+        } else {
+            candidates = legendaries;
         }
 
-        drawn.push(pool[selectedIndex].id);
+        const selected = pickUniform(candidates, random.pickIndex);
+        drawn.push(selected.id);
+
+        const selectedIndex = pool.findIndex((card) => card.id === selected.id);
         pool.splice(selectedIndex, 1);
     }
 

@@ -1,4 +1,5 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
+import { getGoldCoinsPerCardBuy } from "#api_types/card_rarity.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
 import { Button, Collapse, SegmentedControl, Select, TextInput, Tooltip } from "@mantine/core";
 import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
@@ -10,6 +11,7 @@ import { CardLegendaryBadge } from "~/components/cards/card_legendary_badge";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { CenteredLoader } from "~/components/centered_loader";
+import { GoldCoinAmount } from "~/components/rewards/gold_coin_icon";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
@@ -51,6 +53,9 @@ export interface CatalogueProps {
     ownedOnly?: boolean;
     showOwnedOnly?: boolean;
     onShowOwnedOnlyChange?: (value: boolean) => void;
+    canBuyCard?: (cardId: number) => boolean;
+    onBuyCard?: (cardId: number) => void;
+    buyingCardId?: number | null;
 }
 
 interface CatalogCardItemProps {
@@ -65,6 +70,10 @@ interface CatalogCardItemProps {
     isNarrowScreen: boolean;
     isMobilePortrait: boolean;
     showOwnedCount: boolean;
+    canBuy: boolean;
+    buyPrice: number | null;
+    onBuy?: () => void;
+    isBuying: boolean;
 }
 
 const catalogueOwnershipFilterStyles = {
@@ -111,6 +120,10 @@ const CatalogCardItem = ({
     isNarrowScreen,
     isMobilePortrait,
     showOwnedCount,
+    canBuy,
+    buyPrice,
+    onBuy,
+    isBuying,
 }: CatalogCardItemProps) => {
     const thumbOpensArtworkModal = !interactive && !isMobilePortrait;
     const isUnowned = ownedCount !== null && ownedCount === 0;
@@ -182,6 +195,20 @@ const CatalogCardItem = ({
                         </div>
                     </div>
                 )}
+                {!interactive && canBuy && onBuy && buyPrice !== null && (
+                    <div className="gg-composition-row__actions">
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            color="gold"
+                            onClick={onBuy}
+                            loading={isBuying}
+                            aria-label={`Acheter ${card.label}`}
+                        >
+                            <GoldCoinAmount amount={buyPrice} showLabel={false} iconSize={14} />
+                        </Button>
+                    </div>
+                )}
             </div>
         );
     }
@@ -232,6 +259,20 @@ const CatalogCardItem = ({
             {interactive && count > 0 && (
                 <span className="gg-catalog-card-slot__count">{count}</span>
             )}
+            {!interactive && canBuy && onBuy && buyPrice !== null && (
+                <button
+                    type="button"
+                    className="gg-catalog-card-slot__action gg-catalog-card-slot__action--add"
+                    aria-label={`Acheter ${card.label}`}
+                    disabled={isBuying}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onBuy();
+                    }}
+                >
+                    <GoldCoinAmount amount={buyPrice} showLabel={false} iconSize={14} />
+                </button>
+            )}
         </div>
     );
 };
@@ -251,6 +292,9 @@ export const Catalogue = observer(
         ownedOnly = false,
         showOwnedOnly = false,
         onShowOwnedOnlyChange,
+        canBuyCard,
+        onBuyCard,
+        buyingCardId = null,
     }: CatalogueProps) => {
         const cardsQuery = useCardsQuery({ includeNonCollectible });
         const cardSetsQuery = useCardSetsQuery();
@@ -356,6 +400,9 @@ export const Catalogue = observer(
             </div>
         );
 
+        const showBuyActions =
+            !showOwnedOnly && canBuyCard !== undefined && onBuyCard !== undefined;
+
         return (
             <>
                 <div
@@ -406,26 +453,40 @@ export const Catalogue = observer(
                                     Aucune carte ne correspond à vos filtres.
                                 </p>
                             ) : (
-                                filteredCatalog.map((card) => (
-                                    <CatalogCardItem
-                                        key={card.id}
-                                        card={card}
-                                        count={composition?.get(card.id) ?? 0}
-                                        ownedCount={
-                                            ownedCounts === undefined
-                                                ? null
-                                                : ownedCounts.get(card.id) ?? 0
-                                        }
-                                        interactive={interactive}
-                                        canAdd={canAddCard?.(card.id) ?? false}
-                                        onAdd={onAdd ? () => onAdd(card.id) : undefined}
-                                        onRemove={onRemove ? () => onRemove(card.id) : undefined}
-                                        onViewArtwork={() => setArtworkCard(card)}
-                                        isNarrowScreen={isNarrowScreen}
-                                        isMobilePortrait={isMobilePortrait}
-                                        showOwnedCount={ownedOnly || !interactive}
-                                    />
-                                ))
+                                filteredCatalog.map((card) => {
+                                    const canBuy =
+                                        showBuyActions && (canBuyCard?.(card.id) ?? false);
+                                    const buyPrice = canBuy
+                                        ? getGoldCoinsPerCardBuy(card.rarity)
+                                        : null;
+
+                                    return (
+                                        <CatalogCardItem
+                                            key={card.id}
+                                            card={card}
+                                            count={composition?.get(card.id) ?? 0}
+                                            ownedCount={
+                                                ownedCounts === undefined
+                                                    ? null
+                                                    : ownedCounts.get(card.id) ?? 0
+                                            }
+                                            interactive={interactive}
+                                            canAdd={canAddCard?.(card.id) ?? false}
+                                            onAdd={onAdd ? () => onAdd(card.id) : undefined}
+                                            onRemove={
+                                                onRemove ? () => onRemove(card.id) : undefined
+                                            }
+                                            onViewArtwork={() => setArtworkCard(card)}
+                                            isNarrowScreen={isNarrowScreen}
+                                            isMobilePortrait={isMobilePortrait}
+                                            showOwnedCount={ownedOnly || !interactive}
+                                            canBuy={canBuy}
+                                            buyPrice={buyPrice}
+                                            onBuy={onBuyCard ? () => onBuyCard(card.id) : undefined}
+                                            isBuying={buyingCardId === card.id}
+                                        />
+                                    );
+                                })
                             )}
                         </div>
                     </div>

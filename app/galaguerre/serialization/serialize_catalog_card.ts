@@ -21,6 +21,7 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
         cardSetId: card.cardSetId,
         tags: card.data.tags,
         rarity: card.rarity,
+        isCollectible: card.isCollectible,
     };
 
     switch (card.data.type) {

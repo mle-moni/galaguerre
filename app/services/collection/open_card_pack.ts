@@ -1,14 +1,12 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
-import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
 import { PACK_SIZE } from "#api_types/collection.types";
 import { serializeCatalogCard } from "#galaguerre/serialization/serialize_catalog_card";
 import Card from "#models/card";
 import CardPack from "#models/card_pack";
 import db from "@adonisjs/lucid/services/db";
 import { DateTime } from "luxon";
-import { drawWeightedPackCardsWithoutReplacement } from "./draw_weighted_pack_cards.js";
-import { grantCardCopiesForUser } from "./grant_starter_collection_for_user.js";
-import { getUserCollectionCounts } from "./get_user_collection_counts.js";
+import { drawPackCardsWithoutReplacement } from "./draw_weighted_pack_cards.js";
+import { grantPackCardCopyForUser } from "./grant_starter_collection_for_user.js";
 
 export class NoUnopenedPackError extends Error {
     constructor() {
@@ -17,10 +15,10 @@ export class NoUnopenedPackError extends Error {
     }
 }
 
-export class NotEnoughEligibleCardsError extends Error {
+export class NotEnoughCollectibleCardsError extends Error {
     constructor() {
-        super("Collection complète : plus assez de cartes éligibles pour ouvrir un paquet");
-        this.name = "NotEnoughEligibleCardsError";
+        super("Pas assez de cartes collectibles pour ouvrir un paquet");
+        this.name = "NotEnoughCollectibleCardsError";
     }
 }
 
@@ -36,21 +34,16 @@ export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> =>
             throw new NoUnopenedPackError();
         }
 
-        const ownedCounts = await getUserCollectionCounts(userId);
         const collectibleCards = await Card.query({ client: trx }).where("isCollectible", true);
 
-        const eligibleCards = collectibleCards.filter(
-            (card) => (ownedCounts.get(card.id) ?? 0) < getMaxCopiesForRarity(card.rarity),
-        );
-
-        if (eligibleCards.length < PACK_SIZE) {
-            throw new NotEnoughEligibleCardsError();
+        if (collectibleCards.length < PACK_SIZE) {
+            throw new NotEnoughCollectibleCardsError();
         }
 
-        const drawnCardIds = drawWeightedPackCardsWithoutReplacement(eligibleCards, PACK_SIZE);
+        const drawnCardIds = drawPackCardsWithoutReplacement(collectibleCards, PACK_SIZE);
 
         for (const cardId of drawnCardIds) {
-            await grantCardCopiesForUser(userId, cardId, 1, trx);
+            await grantPackCardCopyForUser(userId, cardId, trx);
         }
 
         pack.openedAt = DateTime.now();

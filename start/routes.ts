@@ -48,6 +48,9 @@ router
         router.get("/cards", [CardsController, "index"]);
         router.get("/card-sets", [CardSetsController, "index"]);
         router.get("/collection", [CollectionController, "index"]);
+        router.get("/collection/duplicates-preview", [CollectionController, "duplicatesPreview"]);
+        router.post("/collection/sell-duplicates", [CollectionController, "sellDuplicates"]);
+        router.post("/collection/buy-card", [CollectionController, "buyCard"]);
         router.get("/packs", [CollectionController, "packs"]);
         router.post("/packs/open", [CollectionController, "openPack"]);
         router.post("/packs/buy", [RewardsController, "buyPack"]);
