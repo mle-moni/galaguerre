@@ -1,4 +1,4 @@
-import { getGoldCoinsPerCardBuy, getMaxCopiesForRarity } from "#api_types/card_rarity.types";
+import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
 import { CARD_RARITY_LABELS } from "#api_types/card_rarity.types";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
@@ -55,7 +55,7 @@ export const CollectionPage = observer(() => {
             const maxCopies = getMaxCopiesForRarity(card.rarity);
             if (owned >= maxCopies) return false;
 
-            return user.goldCoins >= getGoldCoinsPerCardBuy(card.rarity);
+            return true;
         },
         [user, showOwnedOnly, catalogById, ownedCounts],
     );
@@ -134,6 +134,7 @@ export const CollectionPage = observer(() => {
                     canBuyCard={canBuyCard}
                     onBuyCard={handleBuyCard}
                     buyingCardId={buyingCardId}
+                    userGoldCoins={user.goldCoins}
                     className="flex-1 min-h-0"
                 />
             </div>

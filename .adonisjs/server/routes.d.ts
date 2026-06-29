@@ -22,6 +22,9 @@ export type ScannedRoutes = {
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
         "collection.index": { paramsTuple?: []; params?: {} };
+        "collection.duplicates_preview": { paramsTuple?: []; params?: {} };
+        "collection.sell_duplicates": { paramsTuple?: []; params?: {} };
+        "collection.buy_card": { paramsTuple?: []; params?: {} };
         "collection.packs": { paramsTuple?: []; params?: {} };
         "collection.open_pack": { paramsTuple?: []; params?: {} };
         "rewards.buy_pack": { paramsTuple?: []; params?: {} };
@@ -57,6 +60,7 @@ export type ScannedRoutes = {
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
         "collection.index": { paramsTuple?: []; params?: {} };
+        "collection.duplicates_preview": { paramsTuple?: []; params?: {} };
         "collection.packs": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
@@ -79,6 +83,7 @@ export type ScannedRoutes = {
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
         "collection.index": { paramsTuple?: []; params?: {} };
+        "collection.duplicates_preview": { paramsTuple?: []; params?: {} };
         "collection.packs": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
@@ -89,6 +94,8 @@ export type ScannedRoutes = {
         "auth.login": { paramsTuple?: []; params?: {} };
         "auth.register": { paramsTuple?: []; params?: {} };
         "auth.logout": { paramsTuple?: []; params?: {} };
+        "collection.sell_duplicates": { paramsTuple?: []; params?: {} };
+        "collection.buy_card": { paramsTuple?: []; params?: {} };
         "collection.open_pack": { paramsTuple?: []; params?: {} };
         "rewards.buy_pack": { paramsTuple?: []; params?: {} };
         "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };

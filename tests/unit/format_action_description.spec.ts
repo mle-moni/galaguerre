@@ -561,7 +561,7 @@ test.group("format_action_description", () => {
             targetTeam: "OPPONENT",
         });
 
-        assert.equal(formatActionDescription(action, "Effet"), "Effet : Défaite l'adversaire.");
+        assert.equal(formatActionDescription(action, "Effet"), "Effet : Vous gagnez la partie.");
     });
 
     test("formats DEFEAT self", ({ assert }) => {
@@ -570,7 +570,7 @@ test.group("format_action_description", () => {
             targetTeam: "PLAYER",
         });
 
-        assert.equal(formatActionDescription(action, "Effet"), "Effet : Défaite votre héros.");
+        assert.equal(formatActionDescription(action, "Effet"), "Effet : Vous perdez la partie.");
     });
 
     test("formats DEFEAT both players", ({ assert }) => {
@@ -579,6 +579,9 @@ test.group("format_action_description", () => {
             targetTeam: "ALL",
         });
 
-        assert.equal(formatActionDescription(action, "Effet"), "Effet : Défaite les deux joueurs.");
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Les deux joueurs perdent la partie.",
+        );
     });
 });

@@ -5,10 +5,11 @@ export const GOLD_COIN_TOOLTIP = "Story points";
 
 interface GoldCoinIconProps {
     size?: number;
+    tooltip?: string | false;
 }
 
-export const GoldCoinIcon = ({ size = 24 }: GoldCoinIconProps) => (
-    <Tooltip label={GOLD_COIN_TOOLTIP} withArrow>
+export const GoldCoinIcon = ({ size = 24, tooltip = GOLD_COIN_TOOLTIP }: GoldCoinIconProps) => {
+    const image = (
         <span className="inline-flex shrink-0 leading-none">
             <Image
                 src={GOLD_COIN_IMAGE_URL}
@@ -19,8 +20,16 @@ export const GoldCoinIcon = ({ size = 24 }: GoldCoinIconProps) => (
                 draggable={false}
             />
         </span>
-    </Tooltip>
-);
+    );
+
+    if (tooltip === false) return image;
+
+    return (
+        <Tooltip label={tooltip} withArrow>
+            {image}
+        </Tooltip>
+    );
+};
 
 interface GoldCoinAmountProps {
     amount: number;

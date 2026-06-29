@@ -400,14 +400,14 @@ const formatHandCardAddLocation = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): s
     }
 };
 
-const formatDefeatTargetLabel = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
+const formatDefeatDescription = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): string => {
     switch (targetTeam) {
         case "OPPONENT":
-            return "l'adversaire";
+            return "Vous gagnez la partie";
         case "ALL":
-            return "les deux joueurs";
+            return "Les deux joueurs perdent la partie";
         default:
-            return "votre héros";
+            return "Vous perdez la partie";
     }
 };
 
@@ -894,7 +894,7 @@ export const formatActionDescription = (
             return prefix ? `${prefix} : ${text}` : text;
         }
         case "DEFEAT":
-            return `${prefix} : Défaite ${formatDefeatTargetLabel(action.targetTeam)}.`;
+            return `${prefix} : ${formatDefeatDescription(action.targetTeam)}.`;
         default:
             return null;
     }

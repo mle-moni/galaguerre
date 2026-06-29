@@ -6,7 +6,7 @@ import {
     formatGroupedActionDescriptions,
 } from "#api_types/format_action_description";
 import { getDisplayedDamage } from "#api_types/get_effective_damage";
-import { joinCardDescriptionParts } from "#api_types/minion_card_description";
+import { getSpellCardDescription, CAST_WHEN_DRAWN_LABEL } from "#api_types/minion_card_description";
 import { Text } from "@mantine/core";
 import { Fragment } from "react";
 import { CardPreviewLink } from "./card_preview_link.jsx";
@@ -50,7 +50,11 @@ export const getCardDescription = (card: PlayerCard, spellPower = 0): string => 
                 spellPower,
             );
 
-            return joinCardDescriptionParts(effectLines) || card.description || card.label;
+            return (
+                getSpellCardDescription(effectLines, card.castsWhenDrawn) ||
+                card.description ||
+                card.label
+            );
         }
         case "WEAPON":
             return card.description || `Arme ${card.damage}/${card.durability}.`;
@@ -131,8 +135,16 @@ const SpellDescription = ({
     card: Extract<PlayerCard, { type: "SPELL" }>;
     spellPower: number;
 }) => {
+    const castWhenDrawnText = card.castsWhenDrawn ? CAST_WHEN_DRAWN_LABEL : null;
+
     return (
         <div className="card-description">
+            {castWhenDrawnText && (
+                <>
+                    {castWhenDrawnText}
+                    {card.spellActions.length > 0 && ". "}
+                </>
+            )}
             {card.spellActions.map((action, index) => (
                 <Fragment key={index}>
                     {index > 0 && ". "}

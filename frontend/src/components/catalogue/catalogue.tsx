@@ -11,7 +11,8 @@ import { CardLegendaryBadge } from "~/components/cards/card_legendary_badge";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { CenteredLoader } from "~/components/centered_loader";
-import { GoldCoinAmount } from "~/components/rewards/gold_coin_icon";
+import { BuyCardModal } from "~/components/catalogue/buy_card_modal";
+import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
@@ -54,8 +55,9 @@ export interface CatalogueProps {
     showOwnedOnly?: boolean;
     onShowOwnedOnlyChange?: (value: boolean) => void;
     canBuyCard?: (cardId: number) => boolean;
-    onBuyCard?: (cardId: number) => void;
+    onBuyCard?: (cardId: number) => void | Promise<void>;
     buyingCardId?: number | null;
+    userGoldCoins?: number;
 }
 
 interface CatalogCardItemProps {
@@ -71,9 +73,7 @@ interface CatalogCardItemProps {
     isMobilePortrait: boolean;
     showOwnedCount: boolean;
     canBuy: boolean;
-    buyPrice: number | null;
     onBuy?: () => void;
-    isBuying: boolean;
 }
 
 const catalogueOwnershipFilterStyles = {
@@ -121,9 +121,7 @@ const CatalogCardItem = ({
     isMobilePortrait,
     showOwnedCount,
     canBuy,
-    buyPrice,
     onBuy,
-    isBuying,
 }: CatalogCardItemProps) => {
     const thumbOpensArtworkModal = !interactive && !isMobilePortrait;
     const isUnowned = ownedCount !== null && ownedCount === 0;
@@ -195,17 +193,16 @@ const CatalogCardItem = ({
                         </div>
                     </div>
                 )}
-                {!interactive && canBuy && onBuy && buyPrice !== null && (
+                {!interactive && canBuy && onBuy && (
                     <div className="gg-composition-row__actions">
                         <Button
                             size="sm"
                             variant="outline"
                             color="gold"
                             onClick={onBuy}
-                            loading={isBuying}
                             aria-label={`Acheter ${card.label}`}
                         >
-                            <GoldCoinAmount amount={buyPrice} showLabel={false} iconSize={14} />
+                            <GoldCoinIcon size={16} />
                         </Button>
                     </div>
                 )}
@@ -259,19 +256,20 @@ const CatalogCardItem = ({
             {interactive && count > 0 && (
                 <span className="gg-catalog-card-slot__count">{count}</span>
             )}
-            {!interactive && canBuy && onBuy && buyPrice !== null && (
-                <button
-                    type="button"
-                    className="gg-catalog-card-slot__action gg-catalog-card-slot__action--add"
-                    aria-label={`Acheter ${card.label}`}
-                    disabled={isBuying}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onBuy();
-                    }}
-                >
-                    <GoldCoinAmount amount={buyPrice} showLabel={false} iconSize={14} />
-                </button>
+            {!interactive && canBuy && onBuy && (
+                <Tooltip label="Acheter" withArrow>
+                    <button
+                        type="button"
+                        className="gg-catalog-card-slot__action gg-catalog-card-slot__action--buy"
+                        aria-label={`Acheter ${card.label}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onBuy();
+                        }}
+                    >
+                        <GoldCoinIcon size={26} tooltip={false} />
+                    </button>
+                </Tooltip>
             )}
         </div>
     );
@@ -295,6 +293,7 @@ export const Catalogue = observer(
         canBuyCard,
         onBuyCard,
         buyingCardId = null,
+        userGoldCoins = 0,
     }: CatalogueProps) => {
         const cardsQuery = useCardsQuery({ includeNonCollectible });
         const cardSetsQuery = useCardSetsQuery();
@@ -306,6 +305,7 @@ export const Catalogue = observer(
         const [internalCostFilter, setInternalCostFilter] = useState<string | null>(null);
         const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
         const [artworkCard, setArtworkCard] = useState<ApiCatalogCard | null>(null);
+        const [buyModalCard, setBuyModalCard] = useState<ApiCatalogCard | null>(null);
         const [showFilters, setShowFilters] = useState(false);
 
         const isControlledCostFilter = onCostFilterChange !== undefined;
@@ -456,9 +456,6 @@ export const Catalogue = observer(
                                 filteredCatalog.map((card) => {
                                     const canBuy =
                                         showBuyActions && (canBuyCard?.(card.id) ?? false);
-                                    const buyPrice = canBuy
-                                        ? getGoldCoinsPerCardBuy(card.rarity)
-                                        : null;
 
                                     return (
                                         <CatalogCardItem
@@ -481,9 +478,7 @@ export const Catalogue = observer(
                                             isMobilePortrait={isMobilePortrait}
                                             showOwnedCount={ownedOnly || !interactive}
                                             canBuy={canBuy}
-                                            buyPrice={buyPrice}
-                                            onBuy={onBuyCard ? () => onBuyCard(card.id) : undefined}
-                                            isBuying={buyingCardId === card.id}
+                                            onBuy={canBuy ? () => setBuyModalCard(card) : undefined}
                                         />
                                     );
                                 })
@@ -496,6 +491,20 @@ export const Catalogue = observer(
                     card={artworkCard}
                     opened={artworkCard !== null}
                     onClose={() => setArtworkCard(null)}
+                />
+
+                <BuyCardModal
+                    card={buyModalCard}
+                    price={buyModalCard ? getGoldCoinsPerCardBuy(buyModalCard.rarity) : null}
+                    userGoldCoins={userGoldCoins}
+                    opened={buyModalCard !== null}
+                    onClose={() => setBuyModalCard(null)}
+                    onConfirm={async () => {
+                        if (!buyModalCard || !onBuyCard) return;
+                        await onBuyCard(buyModalCard.id);
+                        setBuyModalCard(null);
+                    }}
+                    isBuying={buyingCardId === buyModalCard?.id}
                 />
             </>
         );

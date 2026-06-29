@@ -48,9 +48,6 @@ export const getSpellEffectDescription = (actions: CardActionSnapshot[]): string
 
 export const CAST_WHEN_DRAWN_LABEL = "Lancé quand pioché";
 
-const CAST_WHEN_DRAWN_DESCRIPTION =
-    "Lancé quand pioché : Ce sort est lancé automatiquement lorsqu'il est pioché.";
-
 export const joinCardDescriptionParts = (parts: string[]): string => {
     const normalized = parts
         .map((part) => part.trim())
@@ -62,7 +59,7 @@ export const joinCardDescriptionParts = (parts: string[]): string => {
 };
 
 export const getSpellCardDescription = (effectLines: string[], castsWhenDrawn = false): string => {
-    const parts = castsWhenDrawn ? [CAST_WHEN_DRAWN_DESCRIPTION, ...effectLines] : effectLines;
+    const parts = castsWhenDrawn ? [CAST_WHEN_DRAWN_LABEL, ...effectLines] : effectLines;
     return joinCardDescriptionParts(parts);
 };
 
