@@ -80,6 +80,7 @@
     width: 100%;
     max-width: 48rem;
     justify-items: center;
+    padding: 1.25rem;
 }
 
 .pack-opening__cards--full {
@@ -91,6 +92,7 @@
 .pack-opening__card {
     opacity: 0;
     animation: pack-card-reveal 0.45s ease forwards;
+    overflow: visible;
 }
 
 .pack-opening__actions {

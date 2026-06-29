@@ -23,14 +23,12 @@ const PASSIVE_TRIGGER_LABELS: Record<
     DRAW: "pioche",
 };
 
-const LABEL_ONLY_EFFECTS = new Set(["Provocation"]);
+const LABEL_ONLY_EFFECTS = new Set(["Provocation", "Discrétion"]);
 
 const EFFECT_DESCRIPTIONS: Record<string, string> = {
     Charge: "Peut attaquer dès le tour où il est joué.",
     "Furie des vents": "Peut attaquer deux fois par tour.",
     Toxique: "Détruit tout monstre blessé par ce monstre.",
-    Discrétion:
-        "Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
     Immunité: "Bloque la première source de dégâts reçue.",
 };
 

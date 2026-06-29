@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { CardArtworkModal } from "~/components/cards/card_artwork_modal";
-import { CardLegendaryBadge } from "~/components/cards/card_legendary_badge";
+import { CardRarityBadge } from "~/components/cards/card_legendary_badge";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { CenteredLoader } from "~/components/centered_loader";
@@ -106,7 +106,11 @@ const OwnedCountBadge = ({ count }: { count: number }) => (
     </Tooltip>
 );
 
-const LegendaryRarityBadge = () => <CardLegendaryBadge className="gg-catalog-card-slot__rarity" />;
+const CatalogRarityBadge = ({
+    rarity,
+}: { rarity: Exclude<ApiCatalogCard["rarity"], "COMMON"> }) => (
+    <CardRarityBadge rarity={rarity} className="gg-catalog-card-slot__rarity" />
+);
 
 const CatalogCardItem = ({
     card,
@@ -126,7 +130,7 @@ const CatalogCardItem = ({
     const thumbOpensArtworkModal = !interactive && !isMobilePortrait;
     const isUnowned = ownedCount !== null && ownedCount === 0;
     const showOwnedBadge = ownedCount !== null && ownedCount > 0 && showOwnedCount;
-    const showLegendaryBadge = card.rarity === "LEGENDARY";
+    const showRarityBadge = card.rarity !== "COMMON";
 
     if (isNarrowScreen) {
         return (
@@ -154,7 +158,9 @@ const CatalogCardItem = ({
                                 variant="artwork"
                                 overlay={
                                     <>
-                                        {showLegendaryBadge && <LegendaryRarityBadge />}
+                                        {showRarityBadge && (
+                                            <CatalogRarityBadge rarity={card.rarity} />
+                                        )}
                                         {showOwnedBadge && <OwnedCountBadge count={ownedCount} />}
                                     </>
                                 }

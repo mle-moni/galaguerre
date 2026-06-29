@@ -36,7 +36,7 @@
 	overflow: hidden;
 }
 
-.card-legendary-badge {
+.card-rarity-badge {
 	padding: 2px 6px;
 	font-size: 0.65rem;
 	font-weight: 700;
@@ -44,15 +44,28 @@
 	border-radius: 4px;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
-	background: linear-gradient(135deg, #c9a227 0%, #f0d060 50%, #c9a227 100%);
-	color: var(--gg-navy);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 	flex-shrink: 0;
 	cursor: help;
 	white-space: nowrap;
 }
 
-.playing-card-face__text>.card-legendary-badge {
+.card-rarity-badge--legendary {
+	background: linear-gradient(135deg, #c9a227 0%, #f0d060 50%, #c9a227 100%);
+	color: var(--gg-navy);
+}
+
+.card-rarity-badge--epic {
+	background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 50%, #7c3aed 100%);
+	color: #fff;
+}
+
+.card-rarity-badge--rare {
+	background: linear-gradient(135deg, #2563eb 0%, #60a5fa 50%, #2563eb 100%);
+	color: #fff;
+}
+
+.playing-card-face__text>.card-rarity-badge {
 	align-self: center;
 	margin-bottom: calc(var(--card-w) * 0.015);
 	font-size: calc(var(--card-w) * 0.048);

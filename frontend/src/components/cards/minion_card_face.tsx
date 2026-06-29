@@ -12,7 +12,7 @@ import "./card_faces.css";
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
 import { CardFaceLabel } from "./card_face_label.jsx";
 import { CardFaceDescription } from "./card_face_description.jsx";
-import { CardLegendaryBadge } from "./card_legendary_badge.jsx";
+import { CardRarityBadge } from "./card_legendary_badge.jsx";
 
 interface MinionCardFaceProps {
     card: MinionCard;
@@ -95,7 +95,7 @@ export const MinionCardFace = ({
             </div>
             <div className="playing-card-face__body">
                 <div className="playing-card-face__text">
-                    {card.rarity === "LEGENDARY" && <CardLegendaryBadge />}
+                    {card.rarity !== "COMMON" && <CardRarityBadge rarity={card.rarity} />}
                     <CardFaceLabel label={card.label} />
                     <CardFaceDescription
                         card={card}

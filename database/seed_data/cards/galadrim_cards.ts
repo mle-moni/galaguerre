@@ -150,6 +150,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 isPoisonous: true,
             },
         },
+        { rarity: "RARE" },
     ),
     defineMinion(
         67,
@@ -290,15 +291,16 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineMinion(
         77,
         {
-            ...gal("Sales Charismatique", 2),
+            ...gal("Sales Charismatique", 3),
             imageUrl: "/card-covers/galadrim/sales-charismatique.webp",
             attack: 2,
             health: 2,
         },
         {
             tags: ["SALES"],
-            battlecryActions: [drawAction(1), enemyDrawAction(1)],
+            battlecryActions: [drawAction(2), enemyDrawAction(2)],
         },
+        { rarity: "RARE" },
     ),
     defineMinion(
         78,
@@ -658,6 +660,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 ),
             ],
         },
+        { rarity: "RARE" },
     ),
     defineMinion(
         116,
@@ -783,6 +786,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/heures-sup.webp",
         },
         [boostAction(boostAttackWithCharge(2), targetedAllyMinion(), true)],
+        [],
+        { rarity: "RARE" },
     ),
     defineSpell(
         102,
@@ -815,6 +820,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/licenciement-collectif.webp",
         },
         [destroyAction(allMinions())],
+        [],
+        { rarity: "EPIC" },
     ),
     defineSpell(
         135,
@@ -847,6 +854,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/coupure-internet.webp",
         },
         [damageAction(4, randomEnemyTargets(3))],
+        [],
+        { rarity: "EPIC" },
     ),
     defineSpell(
         109,
@@ -863,6 +872,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/casque-reduction-bruit.webp",
         },
         [boostAction(boostDivineShield(), targetedAllyMinion(), true)],
+        [],
+        { rarity: "EPIC" },
     ),
     defineSpell(
         112,
@@ -871,6 +882,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/navigation-privee.webp",
         },
         [boostAction(boostAttackWithStealth(2), targetedAnyMinion(), true)],
+        [],
+        { rarity: "RARE" },
     ),
     defineSpell(
         120,
@@ -880,6 +893,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 onTargetResult: onTargetSurvivedWithHealth(healthEquals(1), drawAction(2)),
             }),
         ],
+        [],
+        { rarity: "RARE" },
     ),
     defineSpell(
         122,
@@ -898,6 +913,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/coupe-budgetaire.webp",
         },
         [relativeCostReconversion(-1, enemyMinions())],
+        [],
+        { rarity: "RARE" },
     ),
     defineSpell(
         126,
@@ -911,6 +928,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 allMinions(),
             ),
         ],
+        [],
+        { rarity: "RARE" },
     ),
     defineSpell(
         127,
@@ -924,6 +943,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         128,
         { ...gal("Débauchage", 9), imageUrl: "/card-covers/galadrim/debauchage.webp" },
         [mindControlAction(targetedEnemyMinion(), true)],
+        [],
+        { rarity: "EPIC" },
     ),
     defineMinion(
         129,
@@ -941,6 +962,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 }),
             ],
         },
+        { rarity: "RARE" },
     ),
     defineMinion(
         139,

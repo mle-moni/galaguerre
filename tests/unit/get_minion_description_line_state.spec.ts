@@ -27,8 +27,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
         hasDivineShield: false,
     },
     effects: [],
-    description:
-        "Monstre 2/2. Immunité : Bloque la première source de dégâts reçue. Discrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
+    description: "Monstre 2/2. Immunité : Bloque la première source de dégâts reçue. Discrétion.",
     battlecryActions: [],
     deathrattleActions: [],
     passives: [],
@@ -59,13 +58,7 @@ test.group("get_minion_description_line_state", () => {
                 activeEffects,
             ),
         );
-        assert.isTrue(
-            isMinionDescriptionLineDisabled(
-                "Discrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
-                2,
-                activeEffects,
-            ),
-        );
+        assert.isTrue(isMinionDescriptionLineDisabled("Discrétion", 2, activeEffects));
     });
 
     test("keeps active keyword lines enabled", ({ assert }) => {
@@ -90,13 +83,7 @@ test.group("get_minion_description_line_state", () => {
                 activeEffects,
             ),
         );
-        assert.isFalse(
-            isMinionDescriptionLineDisabled(
-                "Discrétion : Ne peut être ciblé par les attaques ou sorts adverses tant qu'il n'a pas attaqué. Reste vulnérable aux effets de zone.",
-                2,
-                activeEffects,
-            ),
-        );
+        assert.isFalse(isMinionDescriptionLineDisabled("Discrétion", 2, activeEffects));
     });
 
     test("silence disables all non-base lines", ({ assert }) => {

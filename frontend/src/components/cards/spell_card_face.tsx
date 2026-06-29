@@ -6,7 +6,7 @@ import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
 import { CardFaceLabel } from "./card_face_label.jsx";
 import { CardFaceDescription } from "./card_face_description.jsx";
-import { CardLegendaryBadge } from "./card_legendary_badge.jsx";
+import { CardRarityBadge } from "./card_legendary_badge.jsx";
 
 interface SpellCardFaceProps {
     card: SpellCard;
@@ -49,7 +49,7 @@ export const SpellCardFace = ({
             </div>
             <div className="playing-card-face__body playing-card-face__body--no-stats">
                 <div className="playing-card-face__text">
-                    {card.rarity === "LEGENDARY" && <CardLegendaryBadge />}
+                    {card.rarity !== "COMMON" && <CardRarityBadge rarity={card.rarity} />}
                     <CardFaceLabel label={card.label} />
                     <CardFaceDescription card={card} spellPower={spellPower} />
                 </div>
