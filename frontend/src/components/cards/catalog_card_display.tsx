@@ -13,7 +13,7 @@ export const catalogCardToPlayerCard = (card: ApiCatalogCard): PlayerCard => {
         imageUrl: card.imageUrl,
         baseCost: card.cost,
         cost: card.cost,
-        dynamicCost: null,
+        dynamicCost: card.dynamicCost,
         tags: card.tags,
     };
 

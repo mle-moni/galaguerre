@@ -2,6 +2,7 @@ import type { CardRarity } from "./card_rarity.types.js";
 import type {
     CardActionSnapshot,
     CardTag,
+    DynamicCostSnapshot,
     MinionPowerSnapshot,
     PassiveSnapshot,
 } from "./card.types.js";
@@ -27,6 +28,7 @@ export interface ApiCatalogCardBase {
     label: string;
     imageUrl: string;
     cost: number;
+    dynamicCost: DynamicCostSnapshot | null;
     cardSetId: number;
     tags: CardTag[];
     rarity: CardRarity;
