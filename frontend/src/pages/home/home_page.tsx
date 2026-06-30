@@ -81,6 +81,14 @@ export const HomePage = observer(() => {
                         </p>
                     </Link>
 
+                    <Link to="/friends" className="gg-mode-tile">
+                        <span className="gg-mode-tile__icon">👥</span>
+                        <h2 className="gg-mode-tile__title">Amis</h2>
+                        <p className="gg-mode-tile__subtitle">
+                            Retrouvez et ajoutez des joueurs par pseudo
+                        </p>
+                    </Link>
+
                     <Link to={`/game-history/${user.id}`} className="gg-mode-tile">
                         <span className="gg-mode-tile__icon">📜</span>
                         <h2 className="gg-mode-tile__title">Mon historique</h2>

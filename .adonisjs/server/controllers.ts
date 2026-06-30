@@ -33,6 +33,9 @@ export const controllers = {
         Decks: () => import("#controllers/decks/decks_controller"),
         SerializeDeck: () => import("#controllers/decks/serialize_deck"),
     },
+    friends: {
+        Friends: () => import("#controllers/friends/friends_controller"),
+    },
     gameHistory: {
         GameHistory: () => import("#controllers/game_history/game_history_controller"),
         ListUserGames: () => import("#controllers/game_history/list_user_games"),
