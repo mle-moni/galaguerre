@@ -135,6 +135,21 @@ export class DeckSchema extends BaseModel {
     declare userId: number;
 }
 
+export class FriendshipSchema extends BaseModel {
+    static $columns = ["createdAt", "friendId", "id", "updatedAt", "userId"] as const;
+    $columns = FriendshipSchema.$columns;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime;
+    @column()
+    declare friendId: number;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime | null;
+    @column()
+    declare userId: number;
+}
+
 export class GameReplayStepSchema extends BaseModel {
     static $columns = ["createdAt", "data", "gameId", "id", "stepIndex"] as const;
     $columns = GameReplayStepSchema.$columns;
