@@ -34,7 +34,7 @@ export const persistReplayStep = async (
     game: Game,
     presentation: GamePresentationUpdate,
 ): Promise<void> => {
-    if (!("$isPersisted" in game)) {
+    if (!("$isPersisted" in game) || game.data.isTraining) {
         return;
     }
 

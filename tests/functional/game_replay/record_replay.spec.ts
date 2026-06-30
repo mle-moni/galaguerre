@@ -72,6 +72,34 @@ test.group("record replay", (group) => {
         assert.isNotNull(record);
         assert.equal(await countReplaySteps(passResult.game.id), 3);
     });
+
+    test("does not record presentation steps for training games", async ({ assert }) => {
+        const handCard = createMinionCard({
+            uuid: CARD_IDS.handMinion,
+            label: "Gobelin test",
+            cost: 3,
+        });
+
+        const playResult = await runPlayCard({
+            data: createGameData({
+                isTraining: true,
+                playerOne: {
+                    mana: 5,
+                    hand: [handCard],
+                },
+            }),
+            actor: "playerOne",
+            action: {
+                cardId: CARD_IDS.handMinion,
+                boardIndex: 0,
+                owner: "PLAYER",
+            },
+            expect: { error: null },
+        });
+
+        assert.equal(await countReplaySteps(playResult.game.id), 0);
+        assert.isNull(await loadGameReplayData(playResult.game.id));
+    });
 });
 
 test.group("game replay api", (group) => {
