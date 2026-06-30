@@ -418,6 +418,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
     ),
     defineMinion(
+        151,
+        {
+            ...gal("Léa", 4),
+            imageUrl: "/card-covers/galadrim/lea.webp",
+            attack: 3,
+            health: 3,
+        },
+        {
+            tags: ["SUPPORT"],
+            battlecryActions: [discoverAction({ ...cardDrawFilter(), rarity: "LEGENDARY" })],
+        },
+        { rarity: "LEGENDARY" },
+    ),
+    defineMinion(
         130,
         {
             ...gal("Avocat d'Affaires", 5),
