@@ -5,6 +5,73 @@
     gap: 12px;
 }
 
+.discover-overlay__minimized {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--hand-reserve-height) + 0.75rem);
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: min(calc(100% - 2rem), 720px);
+    padding: 0.75rem 1rem 1rem;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(255, 212, 59, 0.35);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    transform: translateX(-50%);
+    pointer-events: auto;
+}
+
+.discover-overlay__minimized-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #f8f9fa;
+}
+
+.discover-overlay__expand-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8f9fa;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.discover-overlay__expand-button:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.discover-overlay__minimized-cards {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.discover-overlay__minimized-cards .discover-overlay__card {
+    width: var(--card-w-default);
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+    .discover-overlay__minimized {
+        bottom: calc(var(--hand-height) + 3.25rem + max(8px, env(safe-area-inset-bottom)));
+        width: calc(100% - 1rem);
+        padding: 0.625rem 0.75rem 0.75rem;
+    }
+
+    .discover-overlay__minimized-cards .discover-overlay__card {
+        width: var(--card-w-sm);
+    }
+}
+
 @media (min-width: 641px) {
     .discover-overlay__modal-content {
         --modal-size: min(

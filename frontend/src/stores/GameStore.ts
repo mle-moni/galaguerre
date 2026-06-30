@@ -44,7 +44,9 @@ export class GameStore {
     isNarrativePlaying = false;
     mulliganSelectedCardIds: string[] = [];
     mulliganConfirmedLocally = false;
+    discoverOverlayMinimized = false;
     private passTurnSubmittedAt: { state: ApiGame["data"]["state"]; round: number } | null = null;
+    private discoverOverlaySessionKey: string | null = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -104,6 +106,43 @@ export class GameStore {
         this.mulliganConfirmedLocally = false;
     }
 
+    private resetDiscoverOverlayState() {
+        this.discoverOverlayMinimized = false;
+        this.discoverOverlaySessionKey = null;
+    }
+
+    private getDiscoverOverlaySessionKey(game: ApiGame): string | null {
+        const pending = game.data.pendingDiscover;
+        if (!pending) return null;
+
+        const optionUuids = pending.options.map((option) => option.uuid).join(",");
+        return `${pending.playerUserId}:${pending.sourceCardUuid}:${optionUuids}`;
+    }
+
+    private syncDiscoverOverlayState(game: ApiGame) {
+        const sessionKey = this.getDiscoverOverlaySessionKey(game);
+
+        if (!sessionKey) {
+            this.resetDiscoverOverlayState();
+            return;
+        }
+
+        if (this.discoverOverlaySessionKey !== sessionKey) {
+            this.discoverOverlaySessionKey = sessionKey;
+            this.discoverOverlayMinimized = false;
+        }
+    }
+
+    minimizeDiscoverOverlay() {
+        if (!this.isDiscoverChooser) return;
+        this.discoverOverlayMinimized = true;
+    }
+
+    expandDiscoverOverlay() {
+        if (!this.isDiscoverChooser) return;
+        this.discoverOverlayMinimized = false;
+    }
+
     private syncMulliganLocalStateFromServer(game: ApiGame) {
         if (!this._user || game.data.state !== "MULLIGAN") return;
 
@@ -135,6 +174,7 @@ export class GameStore {
 
         if (isNewGame || leavingMulligan) {
             this.resetMulliganLocalState();
+            this.resetDiscoverOverlayState();
             this.passTurnSubmittedAt = null;
             this.narrativeDirector.clear();
             this.combatActionQueue.clear();
@@ -145,6 +185,7 @@ export class GameStore {
         this._authoritativeGame = game;
         this._displayGame = game;
         this.isNarrativePlaying = false;
+        this.syncDiscoverOverlayState(game);
         return this;
     }
 
@@ -152,6 +193,7 @@ export class GameStore {
         const isNewGame = this._authoritativeGame?.id !== game.id;
         this._authoritativeGame = game;
         this.combatActionQueue.resetInFlight();
+        this.syncDiscoverOverlayState(game);
 
         if (presentation) {
             this.narrativeDirector.enqueue(presentation, game);
@@ -170,6 +212,7 @@ export class GameStore {
 
         if (isNewGame) {
             this.resetMulliganLocalState();
+            this.resetDiscoverOverlayState();
             this.narrativeDirector.clear();
             this.combatActionQueue.clear();
             this._displayGame = game;
