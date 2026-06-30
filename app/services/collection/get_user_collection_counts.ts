@@ -14,3 +14,11 @@ export const getUserCollectionEntries = async (
     const rows = await UserCard.query({ client }).where("userId", userId).where("count", ">", 0);
     return rows.map((row) => ({ cardId: row.cardId, count: row.count }));
 };
+
+export const getTotalCollectionCardCount = async (
+    userId: number,
+    client?: TransactionClientContract,
+): Promise<number> => {
+    const rows = await UserCard.query({ client }).where("userId", userId);
+    return rows.reduce((sum, row) => sum + row.count, 0);
+};

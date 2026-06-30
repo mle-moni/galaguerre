@@ -141,14 +141,29 @@
     left: 10px;
 }
 
-.gg-catalog-card-slot__action--buy {
+.gg-catalog-card-slot__trade-actions {
+    position: absolute;
     top: 50%;
     left: 50%;
-    right: auto;
-    bottom: auto;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.gg-catalog-card-slot__action--buy,
+.gg-catalog-card-slot__action--sell {
+    position: static;
     width: 44px;
     height: 44px;
-    transform: translate(-50%, -50%) scale(0.85);
+    font-size: 1.35rem;
+    line-height: 1;
+    opacity: 1;
+    transform: none;
 }
 
 .gg-catalog-card-slot__action:hover {
@@ -162,8 +177,9 @@
     outline-offset: 2px;
 }
 
-.gg-catalog-card-slot__action--buy:focus-visible {
-    transform: translate(-50%, -50%) scale(1);
+.gg-catalog-card-slot__action--buy:focus-visible,
+.gg-catalog-card-slot__action--sell:focus-visible {
+    transform: none;
 }
 
 @media (hover: hover) {
@@ -172,8 +188,13 @@
         transform: scale(1);
     }
 
-    .gg-catalog-card-slot:hover .gg-catalog-card-slot__action--buy {
-        transform: translate(-50%, -50%) scale(1);
+    .gg-catalog-card-slot:hover .gg-catalog-card-slot__trade-actions {
+        opacity: 1;
+    }
+
+    .gg-catalog-card-slot:hover .gg-catalog-card-slot__action--buy,
+    .gg-catalog-card-slot:hover .gg-catalog-card-slot__action--sell {
+        transform: none;
     }
 }
 
@@ -183,8 +204,13 @@
         transform: scale(1);
     }
 
-    .gg-catalog-card-slot__action--buy {
-        transform: translate(-50%, -50%) scale(1);
+    .gg-catalog-card-slot__trade-actions {
+        opacity: 1;
+    }
+
+    .gg-catalog-card-slot__action--buy,
+    .gg-catalog-card-slot__action--sell {
+        transform: none;
     }
 }
 

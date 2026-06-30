@@ -3,6 +3,7 @@ import {
     GOLD_COINS_PER_COMMON_CARD_BUY,
     GOLD_COINS_PER_DUPLICATE_COMMON_SELL,
     type ApiBuyCardResponse,
+    type ApiSellCardResponse,
     type ApiSellDuplicatesResponse,
 } from "#api_types/collection.types";
 import CollectionController from "#controllers/collection/collection_controller";
@@ -178,5 +179,65 @@ test.group("collection api", (group) => {
 
         assert.equal(result.goldCoins, 0);
         assert.deepEqual(result.entry, { cardId: commonCard.id, count: 1 });
+    });
+
+    test("CollectionController.sellCard sells one owned copy", async ({ assert }) => {
+        await syncCards();
+
+        const user = await User.create({
+            email: "sell-card-api@test.fr",
+            pseudo: "sell-card-api",
+            password: "test",
+            goldCoins: 5,
+        });
+
+        await grantStarterCollectionForUser(user.id);
+
+        const commonCard = await Card.query()
+            .where("isCollectible", true)
+            .where("rarity", "COMMON")
+            .firstOrFail();
+
+        const existing = await UserCard.query()
+            .where({ userId: user.id, cardId: commonCard.id })
+            .first();
+        const previousCount = existing?.count ?? 0;
+        await UserCard.updateOrCreate(
+            { userId: user.id, cardId: commonCard.id },
+            { count: previousCount + 1 },
+        );
+
+        const controller = new CollectionController();
+        const result = (await controller.sellCard(
+            createAuthContext(user, { cardId: commonCard.id }) as never,
+        )) as ApiSellCardResponse;
+
+        assert.equal(result.goldCoins, 5 + GOLD_COINS_PER_DUPLICATE_COMMON_SELL);
+        assert.equal(result.entry?.count, previousCount);
+    });
+
+    test("CollectionController.sellCard returns 400 when collection is at minimum", async ({
+        assert,
+    }) => {
+        await syncCards();
+
+        const user = await User.create({
+            email: "sell-card-min-api@test.fr",
+            pseudo: "sell-card-min-api",
+            password: "test",
+        });
+
+        await grantStarterCollectionForUser(user.id);
+
+        const ownedCard = await UserCard.query().where("userId", user.id).firstOrFail();
+
+        const controller = new CollectionController();
+        const result = await controller.sellCard(
+            createAuthContext(user, { cardId: ownedCard.cardId }) as never,
+        );
+
+        assert.deepEqual(result, {
+            error: "Vous devez conserver au moins 30 cartes dans votre collection",
+        });
     });
 });

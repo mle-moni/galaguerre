@@ -2,6 +2,7 @@ import type {
     ApiBuyCardResponse,
     ApiCollectionResponse,
     ApiDuplicatesPreviewResponse,
+    ApiSellCardResponse,
     ApiSellDuplicatesResponse,
 } from "#api_types/collection.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -70,6 +71,26 @@ export const useBuyCardMutation = () => {
         mutationFn: async (cardId: number) => {
             const response = await privateAxios.post<ApiBuyCardResponse>(
                 "/api/collection/buy-card",
+                {
+                    cardId,
+                },
+            );
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: COLLECTION_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+        },
+    });
+};
+
+export const useSellCardMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (cardId: number) => {
+            const response = await privateAxios.post<ApiSellCardResponse>(
+                "/api/collection/sell-card",
                 {
                     cardId,
                 },

@@ -1,8 +1,10 @@
 import type { CardRarity } from "./card_rarity.types.js";
 import { getGoldCoinsPerDuplicateSell } from "./card_rarity.types.js";
 import type { ApiCatalogCard } from "./deck.types.js";
+import { DECK_MIN_CARDS } from "./deck.types.js";
 import { GALADRIM_AGGRO_DECK_RECIPE } from "../database/seed_data/balanced_decks.js";
 
+export const COLLECTION_MIN_CARDS = DECK_MIN_CARDS;
 export const COLLECTION_MAX_COPIES_PER_CARD = 2;
 export const PACK_SIZE = 5;
 
@@ -56,4 +58,9 @@ export interface ApiSellDuplicatesResponse {
 export interface ApiBuyCardResponse {
     goldCoins: number;
     entry: ApiCollectionEntry;
+}
+
+export interface ApiSellCardResponse {
+    goldCoins: number;
+    entry: ApiCollectionEntry | null;
 }

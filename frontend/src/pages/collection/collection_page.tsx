@@ -4,6 +4,7 @@ import {
     getGoldCoinsPerDuplicateSell,
     getMaxCopiesForRarity,
 } from "#api_types/card_rarity.types";
+import { COLLECTION_MIN_CARDS } from "#api_types/collection.types";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo, useState } from "react";
@@ -19,6 +20,7 @@ import {
     useCollectionQuery,
     useDuplicatesPreviewQuery,
     usePacksQuery,
+    useSellCardMutation,
     useSellDuplicatesMutation,
 } from "~/hooks/use_collection";
 import { useCardsQuery } from "~/hooks/use_cards";
@@ -34,9 +36,11 @@ export const CollectionPage = observer(() => {
     const cardsQuery = useCardsQuery({ includeNonCollectible: true });
     const sellDuplicatesMutation = useSellDuplicatesMutation();
     const buyCardMutation = useBuyCardMutation();
+    const sellCardMutation = useSellCardMutation();
     const [showOwnedOnly, setShowOwnedOnly] = useState(true);
     const [sellModalOpened, setSellModalOpened] = useState(false);
     const [buyingCardId, setBuyingCardId] = useState<number | null>(null);
+    const [sellingCardId, setSellingCardId] = useState<number | null>(null);
 
     const duplicatesPreviewQuery = useDuplicatesPreviewQuery(sellModalOpened);
 
@@ -50,9 +54,14 @@ export const CollectionPage = observer(() => {
         [cardsQuery.data],
     );
 
+    const totalCollection = useMemo(
+        () => [...ownedCounts.values()].reduce((sum, count) => sum + count, 0),
+        [ownedCounts],
+    );
+
     const canBuyCard = useCallback(
         (cardId: number) => {
-            if (!user || showOwnedOnly) return false;
+            if (!user) return false;
 
             const card = catalogById.get(cardId);
             if (!card || !card.isCollectible) return false;
@@ -63,7 +72,20 @@ export const CollectionPage = observer(() => {
 
             return true;
         },
-        [user, showOwnedOnly, catalogById, ownedCounts],
+        [user, catalogById, ownedCounts],
+    );
+
+    const canSellCard = useCallback(
+        (cardId: number) => {
+            if (!user) return false;
+
+            const owned = ownedCounts.get(cardId) ?? 0;
+            if (owned <= 0) return false;
+            if (totalCollection <= COLLECTION_MIN_CARDS) return false;
+
+            return true;
+        },
+        [user, ownedCounts, totalCollection],
     );
 
     const handleBuyCard = async (cardId: number) => {
@@ -75,6 +97,18 @@ export const CollectionPage = observer(() => {
             notifyError("Impossible d'acheter cette carte");
         } finally {
             setBuyingCardId(null);
+        }
+    };
+
+    const handleSellCard = async (cardId: number) => {
+        setSellingCardId(cardId);
+        try {
+            await sellCardMutation.mutateAsync(cardId);
+            notifySuccess("Carte vendue !");
+        } catch {
+            notifyError("Impossible de vendre cette carte");
+        } finally {
+            setSellingCardId(null);
         }
     };
 
@@ -140,6 +174,9 @@ export const CollectionPage = observer(() => {
                     canBuyCard={canBuyCard}
                     onBuyCard={handleBuyCard}
                     buyingCardId={buyingCardId}
+                    canSellCard={canSellCard}
+                    onSellCard={handleSellCard}
+                    sellingCardId={sellingCardId}
                     userGoldCoins={user.goldCoins}
                     className="flex-1 min-h-0"
                 />

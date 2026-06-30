@@ -7,6 +7,11 @@ import {
     NotEnoughGoldCoinsError as BuyCardNotEnoughGoldCoinsError,
 } from "#services/collection/buy_card_with_gold_coins";
 import {
+    CardNotSellableError,
+    CollectionTooSmallError,
+    sellCardWithGoldCoins,
+} from "#services/collection/sell_card_with_gold_coins";
+import {
     NoUnopenedPackError,
     NotEnoughCollectibleCardsError,
     openCardPack,
@@ -19,6 +24,12 @@ import {
 import vine from "@vinejs/vine";
 
 const buyCardSchema = vine.compile(
+    vine.object({
+        cardId: vine.number(),
+    }),
+);
+
+const sellCardSchema = vine.compile(
     vine.object({
         cardId: vine.number(),
     }),
@@ -83,6 +94,20 @@ export default class CollectionController {
             }
 
             if (error instanceof CardNotBuyableError) {
+                return response.badRequest({ error: error.message });
+            }
+
+            throw error;
+        }
+    }
+
+    async sellCard({ auth, request, response }: HttpContext) {
+        const { cardId } = await request.validateUsing(sellCardSchema);
+
+        try {
+            return await sellCardWithGoldCoins(auth.user!.id, cardId);
+        } catch (error) {
+            if (error instanceof CardNotSellableError || error instanceof CollectionTooSmallError) {
                 return response.badRequest({ error: error.message });
             }
 

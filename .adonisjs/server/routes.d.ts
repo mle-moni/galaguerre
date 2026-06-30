@@ -25,6 +25,7 @@ export type ScannedRoutes = {
         "collection.duplicates_preview": { paramsTuple?: []; params?: {} };
         "collection.sell_duplicates": { paramsTuple?: []; params?: {} };
         "collection.buy_card": { paramsTuple?: []; params?: {} };
+        "collection.sell_card": { paramsTuple?: []; params?: {} };
         "collection.packs": { paramsTuple?: []; params?: {} };
         "collection.open_pack": { paramsTuple?: []; params?: {} };
         "rewards.buy_pack": { paramsTuple?: []; params?: {} };
@@ -104,6 +105,7 @@ export type ScannedRoutes = {
         "auth.logout": { paramsTuple?: []; params?: {} };
         "collection.sell_duplicates": { paramsTuple?: []; params?: {} };
         "collection.buy_card": { paramsTuple?: []; params?: {} };
+        "collection.sell_card": { paramsTuple?: []; params?: {} };
         "collection.open_pack": { paramsTuple?: []; params?: {} };
         "rewards.buy_pack": { paramsTuple?: []; params?: {} };
         "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };

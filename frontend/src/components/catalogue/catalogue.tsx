@@ -1,5 +1,5 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
-import { getGoldCoinsPerCardBuy } from "#api_types/card_rarity.types";
+import { getGoldCoinsPerCardBuy, getGoldCoinsPerDuplicateSell } from "#api_types/card_rarity.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
 import { Button, Collapse, SegmentedControl, Select, TextInput, Tooltip } from "@mantine/core";
 import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
@@ -12,7 +12,7 @@ import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { CenteredLoader } from "~/components/centered_loader";
 import { BuyCardModal } from "~/components/catalogue/buy_card_modal";
-import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
+import { SellCardModal } from "~/components/catalogue/sell_card_modal";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
@@ -58,6 +58,9 @@ export interface CatalogueProps {
     canBuyCard?: (cardId: number) => boolean;
     onBuyCard?: (cardId: number) => void | Promise<void>;
     buyingCardId?: number | null;
+    canSellCard?: (cardId: number) => boolean;
+    onSellCard?: (cardId: number) => void | Promise<void>;
+    sellingCardId?: number | null;
     userGoldCoins?: number;
 }
 
@@ -75,6 +78,8 @@ interface CatalogCardItemProps {
     showOwnedCount: boolean;
     canBuy: boolean;
     onBuy?: () => void;
+    canSell: boolean;
+    onSell?: () => void;
 }
 
 const catalogueOwnershipFilterStyles = {
@@ -113,6 +118,90 @@ const CatalogRarityBadge = ({
     <CardRarityBadge rarity={rarity} className="gg-catalog-card-slot__rarity" />
 );
 
+const CatalogTradeButtons = ({
+    cardLabel,
+    canBuy,
+    onBuy,
+    canSell,
+    onSell,
+    variant,
+}: {
+    cardLabel: string;
+    canBuy: boolean;
+    onBuy?: () => void;
+    canSell: boolean;
+    onSell?: () => void;
+    variant: "grid" | "list";
+}) => {
+    if (!canBuy && !canSell) return null;
+
+    if (variant === "list") {
+        return (
+            <div className="gg-composition-row__actions">
+                <div className="gg-composition-row__controls">
+                    {canSell && onSell && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            color="gold"
+                            onClick={onSell}
+                            aria-label={`Vendre ${cardLabel}`}
+                        >
+                            💰
+                        </Button>
+                    )}
+                    {canBuy && onBuy && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            color="gold"
+                            onClick={onBuy}
+                            aria-label={`Acheter ${cardLabel}`}
+                        >
+                            🛒
+                        </Button>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="gg-catalog-card-slot__trade-actions">
+            {canSell && onSell && (
+                <Tooltip label="Vendre" withArrow>
+                    <button
+                        type="button"
+                        className="gg-catalog-card-slot__action gg-catalog-card-slot__action--sell"
+                        aria-label={`Vendre ${cardLabel}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onSell();
+                        }}
+                    >
+                        💰
+                    </button>
+                </Tooltip>
+            )}
+            {canBuy && onBuy && (
+                <Tooltip label="Acheter" withArrow>
+                    <button
+                        type="button"
+                        className="gg-catalog-card-slot__action gg-catalog-card-slot__action--buy"
+                        aria-label={`Acheter ${cardLabel}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onBuy();
+                        }}
+                    >
+                        🛒
+                    </button>
+                </Tooltip>
+            )}
+        </div>
+    );
+};
+
 const CatalogCardItem = ({
     card,
     count,
@@ -127,6 +216,8 @@ const CatalogCardItem = ({
     showOwnedCount,
     canBuy,
     onBuy,
+    canSell,
+    onSell,
 }: CatalogCardItemProps) => {
     const thumbOpensArtworkModal = !interactive && !isMobilePortrait;
     const isUnowned = ownedCount !== null && ownedCount === 0;
@@ -200,18 +291,15 @@ const CatalogCardItem = ({
                         </div>
                     </div>
                 )}
-                {!interactive && canBuy && onBuy && (
-                    <div className="gg-composition-row__actions">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            color="gold"
-                            onClick={onBuy}
-                            aria-label={`Acheter ${card.label}`}
-                        >
-                            <GoldCoinIcon size={16} />
-                        </Button>
-                    </div>
+                {!interactive && (
+                    <CatalogTradeButtons
+                        cardLabel={card.label}
+                        canBuy={canBuy}
+                        onBuy={onBuy}
+                        canSell={canSell}
+                        onSell={onSell}
+                        variant="list"
+                    />
                 )}
             </div>
         );
@@ -263,20 +351,15 @@ const CatalogCardItem = ({
             {interactive && count > 0 && (
                 <span className="gg-catalog-card-slot__count">{count}</span>
             )}
-            {!interactive && canBuy && onBuy && (
-                <Tooltip label="Acheter" withArrow>
-                    <button
-                        type="button"
-                        className="gg-catalog-card-slot__action gg-catalog-card-slot__action--buy"
-                        aria-label={`Acheter ${card.label}`}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onBuy();
-                        }}
-                    >
-                        <GoldCoinIcon size={26} tooltip={false} />
-                    </button>
-                </Tooltip>
+            {!interactive && (
+                <CatalogTradeButtons
+                    cardLabel={card.label}
+                    canBuy={canBuy}
+                    onBuy={onBuy}
+                    canSell={canSell}
+                    onSell={onSell}
+                    variant="grid"
+                />
             )}
         </div>
     );
@@ -300,6 +383,9 @@ export const Catalogue = observer(
         canBuyCard,
         onBuyCard,
         buyingCardId = null,
+        canSellCard,
+        onSellCard,
+        sellingCardId = null,
         userGoldCoins = 0,
     }: CatalogueProps) => {
         const cardsQuery = useCardsQuery({ includeNonCollectible });
@@ -313,6 +399,7 @@ export const Catalogue = observer(
         const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
         const [artworkCard, setArtworkCard] = useState<ApiCatalogCard | null>(null);
         const [buyModalCard, setBuyModalCard] = useState<ApiCatalogCard | null>(null);
+        const [sellModalCard, setSellModalCard] = useState<ApiCatalogCard | null>(null);
         const [showFilters, setShowFilters] = useState(false);
 
         const isControlledCostFilter = onCostFilterChange !== undefined;
@@ -407,8 +494,9 @@ export const Catalogue = observer(
             </div>
         );
 
-        const showBuyActions =
-            !showOwnedOnly && canBuyCard !== undefined && onBuyCard !== undefined;
+        const showTradeActions =
+            (canBuyCard !== undefined && onBuyCard !== undefined) ||
+            (canSellCard !== undefined && onSellCard !== undefined);
 
         return (
             <>
@@ -462,7 +550,9 @@ export const Catalogue = observer(
                             ) : (
                                 filteredCatalog.map((card) => {
                                     const canBuy =
-                                        showBuyActions && (canBuyCard?.(card.id) ?? false);
+                                        showTradeActions && (canBuyCard?.(card.id) ?? false);
+                                    const canSell =
+                                        showTradeActions && (canSellCard?.(card.id) ?? false);
 
                                     return (
                                         <CatalogCardItem
@@ -486,6 +576,10 @@ export const Catalogue = observer(
                                             showOwnedCount={ownedOnly || !interactive}
                                             canBuy={canBuy}
                                             onBuy={canBuy ? () => setBuyModalCard(card) : undefined}
+                                            canSell={canSell}
+                                            onSell={
+                                                canSell ? () => setSellModalCard(card) : undefined
+                                            }
                                         />
                                     );
                                 })
@@ -512,6 +606,22 @@ export const Catalogue = observer(
                         setBuyModalCard(null);
                     }}
                     isBuying={buyingCardId === buyModalCard?.id}
+                />
+
+                <SellCardModal
+                    card={sellModalCard}
+                    price={
+                        sellModalCard ? getGoldCoinsPerDuplicateSell(sellModalCard.rarity) : null
+                    }
+                    userGoldCoins={userGoldCoins}
+                    opened={sellModalCard !== null}
+                    onClose={() => setSellModalCard(null)}
+                    onConfirm={async () => {
+                        if (!sellModalCard || !onSellCard) return;
+                        await onSellCard(sellModalCard.id);
+                        setSellModalCard(null);
+                    }}
+                    isSelling={sellingCardId === sellModalCard?.id}
                 />
             </>
         );
