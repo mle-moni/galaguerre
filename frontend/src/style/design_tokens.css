@@ -355,6 +355,13 @@ button.gg-composition-row__thumb {
     align-self: center;
 }
 
+@media (max-width: 379px) {
+    .gg-composition-row__controls {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
 .gg-btn-primary {
     background-color: var(--gg-gold) !important;
     color: var(--gg-navy) !important;

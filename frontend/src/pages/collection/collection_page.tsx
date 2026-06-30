@@ -137,33 +137,36 @@ export const CollectionPage = observer(() => {
             <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0 overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 shrink-0">
                     <h1 className="text-2xl font-bold text-gg-navy m-0">Collection</h1>
-                    <Group gap="sm" className="w-full sm:w-auto">
+                    <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:gap-3 sm:w-auto">
                         <GoldCoinAmount amount={user.goldCoins} showLabel={false} iconSize={22} />
-                        <Button
-                            variant="default"
-                            className="flex-1 sm:flex-none"
-                            onClick={() => setSellModalOpened(true)}
-                        >
-                            Vendre les doublons
-                        </Button>
-                        <Button
-                            component={Link}
-                            to="/collection/shop"
-                            variant="default"
-                            className="flex-1 sm:flex-none"
-                        >
-                            Boutique
-                        </Button>
-                        <Button
-                            component={Link}
-                            to="/collection/packs"
-                            className="gg-btn-primary flex-1 sm:flex-none"
-                            disabled={unopenedCount === 0}
-                            leftSection={<PackIcon width={18} />}
-                        >
-                            Ouvrir des paquets ({unopenedCount})
-                        </Button>
-                    </Group>
+                        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+                            <Button
+                                variant="default"
+                                className="col-span-1 sm:flex-none"
+                                onClick={() => setSellModalOpened(true)}
+                            >
+                                <span className="max-[369px]:hidden">Vendre les doublons</span>
+                                <span className="hidden max-[369px]:inline">💰 Doublons</span>
+                            </Button>
+                            <Button
+                                component={Link}
+                                to="/collection/shop"
+                                variant="default"
+                                className="col-span-1 sm:flex-none"
+                            >
+                                Boutique
+                            </Button>
+                            <Button
+                                component={Link}
+                                to="/collection/packs"
+                                className="gg-btn-primary col-span-2 sm:col-span-1 sm:flex-none"
+                                disabled={unopenedCount === 0}
+                                leftSection={<PackIcon width={18} />}
+                            >
+                                Ouvrir des paquets ({unopenedCount})
+                            </Button>
+                        </div>
+                    </div>
                 </div>
                 <Catalogue
                     headerTitle={false}
