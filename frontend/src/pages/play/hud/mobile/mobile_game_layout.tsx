@@ -7,7 +7,7 @@ import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 import { useGameContext } from "~/hooks/use_game_state";
 import { GameAnimationOverlay } from "../../animations/game_animation_overlay.jsx";
 import { Board } from "../../board/board.jsx";
-import { AbandonGameControl } from "../abandon_game/abandon_game_control.jsx";
+import { GameHudControls } from "../game_hud_controls/game_hud_controls.jsx";
 import { ActionTimelineFab } from "../action_timeline/action_timeline_fab.jsx";
 import { ArmedCardHint } from "../armed_card_hint/armed_card_hint.jsx";
 import { GameFinalScreen } from "../game_final_screen/game_final_screen.jsx";
@@ -36,7 +36,7 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(
 
         return (
             <div className="mobile-game-layout">
-                {!spectating && <AbandonGameControl />}
+                {!spectating && <GameHudControls />}
                 <ActionTimelineFab />
                 <MobileOpponentBar opponent={opponent} />
                 <div className="mobile-game-layout__board">

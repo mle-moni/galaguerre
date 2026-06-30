@@ -1,8 +1,14 @@
-.abandon-game-fab {
+.game-hud-fabs {
 	position: absolute;
 	top: max(0.5rem, env(safe-area-inset-top));
 	right: max(0.5rem, env(safe-area-inset-right));
 	z-index: 20;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.game-hud-fab {
 	width: 44px;
 	height: 44px;
 	border-radius: 50%;
@@ -16,12 +22,16 @@
 	touch-action: manipulation;
 }
 
-.abandon-game-fab:hover {
+.game-hud-fab--abandon:hover {
 	background: rgba(127, 29, 29, 0.85);
 }
 
+.game-hud-fab--glossary:hover {
+	background: rgba(30, 58, 138, 0.85);
+}
+
 @media (max-width: 640px) and (orientation: portrait) {
-	.abandon-game-fab {
+	.game-hud-fabs {
 		top: calc(max(0.5rem, env(safe-area-inset-top)) + 2.75rem + 52px);
 	}
 }

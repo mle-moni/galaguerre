@@ -1,21 +1,8 @@
 import type { CardTag } from "#api_types/card.types";
 import { CARD_TAG_LABELS } from "#api_types/card.types";
+import { EFFECT_SYMBOLS } from "#api_types/card_keyword_glossary";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type { MinionCard } from "#api_types/game.types";
-
-const EFFECT_SYMBOLS: Record<string, string> = {
-    Provocation: "🔒",
-    Charge: "💥",
-    "Furie des vents": "🌪️",
-    Toxique: "🐍",
-    Discrétion: "🥷",
-    Immunité: "🛡️",
-};
-
-export const EFFECT_SYMBOLS_EXTENDED: Record<string, string> = {
-    ...EFFECT_SYMBOLS,
-    "Dernier souffle": "💀",
-};
 
 const getCardEffects = (card: MinionCard): string[] => {
     const effects = card.effects?.length
@@ -41,7 +28,7 @@ export const CardEffectSymbols = ({ card }: { card: MinionCard }) => {
                 <div className="card-effects">
                     {effects.map((effect) => (
                         <div key={effect} className="card-symbol" title={effect}>
-                            {EFFECT_SYMBOLS_EXTENDED[effect] ?? "❓"}
+                            {EFFECT_SYMBOLS[effect] ?? "❓"}
                         </div>
                     ))}
                 </div>

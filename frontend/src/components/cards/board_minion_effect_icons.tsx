@@ -1,6 +1,6 @@
+import { EFFECT_SYMBOLS } from "#api_types/card_keyword_glossary";
 import type { MinionCard } from "#api_types/game.types";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
-import { EFFECT_SYMBOLS_EXTENDED } from "./card_effect_symbols.jsx";
 
 const TRIGGERED_PASSIVE_LABELS: Record<string, string> = {
     TURN_END: "Fin de tour",
@@ -18,7 +18,7 @@ export const BoardMinionEffectIcons = ({ card }: { card: MinionCard }) => {
     for (const effect of getMinionPowerEffects(card.minionPowers)) {
         icons.push({
             key: effect,
-            symbol: EFFECT_SYMBOLS_EXTENDED[effect] ?? "❓",
+            symbol: EFFECT_SYMBOLS[effect] ?? "❓",
             title: effect,
         });
     }

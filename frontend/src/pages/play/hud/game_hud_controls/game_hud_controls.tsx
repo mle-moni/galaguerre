@@ -1,14 +1,16 @@
 import { Button, Modal, Text } from "@mantine/core";
-import { IconFlag } from "@tabler/icons-react";
+import { IconFlag, IconQuestionMark } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useGameContext } from "~/hooks/use_game_state";
 import { abandonGame } from "~/services/ws_client";
-import "./abandon_game_control.css";
+import { GameKeywordsGlossaryModal } from "./game_keywords_glossary_modal.jsx";
+import "./game_hud_controls.css";
 
-export const AbandonGameControl = observer(() => {
+export const GameHudControls = observer(() => {
     const { store } = useGameContext();
     const [confirmOpened, setConfirmOpened] = useState(false);
+    const [glossaryOpened, setGlossaryOpened] = useState(false);
 
     if (store.isFinished) return null;
 
@@ -19,14 +21,24 @@ export const AbandonGameControl = observer(() => {
 
     return (
         <>
-            <button
-                type="button"
-                className="abandon-game-fab"
-                aria-label="Abandonner la partie"
-                onClick={() => setConfirmOpened(true)}
-            >
-                <IconFlag size={22} />
-            </button>
+            <div className="game-hud-fabs">
+                <button
+                    type="button"
+                    className="game-hud-fab game-hud-fab--abandon"
+                    aria-label="Abandonner la partie"
+                    onClick={() => setConfirmOpened(true)}
+                >
+                    <IconFlag size={22} />
+                </button>
+                <button
+                    type="button"
+                    className="game-hud-fab game-hud-fab--glossary"
+                    aria-label="Glossaire des mots-clés"
+                    onClick={() => setGlossaryOpened(true)}
+                >
+                    <IconQuestionMark size={22} />
+                </button>
+            </div>
 
             <Modal
                 opened={confirmOpened}
@@ -46,6 +58,11 @@ export const AbandonGameControl = observer(() => {
                     </Button>
                 </div>
             </Modal>
+
+            <GameKeywordsGlossaryModal
+                opened={glossaryOpened}
+                onClose={() => setGlossaryOpened(false)}
+            />
         </>
     );
 });

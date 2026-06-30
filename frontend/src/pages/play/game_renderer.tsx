@@ -9,7 +9,7 @@ import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 
 import { GameAnimationOverlay } from "./animations/game_animation_overlay.jsx";
-import { AbandonGameControl } from "./hud/abandon_game/abandon_game_control.jsx";
+import { GameHudControls } from "./hud/game_hud_controls/game_hud_controls.jsx";
 import { ArmedCardHint } from "./hud/armed_card_hint/armed_card_hint.jsx";
 import { ActionTimeline } from "./hud/action_timeline/action_timeline.jsx";
 import { MobileGameLayout } from "./hud/mobile/mobile_game_layout.jsx";
@@ -40,7 +40,7 @@ const DesktopGameLayout = observer<GameRendererProps>(({ spectating = false }) =
 
     return (
         <div className="h-full relative">
-            {!spectating && <AbandonGameControl />}
+            {!spectating && <GameHudControls />}
             <ActionTimeline />
             <div className="flex h-full">
                 <div className="flex justify-center w-[124px] shrink-0">

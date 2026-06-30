@@ -6,6 +6,7 @@ import type {
 } from "./game.types.js";
 import { getMinionPowerEffects } from "./get_minion_power_effects.js";
 import type { GalaguerreDynamicCostSource } from "../app/galaguerre/galaguerre.types.js";
+import { EFFECT_DESCRIPTIONS } from "./card_keyword_glossary.js";
 import {
     formatActionDescription,
     formatGroupedActionDescriptions,
@@ -24,13 +25,6 @@ const PASSIVE_TRIGGER_LABELS: Record<
 };
 
 const LABEL_ONLY_EFFECTS = new Set(["Provocation", "Discrétion"]);
-
-const EFFECT_DESCRIPTIONS: Record<string, string> = {
-    Charge: "Peut attaquer dès le tour où il est joué.",
-    "Furie des vents": "Peut attaquer deux fois par tour.",
-    Toxique: "Détruit tout monstre blessé par ce monstre.",
-    Immunité: "Bloque la première source de dégâts reçue.",
-};
 
 export const getBattlecryDescription = (actions: CardActionSnapshot[]): string[] => {
     return formatGroupedActionDescriptions(actions, "Cri de guerre");
