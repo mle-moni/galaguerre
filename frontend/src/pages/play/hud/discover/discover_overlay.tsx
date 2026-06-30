@@ -1,6 +1,6 @@
 import { Button, Modal, Stack, Text } from "@mantine/core";
 import type { PlayerCard } from "#api_types/game.types";
-import { IconChevronUp, IconEye } from "@tabler/icons-react";
+import { IconEye, IconEyeOff } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { PlayerCardFace } from "~/components/cards/player_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
@@ -40,49 +40,6 @@ const DiscoverCardChoices = ({
     </>
 );
 
-const DiscoverMinimizedBar = observer(() => {
-    const { store } = useGameContext();
-
-    if (!store.isDiscoverChooser || !store.discoverOverlayMinimized) return null;
-
-    const pending = store.authoritativeGame.data.pendingDiscover;
-    if (!pending) return null;
-
-    const handleChoose = (cardUuid: string) => {
-        emitSocketEventToServer("game:discover_choice", { cardUuid });
-    };
-
-    return (
-        <div className="discover-overlay__minimized" role="region" aria-label="Découverte en cours">
-            <div className="discover-overlay__minimized-header">
-                <Text size="sm" fw={600}>
-                    Découverte
-                </Text>
-                <CountdownTimer
-                    endsAt={store.authoritativeGame.data.turnEndsAt}
-                    label="Temps restant :"
-                />
-                <button
-                    type="button"
-                    className="discover-overlay__expand-button"
-                    onClick={() => store.expandDiscoverOverlay()}
-                    aria-label="Agrandir la découverte"
-                >
-                    <IconChevronUp size={18} aria-hidden />
-                </button>
-            </div>
-
-            <div className="discover-overlay__minimized-cards">
-                <DiscoverCardChoices
-                    onChoose={handleChoose}
-                    spellPower={store.me.spellPower}
-                    options={pending.options}
-                />
-            </div>
-        </div>
-    );
-});
-
 export const DiscoverOverlay = observer(() => {
     const { store } = useGameContext();
 
@@ -91,25 +48,35 @@ export const DiscoverOverlay = observer(() => {
     const pending = store.authoritativeGame.data.pendingDiscover;
     if (!pending) return null;
 
+    const minimized = store.discoverOverlayMinimized;
+
     const handleChoose = (cardUuid: string) => {
         emitSocketEventToServer("game:discover_choice", { cardUuid });
     };
 
     return (
-        <>
-            <DiscoverMinimizedBar />
-
-            <Modal
-                opened={!store.discoverOverlayMinimized}
-                onClose={() => store.minimizeDiscoverOverlay()}
-                withCloseButton={false}
-                centered
-                size="xl"
-                title="Découverte"
-                overlayProps={{ backgroundOpacity: 0.75 }}
-                classNames={{ content: "discover-overlay__modal-content" }}
-            >
-                <Stack gap="md">
+        <Modal
+            opened
+            onClose={() => store.minimizeDiscoverOverlay()}
+            withCloseButton={false}
+            centered
+            size="xl"
+            title={minimized ? undefined : "Découverte"}
+            withOverlay={!minimized}
+            closeOnClickOutside={!minimized}
+            trapFocus={!minimized}
+            overlayProps={{ backgroundOpacity: 0.75 }}
+            classNames={{
+                root: minimized ? "discover-overlay__modal--minimized" : undefined,
+                content: "discover-overlay__modal-content",
+                header: minimized ? "discover-overlay__modal-header--hidden" : undefined,
+            }}
+        >
+            <Stack gap="md">
+                <div
+                    className={minimized ? "discover-overlay__content--hidden" : undefined}
+                    aria-hidden={minimized}
+                >
                     <Text size="sm" c="dimmed" ta="center">
                         Choisissez une carte à ajouter à votre main.
                     </Text>
@@ -126,18 +93,22 @@ export const DiscoverOverlay = observer(() => {
                             options={pending.options}
                         />
                     </div>
+                </div>
 
-                    <Button
-                        variant="light"
-                        color="gray"
-                        leftSection={<IconEye size={18} />}
-                        onClick={() => store.minimizeDiscoverOverlay()}
-                        fullWidth
-                    >
-                        Voir le plateau
-                    </Button>
-                </Stack>
-            </Modal>
-        </>
+                <Button
+                    variant={minimized ? "filled" : "default"}
+                    color={minimized ? "yellow" : "gray"}
+                    size={minimized ? "md" : "sm"}
+                    className={minimized ? "discover-overlay__toggle-button--prominent" : undefined}
+                    leftSection={minimized ? <IconEye size={18} /> : <IconEyeOff size={18} />}
+                    onClick={() =>
+                        minimized ? store.expandDiscoverOverlay() : store.minimizeDiscoverOverlay()
+                    }
+                    fullWidth
+                >
+                    {minimized ? "Afficher la découverte" : "Masquer"}
+                </Button>
+            </Stack>
+        </Modal>
     );
 });
