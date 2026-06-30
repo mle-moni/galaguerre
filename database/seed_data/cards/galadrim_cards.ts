@@ -127,6 +127,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         150,
         {
             ...gal("Mentor Technique", 2),
+            imageUrl: "/card-covers/galadrim/mentor-technique.webp",
             attack: 2,
             health: 3,
         },
