@@ -40,6 +40,7 @@ export class GameStore {
     private _displayGame: ApiGame | null = null;
     private _user: ApiUser | null = null;
     private _isSpectating = false;
+    private _spectatingAsUserId: number | null = null;
     isNarrativePlaying = false;
     mulliganSelectedCardIds: string[] = [];
     mulliganConfirmedLocally = false;
@@ -82,12 +83,12 @@ export class GameStore {
 
     get authoritativeMe(): GamePlayer {
         const { playerOne, playerTwo } = this.authoritativeGame.data;
-        return playerOne.userId === this.user.id ? playerOne : playerTwo;
+        return playerOne.userId === this.perspectiveUserId ? playerOne : playerTwo;
     }
 
     get authoritativeOpponent(): GamePlayer {
         const { playerOne, playerTwo } = this.authoritativeGame.data;
-        return playerOne.userId === this.user.id ? playerTwo : playerOne;
+        return playerOne.userId === this.perspectiveUserId ? playerTwo : playerOne;
     }
 
     setDisplayGame(game: ApiGame) {
@@ -109,7 +110,7 @@ export class GameStore {
         const mulligan = game.data.mulligan;
         if (!mulligan) return;
 
-        const isPlayerOne = game.data.playerOne.userId === this._user.id;
+        const isPlayerOne = game.data.playerOne.userId === this.perspectiveUserId;
         const serverDone = isPlayerOne ? mulligan.playerOneDone : mulligan.playerTwoDone;
 
         if (!serverDone) {
@@ -117,7 +118,11 @@ export class GameStore {
         }
     }
 
-    init(game: ApiGame, user: ApiUser, options: { spectating?: boolean } = {}): GameStore {
+    init(
+        game: ApiGame,
+        user: ApiUser,
+        options: { spectating?: boolean; spectatingAsUserId?: number } = {},
+    ): GameStore {
         const isNewGame = this._authoritativeGame?.id !== game.id;
         const leavingMulligan =
             !isNewGame &&
@@ -126,6 +131,7 @@ export class GameStore {
 
         this._user = user;
         this._isSpectating = options.spectating ?? false;
+        this._spectatingAsUserId = options.spectatingAsUserId ?? null;
 
         if (isNewGame || leavingMulligan) {
             this.resetMulliganLocalState();
@@ -178,9 +184,14 @@ export class GameStore {
         }
     }
 
-    syncFromQuery(game: ApiGame, user: ApiUser, options: { spectating?: boolean } = {}) {
+    syncFromQuery(
+        game: ApiGame,
+        user: ApiUser,
+        options: { spectating?: boolean; spectatingAsUserId?: number } = {},
+    ) {
         const isNewGame = this._authoritativeGame?.id !== game.id;
         this._isSpectating = options.spectating ?? false;
+        this._spectatingAsUserId = options.spectatingAsUserId ?? null;
         if (!this._user || isNewGame) {
             this.init(game, user, options);
             return;
@@ -208,13 +219,21 @@ export class GameStore {
         return this.p1.userId === this.user.id || this.p2.userId === this.user.id;
     }
 
+    private get perspectiveUserId() {
+        if (this._isSpectating && this._spectatingAsUserId !== null) {
+            return this._spectatingAsUserId;
+        }
+
+        return this.user.id;
+    }
+
     get hasConfirmedMulligan() {
         if (this.isSpectating) return false;
 
         const mulligan = this.authoritativeGame.data.mulligan;
         if (!mulligan) return this.mulliganConfirmedLocally;
 
-        const isPlayerOne = this.authoritativeGame.data.playerOne.userId === this.user.id;
+        const isPlayerOne = this.authoritativeGame.data.playerOne.userId === this.perspectiveUserId;
 
         return (
             (isPlayerOne ? mulligan.playerOneDone : mulligan.playerTwoDone) ||
@@ -262,15 +281,15 @@ export class GameStore {
     }
 
     get opponent(): GamePlayer {
-        if (this.p1.userId === this.user.id) return this.p2;
-        if (this.p2.userId === this.user.id) return this.p1;
+        if (this.p1.userId === this.perspectiveUserId) return this.p2;
+        if (this.p2.userId === this.perspectiveUserId) return this.p1;
 
         return this.p2;
     }
 
     get me(): GamePlayer {
-        if (this.p1.userId === this.user.id) return this.p1;
-        if (this.p2.userId === this.user.id) return this.p2;
+        if (this.p1.userId === this.perspectiveUserId) return this.p1;
+        if (this.p2.userId === this.perspectiveUserId) return this.p2;
 
         return this.p1;
     }
@@ -299,11 +318,11 @@ export class GameStore {
         const p2 = this.authoritativeGame.data.playerTwo;
 
         if (gameState === "PLAYER_ONE_TURN") {
-            return p1.userId === this.user.id;
+            return p1.userId === this.perspectiveUserId;
         }
 
         if (gameState === "PLAYER_TWO_TURN") {
-            return p2.userId === this.user.id;
+            return p2.userId === this.perspectiveUserId;
         }
 
         return false;

@@ -10,17 +10,25 @@ import { useUser } from "./use_user.js";
 
 export const ReplayStoreContext = createContext<ReplayStore | null>(null);
 
-export const getGameStateQueryKey = (gameId: number) => ["gameState", gameId];
+export const getGameStateQueryKey = (gameId: number, asUserId?: number) =>
+    ["gameState", gameId, asUserId ?? null] as const;
 
-export const useGameState = (gameId: number, options: { refetchInterval?: number } = {}) => {
+export const useGameState = (
+    gameId: number,
+    options: { refetchInterval?: number; asUserId?: number } = {},
+) => {
+    const { asUserId, refetchInterval } = options;
+
     const query = useQuery({
-        queryKey: getGameStateQueryKey(gameId),
+        queryKey: getGameStateQueryKey(gameId, asUserId),
         queryFn: async () => {
-            const response = await privateAxios.get<ApiGame>(`/api/games/${gameId}`);
+            const response = await privateAxios.get<ApiGame>(`/api/games/${gameId}`, {
+                params: asUserId ? { asUserId } : undefined,
+            });
 
             return response.data;
         },
-        refetchInterval: options.refetchInterval,
+        refetchInterval,
         refetchOnWindowFocus: true,
     });
 

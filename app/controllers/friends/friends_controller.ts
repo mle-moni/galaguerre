@@ -2,6 +2,7 @@ import type { AddFriendPayload, ApiFriend, ApiFriendSearchResult } from "#api_ty
 import Friendship from "#models/friendship";
 import Game from "#models/game";
 import User from "#models/user";
+import { getMutualFriendIds } from "#services/friendship/mutual_friendship";
 import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
 
@@ -49,14 +50,16 @@ export default class FriendsController {
             .preload("friend")
             .orderBy("createdAt", "desc");
 
-        const currentGameIdsByUserId = await getCurrentGameIdsByUserId(
-            friendships.map((friendship) => friendship.friendId),
-        );
+        const friendIds = friendships.map((friendship) => friendship.friendId);
+        const mutualFriendIds = await getMutualFriendIds(auth.user!.id, friendIds);
+        const currentGameIdsByUserId = await getCurrentGameIdsByUserId([...mutualFriendIds]);
 
         return friendships.map((friendship) =>
             serializeFriend(
                 friendship.friend,
-                currentGameIdsByUserId.get(friendship.friendId) ?? null,
+                mutualFriendIds.has(friendship.friendId)
+                    ? currentGameIdsByUserId.get(friendship.friendId) ?? null
+                    : null,
             ),
         );
     }
@@ -76,14 +79,13 @@ export default class FriendsController {
             .orderByRaw("LOWER(pseudo) ASC")
             .orderBy("id", "asc")
             .limit(10);
-        const currentGameIdsByUserId = await getCurrentGameIdsByUserId(
-            users.filter((user) => friendIds.has(user.id)).map((user) => user.id),
-        );
+        const mutualFriendIds = await getMutualFriendIds(userId, [...friendIds]);
+        const currentGameIdsByUserId = await getCurrentGameIdsByUserId([...mutualFriendIds]);
 
         return users.map((user) => ({
             ...serializeFriend(
                 user,
-                friendIds.has(user.id) ? currentGameIdsByUserId.get(user.id) ?? null : null,
+                mutualFriendIds.has(user.id) ? currentGameIdsByUserId.get(user.id) ?? null : null,
             ),
             isFriend: friendIds.has(user.id),
         }));
@@ -106,9 +108,13 @@ export default class FriendsController {
             { userId, friendId: payload.friendUserId },
         );
 
-        const currentGameIdsByUserId = await getCurrentGameIdsByUserId([friend.id]);
+        const mutualFriendIds = await getMutualFriendIds(userId, [friend.id]);
+        const currentGameIdsByUserId = await getCurrentGameIdsByUserId([...mutualFriendIds]);
 
-        return serializeFriend(friend, currentGameIdsByUserId.get(friend.id) ?? null);
+        return serializeFriend(
+            friend,
+            mutualFriendIds.has(friend.id) ? currentGameIdsByUserId.get(friend.id) ?? null : null,
+        );
     }
 
     async destroy({ auth, params, response }: HttpContext) {

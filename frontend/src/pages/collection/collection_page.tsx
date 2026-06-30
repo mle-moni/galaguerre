@@ -1,5 +1,9 @@
-import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
-import { CARD_RARITY_LABELS } from "#api_types/card_rarity.types";
+import {
+    CARD_RARITY_LABELS,
+    type CardRarity,
+    getGoldCoinsPerDuplicateSell,
+    getMaxCopiesForRarity,
+} from "#api_types/card_rarity.types";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo, useState } from "react";
@@ -20,6 +24,8 @@ import {
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
+
+const SELL_MODAL_RARITIES: CardRarity[] = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
 
 export const CollectionPage = observer(() => {
     const user = useUser();
@@ -148,14 +154,21 @@ export const CollectionPage = observer(() => {
                 <Stack gap="md">
                     <Text size="sm">
                         Un doublon est un exemplaire au-delà du maximum utilisable en deck :{" "}
-                        <strong>2 exemplaires</strong> pour une carte commune,{" "}
+                        <strong>2 exemplaires</strong> pour une carte commune rare ou épique,{" "}
                         <strong>1 exemplaire</strong> pour une carte légendaire.
                     </Text>
-                    <Text size="sm">
-                        La vente est irréversible. Chaque doublon rapporte{" "}
-                        <strong>25 story points</strong> (commune) ou{" "}
-                        <strong>250 story points</strong> (légendaire).
-                    </Text>
+                    <Text size="sm">La vente est irréversible. Chaque doublon rapporte :</Text>
+                    <Stack gap={4}>
+                        {SELL_MODAL_RARITIES.map((rarity) => (
+                            <Group key={rarity} justify="space-between" wrap="nowrap">
+                                <Text size="sm">{CARD_RARITY_LABELS[rarity]}</Text>
+                                <GoldCoinAmount
+                                    amount={getGoldCoinsPerDuplicateSell(rarity)}
+                                    iconSize={16}
+                                />
+                            </Group>
+                        ))}
+                    </Stack>
 
                     {duplicatesPreviewQuery.isLoading ? (
                         <CenteredLoader />

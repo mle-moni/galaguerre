@@ -22,20 +22,27 @@ interface GameProps {
     user: ApiUser;
     gameId: number;
     spectating?: boolean;
+    spectatingAsUserId?: number;
     refetchInterval?: number;
 }
 
-export const Game = ({ gameId, user, spectating = false, refetchInterval }: GameProps) => {
-    const gameQuery = useGameState(gameId, { refetchInterval });
+export const Game = ({
+    gameId,
+    user,
+    spectating = false,
+    spectatingAsUserId,
+    refetchInterval,
+}: GameProps) => {
+    const gameQuery = useGameState(gameId, { refetchInterval, asUserId: spectatingAsUserId });
     const isSocketReady = useIsSocketReady();
     const [isStoreInit, setIsStoreInit] = useState(false);
 
     useEffect(() => {
         if (!gameQuery.data) return;
 
-        GAME_STORE.syncFromQuery(gameQuery.data, user, { spectating });
+        GAME_STORE.syncFromQuery(gameQuery.data, user, { spectating, spectatingAsUserId });
         setIsStoreInit(true);
-    }, [gameQuery.data, spectating, user]);
+    }, [gameQuery.data, spectating, spectatingAsUserId, user]);
 
     if (gameQuery.isError) {
         return (

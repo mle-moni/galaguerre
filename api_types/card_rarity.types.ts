@@ -57,12 +57,14 @@ const GOLD_COINS_PER_CARD_BUY_BY_RARITY = {
     LEGENDARY: 500,
 } as const satisfies Record<CardRarity, number>;
 
-const GOLD_COINS_PER_DUPLICATE_SELL_BY_RARITY = {
-    COMMON: 25,
-    RARE: 88,
-    EPIC: 125,
-    LEGENDARY: 250,
-} as const satisfies Record<CardRarity, number>;
+export const DUPLICATE_SELL_RATIO = 0.2;
+
+const GOLD_COINS_PER_DUPLICATE_SELL_BY_RARITY = Object.fromEntries(
+    Object.entries(GOLD_COINS_PER_CARD_BUY_BY_RARITY).map(([rarity, buyPrice]) => [
+        rarity,
+        Math.round(buyPrice * DUPLICATE_SELL_RATIO),
+    ]),
+) as Record<CardRarity, number>;
 
 export const getGoldCoinsPerCardBuy = (rarity: CardRarity): number =>
     GOLD_COINS_PER_CARD_BUY_BY_RARITY[rarity];

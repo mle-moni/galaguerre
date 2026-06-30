@@ -99,6 +99,8 @@ test.group("friends", (group) => {
             .where("friendId", friend.id);
         const friends = await controller.index(createContext(currentUser).ctx);
 
+        await friend.refresh();
+
         assert.equal(rows.length, 1);
         assert.equal(addedFriend.userId, friend.id);
         assert.deepInclude(friends, {
@@ -111,7 +113,7 @@ test.group("friends", (group) => {
         });
     });
 
-    test("includes current game id for friends in an active game", async ({ assert }) => {
+    test("does not expose current game id without mutual friendship", async ({ assert }) => {
         const { game, playerOne } = await createTestGame(createGameData());
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const currentUser = await createUser(`spectator-${unique}`, `Spectator-${unique}`);
@@ -121,41 +123,107 @@ test.group("friends", (group) => {
         const friends = await new FriendsController().index(createContext(currentUser).ctx);
 
         assert.equal(friends[0]!.userId, playerOne.id);
+        assert.equal(friends[0]!.currentGameId, null);
+        assert.equal(game.id > 0, true);
+    });
+
+    test("includes current game id for mutual friends in an active game", async ({ assert }) => {
+        const { game, playerOne } = await createTestGame(createGameData());
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const currentUser = await createUser(`spectator-${unique}`, `Spectator-${unique}`);
+
+        await Friendship.create({ userId: currentUser.id, friendId: playerOne.id });
+        await Friendship.create({ userId: playerOne.id, friendId: currentUser.id });
+
+        const friends = await new FriendsController().index(createContext(currentUser).ctx);
+
+        assert.equal(friends[0]!.userId, playerOne.id);
         assert.equal(friends[0]!.currentGameId, game.id);
     });
 
-    test("allows watching a friend game without revealing hands", async ({ assert }) => {
-        const secretCard = createMinionCard({
+    test("allows watching a mutual friend game from their point of view", async ({ assert }) => {
+        const friendCard = createMinionCard({
             cardId: 999,
             label: "Secret minion",
             uuid: "secret-minion",
         });
+        const opponentCard = createMinionCard({
+            cardId: 1000,
+            label: "Opponent minion",
+            uuid: "opponent-minion",
+        });
         const { game, playerOne } = await createTestGame(
-            createGameData({ playerOne: { hand: [secretCard] } }),
+            createGameData({
+                playerOne: { hand: [friendCard] },
+                playerTwo: { hand: [opponentCard] },
+            }),
         );
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const currentUser = await createUser(`watcher-${unique}`, `Watcher-${unique}`);
 
         await Friendship.create({ userId: currentUser.id, friendId: playerOne.id });
+        await Friendship.create({ userId: playerOne.id, friendId: currentUser.id });
 
         const result = (await showGame(
-            createContext(currentUser, { params: { id: game.id } }).ctx,
+            createContext(currentUser, {
+                params: { id: game.id },
+                input: { asUserId: playerOne.id },
+            }).ctx,
         )) as ApiGame;
 
         assert.equal(result.id, game.id);
-        assert.equal(result.data.playerOne.hand.length, 1);
-        assert.equal(result.data.playerOne.hand[0]!.label, "dummy card");
+        assert.equal(result.data.playerOne.hand[0]!.label, "Secret minion");
+        assert.equal(result.data.playerTwo.hand[0]!.label, "dummy card");
     });
 
-    test("rejects watching games when no participant is a friend", async ({ assert }) => {
-        const { game } = await createTestGame(createGameData());
-        const outsider = await createOutsiderUser();
-        const { ctx, getForbiddenBody } = createContext(outsider, { params: { id: game.id } });
+    test("rejects watching with one-way friendship only", async ({ assert }) => {
+        const { game, playerOne } = await createTestGame(createGameData());
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const currentUser = await createUser(`watcher-${unique}`, `Watcher-${unique}`);
+
+        await Friendship.create({ userId: currentUser.id, friendId: playerOne.id });
+
+        const { ctx, getForbiddenBody } = createContext(currentUser, {
+            params: { id: game.id },
+            input: { asUserId: playerOne.id },
+        });
 
         await showGame(ctx);
 
         assert.deepEqual(getForbiddenBody(), {
             error: "Vous ne pouvez pas regarder cette partie",
+        });
+    });
+
+    test("rejects watching from another player point of view", async ({ assert }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(createGameData());
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const currentUser = await createUser(`watcher-${unique}`, `Watcher-${unique}`);
+
+        await Friendship.create({ userId: currentUser.id, friendId: playerOne.id });
+        await Friendship.create({ userId: playerOne.id, friendId: currentUser.id });
+
+        const { ctx, getForbiddenBody } = createContext(currentUser, {
+            params: { id: game.id },
+            input: { asUserId: playerTwo.id },
+        });
+
+        await showGame(ctx);
+
+        assert.deepEqual(getForbiddenBody(), {
+            error: "Vous ne pouvez pas regarder cette partie",
+        });
+    });
+
+    test("rejects watching games when no participant is a friend", async ({ assert }) => {
+        const { game } = await createTestGame(createGameData());
+        const outsider = await createOutsiderUser();
+        const { ctx, getBadRequestBody } = createContext(outsider, { params: { id: game.id } });
+
+        await showGame(ctx);
+
+        assert.deepEqual(getBadRequestBody(), {
+            error: "Joueur à observer requis",
         });
     });
 

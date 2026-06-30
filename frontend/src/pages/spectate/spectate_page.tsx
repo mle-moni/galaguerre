@@ -4,7 +4,7 @@ import "../play/game_layout.css";
 import { Alert } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 import { useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { AppLayout } from "~/components/layout/app_layout";
 import { Game } from "~/pages/play/play_page";
 import { useUser } from "~/hooks/use_user";
@@ -14,7 +14,9 @@ const SPECTATE_REFETCH_INTERVAL_MS = 2000;
 export const SpectatePage = () => {
     const user = useUser();
     const { gameId: gameIdParam } = useParams();
+    const [searchParams] = useSearchParams();
     const gameId = Number(gameIdParam);
+    const asUserId = Number(searchParams.get("asUserId"));
 
     useEffect(() => {
         document.documentElement.classList.add("play-page-active");
@@ -37,6 +39,18 @@ export const SpectatePage = () => {
         );
     }
 
+    if (!Number.isFinite(asUserId) || asUserId <= 0) {
+        return (
+            <AppLayout title="Spectateur" backTo="/friends" backLabel="Amis">
+                <div className="max-w-3xl mx-auto w-full">
+                    <Alert color="red" icon={<IconEye size={18} />}>
+                        Joueur à observer requis.
+                    </Alert>
+                </div>
+            </AppLayout>
+        );
+    }
+
     return (
         <div className="play-page">
             <div className="absolute left-3 top-3 z-50 rounded bg-gg-navy px-3 py-2 text-white shadow-md">
@@ -49,6 +63,7 @@ export const SpectatePage = () => {
                 user={user}
                 gameId={gameId}
                 spectating
+                spectatingAsUserId={asUserId}
                 refetchInterval={SPECTATE_REFETCH_INTERVAL_MS}
             />
         </div>

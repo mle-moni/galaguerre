@@ -135,7 +135,9 @@ export const FriendsPage = observer(() => {
                                                             friendIds.has(entry.userId)
                                                         }
                                                         onSpectate={(gameId) =>
-                                                            navigate(`/spectate/${gameId}`)
+                                                            navigate(
+                                                                `/spectate/${gameId}?asUserId=${entry.userId}`,
+                                                            )
                                                         }
                                                     />
                                                 ))}
@@ -176,7 +178,11 @@ export const FriendsPage = observer(() => {
                                             key={friend.userId}
                                             entry={friend}
                                             isFriend={friendIds.has(friend.userId)}
-                                            onSpectate={(gameId) => navigate(`/spectate/${gameId}`)}
+                                            onSpectate={(gameId) =>
+                                                navigate(
+                                                    `/spectate/${gameId}?asUserId=${friend.userId}`,
+                                                )
+                                            }
                                         />
                                     ))}
                                 </Table.Tbody>
