@@ -100,4 +100,20 @@ test.group("discover guards", () => {
 
         assert.equal(description, "Cri de guerre : Découvrez un monstre.");
     });
+
+    test("formatActionDescription formats DISCOVER actions with rarity filter", ({ assert }) => {
+        const description = formatActionDescription(
+            createCardActionSnapshot({
+                type: "DISCOVER",
+                discoverCardFilter: createCardFilterSnapshot({
+                    type: "MINION",
+                    rarity: "LEGENDARY",
+                }),
+                optionCount: 3,
+            }),
+            "Cri de guerre",
+        );
+
+        assert.equal(description, "Cri de guerre : Découvrez un monstre légendaire.");
+    });
 });

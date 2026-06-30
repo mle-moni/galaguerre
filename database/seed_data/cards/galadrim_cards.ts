@@ -17,6 +17,7 @@ import {
     boostPassive,
     boostSpellPower,
     costLessThan,
+    costEquals,
     damageAction,
     deckCardAddAction,
     defeatAction,
@@ -25,6 +26,7 @@ import {
     defineSpell,
     defineWeapon,
     discoverAction,
+    cardDrawFilter,
     drawAction,
     enemyDrawAction,
     enemyHero,
@@ -120,6 +122,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["DEVELOPPEUR"],
             deathrattleActions: [drawAction(1, minionDrawFilter(["DEVELOPPEUR"]))],
         },
+    ),
+    defineMinion(
+        150,
+        {
+            ...gal("Mentor Technique", 2),
+            attack: 2,
+            health: 3,
+        },
+        {
+            tags: ["DEVELOPPEUR"],
+            battlecryActions: [discoverAction(cardDrawFilter(costEquals(1)))],
+        },
+        { rarity: "COMMON" },
     ),
     defineMinion(
         65,
@@ -385,7 +400,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         {
             tags: ["SUPPORT"],
-            battlecryActions: [healAction(4, allyHero())],
+            battlecryActions: [healAction(4, targetedAllyMinion(), true)],
         },
     ),
     defineMinion(

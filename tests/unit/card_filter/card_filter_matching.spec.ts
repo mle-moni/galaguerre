@@ -59,4 +59,18 @@ test.group("card_filter_matching", () => {
             ),
         );
     });
+
+    test("deckCardMatchesFilter applies rarity filters", ({ assert }) => {
+        const common = createMinionCard({ rarity: "COMMON" });
+        const legendary = createMinionCard({ rarity: "LEGENDARY" });
+
+        const legendaryFilter = createCardFilterSnapshot({
+            type: "MINION",
+            rarity: "LEGENDARY",
+        });
+
+        assert.isFalse(deckCardMatchesFilter(common, legendaryFilter));
+        assert.isTrue(deckCardMatchesFilter(legendary, legendaryFilter));
+        assert.isTrue(deckCardMatchesFilter(common, createCardFilterSnapshot({ type: "MINION" })));
+    });
 });

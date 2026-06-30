@@ -17,6 +17,7 @@ const filterMinionTemplates = (
         type: parameters.type,
         comparison,
         tags: parameters.tags,
+        rarity: parameters.rarity,
     };
 
     return getCollectibleMinionCardTemplates().filter((template) =>

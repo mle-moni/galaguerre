@@ -6,7 +6,8 @@ import {
     validatePassiveDefinition,
 } from "./card_definition.validation.js";
 import {
-    GALAGUERRE_CARD_TYPES,
+    GALAGUERRE_CARD_FILTER_TYPES,
+    GALAGUERRE_CARD_RARITIES,
     GALAGUERRE_DECK_CARD_OPERATIONS,
     GALAGUERRE_DECK_PLACEMENTS,
     GALAGUERRE_MANA_SUBTYPES,
@@ -64,9 +65,10 @@ export const boostSchema = z.object({
 });
 
 export const cardFilterSchema = z.object({
-    type: z.enum(GALAGUERRE_CARD_TYPES),
+    type: z.enum(GALAGUERRE_CARD_FILTER_TYPES),
     comparison: comparisonSchema.nullable(),
     tags: z.array(cardTagSchema),
+    rarity: z.enum(GALAGUERRE_CARD_RARITIES).nullable().default(null),
 });
 
 export const reconvertParametersSchema = cardFilterSchema.extend({

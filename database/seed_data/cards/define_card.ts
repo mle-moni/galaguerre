@@ -236,6 +236,7 @@ export const reconvertParameters = (
     type: "MINION",
     comparison: null,
     tags: [],
+    rarity: null,
     cardId: null,
     relativeToSource: false,
     ...overrides,
@@ -620,12 +621,37 @@ export const minionDrawFilter = (
     type: "MINION",
     comparison: comp,
     tags,
+    rarity: null,
+});
+
+export const minionDiscoverFilter = (
+    options: {
+        rarity?: CardRarity;
+        tags?: CardTag[];
+        comparison?: ComparisonDefinition | null;
+    } = {},
+): CardFilterDefinition => ({
+    type: "MINION",
+    comparison: options.comparison ?? null,
+    tags: options.tags ?? [],
+    rarity: options.rarity ?? null,
 });
 
 export const spellDrawFilter = (): CardFilterDefinition => ({
     type: "SPELL",
     comparison: null,
     tags: [],
+    rarity: null,
+});
+
+export const cardDrawFilter = (
+    comp: ComparisonDefinition | null = null,
+    tags: CardTag[] = [],
+): CardFilterDefinition => ({
+    type: "ANY",
+    comparison: comp,
+    tags,
+    rarity: null,
 });
 
 export const actionPassive = (

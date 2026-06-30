@@ -60,4 +60,18 @@ test.group("generate_discover_options", () => {
         const uuids = options.map((option) => option.uuid);
         assert.equal(new Set(uuids).size, uuids.length);
     });
+
+    test("applies rarity filters", ({ assert }) => {
+        const options = generateDiscoverOptions(
+            createCardFilterSnapshot({ type: "MINION", rarity: "LEGENDARY" }),
+            3,
+        );
+
+        assert.isAbove(options.length, 0);
+        for (const option of options) {
+            assert.equal(option.rarity, "LEGENDARY");
+            assert.equal(option.type, "MINION");
+            assert.isTrue(isCardCollectible(option.cardId));
+        }
+    });
 });

@@ -11,7 +11,6 @@ import {
     createCardActionSnapshot,
     createEmptyBoard,
     createGameData,
-    createHeroTargetSnapshot,
     createMinionCard,
     createMinionState,
     createMinionTargetSnapshot,
@@ -34,7 +33,8 @@ const happinessManagerLikeCard = () =>
             createCardActionSnapshot({
                 type: "HEAL",
                 heal: 4,
-                target: createHeroTargetSnapshot("PLAYER"),
+                isTargeted: true,
+                target: createMinionTargetSnapshot("PLAYER"),
             }),
         ],
     });
@@ -113,10 +113,14 @@ test.group("heal narrative", () => {
         assert.equal(remappedHeal.target.owner, "PLAYER");
     });
 
-    test("happiness manager battlecry heal targets own hero in presentation", async ({
+    test("happiness manager battlecry heal targets ally minion in presentation", async ({
         assert,
     }) => {
         const card = happinessManagerLikeCard();
+        const allyMinion = createMinionState(
+            createMinionCard({ uuid: "ally-target", health: 10, attack: 2 }),
+            { health: 1 },
+        );
 
         installSocketCollector();
         try {
@@ -124,10 +128,20 @@ test.group("heal narrative", () => {
                 createGameData({
                     isTraining: true,
                     playerOne: { userId: TRAINING_AI_USER_ID },
-                    playerTwo: { userId: 2, mana: 10, health: 10, hand: [card] },
+                    playerTwo: {
+                        userId: 2,
+                        mana: 10,
+                        health: 10,
+                        hand: [card],
+                        board: placeMinion(createEmptyBoard(), 0, allyMinion),
+                    },
                 }),
                 card,
-                { actor: "playerTwo" },
+                {
+                    actor: "playerTwo",
+                    boardIndex: 1,
+                    actionTarget: { minionUuid: "ally-target", owner: "PLAYER" },
+                },
             );
         } finally {
             restoreSocketCollector();
@@ -149,7 +163,7 @@ test.group("heal narrative", () => {
             throw new Error("Expected STAT_CHANGE effect");
         }
 
-        assert.equal(healEffect.target.type, "HERO");
+        assert.equal(healEffect.target.type, "MINION");
         assert.equal(healEffect.target.owner, "PLAYER");
     });
 

@@ -108,6 +108,7 @@ export const createCardFilterSnapshot = (
     type: "MINION",
     comparison: null,
     tags: [],
+    rarity: null,
     ...overrides,
 });
 
@@ -117,6 +118,7 @@ export const createReconvertParametersSnapshot = (
     type: "MINION",
     comparison: null,
     tags: [],
+    rarity: null,
     cardId: null,
     relativeToSource: false,
     ...overrides,
@@ -187,6 +189,7 @@ export const createCardActionSnapshot = (
                     type: "MINION",
                     comparison: null,
                     tags: [],
+                    rarity: null,
                 },
                 optionCount: overrides.optionCount ?? 3,
                 actionCondition,

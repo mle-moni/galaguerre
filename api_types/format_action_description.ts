@@ -9,6 +9,7 @@ import type {
     TargetSnapshot,
 } from "./game.types.js";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
+import { CARD_RARITY_LABELS } from "./card_rarity.types.js";
 import { CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
 import { hasActionTarget } from "./action_fields_utils.js";
@@ -18,6 +19,16 @@ const CARD_TYPE_LABELS: Record<CardFilterSnapshot["type"], string> = {
     MINION: "Monstre",
     SPELL: "Sort",
     WEAPON: "Arme",
+    ANY: "Carte",
+};
+
+const formatDiscoverCardLabel = (
+    filter: CardFilterSnapshot,
+): { article: string; label: string } => {
+    if (filter.type === "ANY") {
+        return { article: "une", label: "carte" };
+    }
+    return { article: "un", label: CARD_TYPE_LABELS[filter.type].toLowerCase() };
 };
 
 const formatTagChip = (tag: CardTag): string => {
@@ -27,6 +38,9 @@ const formatTagChip = (tag: CardTag): string => {
 };
 
 const formatTagList = (tags: CardTag[]): string => tags.map(formatTagChip).join(", ");
+
+const formatRarityFilterLabel = (rarity: NonNullable<CardFilterSnapshot["rarity"]>): string =>
+    CARD_RARITY_LABELS[rarity].toLowerCase();
 
 const formatAttackComparisonLabel = (operator: "<" | ">" | "=", threshold: number): string => {
     if (operator === "<") return `d'attaque ${threshold - 1} ou moins`;
@@ -217,10 +231,18 @@ const formatDiscoverExtraFilterSuffix = (filter: CardFilterSnapshot): string => 
         parts.push(`pv ${comparison.healthComparison} ${comparison.health}`);
     }
     if (comparison?.costComparison && comparison.cost !== null) {
-        parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
+        if (comparison.costComparison === "=") {
+            const crystalLabel = comparison.cost === 1 ? "cristal" : "cristaux";
+            parts.push(`coûtant ${comparison.cost} ${crystalLabel}`);
+        } else {
+            parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
+        }
     }
     if (filter.tags.length > 0) {
         parts.push(formatTagList(filter.tags));
+    }
+    if (filter.rarity !== null) {
+        parts.push(formatRarityFilterLabel(filter.rarity));
     }
 
     return parts.length > 0 ? ` ${parts.join(" + ")}` : "";
@@ -243,6 +265,9 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     }
     if (filter.tags.length > 0) {
         parts.push(formatTagList(filter.tags));
+    }
+    if (filter.rarity !== null) {
+        parts.push(formatRarityFilterLabel(filter.rarity));
     }
 
     return ` ${parts.join(" + ")}`;
@@ -356,6 +381,7 @@ const formatReconvertTargetLabel = (parameters: ReconvertParametersSnapshot | nu
             type: parameters.type,
             comparison: parameters.comparison,
             tags: [],
+            rarity: parameters.rarity,
         });
     }
 
@@ -469,8 +495,8 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
-            const cardTypeLabel = CARD_TYPE_LABELS[action.discoverCardFilter.type].toLowerCase();
-            return `découvrez un ${cardTypeLabel}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}`;
+            const { article, label } = formatDiscoverCardLabel(action.discoverCardFilter);
+            return `découvrez ${article} ${label}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}`;
         }
         case "MANA": {
             const text = formatManaActionText(action);
@@ -720,8 +746,8 @@ export const formatActionDescription = (
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
-            const cardTypeLabel = CARD_TYPE_LABELS[action.discoverCardFilter.type].toLowerCase();
-            return `${prefix} : Découvrez un ${cardTypeLabel}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}.`;
+            const { article, label } = formatDiscoverCardLabel(action.discoverCardFilter);
+            return `${prefix} : Découvrez ${article} ${label}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}.`;
         }
         case "BOOST": {
             if (!action.boost) return null;

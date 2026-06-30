@@ -29,6 +29,12 @@ export const GALAGUERRE_CARD_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_CARD_TYPES_LABEL_OBJ,
 );
 
+export const GALAGUERRE_CARD_FILTER_TYPES = [...GALAGUERRE_CARD_TYPES, "ANY"] as const;
+export type GalaguerreCardFilterType = GenerateTypeFromEnum<typeof GALAGUERRE_CARD_FILTER_TYPES>;
+
+export const GALAGUERRE_CARD_RARITIES = ["COMMON", "RARE", "EPIC", "LEGENDARY"] as const;
+export type GalaguerreCardRarity = GenerateTypeFromEnum<typeof GALAGUERRE_CARD_RARITIES>;
+
 export const GALAGUERRE_MANA_SUBTYPES = ["TEMPORARY_CHANGE"] as const;
 export type GalaguerreManaSubtype = GenerateTypeFromEnum<typeof GALAGUERRE_MANA_SUBTYPES>;
 
