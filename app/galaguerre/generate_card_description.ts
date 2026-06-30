@@ -1,0 +1,41 @@
+import type { CardData } from "#galaguerre/card_definition.schema";
+import {
+    getBattlecryDescription,
+    getDeathrattleDescription,
+    getMinionCardDescription,
+    getMinionPowerEffects,
+    getPassiveDescription,
+    getSpellCardDescription,
+    getSpellEffectDescription,
+    getWeaponCardDescription,
+} from "#galaguerre/minion_card_metadata";
+
+export const generateCardDescriptionFromData = (data: CardData): string => {
+    switch (data.type) {
+        case "WEAPON": {
+            const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
+            return getWeaponCardDescription(data.damage, data.durability, deathrattleLines);
+        }
+        case "SPELL": {
+            const effectLines = getSpellEffectDescription(data.spellActions);
+            const castsWhenDrawn = data.castsWhenDrawn ?? false;
+            return getSpellCardDescription(effectLines, castsWhenDrawn) || data.name;
+        }
+        case "MINION": {
+            const effects = getMinionPowerEffects(data.minionPowers);
+            const battlecryLines = getBattlecryDescription(data.battlecryActions);
+            const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
+            const passiveLines = getPassiveDescription(data.passives);
+
+            return getMinionCardDescription(
+                data.attack,
+                data.health,
+                effects,
+                battlecryLines,
+                deathrattleLines,
+                passiveLines,
+                data.dynamicCost,
+            );
+        }
+    }
+};

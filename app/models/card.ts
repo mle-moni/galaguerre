@@ -25,6 +25,9 @@ export default class Card extends BaseModel {
     @column()
     declare rarity: CardRarity;
 
+    @column()
+    declare generatedDescription: string | null;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

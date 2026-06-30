@@ -1,5 +1,5 @@
 import { GALADRIM_CARD_SET_NAME } from "#database/seed_data/card_set_names";
-import { buildCardInsert } from "#database/seed_data/cards/define_card";
+import { buildSyncedCardInsert } from "#database/seed_helpers/build_synced_card_insert";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 import Card from "#models/card";
 import CardSet from "#models/card_set";
@@ -17,7 +17,7 @@ export const syncCards = async () => {
         );
 
         for (const entry of GALADRIM_CARDS) {
-            await Card.updateOrCreate({ id: entry.id }, buildCardInsert(entry, cardSet.id), {
+            await Card.updateOrCreate({ id: entry.id }, buildSyncedCardInsert(entry, cardSet.id), {
                 client: trx,
             });
         }

@@ -35,6 +35,7 @@ const normalizeForSearch = (value: string) =>
 const cardMatchesSearch = (card: ApiCatalogCard, query: string) => {
     const normalizedQuery = normalizeForSearch(query);
     if (normalizeForSearch(card.label).includes(normalizedQuery)) return true;
+    if (normalizeForSearch(card.description).includes(normalizedQuery)) return true;
     return card.tags.some((tag) =>
         normalizeForSearch(CARD_TAG_LABELS[tag].label).includes(normalizedQuery),
     );

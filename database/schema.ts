@@ -78,6 +78,7 @@ export class CardSchema extends BaseModel {
         "cardSetId",
         "createdAt",
         "data",
+        "generatedDescription",
         "id",
         "isCollectible",
         "rarity",
@@ -90,6 +91,8 @@ export class CardSchema extends BaseModel {
     declare createdAt: DateTime | null;
     @column()
     declare data: any;
+    @column()
+    declare generatedDescription: string | null;
     @column({ isPrimary: true })
     declare id: number;
     @column()
