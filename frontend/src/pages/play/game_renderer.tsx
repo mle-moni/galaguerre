@@ -26,21 +26,21 @@ import "./game_layout.css";
 interface GameRendererProps {
     game: ApiGame;
     user: ApiUser;
+    spectating?: boolean;
 }
 
-const DesktopGameLayout = observer<GameRendererProps>(({ user }) => {
-    const { store, game } = useGameContext();
+const DesktopGameLayout = observer<GameRendererProps>(({ spectating = false }) => {
+    const { store } = useGameContext();
     useTargetSelectionCancel(store);
     useArmedCardInteraction(store);
     useTargetingArrow(store);
 
-    const me = game.data.playerOne.userId === user.id ? game.data.playerOne : game.data.playerTwo;
-    const opponent =
-        game.data.playerOne.userId === user.id ? game.data.playerTwo : game.data.playerOne;
+    const me = store.me;
+    const opponent = store.opponent;
 
     return (
         <div className="h-full relative">
-            <AbandonGameControl />
+            {!spectating && <AbandonGameControl />}
             <ActionTimeline />
             <div className="flex h-full">
                 <div className="flex justify-center w-[124px] shrink-0">
@@ -68,21 +68,21 @@ const DesktopGameLayout = observer<GameRendererProps>(({ user }) => {
             <PlayerHand player={me} />
 
             <GameFinalScreen />
-            <MulliganOverlay />
-            <OnboardingCoach />
-            <ArmedCardHint />
-            <TargetingArrowOverlay />
+            {!spectating && <MulliganOverlay />}
+            {!spectating && <OnboardingCoach />}
+            {!spectating && <ArmedCardHint />}
+            {!spectating && <TargetingArrowOverlay />}
             <GameAnimationOverlay />
         </div>
     );
 });
 
-export const GameRenderer = observer<GameRendererProps>(({ game, user }) => {
+export const GameRenderer = observer<GameRendererProps>(({ game, user, spectating = false }) => {
     const isMobilePortrait = useIsMobilePortrait();
 
     if (isMobilePortrait) {
-        return <MobileGameLayout user={user} />;
+        return <MobileGameLayout user={user} spectating={spectating} />;
     }
 
-    return <DesktopGameLayout user={user} />;
+    return <DesktopGameLayout game={game} user={user} spectating={spectating} />;
 });

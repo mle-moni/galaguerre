@@ -1,7 +1,7 @@
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { LEADERBOARD_QUERY_KEY, AI_SPEEDRUN_LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
@@ -51,6 +51,11 @@ export const GameFinalScreen = observer(() => {
     });
 
     const handleClose = () => {
+        if (store.isSpectating) {
+            navigate("/friends");
+            return;
+        }
+
         invalidatePostGameQueries();
         navigate(isTraining ? "/" : "/matchmaking");
     };
@@ -88,18 +93,26 @@ export const GameFinalScreen = observer(() => {
             opened={store.showFinalScreen}
             onClose={handleClose}
             closeOnClickOutside={false}
-            title={`Partie terminée - ${store.isUserWinner ? "Victoire" : "Défaite"}`}
+            title={
+                store.isSpectating
+                    ? "Partie terminée"
+                    : `Partie terminée - ${store.isUserWinner ? "Victoire" : "Défaite"}`
+            }
             size="lg"
         >
             <Stack gap="sm">
-                {isOnboardingGame ? (
+                {isOnboardingGame && !store.isSpectating ? (
                     <Text size="sm">
                         Vous connaissez les bases ! En classé, vous gagnez ou perdez de l&apos;Elo.
                         Votre deck de départ est déjà actif.
                     </Text>
                 ) : null}
 
-                {isTraining ? (
+                {store.isSpectating ? (
+                    <Text size="sm" c="dimmed">
+                        Mode spectateur
+                    </Text>
+                ) : isTraining ? (
                     <Text size="sm" c="dimmed">
                         Partie d'entraînement — Elo inchangé
                     </Text>
@@ -125,9 +138,13 @@ export const GameFinalScreen = observer(() => {
                     winnerUserId={store.winner.userId}
                 />
 
-                {userReward ? <GameLootSection reward={userReward} /> : null}
+                {!store.isSpectating && userReward ? <GameLootSection reward={userReward} /> : null}
 
-                {isOnboardingGame ? (
+                {store.isSpectating ? (
+                    <Button onClick={handleClose} mt="sm">
+                        Retour aux amis
+                    </Button>
+                ) : isOnboardingGame ? (
                     <Stack gap="sm" mt="sm" align="center">
                         <ButtonsLayout gap="sm" w={isMobilePortrait ? "100%" : undefined}>
                             <Button

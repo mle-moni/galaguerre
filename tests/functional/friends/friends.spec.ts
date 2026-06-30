@@ -1,10 +1,14 @@
 import FriendsController from "#controllers/friends/friends_controller";
+import { showGame } from "#controllers/games/show_game";
 import type { ApiFriend } from "#api_types/friend.types";
+import type { ApiGame } from "#api_types/game.types";
 import Friendship from "#models/friendship";
 import User from "#models/user";
 import testUtils from "@adonisjs/core/services/test_utils";
 import type { HttpContext } from "@adonisjs/core/http";
 import { test } from "@japa/runner";
+import { createOutsiderUser, createTestGame } from "#tests/helpers/game/game_factory";
+import { createGameData, createMinionCard } from "#tests/helpers/game/fixtures";
 
 const createUser = async (suffix: string, pseudo: string) =>
     User.create({
@@ -26,6 +30,7 @@ const createContext = (
     } = {},
 ) => {
     let badRequestBody: unknown;
+    let forbiddenBody: unknown;
     let notFoundBody: unknown;
 
     const ctx = {
@@ -40,6 +45,10 @@ const createContext = (
                 badRequestBody = payload;
                 return payload;
             },
+            forbidden: (payload: unknown) => {
+                forbiddenBody = payload;
+                return payload;
+            },
             notFound: (payload: unknown) => {
                 notFoundBody = payload;
                 return payload;
@@ -50,6 +59,7 @@ const createContext = (
     return {
         ctx,
         getBadRequestBody: () => badRequestBody,
+        getForbiddenBody: () => forbiddenBody,
         getNotFoundBody: () => notFoundBody,
     };
 };
@@ -97,6 +107,55 @@ test.group("friends", (group) => {
             elo: friend.elo,
             wins: friend.wins,
             losses: friend.losses,
+            currentGameId: null,
+        });
+    });
+
+    test("includes current game id for friends in an active game", async ({ assert }) => {
+        const { game, playerOne } = await createTestGame(createGameData());
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const currentUser = await createUser(`spectator-${unique}`, `Spectator-${unique}`);
+
+        await Friendship.create({ userId: currentUser.id, friendId: playerOne.id });
+
+        const friends = await new FriendsController().index(createContext(currentUser).ctx);
+
+        assert.equal(friends[0]!.userId, playerOne.id);
+        assert.equal(friends[0]!.currentGameId, game.id);
+    });
+
+    test("allows watching a friend game without revealing hands", async ({ assert }) => {
+        const secretCard = createMinionCard({
+            cardId: 999,
+            label: "Secret minion",
+            uuid: "secret-minion",
+        });
+        const { game, playerOne } = await createTestGame(
+            createGameData({ playerOne: { hand: [secretCard] } }),
+        );
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const currentUser = await createUser(`watcher-${unique}`, `Watcher-${unique}`);
+
+        await Friendship.create({ userId: currentUser.id, friendId: playerOne.id });
+
+        const result = (await showGame(
+            createContext(currentUser, { params: { id: game.id } }).ctx,
+        )) as ApiGame;
+
+        assert.equal(result.id, game.id);
+        assert.equal(result.data.playerOne.hand.length, 1);
+        assert.equal(result.data.playerOne.hand[0]!.label, "dummy card");
+    });
+
+    test("rejects watching games when no participant is a friend", async ({ assert }) => {
+        const { game } = await createTestGame(createGameData());
+        const outsider = await createOutsiderUser();
+        const { ctx, getForbiddenBody } = createContext(outsider, { params: { id: game.id } });
+
+        await showGame(ctx);
+
+        assert.deepEqual(getForbiddenBody(), {
+            error: "Vous ne pouvez pas regarder cette partie",
         });
     });
 

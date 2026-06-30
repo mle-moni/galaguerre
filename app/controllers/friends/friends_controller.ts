@@ -1,5 +1,6 @@
 import type { AddFriendPayload, ApiFriend, ApiFriendSearchResult } from "#api_types/friend.types";
 import Friendship from "#models/friendship";
+import Game from "#models/game";
 import User from "#models/user";
 import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
@@ -10,12 +11,35 @@ const addFriendValidator = vine.compile(
     }),
 );
 
-const serializeFriend = (user: User): ApiFriend => ({
+const getCurrentGameIdsByUserId = async (userIds: number[]): Promise<Map<number, number>> => {
+    if (userIds.length === 0) return new Map();
+
+    const games = await Game.query()
+        .where("isFinished", false)
+        .where((query) => {
+            query.whereIn("playerOneId", userIds).orWhereIn("playerTwoId", userIds);
+        });
+    const currentGameIdsByUserId = new Map<number, number>();
+
+    for (const game of games) {
+        if (game.playerOneId && userIds.includes(game.playerOneId)) {
+            currentGameIdsByUserId.set(game.playerOneId, game.id);
+        }
+        if (game.playerTwoId && userIds.includes(game.playerTwoId)) {
+            currentGameIdsByUserId.set(game.playerTwoId, game.id);
+        }
+    }
+
+    return currentGameIdsByUserId;
+};
+
+const serializeFriend = (user: User, currentGameId: number | null = null): ApiFriend => ({
     userId: user.id,
     pseudo: user.pseudo,
     elo: user.elo,
     wins: user.wins,
     losses: user.losses,
+    currentGameId,
 });
 
 export default class FriendsController {
@@ -25,7 +49,16 @@ export default class FriendsController {
             .preload("friend")
             .orderBy("createdAt", "desc");
 
-        return friendships.map((friendship) => serializeFriend(friendship.friend));
+        const currentGameIdsByUserId = await getCurrentGameIdsByUserId(
+            friendships.map((friendship) => friendship.friendId),
+        );
+
+        return friendships.map((friendship) =>
+            serializeFriend(
+                friendship.friend,
+                currentGameIdsByUserId.get(friendship.friendId) ?? null,
+            ),
+        );
     }
 
     async search({ auth, request }: HttpContext): Promise<ApiFriendSearchResult[]> {
@@ -43,9 +76,15 @@ export default class FriendsController {
             .orderByRaw("LOWER(pseudo) ASC")
             .orderBy("id", "asc")
             .limit(10);
+        const currentGameIdsByUserId = await getCurrentGameIdsByUserId(
+            users.filter((user) => friendIds.has(user.id)).map((user) => user.id),
+        );
 
         return users.map((user) => ({
-            ...serializeFriend(user),
+            ...serializeFriend(
+                user,
+                friendIds.has(user.id) ? currentGameIdsByUserId.get(user.id) ?? null : null,
+            ),
             isFriend: friendIds.has(user.id),
         }));
     }
@@ -67,7 +106,9 @@ export default class FriendsController {
             { userId, friendId: payload.friendUserId },
         );
 
-        return serializeFriend(friend);
+        const currentGameIdsByUserId = await getCurrentGameIdsByUserId([friend.id]);
+
+        return serializeFriend(friend, currentGameIdsByUserId.get(friend.id) ?? null);
     }
 
     async destroy({ auth, params, response }: HttpContext) {

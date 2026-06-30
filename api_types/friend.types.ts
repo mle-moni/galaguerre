@@ -4,6 +4,7 @@ export interface ApiFriend {
     elo: number;
     wins: number;
     losses: number;
+    currentGameId: number | null;
 }
 
 export interface ApiFriendSearchResult extends ApiFriend {

@@ -21,38 +21,40 @@ import "./mobile.css";
 
 interface MobileGameLayoutProps {
     user: ApiUser;
+    spectating?: boolean;
 }
 
-export const MobileGameLayout = observer<MobileGameLayoutProps>(({ user }) => {
-    const { store, game } = useGameContext();
-    useTargetSelectionCancel(store);
-    useArmedCardInteraction(store);
-    useTargetingArrow(store);
+export const MobileGameLayout = observer<MobileGameLayoutProps>(
+    ({ user: _user, spectating = false }) => {
+        const { store } = useGameContext();
+        useTargetSelectionCancel(store);
+        useArmedCardInteraction(store);
+        useTargetingArrow(store);
 
-    const me = game.data.playerOne.userId === user.id ? game.data.playerOne : game.data.playerTwo;
-    const opponent =
-        game.data.playerOne.userId === user.id ? game.data.playerTwo : game.data.playerOne;
+        const me = store.me;
+        const opponent = store.opponent;
 
-    return (
-        <div className="mobile-game-layout">
-            <AbandonGameControl />
-            <ActionTimelineFab />
-            <MobileOpponentBar opponent={opponent} />
-            <div className="mobile-game-layout__board">
-                <PlayedCardReveal />
-                <Board />
+        return (
+            <div className="mobile-game-layout">
+                {!spectating && <AbandonGameControl />}
+                <ActionTimelineFab />
+                <MobileOpponentBar opponent={opponent} />
+                <div className="mobile-game-layout__board">
+                    <PlayedCardReveal />
+                    <Board />
+                </div>
+                <MobilePlayerBar me={me} />
+                <div className="mobile-game-layout__hand-area">
+                    <PlayerHand player={me} isMobile />
+                </div>
+
+                <GameFinalScreen />
+                {!spectating && <MulliganOverlay />}
+                {!spectating && <OnboardingCoach />}
+                {!spectating && <ArmedCardHint isMobile />}
+                {!spectating && <TargetingArrowOverlay />}
+                <GameAnimationOverlay />
             </div>
-            <MobilePlayerBar me={me} />
-            <div className="mobile-game-layout__hand-area">
-                <PlayerHand player={me} isMobile />
-            </div>
-
-            <GameFinalScreen />
-            <MulliganOverlay />
-            <OnboardingCoach />
-            <ArmedCardHint isMobile />
-            <TargetingArrowOverlay />
-            <GameAnimationOverlay />
-        </div>
-    );
-});
+        );
+    },
+);
