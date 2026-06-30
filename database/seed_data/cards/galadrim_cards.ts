@@ -507,14 +507,14 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Vincent", 12),
             imageUrl: "/card-covers/galadrim/vincent.webp",
-            attack: 8,
-            health: 8,
+            attack: 7,
+            health: 7,
         },
         {
             tags: ["PM"],
             dynamicCost: { reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }] },
         },
-        { rarity: "LEGENDARY" },
+        { rarity: "EPIC" },
     ),
 
     // --- regional / pets minions ---
