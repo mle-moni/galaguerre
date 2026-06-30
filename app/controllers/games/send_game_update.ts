@@ -5,6 +5,7 @@ import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import { refreshGameDynamicCosts } from "../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { buildPresentationForUser } from "../../galaguerre/game_narrative/build_presentation_update.js";
+import { scheduleAiDiscoverIfNeeded } from "../../galaguerre/ai/schedule_ai_discover.js";
 
 const getTrainingHumanUserId = (game: Game): number => {
     if (game.data.playerOne.userId === TRAINING_AI_USER_ID) {
@@ -35,9 +36,12 @@ export const sendGameUpdate = (game: Game, presentation?: GamePresentationUpdate
     if (game.data.isTraining) {
         const humanUserId = getTrainingHumanUserId(game);
         emitForUser(game, humanUserId, presentation);
+        scheduleAiDiscoverIfNeeded(game);
         return;
     }
 
     emitForUser(game, game.data.playerOne.userId, presentation);
     emitForUser(game, game.data.playerTwo.userId, presentation);
+
+    scheduleAiDiscoverIfNeeded(game);
 };

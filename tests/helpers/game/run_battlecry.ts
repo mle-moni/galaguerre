@@ -17,7 +17,7 @@ export const runBattlecry = (
     data: GameData,
     card: MinionCard,
     options: BattlecryRunOptions = {},
-): { game: Game; gameEnded: boolean } => {
+): { game: Game; gameEnded: boolean; discoverPending: boolean } => {
     const boardIndex = options.boardIndex ?? 0;
     const actor = options.actor ?? "playerOne";
     const game = createInMemoryGame(data);
@@ -31,12 +31,17 @@ export const runBattlecry = (
     );
     refreshAurasAfterMinionPlayed(game, player, boardIndex);
 
-    const { gameEnded } = executeBattlecries(game, player, card, options.actionTarget);
+    const { gameEnded, discoverPending } = executeBattlecries(
+        game,
+        player,
+        card,
+        options.actionTarget,
+    );
 
     if (gameEnded) {
         game.isFinished = true;
         game.data.state = "FINISHED";
     }
 
-    return { game, gameEnded };
+    return { game, gameEnded, discoverPending };
 };

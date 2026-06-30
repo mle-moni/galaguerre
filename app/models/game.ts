@@ -2,6 +2,7 @@ import type {
     ApiGame,
     GameData,
     GameLogEntry,
+    GamePendingDiscover,
     GamePlayer,
     PlayerCard,
 } from "#api_types/game.types";
@@ -53,11 +54,13 @@ export default class Game extends BaseModel {
         const playerOne: GamePlayer = hidePlayerData(p1, forUserId);
         const playerTwo: GamePlayer = hidePlayerData(p2, forUserId);
         const actionLog = hideActionLogForUser(this.data.actionLog, forUserId);
+        const pendingDiscover = hidePendingDiscoverForUser(this.data.pendingDiscover, forUserId);
         const data: GameData = {
             ...this.data,
             playerOne,
             playerTwo,
             actionLog,
+            pendingDiscover,
         };
 
         return {
@@ -90,6 +93,19 @@ const hidePlayerData = (player: GamePlayer, forUserId: number): GamePlayer => {
         ...player,
         deckCards,
         hand: player.userId === forUserId ? player.hand : hiddenHand,
+    };
+};
+
+const hidePendingDiscoverForUser = (
+    pendingDiscover: GamePendingDiscover | undefined,
+    forUserId: number,
+): GamePendingDiscover | undefined => {
+    if (!pendingDiscover) return undefined;
+    if (pendingDiscover.playerUserId === forUserId) return pendingDiscover;
+
+    return {
+        ...pendingDiscover,
+        options: pendingDiscover.options.map(hideCardData),
     };
 };
 

@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { getCardDescription } from "./card_detail_content.jsx";
 import { getCardFaceDescriptionSizeClass } from "./card_face_description_size.js";
 import { MinionDescriptionContent } from "./minion_description_content.jsx";
+import { CardGeneratedByLabel } from "./card_generated_by_label.jsx";
 import "./card_faces.css";
 
 interface CardFaceDescriptionProps {
@@ -21,13 +22,21 @@ export const CardFaceDescription = ({
 
     if (card.type === "MINION") {
         return (
-            <MinionDescriptionContent
-                card={card}
-                isSilenced={isSilenced}
-                className={clsx("card-face-description", sizeClass)}
-            />
+            <>
+                <CardGeneratedByLabel card={card} />
+                <MinionDescriptionContent
+                    card={card}
+                    isSilenced={isSilenced}
+                    className={clsx("card-face-description", sizeClass)}
+                />
+            </>
         );
     }
 
-    return <div className={clsx("card-face-description", sizeClass)}>{description}</div>;
+    return (
+        <>
+            <CardGeneratedByLabel card={card} />
+            <div className={clsx("card-face-description", sizeClass)}>{description}</div>
+        </>
+    );
 };

@@ -12,6 +12,7 @@ export const V1_ACTION_TYPES = [
     "SUMMON",
     "DECK_CARD",
     "HAND_CARD",
+    "DISCOVER",
     "MANA",
     "DEFEAT",
 ] as const;

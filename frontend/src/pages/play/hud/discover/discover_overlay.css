@@ -1,0 +1,88 @@
+.discover-overlay__cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+@media (min-width: 641px) {
+    .discover-overlay__modal-content {
+        --modal-size: min(
+            calc(3 * var(--card-w-full) + 2 * 12px + 2 * var(--mantine-spacing-md)),
+            calc(100vw - 2rem)
+        );
+        flex: 0 0 var(--modal-size);
+        width: var(--modal-size);
+    }
+
+    .discover-overlay__cards {
+        flex-wrap: nowrap;
+    }
+}
+
+.discover-overlay__card {
+    width: var(--card-w-full);
+    border: 3px solid transparent;
+    border-radius: 8px;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.discover-overlay__card:hover {
+    transform: translateY(-4px);
+    border-color: #ffd43b;
+    box-shadow: 0 0 0 2px rgba(255, 212, 59, 0.45);
+}
+
+.discover-overlay__card-face {
+    pointer-events: none;
+}
+
+.discover-opponent-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 20;
+    display: flex;
+    gap: 12px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.discover-opponent-indicator__card {
+    width: var(--card-w-default);
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
+    animation: discover-opponent-float 1.8s ease-in-out infinite;
+}
+
+.discover-opponent-indicator__card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.discover-opponent-indicator__card:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes discover-opponent-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.card-generated-by {
+    font-size: 0.55rem;
+    line-height: 1.1;
+    color: #adb5bd;
+    margin-bottom: 2px;
+}

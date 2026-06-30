@@ -46,6 +46,7 @@ export const GALAGUERRE_ACTIONS_TYPES = [
     "SUMMON",
     "DECK_CARD",
     "HAND_CARD",
+    "DISCOVER",
     "MANA",
     "DEFEAT",
 ] as const;
@@ -65,6 +66,7 @@ export const GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ: LabelObjectType<GalaguerreActio
     SUMMON: "Summon",
     DECK_CARD: "Deck Card",
     HAND_CARD: "Hand Card",
+    DISCOVER: "Discover",
     MANA: "Mana",
     DEFEAT: "Defeat",
 };

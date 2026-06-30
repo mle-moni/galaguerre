@@ -1,14 +1,8 @@
 import type { PassiveTriggerEntry } from "./collect_passive_triggers.js";
 import type Game from "#models/game";
-import { executeAction } from "../action_engine/execute_action.js";
-import { isTargetedV1Action } from "../action_engine/is_targeted_v1_action.js";
-import { isV1Action } from "../action_engine/is_v1_action.js";
+import { executeActionSequence } from "../action_engine/execute_action_sequence.js";
 import { beginLoggedBeatIfNone, endCurrentBeat } from "../game_narrative/narrative_beats.js";
 import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
-
-const getOpponent = (game: Game, player: PassiveTriggerEntry["owner"]) => {
-    return player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
-};
 
 const isGameOver = (game: Game): boolean => {
     return game.data.playerOne.health <= 0 || game.data.playerTwo.health <= 0;
@@ -17,15 +11,15 @@ const isGameOver = (game: Game): boolean => {
 export const executePassiveActions = (
     game: Game,
     entries: PassiveTriggerEntry[],
-): { gameEnded: boolean } => {
+): { gameEnded: boolean; discoverPending: boolean } => {
     let openedStandaloneBeat = false;
 
     for (const entry of entries) {
         const action = entry.passive.action;
         if (!action) continue;
-        if (!isV1Action(action) && !isTargetedV1Action(action)) continue;
 
-        const opponent = getOpponent(game, entry.owner);
+        const opponent =
+            entry.owner === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
         const sourceMinion = entry.owner.board[entry.sourceBoardIndex] ?? undefined;
 
         withNarrativeRecorder((recorder) => {
@@ -44,13 +38,28 @@ export const executePassiveActions = (
             }
         });
 
-        executeAction(action, game, entry.owner, opponent, undefined, 0, sourceMinion);
+        const sourceCard = sourceMinion?.originalCard;
+        if (!sourceCard) continue;
 
-        if (isGameOver(game)) {
+        const result = executeActionSequence(game, entry.owner, opponent, [action], {
+            sourceCard: {
+                cardId: sourceCard.cardId,
+                label: sourceCard.label,
+                uuid: sourceCard.uuid,
+            },
+            effectKind: "PASSIVE",
+            sourceMinion,
+        });
+
+        if (result.discoverPending) {
+            return result;
+        }
+
+        if (result.gameEnded || isGameOver(game)) {
             if (openedStandaloneBeat) {
                 endCurrentBeat(game);
             }
-            return { gameEnded: true };
+            return { gameEnded: true, discoverPending: false };
         }
     }
 
@@ -58,5 +67,5 @@ export const executePassiveActions = (
         endCurrentBeat(game);
     }
 
-    return { gameEnded: false };
+    return { gameEnded: false, discoverPending: false };
 };

@@ -8,6 +8,7 @@ import {
     getHeroAttacksThisRound,
     whichPlayerAmI,
 } from "../game_utils.js";
+import { ensureNoPendingDiscover } from "../discover/ensure_no_pending_discover.js";
 import { weaponToHeroAction } from "./weapon_to_hero_action.js";
 import { weaponToMinionAction } from "./weapon_to_minion_action.js";
 
@@ -22,6 +23,7 @@ export const gameWeaponAction = async (
 
     const isMyTurn = ensureIsMyTurn(currentGame, userId, socketId);
     if (!isMyTurn) return;
+    if (!ensureNoPendingDiscover(currentGame, socketId, userId)) return;
     const { player, opponent } = whichPlayerAmI(currentGame, userId);
 
     const weaponState = player.weaponState;

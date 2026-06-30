@@ -128,6 +128,18 @@ export const enemyDrawAction = (
     onTargetResult: null,
 });
 
+export const discoverAction = (
+    discoverCardFilter: CardFilterDefinition,
+    options: { optionCount?: number } = {},
+): CardActionDefinition => ({
+    type: "DISCOVER",
+    isTargeted: false,
+    discoverCardFilter,
+    optionCount: options.optionCount ?? 3,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const manaTemporaryChangeAction = (amount: number): CardActionDefinition => ({
     type: "MANA",
     isTargeted: false,

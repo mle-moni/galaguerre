@@ -8,6 +8,7 @@ import {
 } from "../../galaguerre/game_narrative/narrative_beats.js";
 import { runGameActionWithNarrative } from "../../galaguerre/game_narrative/run_game_action_with_narrative.js";
 import { ensureIsMyTurn, getGameActionInfos } from "./game_utils.js";
+import { ensureNoPendingDiscover } from "./discover/ensure_no_pending_discover.js";
 import { setupNextGameTurn } from "./setup_next_game_turn.js";
 import { terminateGame } from "./terminate_game.js";
 
@@ -35,6 +36,7 @@ export const passGameTurn = async (socketId: string) => {
     const { currentGame, userId } = gameInfos;
     const isMyTurn = ensureIsMyTurn(currentGame, userId, socketId);
     if (!isMyTurn) return;
+    if (!ensureNoPendingDiscover(currentGame, socketId, userId)) return;
 
     const activePlayer =
         currentGame.data.state === "PLAYER_ONE_TURN"

@@ -143,15 +143,19 @@ export const getAllMinionCardTemplates = (): MinionCard[] =>
         (card): card is MinionCard => card.type === "MINION",
     );
 
-const MINION_IS_COLLECTIBLE_BY_ID = new Map<number, boolean>(
-    GALADRIM_CARDS.filter((entry) => entry.data.type === "MINION").map((entry) => [
-        entry.id,
-        entry.isCollectible ?? true,
-    ]),
+const CARD_IS_COLLECTIBLE_BY_ID = new Map<number, boolean>(
+    GALADRIM_CARDS.map((entry) => [entry.id, entry.isCollectible ?? true]),
 );
 
-export const isMinionCardCollectible = (cardId: number): boolean =>
-    MINION_IS_COLLECTIBLE_BY_ID.get(cardId) ?? true;
+export const isCardCollectible = (cardId: number): boolean =>
+    CARD_IS_COLLECTIBLE_BY_ID.get(cardId) ?? true;
+
+export const isMinionCardCollectible = (cardId: number): boolean => isCardCollectible(cardId);
+
+export const getAllCardTemplates = (): PlayerCard[] => Array.from(CARD_PREVIEW_BY_ID.values());
+
+export const getCollectibleCardTemplates = (): PlayerCard[] =>
+    getAllCardTemplates().filter((template) => isCardCollectible(template.cardId));
 
 export const getCollectibleMinionCardTemplates = (): MinionCard[] =>
     getAllMinionCardTemplates().filter((template) => isMinionCardCollectible(template.cardId));

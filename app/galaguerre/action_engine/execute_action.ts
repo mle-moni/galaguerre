@@ -46,6 +46,8 @@ import { triggerSummonPassivesForCards } from "../passive_engine/trigger_summon_
 import { requireMinionIndex } from "./find_minion_on_board.js";
 import { resolveManaAmount } from "./resolve_mana_amount.js";
 import { recordGainMana, resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import { startDiscover } from "../discover/start_discover.js";
+import type { ExecuteActionOptions, ExecuteActionResult } from "../discover/discover_types.js";
 
 const applyEffectToResolvedTarget = (
     resolved: ResolvedTarget,
@@ -170,8 +172,9 @@ const executeNonTargetedV1Action = (
     opponent: GamePlayer,
     damageBonus: number,
     sourceMinion?: MinionState,
-): void => {
-    if (!isV1Action(action)) return;
+    options?: ExecuteActionOptions,
+): ExecuteActionResult => {
+    if (!isV1Action(action)) return "ok";
 
     switch (action.type) {
         case "DAMAGE": {
@@ -179,7 +182,7 @@ const executeNonTargetedV1Action = (
             if (action.target?.type === "ALL") {
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
                     const { gameEnded } = applyDamageToHero(game, target, damage, player);
-                    if (gameEnded) return;
+                    if (gameEnded) return "ok";
                 }
                 applyDamageToAllMinions(
                     game,
@@ -212,7 +215,7 @@ const executeNonTargetedV1Action = (
                     : [opponent];
             for (const target of targets) {
                 const { gameEnded } = applyDamageToHero(game, target, damage, player);
-                if (gameEnded) return;
+                if (gameEnded) return "ok";
             }
             break;
         }
@@ -220,7 +223,7 @@ const executeNonTargetedV1Action = (
             if (action.target?.type === "ALL") {
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
                     const { gameEnded } = applyHealToHero(game, target, action.heal!, player);
-                    if (gameEnded) return;
+                    if (gameEnded) return "ok";
                 }
                 applyHealToAllMinions(
                     game,
@@ -253,7 +256,7 @@ const executeNonTargetedV1Action = (
                     : [player];
             for (const target of targets) {
                 const { gameEnded } = applyHealToHero(game, target, action.heal!, player);
-                if (gameEnded) return;
+                if (gameEnded) return "ok";
             }
             break;
         }
@@ -323,7 +326,7 @@ const executeNonTargetedV1Action = (
                     action.target,
                     sourceMinion,
                 );
-                if (gameEnded) return;
+                if (gameEnded) return "ok";
             }
             break;
         }
@@ -332,7 +335,7 @@ const executeNonTargetedV1Action = (
 
             for (const target of resolveHeroTargets(action.target, player, opponent)) {
                 const { gameEnded } = breakWeapon(game, target);
-                if (gameEnded) return;
+                if (gameEnded) return "ok";
             }
             break;
         }
@@ -365,7 +368,7 @@ const executeNonTargetedV1Action = (
                 sourceMinion,
             );
             const { gameEnded } = triggerSummonPassivesForCards(game, player, summonedCards);
-            if (gameEnded) return;
+            if (gameEnded) return "ok";
             break;
         }
         case "DECK_CARD":
@@ -374,6 +377,11 @@ const executeNonTargetedV1Action = (
         case "HAND_CARD":
             executeHandCardAction(action, game, player, opponent);
             break;
+        case "DISCOVER": {
+            if (!evaluateActionCondition(action.actionCondition, player, opponent)) return "ok";
+            if (!options?.discoverContext) return "ok";
+            return startDiscover(game, player, action, options.discoverContext);
+        }
         case "MANA":
             if (action.subtype === "TEMPORARY_CHANGE") {
                 const gain = resolveManaAmount(action, player, opponent);
@@ -383,10 +391,12 @@ const executeNonTargetedV1Action = (
             break;
         case "DEFEAT": {
             const { gameEnded } = applyDefeat(game, player, opponent, action.targetTeam);
-            if (gameEnded) return;
+            if (gameEnded) return "ok";
             break;
         }
     }
+
+    return "ok";
 };
 
 const tryExecuteOnTargetResult = (
@@ -397,18 +407,20 @@ const tryExecuteOnTargetResult = (
     opponent: GamePlayer,
     damageBonus: number,
     sourceMinion?: MinionState,
-): void => {
-    if (!action.onTargetResult) return;
+    options?: ExecuteActionOptions,
+): ExecuteActionResult => {
+    if (!action.onTargetResult) return "ok";
 
-    if (!shouldTriggerOnTargetResult(action.onTargetResult, outcome)) return;
+    if (!shouldTriggerOnTargetResult(action.onTargetResult, outcome)) return "ok";
 
-    executeNonTargetedV1Action(
+    return executeNonTargetedV1Action(
         action.onTargetResult.action,
         game,
         player,
         opponent,
         damageBonus,
         sourceMinion,
+        options,
     );
 };
 
@@ -420,6 +432,7 @@ const applyTargetedEffectWithFollowUp = (
     opponent: GamePlayer,
     damageBonus: number,
     sourceMinion?: MinionState,
+    options?: ExecuteActionOptions,
 ): boolean => {
     const outcome = applyEffectToResolvedTarget(
         resolved,
@@ -431,8 +444,17 @@ const applyTargetedEffectWithFollowUp = (
     );
     if (outcome.gameEnded) return true;
 
-    tryExecuteOnTargetResult(action, outcome, game, player, opponent, damageBonus, sourceMinion);
-    return false;
+    const followUpResult = tryExecuteOnTargetResult(
+        action,
+        outcome,
+        game,
+        player,
+        opponent,
+        damageBonus,
+        sourceMinion,
+        options,
+    );
+    return followUpResult === "discover_pending";
 };
 
 export const executeAction = (
@@ -443,19 +465,20 @@ export const executeAction = (
     selectedTarget?: ActionTarget,
     damageBonus = 0,
     sourceMinion?: MinionState,
-): void => {
+    options?: ExecuteActionOptions,
+): ExecuteActionResult => {
     if (action.type === "MIND_CONTROL") {
-        if (!evaluateActionCondition(action.actionCondition, player, opponent)) return;
-        if (!canMindControlWithBoardSpace(player)) return;
+        if (!evaluateActionCondition(action.actionCondition, player, opponent)) return "ok";
+        if (!canMindControlWithBoardSpace(player)) return "ok";
     }
 
     if (isTargetedV1Action(action)) {
-        if (!selectedTarget) return;
+        if (!selectedTarget) return "ok";
 
         const resolved = resolveSelectedTarget(selectedTarget, player, opponent);
-        if (!resolved) return;
+        if (!resolved) return "ok";
 
-        applyTargetedEffectWithFollowUp(
+        const shouldStop = applyTargetedEffectWithFollowUp(
             resolved,
             action,
             game,
@@ -463,8 +486,11 @@ export const executeAction = (
             opponent,
             damageBonus,
             sourceMinion,
+            options,
         );
-        return;
+        if (!shouldStop) return "ok";
+        if (game.data.playerOne.health <= 0 || game.data.playerTwo.health <= 0) return "ok";
+        return "discover_pending";
     }
 
     const randomTarget = getActionTarget(action);
@@ -482,11 +508,23 @@ export const executeAction = (
                 opponent,
                 damageBonus,
                 sourceMinion,
+                options,
             );
-            if (shouldStop) return;
+            if (shouldStop) {
+                if (game.data.playerOne.health <= 0 || game.data.playerTwo.health <= 0) return "ok";
+                return "discover_pending";
+            }
         }
-        return;
+        return "ok";
     }
 
-    executeNonTargetedV1Action(action, game, player, opponent, damageBonus, sourceMinion);
+    return executeNonTargetedV1Action(
+        action,
+        game,
+        player,
+        opponent,
+        damageBonus,
+        sourceMinion,
+        options,
+    );
 };

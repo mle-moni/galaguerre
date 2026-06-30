@@ -88,7 +88,14 @@ export type NarrativeEffect =
           card: PlayerCard;
           source: "DECK" | "GENERATED";
       }
-    | { type: "FATIGUE"; owner: SpotOwner; amount: number };
+    | { type: "FATIGUE"; owner: SpotOwner; amount: number }
+    | { type: "DISCOVER_START"; owner: SpotOwner; optionUuids: string[] }
+    | {
+          type: "DISCOVER_RESOLVE";
+          owner: SpotOwner;
+          chosenCardUuid: string;
+          generatedBy: { cardId: number; label: string };
+      };
 
 export interface NarrativeBeat {
     id: string;

@@ -206,6 +206,26 @@ const formatRandomAllLabel = (
         : `${maxTargets} personnages adverses aléatoires différents`;
 };
 
+const formatDiscoverExtraFilterSuffix = (filter: CardFilterSnapshot): string => {
+    const parts: string[] = [];
+    const comparison = filter.comparison;
+
+    if (comparison?.attackComparison && comparison.attack !== null) {
+        parts.push(formatAttackComparisonLabel(comparison.attackComparison, comparison.attack));
+    }
+    if (comparison?.healthComparison && comparison.health !== null) {
+        parts.push(`pv ${comparison.healthComparison} ${comparison.health}`);
+    }
+    if (comparison?.costComparison && comparison.cost !== null) {
+        parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
+    }
+    if (filter.tags.length > 0) {
+        parts.push(formatTagList(filter.tags));
+    }
+
+    return parts.length > 0 ? ` ${parts.join(" + ")}` : "";
+};
+
 const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     if (!filter) return "";
 
@@ -446,6 +466,11 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
             const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
             return `l'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}`;
+        }
+        case "DISCOVER": {
+            if (action.optionCount === null || action.optionCount <= 0) return null;
+            const cardTypeLabel = CARD_TYPE_LABELS[action.discoverCardFilter.type].toLowerCase();
+            return `découvrez un ${cardTypeLabel}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}`;
         }
         case "MANA": {
             const text = formatManaActionText(action);
@@ -692,6 +717,11 @@ export const formatActionDescription = (
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
             const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
             return `${prefix} : L'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}.`;
+        }
+        case "DISCOVER": {
+            if (action.optionCount === null || action.optionCount <= 0) return null;
+            const cardTypeLabel = CARD_TYPE_LABELS[action.discoverCardFilter.type].toLowerCase();
+            return `${prefix} : Découvrez un ${cardTypeLabel}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}.`;
         }
         case "BOOST": {
             if (!action.boost) return null;

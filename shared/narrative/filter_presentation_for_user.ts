@@ -1,4 +1,10 @@
-import type { GameData, GameLogEntry, GamePlayer, PlayerCard } from "#api_types/game.types";
+import type {
+    GameData,
+    GameLogEntry,
+    GamePendingDiscover,
+    GamePlayer,
+    PlayerCard,
+} from "#api_types/game.types";
 import type { GamePresentationUpdate, NarrativeBeat } from "#api_types/game_narrative.types";
 import { remapEffectForUser } from "./remap_narrative_for_user.js";
 
@@ -47,12 +53,27 @@ export const hideGameDataForUser = (data: GameData, forUserId: number): GameData
     const playerOne = hidePlayerDataForUser(data.playerOne, forUserId);
     const playerTwo = hidePlayerDataForUser(data.playerTwo, forUserId);
     const actionLog = hideActionLogForUser(data.actionLog, forUserId);
+    const pendingDiscover = hidePendingDiscoverForUser(data.pendingDiscover, forUserId);
 
     return {
         ...data,
         playerOne,
         playerTwo,
         actionLog,
+        pendingDiscover,
+    };
+};
+
+const hidePendingDiscoverForUser = (
+    pendingDiscover: GamePendingDiscover | undefined,
+    forUserId: number,
+): GamePendingDiscover | undefined => {
+    if (!pendingDiscover) return undefined;
+    if (pendingDiscover.playerUserId === forUserId) return pendingDiscover;
+
+    return {
+        ...pendingDiscover,
+        options: pendingDiscover.options.map(hideCardData),
     };
 };
 

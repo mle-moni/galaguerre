@@ -790,6 +790,16 @@ const validateNonTargetedAction = (
             validateHandCardPayload(action, ctx, path);
             break;
         }
+        case "DISCOVER": {
+            if (action.optionCount <= 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "DISCOVER action requires optionCount > 0",
+                    path: [...path, "optionCount"],
+                });
+            }
+            break;
+        }
         case "MANA": {
             if (action.subtype !== "TEMPORARY_CHANGE") {
                 ctx.addIssue({

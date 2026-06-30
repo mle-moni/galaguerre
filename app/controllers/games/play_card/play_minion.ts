@@ -145,7 +145,7 @@ export const playMinion = async ({
         });
         endCurrentBeat(game);
 
-        const { gameEnded: battlecryGameEnded } = executeBattlecries(
+        const { gameEnded: battlecryGameEnded, discoverPending } = executeBattlecries(
             game,
             player,
             card,
@@ -156,6 +156,8 @@ export const playMinion = async ({
             await terminateGame(game, { skipSendUpdate: true });
             return;
         }
+
+        if (discoverPending) return;
 
         const { gameEnded: summonPassiveGameEnded } = triggerSummonPassives(game, player, card);
 

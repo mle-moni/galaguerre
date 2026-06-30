@@ -176,6 +176,14 @@ const handCardActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const discoverActionFieldsSchema = z.object({
+    type: z.literal("DISCOVER"),
+    isTargeted: z.literal(false).default(false),
+    discoverCardFilter: cardFilterSchema,
+    optionCount: z.number().int().positive().default(3),
+    actionCondition: actionConditionSchema,
+});
+
 const manaAmountScaleSchema = z.object({
     source: z.enum(GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES),
     amountPer: z.number().positive().default(1),
@@ -211,6 +219,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     summonActionFieldsSchema,
     deckCardActionFieldsSchema,
     handCardActionFieldsSchema,
+    discoverActionFieldsSchema,
     manaActionFieldsSchema,
     defeatActionSchema,
 ]);
@@ -256,6 +265,7 @@ export const cardActionSchema = z
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),
         deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         handCardActionFieldsSchema.extend(cardActionOnTargetResultField),
+        discoverActionFieldsSchema.extend(cardActionOnTargetResultField),
         manaActionFieldsSchema.extend(cardActionOnTargetResultField),
         defeatActionSchema.extend(cardActionOnTargetResultField),
     ])

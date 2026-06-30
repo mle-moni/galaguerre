@@ -116,7 +116,7 @@ export const playSpell = async ({
             recorder.recordEffect({ type: "SPEND_MANA", owner: spotOwner, amount: effectiveCost });
         });
 
-        const { gameEnded: spellGameEnded } = executeSpellEffect(
+        const { gameEnded: spellGameEnded, discoverPending } = executeSpellEffect(
             game,
             player,
             card,
@@ -129,6 +129,8 @@ export const playSpell = async ({
             await terminateGame(game, { skipSendUpdate: true });
             return;
         }
+
+        if (discoverPending) return;
 
         const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
 

@@ -12,6 +12,7 @@ import {
     getGameActionInfos,
     whichPlayerAmI,
 } from "../game_utils.js";
+import { ensureNoPendingDiscover } from "../discover/ensure_no_pending_discover.js";
 import { playMinion } from "./play_minion.js";
 import { playSpell } from "./play_spell.js";
 import { playWeapon } from "./play_weapon.js";
@@ -27,6 +28,7 @@ export const gamePlayCard = async (
 
     const isMyTurn = ensureIsMyTurn(currentGame, userId, socketId);
     if (!isMyTurn) return;
+    if (!ensureNoPendingDiscover(currentGame, socketId, userId)) return;
     const { player } = whichPlayerAmI(currentGame, userId);
 
     const card = ensureCardFoundInHand(player.hand, cardId, socketId);

@@ -23,6 +23,7 @@ export interface ClientSocketEventByKey {
     "game:weapon_action": { minionUuid: string | null; owner: SpotOwner };
     "game:abandon": Record<string, never>;
     "game:mulligan": { cardIds: string[] };
+    "game:discover_choice": { cardUuid: string };
     pass_turn: Record<string, never>;
 }
 

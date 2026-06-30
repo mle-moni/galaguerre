@@ -46,6 +46,7 @@ export interface PlayerCardBase {
     dynamicCost: DynamicCostSnapshot | null;
     tags: CardTag[];
     rarity: CardRarity;
+    generatedBy?: { cardId: number; label: string };
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 
@@ -225,6 +226,27 @@ export interface GameMulliganState {
     playerTwoDone: boolean;
 }
 
+export type DiscoverEffectKind = "BATTLECRY" | "SPELL" | "DEATHRATTLE" | "PASSIVE";
+
+export interface DiscoverContinuation {
+    remainingActions: CardActionSnapshot[];
+    context: {
+        effectKind: DiscoverEffectKind;
+        selectedTarget?: ActionTarget;
+        damageBonus: number;
+        sourceMinionUuid?: string;
+    };
+}
+
+export interface GamePendingDiscover {
+    playerUserId: number;
+    sourceCardId: number;
+    sourceCardLabel: string;
+    sourceCardUuid: string;
+    options: PlayerCard[];
+    continuation: DiscoverContinuation;
+}
+
 export interface GameData {
     state: "INIT" | "MULLIGAN" | "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" | "FINISHED";
     currentRound: number;
@@ -232,6 +254,7 @@ export interface GameData {
     playerTwo: GamePlayer;
     actionLog: GameLogEntry[];
     mulligan?: GameMulliganState;
+    pendingDiscover?: GamePendingDiscover;
     turnEndsAt?: number;
     mulliganEndsAt?: number;
     ratingResult?: GameRatingResult;

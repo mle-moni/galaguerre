@@ -48,6 +48,11 @@ export const controllers = {
         CancelGameSearch: () => import("#controllers/games/cancel_game_search"),
         CreateGame: () => import("#controllers/games/create_game"),
         CreateTrainingGame: () => import("#controllers/games/create_training_game"),
+        discover: {
+            EnsureNoPendingDiscover: () =>
+                import("#controllers/games/discover/ensure_no_pending_discover"),
+            GameDiscoverChoice: () => import("#controllers/games/discover/game_discover_choice"),
+        },
         GameSearchHeartbeat: () => import("#controllers/games/game_search_heartbeat"),
         GameSearch: () => import("#controllers/games/game_search"),
         GameUtils: () => import("#controllers/games/game_utils"),

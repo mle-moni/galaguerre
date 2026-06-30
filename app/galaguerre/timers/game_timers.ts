@@ -4,6 +4,9 @@ import { finalizeMulligan } from "#controllers/games/mulligan/finalize_mulligan"
 import { autoConfirmPendingMulligans } from "#controllers/games/mulligan/perform_mulligan";
 import { scheduleAiMulliganIfNeeded } from "../ai/schedule_ai_mulligan.js";
 import { scheduleAiTurnIfNeeded } from "../ai/schedule_ai_turn.js";
+import { autoResolvePendingDiscover } from "../discover/resolve_discover_choice.js";
+import { runGameActionWithNarrative } from "../game_narrative/run_game_action_with_narrative.js";
+import { terminateGame } from "#controllers/games/terminate_game";
 
 const MULLIGAN_TIMER_MS = 60_000;
 const TURN_TIMER_MS = 105_000;
@@ -149,6 +152,18 @@ export const handleTurnTimerExpired = async (
 
         const activePlayer =
             activeState === "PLAYER_ONE_TURN" ? game.data.playerOne : game.data.playerTwo;
+
+        if (game.data.pendingDiscover) {
+            await runGameActionWithNarrative(game, async () => {
+                const { gameEnded } = autoResolvePendingDiscover(game);
+                if (gameEnded) {
+                    await terminateGame(game, { skipSendUpdate: true });
+                }
+            });
+
+            await game.refresh();
+            if (game.isFinished || game.data.pendingDiscover) return;
+        }
 
         await performPassTurn(game, activePlayer);
     } catch (error) {

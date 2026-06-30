@@ -17,6 +17,8 @@ import { Board } from "./board/board.jsx";
 import { DecksInfos } from "./hud/decks_infos/decks_infos.jsx";
 import { GameFinalScreen } from "./hud/game_final_screen/game_final_screen.jsx";
 import { MulliganOverlay } from "./hud/mulligan/mulligan_overlay.jsx";
+import { DiscoverOverlay } from "./hud/discover/discover_overlay.jsx";
+import { DiscoverOpponentIndicator } from "./hud/discover/discover_opponent_indicator.jsx";
 import { OnboardingCoach } from "./hud/onboarding_coach/onboarding_coach.jsx";
 import { PlayedCardReveal } from "./hud/played_card_reveal/played_card_reveal.jsx";
 import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
@@ -52,7 +54,8 @@ const DesktopGameLayout = observer<GameRendererProps>(({ spectating = false }) =
                         className="desktop-hand-reserve desktop-hand-reserve--top"
                         aria-hidden="true"
                     />
-                    <div className="flex-1 min-h-0">
+                    <div className="flex-1 min-h-0 relative">
+                        <DiscoverOpponentIndicator />
                         <Board />
                     </div>
                     <div
@@ -69,6 +72,7 @@ const DesktopGameLayout = observer<GameRendererProps>(({ spectating = false }) =
 
             <GameFinalScreen />
             {!spectating && <MulliganOverlay />}
+            {!spectating && <DiscoverOverlay />}
             {!spectating && <OnboardingCoach />}
             {!spectating && <ArmedCardHint />}
             {!spectating && <TargetingArrowOverlay />}

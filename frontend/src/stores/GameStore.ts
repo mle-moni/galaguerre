@@ -70,7 +70,7 @@ export class GameStore {
     }
 
     get isInputBlocked() {
-        return this.isNarrativePlaying || this.isSpectating;
+        return this.isNarrativePlaying || this.isSpectating || this.hasPendingDiscover;
     }
 
     get canPlanCombatAction() {
@@ -155,6 +155,9 @@ export class GameStore {
 
         if (presentation) {
             this.narrativeDirector.enqueue(presentation, game);
+            if (game.data.pendingDiscover) {
+                this._displayGame = game;
+            }
             return;
         }
 
@@ -180,6 +183,11 @@ export class GameStore {
         }
 
         if (game.data.state === "MULLIGAN") {
+            this._displayGame = game;
+            return;
+        }
+
+        if (game.data.pendingDiscover) {
             this._displayGame = game;
         }
     }
@@ -209,6 +217,17 @@ export class GameStore {
 
     get isMulligan() {
         return this.authoritativeGame.data.state === "MULLIGAN";
+    }
+
+    get hasPendingDiscover() {
+        return this.authoritativeGame.data.pendingDiscover !== undefined;
+    }
+
+    get isDiscoverChooser() {
+        if (this.isSpectating) return false;
+
+        const pending = this.authoritativeGame.data.pendingDiscover;
+        return pending?.playerUserId === this.perspectiveUserId;
     }
 
     get isSpectating() {

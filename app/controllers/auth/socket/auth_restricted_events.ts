@@ -2,6 +2,7 @@ import { MAX_BOARD_MINIONS } from "#api_types/board";
 import { SPOT_OWNERS } from "#api_types/game.types";
 import { abandonGame } from "#controllers/games/abandon_game";
 import { gameMulligan } from "#controllers/games/mulligan/game_mulligan";
+import { gameDiscoverChoice } from "#controllers/games/discover/game_discover_choice";
 import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
 import { gameWeaponAction } from "#controllers/games/weapon_action/game_weapon_action";
 import { passGameTurn } from "#controllers/games/pass_game_turn";
@@ -71,6 +72,15 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
             cardIds: vine.array(vine.string()),
         }),
     );
+
+    subscribeToClientSocketEvent(
+        socket,
+        "game:discover_choice",
+        (data) => gameDiscoverChoice(socket.id, data),
+        vine.object({
+            cardUuid: vine.string(),
+        }),
+    );
 };
 
 export const partAuthRestrictedEvents = (socket: Socket) => {
@@ -81,4 +91,5 @@ export const partAuthRestrictedEvents = (socket: Socket) => {
     socket.removeAllListeners("game:weapon_action");
     socket.removeAllListeners("game:abandon");
     socket.removeAllListeners("game:mulligan");
+    socket.removeAllListeners("game:discover_choice");
 };
