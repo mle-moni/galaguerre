@@ -228,11 +228,11 @@
 
 .card-symbol-stack {
 	position: absolute;
-	top: 2px;
-	right: 2px;
+	top: calc(var(--card-w) * 0.009);
+	right: calc(var(--card-w) * 0.009);
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: calc(var(--card-w) * 0.009);
 	z-index: 1;
 }
 
@@ -240,30 +240,30 @@
 .card-tags {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: calc(var(--card-w) * 0.009);
 }
 
 .card-symbol {
-	width: 30px;
-	height: 30px;
+	width: calc(var(--card-w) * 0.136);
+	height: calc(var(--card-w) * 0.136);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 16px;
+	font-size: calc(var(--card-w) * 0.073);
 	line-height: 1;
 	background-color: #1e3a5f;
-	border: 2px solid #000;
+	border: calc(var(--card-w) * 0.009) solid #000;
 }
 
 .card-tag-symbol-badge {
-	width: 30px;
-	height: 30px;
+	width: calc(var(--card-w) * 0.136);
+	height: calc(var(--card-w) * 0.136);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border: 2px solid #000;
+	border: calc(var(--card-w) * 0.009) solid #000;
 	overflow: hidden;
 }
 
@@ -274,7 +274,7 @@
 }
 
 .card-tag-symbol-badge > span {
-	font-size: 16px;
+	font-size: calc(var(--card-w) * 0.073);
 	line-height: 1;
 }
 

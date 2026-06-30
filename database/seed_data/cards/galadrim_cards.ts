@@ -24,6 +24,7 @@ import {
     defineMinion,
     defineSpell,
     defineWeapon,
+    discoverAction,
     drawAction,
     enemyDrawAction,
     enemyHero,
@@ -846,6 +847,14 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/goodies-galadrim.webp",
         },
         [healAction(5, targetedAllyMinion(), true)],
+    ),
+    defineSpell(
+        149,
+        {
+            ...gal("Recherche Stack Overflow", 1),
+            imageUrl: "/card-covers/galadrim/recherche-stack-overflow.webp",
+        },
+        [discoverAction(spellDrawFilter())],
     ),
     defineSpell(
         105,
