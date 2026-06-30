@@ -851,8 +851,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(
         149,
         {
-            ...gal("Recherche Stack Overflow", 1),
-            imageUrl: "/card-covers/galadrim/recherche-stack-overflow.webp",
+            ...gal("Recherche Google", 1),
+            imageUrl: "/card-covers/galadrim/recherche-google.webp",
         },
         [discoverAction(spellDrawFilter())],
     ),
