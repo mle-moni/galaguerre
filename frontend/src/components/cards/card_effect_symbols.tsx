@@ -3,6 +3,7 @@ import { CARD_TAG_LABELS } from "#api_types/card.types";
 import { EFFECT_SYMBOLS } from "#api_types/card_keyword_glossary";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type { MinionCard } from "#api_types/game.types";
+import { CardTagSymbol } from "./card_tag_symbol.jsx";
 
 const getCardEffects = (card: MinionCard): string[] => {
     const effects = card.effects?.length
@@ -38,8 +39,13 @@ export const CardEffectSymbols = ({ card }: { card: MinionCard }) => {
                     {tags.map((tag: CardTag) => {
                         const meta = CARD_TAG_LABELS[tag];
                         return (
-                            <div key={tag} className="card-symbol" title={meta.label}>
-                                {meta.symbol}
+                            <div
+                                key={tag}
+                                className="card-tag-symbol-badge"
+                                title={meta.label}
+                                style={{ backgroundColor: meta.backgroundColor }}
+                            >
+                                <CardTagSymbol symbol={meta.symbol} />
                             </div>
                         );
                     })}

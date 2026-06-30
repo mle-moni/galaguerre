@@ -2,6 +2,7 @@ import {
     CARD_FAMILY_GLOSSARY_ENTRIES,
     KEYWORD_GLOSSARY_ENTRIES,
 } from "#api_types/card_keyword_glossary";
+import { CardTagSymbol } from "~/components/cards/card_tag_symbol";
 import { Modal, ScrollArea, Text, Title } from "@mantine/core";
 
 interface GameKeywordsGlossaryModalProps {
@@ -36,8 +37,13 @@ export const GameKeywordsGlossaryModal = ({ opened, onClose }: GameKeywordsGloss
                         <ul className="m-0 pl-0 list-none flex flex-col gap-2">
                             {CARD_FAMILY_GLOSSARY_ENTRIES.map((entry) => (
                                 <li key={entry.label}>
-                                    <Text size="sm" component="span">
-                                        {entry.symbol} {entry.label}
+                                    <Text
+                                        size="sm"
+                                        component="span"
+                                        className="inline-flex items-center gap-1"
+                                    >
+                                        <CardTagSymbol symbol={entry.symbol} size={16} />
+                                        {entry.label}
                                     </Text>
                                 </li>
                             ))}

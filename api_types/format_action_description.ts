@@ -9,7 +9,7 @@ import type {
     TargetSnapshot,
 } from "./game.types.js";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
-import { CARD_TAG_LABELS } from "./card.types.js";
+import { CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
 import { hasActionTarget } from "./action_fields_utils.js";
 import { hasRandomLimitedTarget } from "./target_matching.js";
@@ -22,7 +22,8 @@ const CARD_TYPE_LABELS: Record<CardFilterSnapshot["type"], string> = {
 
 const formatTagChip = (tag: CardTag): string => {
     const meta = CARD_TAG_LABELS[tag];
-    return `${meta.symbol} ${meta.label}`;
+    const prefix = isCardTagImageSymbol(meta.symbol) ? "" : `${meta.symbol} `;
+    return `${prefix}${meta.label}`;
 };
 
 const formatTagList = (tags: CardTag[]): string => tags.map(formatTagChip).join(", ");

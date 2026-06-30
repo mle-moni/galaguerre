@@ -11,13 +11,18 @@ export const CARD_TAGS = [
 
 export type CardTag = (typeof CARD_TAGS)[number];
 
-export const CARD_TAG_LABELS: Record<CardTag, { label: string; symbol: string }> = {
-    DEVELOPPEUR: { label: "Développeur", symbol: "💻" },
-    PM: { label: "PM", symbol: "📊" },
-    SALES: { label: "Sales", symbol: "💰" },
-    PARISIEN: { label: "Parisien", symbol: "📍" },
-    NANTAIS: { label: "Nantais", symbol: "📍" },
-    LYONNAIS: { label: "Lyonnais", symbol: "📍" },
-    PETS: { label: "Pets", symbol: "🐾" },
-    SUPPORT: { label: "Équipe support", symbol: "❤️‍🩹" },
+export const isCardTagImageSymbol = (symbol: string): boolean => symbol.startsWith("/");
+
+export const CARD_TAG_LABELS: Record<
+    CardTag,
+    { label: string; symbol: string; backgroundColor: string }
+> = {
+    DEVELOPPEUR: { label: "Développeur", symbol: "💻", backgroundColor: "#1e3a5f" },
+    PM: { label: "PM", symbol: "📊", backgroundColor: "#1e3a5f" },
+    SALES: { label: "Sales", symbol: "💰", backgroundColor: "#1e3a5f" },
+    PARISIEN: { label: "Parisien", symbol: "/game/parisien.webp", backgroundColor: "#ffffff" },
+    NANTAIS: { label: "Nantais", symbol: "/game/nantais.webp", backgroundColor: "#ffffff" },
+    LYONNAIS: { label: "Lyonnais", symbol: "/game/lyonnais.webp", backgroundColor: "#1e3a5f" },
+    PETS: { label: "Pets", symbol: "🐾", backgroundColor: "#1e3a5f" },
+    SUPPORT: { label: "Équipe support", symbol: "❤️‍🩹", backgroundColor: "#1e3a5f" },
 };

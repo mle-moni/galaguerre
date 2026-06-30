@@ -10,6 +10,7 @@ import { getSpellCardDescription, CAST_WHEN_DRAWN_LABEL } from "#api_types/minio
 import { Text } from "@mantine/core";
 import { Fragment } from "react";
 import { CardPreviewLink } from "./card_preview_link.jsx";
+import { CardTagSymbol } from "./card_tag_symbol.jsx";
 import { MinionDescriptionContent } from "./minion_description_content.jsx";
 import "./card_faces.css";
 
@@ -213,8 +214,12 @@ export const CardDetailContent = ({ card, spellPower = 0, isSilenced }: CardDeta
                     {tags.map((tag) => {
                         const meta = CARD_TAG_LABELS[tag];
                         return (
-                            <span key={`tag-${tag}`} className="card-tag-chip">
-                                {meta.symbol} {meta.label}
+                            <span
+                                key={`tag-${tag}`}
+                                className="card-tag-chip inline-flex items-center gap-1"
+                            >
+                                <CardTagSymbol symbol={meta.symbol} size={14} />
+                                {meta.label}
                             </span>
                         );
                     })}
