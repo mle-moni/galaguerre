@@ -31,7 +31,9 @@ export default class extends BaseSeeder {
                 .delete();
         }
 
-        const cards = await Card.query().where("rarity", "COMMON").where("isCollectible", true);
+        const cards = await Card.query()
+            // .where("rarity", "COMMON")
+            .where("isCollectible", true);
         for (const card of cards) {
             await UserCard.updateOrCreate(
                 { userId: testUser.id, cardId: card.id },
