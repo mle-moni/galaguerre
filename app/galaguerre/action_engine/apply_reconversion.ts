@@ -63,6 +63,7 @@ export const applyReconversionWithTemplate = (
     owner: GamePlayer,
     boardIndex: number,
     template: MinionCard,
+    controller: GamePlayer,
 ): void => {
     const minion = owner.board[boardIndex];
     if (!minion || minion.originalCard.type !== "MINION") return;
@@ -77,6 +78,9 @@ export const applyReconversionWithTemplate = (
     minion.maxHealth = newCard.health;
     minion.health = newCard.health;
     minion.attacksThisRound = 0;
+    if (owner === controller) {
+        minion.placedAtRound = game.data.currentRound;
+    }
     minion.divineShieldConsumed = false;
     minion.initialKeywords = {
         hasTaunt: minionPowers.hasTaunt,
@@ -99,6 +103,7 @@ export const applyReconversionToMinion = (
     boardIndex: number,
     parameters: ReconvertParametersSnapshot,
     sourceMinionForRelative: MinionState,
+    controller: GamePlayer,
 ): void => {
     const minion = owner.board[boardIndex];
     if (!minion || minion.originalCard.type !== "MINION") return;
@@ -106,7 +111,7 @@ export const applyReconversionToMinion = (
     const template = resolveReconvertTemplate(parameters, sourceMinionForRelative);
     if (!template) return;
 
-    applyReconversionWithTemplate(game, owner, boardIndex, template);
+    applyReconversionWithTemplate(game, owner, boardIndex, template, controller);
 };
 
 export const applyReconversionToAllMinions = (
@@ -123,7 +128,7 @@ export const applyReconversionToAllMinions = (
             if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
             if (!minionMatchesTarget(minion, target, isOpponent)) continue;
 
-            applyReconversionToMinion(game, owner, boardIndex, parameters, minion);
+            applyReconversionToMinion(game, owner, boardIndex, parameters, minion, player);
         }
     }
 };

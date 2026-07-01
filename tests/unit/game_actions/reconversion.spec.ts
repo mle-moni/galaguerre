@@ -1,4 +1,5 @@
 import { test } from "@japa/runner";
+import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { executeAction } from "#galaguerre/action_engine/execute_action";
 import { killMinion } from "#galaguerre/action_engine/kill_minion";
 import {
@@ -19,10 +20,15 @@ import {
     createMinionTargetSnapshot,
     createPassiveSnapshot,
     createReconvertParametersSnapshot,
+    createSpellCard,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { assertBoardIndex } from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
+import { runMinionActionOnGameInMemory } from "#tests/helpers/game/run_minion_action_in_memory";
+import { runPassTurnFromGame } from "#tests/helpers/game/run_setup_next_turn";
+import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
+import { assertError } from "#tests/helpers/game/socket_event_collector";
 
 const createGame = (data: ReturnType<typeof createGameData>) => createInMemoryGame(data);
 
@@ -35,8 +41,16 @@ const applyLegumeReconversion = (
     owner: "playerOne" | "playerTwo",
     boardIndex: 0 | 1 | 2 | 3 | 4,
     sourceMinion: ReturnType<typeof createMinionState>,
+    controller: "playerOne" | "playerTwo" = "playerOne",
 ) => {
-    applyReconversionToMinion(game, game.data[owner], boardIndex, legumeParameters(), sourceMinion);
+    applyReconversionToMinion(
+        game,
+        game.data[owner],
+        boardIndex,
+        legumeParameters(),
+        sourceMinion,
+        game.data[controller],
+    );
 };
 
 test.group("RECONVERSION action", () => {
@@ -84,6 +98,7 @@ test.group("RECONVERSION action", () => {
             0,
             createReconvertParametersSnapshot({ cardId: DIRECTEUR_COMMERCIAL_CARD_ID }),
             target,
+            game.data.playerOne,
         );
 
         const minion = game.data.playerTwo.board[0]!;
@@ -210,6 +225,7 @@ test.group("RECONVERSION action", () => {
             0,
             createReconvertParametersSnapshot({ cardId: DEV_AIGRI_CARD_ID }),
             target,
+            game.data.playerOne,
         );
 
         const minion = game.data.playerTwo.board[0]!;
@@ -242,6 +258,7 @@ test.group("RECONVERSION action", () => {
             0,
             createReconvertParametersSnapshot({ cardId: DIRECTEUR_COMMERCIAL_CARD_ID }),
             target,
+            game.data.playerOne,
         );
         killMinion(game, game.data.playerTwo, target.uuid);
 
@@ -278,6 +295,7 @@ test.group("RECONVERSION action", () => {
             1,
             createReconvertParametersSnapshot({ cardId: SCRUM_MASTER_CARD_ID }),
             target,
+            game.data.playerOne,
         );
 
         assert.equal(game.data.playerOne.board[0]!.attack, 3);
@@ -376,6 +394,7 @@ test.group("RECONVERSION action", () => {
                 }),
             }),
             target,
+            game.data.playerOne,
         );
 
         const reconverted = game.data.playerTwo.board[0]!.originalCard;
@@ -418,6 +437,7 @@ test.group("RECONVERSION action", () => {
                 relativeToSource: true,
             }),
             target,
+            game.data.playerOne,
         );
 
         const reconverted = game.data.playerTwo.board[0]!.originalCard;
@@ -464,6 +484,7 @@ test.group("RECONVERSION action", () => {
                 relativeToSource: true,
             }),
             target,
+            game.data.playerOne,
         );
 
         const reconverted = game.data.playerTwo.board[0]!.originalCard;
@@ -546,6 +567,7 @@ test.group("RECONVERSION action", () => {
                 relativeToSource: true,
             }),
             target,
+            game.data.playerOne,
         );
 
         const reconverted = game.data.playerTwo.board[0]!.originalCard;
@@ -577,9 +599,320 @@ test.group("RECONVERSION action", () => {
                 }),
             }),
             target,
+            game.data.playerOne,
         );
 
         assert.equal(game.data.playerTwo.board[0]!.originalCard.cardId, targetCard.cardId);
         assert.equal(game.data.playerTwo.board[0]!.attack, 2);
+    });
+});
+
+const CURRENT_ROUND = 3;
+const PARISIEN_PRESSE_CARD_ID = 87;
+
+const leveeDeFondsParameters = () =>
+    createReconvertParametersSnapshot({
+        comparison: createComparisonSnapshot({ costComparison: "=", cost: 2 }),
+        relativeToSource: true,
+    });
+
+const createLeveeDeFondsSpell = () =>
+    createSpellCard({
+        cost: 1,
+        spellActions: [
+            createCardActionSnapshot({
+                type: "RECONVERSION",
+                isTargeted: true,
+                reconvertParameters: leveeDeFondsParameters(),
+                target: createMinionTargetSnapshot("PLAYER"),
+            }),
+        ],
+    });
+
+const reconvertAllyMinion = (
+    allyMinion: ReturnType<typeof createMinionCard>,
+    reconvertParameters: ReturnType<typeof createReconvertParametersSnapshot>,
+    options: { placedAtRound?: number; currentRound?: number } = {},
+) => {
+    const currentRound = options.currentRound ?? CURRENT_ROUND;
+    const placedAtRound = options.placedAtRound ?? 1;
+    const allyState = createMinionState(allyMinion, { placedAtRound });
+
+    const game = createGame(
+        createGameData({
+            currentRound,
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), 0, allyState),
+            },
+        }),
+    );
+
+    applyReconversionToMinion(
+        game,
+        game.data.playerOne,
+        0,
+        reconvertParameters,
+        game.data.playerOne.board[0]!,
+        game.data.playerOne,
+    );
+
+    return game;
+};
+
+test.group("RECONVERSION summoning sickness", () => {
+    test("sets placedAtRound to current round after reconversion", ({ assert }) => {
+        const allyMinion = createMinionCard({ uuid: "ally-minion", attack: 2, health: 2, cost: 1 });
+
+        const game = reconvertAllyMinion(allyMinion, legumeParameters());
+
+        assertBoardIndex(assert, game, "playerOne", 0, { placedAtRound: CURRENT_ROUND });
+    });
+
+    test("reconverted ally without charge cannot attack hero same turn", async ({ assert }) => {
+        const allyMinion = createMinionCard({ uuid: "ally-minion", attack: 4, health: 5 });
+
+        const gameAfterReconversion = reconvertAllyMinion(allyMinion, legumeParameters());
+
+        const { game } = await runMinionActionOnGameInMemory(gameAfterReconversion, "playerOne", {
+            minionId: "ally-minion",
+            minionUuid: null,
+            owner: "OPPONENT",
+        });
+
+        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
+
+    test("reconverted ally without charge cannot attack minion same turn", async ({ assert }) => {
+        const allyMinion = createMinionCard({ uuid: "ally-minion", attack: 4, health: 5 });
+        const defenderCard = createMinionCard({ uuid: "defender", attack: 1, health: 3 });
+
+        const gameAfterReconversion = createGame(
+            createGameData({
+                currentRound: CURRENT_ROUND,
+                playerOne: {
+                    board: placeMinion(
+                        createEmptyBoard(),
+                        0,
+                        createMinionState(allyMinion, { placedAtRound: 1 }),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(defenderCard)),
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            gameAfterReconversion,
+            gameAfterReconversion.data.playerOne,
+            0,
+            legumeParameters(),
+            gameAfterReconversion.data.playerOne.board[0]!,
+            gameAfterReconversion.data.playerOne,
+        );
+
+        await runMinionActionOnGameInMemory(gameAfterReconversion, "playerOne", {
+            minionId: "ally-minion",
+            minionUuid: "defender",
+            owner: "OPPONENT",
+        });
+
+        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertBoardIndex(assert, gameAfterReconversion, "playerOne", 0, { health: 1 });
+        assertBoardIndex(assert, gameAfterReconversion, "playerTwo", 0, { health: 3 });
+    });
+
+    test("reconverted ally with charge can attack hero same turn", async ({ assert }) => {
+        const allyMinion = createMinionCard({ uuid: "ally-charge", attack: 4, health: 5 });
+
+        const gameAfterReconversion = reconvertAllyMinion(
+            allyMinion,
+            createReconvertParametersSnapshot({ cardId: PARISIEN_PRESSE_CARD_ID }),
+        );
+
+        const { game } = await runMinionActionOnGameInMemory(gameAfterReconversion, "playerOne", {
+            minionId: "ally-charge",
+            minionUuid: null,
+            owner: "OPPONENT",
+        });
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+    });
+
+    test("reconverted ally with charge can attack minion same turn", async ({ assert }) => {
+        const allyMinion = createMinionCard({ uuid: "ally-charge", attack: 4, health: 5 });
+        const defenderCard = createMinionCard({ uuid: "defender", attack: 1, health: 3 });
+
+        const gameAfterReconversion = createGame(
+            createGameData({
+                currentRound: CURRENT_ROUND,
+                playerOne: {
+                    board: placeMinion(
+                        createEmptyBoard(),
+                        0,
+                        createMinionState(allyMinion, { placedAtRound: 1 }),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(defenderCard)),
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            gameAfterReconversion,
+            gameAfterReconversion.data.playerOne,
+            0,
+            createReconvertParametersSnapshot({ cardId: PARISIEN_PRESSE_CARD_ID }),
+            gameAfterReconversion.data.playerOne.board[0]!,
+            gameAfterReconversion.data.playerOne,
+        );
+
+        await runMinionActionOnGameInMemory(gameAfterReconversion, "playerOne", {
+            minionId: "ally-charge",
+            minionUuid: "defender",
+            owner: "OPPONENT",
+        });
+
+        assertBoardIndex(assert, gameAfterReconversion, "playerTwo", 0, { health: 1 });
+    });
+
+    test("levée de fonds reconversion sets placedAtRound on ally", ({ assert }) => {
+        const allyMinion = createMinionCard({ uuid: "funded-ally", attack: 3, health: 3, cost: 1 });
+        const spell = createLeveeDeFondsSpell();
+
+        const { game: gameAfterReconversion } = runSpellEffect(
+            createGameData({
+                currentRound: CURRENT_ROUND,
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                    board: placeMinion(
+                        createEmptyBoard(),
+                        0,
+                        createMinionState(allyMinion, { placedAtRound: 1 }),
+                    ),
+                },
+            }),
+            spell,
+            { actionTarget: { minionUuid: "funded-ally", owner: "PLAYER" } },
+        );
+
+        assertBoardIndex(assert, gameAfterReconversion, "playerOne", 0, {
+            placedAtRound: CURRENT_ROUND,
+        });
+    });
+});
+
+const coupeBudgetaireParameters = () =>
+    createReconvertParametersSnapshot({
+        comparison: createComparisonSnapshot({ costComparison: "=", cost: -1 }),
+        relativeToSource: true,
+    });
+
+const createCoupeBudgetaireSpell = () =>
+    createSpellCard({
+        cost: 2,
+        spellActions: [
+            createCardActionSnapshot({
+                type: "RECONVERSION",
+                reconvertParameters: coupeBudgetaireParameters(),
+                target: createMinionTargetSnapshot("OPPONENT"),
+            }),
+        ],
+    });
+
+const reconvertEnemyMinion = (
+    enemyMinion: ReturnType<typeof createMinionCard>,
+    reconvertParameters: ReturnType<typeof createReconvertParametersSnapshot> = legumeParameters(),
+    options: { placedAtRound?: number; currentRound?: number } = {},
+) => {
+    const currentRound = options.currentRound ?? CURRENT_ROUND;
+    const placedAtRound = options.placedAtRound ?? 1;
+    const enemyState = createMinionState(enemyMinion, { placedAtRound });
+
+    const game = createGame(
+        createGameData({
+            currentRound,
+            state: "PLAYER_ONE_TURN",
+            playerTwo: {
+                board: placeMinion(createEmptyBoard(), 0, enemyState),
+            },
+        }),
+    );
+
+    applyReconversionToMinion(
+        game,
+        game.data.playerTwo,
+        0,
+        reconvertParameters,
+        game.data.playerTwo.board[0]!,
+        game.data.playerOne,
+    );
+
+    return game;
+};
+
+test.group("RECONVERSION enemy minion attack", () => {
+    test("keeps placedAtRound when reconverted by opponent", ({ assert }) => {
+        const enemyMinion = createMinionCard({ uuid: "enemy-minion", attack: 4, health: 5 });
+
+        const game = reconvertEnemyMinion(enemyMinion);
+
+        assertBoardIndex(assert, game, "playerTwo", 0, { placedAtRound: 1 });
+    });
+
+    test("reconverted enemy can attack hero on opponent turn same round", async ({ assert }) => {
+        const enemyMinion = createMinionCard({ uuid: "enemy-minion", attack: 4, health: 5 });
+
+        const gameAfterReconversion = reconvertEnemyMinion(enemyMinion);
+        const { game: gameOnEnemyTurn } = await runPassTurnFromGame(gameAfterReconversion);
+
+        assert.equal(gameOnEnemyTurn.data.state, "PLAYER_TWO_TURN");
+        assert.equal(gameOnEnemyTurn.data.currentRound, CURRENT_ROUND);
+
+        const { game, errors } = await runMinionActionOnGameInMemory(gameOnEnemyTurn, "playerTwo", {
+            minionId: "enemy-minion",
+            minionUuid: null,
+            owner: "OPPONENT",
+        });
+
+        assert.deepEqual(errors, []);
+        assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 1);
+    });
+
+    test("coupe budgétaire reconversion lets enemy attack on their turn", async ({ assert }) => {
+        const enemyMinion = createMinionCard({ uuid: "budget-cut", attack: 5, health: 5, cost: 3 });
+        const spell = createCoupeBudgetaireSpell();
+
+        const { game: gameAfterReconversion } = runSpellEffect(
+            createGameData({
+                currentRound: CURRENT_ROUND,
+                state: "PLAYER_ONE_TURN",
+                playerOne: { mana: 10, hand: [spell] },
+                playerTwo: {
+                    board: placeMinion(
+                        createEmptyBoard(),
+                        0,
+                        createMinionState(enemyMinion, { placedAtRound: 1 }),
+                    ),
+                },
+            }),
+            spell,
+        );
+
+        assertBoardIndex(assert, gameAfterReconversion, "playerTwo", 0, { placedAtRound: 1 });
+
+        const { game: gameOnEnemyTurn } = await runPassTurnFromGame(gameAfterReconversion);
+
+        const { errors } = await runMinionActionOnGameInMemory(gameOnEnemyTurn, "playerTwo", {
+            minionId: "budget-cut",
+            minionUuid: null,
+            owner: "OPPONENT",
+        });
+
+        assert.deepEqual(errors, []);
+        assert.isBelow(gameOnEnemyTurn.data.playerOne.health, DEFAULT_HERO_HEALTH);
     });
 });

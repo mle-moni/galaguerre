@@ -168,6 +168,7 @@ test.group("generatePlayerCards", () => {
                 healthComparison: null,
                 health: null,
             },
+            rarity: null,
             tags: [],
         });
         assert.include(generated.description, "Cri de guerre : Pioche 1 carte Monstre + coût = 2.");

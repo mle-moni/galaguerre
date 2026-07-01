@@ -73,6 +73,8 @@ export const executeDeathrattles = (
         }
     }
 
-    endCurrentBeat(game);
+    if (actions.length > 0) {
+        endCurrentBeat(game);
+    }
     return { gameEnded: false, discoverPending: false };
 };

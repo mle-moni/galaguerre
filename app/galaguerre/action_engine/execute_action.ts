@@ -143,6 +143,7 @@ const applyEffectToResolvedTarget = (
                 boardIndex,
                 action.reconvertParameters,
                 resolved.minion,
+                player,
             );
             return { gameEnded: false };
         }

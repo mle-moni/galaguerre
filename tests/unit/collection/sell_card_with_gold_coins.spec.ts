@@ -76,7 +76,7 @@ test.group("sell card with gold coins", (group) => {
         const owned = await UserCard.query()
             .where({ userId: user.id, cardId: soloCard.id })
             .first();
-        assert.isUndefined(owned);
+        assert.isNull(owned);
     });
 
     test("rejects selling when collection would drop below minimum", async ({ assert }) => {
