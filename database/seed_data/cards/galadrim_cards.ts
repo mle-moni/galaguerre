@@ -138,6 +138,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { rarity: "COMMON" },
     ),
     defineMinion(
+        152,
+        {
+            ...gal("A/B testeur", 2),
+            imageUrl: "/card-covers/galadrim/ab-testeur.webp",
+            attack: 1,
+            health: 1,
+        },
+        {
+            battlecryActions: [discoverAction(cardDrawFilter(costEquals(3)))],
+        },
+        { rarity: "COMMON" },
+    ),
+    defineMinion(
         65,
         {
             ...gal("Dev Aigri", 3),
@@ -885,6 +898,16 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/recherche-google.webp",
         },
         [discoverAction(spellDrawFilter())],
+    ),
+    defineSpell(
+        153,
+        {
+            ...gal("Zoothérapie", 3),
+            imageUrl: "/card-covers/galadrim/zootherapie.webp",
+        },
+        [discoverAction(minionDrawFilter(["PETS"])), discoverAction(minionDrawFilter(["PETS"]))],
+        [],
+        { rarity: "RARE" },
     ),
     defineSpell(
         105,

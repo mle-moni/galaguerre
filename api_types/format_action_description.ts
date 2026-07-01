@@ -558,9 +558,14 @@ const formatFrenchList = (items: string[]): string => {
 };
 
 type HandCardAction = Extract<CardActionSnapshot, { type: "HAND_CARD" }>;
+type DiscoverAction = Extract<CardActionSnapshot, { type: "DISCOVER" }>;
 
 const isSameHandCardGroup = (left: HandCardAction, right: HandCardAction): boolean =>
     left.handTargetTeam === right.handTargetTeam && left.copyCount === right.copyCount;
+
+const isSameDiscoverGroup = (left: DiscoverAction, right: DiscoverAction): boolean =>
+    left.optionCount === right.optionCount &&
+    JSON.stringify(left.discoverCardFilter) === JSON.stringify(right.discoverCardFilter);
 
 const formatMergedHandCardAddDescription = (actions: HandCardAction[], prefix: string): string => {
     const copies = actions.map((action) =>
@@ -570,8 +575,20 @@ const formatMergedHandCardAddDescription = (actions: HandCardAction[], prefix: s
     return `${prefix} : Ajoute ${formatFrenchList(copies)} ${formatHandCardAddLocation(actions[0].handTargetTeam)}.`;
 };
 
+const formatMergedDiscoverDescription = (actions: DiscoverAction[], prefix: string): string => {
+    const { article, label } = formatDiscoverCardLabel(actions[0].discoverCardFilter);
+    const filterSuffix = formatDiscoverExtraFilterSuffix(actions[0].discoverCardFilter);
+    const firstClause = `Découvrez ${article} ${label}${filterSuffix}`;
+    const additionalClauses = actions
+        .slice(1)
+        .map(() => `Puis, découvrez un autre ${label}${filterSuffix}`);
+
+    return `${prefix} : ${[firstClause, ...additionalClauses].join(". ")}.`;
+};
+
 type ActionDescriptionGroup =
     | { type: "hand_card"; actions: HandCardAction[] }
+    | { type: "discover"; actions: DiscoverAction[] }
     | { type: "single"; action: CardActionSnapshot };
 
 const groupActionDescriptions = (actions: CardActionSnapshot[]): ActionDescriptionGroup[] => {
@@ -586,6 +603,17 @@ const groupActionDescriptions = (actions: CardActionSnapshot[]): ActionDescripti
             }
 
             groups.push({ type: "hand_card", actions: [action] });
+            continue;
+        }
+
+        if (action.type === "DISCOVER") {
+            const last = groups.at(-1);
+            if (last?.type === "discover" && isSameDiscoverGroup(last.actions[0], action)) {
+                last.actions.push(action);
+                continue;
+            }
+
+            groups.push({ type: "discover", actions: [action] });
             continue;
         }
 
@@ -608,6 +636,14 @@ export const formatGroupedActionDescriptions = (
                 }
 
                 return formatMergedHandCardAddDescription(group.actions, prefix);
+            }
+
+            if (group.type === "discover") {
+                if (group.actions.length === 1) {
+                    return formatActionDescription(group.actions[0], prefix, spellPower);
+                }
+
+                return formatMergedDiscoverDescription(group.actions, prefix);
             }
 
             return formatActionDescription(group.action, prefix, spellPower);

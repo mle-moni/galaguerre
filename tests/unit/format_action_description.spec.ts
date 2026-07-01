@@ -555,6 +555,25 @@ test.group("format_action_description", () => {
         assert.equal(formatGroupedActionDescriptions(actions, "Effet").length, 2);
     });
 
+    test("merges consecutive identical DISCOVER actions", ({ assert }) => {
+        const actions = [
+            createCardActionSnapshot({
+                type: "DISCOVER",
+                discoverCardFilter: createCardFilterSnapshot({ type: "MINION", tags: ["PETS"] }),
+                optionCount: 3,
+            }),
+            createCardActionSnapshot({
+                type: "DISCOVER",
+                discoverCardFilter: createCardFilterSnapshot({ type: "MINION", tags: ["PETS"] }),
+                optionCount: 3,
+            }),
+        ];
+
+        assert.deepEqual(formatGroupedActionDescriptions(actions, "Effet"), [
+            "Effet : Découvrez un monstre 🐾 Pets. Puis, découvrez un autre monstre 🐾 Pets.",
+        ]);
+    });
+
     test("formats DEFEAT opponent", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DEFEAT",
