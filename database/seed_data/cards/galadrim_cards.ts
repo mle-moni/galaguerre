@@ -14,6 +14,7 @@ import {
     boostBoth,
     boostBothWithTaunt,
     boostCharge,
+    boostHealth,
     boostPassive,
     boostSpellPower,
     costLessThan,
@@ -50,6 +51,7 @@ import {
     relativeCostReconversion,
     selfMinion,
     silenceAction,
+    summonCardId,
     spellDrawFilter,
     targetedAllyMinion,
     targetedAllyMinionWithComparison,
@@ -640,6 +642,35 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
     ),
     defineMinion(
+        154,
+        {
+            ...gal("Neva", 3),
+            imageUrl: "/card-covers/neva.webp",
+            attack: 2,
+            health: 3,
+        },
+        {
+            tags: ["PETS"],
+            battlecryActions: [
+                boostAction(boostHealth(2), otherAllyMinionsWithTag("PETS")),
+            ],
+        },
+        { rarity: "RARE" },
+    ),
+    defineMinion(
+        156,
+        {
+            ...gal("Papuche", 2),
+            imageUrl: "/card-covers/papuche.webp",
+            attack: 2,
+            health: 1,
+        },
+        {
+            tags: ["PETS"],
+            battlecryActions: [summonCardId(155)],
+        },
+    ),
+    defineMinion(
         95,
         {
             ...gal("Plante Verte", 1),
@@ -1111,6 +1142,17 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
 
     // --- cartes non collectionnables ---
+    defineMinion(
+        155,
+        {
+            ...gal("Plume", 1),
+            imageUrl: "/card-covers/plume.webp",
+            attack: 1,
+            health: 1,
+        },
+        { tags: ["PETS"] },
+        { isCollectible: false },
+    ),
     defineSpell(
         1,
         {
