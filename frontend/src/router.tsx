@@ -6,6 +6,7 @@ import { Error404Page } from "./pages/errors/error_404_page.jsx";
 import { CollectionPage } from "./pages/collection/collection_page.jsx";
 import { CollectionShopPage } from "./pages/collection/collection_shop_page.jsx";
 import { PackOpeningPage } from "./pages/collection/pack_opening_page.jsx";
+import { DeckSharePage } from "./pages/decks/deck_share_page.jsx";
 import { DeckBuilderPage } from "./pages/decks/deck_builder_page.jsx";
 import { DecksPage } from "./pages/decks/decks_page.jsx";
 import { BoardMinionStylesPage } from "./pages/dev/board_minion_styles_page.jsx";
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
             {
                 path: "/decks",
                 element: <DecksPage />,
+            },
+            {
+                path: "/decks/s/:code",
+                element: <DeckSharePage />,
             },
             {
                 path: "/decks/:id",

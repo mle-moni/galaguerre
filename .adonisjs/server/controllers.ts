@@ -28,6 +28,10 @@ export const controllers = {
     collection: {
         Collection: () => import("#controllers/collection/collection_controller"),
     },
+    deckShares: {
+        DeckShares: () => import("#controllers/deck_shares/deck_shares_controller"),
+        SerializeDeckShare: () => import("#controllers/deck_shares/serialize_deck_share"),
+    },
     decks: {
         DeckUtils: () => import("#controllers/decks/deck_utils"),
         Decks: () => import("#controllers/decks/decks_controller"),

@@ -539,6 +539,9 @@ button.gg-composition-row__thumb {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.06);
     margin-bottom: 1rem;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
 }
 
 .gg-mana-curve-toggle {
@@ -575,6 +578,9 @@ button.gg-composition-row__thumb {
     align-items: flex-end;
     justify-content: space-between;
     gap: 2px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     overflow-x: auto;
     padding-bottom: 0.25rem;
     scrollbar-width: thin;
@@ -715,6 +721,21 @@ button.gg-composition-row__thumb {
 }
 
 @media (max-width: 639px) {
+    .gg-mana-curve__column {
+        min-width: 0;
+        flex: 1 1 0;
+    }
+
+    .gg-catalog-grid--list {
+        min-width: 0;
+        padding: 0;
+        overflow-x: clip;
+    }
+
+    .gg-composition-row {
+        min-width: 0;
+    }
+
     .gg-panel-header {
         padding: 0.75rem 1rem;
         font-size: 1rem;
@@ -746,9 +767,5 @@ button.gg-composition-row__thumb {
 
     .gg-deck-card-item__actions {
         grid-template-columns: 1fr;
-    }
-
-    .gg-deck-card-item__actions .invisible {
-        display: none;
     }
 }

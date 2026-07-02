@@ -118,6 +118,25 @@ export class DeckCardSchema extends BaseModel {
     declare updatedAt: DateTime | null;
 }
 
+export class DeckShareSchema extends BaseModel {
+    static $columns = ["cards", "code", "createdAt", "deckId", "id", "name", "userId"] as const;
+    $columns = DeckShareSchema.$columns;
+    @column()
+    declare cards: any;
+    @column()
+    declare code: string;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime;
+    @column()
+    declare deckId: number;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column()
+    declare name: string;
+    @column()
+    declare userId: number;
+}
+
 export class DeckSchema extends BaseModel {
     static $columns = ["createdAt", "id", "name", "selected", "updatedAt", "userId"] as const;
     $columns = DeckSchema.$columns;

@@ -18,6 +18,7 @@ export type ScannedRoutes = {
             paramsTuple: [ParamValue, ParamValue];
             params: { userId: ParamValue; gameId: ParamValue };
         };
+        "deck_shares.show": { paramsTuple: [ParamValue]; params: { code: ParamValue } };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
@@ -35,6 +36,8 @@ export type ScannedRoutes = {
         "friends.store": { paramsTuple?: []; params?: {} };
         "friends.destroy": { paramsTuple: [ParamValue]; params: { friendUserId: ParamValue } };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "deck_shares.store": { paramsTuple: [ParamValue]; params: { deckId: ParamValue } };
+        "deck_shares.import": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.store": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
@@ -61,6 +64,7 @@ export type ScannedRoutes = {
             paramsTuple: [ParamValue, ParamValue];
             params: { userId: ParamValue; gameId: ParamValue };
         };
+        "deck_shares.show": { paramsTuple: [ParamValue]; params: { code: ParamValue } };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
@@ -86,6 +90,7 @@ export type ScannedRoutes = {
             paramsTuple: [ParamValue, ParamValue];
             params: { userId: ParamValue; gameId: ParamValue };
         };
+        "deck_shares.show": { paramsTuple: [ParamValue]; params: { code: ParamValue } };
         "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
@@ -111,6 +116,8 @@ export type ScannedRoutes = {
         "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };
         "friends.store": { paramsTuple?: []; params?: {} };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "deck_shares.store": { paramsTuple: [ParamValue]; params: { deckId: ParamValue } };
+        "deck_shares.import": { paramsTuple?: []; params?: {} };
         "decks.store": { paramsTuple?: []; params?: {} };
         "games.training": { paramsTuple?: []; params?: {} };
         "games.search_heartbeat": { paramsTuple?: []; params?: {} };

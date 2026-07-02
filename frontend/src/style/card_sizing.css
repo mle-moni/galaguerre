@@ -34,6 +34,11 @@
         --card-h-hand: calc(var(--card-w-hand) * 1.4);
         --stat-badge-hand: clamp(14px, 3.5vw, 16px);
     }
+
+    .card-composition {
+        --card-w: clamp(72px, 28vw, 120px);
+        --card-h: calc(var(--card-w) * 1.4);
+    }
 }
 
 .playing-card-face {

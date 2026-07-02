@@ -13,13 +13,14 @@ export const COLLECTION_QUERY_KEY = ["collection"] as const;
 export const PACKS_QUERY_KEY = ["packs"] as const;
 export const DUPLICATES_PREVIEW_QUERY_KEY = ["collection", "duplicates-preview"] as const;
 
-export const useCollectionQuery = () => {
+export const useCollectionQuery = (options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: COLLECTION_QUERY_KEY,
         queryFn: async () => {
             const response = await privateAxios.get<ApiCollectionResponse>("/api/collection");
             return response.data.entries;
         },
+        enabled: options?.enabled ?? true,
     });
 };
 

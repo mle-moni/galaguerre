@@ -69,7 +69,7 @@ export const AppLayout = observer(
                     </div>
                 </header>
                 <main
-                    className={`flex-1 min-h-0 flex flex-col p-3 sm:p-4 md:p-6 ${fillViewport ? "overflow-hidden" : "overflow-y-auto"}`}
+                    className={`flex-1 min-h-0 min-w-0 flex flex-col p-3 sm:p-4 md:p-6 ${fillViewport ? "overflow-hidden" : "overflow-x-clip overflow-y-auto"}`}
                 >
                     {children}
                 </main>

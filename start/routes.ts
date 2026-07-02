@@ -16,6 +16,7 @@ import AuthController from "#controllers/auth/auth_controller";
 import CardsController from "#controllers/cards/cards_controller";
 import CardSetsController from "#controllers/card_sets/card_sets_controller";
 import CollectionController from "#controllers/collection/collection_controller";
+import DeckSharesController from "#controllers/deck_shares/deck_shares_controller";
 import DecksController from "#controllers/decks/decks_controller";
 import FriendsController from "#controllers/friends/friends_controller";
 import GameHistoryController from "#controllers/game_history/game_history_controller";
@@ -39,6 +40,7 @@ router
         router.get("/game-history/:userId", [GameHistoryController, "index"]);
         router.get("/game-history/:userId/:gameId", [GameHistoryController, "show"]);
         router.get("/game-history/:userId/:gameId/replay", [GameHistoryController, "replay"]);
+        router.get("/deck-shares/:code", [DeckSharesController, "show"]);
     })
     .prefix("/api");
 
@@ -62,6 +64,8 @@ router
         router.post("/friends", [FriendsController, "store"]);
         router.delete("/friends/:friendUserId", [FriendsController, "destroy"]);
         router.post("/decks/:id/select", [DecksController, "select"]);
+        router.post("/decks/:deckId/share", [DeckSharesController, "store"]);
+        router.post("/decks/import", [DeckSharesController, "import"]);
         router.resource("decks", DecksController).apiOnly();
         router.post("/games/training", [GamesController, "training"]);
         router.delete("/games/search", [GamesController, "cancelSearch"]);

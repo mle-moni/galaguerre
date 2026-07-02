@@ -1,7 +1,13 @@
 import { DECK_MAX_CARDS, DECK_MIN_CARDS, type ApiDeckCardEntry } from "#api_types/deck.types";
 import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
 import { Button, Collapse, NumberInput, Tabs, TextInput } from "@mantine/core";
-import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
+import {
+    IconChevronDown,
+    IconChevronUp,
+    IconMinus,
+    IconPlus,
+    IconShare,
+} from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -18,6 +24,7 @@ import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
+import { ShareDeckModal } from "~/components/decks/share_deck_modal";
 
 const entriesToMap = (entries: ApiDeckCardEntry[]) => {
     const map = new Map<number, number>();
@@ -50,6 +57,7 @@ export const DeckBuilderPage = observer(() => {
     const [composition, setComposition] = useState<Map<number, number> | null>(null);
     const [costFilter, setCostFilter] = useState<string | null>(null);
     const [showManaCurve, setShowManaCurve] = useState(false);
+    const [shareDeckId, setShareDeckId] = useState<number | null>(null);
 
     const catalog = cardsQuery.data ?? [];
     const cardSets = cardSetsQuery.data ?? [];
@@ -300,6 +308,15 @@ export const DeckBuilderPage = observer(() => {
                     <div className="flex flex-col sm:flex-row gap-2">
                         <Button
                             variant="outline"
+                            color="gold"
+                            className="w-full sm:w-auto"
+                            leftSection={<IconShare size={16} />}
+                            onClick={() => setShareDeckId(deckId)}
+                        >
+                            Partager
+                        </Button>
+                        <Button
+                            variant="outline"
                             color="navy"
                             className="w-full sm:w-auto"
                             onClick={() => navigate("/decks")}
@@ -348,6 +365,8 @@ export const DeckBuilderPage = observer(() => {
                     </div>
                 )}
             </div>
+
+            <ShareDeckModal deckId={shareDeckId} onClose={() => setShareDeckId(null)} />
         </AppLayout>
     );
 });

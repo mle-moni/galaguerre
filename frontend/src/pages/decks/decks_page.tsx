@@ -1,5 +1,5 @@
 import { Button, Modal, Text } from "@mantine/core";
-import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconPlus, IconShare, IconTrash } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
@@ -13,6 +13,7 @@ import {
     useSelectDeckMutation,
 } from "~/hooks/use_decks";
 import { useUser } from "~/hooks/use_user";
+import { ShareDeckModal } from "~/components/decks/share_deck_modal";
 
 export const DecksPage = observer(() => {
     const user = useUser();
@@ -22,6 +23,7 @@ export const DecksPage = observer(() => {
     const deleteMutation = useDeleteDeckMutation();
     const selectMutation = useSelectDeckMutation();
     const [deckToDelete, setDeckToDelete] = useState<number | null>(null);
+    const [deckToShare, setDeckToShare] = useState<number | null>(null);
 
     if (!user) return <Navigate to="/login" />;
 
@@ -97,19 +99,25 @@ export const DecksPage = observer(() => {
                                     )}
                                 </div>
                                 <div className="gg-deck-card-item__actions">
+                                    {!deck.selected && (
+                                        <Button
+                                            size="xs"
+                                            className="gg-btn-primary"
+                                            loading={selectMutation.isPending}
+                                            disabled={!deck.valid}
+                                            onClick={() => selectMutation.mutate(deck.id)}
+                                        >
+                                            Sélectionner
+                                        </Button>
+                                    )}
                                     <Button
                                         size="xs"
-                                        className={clsx(
-                                            "gg-btn-primary",
-                                            deck.selected && "invisible pointer-events-none",
-                                        )}
-                                        loading={selectMutation.isPending}
-                                        disabled={!deck.valid || deck.selected}
-                                        tabIndex={deck.selected ? -1 : undefined}
-                                        aria-hidden={deck.selected}
-                                        onClick={() => selectMutation.mutate(deck.id)}
+                                        variant="outline"
+                                        color="gold"
+                                        leftSection={<IconShare size={14} />}
+                                        onClick={() => setDeckToShare(deck.id)}
                                     >
-                                        Sélectionner
+                                        Partager
                                     </Button>
                                     <Button
                                         component={Link}
@@ -156,6 +164,8 @@ export const DecksPage = observer(() => {
                     </Button>
                 </div>
             </Modal>
+
+            <ShareDeckModal deckId={deckToShare} onClose={() => setDeckToShare(null)} />
         </AppLayout>
     );
 });
