@@ -148,6 +148,7 @@ export interface MinionState {
     permanentKeywords?: MinionPowerSnapshot;
     auraAppliedTo?: AuraAppliedTarget[];
     auraHeroSpellPowerAppliedTo?: "PLAYER" | "OPPONENT" | "ALL" | null;
+    auraSelfScaledBoost?: { attack: number; health: number; spellPower: number } | null;
     isSilenced?: boolean;
     divineShieldConsumed?: boolean;
 }

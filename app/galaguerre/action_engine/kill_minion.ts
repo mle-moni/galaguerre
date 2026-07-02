@@ -7,6 +7,7 @@ import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import {
     removeMinionFromAuraTracking,
+    refreshScaledPassiveAuras,
     revertPassiveAurasForSource,
 } from "../passive_engine/passive_aura.js";
 import { executeDeathrattles } from "./execute_deathrattles.js";
@@ -44,6 +45,7 @@ export const killMinion = (
     revertPassiveAurasForSource(game, owner, minion);
     removeMinionFromAuraTracking(game, minion);
     removeMinionByUuid(owner.board, minionUuid);
+    refreshScaledPassiveAuras(game);
 
     recordMinionDeath(game, owner, card);
 

@@ -476,6 +476,9 @@ export const selfMinion = (): TargetDefinition =>
 export const otherAllyMinionsWithTag = (tag: CardTag): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "PLAYER", tag, excludeSelf: true });
 
+export const otherMinionsWithTag = (tag: CardTag): TargetDefinition =>
+    baseTarget({ type: "MINION", targetTeam: "ALL", tag, excludeSelf: true });
+
 export const targetedEnemyHero = (): TargetDefinition =>
     baseTarget({ type: "HERO", targetTeam: "OPPONENT" });
 
@@ -673,11 +676,12 @@ export const actionPassive = (
 export const boostPassive = (
     boost: BoostDefinition,
     target: TargetDefinition,
+    scaleToSource = false,
 ): PassiveDefinition => ({
     type: "BOOST",
     triggersOn: null,
     action: null,
-    passiveBoost: { boost, target },
+    passiveBoost: { boost, target, scaleToSource },
     playCardFilter: null,
     summonFilter: null,
     triggerTargetFilter: null,

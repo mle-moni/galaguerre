@@ -68,7 +68,11 @@ export type PassiveDefinition = {
         | "SUMMON"
         | null;
     action: CardActionDefinition | null;
-    passiveBoost: { boost: BoostDefinition; target: TargetDefinition | null } | null;
+    passiveBoost: {
+        boost: BoostDefinition;
+        target: TargetDefinition | null;
+        scaleToSource?: boolean;
+    } | null;
     playCardFilter: CardFilterDefinition | null;
     summonFilter: CardFilterDefinition | null;
     triggerTargetFilter: TargetDefinition | null;
@@ -880,7 +884,7 @@ const validatePassiveBoost = (
         return;
     }
 
-    const { boost, target } = passive.passiveBoost;
+    const { boost, target, scaleToSource } = passive.passiveBoost;
     validateBoostContent(boost, ctx, [...path, "passiveBoost", "boost"]);
 
     if (!target) {
@@ -890,6 +894,32 @@ const validatePassiveBoost = (
             path: [...path, "passiveBoost", "target"],
         });
         return;
+    }
+
+    if (scaleToSource === true) {
+        if (target.type !== "MINION") {
+            ctx.addIssue({
+                code: "custom",
+                message: "scaleToSource passive boost requires a MINION target",
+                path: [...path, "passiveBoost", "target", "type"],
+            });
+        }
+
+        if (!target.excludeSelf) {
+            ctx.addIssue({
+                code: "custom",
+                message: "scaleToSource passive boost requires excludeSelf on target",
+                path: [...path, "passiveBoost", "target", "excludeSelf"],
+            });
+        }
+
+        if (boost.minionPowers !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "scaleToSource passive boost cannot grant minion powers",
+                path: [...path, "passiveBoost", "boost", "minionPowers"],
+            });
+        }
     }
 
     validateBoostTargetCompatibility(target, boost, ctx, path);

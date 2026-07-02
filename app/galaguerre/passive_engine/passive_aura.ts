@@ -44,6 +44,108 @@ const applyAuraBoostToMinion = (minion: MinionState, passiveBoost: PassiveBoostS
     }
 };
 
+type ScaledBoostAmounts = {
+    attack: number;
+    health: number;
+    spellPower: number;
+};
+
+const countMatchingMinions = (
+    game: Game,
+    sourceOwner: GamePlayer,
+    sourceMinion: MinionState,
+    target: PassiveBoostSnapshot["target"],
+): number => {
+    if (!target) return 0;
+
+    const opponent = getOpponent(game, sourceOwner);
+    let count = 0;
+
+    for (const { board, isOpponent } of getTargetBoardEntries(target, sourceOwner, opponent)) {
+        for (const minion of board) {
+            if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
+            if (!minionMatchesTarget(minion, target, isOpponent)) continue;
+            count++;
+        }
+    }
+
+    return count;
+};
+
+const scaleBoostAmounts = (
+    boost: PassiveBoostSnapshot["boost"],
+    multiplier: number,
+): ScaledBoostAmounts => ({
+    attack: (boost.attack ?? 0) * multiplier,
+    health: (boost.health ?? 0) * multiplier,
+    spellPower: (boost.spellPower ?? 0) * multiplier,
+});
+
+const applyScaledBoostAmountsToMinion = (minion: MinionState, scaled: ScaledBoostAmounts): void => {
+    if (scaled.attack !== 0) {
+        minion.attack += scaled.attack;
+    }
+    if (scaled.health !== 0) {
+        minion.health += scaled.health;
+        minion.maxHealth += scaled.health;
+    }
+};
+
+const revertScaledBoostAmountsFromMinion = (
+    minion: MinionState,
+    scaled: ScaledBoostAmounts,
+): void => {
+    if (scaled.attack !== 0) {
+        minion.attack -= scaled.attack;
+    }
+    if (scaled.health !== 0) {
+        minion.health -= scaled.health;
+        minion.maxHealth -= scaled.health;
+    }
+};
+
+const revertScaledPassiveBoostFromSource = (sourceMinion: MinionState): void => {
+    if (!sourceMinion.auraSelfScaledBoost) return;
+
+    revertScaledBoostAmountsFromMinion(sourceMinion, sourceMinion.auraSelfScaledBoost);
+    sourceMinion.auraSelfScaledBoost = null;
+};
+
+const applyScaledPassiveBoostToSource = (
+    game: Game,
+    sourceOwner: GamePlayer,
+    sourceMinion: MinionState,
+    passiveBoost: PassiveBoostSnapshot,
+): void => {
+    const { boost, target } = passiveBoost;
+    if (!target || target.type !== "MINION") return;
+
+    revertScaledPassiveBoostFromSource(sourceMinion);
+
+    const count = countMatchingMinions(game, sourceOwner, sourceMinion, target);
+    if (count === 0) return;
+
+    const scaled = scaleBoostAmounts(boost, count);
+    applyScaledBoostAmountsToMinion(sourceMinion, scaled);
+    sourceMinion.auraSelfScaledBoost = scaled;
+};
+
+export const refreshScaledPassiveAuras = (game: Game): void => {
+    for (const owner of [game.data.playerOne, game.data.playerTwo]) {
+        for (const sourceMinion of owner.board) {
+            if (sourceMinion.originalCard.type !== "MINION" || sourceMinion.isSilenced) {
+                continue;
+            }
+
+            const sourceCard = sourceMinion.originalCard as MinionCard;
+            for (const passiveBoost of collectBoostPassives(sourceCard)) {
+                if (passiveBoost.scaleToSource !== true) continue;
+                applyScaledPassiveBoostToSource(game, owner, sourceMinion, passiveBoost);
+            }
+        }
+    }
+};
+
 export const recalculateMinionKeywords = (game: Game, minion: MinionState): void => {
     if (minion.originalCard.type !== "MINION") return;
 
@@ -165,8 +267,13 @@ const applyPassiveBoostAura = (
     sourceMinion: MinionState,
     passiveBoost: PassiveBoostSnapshot,
 ): void => {
-    const { boost, target } = passiveBoost;
+    const { boost, target, scaleToSource } = passiveBoost;
     if (!target) return;
+
+    if (scaleToSource === true) {
+        applyScaledPassiveBoostToSource(game, sourceOwner, sourceMinion, passiveBoost);
+        return;
+    }
 
     const opponent = getOpponent(game, sourceOwner);
 
@@ -337,6 +444,8 @@ export const revertPassiveAurasForSource = (
 ): void => {
     const card = sourceMinion.originalCard as MinionCard;
     const passiveBoosts = collectBoostPassives(card);
+
+    revertScaledPassiveBoostFromSource(sourceMinion);
 
     for (const appliedTarget of sourceMinion.auraAppliedTo ?? []) {
         const targetOwner = getPlayerFromSpotOwner(game, appliedTarget.owner);

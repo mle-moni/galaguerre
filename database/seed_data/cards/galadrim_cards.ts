@@ -42,6 +42,7 @@ import {
     manaTemporaryChangePerOpponentMinionAction,
     otherAllyMinions,
     otherAllyMinionsWithTag,
+    otherMinionsWithTag,
     randomEnemyCharacter,
     randomEnemyMinion,
     randomEnemyTargets,
@@ -651,9 +652,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         {
             tags: ["PETS"],
-            battlecryActions: [
-                boostAction(boostHealth(2), otherAllyMinionsWithTag("PETS")),
-            ],
+            battlecryActions: [boostAction(boostHealth(2), otherAllyMinionsWithTag("PETS"))],
         },
         { rarity: "RARE" },
     ),
@@ -669,6 +668,59 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["PETS"],
             battlecryActions: [summonCardId(155)],
         },
+    ),
+    defineMinion(
+        157,
+        {
+            ...gal("Koda", 1),
+            imageUrl: "/card-covers/koda.webp",
+            attack: 1,
+            health: 2,
+        },
+        {
+            tags: ["PETS"],
+            passives: [
+                actionPassive(
+                    "SUMMON",
+                    boostAction(boostAttack(1), selfMinion()),
+                    null,
+                    null,
+                    minionDrawFilter(["PETS"]),
+                ),
+            ],
+        },
+        { rarity: "RARE" },
+    ),
+    defineMinion(
+        158,
+        {
+            ...gal("Aloy", 3),
+            imageUrl: "/card-covers/aloy.webp",
+            attack: 3,
+            health: 3,
+        },
+        {
+            tags: ["PETS"],
+            passives: [boostPassive(boostBoth(2, 1), otherAllyMinionsWithTag("PETS"))],
+        },
+        { rarity: "EPIC" },
+    ),
+    defineMinion(
+        159,
+        {
+            ...gal("OG Sully", 4),
+            imageUrl: "/card-covers/sully.webp",
+            attack: 2,
+            health: 4,
+        },
+        {
+            tags: ["PETS"],
+            minionPowers: {
+                hasCharge: true,
+            },
+            passives: [boostPassive(boostAttack(1), otherMinionsWithTag("PETS"), true)],
+        },
+        { rarity: "LEGENDARY" },
     ),
     defineMinion(
         95,

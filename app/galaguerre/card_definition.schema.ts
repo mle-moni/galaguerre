@@ -282,6 +282,7 @@ export const deathrattleActionSchema = cardActionSchema.superRefine((action, ctx
 export const passiveBoostSchema = z.object({
     boost: boostSchema,
     target: targetSchema.nullable(),
+    scaleToSource: z.boolean().optional(),
 });
 
 export const passiveSchema = z

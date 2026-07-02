@@ -2,11 +2,13 @@ import type {
     CardActionSnapshot,
     DynamicCostSnapshot,
     MinionCard,
+    PassiveBoostSnapshot,
     PassiveSnapshot,
 } from "./game.types.js";
 import { getMinionPowerEffects } from "./get_minion_power_effects.js";
 import type { GalaguerreDynamicCostSource } from "../app/galaguerre/galaguerre.types.js";
 import { EFFECT_DESCRIPTIONS } from "./card_keyword_glossary.js";
+import { CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
 import {
     formatActionDescription,
     formatGroupedActionDescriptions,
@@ -55,6 +57,32 @@ export const getSpellCardDescription = (effectLines: string[], castsWhenDrawn = 
     return joinCardDescriptionParts(parts);
 };
 
+const formatTagChip = (tag: NonNullable<PassiveBoostSnapshot["target"]>["tag"]): string => {
+    if (!tag) return "";
+    const meta = CARD_TAG_LABELS[tag];
+    const prefix = isCardTagImageSymbol(meta.symbol) ? "" : `${meta.symbol} `;
+    return `${prefix}${meta.label}`;
+};
+
+const formatScaledPassiveBoostDescription = (passiveBoost: PassiveBoostSnapshot): string => {
+    const { boost, target } = passiveBoost;
+    const parts: string[] = [];
+
+    if (boost.attack !== null && boost.health !== null) {
+        parts.push(`+${boost.attack}/+${boost.health}`);
+    } else {
+        if (boost.attack !== null) parts.push(`+${boost.attack} attaque`);
+        if (boost.health !== null) parts.push(`+${boost.health} PV`);
+    }
+
+    if (boost.spellPower !== null) {
+        parts.push(`+${boost.spellPower} dégâts de sort`);
+    }
+
+    const tagPart = target?.tag ? ` ${formatTagChip(target.tag)}` : "";
+    return `Passif : Gagne ${parts.join(", ")} pour chaque autre serviteur${tagPart} sur le plateau.`;
+};
+
 export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => {
     return passives
         .map((passive) => {
@@ -74,6 +102,10 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
             }
 
             if (passive.type === "BOOST" && passive.passiveBoost) {
+                if (passive.passiveBoost.scaleToSource === true) {
+                    return formatScaledPassiveBoostDescription(passive.passiveBoost);
+                }
+
                 const actionLike: CardActionSnapshot = {
                     type: "BOOST",
                     isTargeted: false,
