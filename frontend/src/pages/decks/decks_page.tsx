@@ -3,8 +3,7 @@ import { IconEdit, IconPlus, IconShare, IconTrash } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { AppLayout } from "~/components/layout/app_layout";
+import { Link, useNavigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
 import {
     useCreateDeckMutation,
@@ -12,11 +11,9 @@ import {
     useDeleteDeckMutation,
     useSelectDeckMutation,
 } from "~/hooks/use_decks";
-import { useUser } from "~/hooks/use_user";
 import { ShareDeckModal } from "~/components/decks/share_deck_modal";
 
 export const DecksPage = observer(() => {
-    const user = useUser();
     const navigate = useNavigate();
     const decksQuery = useDecksQuery();
     const createMutation = useCreateDeckMutation();
@@ -24,8 +21,6 @@ export const DecksPage = observer(() => {
     const selectMutation = useSelectDeckMutation();
     const [deckToDelete, setDeckToDelete] = useState<number | null>(null);
     const [deckToShare, setDeckToShare] = useState<number | null>(null);
-
-    if (!user) return <Navigate to="/login" />;
 
     if (decksQuery.isLoading) return <CenteredLoader absolute />;
 
@@ -43,10 +38,10 @@ export const DecksPage = observer(() => {
     };
 
     return (
-        <AppLayout title="Mes decks" backTo="/" backLabel="Accueil">
+        <>
             <div className="max-w-3xl mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-6">
-                    <h1 className="text-2xl font-bold text-gg-navy m-0">Mes decks</h1>
+                    <h1 className="text-2xl font-bold text-white m-0">Mes decks</h1>
                     <Button
                         className="gg-btn-primary w-full sm:w-auto"
                         leftSection={<IconPlus size={16} />}
@@ -166,6 +161,6 @@ export const DecksPage = observer(() => {
             </Modal>
 
             <ShareDeckModal deckId={deckToShare} onClose={() => setDeckToShare(null)} />
-        </AppLayout>
+        </>
     );
 });

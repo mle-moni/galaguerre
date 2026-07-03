@@ -1,7 +1,9 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { AppLayout } from "./components/layout/app_layout.jsx";
 import { AppShell } from "./components/layout/app_shell.jsx";
 import { CenteredLoader } from "./components/centered_loader.jsx";
 import { UserContext, useUserQuery } from "./hooks/use_user.js";
+import "./router.types.js";
 import { Error404Page } from "./pages/errors/error_404_page.jsx";
 import { CollectionPage } from "./pages/collection/collection_page.jsx";
 import { CollectionShopPage } from "./pages/collection/collection_shop_page.jsx";
@@ -30,80 +32,12 @@ const router = createBrowserRouter([
         element: <AppShell />,
         children: [
             {
-                path: "/",
-                element: <HomePage />,
-            },
-            {
                 path: "/play",
                 element: <PlayPage />,
             },
             {
                 path: "/spectate/:gameId",
                 element: <SpectatePage />,
-            },
-            {
-                path: "/collection",
-                element: <CollectionPage />,
-            },
-            {
-                path: "/collection/packs",
-                element: <PackOpeningPage />,
-            },
-            {
-                path: "/collection/shop",
-                element: <CollectionShopPage />,
-            },
-            {
-                path: "/decks",
-                element: <DecksPage />,
-            },
-            {
-                path: "/decks/s/:code",
-                element: <DeckSharePage />,
-            },
-            {
-                path: "/decks/:id",
-                element: <DeckBuilderPage />,
-            },
-            {
-                path: "/matchmaking",
-                element: <MatchmakingPage />,
-            },
-            {
-                path: "/training",
-                element: <TrainingPage />,
-            },
-            {
-                path: "/rules",
-                element: <RulesPage />,
-            },
-            {
-                path: "/onboarding",
-                element: <OnboardingPage />,
-            },
-            {
-                path: "/leaderboard",
-                element: <LeaderboardPage />,
-            },
-            {
-                path: "/friends",
-                element: <FriendsPage />,
-            },
-            {
-                path: "/game-history/:userId",
-                element: <GameHistoryListPage />,
-            },
-            {
-                path: "/game-history/:userId/:gameId",
-                element: <GameHistoryDetailPage />,
-            },
-            {
-                path: "/game-history/:userId/:gameId/replay",
-                element: <ReplayPage />,
-            },
-            {
-                path: "/dev/board-minion-styles",
-                element: <BoardMinionStylesPage />,
             },
             {
                 path: "/login",
@@ -114,8 +48,85 @@ const router = createBrowserRouter([
                 element: <RegisterPage />,
             },
             {
-                path: "*",
-                element: <Error404Page />,
+                element: <AppLayout />,
+                children: [
+                    {
+                        path: "/",
+                        element: <HomePage />,
+                    },
+                    {
+                        path: "/collection",
+                        element: <CollectionPage />,
+                        handle: { fillViewport: true },
+                    },
+                    {
+                        path: "/collection/packs",
+                        element: <PackOpeningPage />,
+                        handle: { fillViewport: true },
+                    },
+                    {
+                        path: "/collection/shop",
+                        element: <CollectionShopPage />,
+                    },
+                    {
+                        path: "/decks",
+                        element: <DecksPage />,
+                    },
+                    {
+                        path: "/decks/s/:code",
+                        element: <DeckSharePage />,
+                    },
+                    {
+                        path: "/decks/:id",
+                        element: <DeckBuilderPage />,
+                        handle: { fillViewport: true },
+                    },
+                    {
+                        path: "/matchmaking",
+                        element: <MatchmakingPage />,
+                    },
+                    {
+                        path: "/training",
+                        element: <TrainingPage />,
+                    },
+                    {
+                        path: "/rules",
+                        element: <RulesPage />,
+                    },
+                    {
+                        path: "/onboarding",
+                        element: <OnboardingPage />,
+                    },
+                    {
+                        path: "/leaderboard",
+                        element: <LeaderboardPage />,
+                    },
+                    {
+                        path: "/friends",
+                        element: <FriendsPage />,
+                    },
+                    {
+                        path: "/game-history/:userId",
+                        element: <GameHistoryListPage />,
+                    },
+                    {
+                        path: "/game-history/:userId/:gameId",
+                        element: <GameHistoryDetailPage />,
+                    },
+                    {
+                        path: "/game-history/:userId/:gameId/replay",
+                        element: <ReplayPage />,
+                        handle: { fillViewport: true },
+                    },
+                    {
+                        path: "/dev/board-minion-styles",
+                        element: <BoardMinionStylesPage />,
+                    },
+                    {
+                        path: "*",
+                        element: <Error404Page />,
+                    },
+                ],
             },
         ],
     },

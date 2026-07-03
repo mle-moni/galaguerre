@@ -3,7 +3,8 @@ export default {
     content: ["./resources/**/*.{edge,js,ts}", "./frontend/**/*.{js,ts,jsx,tsx}"],
     theme: {
         fontFamily: {
-            roboto: ["Roboto"],
+            sans: ["Inter", "system-ui", "sans-serif"],
+            display: ["Cinzel", "Georgia", "serif"],
         },
         extend: {
             colors: {

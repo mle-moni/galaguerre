@@ -1,7 +1,11 @@
 import { createTheme } from "@mantine/core";
 
 export const mantineTheme = createTheme({
-    fontFamily: "Roboto, sans-serif",
+    fontFamily: "Inter, system-ui, sans-serif",
+    headings: {
+        fontFamily: "Cinzel, Georgia, serif",
+        fontWeight: "600",
+    },
     primaryColor: "gold",
     colors: {
         navy: [

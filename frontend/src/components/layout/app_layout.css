@@ -1,0 +1,245 @@
+:root {
+    --gg-celestial-bg: #0a1628;
+    --gg-celestial-panel: rgba(15, 30, 60, 0.82);
+    --gg-celestial-panel-border: rgba(240, 184, 64, 0.45);
+    --gg-celestial-glow: rgba(100, 180, 255, 0.35);
+}
+
+.app-layout {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--gg-celestial-bg);
+    color: var(--gg-text-on-dark);
+    overflow: hidden;
+}
+
+.app-layout__main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.app-layout__content {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0.75rem clamp(1rem, 2vw, 2.5rem) 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+    min-height: 0;
+}
+
+.app-layout__content--fill {
+    overflow: hidden;
+}
+
+.app-header {
+    flex-shrink: 0;
+    background: linear-gradient(180deg, rgba(10, 22, 40, 0.98) 0%, rgba(15, 30, 60, 0.95) 100%);
+    border-bottom: 1px solid var(--gg-celestial-panel-border);
+    padding: 0.5rem clamp(1rem, 2vw, 2.5rem);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.app-header__logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.03em;
+    color: var(--gg-gold);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.app-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    justify-content: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.app-header__nav::-webkit-scrollbar {
+    display: none;
+}
+
+.app-header__nav-link {
+    padding: 0.4rem 0.75rem;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.app-header__nav-link:hover {
+    color: white;
+}
+
+.app-header__nav-link--active {
+    color: var(--gg-gold);
+    border-bottom-color: var(--gg-gold);
+    text-shadow: 0 0 12px var(--gg-celestial-glow);
+}
+
+.app-header__nav-link--disabled {
+    color: rgba(255, 255, 255, 0.35);
+    cursor: default;
+    pointer-events: none;
+}
+
+.app-header__right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.app-header__currencies {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.app-header__currency {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: white;
+    text-decoration: none;
+}
+
+.app-header__currency img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.app-header__currency--pack img {
+    height: 28px;
+}
+
+.app-header__currency--pack:hover {
+    color: var(--gg-gold-hover);
+}
+
+.app-header__icons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.app-header__icon-btn {
+    position: relative;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.app-header__icon-btn:hover {
+    color: white;
+}
+
+.app-header__notif-dot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 7px;
+    height: 7px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 1px solid var(--gg-celestial-bg);
+}
+
+.app-header__profile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.app-header__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--gg-gold);
+    object-fit: cover;
+}
+
+.app-header__profile-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.app-header__profile-title {
+    font-size: 0.7rem;
+    color: var(--gg-gold);
+}
+
+.app-header__profile-level {
+    font-size: 0.65rem;
+    color: var(--gg-text-muted);
+}
+
+.app-header__logout {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.app-header__logout:hover {
+    color: white;
+}
+
+@media (max-width: 767px) {
+    .app-header__profile-info {
+        display: none;
+    }
+
+    .app-header__currencies {
+        display: none;
+    }
+}
+
+@media (min-width: 1600px) {
+    .app-layout__content {
+        gap: clamp(0.75rem, 1vw, 1.25rem);
+    }
+}
+
+@media (max-height: 999px) {
+    .app-layout__content {
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem 1rem;
+    }
+
+    .app-header {
+        padding: 0.35rem 0.75rem;
+    }
+}

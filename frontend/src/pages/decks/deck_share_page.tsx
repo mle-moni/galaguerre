@@ -10,7 +10,6 @@ import { CardArtworkModal } from "~/components/cards/card_artwork_modal";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { useCardsQuery } from "~/hooks/use_cards";
@@ -63,11 +62,9 @@ export const DeckSharePage = observer(() => {
 
     if (shareQuery.isError || !share) {
         return (
-            <AppLayout title="Deck partagé" backTo="/decks" backLabel="Mes decks">
-                <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
-                    <p className="text-white/80 m-0">Deck partagé introuvable.</p>
-                </div>
-            </AppLayout>
+            <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
+                <p className="text-white/80 m-0">Deck partagé introuvable.</p>
+            </div>
         );
     }
 
@@ -114,8 +111,7 @@ export const DeckSharePage = observer(() => {
     });
 
     return (
-        <AppLayout title="Deck partagé" backTo="/decks" backLabel="Mes decks">
-            <div className="max-w-5xl mx-auto w-full min-w-0 flex flex-col gap-6 overflow-x-clip">
+        <div className="max-w-5xl mx-auto w-full min-w-0 flex flex-col gap-6 overflow-x-clip">
                 <div className="gg-panel p-4 sm:p-6 min-w-0 overflow-hidden">
                     <Stack gap="sm">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -300,6 +296,5 @@ export const DeckSharePage = observer(() => {
                     onClose={() => setArtworkCard(null)}
                 />
             </div>
-        </AppLayout>
     );
 });

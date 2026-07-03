@@ -8,11 +8,10 @@ import { COLLECTION_MIN_CARDS } from "#api_types/collection.types";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Catalogue } from "~/components/catalogue/catalogue";
 import { GoldCoinAmount } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import {
     entriesToOwnedCounts,
@@ -30,7 +29,7 @@ import { notifyError, notifySuccess } from "~/services/toasts";
 const SELL_MODAL_RARITIES: CardRarity[] = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
 
 export const CollectionPage = observer(() => {
-    const user = useUser();
+    const user = useUser()!;
     const collectionQuery = useCollectionQuery();
     const packsQuery = usePacksQuery();
     const cardsQuery = useCardsQuery({ includeNonCollectible: true });
@@ -123,7 +122,6 @@ export const CollectionPage = observer(() => {
         }
     };
 
-    if (!user) return <Navigate to="/login" />;
     if (collectionQuery.isLoading || packsQuery.isLoading || cardsQuery.isLoading) {
         return <CenteredLoader absolute />;
     }
@@ -133,10 +131,10 @@ export const CollectionPage = observer(() => {
     const hasDuplicates = (duplicatesPreview?.totalGoldCoins ?? 0) > 0;
 
     return (
-        <AppLayout title="Collection" backTo="/" backLabel="Accueil" fillViewport>
+        <>
             <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0 overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 shrink-0">
-                    <h1 className="text-2xl font-bold text-gg-navy m-0">Collection</h1>
+                    <h1 className="text-2xl font-bold text-white m-0">Collection</h1>
                     <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:gap-3 sm:w-auto">
                         <GoldCoinAmount amount={user.goldCoins} showLabel={false} iconSize={22} />
                         <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
@@ -263,6 +261,6 @@ export const CollectionPage = observer(() => {
                     </Group>
                 </Stack>
             </Modal>
-        </AppLayout>
+        </>
     );
 });

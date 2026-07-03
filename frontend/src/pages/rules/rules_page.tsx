@@ -1,7 +1,6 @@
 import { Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
-import { Link, Navigate } from "react-router-dom";
-import { AppLayout } from "~/components/layout/app_layout";
+import { Link } from "react-router-dom";
 import { useUser } from "~/hooks/use_user";
 
 const RULE_SECTIONS = [
@@ -36,13 +35,10 @@ const RULE_SECTIONS = [
 ] as const;
 
 export const RulesPage = observer(() => {
-    const user = useUser();
-
-    if (!user) return <Navigate to="/login" replace />;
+    const user = useUser()!;
 
     return (
-        <AppLayout title="Comment jouer" backTo="/" backLabel="Accueil">
-            <div className="max-w-2xl mx-auto flex flex-col gap-4">
+        <div className="max-w-2xl mx-auto flex flex-col gap-4">
                 <div className="gg-panel">
                     <div className="gg-panel-header">Règles de Galaguerre</div>
                     <div className="gg-panel-body flex flex-col gap-5">
@@ -68,6 +64,5 @@ export const RulesPage = observer(() => {
                     </div>
                 </div>
             </div>
-        </AppLayout>
     );
 });

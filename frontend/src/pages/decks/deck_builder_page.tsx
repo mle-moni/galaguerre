@@ -15,14 +15,12 @@ import { Catalogue } from "~/components/catalogue/catalogue";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
 import { entriesToOwnedCounts, useCollectionQuery } from "~/hooks/use_collection";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
-import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
 import { ShareDeckModal } from "~/components/decks/share_deck_modal";
 
@@ -41,7 +39,6 @@ const getTotalCards = (map: Map<number, number>) =>
     [...map.values()].reduce((sum, count) => sum + count, 0);
 
 export const DeckBuilderPage = observer(() => {
-    const user = useUser();
     const navigate = useNavigate();
     const { id } = useParams();
     const deckId = Number(id);
@@ -70,7 +67,6 @@ export const DeckBuilderPage = observer(() => {
     );
     const activeSetIds = useMemo(() => new Set(cardSets.map((set) => set.id)), [cardSets]);
 
-    if (!user) return <Navigate to="/login" />;
     if (!deckId || Number.isNaN(deckId)) return <Navigate to="/decks" />;
     if (
         deckQuery.isLoading ||
@@ -292,7 +288,7 @@ export const DeckBuilderPage = observer(() => {
     );
 
     return (
-        <AppLayout title="Éditeur de deck" backTo="/decks" backLabel="Mes decks" fillViewport>
+        <>
             <div className="max-w-7xl mx-auto w-full flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
                 <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end justify-between shrink-0">
                     <TextInput
@@ -367,6 +363,6 @@ export const DeckBuilderPage = observer(() => {
             </div>
 
             <ShareDeckModal deckId={shareDeckId} onClose={() => setShareDeckId(null)} />
-        </AppLayout>
+        </>
     );
 });

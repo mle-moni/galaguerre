@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
-import { AppLayout } from "~/components/layout/app_layout";
 import { useBoardMinionVariant } from "~/hooks/use_board_minion_variant";
 import { useGameReplayQuery } from "~/hooks/use_game_replay";
 import { GameStateContext, ReplayStoreContext } from "~/hooks/use_game_state";
@@ -34,44 +33,31 @@ export const ReplayPage = () => {
 
     if (replayQuery.isError || !replayQuery.data) {
         return (
-            <AppLayout
-                title="Replay"
-                backTo={`/game-history/${userId}/${gameId}`}
-                backLabel="Détail de la partie"
-            >
-                <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
-                    <p className="text-white/80 m-0">Replay indisponible pour cette partie.</p>
-                </div>
-            </AppLayout>
+            <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
+                <p className="text-white/80 m-0">Replay indisponible pour cette partie.</p>
+            </div>
         );
     }
 
     return (
-        <AppLayout
-            title="Replay"
-            backTo={`/game-history/${userId}/${gameId}`}
-            backLabel="Détail de la partie"
-            fillViewport
-        >
-            <ReplayStoreContext.Provider value={REPLAY_STORE}>
-                <GameStateContext.Provider value={REPLAY_STORE.displayGame}>
-                    <div
-                        className={clsx(
-                            "flex flex-col gap-4 h-full min-h-0 min-w-0 w-full overflow-hidden",
-                            boardMinionVariant === "rect" && "board-minion-variant--rect",
-                        )}
-                    >
-                        <div className="flex-1 min-h-0 min-w-0 relative overflow-hidden">
-                            <ReplayRenderer />
-                        </div>
-                        <ReplayControls
-                            store={REPLAY_STORE}
-                            replay={replayQuery.data}
-                            onSwitchPerspective={switchPerspective}
-                        />
+        <ReplayStoreContext.Provider value={REPLAY_STORE}>
+            <GameStateContext.Provider value={REPLAY_STORE.displayGame}>
+                <div
+                    className={clsx(
+                        "flex flex-col gap-4 h-full min-h-0 min-w-0 w-full overflow-hidden",
+                        boardMinionVariant === "rect" && "board-minion-variant--rect",
+                    )}
+                >
+                    <div className="flex-1 min-h-0 min-w-0 relative overflow-hidden">
+                        <ReplayRenderer />
                     </div>
-                </GameStateContext.Provider>
-            </ReplayStoreContext.Provider>
-        </AppLayout>
+                    <ReplayControls
+                        store={REPLAY_STORE}
+                        replay={replayQuery.data}
+                        onSwitchPerspective={switchPerspective}
+                    />
+                </div>
+            </GameStateContext.Provider>
+        </ReplayStoreContext.Provider>
     );
 };

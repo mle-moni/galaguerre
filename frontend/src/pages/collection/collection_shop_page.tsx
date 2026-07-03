@@ -7,20 +7,16 @@ import { ActionIcon, Button, Center, Group, Modal, Paper, Stack, Text } from "@m
 import { IconQuestionMark } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
 import { GoldCoinAmount, GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
-import { AppLayout } from "~/components/layout/app_layout";
 import { useBuyPackMutation } from "~/hooks/use_collection";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
 
 export const CollectionShopPage = observer(() => {
-    const user = useUser();
+    const user = useUser()!;
     const buyPackMutation = useBuyPackMutation();
     const [helpOpened, setHelpOpened] = useState(false);
-
-    if (!user) return <Navigate to="/login" />;
 
     const goldCoins = user.goldCoins;
     const canAfford = goldCoins >= GOLD_COINS_PER_PACK;
@@ -35,9 +31,8 @@ export const CollectionShopPage = observer(() => {
     };
 
     return (
-        <AppLayout title="Boutique" backTo="/collection" backLabel="Collection">
-            <div className="max-w-2xl mx-auto w-full">
-                <h1 className="text-2xl font-bold text-gg-navy mb-6">Boutique</h1>
+        <div className="max-w-2xl mx-auto w-full">
+                <h1 className="text-2xl font-bold text-white mb-6">Boutique</h1>
 
                 <Stack gap="lg">
                     <Group gap="xs" wrap="nowrap" align="center">
@@ -95,7 +90,7 @@ export const CollectionShopPage = observer(() => {
                                 <ActionIcon
                                     variant="transparent"
                                     size="sm"
-                                    className="text-gg-navy"
+                                    className="text-white/70"
                                     aria-label="Comment gagner des story points"
                                     onClick={() => setHelpOpened(true)}
                                 >
@@ -114,6 +109,5 @@ export const CollectionShopPage = observer(() => {
                     </Paper>
                 </Stack>
             </div>
-        </AppLayout>
     );
 });

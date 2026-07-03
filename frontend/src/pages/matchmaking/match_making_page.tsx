@@ -2,7 +2,6 @@ import { Button, Text } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { Link, Navigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
@@ -10,12 +9,11 @@ import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useUser } from "~/hooks/use_user";
 
 export const MatchmakingPage = observer(() => {
-    const user = useUser();
+    const user = useUser()!;
     const { isSearching, startSearch, isStarting } = useMatchmaking();
     const decksQuery = useDecksQuery();
     const cardsQuery = useCardsQuery();
 
-    if (!user) return <Navigate to="/login" />;
     if (user.currentGameId) return <Navigate to="/play" />;
 
     if (decksQuery.isLoading || cardsQuery.isLoading) return <CenteredLoader absolute />;
@@ -30,8 +28,7 @@ export const MatchmakingPage = observer(() => {
     const canSearch = selectedDeck?.valid ?? false;
 
     return (
-        <AppLayout title="Matchmaking" backTo="/" backLabel="Accueil">
-            <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto">
                 <div className="gg-panel">
                     <div className="gg-panel-header">Rechercher une partie</div>
                     <div className="gg-panel-body flex flex-col gap-4">
@@ -104,6 +101,5 @@ export const MatchmakingPage = observer(() => {
                     </div>
                 </div>
             </div>
-        </AppLayout>
     );
 });

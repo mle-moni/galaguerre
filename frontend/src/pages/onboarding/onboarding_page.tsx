@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
@@ -12,7 +11,7 @@ import { privateAxios } from "~/services/axios";
 import { applyTrainingGameStarted } from "~/services/apply_training_game_started";
 
 export const OnboardingPage = observer(() => {
-    const user = useUser();
+    const user = useUser()!;
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const decksQuery = useDecksQuery();
@@ -29,7 +28,6 @@ export const OnboardingPage = observer(() => {
         },
     });
 
-    if (!user) return <Navigate to="/login" replace />;
     if (user.currentGameId) return <Navigate to="/play" replace />;
 
     if (decksQuery.isLoading || cardsQuery.isLoading) return <CenteredLoader absolute />;
@@ -45,8 +43,7 @@ export const OnboardingPage = observer(() => {
     const displayName = user.pseudo ?? user.email.split("@")[0];
 
     return (
-        <AppLayout title="Premiers pas">
-            <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto">
                 <div className="gg-panel">
                     <div className="gg-panel-header">Bienvenue dans l&apos;arène</div>
                     <div className="gg-panel-body flex flex-col gap-4">
@@ -136,6 +133,5 @@ export const OnboardingPage = observer(() => {
                     </div>
                 </div>
             </div>
-        </AppLayout>
     );
 });

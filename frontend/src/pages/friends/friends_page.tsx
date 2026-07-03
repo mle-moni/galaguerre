@@ -4,14 +4,12 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { IconEye, IconSearch } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FriendActionButton } from "~/components/friends/friend_action_button";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { ResponsiveTable } from "~/components/responsive_table";
 import { useFriendSearchQuery, useFriendsQuery } from "~/hooks/use_friends";
-import { useUser } from "~/hooks/use_user";
 
 const tableStyles = {
     th: { color: "rgba(255,255,255,0.7)", fontWeight: 600 },
@@ -79,7 +77,6 @@ const FriendRow = ({
 );
 
 export const FriendsPage = observer(() => {
-    const user = useUser();
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebouncedValue(search.trim(), 250);
@@ -89,12 +86,9 @@ export const FriendsPage = observer(() => {
     const friendIds = useMemo(() => new Set(friends.map((friend) => friend.userId)), [friends]);
     const searchResults = searchQuery.data ?? [];
 
-    if (!user) return <Navigate to="/login" />;
-
     return (
-        <AppLayout title="Amis" backTo="/" backLabel="Accueil">
-            <div className="max-w-4xl mx-auto w-full">
-                <h1 className="text-xl sm:text-2xl font-bold text-gg-navy m-0 mb-6">Amis</h1>
+        <div className="max-w-4xl mx-auto w-full">
+                <h1 className="text-xl sm:text-2xl font-bold text-white m-0 mb-6">Amis</h1>
 
                 <div className="gg-panel mb-6">
                     <div className="gg-panel-header">Rechercher un joueur</div>
@@ -191,6 +185,5 @@ export const FriendsPage = observer(() => {
                     )}
                 </div>
             </div>
-        </AppLayout>
     );
 });

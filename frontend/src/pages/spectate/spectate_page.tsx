@@ -5,7 +5,7 @@ import { Alert } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
-import { AppLayout } from "~/components/layout/app_layout";
+import { AppLayoutFrame } from "~/components/layout/app_layout";
 import { Game } from "~/pages/play/play_page";
 import { useUser } from "~/hooks/use_user";
 
@@ -29,25 +29,25 @@ export const SpectatePage = () => {
 
     if (!Number.isFinite(gameId) || gameId <= 0) {
         return (
-            <AppLayout title="Spectateur" backTo="/friends" backLabel="Amis">
+            <AppLayoutFrame>
                 <div className="max-w-3xl mx-auto w-full">
                     <Alert color="red" icon={<IconEye size={18} />}>
                         Partie invalide.
                     </Alert>
                 </div>
-            </AppLayout>
+            </AppLayoutFrame>
         );
     }
 
     if (!Number.isFinite(asUserId) || asUserId <= 0) {
         return (
-            <AppLayout title="Spectateur" backTo="/friends" backLabel="Amis">
+            <AppLayoutFrame>
                 <div className="max-w-3xl mx-auto w-full">
                     <Alert color="red" icon={<IconEye size={18} />}>
                         Joueur à observer requis.
                     </Alert>
                 </div>
-            </AppLayout>
+            </AppLayoutFrame>
         );
     }
 

@@ -3,13 +3,11 @@ import { Button } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { PackIcon } from "~/components/rewards/pack_icon";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useOpenPackMutation, usePacksQuery } from "~/hooks/use_collection";
 import { usePackOpeningFullSize } from "~/hooks/use_pack_opening_full_size";
-import { useUser } from "~/hooks/use_user";
 import { notifyError } from "~/services/toasts";
 import { PackOpeningCard } from "./pack_opening_card";
 import "./pack_opening_page.css";
@@ -19,7 +17,6 @@ type PackOpeningPhase = "idle" | "packReady" | "opening" | "cards" | "done";
 const INTERACTIVE_PACK_WIDTH = 220;
 
 export const PackOpeningPage = observer(() => {
-    const user = useUser();
     const packsQuery = usePacksQuery();
     const openPackMutation = useOpenPackMutation();
     const useFullSize = usePackOpeningFullSize();
@@ -41,7 +38,6 @@ export const PackOpeningPage = observer(() => {
         }
     }, [phase, allCardsFlipped]);
 
-    if (!user) return <Navigate to="/login" />;
     if (packsQuery.isLoading) return <CenteredLoader absolute />;
 
     const unopenedCount = packsQuery.data?.unopenedCount ?? 0;
@@ -103,19 +99,13 @@ export const PackOpeningPage = observer(() => {
     const showCards = phase === "cards" || phase === "done";
 
     return (
-        <AppLayout
-            title="Ouvrir des paquets"
-            backTo="/collection"
-            backLabel="Collection"
-            fillViewport
+        <div
+            className={clsx(
+                "mx-auto w-full flex flex-col flex-1 min-h-0 gap-6 pb-4",
+                useFullSize ? "pack-opening__container--full" : "max-w-5xl",
+            )}
         >
-            <div
-                className={clsx(
-                    "mx-auto w-full flex flex-col flex-1 min-h-0 gap-6 pb-4",
-                    useFullSize ? "pack-opening__container--full" : "max-w-5xl",
-                )}
-            >
-                <h1 className="text-2xl font-bold text-gg-navy m-0 shrink-0">Ouvrir des paquets</h1>
+                <h1 className="text-2xl font-bold text-white m-0 shrink-0">Ouvrir des paquets</h1>
 
                 <div className="pack-opening__stage">
                     {phase === "idle" ? (
@@ -233,6 +223,5 @@ export const PackOpeningPage = observer(() => {
                     ) : null}
                 </div>
             </div>
-        </AppLayout>
     );
 });

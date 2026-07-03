@@ -3,7 +3,6 @@ import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type { MinionCard } from "#api_types/game.types";
 import clsx from "clsx";
 import { BoardMinionToken } from "~/components/cards/board_minion_token";
-import { AppLayout } from "~/components/layout/app_layout";
 import "~/pages/play/game_layout.css";
 import "./board_minion_styles_page.css";
 
@@ -99,8 +98,7 @@ export const BoardMinionStylesPage = () => {
     const cards = getSampleCards();
 
     return (
-        <AppLayout title="Styles minions plateau" backTo="/" backLabel="Accueil">
-            <div className="board-minion-styles">
+        <div className="board-minion-styles">
                 <p className="board-minion-styles__intro">
                     Comparaison des jetons minion sur le plateau. La variante rectangle utilise le
                     ratio d&apos;image natif des cartes (8:5) avec <code>object-fit: contain</code>.
@@ -125,6 +123,5 @@ export const BoardMinionStylesPage = () => {
                     cards={cards}
                 />
             </div>
-        </AppLayout>
     );
 };

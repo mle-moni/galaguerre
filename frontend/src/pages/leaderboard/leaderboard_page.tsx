@@ -2,7 +2,6 @@ import { Badge, Table, Tabs } from "@mantine/core";
 import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { FriendActionButton } from "~/components/friends/friend_action_button";
-import { AppLayout } from "~/components/layout/app_layout";
 import { CenteredLoader } from "~/components/centered_loader";
 import { ResponsiveTable } from "~/components/responsive_table";
 import { PlayerNameLink } from "~/components/player_name_link";
@@ -41,9 +40,8 @@ export const LeaderboardPage = observer(() => {
     const speedrunEntries = speedrunQuery.data ?? [];
 
     return (
-        <AppLayout title="Classement" backTo="/" backLabel="Accueil">
-            <div className="max-w-3xl mx-auto">
-                <h1 className="text-xl sm:text-2xl font-bold text-gg-navy m-0 mb-6">Classement</h1>
+        <div className="max-w-3xl mx-auto">
+                <h1 className="text-xl sm:text-2xl font-bold text-white m-0 mb-6">Classement</h1>
 
                 <Tabs
                     value={activeTab}
@@ -239,6 +237,5 @@ export const LeaderboardPage = observer(() => {
                     </Tabs.Panel>
                 </Tabs>
             </div>
-        </AppLayout>
     );
 });
