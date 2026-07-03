@@ -646,7 +646,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         154,
         {
             ...gal("Neva", 3),
-            imageUrl: "/card-covers/neva.webp",
+            imageUrl: "/card-covers/galadrim/neva.webp",
             attack: 2,
             health: 3,
         },
@@ -660,7 +660,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         156,
         {
             ...gal("Papuche", 2),
-            imageUrl: "/card-covers/papuche.webp",
+            imageUrl: "/card-covers/galadrim/papuche.webp",
             attack: 2,
             health: 1,
         },
@@ -673,7 +673,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         157,
         {
             ...gal("Koda", 1),
-            imageUrl: "/card-covers/koda.webp",
+            imageUrl: "/card-covers/galadrim/koda.webp",
             attack: 1,
             health: 2,
         },
@@ -695,7 +695,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         158,
         {
             ...gal("Aloy", 3),
-            imageUrl: "/card-covers/aloy.webp",
+            imageUrl: "/card-covers/galadrim/aloy.webp",
             attack: 3,
             health: 3,
         },
@@ -709,7 +709,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         159,
         {
             ...gal("OG Sully", 4),
-            imageUrl: "/card-covers/sully.webp",
+            imageUrl: "/card-covers/galadrim/sully.webp",
             attack: 2,
             health: 4,
         },
@@ -1198,7 +1198,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         155,
         {
             ...gal("Plume", 1),
-            imageUrl: "/card-covers/plume.webp",
+            imageUrl: "/card-covers/galadrim/plume.webp",
             attack: 1,
             health: 1,
         },
