@@ -44,94 +44,94 @@ export const OnboardingPage = observer(() => {
 
     return (
         <div className="max-w-lg mx-auto">
-                <div className="gg-panel">
-                    <div className="gg-panel-header">Bienvenue dans l&apos;arène</div>
-                    <div className="gg-panel-body flex flex-col gap-4">
-                        <Text className="text-white font-semibold text-lg m-0">
-                            Bienvenue, {displayName} !
-                        </Text>
+            <div className="gg-panel">
+                <div className="gg-panel-header">Bienvenue dans l&apos;arène</div>
+                <div className="gg-panel-body flex flex-col gap-4">
+                    <Text className="text-white font-semibold text-lg m-0">
+                        Bienvenue, {displayName} !
+                    </Text>
 
-                        <Text className="text-white/80 m-0" size="sm">
-                            Galaguerre est un jeu de cartes en duel : réduisez les points de vie de
-                            l&apos;adversaire à 0. Chaque tour, votre mana augmente, vous jouez des
-                            cartes, attaquez, puis passez votre tour.
-                        </Text>
+                    <Text className="text-white/80 m-0" size="sm">
+                        Galaguerre est un jeu de cartes en duel : réduisez les points de vie de
+                        l&apos;adversaire à 0. Chaque tour, votre mana augmente, vous jouez des
+                        cartes, attaquez, puis passez votre tour.
+                    </Text>
 
-                        {selectedDeck ? (
-                            <>
-                                <div>
-                                    <Text className="text-white font-semibold mb-1">
-                                        Votre deck de départ : {selectedDeck.name}
-                                    </Text>
-                                    <Text size="sm" className="text-white/60">
-                                        {selectedDeck.cardCount} cartes — prêt à jouer
-                                    </Text>
+                    {selectedDeck ? (
+                        <>
+                            <div>
+                                <Text className="text-white font-semibold mb-1">
+                                    Votre deck de départ : {selectedDeck.name}
+                                </Text>
+                                <Text size="sm" className="text-white/60">
+                                    {selectedDeck.cardCount} cartes — prêt à jouer
+                                </Text>
+                            </div>
+
+                            {selectedDeck.cardCount > 0 && (
+                                <div className="pointer-events-none">
+                                    <ManaCurveChart
+                                        composition={deckComposition}
+                                        catalogById={catalogById}
+                                        selectedCost={null}
+                                        onCostClick={() => {}}
+                                    />
                                 </div>
+                            )}
 
-                                {selectedDeck.cardCount > 0 && (
-                                    <div className="pointer-events-none">
-                                        <ManaCurveChart
-                                            composition={deckComposition}
-                                            catalogById={catalogById}
-                                            selectedCost={null}
-                                            onCostClick={() => {}}
-                                        />
-                                    </div>
-                                )}
-
-                                <Link
-                                    to={`/decks/${selectedDeck.id}`}
-                                    className="text-gg-gold text-sm font-medium no-underline hover:underline"
-                                >
-                                    Explorer mon deck →
-                                </Link>
-                            </>
-                        ) : (
-                            <Text className="text-white/80">
-                                Aucun deck trouvé.{" "}
-                                <Link to="/decks" className="text-gg-gold">
-                                    Créez un deck
-                                </Link>{" "}
-                                pour commencer.
-                            </Text>
-                        )}
-
-                        {!canStart && selectedDeck && (
-                            <Text size="sm" className="text-red-300">
-                                Votre deck doit être valide pour lancer une partie.
-                            </Text>
-                        )}
-
-                        <Text className="text-white/70 m-0" size="sm">
-                            Pour votre première partie, affrontez l&apos;IA en entraînement — sans
-                            impact sur votre Elo.
+                            <Link
+                                to={`/decks/${selectedDeck.id}`}
+                                className="text-gg-gold text-sm font-medium no-underline hover:underline"
+                            >
+                                Explorer mon deck →
+                            </Link>
+                        </>
+                    ) : (
+                        <Text className="text-white/80">
+                            Aucun deck trouvé.{" "}
+                            <Link to="/decks" className="text-gg-gold">
+                                Créez un deck
+                            </Link>{" "}
+                            pour commencer.
                         </Text>
+                    )}
 
-                        <Button
-                            className="gg-btn-primary w-full"
-                            size="md"
-                            disabled={!canStart}
-                            loading={startMutation.isPending}
-                            onClick={() => startMutation.mutate()}
-                        >
-                            Lancer ma première partie
-                        </Button>
+                    {!canStart && selectedDeck && (
+                        <Text size="sm" className="text-red-300">
+                            Votre deck doit être valide pour lancer une partie.
+                        </Text>
+                    )}
 
-                        <Link
-                            to="/"
-                            className="text-center text-white/60 text-sm no-underline hover:text-white/80"
-                        >
-                            Passer pour l&apos;instant
-                        </Link>
+                    <Text className="text-white/70 m-0" size="sm">
+                        Pour votre première partie, affrontez l&apos;IA en entraînement — sans
+                        impact sur votre Elo.
+                    </Text>
 
-                        <Link
-                            to="/rules"
-                            className="text-center text-gg-gold text-sm no-underline hover:underline"
-                        >
-                            Lire les règles avant de jouer
-                        </Link>
-                    </div>
+                    <Button
+                        className="gg-btn-primary w-full"
+                        size="md"
+                        disabled={!canStart}
+                        loading={startMutation.isPending}
+                        onClick={() => startMutation.mutate()}
+                    >
+                        Lancer ma première partie
+                    </Button>
+
+                    <Link
+                        to="/"
+                        className="text-center text-white/60 text-sm no-underline hover:text-white/80"
+                    >
+                        Passer pour l&apos;instant
+                    </Link>
+
+                    <Link
+                        to="/rules"
+                        className="text-center text-gg-gold text-sm no-underline hover:underline"
+                    >
+                        Lire les règles avant de jouer
+                    </Link>
                 </div>
             </div>
+        </div>
     );
 });

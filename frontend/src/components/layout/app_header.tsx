@@ -47,7 +47,10 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
 
                     if ("disabled" in item && item.disabled) {
                         return (
-                            <span key={item.label} className="app-header__nav-link app-header__nav-link--disabled">
+                            <span
+                                key={item.label}
+                                className="app-header__nav-link app-header__nav-link--disabled"
+                            >
                                 {item.label}
                             </span>
                         );
@@ -86,7 +89,11 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                         <IconMail size={18} />
                         <span className="app-header__notif-dot" />
                     </button>
-                    <button type="button" className="app-header__icon-btn" aria-label="Notifications">
+                    <button
+                        type="button"
+                        className="app-header__icon-btn"
+                        aria-label="Notifications"
+                    >
                         <IconBell size={18} />
                     </button>
                 </div>

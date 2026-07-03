@@ -119,9 +119,7 @@ export const GameHistoryListPage = observer(() => {
                         userId={user.userId}
                         className="text-white no-underline hover:underline"
                     />
-                    {isOwnHistory && (
-                        <span className="text-gg-gold text-base ml-2">(vous)</span>
-                    )}
+                    {isOwnHistory && <span className="text-gg-gold text-base ml-2">(vous)</span>}
                 </h1>
                 {!isOwnHistory && (
                     <FriendActionButton

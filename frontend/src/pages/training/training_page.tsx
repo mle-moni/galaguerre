@@ -43,70 +43,70 @@ export const TrainingPage = observer(() => {
 
     return (
         <div className="max-w-lg mx-auto">
-                <div className="gg-panel">
-                    <div className="gg-panel-header">Partie d'entraînement</div>
-                    <div className="gg-panel-body flex flex-col gap-4">
-                        <Text className="text-white/80" size="sm">
-                            Affrontez une IA avec un deck fixe de monstres. L'Elo n'est pas impacté.
-                        </Text>
+            <div className="gg-panel">
+                <div className="gg-panel-header">Partie d'entraînement</div>
+                <div className="gg-panel-body flex flex-col gap-4">
+                    <Text className="text-white/80" size="sm">
+                        Affrontez une IA avec un deck fixe de monstres. L'Elo n'est pas impacté.
+                    </Text>
 
-                        {selectedDeck ? (
-                            <>
-                                <div>
-                                    <Text className="text-white font-semibold mb-1">
-                                        Deck sélectionné : {selectedDeck.name}
-                                    </Text>
-                                    <Text size="sm" className="text-white/60">
-                                        {selectedDeck.cardCount} cartes
-                                        {!selectedDeck.valid && " — deck invalide"}
-                                    </Text>
+                    {selectedDeck ? (
+                        <>
+                            <div>
+                                <Text className="text-white font-semibold mb-1">
+                                    Deck sélectionné : {selectedDeck.name}
+                                </Text>
+                                <Text size="sm" className="text-white/60">
+                                    {selectedDeck.cardCount} cartes
+                                    {!selectedDeck.valid && " — deck invalide"}
+                                </Text>
+                            </div>
+
+                            {selectedDeck.cardCount > 0 && (
+                                <div className="pointer-events-none">
+                                    <ManaCurveChart
+                                        composition={deckComposition}
+                                        catalogById={catalogById}
+                                        selectedCost={null}
+                                        onCostClick={() => {}}
+                                    />
                                 </div>
+                            )}
 
-                                {selectedDeck.cardCount > 0 && (
-                                    <div className="pointer-events-none">
-                                        <ManaCurveChart
-                                            composition={deckComposition}
-                                            catalogById={catalogById}
-                                            selectedCost={null}
-                                            onCostClick={() => {}}
-                                        />
-                                    </div>
-                                )}
+                            <Link
+                                to="/decks"
+                                className="text-gg-gold text-sm font-medium no-underline hover:underline"
+                            >
+                                Changer de deck →
+                            </Link>
+                        </>
+                    ) : (
+                        <Text className="text-white/80">
+                            Vous n'avez pas de deck sélectionné.{" "}
+                            <Link to="/decks" className="text-gg-gold">
+                                Choisissez un deck
+                            </Link>{" "}
+                            pour jouer.
+                        </Text>
+                    )}
 
-                                <Link
-                                    to="/decks"
-                                    className="text-gg-gold text-sm font-medium no-underline hover:underline"
-                                >
-                                    Changer de deck →
-                                </Link>
-                            </>
-                        ) : (
-                            <Text className="text-white/80">
-                                Vous n'avez pas de deck sélectionné.{" "}
-                                <Link to="/decks" className="text-gg-gold">
-                                    Choisissez un deck
-                                </Link>{" "}
-                                pour jouer.
-                            </Text>
-                        )}
+                    {!canStart && selectedDeck && (
+                        <Text size="sm" className="text-red-300">
+                            Votre deck doit être valide et contenir exactement 30 cartes.
+                        </Text>
+                    )}
 
-                        {!canStart && selectedDeck && (
-                            <Text size="sm" className="text-red-300">
-                                Votre deck doit être valide et contenir exactement 30 cartes.
-                            </Text>
-                        )}
-
-                        <Button
-                            className="gg-btn-primary w-full sm:w-auto"
-                            size="md"
-                            disabled={!canStart}
-                            loading={startMutation.isPending}
-                            onClick={() => startMutation.mutate()}
-                        >
-                            Lancer une partie d'entraînement
-                        </Button>
-                    </div>
+                    <Button
+                        className="gg-btn-primary w-full sm:w-auto"
+                        size="md"
+                        disabled={!canStart}
+                        loading={startMutation.isPending}
+                        onClick={() => startMutation.mutate()}
+                    >
+                        Lancer une partie d'entraînement
+                    </Button>
                 </div>
             </div>
+        </div>
     );
 });

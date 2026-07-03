@@ -99,29 +99,29 @@ export const BoardMinionStylesPage = () => {
 
     return (
         <div className="board-minion-styles">
-                <p className="board-minion-styles__intro">
-                    Comparaison des jetons minion sur le plateau. La variante rectangle utilise le
-                    ratio d&apos;image natif des cartes (8:5) avec <code>object-fit: contain</code>.
-                </p>
-                <p className="board-minion-styles__intro">
-                    En partie, le mode rectangle est actif par défaut sur desktop ; le mode ovale
-                    reste utilisé sur mobile portrait. Forcer un mode :{" "}
-                    <code>?boardMinion=rect</code> ou <code>?boardMinion=oval</code>.
-                </p>
+            <p className="board-minion-styles__intro">
+                Comparaison des jetons minion sur le plateau. La variante rectangle utilise le ratio
+                d&apos;image natif des cartes (8:5) avec <code>object-fit: contain</code>.
+            </p>
+            <p className="board-minion-styles__intro">
+                En partie, le mode rectangle est actif par défaut sur desktop ; le mode ovale reste
+                utilisé sur mobile portrait. Forcer un mode : <code>?boardMinion=rect</code> ou{" "}
+                <code>?boardMinion=oval</code>.
+            </p>
 
-                <StyleSection
-                    title="Ovale (actuel)"
-                    description="Forme elliptique, image recadrée pour remplir la zone."
-                    variant="oval"
-                    cards={cards}
-                />
+            <StyleSection
+                title="Ovale (actuel)"
+                description="Forme elliptique, image recadrée pour remplir la zone."
+                variant="oval"
+                cards={cards}
+            />
 
-                <StyleSection
-                    title="Rectangle 8:5 (test)"
-                    description="Forme rectangulaire, image affichée dans son ratio d'origine."
-                    variant="rect"
-                    cards={cards}
-                />
-            </div>
+            <StyleSection
+                title="Rectangle 8:5 (test)"
+                description="Forme rectangulaire, image affichée dans son ratio d'origine."
+                variant="rect"
+                cards={cards}
+            />
+        </div>
     );
 };

@@ -1,10 +1,6 @@
 import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
-import {
-    HOME_MOCK_DAILY_QUESTS,
-    HOME_MOCK_QUEST_RESET,
-    type HomeQuest,
-} from "../home_mock_data";
+import { HOME_MOCK_DAILY_QUESTS, HOME_MOCK_QUEST_RESET, type HomeQuest } from "../home_mock_data";
 import { HomeCollectionPanel } from "./home_collection_panel";
 import { HomeEventsPanel } from "./home_events_panel";
 import { HomePanel } from "./home_panel";

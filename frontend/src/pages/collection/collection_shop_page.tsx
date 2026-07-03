@@ -32,82 +32,78 @@ export const CollectionShopPage = observer(() => {
 
     return (
         <div className="max-w-2xl mx-auto w-full">
-                <h1 className="text-2xl font-bold text-white mb-6">Boutique</h1>
+            <h1 className="text-2xl font-bold text-white mb-6">Boutique</h1>
 
-                <Stack gap="lg">
-                    <Group gap="xs" wrap="nowrap" align="center">
-                        <GoldCoinIcon size={48} />
-                        <Text size="lg" fw={600}>
-                            x {goldCoins}
+            <Stack gap="lg">
+                <Group gap="xs" wrap="nowrap" align="center">
+                    <GoldCoinIcon size={48} />
+                    <Text size="lg" fw={600}>
+                        x {goldCoins}
+                    </Text>
+                </Group>
+
+                <Modal
+                    opened={helpOpened}
+                    onClose={() => setHelpOpened(false)}
+                    title="Comment gagner des story points ?"
+                    centered
+                >
+                    <Stack gap="sm">
+                        <Text size="sm" c="dimmed">
+                            Victoire :{" "}
+                            <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
+                                <GoldCoinIcon size={16} />
+                                <span>+{GOLD_COINS_PER_VICTORY}</span>
+                            </Group>
                         </Text>
-                    </Group>
-
-                    <Modal
-                        opened={helpOpened}
-                        onClose={() => setHelpOpened(false)}
-                        title="Comment gagner des story points ?"
-                        centered
-                    >
-                        <Stack gap="sm">
-                            <Text size="sm" c="dimmed">
-                                Victoire :{" "}
-                                <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
-                                    <GoldCoinIcon size={16} />
-                                    <span>+{GOLD_COINS_PER_VICTORY}</span>
-                                </Group>
-                            </Text>
-                            <Text size="sm" c="dimmed">
-                                Défaite ou match nul :{" "}
-                                <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
-                                    <GoldCoinIcon size={16} />
-                                    <span>+{GOLD_COINS_PER_DEFEAT}</span>
-                                </Group>
-                            </Text>
-                            <Group gap={6} wrap="nowrap">
-                                <PackIcon width={16} />
-                                <Text size="sm" c="dimmed">
-                                    Première victoire du jour : +1 paquet bonus
-                                </Text>
+                        <Text size="sm" c="dimmed">
+                            Défaite ou match nul :{" "}
+                            <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
+                                <GoldCoinIcon size={16} />
+                                <span>+{GOLD_COINS_PER_DEFEAT}</span>
                             </Group>
-                        </Stack>
-                    </Modal>
-
-                    <Paper withBorder p="lg" radius="md">
-                        <Stack gap="sm">
-                            <Center>
-                                <PackIcon width={120} />
-                            </Center>
-                            <Text fw={600}>Paquet de cartes</Text>
+                        </Text>
+                        <Group gap={6} wrap="nowrap">
+                            <PackIcon width={16} />
                             <Text size="sm" c="dimmed">
-                                5 cartes aléatoires pour enrichir votre collection.
+                                Première victoire du jour : +1 paquet bonus
                             </Text>
-                            <Group gap="xs" wrap="nowrap" align="center">
-                                <GoldCoinAmount
-                                    amount={GOLD_COINS_PER_PACK}
-                                    showLabel
-                                    iconSize={20}
-                                />
-                                <ActionIcon
-                                    variant="transparent"
-                                    size="sm"
-                                    className="text-white/70"
-                                    aria-label="Comment gagner des story points"
-                                    onClick={() => setHelpOpened(true)}
-                                >
-                                    <IconQuestionMark size={18} />
-                                </ActionIcon>
-                            </Group>
-                            <Button
-                                onClick={handleBuy}
-                                loading={buyPackMutation.isPending}
-                                disabled={!canAfford}
-                                className="gg-btn-primary w-full sm:w-auto"
+                        </Group>
+                    </Stack>
+                </Modal>
+
+                <Paper withBorder p="lg" radius="md">
+                    <Stack gap="sm">
+                        <Center>
+                            <PackIcon width={120} />
+                        </Center>
+                        <Text fw={600}>Paquet de cartes</Text>
+                        <Text size="sm" c="dimmed">
+                            5 cartes aléatoires pour enrichir votre collection.
+                        </Text>
+                        <Group gap="xs" wrap="nowrap" align="center">
+                            <GoldCoinAmount amount={GOLD_COINS_PER_PACK} showLabel iconSize={20} />
+                            <ActionIcon
+                                variant="transparent"
+                                size="sm"
+                                className="text-white/70"
+                                aria-label="Comment gagner des story points"
+                                onClick={() => setHelpOpened(true)}
                             >
-                                Acheter
-                            </Button>
-                        </Stack>
-                    </Paper>
-                </Stack>
-            </div>
+                                <IconQuestionMark size={18} />
+                            </ActionIcon>
+                        </Group>
+                        <Button
+                            onClick={handleBuy}
+                            loading={buyPackMutation.isPending}
+                            disabled={!canAfford}
+                            className="gg-btn-primary w-full sm:w-auto"
+                        >
+                            Acheter
+                        </Button>
+                    </Stack>
+                </Paper>
+            </Stack>
+        </div>
     );
 });

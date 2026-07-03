@@ -2,6 +2,7 @@ import type {
     ApiBuyCardResponse,
     ApiCollectionResponse,
     ApiDuplicatesPreviewResponse,
+    ApiOpenPackResponse,
     ApiSellCardResponse,
     ApiSellDuplicatesResponse,
 } from "#api_types/collection.types";
@@ -110,7 +111,7 @@ export const useOpenPackMutation = () => {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await privateAxios.post<{ cards: unknown[] }>("/api/packs/open");
+            const response = await privateAxios.post<ApiOpenPackResponse>("/api/packs/open");
             return response.data.cards;
         },
         onSuccess: () => {

@@ -61,10 +61,18 @@ export const HomeRightSidebar = ({ friends, isLoading }: HomeRightSidebarProps) 
                             <strong>{invite.fromPseudo}</strong> vous invite — {invite.mode}
                         </p>
                         <div className="home-invite__actions">
-                            <button type="button" className="home-invite__btn home-invite__btn--accept" aria-label="Accepter">
+                            <button
+                                type="button"
+                                className="home-invite__btn home-invite__btn--accept"
+                                aria-label="Accepter"
+                            >
                                 ✓
                             </button>
-                            <button type="button" className="home-invite__btn home-invite__btn--decline" aria-label="Refuser">
+                            <button
+                                type="button"
+                                className="home-invite__btn home-invite__btn--decline"
+                                aria-label="Refuser"
+                            >
                                 ✕
                             </button>
                         </div>

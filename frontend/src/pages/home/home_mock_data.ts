@@ -41,9 +41,30 @@ export const HOME_MOCK_PROFILE = {
 } as const;
 
 export const HOME_MOCK_DAILY_QUESTS: HomeQuest[] = [
-    { id: "q1", title: "Jouer 3 parties", progress: 2, total: 3, rewardAmount: 50, rewardType: "story_points" },
-    { id: "q2", title: "Gagner 1 partie classée", progress: 0, total: 1, rewardAmount: 1, rewardType: "pack" },
-    { id: "q3", title: "Ouvrir 1 paquet", progress: 1, total: 1, rewardAmount: 25, rewardType: "story_points" },
+    {
+        id: "q1",
+        title: "Jouer 3 parties",
+        progress: 2,
+        total: 3,
+        rewardAmount: 50,
+        rewardType: "story_points",
+    },
+    {
+        id: "q2",
+        title: "Gagner 1 partie classée",
+        progress: 0,
+        total: 1,
+        rewardAmount: 1,
+        rewardType: "pack",
+    },
+    {
+        id: "q3",
+        title: "Ouvrir 1 paquet",
+        progress: 1,
+        total: 1,
+        rewardAmount: 25,
+        rewardType: "story_points",
+    },
 ];
 
 export const HOME_MOCK_QUEST_RESET = "12 h 45 min";

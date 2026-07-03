@@ -88,102 +88,98 @@ export const FriendsPage = observer(() => {
 
     return (
         <div className="max-w-4xl mx-auto w-full">
-                <h1 className="text-xl sm:text-2xl font-bold text-white m-0 mb-6">Amis</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-white m-0 mb-6">Amis</h1>
 
-                <div className="gg-panel mb-6">
-                    <div className="gg-panel-header">Rechercher un joueur</div>
-                    <div className="gg-panel-body flex flex-col gap-4">
-                        <TextInput
-                            aria-label="Rechercher par pseudo"
-                            leftSection={<IconSearch size={16} />}
-                            onChange={(event) => setSearch(event.currentTarget.value)}
-                            placeholder="Pseudo"
-                            value={search}
-                        />
+            <div className="gg-panel mb-6">
+                <div className="gg-panel-header">Rechercher un joueur</div>
+                <div className="gg-panel-body flex flex-col gap-4">
+                    <TextInput
+                        aria-label="Rechercher par pseudo"
+                        leftSection={<IconSearch size={16} />}
+                        onChange={(event) => setSearch(event.currentTarget.value)}
+                        placeholder="Pseudo"
+                        value={search}
+                    />
 
-                        {debouncedSearch.length >= 2 && searchQuery.isFetching && (
-                            <CenteredLoader />
-                        )}
+                    {debouncedSearch.length >= 2 && searchQuery.isFetching && <CenteredLoader />}
 
-                        {debouncedSearch.length >= 2 && !searchQuery.isFetching && (
-                            <>
-                                {searchResults.length === 0 ? (
-                                    <p className="text-white/70 m-0">Aucun joueur trouvé.</p>
-                                ) : (
-                                    <ResponsiveTable minWidth={360}>
-                                        <Table
-                                            highlightOnHover
-                                            highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
-                                            striped
-                                            stripedColor="rgba(255, 255, 255, 0.06)"
-                                            styles={tableStyles}
-                                            withTableBorder={false}
-                                        >
-                                            <Table.Tbody>
-                                                {searchResults.map((entry) => (
-                                                    <FriendRow
-                                                        key={entry.userId}
-                                                        entry={entry}
-                                                        isFriend={
-                                                            entry.isFriend ||
-                                                            friendIds.has(entry.userId)
-                                                        }
-                                                        onSpectate={(gameId) =>
-                                                            navigate(
-                                                                `/spectate/${gameId}?asUserId=${entry.userId}`,
-                                                            )
-                                                        }
-                                                    />
-                                                ))}
-                                            </Table.Tbody>
-                                        </Table>
-                                    </ResponsiveTable>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                <div className="gg-panel overflow-hidden">
-                    <div className="gg-panel-header">Mes amis</div>
-                    {friendsQuery.isLoading ? (
-                        <div className="gg-panel-body">
-                            <CenteredLoader />
-                        </div>
-                    ) : friends.length === 0 ? (
-                        <div className="gg-panel-body">
-                            <p className="text-white/70 m-0">
-                                Vous n'avez pas encore ajouté d'ami.
-                            </p>
-                        </div>
-                    ) : (
-                        <ResponsiveTable minWidth={360}>
-                            <Table
-                                highlightOnHover
-                                highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
-                                striped
-                                stripedColor="rgba(255, 255, 255, 0.06)"
-                                styles={tableStyles}
-                                withTableBorder={false}
-                            >
-                                <Table.Tbody>
-                                    {friends.map((friend) => (
-                                        <FriendRow
-                                            key={friend.userId}
-                                            entry={friend}
-                                            isFriend={friendIds.has(friend.userId)}
-                                            onSpectate={(gameId) =>
-                                                navigate(
-                                                    `/spectate/${gameId}?asUserId=${friend.userId}`,
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </Table.Tbody>
-                            </Table>
-                        </ResponsiveTable>
+                    {debouncedSearch.length >= 2 && !searchQuery.isFetching && (
+                        <>
+                            {searchResults.length === 0 ? (
+                                <p className="text-white/70 m-0">Aucun joueur trouvé.</p>
+                            ) : (
+                                <ResponsiveTable minWidth={360}>
+                                    <Table
+                                        highlightOnHover
+                                        highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
+                                        striped
+                                        stripedColor="rgba(255, 255, 255, 0.06)"
+                                        styles={tableStyles}
+                                        withTableBorder={false}
+                                    >
+                                        <Table.Tbody>
+                                            {searchResults.map((entry) => (
+                                                <FriendRow
+                                                    key={entry.userId}
+                                                    entry={entry}
+                                                    isFriend={
+                                                        entry.isFriend ||
+                                                        friendIds.has(entry.userId)
+                                                    }
+                                                    onSpectate={(gameId) =>
+                                                        navigate(
+                                                            `/spectate/${gameId}?asUserId=${entry.userId}`,
+                                                        )
+                                                    }
+                                                />
+                                            ))}
+                                        </Table.Tbody>
+                                    </Table>
+                                </ResponsiveTable>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
+
+            <div className="gg-panel overflow-hidden">
+                <div className="gg-panel-header">Mes amis</div>
+                {friendsQuery.isLoading ? (
+                    <div className="gg-panel-body">
+                        <CenteredLoader />
+                    </div>
+                ) : friends.length === 0 ? (
+                    <div className="gg-panel-body">
+                        <p className="text-white/70 m-0">Vous n'avez pas encore ajouté d'ami.</p>
+                    </div>
+                ) : (
+                    <ResponsiveTable minWidth={360}>
+                        <Table
+                            highlightOnHover
+                            highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
+                            striped
+                            stripedColor="rgba(255, 255, 255, 0.06)"
+                            styles={tableStyles}
+                            withTableBorder={false}
+                        >
+                            <Table.Tbody>
+                                {friends.map((friend) => (
+                                    <FriendRow
+                                        key={friend.userId}
+                                        entry={friend}
+                                        isFriend={friendIds.has(friend.userId)}
+                                        onSpectate={(gameId) =>
+                                            navigate(
+                                                `/spectate/${gameId}?asUserId=${friend.userId}`,
+                                            )
+                                        }
+                                    />
+                                ))}
+                            </Table.Tbody>
+                        </Table>
+                    </ResponsiveTable>
+                )}
+            </div>
+        </div>
     );
 });

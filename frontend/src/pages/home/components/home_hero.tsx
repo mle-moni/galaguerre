@@ -7,10 +7,7 @@ interface HomeHeroProps {
 
 export const HomeHero = ({ playTarget }: HomeHeroProps) => (
     <section className="home-hero">
-        <div
-            className="home-hero__bg"
-            style={{ backgroundImage: `url(${HOME_ASSETS.heroBg})` }}
-        />
+        <div className="home-hero__bg" style={{ backgroundImage: `url(${HOME_ASSETS.heroBg})` }} />
         <div className="home-hero__overlay" />
 
         <div className="home-hero__content">

@@ -29,77 +29,77 @@ export const MatchmakingPage = observer(() => {
 
     return (
         <div className="max-w-lg mx-auto">
-                <div className="gg-panel">
-                    <div className="gg-panel-header">Rechercher une partie</div>
-                    <div className="gg-panel-body flex flex-col gap-4">
-                        {selectedDeck ? (
-                            <>
-                                <div>
-                                    <Text className="text-white font-semibold mb-1">
-                                        Deck sélectionné : {selectedDeck.name}
-                                    </Text>
-                                    <Text size="sm" className="text-white/60">
-                                        {selectedDeck.cardCount} cartes
-                                        {!selectedDeck.valid && " — deck invalide"}
-                                    </Text>
-                                </div>
-
-                                {selectedDeck.cardCount > 0 && (
-                                    <div className="pointer-events-none">
-                                        <ManaCurveChart
-                                            composition={deckComposition}
-                                            catalogById={catalogById}
-                                            selectedCost={null}
-                                            onCostClick={() => {}}
-                                        />
-                                    </div>
-                                )}
-
-                                <Link
-                                    to="/decks"
-                                    className="text-gg-gold text-sm font-medium no-underline hover:underline"
-                                >
-                                    Changer de deck →
-                                </Link>
-                            </>
-                        ) : (
-                            <Text className="text-white/80">
-                                Vous n'avez pas de deck sélectionné.{" "}
-                                <Link to="/decks" className="text-gg-gold">
-                                    Choisissez un deck
-                                </Link>{" "}
-                                pour jouer.
-                            </Text>
-                        )}
-
-                        {!canSearch && selectedDeck && (
-                            <Text size="sm" className="text-red-300">
-                                {selectedDeck.compositionErrors[0] ??
-                                    "Votre deck doit être valide et contenir exactement 30 cartes."}
-                            </Text>
-                        )}
-
-                        {!isSearching ? (
-                            <Button
-                                className="gg-btn-primary w-full sm:w-auto"
-                                size="md"
-                                disabled={!canSearch}
-                                loading={isStarting}
-                                onClick={() => startSearch()}
-                            >
-                                Rechercher une partie
-                            </Button>
-                        ) : (
-                            <div className="text-center py-4">
-                                <CenteredLoader />
-                                <Text className="text-white mt-4">Recherche en cours...</Text>
-                                <Text size="sm" className="text-white/60 mt-1">
-                                    Vous pouvez naviguer ailleurs pendant la recherche
+            <div className="gg-panel">
+                <div className="gg-panel-header">Rechercher une partie</div>
+                <div className="gg-panel-body flex flex-col gap-4">
+                    {selectedDeck ? (
+                        <>
+                            <div>
+                                <Text className="text-white font-semibold mb-1">
+                                    Deck sélectionné : {selectedDeck.name}
+                                </Text>
+                                <Text size="sm" className="text-white/60">
+                                    {selectedDeck.cardCount} cartes
+                                    {!selectedDeck.valid && " — deck invalide"}
                                 </Text>
                             </div>
-                        )}
-                    </div>
+
+                            {selectedDeck.cardCount > 0 && (
+                                <div className="pointer-events-none">
+                                    <ManaCurveChart
+                                        composition={deckComposition}
+                                        catalogById={catalogById}
+                                        selectedCost={null}
+                                        onCostClick={() => {}}
+                                    />
+                                </div>
+                            )}
+
+                            <Link
+                                to="/decks"
+                                className="text-gg-gold text-sm font-medium no-underline hover:underline"
+                            >
+                                Changer de deck →
+                            </Link>
+                        </>
+                    ) : (
+                        <Text className="text-white/80">
+                            Vous n'avez pas de deck sélectionné.{" "}
+                            <Link to="/decks" className="text-gg-gold">
+                                Choisissez un deck
+                            </Link>{" "}
+                            pour jouer.
+                        </Text>
+                    )}
+
+                    {!canSearch && selectedDeck && (
+                        <Text size="sm" className="text-red-300">
+                            {selectedDeck.compositionErrors[0] ??
+                                "Votre deck doit être valide et contenir exactement 30 cartes."}
+                        </Text>
+                    )}
+
+                    {!isSearching ? (
+                        <Button
+                            className="gg-btn-primary w-full sm:w-auto"
+                            size="md"
+                            disabled={!canSearch}
+                            loading={isStarting}
+                            onClick={() => startSearch()}
+                        >
+                            Rechercher une partie
+                        </Button>
+                    ) : (
+                        <div className="text-center py-4">
+                            <CenteredLoader />
+                            <Text className="text-white mt-4">Recherche en cours...</Text>
+                            <Text size="sm" className="text-white/60 mt-1">
+                                Vous pouvez naviguer ailleurs pendant la recherche
+                            </Text>
+                        </div>
+                    )}
                 </div>
             </div>
+        </div>
     );
 });

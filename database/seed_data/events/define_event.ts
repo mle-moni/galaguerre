@@ -8,10 +8,7 @@ export type EventSeedEntry = {
     startsAt: string;
 };
 
-export const defineEvent = (
-    id: number,
-    entry: Omit<EventSeedEntry, "id">,
-): EventSeedEntry => ({
+export const defineEvent = (id: number, entry: Omit<EventSeedEntry, "id">): EventSeedEntry => ({
     id,
     ...entry,
 });

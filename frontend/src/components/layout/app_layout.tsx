@@ -23,7 +23,12 @@ const AppLayoutShell = observer(({ children, fillViewport = false }: AppLayoutSh
         <div className="app-layout">
             <AppHeader user={user} playTarget={playTarget} />
             <div className="app-layout__main">
-                <div className={clsx("app-layout__content", fillViewport && "app-layout__content--fill")}>
+                <div
+                    className={clsx(
+                        "app-layout__content",
+                        fillViewport && "app-layout__content--fill",
+                    )}
+                >
                     {children}
                 </div>
             </div>
@@ -42,6 +47,8 @@ export const AppLayout = observer(() => {
     );
 });
 
-export const AppLayoutFrame = observer(({ children, fillViewport = false }: AppLayoutShellProps) => {
-    return <AppLayoutShell fillViewport={fillViewport}>{children}</AppLayoutShell>;
-});
+export const AppLayoutFrame = observer(
+    ({ children, fillViewport = false }: AppLayoutShellProps) => {
+        return <AppLayoutShell fillViewport={fillViewport}>{children}</AppLayoutShell>;
+    },
+);

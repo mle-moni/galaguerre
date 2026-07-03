@@ -69,7 +69,10 @@ test.group("events", (group) => {
         const today = DateTime.now().startOf("day");
 
         await createEvent(`${unique}-in-window`, today.plus({ days: 2 }));
-        await createEvent(`${unique}-out-window`, today.plus({ days: UPCOMING_EVENT_WINDOW_DAYS + 1 }));
+        await createEvent(
+            `${unique}-out-window`,
+            today.plus({ days: UPCOMING_EVENT_WINDOW_DAYS + 1 }),
+        );
 
         const controller = new EventsController();
         const { ctx } = createContext(user);
@@ -147,7 +150,9 @@ test.group("events", (group) => {
         const user = await createUser(unique);
         const event = await createEvent(
             unique,
-            DateTime.now().startOf("day").plus({ days: UPCOMING_EVENT_WINDOW_DAYS + 2 }),
+            DateTime.now()
+                .startOf("day")
+                .plus({ days: UPCOMING_EVENT_WINDOW_DAYS + 2 }),
         );
 
         const controller = new EventsController();

@@ -105,116 +105,116 @@ export const PackOpeningPage = observer(() => {
                 useFullSize ? "pack-opening__container--full" : "max-w-5xl",
             )}
         >
-                <h1 className="text-2xl font-bold text-white m-0 shrink-0">Ouvrir des paquets</h1>
+            <h1 className="text-2xl font-bold text-white m-0 shrink-0">Ouvrir des paquets</h1>
 
-                <div className="pack-opening__stage">
-                    {phase === "idle" ? (
-                        <div className="pack-opening__idle">
-                            {unopenedCount > 0 ? (
-                                <div className="pack-opening__packs">
-                                    {Array.from({ length: unopenedCount }, (_, index) => (
-                                        <PackIcon key={index} width={packIconWidth} />
-                                    ))}
-                                </div>
-                            ) : null}
-                            {unopenedCount === 0 && (
-                                <p className="pack-opening__message m-0">
-                                    Vous n'avez plus de paquets à ouvrir.
-                                </p>
-                            )}
-                            {unopenedCount > 0 ? (
-                                <Button className="gg-btn-primary" onClick={handleStartOpening}>
-                                    Ouvrir un paquet
-                                </Button>
-                            ) : (
-                                <Button
-                                    component={Link}
-                                    to="/collection/shop"
-                                    className="gg-btn-primary"
-                                >
-                                    Acheter un paquet
-                                </Button>
-                            )}
-                        </div>
-                    ) : null}
-
-                    {phase === "packReady" || phase === "opening" ? (
-                        <div className="pack-opening__pack-ready">
-                            <button
-                                type="button"
-                                className={clsx(
-                                    "pack-opening__pack",
-                                    phase === "packReady" && "pack-opening__pack--ready",
-                                    phase === "opening" && "pack-opening__pack--opening",
-                                )}
-                                onClick={handlePackClick}
-                                onAnimationEnd={handlePackAnimationEnd}
-                                disabled={phase === "opening"}
-                                aria-busy={phase === "opening"}
-                                aria-label="Ouvrir le paquet"
-                            >
-                                <PackIcon width={INTERACTIVE_PACK_WIDTH} />
-                            </button>
-                            <p className="pack-opening__message m-0">
-                                {phase === "opening"
-                                    ? "Ouverture en cours…"
-                                    : "Cliquez sur le paquet pour l'ouvrir"}
-                            </p>
-                        </div>
-                    ) : null}
-
-                    {showCards && revealedCards !== null ? (
-                        <div className="pack-opening__reveal">
-                            <div
-                                className={clsx(
-                                    "pack-opening__cards",
-                                    useFullSize && "pack-opening__cards--full",
-                                )}
-                            >
-                                {revealedCards.map((card, index) => (
-                                    <PackOpeningCard
-                                        key={`${card.id}-${index}`}
-                                        card={card}
-                                        isFlipped={flippedIndices.has(index)}
-                                        canFlip={phase === "cards" && !flippedIndices.has(index)}
-                                        onFlip={() => handleFlipCard(index)}
-                                        animationDelay={`${index * 120}ms`}
-                                    />
+            <div className="pack-opening__stage">
+                {phase === "idle" ? (
+                    <div className="pack-opening__idle">
+                        {unopenedCount > 0 ? (
+                            <div className="pack-opening__packs">
+                                {Array.from({ length: unopenedCount }, (_, index) => (
+                                    <PackIcon key={index} width={packIconWidth} />
                                 ))}
                             </div>
-                            {phase === "done" ? (
-                                <div className="pack-opening__actions">
-                                    {unopenedCount > 0 ? (
-                                        <>
-                                            <Button
-                                                className="gg-btn-primary"
-                                                onClick={handleOpenAnother}
-                                            >
-                                                Ouvrir un autre paquet ({unopenedCount})
-                                            </Button>
-                                            <Button
-                                                component={Link}
-                                                to="/collection"
-                                                variant="outline"
-                                                color="navy"
-                                            >
-                                                Voir ma collection
-                                            </Button>
-                                        </>
-                                    ) : (
+                        ) : null}
+                        {unopenedCount === 0 && (
+                            <p className="pack-opening__message m-0">
+                                Vous n'avez plus de paquets à ouvrir.
+                            </p>
+                        )}
+                        {unopenedCount > 0 ? (
+                            <Button className="gg-btn-primary" onClick={handleStartOpening}>
+                                Ouvrir un paquet
+                            </Button>
+                        ) : (
+                            <Button
+                                component={Link}
+                                to="/collection/shop"
+                                className="gg-btn-primary"
+                            >
+                                Acheter un paquet
+                            </Button>
+                        )}
+                    </div>
+                ) : null}
+
+                {phase === "packReady" || phase === "opening" ? (
+                    <div className="pack-opening__pack-ready">
+                        <button
+                            type="button"
+                            className={clsx(
+                                "pack-opening__pack",
+                                phase === "packReady" && "pack-opening__pack--ready",
+                                phase === "opening" && "pack-opening__pack--opening",
+                            )}
+                            onClick={handlePackClick}
+                            onAnimationEnd={handlePackAnimationEnd}
+                            disabled={phase === "opening"}
+                            aria-busy={phase === "opening"}
+                            aria-label="Ouvrir le paquet"
+                        >
+                            <PackIcon width={INTERACTIVE_PACK_WIDTH} />
+                        </button>
+                        <p className="pack-opening__message m-0">
+                            {phase === "opening"
+                                ? "Ouverture en cours…"
+                                : "Cliquez sur le paquet pour l'ouvrir"}
+                        </p>
+                    </div>
+                ) : null}
+
+                {showCards && revealedCards !== null ? (
+                    <div className="pack-opening__reveal">
+                        <div
+                            className={clsx(
+                                "pack-opening__cards",
+                                useFullSize && "pack-opening__cards--full",
+                            )}
+                        >
+                            {revealedCards.map((card, index) => (
+                                <PackOpeningCard
+                                    key={`${card.id}-${index}`}
+                                    card={card}
+                                    isFlipped={flippedIndices.has(index)}
+                                    canFlip={phase === "cards" && !flippedIndices.has(index)}
+                                    onFlip={() => handleFlipCard(index)}
+                                    animationDelay={`${index * 120}ms`}
+                                />
+                            ))}
+                        </div>
+                        {phase === "done" ? (
+                            <div className="pack-opening__actions">
+                                {unopenedCount > 0 ? (
+                                    <>
+                                        <Button
+                                            className="gg-btn-primary"
+                                            onClick={handleOpenAnother}
+                                        >
+                                            Ouvrir un autre paquet ({unopenedCount})
+                                        </Button>
                                         <Button
                                             component={Link}
                                             to="/collection"
-                                            className="gg-btn-primary"
+                                            variant="outline"
+                                            color="navy"
                                         >
-                                            Retour à la collection
+                                            Voir ma collection
                                         </Button>
-                                    )}
-                                </div>
-                            ) : null}
-                        </div>
-                    ) : null}
-                </div>
+                                    </>
+                                ) : (
+                                    <Button
+                                        component={Link}
+                                        to="/collection"
+                                        className="gg-btn-primary"
+                                    >
+                                        Retour à la collection
+                                    </Button>
+                                )}
+                            </div>
+                        ) : null}
+                    </div>
+                ) : null}
             </div>
+        </div>
     );
 });
