@@ -1,29 +1,28 @@
 import type { ApiFriend } from "#api_types/friend.types";
 import { Link } from "react-router-dom";
-import {
-    HOME_ASSETS,
-    HOME_MOCK_FRIEND_AVATARS,
-    HOME_MOCK_INVITATIONS,
-    type HomeOnlineFriend,
-} from "../home_mock_data";
+import { UserAvatar } from "~/components/user_avatar";
+import { HOME_MOCK_INVITATIONS, type HomeOnlineFriend } from "../home_mock_data";
 import { HomePanel } from "./home_panel";
 
-const toOnlineFriend = (friend: ApiFriend, index: number): HomeOnlineFriend => ({
+const toOnlineFriend = (friend: ApiFriend): HomeOnlineFriend => ({
     userId: friend.userId,
-    pseudo: friend.pseudo ?? `Joueur #${friend.userId}`,
+    pseudo: friend.pseudo,
     status: friend.currentGameId !== null ? "in_game" : "online",
-    avatarUrl: HOME_MOCK_FRIEND_AVATARS[index % HOME_MOCK_FRIEND_AVATARS.length],
 });
 
 const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => (
     <div className="home-friend">
         <div className="home-friend__avatar-wrap">
-            <img src={friend.avatarUrl} alt="" className="home-friend__avatar" />
+            <UserAvatar
+                pseudo={friend.pseudo}
+                userId={friend.userId}
+                className="home-friend__avatar"
+            />
             <span
                 className={`home-friend__status home-friend__status--${friend.status === "in_game" ? "in_game" : "online"}`}
             />
         </div>
-        <span className="home-friend__name">{friend.pseudo}</span>
+        <span className="home-friend__name">{friend.pseudo ?? `Joueur #${friend.userId}`}</span>
         <span
             className={`home-friend__status-label${friend.status === "in_game" ? " home-friend__status-label--in_game" : ""}`}
         >

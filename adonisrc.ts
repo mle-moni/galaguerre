@@ -52,6 +52,7 @@ export default defineConfig({
         () => import("#start/web_sockets"),
         () => import("#start/game_timers"),
         () => import("#start/sync_cards"),
+        () => import("#start/sync_events"),
     ],
 
     /*

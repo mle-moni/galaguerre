@@ -1,18 +1,16 @@
+import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
+import { PackIcon } from "~/components/rewards/pack_icon";
 import {
-    HOME_ASSETS,
     HOME_MOCK_DAILY_QUESTS,
-    HOME_MOCK_PROFILE,
     HOME_MOCK_QUEST_RESET,
-    HOME_MOCK_SEASON,
     type HomeQuest,
 } from "../home_mock_data";
+import { HomeCollectionPanel } from "./home_collection_panel";
 import { HomeEventsPanel } from "./home_events_panel";
 import { HomePanel } from "./home_panel";
 
 const QuestRow = ({ quest }: { quest: HomeQuest }) => {
     const pct = Math.min(100, (quest.progress / quest.total) * 100);
-    const rewardIcon =
-        quest.rewardType === "gold" ? HOME_ASSETS.iconGold : HOME_ASSETS.iconCrystal;
 
     return (
         <div className="home-quest">
@@ -26,52 +24,30 @@ const QuestRow = ({ quest }: { quest: HomeQuest }) => {
                 </div>
             </div>
             <span className="home-quest__reward">
-                <img src={rewardIcon} alt="" />
+                {quest.rewardType === "story_points" ? (
+                    <GoldCoinIcon size={14} tooltip={false} />
+                ) : (
+                    <PackIcon width={14} />
+                )}
                 {quest.rewardAmount}
             </span>
         </div>
     );
 };
 
-interface HomeLeftSidebarProps {
-    elo: number;
-}
+export const HomeLeftSidebar = () => (
+    <aside className="flex flex-col gap-3">
+        <HomePanel
+            title="Quêtes Quotidiennes"
+            headerRight={<span className="home-panel__muted">{HOME_MOCK_QUEST_RESET}</span>}
+        >
+            {HOME_MOCK_DAILY_QUESTS.map((quest) => (
+                <QuestRow key={quest.id} quest={quest} />
+            ))}
+        </HomePanel>
 
-export const HomeLeftSidebar = ({ elo }: HomeLeftSidebarProps) => {
-    const xpPct = (HOME_MOCK_PROFILE.xp / HOME_MOCK_PROFILE.xpMax) * 100;
+        <HomeCollectionPanel />
 
-    return (
-        <aside className="flex flex-col gap-3">
-            <HomePanel
-                title="Quêtes Quotidiennes"
-                headerRight={<span className="home-panel__muted">{HOME_MOCK_QUEST_RESET}</span>}
-            >
-                {HOME_MOCK_DAILY_QUESTS.map((quest) => (
-                    <QuestRow key={quest.id} quest={quest} />
-                ))}
-            </HomePanel>
-
-            <HomePanel title="Progression">
-                <p className="home-progression__season">{HOME_MOCK_SEASON.name}</p>
-                <p className="home-progression__timer">{HOME_MOCK_SEASON.timeRemaining} restants</p>
-                <div className="home-progression__level-row">
-                    <div className="home-progression__badge">{HOME_MOCK_PROFILE.level}</div>
-                    <div className="home-progression__xp">
-                        <p className="home-progression__xp-label">
-                            {HOME_MOCK_PROFILE.xp.toLocaleString("fr-FR")} /{" "}
-                            {HOME_MOCK_PROFILE.xpMax.toLocaleString("fr-FR")} XP · Elo {elo}
-                        </p>
-                        <div className="home-progression__bar-track">
-                            <div
-                                className="home-progression__bar-fill"
-                                style={{ width: `${xpPct}%` }}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </HomePanel>
-
-            <HomeEventsPanel />
-        </aside>
-    );
-};
+        <HomeEventsPanel />
+    </aside>
+);

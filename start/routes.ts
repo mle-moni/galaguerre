@@ -18,6 +18,7 @@ import CardSetsController from "#controllers/card_sets/card_sets_controller";
 import CollectionController from "#controllers/collection/collection_controller";
 import DeckSharesController from "#controllers/deck_shares/deck_shares_controller";
 import DecksController from "#controllers/decks/decks_controller";
+import EventsController from "#controllers/events/events_controller";
 import FriendsController from "#controllers/friends/friends_controller";
 import GameHistoryController from "#controllers/game_history/game_history_controller";
 import GamesController from "#controllers/games/games_controller";
@@ -63,6 +64,8 @@ router
         router.get("/friends/search", [FriendsController, "search"]);
         router.post("/friends", [FriendsController, "store"]);
         router.delete("/friends/:friendUserId", [FriendsController, "destroy"]);
+        router.get("/events", [EventsController, "index"]);
+        router.post("/events/:id/register", [EventsController, "register"]);
         router.post("/decks/:id/select", [DecksController, "select"]);
         router.post("/decks/:deckId/share", [DeckSharesController, "store"]);
         router.post("/decks/import", [DeckSharesController, "import"]);

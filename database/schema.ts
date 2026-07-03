@@ -4,296 +4,284 @@
  * Run "node ace migration:run" command to re-generate this file
  */
 
-import { BaseModel, column } from "@adonisjs/lucid/orm";
-import { DateTime } from "luxon";
+import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from 'luxon'
 
 export class AuthAccessTokenSchema extends BaseModel {
-    static $columns = [
-        "abilities",
-        "createdAt",
-        "expiresAt",
-        "hash",
-        "id",
-        "lastUsedAt",
-        "name",
-        "tokenableId",
-        "type",
-        "updatedAt",
-    ] as const;
-    $columns = AuthAccessTokenSchema.$columns;
-    @column()
-    declare abilities: string;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime | null;
-    @column.dateTime()
-    declare expiresAt: DateTime | null;
-    @column()
-    declare hash: string;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column.dateTime()
-    declare lastUsedAt: DateTime | null;
-    @column()
-    declare name: string | null;
-    @column()
-    declare tokenableId: number;
-    @column()
-    declare type: string;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
+  static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
+  $columns = AuthAccessTokenSchema.$columns
+  @column()
+  declare abilities: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column.dateTime()
+  declare expiresAt: DateTime | null
+  @column()
+  declare hash: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare lastUsedAt: DateTime | null
+  @column()
+  declare name: string | null
+  @column()
+  declare tokenableId: number
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class CardPackSchema extends BaseModel {
-    static $columns = ["createdAt", "id", "openedAt", "updatedAt", "userId"] as const;
-    $columns = CardPackSchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime | null;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column.dateTime()
-    declare openedAt: DateTime | null;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
-    @column()
-    declare userId: number;
+  static $columns = ['createdAt', 'id', 'openedAt', 'updatedAt', 'userId'] as const
+  $columns = CardPackSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare openedAt: DateTime | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
 }
 
 export class CardSetSchema extends BaseModel {
-    static $columns = ["createdAt", "id", "isActive", "name", "updatedAt"] as const;
-    $columns = CardSetSchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime | null;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare isActive: boolean;
-    @column()
-    declare name: string;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
+  static $columns = ['createdAt', 'id', 'isActive', 'name', 'updatedAt'] as const
+  $columns = CardSetSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isActive: boolean
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class CardSchema extends BaseModel {
-    static $columns = [
-        "cardSetId",
-        "createdAt",
-        "data",
-        "generatedDescription",
-        "id",
-        "isCollectible",
-        "rarity",
-        "updatedAt",
-    ] as const;
-    $columns = CardSchema.$columns;
-    @column()
-    declare cardSetId: number;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime | null;
-    @column()
-    declare data: any;
-    @column()
-    declare generatedDescription: string | null;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare isCollectible: boolean;
-    @column()
-    declare rarity: string;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
+  static $columns = ['cardSetId', 'createdAt', 'data', 'generatedDescription', 'id', 'isCollectible', 'rarity', 'updatedAt'] as const
+  $columns = CardSchema.$columns
+  @column()
+  declare cardSetId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare data: any
+  @column()
+  declare generatedDescription: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isCollectible: boolean
+  @column()
+  declare rarity: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class DeckCardSchema extends BaseModel {
-    static $columns = ["cardId", "createdAt", "deckId", "id", "updatedAt"] as const;
-    $columns = DeckCardSchema.$columns;
-    @column()
-    declare cardId: number;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime | null;
-    @column()
-    declare deckId: number;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
+  static $columns = ['cardId', 'createdAt', 'deckId', 'id', 'updatedAt'] as const
+  $columns = DeckCardSchema.$columns
+  @column()
+  declare cardId: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare deckId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class DeckShareSchema extends BaseModel {
-    static $columns = ["cards", "code", "createdAt", "deckId", "id", "name", "userId"] as const;
-    $columns = DeckShareSchema.$columns;
-    @column()
-    declare cards: any;
-    @column()
-    declare code: string;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime;
-    @column()
-    declare deckId: number;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare name: string;
-    @column()
-    declare userId: number;
+  static $columns = ['cards', 'code', 'createdAt', 'deckId', 'id', 'name', 'userId'] as const
+  $columns = DeckShareSchema.$columns
+  @column()
+  declare cards: any
+  @column()
+  declare code: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare deckId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column()
+  declare userId: number
 }
 
 export class DeckSchema extends BaseModel {
-    static $columns = ["createdAt", "id", "name", "selected", "updatedAt", "userId"] as const;
-    $columns = DeckSchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime | null;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare name: string;
-    @column()
-    declare selected: boolean | null;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
-    @column()
-    declare userId: number;
+  static $columns = ['createdAt', 'id', 'name', 'selected', 'updatedAt', 'userId'] as const
+  $columns = DeckSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column()
+  declare selected: boolean | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class EventRegistrationSchema extends BaseModel {
+  static $columns = ['createdAt', 'eventId', 'id', 'userId'] as const
+  $columns = EventRegistrationSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare eventId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare userId: number
+}
+
+export class EventSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'imageUrl', 'longDescription', 'shortDescription', 'startsAt', 'title', 'updatedAt'] as const
+  $columns = EventSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare imageUrl: string
+  @column()
+  declare longDescription: string
+  @column()
+  declare shortDescription: string
+  @column.dateTime()
+  declare startsAt: DateTime
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class FriendshipSchema extends BaseModel {
-    static $columns = ["createdAt", "friendId", "id", "updatedAt", "userId"] as const;
-    $columns = FriendshipSchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime;
-    @column()
-    declare friendId: number;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
-    @column()
-    declare userId: number;
+  static $columns = ['createdAt', 'friendId', 'id', 'updatedAt', 'userId'] as const
+  $columns = FriendshipSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare friendId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
 }
 
 export class GameReplayStepSchema extends BaseModel {
-    static $columns = ["createdAt", "data", "gameId", "id", "stepIndex"] as const;
-    $columns = GameReplayStepSchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime;
-    @column()
-    declare data: any;
-    @column()
-    declare gameId: number;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare stepIndex: number;
+  static $columns = ['createdAt', 'data', 'gameId', 'id', 'stepIndex'] as const
+  $columns = GameReplayStepSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare data: any
+  @column()
+  declare gameId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare stepIndex: number
 }
 
 export class GameReplaySchema extends BaseModel {
-    static $columns = ["createdAt", "gameId", "id", "version"] as const;
-    $columns = GameReplaySchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime;
-    @column()
-    declare gameId: number;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare version: number;
+  static $columns = ['createdAt', 'gameId', 'id', 'version'] as const
+  $columns = GameReplaySchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare gameId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare version: number
 }
 
 export class GameSchema extends BaseModel {
-    static $columns = [
-        "createdAt",
-        "data",
-        "endedAt",
-        "id",
-        "isFinished",
-        "playerOneId",
-        "playerTwoId",
-        "updatedAt",
-        "winnerId",
-    ] as const;
-    $columns = GameSchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime;
-    @column()
-    declare data: any;
-    @column.dateTime()
-    declare endedAt: DateTime | null;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare isFinished: boolean | null;
-    @column()
-    declare playerOneId: number | null;
-    @column()
-    declare playerTwoId: number | null;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime;
-    @column()
-    declare winnerId: number | null;
+  static $columns = ['createdAt', 'data', 'endedAt', 'id', 'isFinished', 'playerOneId', 'playerTwoId', 'updatedAt', 'winnerId'] as const
+  $columns = GameSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare data: any
+  @column.dateTime()
+  declare endedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isFinished: boolean | null
+  @column()
+  declare playerOneId: number | null
+  @column()
+  declare playerTwoId: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare winnerId: number | null
 }
 
 export class UserCardSchema extends BaseModel {
-    static $columns = ["cardId", "count", "createdAt", "id", "updatedAt", "userId"] as const;
-    $columns = UserCardSchema.$columns;
-    @column()
-    declare cardId: number;
-    @column()
-    declare count: number;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime | null;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
-    @column()
-    declare userId: number;
+  static $columns = ['cardId', 'count', 'createdAt', 'id', 'updatedAt', 'userId'] as const
+  $columns = UserCardSchema.$columns
+  @column()
+  declare cardId: number
+  @column()
+  declare count: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
 }
 
 export class UserSchema extends BaseModel {
-    static $columns = [
-        "createdAt",
-        "elo",
-        "email",
-        "goldCoins",
-        "id",
-        "isSuperAdmin",
-        "lastDailyPackClaimedOn",
-        "lastVictoryPackGrantedOn",
-        "losses",
-        "onboardingCompletedAt",
-        "password",
-        "pseudo",
-        "socketToken",
-        "updatedAt",
-        "wins",
-    ] as const;
-    $columns = UserSchema.$columns;
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime;
-    @column()
-    declare elo: number;
-    @column()
-    declare email: string;
-    @column()
-    declare goldCoins: number;
-    @column({ isPrimary: true })
-    declare id: number;
-    @column()
-    declare isSuperAdmin: boolean | null;
-    @column.date()
-    declare lastDailyPackClaimedOn: DateTime | null;
-    @column.date()
-    declare lastVictoryPackGrantedOn: DateTime | null;
-    @column()
-    declare losses: number;
-    @column.dateTime()
-    declare onboardingCompletedAt: DateTime | null;
-    @column({ serializeAs: null })
-    declare password: string;
-    @column()
-    declare pseudo: string | null;
-    @column()
-    declare socketToken: string | null;
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null;
-    @column()
-    declare wins: number;
+  static $columns = ['createdAt', 'elo', 'email', 'goldCoins', 'id', 'isSuperAdmin', 'lastDailyPackClaimedOn', 'lastVictoryPackGrantedOn', 'losses', 'onboardingCompletedAt', 'password', 'pseudo', 'socketToken', 'updatedAt', 'wins'] as const
+  $columns = UserSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare elo: number
+  @column()
+  declare email: string
+  @column()
+  declare goldCoins: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isSuperAdmin: boolean | null
+  @column.date()
+  declare lastDailyPackClaimedOn: DateTime | null
+  @column.date()
+  declare lastVictoryPackGrantedOn: DateTime | null
+  @column()
+  declare losses: number
+  @column.dateTime()
+  declare onboardingCompletedAt: DateTime | null
+  @column({ serializeAs: null })
+  declare password: string
+  @column()
+  declare pseudo: string | null
+  @column()
+  declare socketToken: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare wins: number
 }

@@ -9,7 +9,7 @@ import { CenteredLoader } from "~/components/centered_loader";
 import { useOpenPackMutation, usePacksQuery } from "~/hooks/use_collection";
 import { usePackOpeningFullSize } from "~/hooks/use_pack_opening_full_size";
 import { notifyError } from "~/services/toasts";
-import { PackOpeningCard } from "./pack_opening_card";
+import { PackOpeningCard } from "./pack_opening_card.jsx";
 import "./pack_opening_page.css";
 
 type PackOpeningPhase = "idle" | "packReady" | "opening" | "cards" | "done";
@@ -117,11 +117,11 @@ export const PackOpeningPage = observer(() => {
                                     ))}
                                 </div>
                             ) : null}
-                            <p className="pack-opening__message m-0">
-                                {unopenedCount > 0
-                                    ? `Vous avez ${unopenedCount} paquet${unopenedCount > 1 ? "s" : ""} à ouvrir. Chaque paquet contient 5 cartes.`
-                                    : "Vous n'avez plus de paquets à ouvrir."}
-                            </p>
+                            {unopenedCount === 0 && (
+                                <p className="pack-opening__message m-0">
+                                    Vous n'avez plus de paquets à ouvrir.
+                                </p>
+                            )}
                             {unopenedCount > 0 ? (
                                 <Button className="gg-btn-primary" onClick={handleStartOpening}>
                                     Ouvrir un paquet
@@ -165,13 +165,6 @@ export const PackOpeningPage = observer(() => {
 
                     {showCards && revealedCards !== null ? (
                         <div className="pack-opening__reveal">
-                            <p className="pack-opening__message m-0">
-                                {phase === "done"
-                                    ? useFullSize
-                                        ? "Voici vos 5 nouvelles cartes :"
-                                        : "Voici vos 5 nouvelles cartes — cliquez sur une carte pour la voir en grand"
-                                    : `Cliquez sur une carte pour la retourner (${flippedCount}/${revealedCards.length})`}
-                            </p>
                             <div
                                 className={clsx(
                                     "pack-opening__cards",

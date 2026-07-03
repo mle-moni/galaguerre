@@ -29,6 +29,8 @@ export type ScannedRoutes = {
     'friends.search': { paramsTuple?: []; params?: {} }
     'friends.store': { paramsTuple?: []; params?: {} }
     'friends.destroy': { paramsTuple: [ParamValue]; params: {'friendUserId': ParamValue} }
+    'events.index': { paramsTuple?: []; params?: {} }
+    'events.register': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'decks.select': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'deck_shares.store': { paramsTuple: [ParamValue]; params: {'deckId': ParamValue} }
     'deck_shares.import': { paramsTuple?: []; params?: {} }
@@ -61,6 +63,7 @@ export type ScannedRoutes = {
     'collection.packs': { paramsTuple?: []; params?: {} }
     'friends.index': { paramsTuple?: []; params?: {} }
     'friends.search': { paramsTuple?: []; params?: {} }
+    'events.index': { paramsTuple?: []; params?: {} }
     'decks.index': { paramsTuple?: []; params?: {} }
     'decks.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'games.index': { paramsTuple?: []; params?: {} }
@@ -81,6 +84,7 @@ export type ScannedRoutes = {
     'collection.packs': { paramsTuple?: []; params?: {} }
     'friends.index': { paramsTuple?: []; params?: {} }
     'friends.search': { paramsTuple?: []; params?: {} }
+    'events.index': { paramsTuple?: []; params?: {} }
     'decks.index': { paramsTuple?: []; params?: {} }
     'decks.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'games.index': { paramsTuple?: []; params?: {} }
@@ -97,6 +101,7 @@ export type ScannedRoutes = {
     'rewards.buy_pack': { paramsTuple?: []; params?: {} }
     'rewards.claim_daily_pack': { paramsTuple?: []; params?: {} }
     'friends.store': { paramsTuple?: []; params?: {} }
+    'events.register': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'decks.select': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'deck_shares.store': { paramsTuple: [ParamValue]; params: {'deckId': ParamValue} }
     'deck_shares.import': { paramsTuple?: []; params?: {} }

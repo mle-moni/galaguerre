@@ -182,9 +182,8 @@
 .app-header__avatar {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
     border: 2px solid var(--gg-gold);
-    object-fit: cover;
+    font-size: 0.75rem;
 }
 
 .app-header__profile-info {

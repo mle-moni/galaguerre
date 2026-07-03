@@ -1,85 +1,92 @@
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
-import {
-    formatHomeEventDate,
-    getUpcomingHomeEvents,
-    HOME_MOCK_EVENTS,
-} from "../home_mock_data";
+import { useState } from "react";
+import { CenteredLoader } from "~/components/centered_loader";
+import { formatEventDate } from "~/helpers/format_event_date";
+import { formatEventRegistrationCount } from "~/helpers/format_event_registration_count";
+import { useEventsQuery } from "~/hooks/use_events";
+import type { ApiEvent } from "#api_types/event.types";
 import { EventRegistrationModal } from "./event_registration_modal";
 import { HomePanel } from "./home_panel";
 
 export const HomeEventsPanel = () => {
-    const upcomingEvents = useMemo(() => getUpcomingHomeEvents(HOME_MOCK_EVENTS), []);
+    const eventsQuery = useEventsQuery();
+    const events = eventsQuery.data ?? [];
     const [activeIndex, setActiveIndex] = useState(0);
-    const [registrationTarget, setRegistrationTarget] = useState<
-        (typeof upcomingEvents)[number] | null
-    >(null);
+    const [registrationTarget, setRegistrationTarget] = useState<ApiEvent | null>(null);
 
-    const safeIndex =
-        upcomingEvents.length === 0 ? 0 : activeIndex % upcomingEvents.length;
-    const current = upcomingEvents[safeIndex];
+    const safeIndex = events.length === 0 ? 0 : activeIndex % events.length;
+    const current = events[safeIndex];
 
     const goToPrevious = () => {
-        if (upcomingEvents.length === 0) return;
-        setActiveIndex((index) => (index - 1 + upcomingEvents.length) % upcomingEvents.length);
+        if (events.length === 0) return;
+        setActiveIndex((index) => (index - 1 + events.length) % events.length);
     };
 
     const goToNext = () => {
-        if (upcomingEvents.length === 0) return;
-        setActiveIndex((index) => (index + 1) % upcomingEvents.length);
+        if (events.length === 0) return;
+        setActiveIndex((index) => (index + 1) % events.length);
     };
 
     return (
         <>
             <HomePanel title="Événements">
-                {upcomingEvents.length === 0 ? (
+                {eventsQuery.isLoading ? (
+                    <CenteredLoader />
+                ) : eventsQuery.isError ? (
+                    <p className="home-event__empty">Impossible de charger les événements</p>
+                ) : events.length === 0 ? (
                     <p className="home-event__empty">Aucun événement à venir</p>
                 ) : (
                     <div className="home-event-carousel">
-                        <div className="home-event-carousel__controls">
-                            <button
-                                type="button"
-                                className="home-event-carousel__nav"
-                                onClick={goToPrevious}
-                                aria-label="Événement précédent"
-                            >
-                                <IconChevronLeft size={16} />
-                            </button>
-                            <button
-                                type="button"
-                                className="home-event-carousel__nav"
-                                onClick={goToNext}
-                                aria-label="Événement suivant"
-                            >
-                                <IconChevronRight size={16} />
-                            </button>
-                        </div>
+                        {events.length > 1 && (
+                            <div className="home-event-carousel__controls">
+                                <button
+                                    type="button"
+                                    className="home-event-carousel__nav"
+                                    onClick={goToPrevious}
+                                    aria-label="Événement précédent"
+                                >
+                                    <IconChevronLeft size={16} />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="home-event-carousel__nav"
+                                    onClick={goToNext}
+                                    aria-label="Événement suivant"
+                                >
+                                    <IconChevronRight size={16} />
+                                </button>
+                            </div>
+                        )}
 
                         <article className="home-event-carousel__slide">
                             <img
-                                src={current.event.imageUrl}
-                                alt={current.event.title}
+                                src={current.imageUrl}
+                                alt={current.title}
                                 className="home-event__banner"
                             />
-                            <p className="home-event__date">{formatHomeEventDate(current.date)}</p>
-                            <h3 className="home-event__title">{current.event.title}</h3>
-                            <p className="home-event__description">
-                                {current.event.shortDescription}
-                            </p>
+                            <p className="home-event__date">{formatEventDate(current.startsAt)}</p>
+                            <h3 className="home-event__title">{current.title}</h3>
+                            <p className="home-event__description">{current.shortDescription}</p>
+                            {current.registrationCount > 0 && (
+                                <p className="home-event__registrations">
+                                    {formatEventRegistrationCount(current.registrationCount)}
+                                </p>
+                            )}
                             <button
                                 type="button"
                                 className="home-event__btn"
                                 onClick={() => setRegistrationTarget(current)}
                             >
-                                S'inscrire
+                                {current.isRegistered ? "Inscrit" : "S'inscrire"}
                             </button>
                         </article>
 
-                        {upcomingEvents.length > 1 && (
+                        {events.length > 1 && (
                             <div className="home-event-carousel__dots">
-                                {upcomingEvents.map((item, index) => (
+                                {events.map((event, index) => (
                                     <button
-                                        key={item.event.id}
+                                        key={event.id}
                                         type="button"
                                         className={`home-event-carousel__dot${index === safeIndex ? " home-event-carousel__dot--active" : ""}`}
                                         onClick={() => setActiveIndex(index)}
@@ -93,8 +100,7 @@ export const HomeEventsPanel = () => {
             </HomePanel>
 
             <EventRegistrationModal
-                event={registrationTarget?.event ?? null}
-                eventDate={registrationTarget?.date ?? null}
+                event={registrationTarget}
                 onClose={() => setRegistrationTarget(null)}
             />
         </>

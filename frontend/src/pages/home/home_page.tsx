@@ -15,7 +15,7 @@ export const HomePage = observer(() => {
     return (
         <>
             <div className="home-grid">
-                <HomeLeftSidebar elo={user.elo} />
+                <HomeLeftSidebar />
                 <HomeHero playTarget={playTarget} />
                 <HomeRightSidebar
                     friends={friendsQuery.data ?? []}

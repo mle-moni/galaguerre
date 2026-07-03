@@ -37,6 +37,9 @@ export const controllers = {
     Decks: () => import('#controllers/decks/decks_controller'),
     SerializeDeck: () => import('#controllers/decks/serialize_deck'),
   },
+  events: {
+    Events: () => import('#controllers/events/events_controller'),
+  },
   friends: {
     Friends: () => import('#controllers/friends/friends_controller'),
   },

@@ -188,25 +188,56 @@
     height: 14px;
 }
 
-/* Progression */
-.home-progression__season {
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin: 0 0 0.15rem;
+/* Collection */
+.home-collection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem 0.6rem;
 }
 
-.home-progression__timer {
-    font-size: 0.65rem;
-    color: var(--gg-text-muted);
-    margin: 0 0 0.6rem;
-}
-
-.home-progression__level-row {
+.home-collection__item {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.15rem;
+    padding: 0.45rem 0.25rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.home-collection__label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.home-collection__label--common {
+    color: #94a3b8;
+}
+
+.home-collection__label--rare {
+    color: #60a5fa;
+}
+
+.home-collection__label--epic {
+    color: #a78bfa;
+}
+
+.home-collection__label--legendary {
+    color: #f0d060;
+}
+
+.home-collection__count {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gg-gold);
+    line-height: 1;
+}
+
+/* Progression (season pass) */
 .home-progression__badge {
     width: 40px;
     height: 40px;
@@ -321,6 +352,12 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
+.home-event__registrations {
+    margin: -0.25rem 0 0.5rem;
+    font-size: 0.6rem;
+    color: var(--gg-gold);
+}
+
 .home-event__btn {
     display: block;
     width: 100%;
@@ -384,9 +421,8 @@
 .home-friend__avatar {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
     border: 1px solid var(--gg-celestial-panel-border);
+    font-size: 0.65rem;
 }
 
 .home-friend__status {

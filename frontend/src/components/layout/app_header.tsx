@@ -6,8 +6,8 @@ import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
 import { usePacksQuery } from "~/hooks/use_collection";
 import { useLogout } from "~/hooks/use_logout";
+import { UserAvatar } from "~/components/user_avatar";
 import { HOME_MOCK_PROFILE } from "~/pages/home/home_mock_data";
-import { APP_HEADER_ASSETS } from "./app_header_assets";
 
 interface AppHeaderProps {
     user: ApiUser;
@@ -92,9 +92,10 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                 </div>
 
                 <div className="app-header__profile">
-                    <img
-                        src={APP_HEADER_ASSETS.avatarPlaceholder}
-                        alt=""
+                    <UserAvatar
+                        pseudo={user.pseudo}
+                        email={user.email}
+                        userId={user.id}
                         className="app-header__avatar"
                     />
                     <div className="app-header__profile-info">
