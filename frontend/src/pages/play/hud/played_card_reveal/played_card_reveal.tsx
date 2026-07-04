@@ -14,8 +14,22 @@ export const PlayedCardReveal = observer(() => {
             ? store.game.data.playerOne
             : store.game.data.playerTwo;
 
+    const dismiss = () => store.playedCardRevealStore.clear();
+
     return (
-        <div className="played-card-reveal" aria-hidden>
+        <div
+            className="played-card-reveal"
+            role="button"
+            tabIndex={0}
+            aria-label="Masquer la carte jouée"
+            onClick={dismiss}
+            onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    dismiss();
+                }
+            }}
+        >
             <PlayerCardFace card={card} size="full" spellPower={player.spellPower} />
         </div>
     );

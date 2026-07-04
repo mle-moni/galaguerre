@@ -41,6 +41,9 @@ export interface ApiDefinition {
         buyPack: (typeof routes)["rewards.buy_pack"];
         claimDailyPack: (typeof routes)["rewards.claim_daily_pack"];
     };
+    presence: {
+        heartbeat: (typeof routes)["presence.heartbeat"];
+    };
     dailyQuests: {
         index: (typeof routes)["daily_quests.index"];
         claim: (typeof routes)["daily_quests.claim"];
@@ -56,6 +59,13 @@ export interface ApiDefinition {
         sent: (typeof routes)["friend_requests.sent"];
         accept: (typeof routes)["friend_requests.accept"];
         destroy: (typeof routes)["friend_requests.destroy"];
+    };
+    gameInvites: {
+        index: (typeof routes)["game_invites.index"];
+        sent: (typeof routes)["game_invites.sent"];
+        store: (typeof routes)["game_invites.store"];
+        accept: (typeof routes)["game_invites.accept"];
+        destroy: (typeof routes)["game_invites.destroy"];
     };
     events: {
         index: (typeof routes)["events.index"];

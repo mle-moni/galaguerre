@@ -3,6 +3,7 @@ import Game from "#models/game";
 import { sendGameUpdate } from "#controllers/games/send_game_update";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { cancelMatchmakingRemoval } from "#services/sockets/matchmaking";
+import { cancelInviteeInviteRemoval } from "#services/game_invites/invite_disconnect_grace";
 import { addSocketData } from "#services/sockets/sockets_data";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import vine from "@vinejs/vine";
@@ -36,6 +37,7 @@ export async function socketAuth(socket: Socket, dto: unknown) {
     socket.join(WsRooms.connectedSockets);
     socket.join(WsRooms.personalSocketRoom(userId));
     cancelMatchmakingRemoval(userId);
+    cancelInviteeInviteRemoval(userId);
 
     emitSocketEvent("auth_success", { message: "Socket connected" }, socket.id);
 

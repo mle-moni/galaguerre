@@ -1,18 +1,30 @@
 import type { ApiFriend, ApiFriendRequest } from "#api_types/friend.types";
+import type { ApiGameInvite } from "#api_types/game_invite.types";
 import { Link } from "react-router-dom";
 import { UserAvatar } from "~/components/user_avatar";
+import { GameInviteButton } from "~/components/friends/game_invite_button";
 import {
     useAcceptFriendRequestMutation,
     useDeclineFriendRequestMutation,
 } from "~/hooks/use_friend_requests";
-import type { HomeOnlineFriend } from "../home_mock_data";
-import { HomePanel } from "./home_panel";
+import {
+    useAcceptGameInviteMutation,
+    useDeclineGameInviteMutation,
+} from "~/hooks/use_game_invites";
+import type { HomeOnlineFriend } from "../home_mock_data.js";
+import { HomePanel } from "./home_panel.jsx";
 
 const toOnlineFriend = (friend: ApiFriend): HomeOnlineFriend => ({
     userId: friend.userId,
     pseudo: friend.pseudo,
     status: friend.currentGameId !== null ? "in_game" : "online",
 });
+
+const compareOnlineFriends = (left: ApiFriend, right: ApiFriend) => {
+    const leftInGame = left.currentGameId !== null ? 0 : 1;
+    const rightInGame = right.currentGameId !== null ? 0 : 1;
+    return leftInGame - rightInGame;
+};
 
 const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => (
     <div className="home-friend">
@@ -32,6 +44,15 @@ const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => (
         >
             {friend.status === "in_game" ? "En jeu" : "En ligne"}
         </span>
+        {friend.status === "online" && (
+            <GameInviteButton
+                friend={{
+                    userId: friend.userId,
+                    isOnline: true,
+                    currentGameId: null,
+                }}
+            />
+        )}
     </div>
 );
 
@@ -72,11 +93,50 @@ const FriendRequestRow = ({ request }: { request: ApiFriendRequest }) => {
     );
 };
 
+const GameInviteRow = ({ invite }: { invite: ApiGameInvite }) => {
+    const acceptMutation = useAcceptGameInviteMutation();
+    const declineMutation = useDeclineGameInviteMutation();
+    const isLoading =
+        (acceptMutation.isPending && acceptMutation.variables === invite.id) ||
+        (declineMutation.isPending && declineMutation.variables === invite.id);
+
+    return (
+        <div className="home-invite">
+            <p className="home-invite__text">
+                <strong>{invite.fromPseudo ?? `Joueur #${invite.fromUserId}`}</strong> vous invite —
+                Partie classée
+            </p>
+            <div className="home-invite__actions">
+                <button
+                    type="button"
+                    className="home-invite__btn home-invite__btn--accept"
+                    aria-label="Accepter"
+                    disabled={isLoading}
+                    onClick={() => acceptMutation.mutate(invite.id)}
+                >
+                    ✓
+                </button>
+                <button
+                    type="button"
+                    className="home-invite__btn home-invite__btn--decline"
+                    aria-label="Refuser"
+                    disabled={isLoading}
+                    onClick={() => declineMutation.mutate(invite.id)}
+                >
+                    ✕
+                </button>
+            </div>
+        </div>
+    );
+};
+
 interface HomeRightSidebarProps {
     friends: ApiFriend[];
     isLoadingFriends: boolean;
     friendRequests: ApiFriendRequest[];
     isLoadingRequests: boolean;
+    gameInvites: ApiGameInvite[];
+    isLoadingGameInvites: boolean;
 }
 
 export const HomeRightSidebar = ({
@@ -84,8 +144,14 @@ export const HomeRightSidebar = ({
     isLoadingFriends,
     friendRequests,
     isLoadingRequests,
+    gameInvites,
+    isLoadingGameInvites,
 }: HomeRightSidebarProps) => {
-    const onlineFriends = friends.slice(0, 5).map(toOnlineFriend);
+    const onlineFriends = friends
+        .filter((friend) => friend.isOnline)
+        .sort(compareOnlineFriends)
+        .slice(0, 5)
+        .map(toOnlineFriend);
 
     return (
         <aside className="flex flex-col gap-3">
@@ -93,7 +159,7 @@ export const HomeRightSidebar = ({
                 {isLoadingFriends ? (
                     <p className="home-panel__muted">Chargement…</p>
                 ) : onlineFriends.length === 0 ? (
-                    <p className="home-panel__muted">Aucun ami pour le moment.</p>
+                    <p className="home-panel__muted">Aucun ami en ligne.</p>
                 ) : (
                     onlineFriends.map((friend) => <FriendRow key={friend.userId} friend={friend} />)
                 )}
@@ -103,14 +169,19 @@ export const HomeRightSidebar = ({
             </HomePanel>
 
             <HomePanel title="Invitations">
-                {isLoadingRequests ? (
+                {isLoadingRequests || isLoadingGameInvites ? (
                     <p className="home-panel__muted">Chargement…</p>
-                ) : friendRequests.length === 0 ? (
+                ) : friendRequests.length === 0 && gameInvites.length === 0 ? (
                     <p className="home-panel__muted">Aucune invitation.</p>
                 ) : (
-                    friendRequests.map((request) => (
-                        <FriendRequestRow key={request.id} request={request} />
-                    ))
+                    <>
+                        {gameInvites.map((invite) => (
+                            <GameInviteRow key={`game-${invite.id}`} invite={invite} />
+                        ))}
+                        {friendRequests.map((request) => (
+                            <FriendRequestRow key={`friend-${request.id}`} request={request} />
+                        ))}
+                    </>
                 )}
             </HomePanel>
         </aside>

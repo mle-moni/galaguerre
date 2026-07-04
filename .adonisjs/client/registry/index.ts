@@ -224,6 +224,16 @@ const routes = {
         ],
         types: placeholder as Registry["rewards.claim_daily_pack"]["types"],
     },
+    "presence.heartbeat": {
+        methods: ["POST"],
+        pattern: "/api/presence/heartbeat",
+        tokens: [
+            { old: "/api/presence/heartbeat", type: 0, val: "api", end: "" },
+            { old: "/api/presence/heartbeat", type: 0, val: "presence", end: "" },
+            { old: "/api/presence/heartbeat", type: 0, val: "heartbeat", end: "" },
+        ],
+        types: placeholder as Registry["presence.heartbeat"]["types"],
+    },
     "daily_quests.index": {
         methods: ["GET", "HEAD"],
         pattern: "/api/daily-quests",
@@ -321,6 +331,55 @@ const routes = {
             { old: "/api/friend-requests/:id", type: 1, val: "id", end: "" },
         ],
         types: placeholder as Registry["friend_requests.destroy"]["types"],
+    },
+    "game_invites.index": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/game-invites",
+        tokens: [
+            { old: "/api/game-invites", type: 0, val: "api", end: "" },
+            { old: "/api/game-invites", type: 0, val: "game-invites", end: "" },
+        ],
+        types: placeholder as Registry["game_invites.index"]["types"],
+    },
+    "game_invites.sent": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/game-invites/sent",
+        tokens: [
+            { old: "/api/game-invites/sent", type: 0, val: "api", end: "" },
+            { old: "/api/game-invites/sent", type: 0, val: "game-invites", end: "" },
+            { old: "/api/game-invites/sent", type: 0, val: "sent", end: "" },
+        ],
+        types: placeholder as Registry["game_invites.sent"]["types"],
+    },
+    "game_invites.store": {
+        methods: ["POST"],
+        pattern: "/api/game-invites",
+        tokens: [
+            { old: "/api/game-invites", type: 0, val: "api", end: "" },
+            { old: "/api/game-invites", type: 0, val: "game-invites", end: "" },
+        ],
+        types: placeholder as Registry["game_invites.store"]["types"],
+    },
+    "game_invites.accept": {
+        methods: ["POST"],
+        pattern: "/api/game-invites/:id/accept",
+        tokens: [
+            { old: "/api/game-invites/:id/accept", type: 0, val: "api", end: "" },
+            { old: "/api/game-invites/:id/accept", type: 0, val: "game-invites", end: "" },
+            { old: "/api/game-invites/:id/accept", type: 1, val: "id", end: "" },
+            { old: "/api/game-invites/:id/accept", type: 0, val: "accept", end: "" },
+        ],
+        types: placeholder as Registry["game_invites.accept"]["types"],
+    },
+    "game_invites.destroy": {
+        methods: ["DELETE"],
+        pattern: "/api/game-invites/:id",
+        tokens: [
+            { old: "/api/game-invites/:id", type: 0, val: "api", end: "" },
+            { old: "/api/game-invites/:id", type: 0, val: "game-invites", end: "" },
+            { old: "/api/game-invites/:id", type: 1, val: "id", end: "" },
+        ],
+        types: placeholder as Registry["game_invites.destroy"]["types"],
     },
     "events.index": {
         methods: ["GET", "HEAD"],

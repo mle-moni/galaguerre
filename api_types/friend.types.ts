@@ -5,6 +5,8 @@ export interface ApiFriend {
     wins: number;
     losses: number;
     currentGameId: number | null;
+    lastSeenAt: string | null;
+    isOnline: boolean;
 }
 
 export type FriendRequestStatus = "none" | "sent" | "received";

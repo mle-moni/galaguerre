@@ -66,7 +66,7 @@ export const CatalogCardDisplay = ({
                 className={clsx("catalog-card-artwork", onClick && "cursor-pointer", className)}
                 style={style}
             >
-                <img src={card.imageUrl} alt={card.label} draggable={false} />
+                <img src={card.imageUrl} alt={card.label} draggable={false} loading="lazy" />
                 {overlay}
             </div>
         );
@@ -91,6 +91,7 @@ export const CatalogCardDisplay = ({
                 style={style}
                 className={className}
                 wrapper={wrapper}
+                imageLoading="lazy"
             />
         </div>
     );

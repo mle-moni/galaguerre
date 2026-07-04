@@ -2,6 +2,10 @@ import { preloadDeckCardSet } from "#controllers/decks/deck_utils";
 import { serializeDeck } from "#controllers/decks/serialize_deck";
 import { findActiveGameForUser } from "#controllers/games/game_utils";
 import Deck from "#models/deck";
+import {
+    cancelInvitesAsInvitee,
+    cancelInvitesAsInviter,
+} from "#services/game_invites/cancel_game_invites";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { removeMatchmakingImmediately } from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
@@ -20,6 +24,9 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
     if (activeGame) {
         return response.badRequest({ error: "Vous avez déjà une partie en cours" });
     }
+
+    await cancelInvitesAsInvitee(user.id);
+    await cancelInvitesAsInviter(user.id);
 
     removeMatchmakingImmediately(user.id);
 

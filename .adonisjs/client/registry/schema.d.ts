@@ -517,6 +517,30 @@ export interface Registry {
             >;
         };
     };
+    "presence.heartbeat": {
+        methods: ["POST"];
+        pattern: "/api/presence/heartbeat";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/presence/presence_controller").default["heartbeat"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/presence/presence_controller").default["heartbeat"]
+                    >
+                >
+            >;
+        };
+    };
     "daily_quests.index": {
         methods: ["GET", "HEAD"];
         pattern: "/api/daily-quests";
@@ -756,6 +780,136 @@ export interface Registry {
                 Awaited<
                     ReturnType<
                         import("#controllers/friends/friend_requests_controller").default["destroy"]
+                    >
+                >
+            >;
+        };
+    };
+    "game_invites.index": {
+        methods: ["GET", "HEAD"];
+        pattern: "/api/game-invites";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["index"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["index"]
+                    >
+                >
+            >;
+        };
+    };
+    "game_invites.sent": {
+        methods: ["GET", "HEAD"];
+        pattern: "/api/game-invites/sent";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["sent"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["sent"]
+                    >
+                >
+            >;
+        };
+    };
+    "game_invites.store": {
+        methods: ["POST"];
+        pattern: "/api/game-invites";
+        types: {
+            body: ExtractBody<
+                InferInput<
+                    typeof import("#app/controllers/game_invites/game_invite_validators.js").createGameInviteValidator
+                >
+            >;
+            paramsTuple: [];
+            params: {};
+            query: ExtractQuery<
+                InferInput<
+                    typeof import("#app/controllers/game_invites/game_invite_validators.js").createGameInviteValidator
+                >
+            >;
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["store"]
+                    >
+                >
+            >;
+            errorResponse:
+                | ExtractErrorResponse<
+                      Awaited<
+                          ReturnType<
+                              import("#controllers/game_invites/game_invites_controller").default["store"]
+                          >
+                      >
+                  >
+                | { status: 422; response: { errors: SimpleError[] } };
+        };
+    };
+    "game_invites.accept": {
+        methods: ["POST"];
+        pattern: "/api/game-invites/:id/accept";
+        types: {
+            body: {};
+            paramsTuple: [ParamValue];
+            params: { id: ParamValue };
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["accept"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["accept"]
+                    >
+                >
+            >;
+        };
+    };
+    "game_invites.destroy": {
+        methods: ["DELETE"];
+        pattern: "/api/game-invites/:id";
+        types: {
+            body: {};
+            paramsTuple: [ParamValue];
+            params: { id: ParamValue };
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["destroy"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/game_invites/game_invites_controller").default["destroy"]
                     >
                 >
             >;

@@ -6,10 +6,13 @@ import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FriendActionButton } from "~/components/friends/friend_action_button";
+import { GameInviteButton } from "~/components/friends/game_invite_button";
 import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { ResponsiveTable } from "~/components/responsive_table";
+import { useRelativeTimeTick } from "~/hooks/use_relative_time";
 import { useFriendSearchQuery, useFriendsQuery } from "~/hooks/use_friends";
+import { formatLastSeen } from "~/utils/format_last_seen";
 
 const tableStyles = {
     th: { color: "rgba(255,255,255,0.7)", fontWeight: 600 },
@@ -22,14 +25,49 @@ const FriendStats = ({ user }: { user: ApiFriend }) => (
     </span>
 );
 
+const FriendLastSeen = ({ friend, tick }: { friend: ApiFriend; tick: number }) => {
+    void tick;
+
+    if (friend.isOnline || !friend.lastSeenAt) return null;
+
+    return (
+        <span className="text-white/50 text-sm">
+            Dernière connexion {formatLastSeen(friend.lastSeenAt)}
+        </span>
+    );
+};
+
+const compareFriends = (left: ApiFriend, right: ApiFriend) => {
+    const leftRank = getFriendSortRank(left);
+    const rightRank = getFriendSortRank(right);
+
+    if (leftRank !== rightRank) return leftRank - rightRank;
+
+    if (!left.isOnline && !right.isOnline) {
+        const leftLastSeen = left.lastSeenAt ? Date.parse(left.lastSeenAt) : 0;
+        const rightLastSeen = right.lastSeenAt ? Date.parse(right.lastSeenAt) : 0;
+        return rightLastSeen - leftLastSeen;
+    }
+
+    return (left.pseudo ?? "").localeCompare(right.pseudo ?? "", "fr");
+};
+
+const getFriendSortRank = (friend: ApiFriend) => {
+    if (!friend.isOnline) return 2;
+    if (friend.currentGameId !== null) return 0;
+    return 1;
+};
+
 const FriendRow = ({
     entry,
     isFriend,
     onSpectate,
+    relativeTimeTick,
 }: {
     entry: ApiFriend | ApiFriendSearchResult;
     isFriend: boolean;
     onSpectate: (gameId: number) => void;
+    relativeTimeTick: number;
 }) => {
     const friendRequestStatus =
         "friendRequestStatus" in entry ? entry.friendRequestStatus : undefined;
@@ -54,8 +92,16 @@ const FriendRow = ({
                                 En partie
                             </Badge>
                         )}
+                        {isFriend && entry.isOnline && !entry.currentGameId && (
+                            <Badge color="green" size="xs" variant="light">
+                                En ligne
+                            </Badge>
+                        )}
                     </span>
                     <FriendStats user={entry} />
+                    {isFriend && "isOnline" in entry && (
+                        <FriendLastSeen friend={entry} tick={relativeTimeTick} />
+                    )}
                 </div>
             </Table.Td>
             <Table.Td ta="right">
@@ -74,6 +120,7 @@ const FriendRow = ({
                             </ActionIcon>
                         </Tooltip>
                     )}
+                    {isFriend && "isOnline" in entry && <GameInviteButton friend={entry} />}
                     <FriendActionButton
                         userId={entry.userId}
                         isFriend={isFriend}
@@ -87,11 +134,15 @@ const FriendRow = ({
 
 export const FriendsPage = observer(() => {
     const navigate = useNavigate();
+    const relativeTimeTick = useRelativeTimeTick();
     const [search, setSearch] = useState("");
     const [debouncedSearch] = useDebouncedValue(search.trim(), 250);
     const friendsQuery = useFriendsQuery();
     const searchQuery = useFriendSearchQuery(debouncedSearch);
-    const friends = friendsQuery.data ?? [];
+    const friends = useMemo(
+        () => [...(friendsQuery.data ?? [])].sort(compareFriends),
+        [friendsQuery.data],
+    );
     const friendIds = useMemo(() => new Set(friends.map((friend) => friend.userId)), [friends]);
     const searchResults = searchQuery.data ?? [];
 
@@ -135,6 +186,7 @@ export const FriendsPage = observer(() => {
                                                         entry.isFriend ||
                                                         friendIds.has(entry.userId)
                                                     }
+                                                    relativeTimeTick={relativeTimeTick}
                                                     onSpectate={(gameId) =>
                                                         navigate(
                                                             `/spectate/${gameId}?asUserId=${entry.userId}`,
@@ -177,6 +229,7 @@ export const FriendsPage = observer(() => {
                                         key={friend.userId}
                                         entry={friend}
                                         isFriend={friendIds.has(friend.userId)}
+                                        relativeTimeTick={relativeTimeTick}
                                         onSpectate={(gameId) =>
                                             navigate(
                                                 `/spectate/${gameId}?asUserId=${friend.userId}`,

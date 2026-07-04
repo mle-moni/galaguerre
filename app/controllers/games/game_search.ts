@@ -1,6 +1,11 @@
 import { findActiveGameForUser } from "#controllers/games/game_utils";
 import Deck from "#models/deck";
 import type User from "#models/user";
+import {
+    cancelInvitesAsInvitee,
+    cancelInvitesAsInviter,
+    cancelAllInvitesForUser,
+} from "#services/game_invites/cancel_game_invites";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
     addMatchmakingQueueItem,
@@ -18,6 +23,9 @@ import { createGame } from "./create_game.js";
 
 export const gameSearch = async ({ auth, response }: HttpContext) => {
     const user = auth.user!;
+
+    await cancelInvitesAsInvitee(user.id);
+    await cancelInvitesAsInviter(user.id);
 
     const activeGame = await findActiveGameForUser(user.id);
     if (activeGame) {
@@ -110,6 +118,9 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
 
     removeMatchmakingQueueItem(user.id);
     removeMatchmakingQueueItem(opponent.userId);
+
+    await cancelAllInvitesForUser(user.id);
+    await cancelAllInvitesForUser(opponent.userId);
 
     const rooms = [
         WsRooms.personalSocketRoom(opponent.userId),

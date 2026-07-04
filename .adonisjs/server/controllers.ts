@@ -58,6 +58,10 @@ export const controllers = {
         ShowGameReplay: () => import("#controllers/game_history/show_game_replay"),
         ShowUserGame: () => import("#controllers/game_history/show_user_game"),
     },
+    gameInvites: {
+        GameInviteValidators: () => import("#controllers/game_invites/game_invite_validators"),
+        GameInvites: () => import("#controllers/game_invites/game_invites_controller"),
+    },
     games: {
         AbandonGame: () => import("#controllers/games/abandon_game"),
         CancelGameSearch: () => import("#controllers/games/cancel_game_search"),
@@ -111,6 +115,9 @@ export const controllers = {
     },
     leaderboard: {
         Leaderboard: () => import("#controllers/leaderboard/leaderboard_controller"),
+    },
+    presence: {
+        Presence: () => import("#controllers/presence/presence_controller"),
     },
     rewards: {
         Rewards: () => import("#controllers/rewards/rewards_controller"),

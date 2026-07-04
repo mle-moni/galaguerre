@@ -30,6 +30,7 @@ interface MinionCardFaceProps {
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
+    imageLoading?: "eager" | "lazy";
 }
 
 export const MinionCardFace = ({
@@ -48,6 +49,7 @@ export const MinionCardFace = ({
     onClick,
     onPointerDown,
     wrapper = (content) => content,
+    imageLoading,
 }: MinionCardFaceProps) => {
     const maxAttacks = getMinionCardMaxAttacks(card);
     const showWindfuryBadge =
@@ -91,6 +93,7 @@ export const MinionCardFace = ({
                     src={card.imageUrl}
                     alt="Galaguerre card"
                     draggable={false}
+                    loading={imageLoading}
                 />
             </div>
             <div className="playing-card-face__body">

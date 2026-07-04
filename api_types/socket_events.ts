@@ -1,4 +1,5 @@
 import type { ActionTarget, ApiGame, SpotOwner } from "./game.types.js";
+import type { ApiGameInvite } from "./game_invite.types.js";
 import type { GamePresentationUpdate } from "./game_narrative.types.js";
 
 export interface SocketEventByKey {
@@ -8,6 +9,8 @@ export interface SocketEventByKey {
     auth_success: { message: string };
     "game:created": { gameId: number };
     "game:update": { game: ApiGame; presentation?: GamePresentationUpdate };
+    "game:invite_received": { invite: ApiGameInvite };
+    "game:invite_cancelled": { inviteId: number };
 }
 
 export type SocketEventKey = keyof SocketEventByKey;

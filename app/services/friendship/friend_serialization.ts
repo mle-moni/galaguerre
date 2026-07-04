@@ -1,5 +1,6 @@
 import Game from "#models/game";
 import User from "#models/user";
+import { isUserOnline } from "#services/presence/presence";
 
 export const getCurrentGameIdsByUserId = async (
     userIds: number[],
@@ -32,4 +33,6 @@ export const serializeFriend = (user: User, currentGameId: number | null = null)
     wins: user.wins,
     losses: user.losses,
     currentGameId,
+    lastSeenAt: user.lastSeenAt?.toISO() ?? null,
+    isOnline: isUserOnline(user.lastSeenAt),
 });

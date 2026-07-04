@@ -16,6 +16,7 @@ interface SpellCardFaceProps {
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
+    imageLoading?: "eager" | "lazy";
 }
 
 export const SpellCardFace = ({
@@ -26,6 +27,7 @@ export const SpellCardFace = ({
     onClick,
     onPointerDown,
     wrapper = (content) => content,
+    imageLoading,
 }: SpellCardFaceProps) => {
     const content = (
         <div
@@ -45,6 +47,7 @@ export const SpellCardFace = ({
                     src={card.imageUrl}
                     alt="Galaguerre spell"
                     draggable={false}
+                    loading={imageLoading}
                 />
             </div>
             <div className="playing-card-face__body playing-card-face__body--no-stats">

@@ -31,6 +31,7 @@ export type ScannedRoutes = {
         "collection.open_pack": { paramsTuple?: []; params?: {} };
         "rewards.buy_pack": { paramsTuple?: []; params?: {} };
         "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };
+        "presence.heartbeat": { paramsTuple?: []; params?: {} };
         "daily_quests.index": { paramsTuple?: []; params?: {} };
         "daily_quests.claim": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "friends.index": { paramsTuple?: []; params?: {} };
@@ -41,6 +42,11 @@ export type ScannedRoutes = {
         "friend_requests.sent": { paramsTuple?: []; params?: {} };
         "friend_requests.accept": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "friend_requests.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "game_invites.index": { paramsTuple?: []; params?: {} };
+        "game_invites.sent": { paramsTuple?: []; params?: {} };
+        "game_invites.store": { paramsTuple?: []; params?: {} };
+        "game_invites.accept": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "game_invites.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "events.index": { paramsTuple?: []; params?: {} };
         "events.register": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
@@ -84,6 +90,8 @@ export type ScannedRoutes = {
         "friends.search": { paramsTuple?: []; params?: {} };
         "friend_requests.index": { paramsTuple?: []; params?: {} };
         "friend_requests.sent": { paramsTuple?: []; params?: {} };
+        "game_invites.index": { paramsTuple?: []; params?: {} };
+        "game_invites.sent": { paramsTuple?: []; params?: {} };
         "events.index": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
@@ -114,6 +122,8 @@ export type ScannedRoutes = {
         "friends.search": { paramsTuple?: []; params?: {} };
         "friend_requests.index": { paramsTuple?: []; params?: {} };
         "friend_requests.sent": { paramsTuple?: []; params?: {} };
+        "game_invites.index": { paramsTuple?: []; params?: {} };
+        "game_invites.sent": { paramsTuple?: []; params?: {} };
         "events.index": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
@@ -130,9 +140,12 @@ export type ScannedRoutes = {
         "collection.open_pack": { paramsTuple?: []; params?: {} };
         "rewards.buy_pack": { paramsTuple?: []; params?: {} };
         "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };
+        "presence.heartbeat": { paramsTuple?: []; params?: {} };
         "daily_quests.claim": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "friends.store": { paramsTuple?: []; params?: {} };
         "friend_requests.accept": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "game_invites.store": { paramsTuple?: []; params?: {} };
+        "game_invites.accept": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "events.register": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.select": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "deck_shares.store": { paramsTuple: [ParamValue]; params: { deckId: ParamValue } };
@@ -149,6 +162,7 @@ export type ScannedRoutes = {
     DELETE: {
         "friends.destroy": { paramsTuple: [ParamValue]; params: { friendUserId: ParamValue } };
         "friend_requests.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "game_invites.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "games.cancel_search": { paramsTuple?: []; params?: {} };
         "games.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };

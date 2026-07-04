@@ -10,6 +10,7 @@ import {
     sendGameSearchHeartbeat,
     startGameSearch,
 } from "~/services/matchmaking";
+import { CLIENT_SOCKET } from "~/services/ws_client";
 import { USER_QUERY_KEY, useUser } from "./use_user.js";
 
 export const useMatchmaking = () => {
@@ -69,6 +70,17 @@ export const useMatchmakingOrchestrator = () => {
             wasSearchingRef.current = true;
         }
     }, [isSearching]);
+
+    useEffect(() => {
+        const onGameCreated = () => {
+            wasSearchingRef.current = true;
+        };
+
+        CLIENT_SOCKET.on("game:created", onGameCreated);
+        return () => {
+            CLIENT_SOCKET.off("game:created", onGameCreated);
+        };
+    }, []);
 
     const handleMatched = useCallback(
         (gameId: number) => {

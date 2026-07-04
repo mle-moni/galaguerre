@@ -25,6 +25,7 @@ interface PlayerCardFaceProps {
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
+    imageLoading?: "eager" | "lazy";
 }
 
 export const PlayerCardFace = ({
@@ -44,6 +45,7 @@ export const PlayerCardFace = ({
     onClick,
     onPointerDown,
     wrapper,
+    imageLoading,
 }: PlayerCardFaceProps) => {
     const sizeClassName = size === "full" ? "playing-card-face--full" : undefined;
     const mergedClassName = clsx(sizeClassName, className);
@@ -57,6 +59,7 @@ export const PlayerCardFace = ({
                 spellPower={spellPower}
                 onClick={onClick}
                 wrapper={wrapper}
+                imageLoading={imageLoading}
             />
         );
     }
@@ -71,6 +74,7 @@ export const PlayerCardFace = ({
                 onClick={onClick}
                 onPointerDown={onPointerDown}
                 wrapper={wrapper}
+                imageLoading={imageLoading}
             />
         );
     }
@@ -92,6 +96,7 @@ export const PlayerCardFace = ({
             onClick={onClick}
             onPointerDown={onPointerDown}
             wrapper={wrapper}
+            imageLoading={imageLoading}
         />
     );
 };

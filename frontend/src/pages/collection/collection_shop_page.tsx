@@ -80,11 +80,16 @@ export const CollectionShopPage = observer(() => {
                             5 cartes aléatoires pour enrichir votre collection.
                         </Text>
                         <Group gap="xs" wrap="nowrap" align="center">
-                            <GoldCoinAmount amount={GOLD_COINS_PER_PACK} showLabel iconSize={20} />
+                            <GoldCoinAmount
+                                amount={GOLD_COINS_PER_PACK}
+                                showLabel
+                                iconSize={20}
+                                textProps={{ c: "dark", fw: 600 }}
+                            />
                             <ActionIcon
                                 variant="transparent"
                                 size="sm"
-                                className="text-white/70"
+                                className="text-gray-400"
                                 aria-label="Comment gagner des story points"
                                 onClick={() => setHelpOpened(true)}
                             >

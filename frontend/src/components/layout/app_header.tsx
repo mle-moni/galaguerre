@@ -19,7 +19,6 @@ const NAV_ITEMS = [
     { label: "Jouer", to: null as string | null, dynamic: true },
     { label: "Decks", to: "/decks" },
     { label: "Collection", to: "/collection" },
-    { label: "Quêtes", to: null, disabled: true },
     { label: "Boutique", to: "/collection/shop" },
     { label: "Classement", to: "/leaderboard" },
 ] as const;

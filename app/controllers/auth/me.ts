@@ -1,4 +1,5 @@
 import Game from "#models/game";
+import { touchPresence } from "#services/presence/presence";
 import { canClaimDailyPack } from "#services/rewards/claim_daily_pack";
 import { findQueueItemByUserId } from "#services/sockets/matchmaking";
 import { randomUUID } from "node:crypto";
@@ -18,6 +19,7 @@ export const me = async ({ auth, response }: HttpContext) => {
     user.socketToken = randomUUID();
 
     await user.save();
+    await touchPresence(user.id);
 
     const queueItem = findQueueItemByUserId(user.id);
 

@@ -13,7 +13,7 @@ export const HomeBottomSection = () => {
         <section className="home-bottom">
             <HomeNewsPanel />
 
-            <HomePanel title="Passe de Saison" className="home-season-pass">
+            <HomePanel title="Progression" className="home-season-pass">
                 <img src={HOME_ASSETS.seasonPassChar} alt="" className="home-season-pass__char" />
                 <div className="home-season-pass__top">
                     <div className="home-progression__badge">{HOME_MOCK_PROFILE.level}</div>

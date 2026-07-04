@@ -1,6 +1,7 @@
 import type { AddFriendPayload } from "#api_types/friend.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { client } from "~/services/client";
+import { PRESENCE_HEARTBEAT_INTERVAL_MS } from "~/services/presence";
 import { useUser } from "./use_user.js";
 import {
     FRIEND_REQUESTS_QUERY_KEY,
@@ -21,6 +22,7 @@ export const useFriendsQuery = () => {
             return client.api.friends.index({});
         },
         enabled: !!user,
+        refetchInterval: PRESENCE_HEARTBEAT_INTERVAL_MS,
     });
 };
 

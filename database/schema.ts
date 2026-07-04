@@ -227,6 +227,21 @@ export class FriendshipSchema extends BaseModel {
     declare userId: number;
 }
 
+export class GameInviteSchema extends BaseModel {
+    static $columns = ["createdAt", "fromUserId", "id", "toUserId", "updatedAt"] as const;
+    $columns = GameInviteSchema.$columns;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime;
+    @column()
+    declare fromUserId: number;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column()
+    declare toUserId: number;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime | null;
+}
+
 export class GameReplayStepSchema extends BaseModel {
     static $columns = ["createdAt", "data", "gameId", "id", "stepIndex"] as const;
     $columns = GameReplayStepSchema.$columns;
@@ -362,6 +377,7 @@ export class UserSchema extends BaseModel {
         "id",
         "isSuperAdmin",
         "lastDailyPackClaimedOn",
+        "lastSeenAt",
         "losses",
         "onboardingCompletedAt",
         "password",
@@ -385,6 +401,8 @@ export class UserSchema extends BaseModel {
     declare isSuperAdmin: boolean | null;
     @column.date()
     declare lastDailyPackClaimedOn: DateTime | null;
+    @column.dateTime()
+    declare lastSeenAt: DateTime | null;
     @column()
     declare losses: number;
     @column.dateTime()

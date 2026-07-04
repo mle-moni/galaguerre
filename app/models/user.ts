@@ -50,6 +50,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     @column.date()
     declare lastDailyPackClaimedOn: DateTime | null;
 
+    @column.dateTime()
+    declare lastSeenAt: DateTime | null;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

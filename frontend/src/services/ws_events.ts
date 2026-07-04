@@ -1,7 +1,9 @@
+import type { ApiGameInvite, ApiSentGameInvite } from "#api_types/game_invite.types";
 import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame } from "#api_types/game.types";
 import type { Socket } from "socket.io-client";
 import { getGameStateQueryKey } from "~/hooks/use_game_state";
+import { GAME_INVITES_QUERY_KEY, SENT_GAME_INVITES_QUERY_KEY } from "~/hooks/use_game_invites";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { fetchCurrentUser } from "./fetch_current_user.js";
 import { queryClient } from "./query_client.js";
@@ -101,6 +103,25 @@ export const setupEvents = (socket: Socket) => {
                 matchmakingSearchSessionId: null,
             };
         });
+        queryClient.setQueryData<ApiGameInvite[]>(GAME_INVITES_QUERY_KEY, []);
+        queryClient.setQueryData(SENT_GAME_INVITES_QUERY_KEY, []);
+    });
+
+    subscribeToSocketEvent("game:invite_received", ({ invite }) => {
+        queryClient.setQueryData<ApiGameInvite[]>(GAME_INVITES_QUERY_KEY, (oldInvites) => {
+            const invites = oldInvites ?? [];
+            if (invites.some((entry) => entry.id === invite.id)) return invites;
+            return [invite, ...invites];
+        });
+    });
+
+    subscribeToSocketEvent("game:invite_cancelled", ({ inviteId }) => {
+        queryClient.setQueryData<ApiGameInvite[]>(GAME_INVITES_QUERY_KEY, (oldInvites) =>
+            (oldInvites ?? []).filter((invite) => invite.id !== inviteId),
+        );
+        queryClient.setQueryData<ApiSentGameInvite[]>(SENT_GAME_INVITES_QUERY_KEY, (oldInvites) =>
+            (oldInvites ?? []).filter((invite) => invite.id !== inviteId),
+        );
     });
 
     subscribeToSocketEvent("game:update", ({ game, presentation }) => {

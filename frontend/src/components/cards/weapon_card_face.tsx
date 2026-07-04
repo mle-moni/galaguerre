@@ -15,6 +15,7 @@ interface WeaponCardFaceProps {
     spellPower?: number;
     onClick?: () => void;
     wrapper?: (content: ReactNode) => ReactNode;
+    imageLoading?: "eager" | "lazy";
 }
 
 export const WeaponCardFace = ({
@@ -24,6 +25,7 @@ export const WeaponCardFace = ({
     spellPower = 0,
     onClick,
     wrapper = (content) => content,
+    imageLoading,
 }: WeaponCardFaceProps) => {
     const content = (
         <div
@@ -42,6 +44,7 @@ export const WeaponCardFace = ({
                     src={card.imageUrl}
                     alt="Galaguerre weapon"
                     draggable={false}
+                    loading={imageLoading}
                 />
             </div>
             <div className="playing-card-face__body">

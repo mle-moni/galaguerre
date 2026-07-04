@@ -58,6 +58,7 @@ router
         router.post("/packs/open", [controllers.collection.Collection, "openPack"]);
         router.post("/packs/buy", [controllers.rewards.Rewards, "buyPack"]);
         router.post("/rewards/daily-pack", [controllers.rewards.Rewards, "claimDailyPack"]);
+        router.post("/presence/heartbeat", [controllers.presence.Presence, "heartbeat"]);
         router.get("/daily-quests", [controllers.dailyQuests.DailyQuests, "index"]);
         router.post("/daily-quests/:id/claim", [controllers.dailyQuests.DailyQuests, "claim"]);
         router.get("/friends", [controllers.friends.Friends, "index"]);
@@ -68,6 +69,11 @@ router
         router.get("/friend-requests/sent", [controllers.friends.FriendRequests, "sent"]);
         router.post("/friend-requests/:id/accept", [controllers.friends.FriendRequests, "accept"]);
         router.delete("/friend-requests/:id", [controllers.friends.FriendRequests, "destroy"]);
+        router.get("/game-invites", [controllers.gameInvites.GameInvites, "index"]);
+        router.get("/game-invites/sent", [controllers.gameInvites.GameInvites, "sent"]);
+        router.post("/game-invites", [controllers.gameInvites.GameInvites, "store"]);
+        router.post("/game-invites/:id/accept", [controllers.gameInvites.GameInvites, "accept"]);
+        router.delete("/game-invites/:id", [controllers.gameInvites.GameInvites, "destroy"]);
         router.get("/events", [controllers.events.Events, "index"]);
         router.post("/events/:id/register", [controllers.events.Events, "register"]);
         router.post("/decks/:id/select", [controllers.decks.Decks, "select"]);
