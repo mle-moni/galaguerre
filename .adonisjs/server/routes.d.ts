@@ -34,6 +34,7 @@ export type ScannedRoutes = {
         "presence.heartbeat": { paramsTuple?: []; params?: {} };
         "daily_quests.index": { paramsTuple?: []; params?: {} };
         "daily_quests.claim": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "progression.claim": { paramsTuple: [ParamValue]; params: { level: ParamValue } };
         "friends.index": { paramsTuple?: []; params?: {} };
         "friends.search": { paramsTuple?: []; params?: {} };
         "friends.store": { paramsTuple?: []; params?: {} };
@@ -142,6 +143,7 @@ export type ScannedRoutes = {
         "rewards.claim_daily_pack": { paramsTuple?: []; params?: {} };
         "presence.heartbeat": { paramsTuple?: []; params?: {} };
         "daily_quests.claim": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "progression.claim": { paramsTuple: [ParamValue]; params: { level: ParamValue } };
         "friends.store": { paramsTuple?: []; params?: {} };
         "friend_requests.accept": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "game_invites.store": { paramsTuple?: []; params?: {} };

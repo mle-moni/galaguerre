@@ -21,7 +21,7 @@ const tableStyles = {
 
 const FriendStats = ({ user }: { user: ApiFriend }) => (
     <span className="text-white/70 text-sm">
-        {user.elo} Elo · {user.wins}V / {user.losses}D
+        Niv. {user.level} · {user.levelTitle} · {user.elo} Elo · {user.wins}V / {user.losses}D
     </span>
 );
 

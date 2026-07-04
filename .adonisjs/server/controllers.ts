@@ -119,6 +119,9 @@ export const controllers = {
     presence: {
         Presence: () => import("#controllers/presence/presence_controller"),
     },
+    progression: {
+        Progression: () => import("#controllers/progression/progression_controller"),
+    },
     rewards: {
         Rewards: () => import("#controllers/rewards/rewards_controller"),
     },

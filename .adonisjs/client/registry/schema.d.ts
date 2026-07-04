@@ -589,6 +589,30 @@ export interface Registry {
             >;
         };
     };
+    "progression.claim": {
+        methods: ["POST"];
+        pattern: "/api/progression/levels/:level/claim";
+        types: {
+            body: {};
+            paramsTuple: [ParamValue];
+            params: { level: ParamValue };
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/progression/progression_controller").default["claim"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/progression/progression_controller").default["claim"]
+                    >
+                >
+            >;
+        };
+    };
     "friends.index": {
         methods: ["GET", "HEAD"];
         pattern: "/api/friends";

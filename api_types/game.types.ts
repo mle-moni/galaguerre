@@ -28,6 +28,7 @@ import type {
     PassiveSnapshot,
 } from "./card.types.js";
 import type { CardRarity } from "./card_rarity.types.js";
+import type { GameXpResult } from "./progression.js";
 import type { GameRewardResult } from "./rewards.types.js";
 
 export interface ComparableStats {
@@ -221,6 +222,7 @@ export interface GameRatingResult {
 }
 
 export type { GameRewardPlayerResult, GameRewardResult } from "./rewards.types.js";
+export type { GameXpPlayerResult, GameXpResult } from "./progression.js";
 
 export interface GameMulliganState {
     playerOneDone: boolean;
@@ -260,6 +262,7 @@ export interface GameData {
     mulliganEndsAt?: number;
     ratingResult?: GameRatingResult;
     rewardResult?: GameRewardResult;
+    xpResult?: GameXpResult;
     isTraining?: boolean;
     isOnboardingTutorial?: boolean;
 }

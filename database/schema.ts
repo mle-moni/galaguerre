@@ -320,6 +320,19 @@ export class UserCardSchema extends BaseModel {
     declare userId: number;
 }
 
+export class UserClaimedProgressionLevelSchema extends BaseModel {
+    static $columns = ["claimedAt", "id", "level", "userId"] as const;
+    $columns = UserClaimedProgressionLevelSchema.$columns;
+    @column.dateTime()
+    declare claimedAt: DateTime;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column()
+    declare level: number;
+    @column()
+    declare userId: number;
+}
+
 export class UserDailyQuestSchema extends BaseModel {
     static $columns = [
         "claimedAt",
@@ -385,6 +398,7 @@ export class UserSchema extends BaseModel {
         "socketToken",
         "updatedAt",
         "wins",
+        "xp",
     ] as const;
     $columns = UserSchema.$columns;
     @column.dateTime({ autoCreate: true })
@@ -417,4 +431,6 @@ export class UserSchema extends BaseModel {
     declare updatedAt: DateTime | null;
     @column()
     declare wins: number;
+    @column()
+    declare xp: number;
 }

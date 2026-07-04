@@ -453,13 +453,27 @@
     background: #f59e0b;
 }
 
-.home-friend__name {
+.home-friend__info {
     flex: 1;
-    font-size: 0.75rem;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.home-friend__name {
+    font-size: 0.75rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.home-friend__level {
+    font-size: 0.58rem;
+    color: var(--gg-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .home-friend__status-label {
@@ -598,39 +612,43 @@
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* Season pass */
-.home-season-pass {
+/* Progression panel */
+.home-progression-panel {
     position: relative;
     overflow: hidden;
 }
 
-.home-season-pass__top {
+.home-progression-panel__top {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.6rem;
 }
 
-.home-season-pass__char {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 120px;
-    height: auto;
-    object-fit: contain;
-    opacity: 0.85;
-    pointer-events: none;
-}
-
-.home-season-pass__track {
+.home-progression-panel__track-wrap {
     display: flex;
-    gap: 0.4rem;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-    scrollbar-width: thin;
+    align-items: center;
+    gap: 0.25rem;
 }
 
-.home-season-pass__reward {
+.home-progression-panel__nav-btn {
+    flex-shrink: 0;
+}
+
+.home-progression-panel__nav-spacer {
+    flex-shrink: 0;
+    width: 28px;
+}
+
+.home-progression-panel__track {
+    display: flex;
+    flex: 1;
+    gap: 0.4rem;
+    overflow: hidden;
+    justify-content: flex-start;
+}
+
+.home-progression-panel__milestone {
     flex-shrink: 0;
     width: 44px;
     display: flex;
@@ -639,7 +657,11 @@
     gap: 0.2rem;
 }
 
-.home-season-pass__reward-icon {
+.home-progression-panel__milestone--claimable {
+    width: 64px;
+}
+
+.home-progression-panel__milestone-icon {
     width: 36px;
     height: 36px;
     border-radius: var(--gg-radius-sm);
@@ -648,21 +670,50 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gg-text-muted);
 }
 
-.home-season-pass__reward--current .home-season-pass__reward-icon {
+.home-progression-panel__milestone--current .home-progression-panel__milestone-icon {
     border-color: var(--gg-gold);
     box-shadow: 0 0 10px var(--gg-celestial-glow);
+    color: var(--gg-gold);
 }
 
-.home-season-pass__reward--claimed .home-season-pass__reward-icon {
+.home-progression-panel__milestone--reached .home-progression-panel__milestone-icon {
     opacity: 0.5;
 }
 
-.home-season-pass__reward-level {
+.home-progression-panel__milestone--claimable .home-progression-panel__milestone-icon {
+    border-color: var(--gg-gold);
+    box-shadow: 0 0 8px var(--gg-celestial-glow);
+    color: var(--gg-gold);
+    opacity: 1;
+}
+
+.home-progression-panel__milestone--claimed .home-progression-panel__milestone-icon {
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.5);
+    opacity: 0.6;
+}
+
+.home-progression-panel__claim-btn {
+    font-size: 0.55rem !important;
+    height: 18px !important;
+    padding: 0 4px !important;
+}
+
+.home-progression-panel__milestone-level {
     font-size: 0.55rem;
     color: var(--gg-text-muted);
+}
+
+.home-progression__level-title {
+    margin: 0 0 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gg-gold);
 }
 
 .home-panel__link {
@@ -745,7 +796,7 @@
         font-size: clamp(0.8rem, 0.85vw, 0.95rem);
     }
 
-    .home-season-pass__char {
+    .home-progression-panel__char {
         width: clamp(120px, 10vw, 200px);
     }
 }
@@ -800,11 +851,11 @@
         height: 48px;
     }
 
-    .home-season-pass__char {
+    .home-progression-panel__char {
         width: 90px;
     }
 
-    .home-season-pass__top {
+    .home-progression-panel__top {
         margin-bottom: 0.4rem;
     }
 

@@ -4,6 +4,8 @@ export interface ApiFriend {
     elo: number;
     wins: number;
     losses: number;
+    level: number;
+    levelTitle: string;
     currentGameId: number | null;
     lastSeenAt: string | null;
     isOnline: boolean;

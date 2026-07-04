@@ -30,6 +30,5 @@ crop_webp "icon-crystal.webp" "36x36+1310+18"
 crop_webp "icon-gem.webp" "36x36+1430+18"
 crop_webp "event-banner.webp" "280x120+20+620"
 crop_webp "avatar-placeholder.webp" "48x48+1540+18"
-crop_webp "season-pass-char.webp" "200x140+1450+780"
 
 echo "Extracted home assets to $OUT"

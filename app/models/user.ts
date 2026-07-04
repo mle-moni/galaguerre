@@ -47,6 +47,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     @column()
     declare goldCoins: number;
 
+    @column()
+    declare xp: number;
+
     @column.date()
     declare lastDailyPackClaimedOn: DateTime | null;
 

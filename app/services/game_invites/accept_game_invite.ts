@@ -110,6 +110,7 @@ export const acceptGameInvite = async (inviteId: number, userId: number) => {
         throw error;
     }
 
+    await invite.delete();
     await cancelAllInvitesForUser(inviterId);
     await cancelAllInvitesForUser(userId);
 

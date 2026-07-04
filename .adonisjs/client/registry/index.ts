@@ -254,6 +254,18 @@ const routes = {
         ],
         types: placeholder as Registry["daily_quests.claim"]["types"],
     },
+    "progression.claim": {
+        methods: ["POST"],
+        pattern: "/api/progression/levels/:level/claim",
+        tokens: [
+            { old: "/api/progression/levels/:level/claim", type: 0, val: "api", end: "" },
+            { old: "/api/progression/levels/:level/claim", type: 0, val: "progression", end: "" },
+            { old: "/api/progression/levels/:level/claim", type: 0, val: "levels", end: "" },
+            { old: "/api/progression/levels/:level/claim", type: 1, val: "level", end: "" },
+            { old: "/api/progression/levels/:level/claim", type: 0, val: "claim", end: "" },
+        ],
+        types: placeholder as Registry["progression.claim"]["types"],
+    },
     "friends.index": {
         methods: ["GET", "HEAD"],
         pattern: "/api/friends",

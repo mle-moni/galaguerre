@@ -3,6 +3,7 @@ import { applyGameResult, getWinnerUserId } from "#services/elo";
 import { completeOnboardingIfNeeded } from "#services/onboarding/complete_onboarding_if_needed";
 import { getTrainingGameHumanUserId } from "#services/onboarding/get_training_game_human_user_id";
 import { applyGameRewards } from "#services/rewards/apply_game_rewards";
+import { applyGameXp } from "#services/progression/apply_game_xp";
 import { updateDailyQuestProgressForGame } from "#services/daily_quests/update_daily_quest_progress";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { DateTime } from "luxon";
@@ -35,6 +36,7 @@ export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boo
         }
 
         await applyGameRewards(game);
+        await applyGameXp(game);
         await updateDailyQuestProgressForGame(game);
 
         if (!options?.skipSendUpdate) {
@@ -45,6 +47,7 @@ export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boo
 
     await applyGameResult(game);
     await applyGameRewards(game);
+    await applyGameXp(game);
     await updateDailyQuestProgressForGame(game);
     await game.save();
 

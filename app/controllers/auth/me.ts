@@ -1,4 +1,6 @@
+import { getProgressionFromTotalXp } from "#api_types/progression";
 import Game from "#models/game";
+import { listClaimedProgressionLevels } from "#services/progression/list_claimed_progression_levels";
 import { touchPresence } from "#services/presence/presence";
 import { canClaimDailyPack } from "#services/rewards/claim_daily_pack";
 import { findQueueItemByUserId } from "#services/sockets/matchmaking";
@@ -36,5 +38,7 @@ export const me = async ({ auth, response }: HttpContext) => {
         onboardingCompletedAt: user.onboardingCompletedAt?.toISO() ?? null,
         goldCoins: user.goldCoins,
         canClaimDailyPack: canClaimDailyPack(user),
+        progression: getProgressionFromTotalXp(user.xp),
+        claimedProgressionLevels: await listClaimedProgressionLevels(user.id),
     };
 };

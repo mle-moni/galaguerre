@@ -10,6 +10,7 @@ import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useOnboardingGame } from "~/hooks/use_onboarding_game";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { client } from "~/services/client";
+import { clearCurrentGameId } from "~/services/clear_current_game_id";
 import { queryClient } from "~/services/query_client";
 import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
 import type { ApiUser } from "#api_types/auth.types";
@@ -36,6 +37,11 @@ export const GameFinalScreen = observer(() => {
         }
     };
 
+    const leaveFinishedGame = () => {
+        clearCurrentGameId(queryClient, store.game.id);
+        invalidatePostGameQueries();
+    };
+
     const startTrainingMutation = useApiMutation({
         mutationFn: async () => {
             return (await client.api.games.training({})) as { gameId: number };
@@ -55,7 +61,7 @@ export const GameFinalScreen = observer(() => {
             return;
         }
 
-        invalidatePostGameQueries();
+        leaveFinishedGame();
         navigate(isTraining ? "/" : "/matchmaking");
     };
 
@@ -64,7 +70,7 @@ export const GameFinalScreen = observer(() => {
     };
 
     const handleReplay = () => {
-        invalidatePostGameQueries();
+        leaveFinishedGame();
 
         if (isTraining) {
             startTrainingMutation.mutate();
@@ -84,6 +90,11 @@ export const GameFinalScreen = observer(() => {
         store.me.userId === store.p1.userId
             ? store.game.data.rewardResult?.playerOne
             : store.game.data.rewardResult?.playerTwo;
+
+    const userXp =
+        store.me.userId === store.p1.userId
+            ? store.game.data.xpResult?.playerOne.xp ?? 0
+            : store.game.data.xpResult?.playerTwo.xp ?? 0;
 
     return (
         <Modal
@@ -137,7 +148,9 @@ export const GameFinalScreen = observer(() => {
                     winnerUserId={store.winner.userId}
                 />
 
-                {!store.isSpectating && userReward ? <GameLootSection reward={userReward} /> : null}
+                {!store.isSpectating && userReward ? (
+                    <GameLootSection reward={userReward} xp={userXp} />
+                ) : null}
 
                 {store.isSpectating ? (
                     <Button onClick={handleClose} mt="sm">

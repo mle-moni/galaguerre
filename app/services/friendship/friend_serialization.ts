@@ -1,5 +1,6 @@
 import Game from "#models/game";
 import User from "#models/user";
+import { getProgressionFromTotalXp } from "#api_types/progression";
 import { isUserOnline } from "#services/presence/presence";
 
 export const getCurrentGameIdsByUserId = async (
@@ -26,13 +27,19 @@ export const getCurrentGameIdsByUserId = async (
     return currentGameIdsByUserId;
 };
 
-export const serializeFriend = (user: User, currentGameId: number | null = null) => ({
-    userId: user.id,
-    pseudo: user.pseudo,
-    elo: user.elo,
-    wins: user.wins,
-    losses: user.losses,
-    currentGameId,
-    lastSeenAt: user.lastSeenAt?.toISO() ?? null,
-    isOnline: isUserOnline(user.lastSeenAt),
-});
+export const serializeFriend = (user: User, currentGameId: number | null = null) => {
+    const progression = getProgressionFromTotalXp(user.xp);
+
+    return {
+        userId: user.id,
+        pseudo: user.pseudo,
+        elo: user.elo,
+        wins: user.wins,
+        losses: user.losses,
+        level: progression.level,
+        levelTitle: progression.levelTitle,
+        currentGameId,
+        lastSeenAt: user.lastSeenAt?.toISO() ?? null,
+        isOnline: isUserOnline(user.lastSeenAt),
+    };
+};

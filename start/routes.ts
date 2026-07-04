@@ -61,6 +61,10 @@ router
         router.post("/presence/heartbeat", [controllers.presence.Presence, "heartbeat"]);
         router.get("/daily-quests", [controllers.dailyQuests.DailyQuests, "index"]);
         router.post("/daily-quests/:id/claim", [controllers.dailyQuests.DailyQuests, "claim"]);
+        router.post("/progression/levels/:level/claim", [
+            controllers.progression.Progression,
+            "claim",
+        ]);
         router.get("/friends", [controllers.friends.Friends, "index"]);
         router.get("/friends/search", [controllers.friends.Friends, "search"]);
         router.post("/friends", [controllers.friends.Friends, "store"]);

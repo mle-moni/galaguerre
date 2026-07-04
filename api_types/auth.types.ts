@@ -1,3 +1,5 @@
+import type { ApiUserProgression } from "./progression.js";
+
 export interface ApiUser {
     id: number;
     pseudo: string | null;
@@ -11,4 +13,6 @@ export interface ApiUser {
     onboardingCompletedAt: string | null;
     goldCoins: number;
     canClaimDailyPack: boolean;
+    progression: ApiUserProgression;
+    claimedProgressionLevels: number[];
 }

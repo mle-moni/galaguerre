@@ -41,7 +41,7 @@ export const useSendGameInviteMutation = () => {
     return useMutation({
         mutationFn: async (toUserId: number) => {
             return await client.api.gameInvites.store({
-                toUserId,
+                body: { toUserId },
             });
         },
         onSuccess: () => {

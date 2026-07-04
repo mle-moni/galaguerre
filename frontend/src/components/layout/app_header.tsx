@@ -7,7 +7,6 @@ import { PackIcon } from "~/components/rewards/pack_icon";
 import { usePacksQuery } from "~/hooks/use_collection";
 import { useLogout } from "~/hooks/use_logout";
 import { UserAvatar } from "~/components/user_avatar";
-import { HOME_MOCK_PROFILE } from "~/pages/home/home_mock_data";
 
 interface AppHeaderProps {
     user: ApiUser;
@@ -111,7 +110,7 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                             {user.pseudo ?? user.email.split("@")[0]}
                         </span>
                         <span className="app-header__profile-level">
-                            {HOME_MOCK_PROFILE.title} · Niveau {HOME_MOCK_PROFILE.level}
+                            {user.progression.levelTitle} · Niveau {user.progression.level}
                         </span>
                     </div>
                 </div>

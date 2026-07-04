@@ -18,6 +18,8 @@ const toOnlineFriend = (friend: ApiFriend): HomeOnlineFriend => ({
     userId: friend.userId,
     pseudo: friend.pseudo,
     status: friend.currentGameId !== null ? "in_game" : "online",
+    level: friend.level,
+    levelTitle: friend.levelTitle,
 });
 
 const compareOnlineFriends = (left: ApiFriend, right: ApiFriend) => {
@@ -38,7 +40,12 @@ const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => (
                 className={`home-friend__status home-friend__status--${friend.status === "in_game" ? "in_game" : "online"}`}
             />
         </div>
-        <span className="home-friend__name">{friend.pseudo ?? `Joueur #${friend.userId}`}</span>
+        <div className="home-friend__info">
+            <span className="home-friend__name">{friend.pseudo ?? `Joueur #${friend.userId}`}</span>
+            <span className="home-friend__level">
+                Niv. {friend.level} · {friend.levelTitle}
+            </span>
+        </div>
         <span
             className={`home-friend__status-label${friend.status === "in_game" ? " home-friend__status-label--in_game" : ""}`}
         >

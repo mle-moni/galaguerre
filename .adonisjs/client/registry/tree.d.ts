@@ -48,6 +48,9 @@ export interface ApiDefinition {
         index: (typeof routes)["daily_quests.index"];
         claim: (typeof routes)["daily_quests.claim"];
     };
+    progression: {
+        claim: (typeof routes)["progression.claim"];
+    };
     friends: {
         index: (typeof routes)["friends.index"];
         search: (typeof routes)["friends.search"];

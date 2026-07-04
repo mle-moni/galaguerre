@@ -5,10 +5,11 @@ import { PackAmount } from "~/components/rewards/pack_icon";
 
 interface GameLootSectionProps {
     reward: GameRewardPlayerResult;
+    xp?: number;
 }
 
-export const GameLootSection = ({ reward }: GameLootSectionProps) => {
-    if (reward.goldCoins === 0 && reward.packs === 0) {
+export const GameLootSection = ({ reward, xp = 0 }: GameLootSectionProps) => {
+    if (reward.goldCoins === 0 && reward.packs === 0 && xp === 0) {
         return null;
     }
 
@@ -21,6 +22,11 @@ export const GameLootSection = ({ reward }: GameLootSectionProps) => {
                 ) : null}
                 {reward.packs > 0 ? (
                     <PackAmount amount={reward.packs} prefix="+" iconWidth={20} />
+                ) : null}
+                {xp > 0 ? (
+                    <Text size="sm" c="gold.3" fw={600}>
+                        +{xp} XP
+                    </Text>
                 ) : null}
             </Stack>
         </Paper>

@@ -191,6 +191,7 @@ export class GameStore {
 
     receiveUpdate(game: ApiGame, presentation?: GamePresentationUpdate) {
         const isNewGame = this._authoritativeGame?.id !== game.id;
+        const wasAlreadyFinished = !isNewGame && this._authoritativeGame?.data.state === "FINISHED";
         this._authoritativeGame = game;
         this.combatActionQueue.resetInFlight();
         this.syncDiscoverOverlayState(game);
@@ -204,9 +205,13 @@ export class GameStore {
         }
 
         if (game.data.state === "FINISHED") {
-            this.narrativeDirector.clear();
             this._displayGame = game;
-            void this.narrativeDirector.playGameEndExplosions(game);
+
+            if (!wasAlreadyFinished) {
+                this.narrativeDirector.clear();
+                void this.narrativeDirector.playGameEndExplosions(game);
+            }
+
             return;
         }
 
