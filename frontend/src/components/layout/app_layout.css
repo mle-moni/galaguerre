@@ -147,21 +147,6 @@
     gap: 0.5rem;
 }
 
-.app-header__icon-btn {
-    position: relative;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-    padding: 0.25rem;
-    display: flex;
-    align-items: center;
-}
-
-.app-header__icon-btn:hover {
-    color: white;
-}
-
 .app-header__notif-dot {
     position: absolute;
     top: 0;

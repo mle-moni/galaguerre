@@ -7,6 +7,8 @@ interface ManaCurveChartProps {
     catalogById: Map<number, ApiCatalogCard>;
     selectedCost: number | null;
     onCostClick: (cost: number | null) => void;
+    variant?: "dark" | "light";
+    averageLayout?: "footer" | "side";
 }
 
 const BAR_AREA_HEIGHT = 80;
@@ -48,6 +50,8 @@ export const ManaCurveChart = ({
     catalogById,
     selectedCost,
     onCostClick,
+    variant = "dark",
+    averageLayout = "footer",
 }: ManaCurveChartProps) => {
     const { buckets, maxCount, averageCost, totalCards } = useMemo(
         () => computeManaCurve(composition, catalogById),
@@ -56,10 +60,17 @@ export const ManaCurveChart = ({
 
     const ariaLabel = buildAriaLabel(buckets, averageCost, totalCards);
 
+    const isLight = variant === "light";
+    const isSideAvg = averageLayout === "side";
+
     if (totalCards === 0) {
         return (
-            <div className="gg-mana-curve gg-mana-curve--empty">
-                <p className="text-white/50 text-xs m-0 text-center">
+            <div
+                className={`gg-mana-curve gg-mana-curve--empty${isLight ? " gg-mana-curve--light" : ""}`}
+            >
+                <p
+                    className={`text-xs m-0 text-center${isLight ? " text-[#2c2416]/50" : " text-white/50"}`}
+                >
                     Ajoutez des cartes pour voir la courbe
                 </p>
             </div>
@@ -77,81 +88,111 @@ export const ManaCurveChart = ({
         }
     };
 
-    return (
-        <div className="gg-mana-curve" role="img" aria-label={ariaLabel}>
-            <div className="gg-mana-curve__bars">
-                {buckets.map((bucket) => {
-                    const isActive = selectedCost === bucket.cost;
-                    const totalHeight =
-                        bucket.total > 0
-                            ? Math.max(4, (bucket.total / maxCount) * BAR_AREA_HEIGHT)
-                            : 0;
-                    const segmentHeight = (count: number) =>
-                        bucket.total > 0 ? (count / bucket.total) * totalHeight : 0;
+    const averageBadge = (
+        <div className="gg-mana-curve__avg-badge" aria-hidden="true">
+            <img
+                src="/game/mana-medallion.webp"
+                alt=""
+                className="gg-mana-curve__avg-badge-icon"
+                draggable={false}
+            />
+            <span className="gg-mana-curve__avg-badge-label">Coût moyen</span>
+            <span className="gg-mana-curve__avg-badge-value">{averageCost.toFixed(1)}</span>
+            <span className="gg-mana-curve__avg-badge-unit">mana</span>
+        </div>
+    );
 
-                    return (
-                        <button
-                            key={bucket.cost}
-                            type="button"
-                            className={`gg-mana-curve__column ${isActive ? "gg-mana-curve__column--active" : ""}`}
-                            onClick={() => handleColumnClick(bucket.cost)}
-                            onKeyDown={(e) => handleColumnKeyDown(e, bucket.cost)}
-                            title={formatTooltip(bucket)}
-                            aria-label={`${bucket.cost} mana : ${formatTooltip(bucket)}`}
-                            aria-pressed={isActive}
-                        >
-                            {bucket.total > 0 && (
-                                <span className="gg-mana-curve__count">{bucket.total}</span>
-                            )}
-                            <div
-                                className="gg-mana-curve__stack"
-                                style={{ height: `${BAR_AREA_HEIGHT}px` }}
+    const legend = (
+        <div className="gg-mana-curve__legend" aria-hidden="true">
+            <span className="gg-mana-curve__legend-item">
+                <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--minion" />
+                Monstres
+            </span>
+            <span className="gg-mana-curve__legend-item">
+                <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--spell" />
+                Sorts
+            </span>
+            <span className="gg-mana-curve__legend-item">
+                <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--weapon" />
+                Armes
+            </span>
+        </div>
+    );
+
+    return (
+        <div
+            className={`gg-mana-curve${isLight ? " gg-mana-curve--light" : ""}${isSideAvg ? " gg-mana-curve--side-avg" : ""}`}
+            role="img"
+            aria-label={ariaLabel}
+        >
+            <div className="gg-mana-curve__main">
+                <div className="gg-mana-curve__bars">
+                    {buckets.map((bucket) => {
+                        const isActive = selectedCost === bucket.cost;
+                        const totalHeight =
+                            bucket.total > 0
+                                ? Math.max(4, (bucket.total / maxCount) * BAR_AREA_HEIGHT)
+                                : 0;
+                        const segmentHeight = (count: number) =>
+                            bucket.total > 0 ? (count / bucket.total) * totalHeight : 0;
+
+                        return (
+                            <button
+                                key={bucket.cost}
+                                type="button"
+                                className={`gg-mana-curve__column ${isActive ? "gg-mana-curve__column--active" : ""}`}
+                                onClick={() => handleColumnClick(bucket.cost)}
+                                onKeyDown={(e) => handleColumnKeyDown(e, bucket.cost)}
+                                title={formatTooltip(bucket)}
+                                aria-label={`${bucket.cost} mana : ${formatTooltip(bucket)}`}
+                                aria-pressed={isActive}
                             >
-                                {bucket.minion > 0 && (
-                                    <div
-                                        className="gg-mana-curve__segment gg-mana-curve__segment--minion"
-                                        style={{ height: `${segmentHeight(bucket.minion)}px` }}
-                                    />
+                                {bucket.total > 0 && (
+                                    <span className="gg-mana-curve__count">{bucket.total}</span>
                                 )}
-                                {bucket.spell > 0 && (
-                                    <div
-                                        className="gg-mana-curve__segment gg-mana-curve__segment--spell"
-                                        style={{ height: `${segmentHeight(bucket.spell)}px` }}
-                                    />
-                                )}
-                                {bucket.weapon > 0 && (
-                                    <div
-                                        className="gg-mana-curve__segment gg-mana-curve__segment--weapon"
-                                        style={{ height: `${segmentHeight(bucket.weapon)}px` }}
-                                    />
-                                )}
-                            </div>
-                            <span
-                                className={`gg-mana-curve__gem ${isActive ? "gg-mana-curve__gem--active" : ""}`}
-                            >
-                                {bucket.cost}
-                            </span>
-                        </button>
-                    );
-                })}
+                                <div
+                                    className="gg-mana-curve__stack"
+                                    style={{ height: `${BAR_AREA_HEIGHT}px` }}
+                                >
+                                    {bucket.minion > 0 && (
+                                        <div
+                                            className="gg-mana-curve__segment gg-mana-curve__segment--minion"
+                                            style={{ height: `${segmentHeight(bucket.minion)}px` }}
+                                        />
+                                    )}
+                                    {bucket.spell > 0 && (
+                                        <div
+                                            className="gg-mana-curve__segment gg-mana-curve__segment--spell"
+                                            style={{ height: `${segmentHeight(bucket.spell)}px` }}
+                                        />
+                                    )}
+                                    {bucket.weapon > 0 && (
+                                        <div
+                                            className="gg-mana-curve__segment gg-mana-curve__segment--weapon"
+                                            style={{ height: `${segmentHeight(bucket.weapon)}px` }}
+                                        />
+                                    )}
+                                </div>
+                                <span
+                                    className={`gg-mana-curve__gem ${isActive ? "gg-mana-curve__gem--active" : ""}`}
+                                >
+                                    {bucket.cost}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {isSideAvg && averageBadge}
             </div>
 
             <div className="gg-mana-curve__footer">
-                <span className="gg-mana-curve__avg">Moyenne : {averageCost.toFixed(1)} mana</span>
-                <div className="gg-mana-curve__legend" aria-hidden="true">
-                    <span className="gg-mana-curve__legend-item">
-                        <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--minion" />
-                        Monstres
+                {!isSideAvg && (
+                    <span className="gg-mana-curve__avg">
+                        Moyenne : {averageCost.toFixed(1)} mana
                     </span>
-                    <span className="gg-mana-curve__legend-item">
-                        <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--spell" />
-                        Sorts
-                    </span>
-                    <span className="gg-mana-curve__legend-item">
-                        <span className="gg-mana-curve__legend-dot gg-mana-curve__legend-dot--weapon" />
-                        Armes
-                    </span>
-                </div>
+                )}
+                {legend}
             </div>
         </div>
     );

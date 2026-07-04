@@ -1,0 +1,320 @@
+.matchmaking-page {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    margin: -0.75rem clamp(-1rem, -2vw, -2.5rem) -1.5rem;
+    padding: 1.5rem clamp(1rem, 2vw, 2.5rem);
+    overflow: hidden;
+}
+
+.matchmaking-page__bg {
+    position: absolute;
+    inset: 0;
+    background: url("/game/galaguerre-background.webp") center / cover no-repeat;
+    z-index: 0;
+}
+
+.matchmaking-page__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 22, 40, 0.15);
+    z-index: 1;
+}
+
+.matchmaking-page__content {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 720px);
+}
+
+.matchmaking-panel {
+    background: linear-gradient(180deg, #f4e8cc 0%, #e8d5a8 100%);
+    border: 2px solid #c9a227;
+    border-radius: 16px;
+    box-shadow:
+        0 0 0 1px rgba(201, 162, 39, 0.4),
+        0 0 24px rgba(201, 162, 39, 0.25),
+        0 8px 32px rgba(0, 0, 0, 0.35);
+    color: #2c2416;
+    overflow: hidden;
+}
+
+.matchmaking-panel__header {
+    padding: 1.25rem 1.5rem 1rem;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #2c2416;
+    border-bottom: 1px solid rgba(201, 162, 39, 0.45);
+}
+
+.matchmaking-panel__body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.matchmaking-panel__section {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+}
+
+.matchmaking-panel__section:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.matchmaking-panel__section-title {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(44, 36, 22, 0.65);
+    margin: 0 0 0.75rem;
+}
+
+.matchmaking-deck {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.matchmaking-deck__portrait {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #c9a227;
+    box-shadow:
+        0 0 0 2px rgba(201, 162, 39, 0.35),
+        0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    background: rgba(44, 36, 22, 0.08);
+}
+
+.matchmaking-deck__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.matchmaking-deck__info {
+    flex: 1;
+    min-width: 140px;
+}
+
+.matchmaking-deck__label {
+    font-size: 0.75rem;
+    color: rgba(44, 36, 22, 0.6);
+    margin: 0 0 0.15rem;
+}
+
+.matchmaking-deck__name {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    margin: 0 0 0.15rem;
+    color: #2c2416;
+}
+
+.matchmaking-deck__count {
+    font-size: 0.8rem;
+    color: rgba(44, 36, 22, 0.65);
+    margin: 0;
+}
+
+.matchmaking-deck__change {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2c2416;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(201, 162, 39, 0.5);
+    border-radius: 8px;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.matchmaking-deck__change:hover {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: #c9a227;
+    color: #2c2416;
+}
+
+.matchmaking-panel__empty {
+    font-size: 0.875rem;
+    color: rgba(44, 36, 22, 0.75);
+    margin: 0;
+}
+
+.matchmaking-panel__empty a {
+    color: #8b6914;
+    font-weight: 600;
+}
+
+.matchmaking-panel__error {
+    font-size: 0.8rem;
+    color: #b91c1c;
+    margin: 0;
+}
+
+.matchmaking-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.matchmaking-actions__icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.matchmaking-actions__btn {
+    flex: 1 1 200px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 8px;
+    border: 2px solid #c9a227;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.matchmaking-actions__btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.matchmaking-actions__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.matchmaking-actions__btn--search {
+    color: white;
+    background: linear-gradient(180deg, #2a6cb8 0%, #1a4a8a 100%);
+    box-shadow:
+        0 0 16px rgba(100, 180, 255, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.matchmaking-actions__btn--search:hover:not(:disabled) {
+    box-shadow:
+        0 0 24px rgba(100, 180, 255, 0.45),
+        0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.matchmaking-actions__btn--training {
+    color: #2c2416;
+    background: linear-gradient(180deg, #f4e8cc 0%, #dcc99a 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.matchmaking-actions__btn--training:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.matchmaking-searching {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.matchmaking-searching__title {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2c2416;
+    margin: 1rem 0 0.25rem;
+}
+
+.matchmaking-searching__hint {
+    font-size: 0.8rem;
+    color: rgba(44, 36, 22, 0.6);
+    margin: 0;
+}
+
+@media (max-width: 639px) {
+    .matchmaking-page {
+        align-items: stretch;
+        justify-content: flex-start;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 0;
+        margin: -0.75rem -1rem -1.5rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .matchmaking-page__bg,
+    .matchmaking-page__overlay {
+        display: none;
+    }
+
+    .matchmaking-page__content {
+        width: 100%;
+        max-width: none;
+    }
+
+    .matchmaking-panel {
+        min-height: 100%;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        box-shadow: none;
+    }
+
+    .matchmaking-panel__header {
+        font-size: 1.2rem;
+        padding: 1rem 1.25rem;
+    }
+
+    .matchmaking-panel__body {
+        padding: 1rem 1.25rem 1.5rem;
+    }
+
+    .matchmaking-deck {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .matchmaking-deck__change {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .matchmaking-actions {
+        flex-direction: column;
+    }
+
+    .matchmaking-actions__btn {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}

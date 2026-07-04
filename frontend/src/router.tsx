@@ -85,6 +85,7 @@ const router = createBrowserRouter([
                     {
                         path: "/matchmaking",
                         element: <MatchmakingPage />,
+                        handle: { fillViewport: true },
                     },
                     {
                         path: "/rules",

@@ -1,4 +1,5 @@
-import { Button, Text } from "@mantine/core";
+import { Loader } from "@mantine/core";
+import { IconArrowsExchange, IconSwords } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -11,6 +12,11 @@ import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useUser } from "~/hooks/use_user";
 import { applyTrainingGameStarted } from "~/services/apply_training_game_started";
 import { client } from "~/services/client";
+import { getDeckFeaturedCard } from "~/utils/get_deck_featured_card";
+import "./match_making_page.css";
+
+const DECK_PLACEHOLDER_IMAGE = "/card-covers/galadrim/question_mark.webp";
+const SEARCH_COMPASS_IMAGE = "/game/boussole.webp";
 
 export const MatchmakingPage = observer(() => {
     const user = useUser()!;
@@ -41,90 +47,128 @@ export const MatchmakingPage = observer(() => {
         (selectedDeck?.cards ?? []).map(({ cardId, count }) => [cardId, count] as const),
     );
 
+    const featuredCard = getDeckFeaturedCard(deckComposition, catalogById);
     const canSearch = selectedDeck?.valid ?? false;
 
     return (
-        <div className="max-w-lg mx-auto">
-            <div className="gg-panel">
-                <div className="gg-panel-header">Rechercher une partie</div>
-                <div className="gg-panel-body flex flex-col gap-4">
-                    {selectedDeck ? (
-                        <>
-                            <div>
-                                <Text className="text-white font-semibold mb-1">
-                                    Deck sélectionné : {selectedDeck.name}
-                                </Text>
-                                <Text size="sm" className="text-white/60">
-                                    {selectedDeck.cardCount} cartes
-                                    {!selectedDeck.valid && " — deck invalide"}
-                                </Text>
-                            </div>
+        <div className="matchmaking-page">
+            <div className="matchmaking-page__bg" aria-hidden="true" />
+            <div className="matchmaking-page__overlay" aria-hidden="true" />
 
-                            {selectedDeck.cardCount > 0 && (
+            <div className="matchmaking-page__content">
+                <div className="matchmaking-panel">
+                    <div className="matchmaking-panel__header">Rechercher une partie</div>
+
+                    <div className="matchmaking-panel__body">
+                        <div className="matchmaking-panel__section">
+                            {selectedDeck ? (
+                                <div className="matchmaking-deck">
+                                    <div className="matchmaking-deck__portrait">
+                                        <img
+                                            src={featuredCard?.imageUrl ?? DECK_PLACEHOLDER_IMAGE}
+                                            alt={
+                                                featuredCard
+                                                    ? `Artwork de ${featuredCard.label}`
+                                                    : "Aucune carte"
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="matchmaking-deck__info">
+                                        <p className="matchmaking-deck__label">Deck sélectionné</p>
+                                        <p className="matchmaking-deck__name">
+                                            {selectedDeck.name}
+                                        </p>
+                                        <p className="matchmaking-deck__count">
+                                            {selectedDeck.cardCount} cartes
+                                            {!selectedDeck.valid && " — deck invalide"}
+                                        </p>
+                                    </div>
+
+                                    <Link to="/decks" className="matchmaking-deck__change">
+                                        <IconArrowsExchange size={16} />
+                                        Changer de deck
+                                    </Link>
+                                </div>
+                            ) : (
+                                <p className="matchmaking-panel__empty">
+                                    Vous n&apos;avez pas de deck sélectionné.{" "}
+                                    <Link to="/decks">Choisissez un deck</Link> pour jouer.
+                                </p>
+                            )}
+                        </div>
+
+                        {selectedDeck && selectedDeck.cardCount > 0 && (
+                            <div className="matchmaking-panel__section">
+                                <h2 className="matchmaking-panel__section-title">Courbe de mana</h2>
                                 <div className="pointer-events-none">
                                     <ManaCurveChart
                                         composition={deckComposition}
                                         catalogById={catalogById}
                                         selectedCost={null}
                                         onCostClick={() => {}}
+                                        variant="light"
+                                        averageLayout="side"
                                     />
                                 </div>
+                            </div>
+                        )}
+
+                        {!canSearch && selectedDeck && (
+                            <p className="matchmaking-panel__error">
+                                {selectedDeck.compositionErrors[0] ??
+                                    "Votre deck doit être valide et contenir exactement 30 cartes."}
+                            </p>
+                        )}
+
+                        <div className="matchmaking-panel__section">
+                            {!isSearching ? (
+                                <div className="matchmaking-actions">
+                                    <button
+                                        type="button"
+                                        className="matchmaking-actions__btn matchmaking-actions__btn--search"
+                                        disabled={!canSearch || isStarting}
+                                        onClick={() => startSearch()}
+                                    >
+                                        {isStarting ? (
+                                            <Loader size={18} color="white" />
+                                        ) : (
+                                            <img
+                                                src={SEARCH_COMPASS_IMAGE}
+                                                alt=""
+                                                className="matchmaking-actions__icon"
+                                                draggable={false}
+                                            />
+                                        )}
+                                        Rechercher une partie
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="matchmaking-actions__btn matchmaking-actions__btn--training"
+                                        disabled={!canSearch || startTrainingMutation.isPending}
+                                        onClick={() => startTrainingMutation.mutate()}
+                                    >
+                                        {startTrainingMutation.isPending ? (
+                                            <Loader size={18} color="#2c2416" />
+                                        ) : (
+                                            <IconSwords size={20} />
+                                        )}
+                                        Jouer contre l&apos;IA
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="matchmaking-searching">
+                                    <CenteredLoader />
+                                    <p className="matchmaking-searching__title">
+                                        Recherche en cours...
+                                    </p>
+                                    <p className="matchmaking-searching__hint">
+                                        Vous pouvez naviguer ailleurs pendant la recherche
+                                    </p>
+                                </div>
                             )}
-
-                            <Link
-                                to="/decks"
-                                className="text-gg-gold text-sm font-medium no-underline hover:underline"
-                            >
-                                Changer de deck →
-                            </Link>
-                        </>
-                    ) : (
-                        <Text className="text-white/80">
-                            Vous n'avez pas de deck sélectionné.{" "}
-                            <Link to="/decks" className="text-gg-gold">
-                                Choisissez un deck
-                            </Link>{" "}
-                            pour jouer.
-                        </Text>
-                    )}
-
-                    {!canSearch && selectedDeck && (
-                        <Text size="sm" className="text-red-300">
-                            {selectedDeck.compositionErrors[0] ??
-                                "Votre deck doit être valide et contenir exactement 30 cartes."}
-                        </Text>
-                    )}
-
-                    {!isSearching ? (
-                        <div className="flex flex-col gap-3">
-                            <Button
-                                className="gg-btn-primary w-full sm:w-auto"
-                                size="md"
-                                disabled={!canSearch}
-                                loading={isStarting}
-                                onClick={() => startSearch()}
-                            >
-                                Rechercher une partie
-                            </Button>
-                            <Button
-                                className="gg-btn-secondary w-full sm:w-auto"
-                                size="md"
-                                disabled={!canSearch}
-                                loading={startTrainingMutation.isPending}
-                                onClick={() => startTrainingMutation.mutate()}
-                            >
-                                Jouer contre l&apos;IA
-                            </Button>
                         </div>
-                    ) : (
-                        <div className="text-center py-4">
-                            <CenteredLoader />
-                            <Text className="text-white mt-4">Recherche en cours...</Text>
-                            <Text size="sm" className="text-white/60 mt-1">
-                                Vous pouvez naviguer ailleurs pendant la recherche
-                            </Text>
-                        </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -84,20 +84,6 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                     </Link>
                 </div>
 
-                <div className="app-header__icons">
-                    <button type="button" className="app-header__icon-btn" aria-label="Messages">
-                        <IconMail size={18} />
-                        <span className="app-header__notif-dot" />
-                    </button>
-                    <button
-                        type="button"
-                        className="app-header__icon-btn"
-                        aria-label="Notifications"
-                    >
-                        <IconBell size={18} />
-                    </button>
-                </div>
-
                 <div className="app-header__profile">
                     <UserAvatar
                         pseudo={user.pseudo}
