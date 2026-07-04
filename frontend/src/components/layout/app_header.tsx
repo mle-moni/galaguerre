@@ -40,10 +40,12 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
 
             <nav className="app-header__nav" aria-label="Navigation principale">
                 {NAV_ITEMS.map((item) => {
-                    const to = item.dynamic ? playTarget : item.to;
+                    const to = "dynamic" in item && item.dynamic ? playTarget : item.to;
                     const isActive =
-                        !("disabled" in item) &&
-                        (item.match ? item.match(location.pathname) : location.pathname === to);
+                        !("disabled" in item && item.disabled) &&
+                        ("match" in item
+                            ? item.match(location.pathname)
+                            : location.pathname === to);
 
                     if ("disabled" in item && item.disabled) {
                         return (

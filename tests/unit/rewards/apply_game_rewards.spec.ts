@@ -1,13 +1,9 @@
 import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
 import { terminateGame } from "#controllers/games/terminate_game";
-import CardPack from "#models/card_pack";
 import Game from "#models/game";
 import User from "#models/user";
+import UserDailyQuest from "#models/user_daily_quest";
 import { applyGameRewards } from "#services/rewards/apply_game_rewards";
-import {
-    getParisCalendarDate,
-    parseParisCalendarDate,
-} from "#services/rewards/get_paris_calendar_date";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { bindUserIds, createTestGame } from "#tests/helpers/game/game_factory";
 import { createGameData } from "#tests/helpers/game/fixtures";
@@ -17,7 +13,7 @@ import testUtils from "@adonisjs/core/services/test_utils";
 test.group("apply game rewards", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
-    test("winner gets victory coins and first victory pack of the day", async ({ assert }) => {
+    test("winner gets victory coins only", async ({ assert }) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
@@ -33,15 +29,9 @@ test.group("apply game rewards", (group) => {
 
         assert.equal(playerTwo.goldCoins, GOLD_COINS_PER_VICTORY);
         assert.equal(playerOne.goldCoins, GOLD_COINS_PER_DEFEAT);
-        assert.equal(game.data.rewardResult?.playerTwo.packs, 1);
+        assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
         assert.equal(game.data.rewardResult?.playerTwo.goldCoins, GOLD_COINS_PER_VICTORY);
         assert.equal(game.data.rewardResult?.playerOne.packs, 0);
-
-        const winnerPacks = await CardPack.query()
-            .where("userId", playerTwo.id)
-            .whereNull("openedAt")
-            .count("* as total");
-        assert.equal(Number(winnerPacks[0].$extras.total), 1);
     });
 
     test("loser gets defeat coins only", async ({ assert }) => {
@@ -60,7 +50,7 @@ test.group("apply game rewards", (group) => {
 
         assert.equal(playerOne.goldCoins, GOLD_COINS_PER_VICTORY);
         assert.equal(playerTwo.goldCoins, GOLD_COINS_PER_DEFEAT);
-        assert.equal(game.data.rewardResult?.playerOne.packs, 1);
+        assert.equal(game.data.rewardResult?.playerOne.packs, 0);
         assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
     });
 
@@ -82,35 +72,6 @@ test.group("apply game rewards", (group) => {
         assert.equal(playerTwo.goldCoins, GOLD_COINS_PER_DEFEAT);
         assert.equal(game.data.rewardResult?.playerOne.packs, 0);
         assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
-    });
-
-    test("second victory of the day does not grant another pack", async ({ assert }) => {
-        const { game, playerTwo } = await createTestGame(
-            createGameData({
-                state: "PLAYER_ONE_TURN",
-                currentRound: 2,
-                playerOne: { health: 0 },
-                playerTwo: { health: 5 },
-            }),
-        );
-
-        await playerTwo
-            .merge({
-                lastVictoryPackGrantedOn: parseParisCalendarDate(getParisCalendarDate()),
-            })
-            .save();
-
-        await applyGameRewards(game);
-        await playerTwo.refresh();
-
-        assert.equal(playerTwo.goldCoins, GOLD_COINS_PER_VICTORY);
-        assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
-
-        const winnerPacks = await CardPack.query()
-            .where("userId", playerTwo.id)
-            .whereNull("openedAt")
-            .count("* as total");
-        assert.equal(Number(winnerPacks[0].$extras.total), 0);
     });
 
     test("training game rewards only the human player", async ({ assert }) => {
@@ -143,7 +104,7 @@ test.group("apply game rewards", (group) => {
         await human.refresh();
 
         assert.equal(human.goldCoins, GOLD_COINS_PER_VICTORY);
-        assert.equal(game.data.rewardResult?.playerOne.packs, 1);
+        assert.equal(game.data.rewardResult?.playerOne.packs, 0);
         assert.equal(game.data.rewardResult?.playerTwo.goldCoins, 0);
         assert.equal(game.data.rewardResult?.playerTwo.packs, 0);
     });
@@ -210,5 +171,14 @@ test.group("apply game rewards", (group) => {
         assert.exists(game.data.rewardResult);
         assert.equal(game.data.rewardResult!.playerTwo.goldCoins, GOLD_COINS_PER_VICTORY);
         assert.equal(playerTwo.id, game.winnerId);
+
+        const winQuest = await UserDailyQuest.query()
+            .where("userId", playerTwo.id)
+            .where("questType", "WIN_GAME")
+            .first();
+
+        assert.exists(winQuest);
+        assert.equal(winQuest!.progress, 1);
+        assert.isNotNull(winQuest!.completedAt);
     });
 });

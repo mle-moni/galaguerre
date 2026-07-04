@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { entriesToOwnedCounts, useCollectionQuery } from "~/hooks/use_collection";
 import { useCardsQuery } from "~/hooks/use_cards";
-import { HomePanel } from "./home_panel";
+import { HomePanel } from "./home_panel.jsx";
 
 const COLLECTION_RARITIES: CardRarity[] = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
 

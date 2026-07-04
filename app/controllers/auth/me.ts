@@ -1,4 +1,3 @@
-import type { ApiUser } from "#api_types/auth.types";
 import Game from "#models/game";
 import { canClaimDailyPack } from "#services/rewards/claim_daily_pack";
 import { findQueueItemByUserId } from "#services/sockets/matchmaking";
@@ -6,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import type { HttpContext } from "@adonisjs/core/http";
 
 // biome-ignore lint/suspicious/noConfusingVoidType:
-export const me = async ({ auth, response }: HttpContext): Promise<ApiUser | void> => {
+export const me = async ({ auth, response }: HttpContext) => {
     const user = auth.user;
 
     if (!user) return response.unauthorized({ error: "Vous n'êtes pas connecté" });

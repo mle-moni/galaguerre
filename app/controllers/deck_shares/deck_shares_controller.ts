@@ -3,19 +3,8 @@ import DeckShare from "#models/deck_share";
 import { createDeckShare } from "#services/decks/create_deck_share";
 import { DeckShareImportError, importDeckFromShare } from "#services/decks/import_deck_from_share";
 import type { HttpContext } from "@adonisjs/core/http";
-import vine, { SimpleMessagesProvider } from "@vinejs/vine";
-import { DEFAULT_MESSAGE_PROVIDER_CONFIG } from "#adomin/validation/default_validator";
+import { importDeckMessagesProvider, importDeckSchema } from "./deck_share_validators.js";
 import { serializeDeckShare } from "./serialize_deck_share.js";
-
-const importDeckSchema = vine.compile(
-    vine.object({
-        shareCode: vine.string().trim().minLength(1).maxLength(12),
-    }),
-);
-
-const messagesProvider = new SimpleMessagesProvider(DEFAULT_MESSAGE_PROVIDER_CONFIG, {
-    shareCode: "code de partage",
-});
 
 export default class DeckSharesController {
     async show({ params, response }: HttpContext) {
@@ -52,7 +41,7 @@ export default class DeckSharesController {
 
     async import({ auth, request, response }: HttpContext) {
         const payload = (await request.validateUsing(importDeckSchema, {
-            messagesProvider,
+            messagesProvider: importDeckMessagesProvider,
         })) as ImportDeckPayload;
 
         try {

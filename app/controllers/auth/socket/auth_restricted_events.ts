@@ -23,7 +23,7 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         socket,
         "game:play_card",
         (data) => gamePlayCard(socket.id, data),
-        vine.object({
+        vine.create({
             cardId: vine.string(),
             boardIndex: vine.number().withoutDecimals().min(0).max(MAX_BOARD_MINIONS).nullable(),
             owner: vine.enum(SPOT_OWNERS),
@@ -33,14 +33,14 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
                     owner: vine.enum(SPOT_OWNERS),
                 })
                 .optional(),
-        }) as Parameters<typeof subscribeToClientSocketEvent<"game:play_card">>[3],
+        }),
     );
 
     subscribeToClientSocketEvent(
         socket,
         "game:minion_action",
         (data) => gameMinionAction(socket.id, data),
-        vine.object({
+        vine.create({
             minionId: vine.string(),
             minionUuid: vine.string().nullable(),
             owner: vine.enum(SPOT_OWNERS),
@@ -51,7 +51,7 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         socket,
         "game:weapon_action",
         (data) => gameWeaponAction(socket.id, data),
-        vine.object({
+        vine.create({
             minionUuid: vine.string().nullable(),
             owner: vine.enum(SPOT_OWNERS),
         }),
@@ -61,14 +61,14 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         socket,
         "game:abandon",
         () => abandonGame(socket.id),
-        vine.object({}),
+        vine.create({}),
     );
 
     subscribeToClientSocketEvent(
         socket,
         "game:mulligan",
         (data) => gameMulligan(socket.id, data),
-        vine.object({
+        vine.create({
             cardIds: vine.array(vine.string()),
         }),
     );
@@ -77,7 +77,7 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
         socket,
         "game:discover_choice",
         (data) => gameDiscoverChoice(socket.id, data),
-        vine.object({
+        vine.create({
             cardUuid: vine.string(),
         }),
     );

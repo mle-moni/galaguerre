@@ -30,51 +30,60 @@ const FriendRow = ({
     entry: ApiFriend | ApiFriendSearchResult;
     isFriend: boolean;
     onSpectate: (gameId: number) => void;
-}) => (
-    <Table.Tr>
-        <Table.Td>
-            <div className="flex flex-col gap-1">
-                <span className="inline-flex items-center gap-2">
-                    <PlayerNameLink
-                        pseudo={entry.pseudo}
-                        userId={entry.userId}
-                        className="text-white no-underline hover:underline"
-                    />
-                    {isFriend && (
-                        <Badge color="gold" size="xs" variant="light">
-                            Ami
-                        </Badge>
-                    )}
+}) => {
+    const friendRequestStatus =
+        "friendRequestStatus" in entry ? entry.friendRequestStatus : undefined;
+
+    return (
+        <Table.Tr>
+            <Table.Td>
+                <div className="flex flex-col gap-1">
+                    <span className="inline-flex items-center gap-2">
+                        <PlayerNameLink
+                            pseudo={entry.pseudo}
+                            userId={entry.userId}
+                            className="text-white no-underline hover:underline"
+                        />
+                        {isFriend && (
+                            <Badge color="gold" size="xs" variant="light">
+                                Ami
+                            </Badge>
+                        )}
+                        {isFriend && entry.currentGameId && (
+                            <Badge color="green" size="xs" variant="light">
+                                En partie
+                            </Badge>
+                        )}
+                    </span>
+                    <FriendStats user={entry} />
+                </div>
+            </Table.Td>
+            <Table.Td ta="right">
+                <span className="inline-flex items-center justify-end gap-2">
                     {isFriend && entry.currentGameId && (
-                        <Badge color="green" size="xs" variant="light">
-                            En partie
-                        </Badge>
+                        <Tooltip label="Regarder la partie" withArrow>
+                            <ActionIcon
+                                aria-label="Regarder la partie"
+                                color="navy"
+                                onClick={() => {
+                                    if (entry.currentGameId) onSpectate(entry.currentGameId);
+                                }}
+                                variant="filled"
+                            >
+                                <IconEye size={16} />
+                            </ActionIcon>
+                        </Tooltip>
                     )}
+                    <FriendActionButton
+                        userId={entry.userId}
+                        isFriend={isFriend}
+                        friendRequestStatus={friendRequestStatus}
+                    />
                 </span>
-                <FriendStats user={entry} />
-            </div>
-        </Table.Td>
-        <Table.Td ta="right">
-            <span className="inline-flex items-center justify-end gap-2">
-                {isFriend && entry.currentGameId && (
-                    <Tooltip label="Regarder la partie" withArrow>
-                        <ActionIcon
-                            aria-label="Regarder la partie"
-                            color="navy"
-                            onClick={() => {
-                                if (entry.currentGameId) onSpectate(entry.currentGameId);
-                            }}
-                            variant="filled"
-                        >
-                            <IconEye size={16} />
-                        </ActionIcon>
-                    </Tooltip>
-                )}
-                <FriendActionButton userId={entry.userId} isFriend={isFriend} />
-            </span>
-        </Table.Td>
-    </Table.Tr>
-);
+            </Table.Td>
+        </Table.Tr>
+    );
+};
 
 export const FriendsPage = observer(() => {
     const navigate = useNavigate();
@@ -150,7 +159,7 @@ export const FriendsPage = observer(() => {
                     </div>
                 ) : friends.length === 0 ? (
                     <div className="gg-panel-body">
-                        <p className="text-white/70 m-0">Vous n'avez pas encore ajouté d'ami.</p>
+                        <p className="text-white/70 m-0">Vous n'avez pas encore d'ami.</p>
                     </div>
                 ) : (
                     <ResponsiveTable minWidth={360}>

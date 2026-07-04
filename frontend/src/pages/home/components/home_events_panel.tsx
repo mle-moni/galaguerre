@@ -5,8 +5,8 @@ import { formatEventDate } from "~/helpers/format_event_date";
 import { formatEventRegistrationCount } from "~/helpers/format_event_registration_count";
 import { useEventsQuery } from "~/hooks/use_events";
 import type { ApiEvent } from "#api_types/event.types";
-import { EventRegistrationModal } from "./event_registration_modal";
-import { HomePanel } from "./home_panel";
+import { EventRegistrationModal } from "./event_registration_modal.jsx";
+import { HomePanel } from "./home_panel.jsx";
 
 export const HomeEventsPanel = () => {
     const eventsQuery = useEventsQuery();

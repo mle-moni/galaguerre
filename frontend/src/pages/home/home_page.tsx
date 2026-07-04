@@ -1,15 +1,17 @@
 import { observer } from "mobx-react-lite";
+import { useFriendRequestsQuery } from "~/hooks/use_friend_requests";
 import { useFriendsQuery } from "~/hooks/use_friends";
 import { useUser } from "~/hooks/use_user";
-import { HomeBottomSection } from "./components/home_bottom_section";
-import { HomeHero } from "./components/home_hero";
-import { HomeLeftSidebar } from "./components/home_left_sidebar";
-import { HomeRightSidebar } from "./components/home_right_sidebar";
+import { HomeBottomSection } from "./components/home_bottom_section.jsx";
+import { HomeHero } from "./components/home_hero.jsx";
+import { HomeLeftSidebar } from "./components/home_left_sidebar.jsx";
+import { HomeRightSidebar } from "./components/home_right_sidebar.jsx";
 import "./home_page.css";
 
 export const HomePage = observer(() => {
     const user = useUser()!;
     const friendsQuery = useFriendsQuery();
+    const friendRequestsQuery = useFriendRequestsQuery();
     const playTarget = user.currentGameId ? "/play" : "/matchmaking";
 
     return (
@@ -19,7 +21,9 @@ export const HomePage = observer(() => {
                 <HomeHero playTarget={playTarget} />
                 <HomeRightSidebar
                     friends={friendsQuery.data ?? []}
-                    isLoading={friendsQuery.isLoading}
+                    isLoadingFriends={friendsQuery.isLoading}
+                    friendRequests={friendRequestsQuery.data ?? []}
+                    isLoadingRequests={friendRequestsQuery.isLoading}
                 />
             </div>
             <HomeBottomSection />

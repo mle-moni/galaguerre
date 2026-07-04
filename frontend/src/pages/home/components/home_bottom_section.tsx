@@ -1,33 +1,17 @@
 import {
     HOME_ASSETS,
-    HOME_MOCK_NEWS,
     HOME_MOCK_PROFILE,
     HOME_MOCK_SEASON_PASS_REWARDS,
-} from "../home_mock_data";
-import { HomePanel } from "./home_panel";
+} from "../home_mock_data.js";
+import { HomeNewsPanel } from "./home_news_panel.jsx";
+import { HomePanel } from "./home_panel.jsx";
 
 export const HomeBottomSection = () => {
     const xpPct = (HOME_MOCK_PROFILE.xp / HOME_MOCK_PROFILE.xpMax) * 100;
 
     return (
         <section className="home-bottom">
-            <HomePanel
-                title="Actualités"
-                headerRight={<span className="home-panel__link">Voir toutes</span>}
-            >
-                <div className="home-news-list">
-                    {HOME_MOCK_NEWS.map((item) => (
-                        <article key={item.id} className="home-news-item">
-                            <img src={item.imageUrl} alt="" className="home-news-item__thumb" />
-                            <div>
-                                <h3 className="home-news-item__title">{item.title}</h3>
-                                <p className="home-news-item__excerpt">{item.excerpt}</p>
-                                <span className="home-news-item__time">Il y a {item.timeAgo}</span>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            </HomePanel>
+            <HomeNewsPanel />
 
             <HomePanel title="Passe de Saison" className="home-season-pass">
                 <img src={HOME_ASSETS.seasonPassChar} alt="" className="home-season-pass__char" />

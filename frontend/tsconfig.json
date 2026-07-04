@@ -2,14 +2,25 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
-        "lib": ["DOM"],
+        "lib": ["DOM", "DOM.Iterable", "ES2022"],
         "jsx": "preserve",
+        "experimentalDecorators": true,
         "paths": {
             "~/*": ["./src/*.js"],
             "#api_types/*": ["../api_types/*.js"],
-            "#shared/*": ["../shared/*.js"]
+            "#shared/*": ["../shared/*.js"],
+            "#controllers/*": ["../app/controllers/*"],
+            "#app/*": ["../app/*"],
+            "@generated/*": ["../.adonisjs/client/*"],
+            "@generated/registry": ["../.adonisjs/client/registry/index.ts"]
         }
     },
-    "include": ["./src/**/*.ts", "./src/**/*.tsx", "../api_types/**/*.ts", "../shared/**/*.ts"],
+    "include": [
+        "./src/**/*.ts",
+        "./src/**/*.tsx",
+        "../api_types/**/*.ts",
+        "../shared/**/*.ts",
+        "../.adonisjs/client/**/*.ts"
+    ],
     "exclude": ["node_modules", "build"]
 }

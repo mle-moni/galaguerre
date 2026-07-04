@@ -2,13 +2,7 @@ import type { GameRewardPlayerResult, GameRewardResult } from "#api_types/reward
 import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
 import Game from "#models/game";
 import User from "#models/user";
-import { grantCardPacksForUser } from "#services/collection/grant_card_packs_for_user";
 import { getWinnerUserId } from "#services/elo";
-import {
-    getParisCalendarDate,
-    isParisCalendarDateToday,
-    parseParisCalendarDate,
-} from "#services/rewards/get_paris_calendar_date";
 import { gameQualifiesForRewards } from "#services/rewards/game_qualifies_for_rewards";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import db from "@adonisjs/lucid/services/db";
@@ -17,20 +11,13 @@ const EMPTY_REWARD: GameRewardPlayerResult = { goldCoins: 0, packs: 0 };
 
 const isHumanUserId = (userId: number): boolean => userId !== TRAINING_AI_USER_ID;
 
-const computePlayerReward = (
-    isWinner: boolean,
-    isDraw: boolean,
-    grantVictoryPack: boolean,
-): GameRewardPlayerResult => {
+const computePlayerReward = (isWinner: boolean, isDraw: boolean): GameRewardPlayerResult => {
     if (isDraw) {
         return { goldCoins: GOLD_COINS_PER_DEFEAT, packs: 0 };
     }
 
     if (isWinner) {
-        return {
-            goldCoins: GOLD_COINS_PER_VICTORY,
-            packs: grantVictoryPack ? 1 : 0,
-        };
+        return { goldCoins: GOLD_COINS_PER_VICTORY, packs: 0 };
     }
 
     return { goldCoins: GOLD_COINS_PER_DEFEAT, packs: 0 };
@@ -60,8 +47,6 @@ export const applyGameRewards = async (game: Game): Promise<void> => {
         return;
     }
 
-    const todayParis = getParisCalendarDate();
-
     await db.transaction(async (trx) => {
         const users = await User.query({ client: trx }).whereIn("id", humanUserIds).forUpdate();
 
@@ -70,23 +55,11 @@ export const applyGameRewards = async (game: Game): Promise<void> => {
         const playerOneReward = computePlayerReward(
             !isDraw && winnerUserId === game.data.playerOne.userId,
             isDraw,
-            isHumanUserId(game.data.playerOne.userId) &&
-                !isDraw &&
-                winnerUserId === game.data.playerOne.userId &&
-                !isParisCalendarDateToday(
-                    usersById.get(game.data.playerOne.userId)?.lastVictoryPackGrantedOn ?? null,
-                ),
         );
 
         const playerTwoReward = computePlayerReward(
             !isDraw && winnerUserId === game.data.playerTwo.userId,
             isDraw,
-            isHumanUserId(game.data.playerTwo.userId) &&
-                !isDraw &&
-                winnerUserId === game.data.playerTwo.userId &&
-                !isParisCalendarDateToday(
-                    usersById.get(game.data.playerTwo.userId)?.lastVictoryPackGrantedOn ?? null,
-                ),
         );
 
         for (const userId of humanUserIds) {
@@ -98,11 +71,6 @@ export const applyGameRewards = async (game: Game): Promise<void> => {
 
             if (reward.goldCoins > 0) {
                 user.goldCoins += reward.goldCoins;
-            }
-
-            if (reward.packs > 0) {
-                user.lastVictoryPackGrantedOn = parseParisCalendarDate(todayParis);
-                await grantCardPacksForUser(user.id, reward.packs, trx);
             }
 
             user.useTransaction(trx);

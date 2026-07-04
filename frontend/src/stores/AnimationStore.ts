@@ -89,7 +89,7 @@ export type DrawEvent = DrawEventInput & BaseVisualEvent;
 export type TurnBannerEvent = TurnBannerEventInput & BaseVisualEvent;
 export type SourcePulseEvent = SourcePulseEventInput & BaseVisualEvent;
 
-import { getShotDurationMs } from "~/pages/play/animations/shot_durations.js";
+import { getShotDurationMs } from "~/pages/play/animations/shot_durations";
 
 let nextAnimationId = 0;
 

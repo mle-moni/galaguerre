@@ -12,18 +12,7 @@ import router from "@adonisjs/core/services/router";
 import "#adomin/routes/adomin_router";
 import "../app/dbml/dbml_router.js";
 
-import AuthController from "#controllers/auth/auth_controller";
-import CardsController from "#controllers/cards/cards_controller";
-import CardSetsController from "#controllers/card_sets/card_sets_controller";
-import CollectionController from "#controllers/collection/collection_controller";
-import DeckSharesController from "#controllers/deck_shares/deck_shares_controller";
-import DecksController from "#controllers/decks/decks_controller";
-import EventsController from "#controllers/events/events_controller";
-import FriendsController from "#controllers/friends/friends_controller";
-import GameHistoryController from "#controllers/game_history/game_history_controller";
-import GamesController from "#controllers/games/games_controller";
-import LeaderboardController from "#controllers/leaderboard/leaderboard_controller";
-import RewardsController from "#controllers/rewards/rewards_controller";
+import { controllers } from "#generated/controllers";
 import { registerUploadRoute } from "../app/utils/files.js";
 import { middleware } from "./kernel.js";
 
@@ -33,47 +22,62 @@ registerUploadRoute();
 router
     .group(() => {
         router.get("/", () => ({ message: "Galaguerre API" }));
-        router.post("/auth/login", [AuthController, "login"]);
-        router.post("/auth/register", [AuthController, "register"]);
-        router.post("/auth/logout", [AuthController, "logout"]);
-        router.get("/leaderboard", [LeaderboardController, "index"]);
-        router.get("/leaderboard/ai-speedrun", [LeaderboardController, "aiSpeedrun"]);
-        router.get("/game-history/:userId", [GameHistoryController, "index"]);
-        router.get("/game-history/:userId/:gameId", [GameHistoryController, "show"]);
-        router.get("/game-history/:userId/:gameId/replay", [GameHistoryController, "replay"]);
-        router.get("/deck-shares/:code", [DeckSharesController, "show"]);
+        router.post("/auth/login", [controllers.auth.Auth, "login"]);
+        router.post("/auth/register", [controllers.auth.Auth, "register"]);
+        router.post("/auth/logout", [controllers.auth.Auth, "logout"]);
+        router.get("/leaderboard", [controllers.leaderboard.Leaderboard, "index"]);
+        router.get("/leaderboard/ai-speedrun", [controllers.leaderboard.Leaderboard, "aiSpeedrun"]);
+        router.get("/game-history/:userId", [controllers.gameHistory.GameHistory, "index"]);
+        router.get("/game-history/:userId/:gameId", [controllers.gameHistory.GameHistory, "show"]);
+        router.get("/game-history/:userId/:gameId/replay", [
+            controllers.gameHistory.GameHistory,
+            "replay",
+        ]);
+        router.get("/deck-shares/:code", [controllers.deckShares.DeckShares, "show"]);
     })
     .prefix("/api");
 
 // authenticated routes
 router
     .group(() => {
-        router.get("/auth/me", [AuthController, "me"]);
-        router.get("/cards", [CardsController, "index"]);
-        router.get("/card-sets", [CardSetsController, "index"]);
-        router.get("/collection", [CollectionController, "index"]);
-        router.get("/collection/duplicates-preview", [CollectionController, "duplicatesPreview"]);
-        router.post("/collection/sell-duplicates", [CollectionController, "sellDuplicates"]);
-        router.post("/collection/buy-card", [CollectionController, "buyCard"]);
-        router.post("/collection/sell-card", [CollectionController, "sellCard"]);
-        router.get("/packs", [CollectionController, "packs"]);
-        router.post("/packs/open", [CollectionController, "openPack"]);
-        router.post("/packs/buy", [RewardsController, "buyPack"]);
-        router.post("/rewards/daily-pack", [RewardsController, "claimDailyPack"]);
-        router.get("/friends", [FriendsController, "index"]);
-        router.get("/friends/search", [FriendsController, "search"]);
-        router.post("/friends", [FriendsController, "store"]);
-        router.delete("/friends/:friendUserId", [FriendsController, "destroy"]);
-        router.get("/events", [EventsController, "index"]);
-        router.post("/events/:id/register", [EventsController, "register"]);
-        router.post("/decks/:id/select", [DecksController, "select"]);
-        router.post("/decks/:deckId/share", [DeckSharesController, "store"]);
-        router.post("/decks/import", [DeckSharesController, "import"]);
-        router.resource("decks", DecksController).apiOnly();
-        router.post("/games/training", [GamesController, "training"]);
-        router.delete("/games/search", [GamesController, "cancelSearch"]);
-        router.post("/games/search/heartbeat", [GamesController, "searchHeartbeat"]);
-        router.resource("games", GamesController).apiOnly();
+        router.get("/auth/me", [controllers.auth.Auth, "me"]);
+        router.get("/cards", [controllers.cards.Cards, "index"]);
+        router.get("/card-sets", [controllers.cardSets.CardSets, "index"]);
+        router.get("/collection", [controllers.collection.Collection, "index"]);
+        router.get("/collection/duplicates-preview", [
+            controllers.collection.Collection,
+            "duplicatesPreview",
+        ]);
+        router.post("/collection/sell-duplicates", [
+            controllers.collection.Collection,
+            "sellDuplicates",
+        ]);
+        router.post("/collection/buy-card", [controllers.collection.Collection, "buyCard"]);
+        router.post("/collection/sell-card", [controllers.collection.Collection, "sellCard"]);
+        router.get("/packs", [controllers.collection.Collection, "packs"]);
+        router.post("/packs/open", [controllers.collection.Collection, "openPack"]);
+        router.post("/packs/buy", [controllers.rewards.Rewards, "buyPack"]);
+        router.post("/rewards/daily-pack", [controllers.rewards.Rewards, "claimDailyPack"]);
+        router.get("/daily-quests", [controllers.dailyQuests.DailyQuests, "index"]);
+        router.post("/daily-quests/:id/claim", [controllers.dailyQuests.DailyQuests, "claim"]);
+        router.get("/friends", [controllers.friends.Friends, "index"]);
+        router.get("/friends/search", [controllers.friends.Friends, "search"]);
+        router.post("/friends", [controllers.friends.Friends, "store"]);
+        router.delete("/friends/:friendUserId", [controllers.friends.Friends, "destroy"]);
+        router.get("/friend-requests", [controllers.friends.FriendRequests, "index"]);
+        router.get("/friend-requests/sent", [controllers.friends.FriendRequests, "sent"]);
+        router.post("/friend-requests/:id/accept", [controllers.friends.FriendRequests, "accept"]);
+        router.delete("/friend-requests/:id", [controllers.friends.FriendRequests, "destroy"]);
+        router.get("/events", [controllers.events.Events, "index"]);
+        router.post("/events/:id/register", [controllers.events.Events, "register"]);
+        router.post("/decks/:id/select", [controllers.decks.Decks, "select"]);
+        router.post("/decks/:deckId/share", [controllers.deckShares.DeckShares, "store"]);
+        router.post("/decks/import", [controllers.deckShares.DeckShares, "import"]);
+        router.resource("decks", controllers.decks.Decks).apiOnly();
+        router.post("/games/training", [controllers.games.Games, "training"]);
+        router.delete("/games/search", [controllers.games.Games, "cancelSearch"]);
+        router.post("/games/search/heartbeat", [controllers.games.Games, "searchHeartbeat"]);
+        router.resource("games", controllers.games.Games).apiOnly();
     })
     .use(middleware.auth())
     .prefix("/api");

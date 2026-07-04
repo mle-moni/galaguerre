@@ -8,6 +8,7 @@ import type {
     SpotOwner,
     WeaponCard,
 } from "#api_types/game.types";
+import { getActionTarget } from "#api_types/action_fields_utils";
 import {
     actionRequiresTarget,
     canOpponentDirectlyTargetMinion,
@@ -235,8 +236,9 @@ export class TargetSelectionStore {
 
         if (actionTarget.minionUuid === null) {
             return targetedActions.every((action) => {
-                if (!action.target) return false;
-                return heroMatchesTarget(action.target, actionTarget.owner === "OPPONENT");
+                const target = getActionTarget(action);
+                if (!target) return false;
+                return heroMatchesTarget(target, actionTarget.owner === "OPPONENT");
             });
         }
 
@@ -252,8 +254,9 @@ export class TargetSelectionStore {
         }
 
         return targetedActions.every((action) => {
-            if (!action.target) return false;
-            return minionMatchesTarget(minion, action.target, actionTarget.owner === "OPPONENT");
+            const target = getActionTarget(action);
+            if (!target) return false;
+            return minionMatchesTarget(minion, target, actionTarget.owner === "OPPONENT");
         });
     }
 
@@ -262,8 +265,9 @@ export class TargetSelectionStore {
         if (targetedActions.length === 0) return false;
 
         return targetedActions.every((action) => {
-            if (!action.target) return false;
-            return heroMatchesTarget(action.target, isOpponent);
+            const target = getActionTarget(action);
+            if (!target) return false;
+            return heroMatchesTarget(target, isOpponent);
         });
     }
 
@@ -308,8 +312,9 @@ export class TargetSelectionStore {
         if (isOpponent && !canOpponentDirectlyTargetMinion(minion)) return false;
 
         return targetedActions.every((action) => {
-            if (!action.target) return false;
-            return minionMatchesTarget(minion, action.target, isOpponent);
+            const target = getActionTarget(action);
+            if (!target) return false;
+            return minionMatchesTarget(minion, target, isOpponent);
         });
     }
 

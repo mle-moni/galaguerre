@@ -124,5 +124,5 @@ export const getValidationSchemaFromConfig = (
         schemaObj[columnName] = getValidationSchemaFromFieldConfig(adomin, validationMode);
     }
 
-    return vine.compile(vine.object(schemaObj));
+    return vine.create(schemaObj);
 };

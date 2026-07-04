@@ -63,12 +63,10 @@ export const CollectionShopPage = observer(() => {
                                 <span>+{GOLD_COINS_PER_DEFEAT}</span>
                             </Group>
                         </Text>
-                        <Group gap={6} wrap="nowrap">
-                            <PackIcon width={16} />
-                            <Text size="sm" c="dimmed">
-                                Première victoire du jour : +1 paquet bonus
-                            </Text>
-                        </Group>
+                        <Text size="sm" c="dimmed">
+                            Complétez les quêtes journalières sur l&apos;accueil pour gagner des
+                            story points et des paquets.
+                        </Text>
                     </Stack>
                 </Modal>
 

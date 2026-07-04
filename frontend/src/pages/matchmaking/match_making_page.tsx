@@ -1,18 +1,34 @@
 import { Button, Text } from "@mantine/core";
+import { useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { CenteredLoader } from "~/components/centered_loader";
+import { useApiMutation } from "~/hooks/use_api_mutation";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
 import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useUser } from "~/hooks/use_user";
+import { applyTrainingGameStarted } from "~/services/apply_training_game_started";
+import { client } from "~/services/client";
 
 export const MatchmakingPage = observer(() => {
     const user = useUser()!;
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { isSearching, startSearch, isStarting } = useMatchmaking();
     const decksQuery = useDecksQuery();
     const cardsQuery = useCardsQuery();
+
+    const startTrainingMutation = useApiMutation({
+        mutationFn: async () => {
+            return (await client.api.games.training({})) as { gameId: number };
+        },
+        onSuccess: (data) => {
+            applyTrainingGameStarted(queryClient, data.gameId);
+            navigate("/play");
+        },
+    });
 
     if (user.currentGameId) return <Navigate to="/play" />;
 
@@ -80,15 +96,26 @@ export const MatchmakingPage = observer(() => {
                     )}
 
                     {!isSearching ? (
-                        <Button
-                            className="gg-btn-primary w-full sm:w-auto"
-                            size="md"
-                            disabled={!canSearch}
-                            loading={isStarting}
-                            onClick={() => startSearch()}
-                        >
-                            Rechercher une partie
-                        </Button>
+                        <div className="flex flex-col gap-3">
+                            <Button
+                                className="gg-btn-primary w-full sm:w-auto"
+                                size="md"
+                                disabled={!canSearch}
+                                loading={isStarting}
+                                onClick={() => startSearch()}
+                            >
+                                Rechercher une partie
+                            </Button>
+                            <Button
+                                className="gg-btn-secondary w-full sm:w-auto"
+                                size="md"
+                                disabled={!canSearch}
+                                loading={startTrainingMutation.isPending}
+                                onClick={() => startTrainingMutation.mutate()}
+                            >
+                                Jouer contre l&apos;IA
+                            </Button>
+                        </div>
                     ) : (
                         <div className="text-center py-4">
                             <CenteredLoader />

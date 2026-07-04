@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { HOME_ASSETS } from "../home_mock_data";
+import { HOME_ASSETS } from "../home_mock_data.js";
 
 interface HomeHeroProps {
     playTarget: string;

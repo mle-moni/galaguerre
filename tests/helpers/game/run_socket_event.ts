@@ -82,24 +82,20 @@ export const runInvalidPlayCardPayload = async (payload: unknown): Promise<strin
     return getErrors();
 };
 
-export const minionActionVineSchema = vine.compile(
-    vine.object({
-        minionId: vine.string(),
-        minionUuid: vine.string().nullable(),
-        owner: vine.enum(SPOT_OWNERS),
-    }),
-);
+export const minionActionVineSchema = vine.create({
+    minionId: vine.string(),
+    minionUuid: vine.string().nullable(),
+    owner: vine.enum(SPOT_OWNERS),
+});
 
-export const playCardVineSchema = vine.compile(
-    vine.object({
-        cardId: vine.string(),
-        boardIndex: vine.number().min(0).max(MAX_BOARD_MINIONS).nullable(),
-        owner: vine.enum(SPOT_OWNERS),
-        actionTarget: vine
-            .object({
-                minionUuid: vine.string().nullable(),
-                owner: vine.enum(SPOT_OWNERS),
-            })
-            .optional(),
-    }),
-);
+export const playCardVineSchema = vine.create({
+    cardId: vine.string(),
+    boardIndex: vine.number().min(0).max(MAX_BOARD_MINIONS).nullable(),
+    owner: vine.enum(SPOT_OWNERS),
+    actionTarget: vine
+        .object({
+            minionUuid: vine.string().nullable(),
+            owner: vine.enum(SPOT_OWNERS),
+        })
+        .optional(),
+});

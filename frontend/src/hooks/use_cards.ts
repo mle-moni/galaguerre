@@ -1,18 +1,16 @@
-import type { ApiCatalogCard } from "#api_types/deck.types";
-import { useQuery } from "@tanstack/react-query";
-import { privateAxios } from "~/services/axios";
+import { useApiQuery } from "~/hooks/use_api_query";
+import { client } from "~/services/client";
 
 export const cardsQueryKey = (includeNonCollectible = false) =>
     ["cards", { includeNonCollectible }] as const;
 
 export const useCardsQuery = ({ includeNonCollectible = false } = {}) => {
-    return useQuery({
+    return useApiQuery({
         queryKey: cardsQueryKey(includeNonCollectible),
         queryFn: async () => {
-            const response = await privateAxios.get<ApiCatalogCard[]>("/api/cards", {
-                params: includeNonCollectible ? { includeNonCollectible: true } : undefined,
+            return client.api.cards.index({
+                query: includeNonCollectible ? { includeNonCollectible: true } : {},
             });
-            return response.data;
         },
     });
 };

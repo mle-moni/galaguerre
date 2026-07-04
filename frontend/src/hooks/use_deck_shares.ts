@@ -1,33 +1,31 @@
-import type {
-    ApiDeckShare,
-    CreateDeckShareResponse,
-    ImportDeckResponse,
-} from "#api_types/deck_share.types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
-import { privateAxios, publicAxios } from "~/services/axios";
+import { useQueryClient } from "@tanstack/react-query";
+import { getTuyauErrorResponse } from "~/helpers/tuyau_errors";
+import { useApiMutation } from "~/hooks/use_api_mutation";
+import { useApiQuery } from "~/hooks/use_api_query";
+import { client, publicClient } from "~/services/client";
 import { DECKS_QUERY_KEY } from "./use_decks.js";
 
 export const deckShareQueryKey = (code: string) => ["deck-share", code] as const;
 
 export const useDeckShareQuery = (code: string) => {
-    return useQuery({
+    return useApiQuery({
         queryKey: deckShareQueryKey(code),
         queryFn: async () => {
-            const response = await publicAxios.get<ApiDeckShare>(`/api/deck-shares/${code}`);
-            return response.data;
+            return publicClient.api.deckShares.show({
+                params: { code },
+            });
         },
         enabled: code.length > 0,
     });
 };
 
 export const useShareDeckMutation = () => {
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async (deckId: number) => {
-            const response = await privateAxios.post<CreateDeckShareResponse>(
-                `/api/decks/${deckId}/share`,
-            );
-            return response.data;
+            return client.api.deckShares.store({
+                params: { deckId },
+            });
         },
     });
 };
@@ -35,12 +33,12 @@ export const useShareDeckMutation = () => {
 export const useImportDeckShareMutation = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async (shareCode: string) => {
-            const response = await privateAxios.post<ImportDeckResponse>("/api/decks/import", {
-                shareCode,
+            return client.api.deckShares.import({
+                body: { shareCode },
             });
-            return response.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: DECKS_QUERY_KEY });
@@ -49,10 +47,11 @@ export const useImportDeckShareMutation = () => {
 };
 
 export const getDeckShareImportErrorMessage = (error: unknown): string | null => {
-    if (!isAxiosError(error) || !error.response?.data) {
+    const response = getTuyauErrorResponse(error);
+    if (!response || typeof response !== "object") {
         return null;
     }
 
-    const data = error.response.data as { error?: string };
+    const data = response as { error?: string };
     return data.error ?? null;
 };

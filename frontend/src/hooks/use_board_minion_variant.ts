@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { useIsMobilePortrait } from "./use_is_mobile_portrait";
+import { useIsMobilePortrait } from "./use_is_mobile_portrait.js";
 
 export type BoardMinionVariant = "oval" | "rect";
 

@@ -14,12 +14,10 @@ import {
 } from "./serialize_game_history.js";
 import { getGameFinishedAtIso } from "../../galaguerre/game/get_game_finished_at.js";
 
-const showParamsValidator = vine.compile(
-    vine.object({
-        userId: vine.number(),
-        gameId: vine.number(),
-    }),
-);
+const showParamsValidator = vine.create({
+    userId: vine.number(),
+    gameId: vine.number(),
+});
 
 export const showUserGame = async ({
     params,

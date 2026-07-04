@@ -6,12 +6,10 @@ import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
 import { isGameParticipant } from "./serialize_game_history.js";
 
-const showParamsValidator = vine.compile(
-    vine.object({
-        userId: vine.number(),
-        gameId: vine.number(),
-    }),
-);
+const showParamsValidator = vine.create({
+    userId: vine.number(),
+    gameId: vine.number(),
+});
 
 export const showGameReplay = async ({ params, response }: HttpContext): Promise<ApiGameReplay> => {
     const { userId, gameId } = await showParamsValidator.validate(params);

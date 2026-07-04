@@ -1,7 +1,8 @@
 import type { ApiUser } from "#api_types/auth.types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useApiMutation } from "~/hooks/use_api_mutation";
 import {
     MATCHMAKING_HEARTBEAT_INTERVAL_MS,
     cancelGameSearchRequest,
@@ -9,7 +10,7 @@ import {
     sendGameSearchHeartbeat,
     startGameSearch,
 } from "~/services/matchmaking";
-import { USER_QUERY_KEY, useUser } from "./use_user";
+import { USER_QUERY_KEY, useUser } from "./use_user.js";
 
 export const useMatchmaking = () => {
     const user = useUser();
@@ -17,7 +18,7 @@ export const useMatchmaking = () => {
 
     const isSearching = Boolean(user?.matchmakingSearchSessionId && !user.currentGameId);
 
-    const startSearchMutation = useMutation({
+    const startSearchMutation = useApiMutation({
         mutationFn: startGameSearch,
         onSuccess: (data) => {
             if (!data.searchSessionId) return;
@@ -29,7 +30,8 @@ export const useMatchmaking = () => {
         },
     });
 
-    const cancelSearchMutation = useMutation({
+    const cancelSearchMutation = useApiMutation({
+        showErrorToast: false,
         mutationFn: async () => {
             const sessionId = queryClient.getQueryData<ApiUser | null>(
                 USER_QUERY_KEY,

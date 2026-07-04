@@ -18,13 +18,14 @@ import { LoginPage } from "./pages/login/login_page.jsx";
 import { MatchmakingPage } from "./pages/matchmaking/match_making_page.jsx";
 import { PlayPage } from "./pages/play/play_page.jsx";
 import { SpectatePage } from "./pages/spectate/spectate_page.jsx";
-import { TrainingPage } from "./pages/training/training_page.jsx";
 import { GameHistoryDetailPage } from "./pages/game_history/game_history_detail_page.jsx";
 import { GameHistoryListPage } from "./pages/game_history/game_history_list_page.jsx";
 import { ReplayPage } from "./pages/replay/replay_page.jsx";
 import { LeaderboardPage } from "./pages/leaderboard/leaderboard_page.jsx";
 import { OnboardingPage } from "./pages/onboarding/onboarding_page.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
+import { NewsDetailPage } from "./pages/news/news_detail_page.jsx";
+import { NewsListPage } from "./pages/news/news_list_page.jsx";
 import { RulesPage } from "./pages/rules/rules_page.jsx";
 
 const router = createBrowserRouter([
@@ -86,12 +87,16 @@ const router = createBrowserRouter([
                         element: <MatchmakingPage />,
                     },
                     {
-                        path: "/training",
-                        element: <TrainingPage />,
-                    },
-                    {
                         path: "/rules",
                         element: <RulesPage />,
+                    },
+                    {
+                        path: "/actualites",
+                        element: <NewsListPage />,
+                    },
+                    {
+                        path: "/actualites/:slug",
+                        element: <NewsDetailPage />,
                     },
                     {
                         path: "/onboarding",

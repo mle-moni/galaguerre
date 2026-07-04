@@ -11,11 +11,9 @@ import {
 
 const GAME_HISTORY_LIMIT = 50;
 
-const listParamsValidator = vine.compile(
-    vine.object({
-        userId: vine.number(),
-    }),
-);
+const listParamsValidator = vine.create({
+    userId: vine.number(),
+});
 
 export const listUserGames = async ({
     params,

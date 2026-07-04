@@ -1,4 +1,4 @@
-import type { GameData, SpotOwner } from "#api_types/game.types";
+import type { SpotOwner } from "#api_types/game.types";
 import type { NarrativeEntityRef } from "#api_types/game_narrative.types";
 import type { AnimationRect } from "~/stores/AnimationStore";
 import type { GameAnimationSnapshot } from "./game_animation_snapshot.js";

@@ -1,5 +1,11 @@
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
+import type { ApiUser } from "#api_types/auth.types";
+import type {
+    CancelGameSearchResponse,
+    GameSearchHeartbeatResponse,
+    GameSearchResponse,
+} from "#api_types/matchmaking.types";
 import { me } from "#controllers/auth/me";
 import { cancelGameSearch } from "#controllers/games/cancel_game_search";
 import { createTrainingGame } from "#controllers/games/create_training_game";
@@ -25,12 +31,19 @@ import { createGameData } from "#tests/helpers/game/fixtures";
 import type { HttpContext } from "@adonisjs/core/http";
 import { DateTime } from "luxon";
 
-const expectResult = <T>(value: T | void): T => {
-    if (value === undefined) {
+const isErrorResponse = (value: unknown): value is { __status: number } =>
+    typeof value === "object" && value !== null && "__status" in value;
+
+const expectResult = <T extends object>(value: unknown): T => {
+    if (value === undefined || value === null) {
         throw new Error("Expected controller result");
     }
 
-    return value;
+    if (isErrorResponse(value)) {
+        throw new Error("Expected controller result, got error response");
+    }
+
+    return value as T;
 };
 
 const createMockContext = (user: User, body: Record<string, unknown> = {}) => {
@@ -111,7 +124,7 @@ test.group("matchmaking api", (group) => {
         await createValidDeckForUser(user.id, "search");
 
         const { ctx } = createMockContext(user);
-        const result = expectResult(await gameSearch(ctx));
+        const result = expectResult<GameSearchResponse>(await gameSearch(ctx));
         assert.equal(result.message, "Waiting for an opponent to join...");
         assert.isString(result.searchSessionId);
         assert.equal(MATCHMAKING_QUEUE.length, 1);
@@ -123,8 +136,8 @@ test.group("matchmaking api", (group) => {
         await createValidDeckForUser(user.id, "dedup");
 
         const { ctx } = createMockContext(user);
-        const first = expectResult(await gameSearch(ctx));
-        const second = expectResult(await gameSearch(ctx));
+        const first = expectResult<GameSearchResponse>(await gameSearch(ctx));
+        const second = expectResult<GameSearchResponse>(await gameSearch(ctx));
 
         assert.equal(first.searchSessionId, second.searchSessionId);
         assert.equal(MATCHMAKING_QUEUE.length, 1);
@@ -135,7 +148,7 @@ test.group("matchmaking api", (group) => {
         const sessionId = addMatchmakingQueueItem(user.id);
 
         const { ctx } = createMockContext(user);
-        const result = expectResult(await me(ctx));
+        const result = expectResult<ApiUser>(await me(ctx));
 
         assert.equal(result.matchmakingSearchSessionId, sessionId);
     });
@@ -145,7 +158,9 @@ test.group("matchmaking api", (group) => {
         const sessionId = addMatchmakingQueueItem(user.id);
 
         const { ctx } = createMockContext(user, { searchSessionId: sessionId });
-        const result = expectResult(await cancelGameSearch(ctx));
+        const result = expectResult<CancelGameSearchResponse>(
+            await cancelGameSearch(ctx, sessionId),
+        );
 
         assert.equal(result.message, "Search cancelled");
         assert.equal(MATCHMAKING_QUEUE.length, 0);
@@ -153,7 +168,7 @@ test.group("matchmaking api", (group) => {
         const { ctx: missingCtx, getNotFoundBody } = createMockContext(user, {
             searchSessionId: "missing-session",
         });
-        await cancelGameSearch(missingCtx);
+        await cancelGameSearch(missingCtx, "missing-session");
         assert.isDefined(getNotFoundBody());
     });
 
@@ -162,7 +177,9 @@ test.group("matchmaking api", (group) => {
         const sessionId = addMatchmakingQueueItem(user.id);
 
         const { ctx } = createMockContext(user, { searchSessionId: sessionId });
-        const result = expectResult(await gameSearchHeartbeat(ctx));
+        const result = expectResult<GameSearchHeartbeatResponse>(
+            await gameSearchHeartbeat(ctx, sessionId),
+        );
 
         assert.equal(result.status, "searching");
     });
@@ -173,7 +190,9 @@ test.group("matchmaking api", (group) => {
         MATCHMAKING_QUEUE[0]!.lastHeartbeatAt = Date.now() - MATCHMAKING_TTL_MS - 1;
 
         const { ctx } = createMockContext(user, { searchSessionId: sessionId });
-        const result = expectResult(await gameSearchHeartbeat(ctx));
+        const result = expectResult<GameSearchHeartbeatResponse>(
+            await gameSearchHeartbeat(ctx, sessionId),
+        );
 
         assert.equal(result.status, "idle");
     });
@@ -190,7 +209,9 @@ test.group("matchmaking api", (group) => {
         });
 
         const { ctx } = createMockContext(playerOne, { searchSessionId: sessionId });
-        const result = expectResult(await gameSearchHeartbeat(ctx));
+        const result = expectResult<GameSearchHeartbeatResponse>(
+            await gameSearchHeartbeat(ctx, sessionId),
+        );
 
         assert.equal(result.status, "matched");
         if (result.status !== "matched") {
@@ -205,11 +226,15 @@ test.group("matchmaking api", (group) => {
         await createValidDeckForUser(playerOne.id, "p1");
         await createValidDeckForUser(playerTwo.id, "p2");
 
-        const first = expectResult(await gameSearch(createMockContext(playerOne).ctx));
+        const first = expectResult<GameSearchResponse>(
+            await gameSearch(createMockContext(playerOne).ctx),
+        );
         assert.isString(first.searchSessionId);
         assert.equal(MATCHMAKING_QUEUE.length, 1);
 
-        const second = expectResult(await gameSearch(createMockContext(playerTwo).ctx));
+        const second = expectResult<GameSearchResponse>(
+            await gameSearch(createMockContext(playerTwo).ctx),
+        );
         assert.equal(second.message, "Game created");
         assert.equal(MATCHMAKING_QUEUE.length, 0);
 
@@ -231,7 +256,9 @@ test.group("matchmaking api", (group) => {
         const ghostSessionId = addMatchmakingQueueItem(waitingPlayer.id);
         MATCHMAKING_QUEUE[0]!.lastHeartbeatAt = Date.now() - MATCHMAKING_TTL_MS - 1;
 
-        const result = expectResult(await gameSearch(createMockContext(joiner).ctx));
+        const result = expectResult<GameSearchResponse>(
+            await gameSearch(createMockContext(joiner).ctx),
+        );
 
         assert.equal(result.message, "Waiting for an opponent to join...");
         assert.isString(result.searchSessionId);
@@ -276,7 +303,9 @@ test.group("matchmaking api", (group) => {
             isFinished: false,
         });
 
-        const result = expectResult(await gameSearch(createMockContext(joiner).ctx));
+        const result = expectResult<GameSearchResponse>(
+            await gameSearch(createMockContext(joiner).ctx),
+        );
 
         assert.equal(result.message, "Waiting for an opponent to join...");
         assert.isString(result.searchSessionId);
@@ -294,14 +323,16 @@ test.group("matchmaking api", (group) => {
         addMatchmakingQueueItem(user.id);
 
         const { ctx } = createMockContext(user);
-        const result = expectResult(await createTrainingGame(ctx));
+        const result = expectResult<{ message: string; gameId: number }>(
+            await createTrainingGame(ctx),
+        );
 
         assert.isNumber(result.gameId);
         assert.equal(MATCHMAKING_QUEUE.length, 0);
         assert.isNull(findQueueItemByUserId(user.id));
 
         const { ctx: meCtx } = createMockContext(user);
-        const meResult = expectResult(await me(meCtx));
+        const meResult = expectResult<ApiUser>(await me(meCtx));
         assert.isNull(meResult.matchmakingSearchSessionId);
         assert.equal(meResult.currentGameId, result.gameId);
     });

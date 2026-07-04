@@ -1,47 +1,31 @@
-import type { AddFriendPayload, ApiFriend, ApiFriendSearchResult } from "#api_types/friend.types";
+import type {
+    AddFriendPayload,
+    AddFriendResponse,
+    ApiFriend,
+    ApiFriendSearchResult,
+    FriendRequestStatus,
+} from "#api_types/friend.types";
+import FriendRequest from "#models/friend_request";
 import Friendship from "#models/friendship";
-import Game from "#models/game";
 import User from "#models/user";
-import { getMutualFriendIds } from "#services/friendship/mutual_friendship";
+import { createMutualFriendship } from "#services/friendship/create_mutual_friendship";
+import {
+    getCurrentGameIdsByUserId,
+    serializeFriend,
+} from "#services/friendship/friend_serialization";
+import { getMutualFriendIds, isMutualFriend } from "#services/friendship/mutual_friendship";
 import type { HttpContext } from "@adonisjs/core/http";
-import vine from "@vinejs/vine";
+import { addFriendValidator, searchFriendsValidator } from "./friends_validators.js";
 
-const addFriendValidator = vine.compile(
-    vine.object({
-        friendUserId: vine.number().withoutDecimals().positive(),
-    }),
-);
-
-const getCurrentGameIdsByUserId = async (userIds: number[]): Promise<Map<number, number>> => {
-    if (userIds.length === 0) return new Map();
-
-    const games = await Game.query()
-        .where("isFinished", false)
-        .where((query) => {
-            query.whereIn("playerOneId", userIds).orWhereIn("playerTwoId", userIds);
-        });
-    const currentGameIdsByUserId = new Map<number, number>();
-
-    for (const game of games) {
-        if (game.playerOneId && userIds.includes(game.playerOneId)) {
-            currentGameIdsByUserId.set(game.playerOneId, game.id);
-        }
-        if (game.playerTwoId && userIds.includes(game.playerTwoId)) {
-            currentGameIdsByUserId.set(game.playerTwoId, game.id);
-        }
-    }
-
-    return currentGameIdsByUserId;
+const getFriendRequestStatus = (
+    userId: number,
+    sentRequestUserIds: Set<number>,
+    receivedRequestUserIds: Set<number>,
+): FriendRequestStatus => {
+    if (sentRequestUserIds.has(userId)) return "sent";
+    if (receivedRequestUserIds.has(userId)) return "received";
+    return "none";
 };
-
-const serializeFriend = (user: User, currentGameId: number | null = null): ApiFriend => ({
-    userId: user.id,
-    pseudo: user.pseudo,
-    elo: user.elo,
-    wins: user.wins,
-    losses: user.losses,
-    currentGameId,
-});
 
 export default class FriendsController {
     async index({ auth }: HttpContext): Promise<ApiFriend[]> {
@@ -54,24 +38,26 @@ export default class FriendsController {
         const mutualFriendIds = await getMutualFriendIds(auth.user!.id, friendIds);
         const currentGameIdsByUserId = await getCurrentGameIdsByUserId([...mutualFriendIds]);
 
-        return friendships.map((friendship) =>
-            serializeFriend(
-                friendship.friend,
-                mutualFriendIds.has(friendship.friendId)
-                    ? currentGameIdsByUserId.get(friendship.friendId) ?? null
-                    : null,
-            ),
-        );
+        return friendships
+            .filter((friendship) => mutualFriendIds.has(friendship.friendId))
+            .map((friendship) =>
+                serializeFriend(
+                    friendship.friend,
+                    currentGameIdsByUserId.get(friendship.friendId) ?? null,
+                ),
+            );
     }
 
     async search({ auth, request }: HttpContext): Promise<ApiFriendSearchResult[]> {
-        const search = String(request.input("q", "")).trim();
+        const { q = "" } = await request.validateUsing(searchFriendsValidator);
+        const search = q.trim();
 
         if (search.length < 2) return [];
 
         const userId = auth.user!.id;
         const friendships = await Friendship.query().where("userId", userId);
-        const friendIds = new Set(friendships.map((friendship) => friendship.friendId));
+        const friendIds = friendships.map((friendship) => friendship.friendId);
+        const mutualFriendIds = await getMutualFriendIds(userId, friendIds);
         const users = await User.query()
             .where("id", "!=", userId)
             .whereNotNull("pseudo")
@@ -79,7 +65,15 @@ export default class FriendsController {
             .orderByRaw("LOWER(pseudo) ASC")
             .orderBy("id", "asc")
             .limit(10);
-        const mutualFriendIds = await getMutualFriendIds(userId, [...friendIds]);
+        const userIds = users.map((user) => user.id);
+        const sentRequests = await FriendRequest.query()
+            .where("fromUserId", userId)
+            .whereIn("toUserId", userIds);
+        const receivedRequests = await FriendRequest.query()
+            .where("toUserId", userId)
+            .whereIn("fromUserId", userIds);
+        const sentRequestUserIds = new Set(sentRequests.map((entry) => entry.toUserId));
+        const receivedRequestUserIds = new Set(receivedRequests.map((entry) => entry.fromUserId));
         const currentGameIdsByUserId = await getCurrentGameIdsByUserId([...mutualFriendIds]);
 
         return users.map((user) => ({
@@ -87,7 +81,12 @@ export default class FriendsController {
                 user,
                 mutualFriendIds.has(user.id) ? currentGameIdsByUserId.get(user.id) ?? null : null,
             ),
-            isFriend: friendIds.has(user.id),
+            isFriend: mutualFriendIds.has(user.id),
+            friendRequestStatus: getFriendRequestStatus(
+                user.id,
+                sentRequestUserIds,
+                receivedRequestUserIds,
+            ),
         }));
     }
 
@@ -103,18 +102,51 @@ export default class FriendsController {
 
         if (!friend) return response.notFound({ error: "Utilisateur introuvable" });
 
-        await Friendship.firstOrCreate(
-            { userId, friendId: payload.friendUserId },
-            { userId, friendId: payload.friendUserId },
-        );
+        if (await isMutualFriend(userId, friend.id)) {
+            return response.badRequest({ error: "Vous êtes déjà amis" });
+        }
 
-        const mutualFriendIds = await getMutualFriendIds(userId, [friend.id]);
-        const currentGameIdsByUserId = await getCurrentGameIdsByUserId([...mutualFriendIds]);
+        const inverseRequest = await FriendRequest.query()
+            .where("fromUserId", friend.id)
+            .where("toUserId", userId)
+            .first();
 
-        return serializeFriend(
-            friend,
-            mutualFriendIds.has(friend.id) ? currentGameIdsByUserId.get(friend.id) ?? null : null,
-        );
+        if (inverseRequest) {
+            await createMutualFriendship(userId, friend.id);
+            await inverseRequest.delete();
+
+            const currentGameIdsByUserId = await getCurrentGameIdsByUserId([friend.id]);
+
+            return {
+                status: "accepted",
+                requestId: null,
+                friend: serializeFriend(friend, currentGameIdsByUserId.get(friend.id) ?? null),
+            } satisfies AddFriendResponse;
+        }
+
+        const existingRequest = await FriendRequest.query()
+            .where("fromUserId", userId)
+            .where("toUserId", friend.id)
+            .first();
+
+        if (existingRequest) {
+            return {
+                status: "sent",
+                requestId: existingRequest.id,
+                friend: null,
+            } satisfies AddFriendResponse;
+        }
+
+        const friendRequest = await FriendRequest.create({
+            fromUserId: userId,
+            toUserId: friend.id,
+        });
+
+        return {
+            status: "sent",
+            requestId: friendRequest.id,
+            friend: null,
+        } satisfies AddFriendResponse;
     }
 
     async destroy({ auth, params, response }: HttpContext) {
@@ -124,10 +156,10 @@ export default class FriendsController {
             return response.badRequest({ error: "Ami invalide" });
         }
 
-        await Friendship.query()
-            .where("userId", auth.user!.id)
-            .where("friendId", friendUserId)
-            .delete();
+        const userId = auth.user!.id;
+
+        await Friendship.query().where("userId", userId).where("friendId", friendUserId).delete();
+        await Friendship.query().where("userId", friendUserId).where("friendId", userId).delete();
 
         return { message: "Ami retiré" };
     }

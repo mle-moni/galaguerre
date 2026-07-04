@@ -1,31 +1,23 @@
-import type {
-    ApiAiSpeedrunLeaderboardEntry,
-    ApiLeaderboardEntry,
-} from "#api_types/leaderboard.types";
-import { useQuery } from "@tanstack/react-query";
-import { publicAxios } from "~/services/axios";
+import { useApiQuery } from "~/hooks/use_api_query";
+import { publicClient } from "~/services/client";
 
 export const LEADERBOARD_QUERY_KEY = ["leaderboard"] as const;
 export const AI_SPEEDRUN_LEADERBOARD_QUERY_KEY = ["leaderboard", "ai-speedrun"] as const;
 
 export const useLeaderboardQuery = () => {
-    return useQuery({
+    return useApiQuery({
         queryKey: LEADERBOARD_QUERY_KEY,
         queryFn: async () => {
-            const response = await publicAxios.get<ApiLeaderboardEntry[]>("/api/leaderboard");
-            return response.data;
+            return publicClient.api.leaderboard.index({});
         },
     });
 };
 
 export const useAiSpeedrunLeaderboardQuery = (enabled = true) => {
-    return useQuery({
+    return useApiQuery({
         queryKey: AI_SPEEDRUN_LEADERBOARD_QUERY_KEY,
         queryFn: async () => {
-            const response = await publicAxios.get<ApiAiSpeedrunLeaderboardEntry[]>(
-                "/api/leaderboard/ai-speedrun",
-            );
-            return response.data;
+            return publicClient.api.leaderboard.aiSpeedrun({});
         },
         enabled,
     });

@@ -1,0 +1,60 @@
+.news-recap-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.news-recap-section + .news-recap-section {
+    margin-top: 1.25rem;
+}
+
+.news-recap-section__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    color: #fff;
+}
+
+.news-recap-grid {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+}
+
+.news-recap-card-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    cursor: default;
+}
+
+.news-recap-card-slot:hover {
+    transform: none;
+}
+
+.news-recap-card-slot .gg-catalog-card-slot__preview {
+    cursor: default;
+}
+
+.news-recap-card__changes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.news-recap-card__changes--buff {
+    color: #86efac;
+}
+
+.news-recap-card__changes--nerf {
+    color: #fca5a5;
+}
+
+.news-recap-empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--gg-text-muted);
+}

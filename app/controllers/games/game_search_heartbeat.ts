@@ -4,19 +4,12 @@ import { findQueueItemByUserId, touchHeartbeat } from "#services/sockets/matchma
 import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
 
-const heartbeatSchema = vine.compile(
-    vine.object({
-        searchSessionId: vine.string(),
-    }),
-);
+export const heartbeatSchema = vine.create({
+    searchSessionId: vine.string(),
+});
 
-export const gameSearchHeartbeat = async ({ auth, request, response }: HttpContext) => {
+export const gameSearchHeartbeat = async ({ auth }: HttpContext, searchSessionId: string) => {
     const user = auth.user!;
-    const [errors, body] = await heartbeatSchema.tryValidate(request.body());
-
-    if (errors) {
-        return response.badRequest({ error: "searchSessionId is required" });
-    }
 
     const currentGame = await findActiveGameForUser(user.id);
     if (currentGame) {
@@ -27,7 +20,7 @@ export const gameSearchHeartbeat = async ({ auth, request, response }: HttpConte
         return result;
     }
 
-    const item = touchHeartbeat(body.searchSessionId);
+    const item = touchHeartbeat(searchSessionId);
     if (!item || item.userId !== user.id) {
         const result: GameSearchHeartbeatResponse = { status: "idle" };
         return result;

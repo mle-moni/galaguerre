@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { privateAxios, TOKEN_STORAGE_KEY } from "~/services/axios";
+import { useApiMutation } from "~/hooks/use_api_mutation";
+import { client, TOKEN_STORAGE_KEY } from "~/services/client";
 import { cancelActiveMatchmakingSearch } from "~/services/matchmaking";
 import { CLIENT_SOCKET, markSocketDisconnected, setSocketAuthSuccess } from "~/services/ws_client";
 import { USER_QUERY_KEY } from "./use_user.js";
@@ -9,7 +10,8 @@ export const useLogout = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async () => {
             await cancelActiveMatchmakingSearch(queryClient);
 
@@ -17,7 +19,7 @@ export const useLogout = () => {
                 CLIENT_SOCKET.emit("logout");
             }
 
-            await privateAxios.post("/api/auth/logout");
+            await client.api.auth.logout({});
         },
         onSettled: () => {
             CLIENT_SOCKET.disconnect();

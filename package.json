@@ -19,7 +19,8 @@
         "lint-check": "biome lint",
         "typecheck": "tsc --noEmit",
         "frontend-typecheck": "cd frontend && yarn tsc --noEmit --project tsconfig.json",
-        "generate:card-images": "node --experimental-strip-types scripts/generate_hs_card_ids.ts"
+        "generate:card-images": "node --experimental-strip-types scripts/generate_hs_card_ids.ts",
+        "generate:news-recaps": "node --experimental-strip-types scripts/generate_news_recaps.ts"
     },
     "imports": {
         "#adomin/*": "./app/adomin/*.js",
@@ -90,8 +91,8 @@
         "@adonisjs/static": "^2.0.1",
         "@adonisjs/vite": "^5.1.1",
         "@softwaretechnik/dbml-renderer": "^1.0.30",
+        "@tuyau/core": "^1.2.2",
         "@vinejs/vine": "^4.4.0",
-        "axios": "^1.17.0",
         "edge.js": "^6.5.1",
         "luxon": "^3.4.4",
         "motion": "^12.40.0",

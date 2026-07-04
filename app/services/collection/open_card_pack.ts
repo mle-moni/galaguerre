@@ -7,6 +7,7 @@ import db from "@adonisjs/lucid/services/db";
 import { DateTime } from "luxon";
 import { drawPackCardsWithoutReplacement } from "./draw_weighted_pack_cards.js";
 import { grantPackCardCopyForUser } from "./grant_starter_collection_for_user.js";
+import { updateDailyQuestProgressForPackOpen } from "#services/daily_quests/update_daily_quest_progress";
 
 export class NoUnopenedPackError extends Error {
     constructor() {
@@ -23,7 +24,7 @@ export class NotEnoughCollectibleCardsError extends Error {
 }
 
 export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> => {
-    return db.transaction(async (trx) => {
+    const openedCards = await db.transaction(async (trx) => {
         const pack = await CardPack.query({ client: trx })
             .where("userId", userId)
             .whereNull("openedAt")
@@ -53,4 +54,8 @@ export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> =>
         const cardsById = new Map(collectibleCards.map((card) => [card.id, card]));
         return drawnCardIds.map((cardId) => serializeCatalogCard(cardsById.get(cardId)!));
     });
+
+    await updateDailyQuestProgressForPackOpen(userId, 1);
+
+    return openedCards;
 };

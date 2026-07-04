@@ -27,13 +27,19 @@ export const controllers = {
     },
     collection: {
         Collection: () => import("#controllers/collection/collection_controller"),
+        CollectionValidators: () => import("#controllers/collection/collection_validators"),
+    },
+    dailyQuests: {
+        DailyQuests: () => import("#controllers/daily_quests/daily_quests_controller"),
     },
     deckShares: {
+        DeckShareValidators: () => import("#controllers/deck_shares/deck_share_validators"),
         DeckShares: () => import("#controllers/deck_shares/deck_shares_controller"),
         SerializeDeckShare: () => import("#controllers/deck_shares/serialize_deck_share"),
     },
     decks: {
         DeckUtils: () => import("#controllers/decks/deck_utils"),
+        DeckValidators: () => import("#controllers/decks/deck_validators"),
         Decks: () => import("#controllers/decks/decks_controller"),
         SerializeDeck: () => import("#controllers/decks/serialize_deck"),
     },
@@ -41,7 +47,9 @@ export const controllers = {
         Events: () => import("#controllers/events/events_controller"),
     },
     friends: {
+        FriendRequests: () => import("#controllers/friends/friend_requests_controller"),
         Friends: () => import("#controllers/friends/friends_controller"),
+        FriendsValidators: () => import("#controllers/friends/friends_validators"),
     },
     gameHistory: {
         GameHistory: () => import("#controllers/game_history/game_history_controller"),

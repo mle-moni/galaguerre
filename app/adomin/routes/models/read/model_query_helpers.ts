@@ -7,31 +7,29 @@ import { getSqlColumnToUse } from "../get_model_config.js";
 import { EXPORT_TYPES } from "./download_export_file.js";
 import { whereClause } from "./where_clause.js";
 
-export const paginationValidator = vine.compile(
-    vine.object({
-        pageIndex: vine.number(),
-        pageSize: vine.number(),
-        globalFilter: vine.string().optional(),
-        filters: vine
-            .array(
-                vine.object({
-                    id: vine.string(),
-                    value: vine.string().nullable(),
-                }),
-            )
-            .optional(),
-        filtersMode: vine.enum(["and", "or"]).optional(),
-        sorting: vine
-            .array(
-                vine.object({
-                    id: vine.string(),
-                    desc: vine.boolean(),
-                }),
-            )
-            .optional(),
-        exportType: vine.enum(EXPORT_TYPES).optional(),
-    }),
-);
+export const paginationValidator = vine.create({
+    pageIndex: vine.number(),
+    pageSize: vine.number(),
+    globalFilter: vine.string().optional(),
+    filters: vine
+        .array(
+            vine.object({
+                id: vine.string(),
+                value: vine.string().nullable(),
+            }),
+        )
+        .optional(),
+    filtersMode: vine.enum(["and", "or"]).optional(),
+    sorting: vine
+        .array(
+            vine.object({
+                id: vine.string(),
+                desc: vine.boolean(),
+            }),
+        )
+        .optional(),
+    exportType: vine.enum(EXPORT_TYPES).optional(),
+});
 
 export type PaginationSettings = Infer<typeof paginationValidator>;
 

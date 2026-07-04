@@ -3,21 +3,16 @@ import { cancelSearch } from "#services/sockets/matchmaking";
 import type { HttpContext } from "@adonisjs/core/http";
 import vine from "@vinejs/vine";
 
-const cancelSchema = vine.compile(
-    vine.object({
-        searchSessionId: vine.string(),
-    }),
-);
+export const cancelSchema = vine.create({
+    searchSessionId: vine.string(),
+});
 
-export const cancelGameSearch = async ({ auth, request, response }: HttpContext) => {
+export const cancelGameSearch = async (
+    { auth, response }: HttpContext,
+    searchSessionId: string,
+) => {
     const user = auth.user!;
-    const [errors, body] = await cancelSchema.tryValidate(request.body());
-
-    if (errors) {
-        return response.badRequest({ error: "searchSessionId is required" });
-    }
-
-    const cancelled = cancelSearch(body.searchSessionId, user.id);
+    const cancelled = cancelSearch(searchSessionId, user.id);
 
     if (!cancelled) {
         return response.notFound({ error: "No active search session found" });

@@ -1,13 +1,14 @@
 import { Button, Text } from "@mantine/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { CenteredLoader } from "~/components/centered_loader";
+import { useApiMutation } from "~/hooks/use_api_mutation";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
 import { useUser } from "~/hooks/use_user";
-import { privateAxios } from "~/services/axios";
+import { client } from "~/services/client";
 import { applyTrainingGameStarted } from "~/services/apply_training_game_started";
 
 export const OnboardingPage = observer(() => {
@@ -17,10 +18,9 @@ export const OnboardingPage = observer(() => {
     const decksQuery = useDecksQuery();
     const cardsQuery = useCardsQuery();
 
-    const startMutation = useMutation({
+    const startMutation = useApiMutation({
         mutationFn: async () => {
-            const response = await privateAxios.post<{ gameId: number }>("/api/games/training");
-            return response.data;
+            return (await client.api.games.training({})) as { gameId: number };
         },
         onSuccess: (data) => {
             applyTrainingGameStarted(queryClient, data.gameId);

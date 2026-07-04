@@ -21,19 +21,7 @@ import {
     NoDuplicatesToSellError,
     sellAllDuplicateCards,
 } from "#services/collection/sell_duplicate_cards";
-import vine from "@vinejs/vine";
-
-const buyCardSchema = vine.compile(
-    vine.object({
-        cardId: vine.number(),
-    }),
-);
-
-const sellCardSchema = vine.compile(
-    vine.object({
-        cardId: vine.number(),
-    }),
-);
+import { buyCardSchema, sellCardSchema } from "./collection_validators.js";
 
 export default class CollectionController {
     async index({ auth }: HttpContext) {

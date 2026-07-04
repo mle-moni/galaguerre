@@ -130,9 +130,7 @@ test.group("decks api", (group) => {
         await createMinionCard("Légume", false);
         const collectible = await createMinionCard("Lutin", true);
 
-        const cards = await listCards({
-            request: { input: () => undefined },
-        } as never);
+        const cards = await listCards({} as never);
 
         assert.isTrue(cards.some((card) => card.id === collectible.id));
         assert.isFalse(cards.some((card) => card.label === "Légume"));
@@ -141,11 +139,7 @@ test.group("decks api", (group) => {
     test("listCards includes non-collectible cards when requested", async ({ assert }) => {
         const nonCollectible = await createMinionCard("Légume", false);
 
-        const cards = await listCards({
-            request: {
-                input: (key: string) => (key === "includeNonCollectible" ? "true" : undefined),
-            },
-        } as never);
+        const cards = await listCards({} as never, true);
 
         assert.isTrue(cards.some((card) => card.id === nonCollectible.id));
     });

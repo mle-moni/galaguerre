@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
-import { useMutation } from "@tanstack/react-query";
+import { useApiMutation } from "~/hooks/use_api_mutation";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import { useGameContext } from "~/hooks/use_game_state";
@@ -9,7 +9,7 @@ import { PACKS_QUERY_KEY } from "~/hooks/use_collection";
 import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useOnboardingGame } from "~/hooks/use_onboarding_game";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
-import { privateAxios } from "~/services/axios";
+import { client } from "~/services/client";
 import { queryClient } from "~/services/query_client";
 import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
 import type { ApiUser } from "#api_types/auth.types";
@@ -36,10 +36,9 @@ export const GameFinalScreen = observer(() => {
         }
     };
 
-    const startTrainingMutation = useMutation({
+    const startTrainingMutation = useApiMutation({
         mutationFn: async () => {
-            const response = await privateAxios.post<{ gameId: number }>("/api/games/training");
-            return response.data;
+            return (await client.api.games.training({})) as { gameId: number };
         },
         onSuccess: (data) => {
             queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {

@@ -88,7 +88,7 @@ const catalogueOwnershipFilterStyles = {
         border: "1px solid var(--mantine-color-gray-4)",
         padding: 4,
         height: 36,
-        boxSizing: "border-box",
+        boxSizing: "border-box" as const,
         alignItems: "center",
     },
     label: {
@@ -222,8 +222,6 @@ const CatalogCardItem = ({
     const thumbOpensArtworkModal = !interactive && !isMobilePortrait;
     const isUnowned = ownedCount !== null && ownedCount === 0;
     const showOwnedBadge = ownedCount !== null && ownedCount > 0 && showOwnedCount;
-    const showRarityBadge = card.rarity !== "COMMON";
-
     if (isNarrowScreen) {
         return (
             <div className={clsx("gg-composition-row", isUnowned && "gg-composition-row--unowned")}>
@@ -250,7 +248,7 @@ const CatalogCardItem = ({
                                 variant="artwork"
                                 overlay={
                                     <>
-                                        {showRarityBadge && (
+                                        {card.rarity !== "COMMON" && (
                                             <CatalogRarityBadge rarity={card.rarity} />
                                         )}
                                         {showOwnedBadge && <OwnedCountBadge count={ownedCount} />}

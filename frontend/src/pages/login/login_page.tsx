@@ -1,20 +1,20 @@
 import { Button, PasswordInput, TextInput } from "@mantine/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { Link, Navigate } from "react-router-dom";
 import { AuthLayout } from "~/components/layout/auth_layout";
+import { useApiMutation } from "~/hooks/use_api_mutation";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { useUser } from "~/hooks/use_user";
-import { privateAxios, setToken } from "~/services/axios";
+import { client, setToken } from "~/services/client";
 
 export const LoginPage = observer(() => {
     const user = useUser();
     const queryClient = useQueryClient();
 
-    const loginMutation = useMutation({
-        mutationFn: async (data: FormData) => {
-            const response = await privateAxios.post("/api/auth/login", data);
-            return response.data;
+    const loginMutation = useApiMutation({
+        mutationFn: async (data: { email: string; password: string }) => {
+            return client.api.auth.login({ body: data });
         },
         onSuccess: async (data) => {
             setToken(data.token);
@@ -25,7 +25,10 @@ export const LoginPage = observer(() => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        loginMutation.mutate(formData);
+        loginMutation.mutate({
+            email: formData.get("email") as string,
+            password: formData.get("password") as string,
+        });
     };
 
     if (user) return <Navigate to="/" />;

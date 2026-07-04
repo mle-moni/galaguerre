@@ -1,9 +1,9 @@
 import type { HttpContext } from "@adonisjs/core/http";
-import { cancelGameSearch } from "./cancel_game_search.js";
+import { cancelGameSearch, cancelSchema } from "./cancel_game_search.js";
 import { createTrainingGame } from "./create_training_game.js";
 import { gameSearch } from "./game_search.js";
-import { gameSearchHeartbeat } from "./game_search_heartbeat.js";
-import { showGame } from "./show_game.js";
+import { gameSearchHeartbeat, heartbeatSchema } from "./game_search_heartbeat.js";
+import { showGame, showGameQueryValidator } from "./show_game.js";
 
 export default class GamesController {
     async index(ctx: HttpContext) {
@@ -19,15 +19,18 @@ export default class GamesController {
     }
 
     async cancelSearch(ctx: HttpContext) {
-        return cancelGameSearch(ctx);
+        const { searchSessionId } = await ctx.request.validateUsing(cancelSchema);
+        return cancelGameSearch(ctx, searchSessionId);
     }
 
     async searchHeartbeat(ctx: HttpContext) {
-        return gameSearchHeartbeat(ctx);
+        const { searchSessionId } = await ctx.request.validateUsing(heartbeatSchema);
+        return gameSearchHeartbeat(ctx, searchSessionId);
     }
 
     async show(ctx: HttpContext) {
-        return showGame(ctx);
+        const { asUserId } = await ctx.request.validateUsing(showGameQueryValidator);
+        return showGame(ctx, asUserId);
     }
 
     async update(ctx: HttpContext) {

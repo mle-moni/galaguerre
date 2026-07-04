@@ -173,6 +173,16 @@
     border-radius: 2px;
 }
 
+.home-quest--claimed {
+    opacity: 0.65;
+}
+
+.home-quest__loading {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
 .home-quest__reward {
     display: flex;
     align-items: center;
@@ -548,6 +558,17 @@
     gap: 0.5rem;
     padding: 0;
     border-bottom: none;
+}
+
+.home-news-item--link {
+    text-decoration: none;
+    color: inherit;
+    border-radius: var(--gg-radius-sm);
+    transition: background 0.15s ease;
+}
+
+.home-news-item--link:hover {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .home-news-item__thumb {

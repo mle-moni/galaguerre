@@ -1,15 +1,14 @@
 import { Button, Center, Modal, Stack, Text } from "@mantine/core";
 import { PackIcon } from "~/components/rewards/pack_icon";
-import { useMutation } from "@tanstack/react-query";
+import { useApiMutation } from "~/hooks/use_api_mutation";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import type { ApiClaimDailyPackResponse } from "#api_types/rewards.types";
 import { PACKS_QUERY_KEY } from "~/hooks/use_collection";
 import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
-import { privateAxios } from "~/services/axios";
+import { client } from "~/services/client";
 import { queryClient } from "~/services/query_client";
-import { notifyError, notifySuccess } from "~/services/toasts";
+import { notifySuccess } from "~/services/toasts";
 
 const HIDDEN_ROUTES = new Set(["/play", "/login", "/register"]);
 
@@ -18,20 +17,16 @@ export const DailyPackModal = observer(() => {
     const location = useLocation();
     const [dismissed, setDismissed] = useState(false);
 
-    const claimMutation = useMutation({
+    const claimMutation = useApiMutation({
+        errorMessage: "Impossible de réclamer le paquet quotidien",
         mutationFn: async () => {
-            const response =
-                await privateAxios.post<ApiClaimDailyPackResponse>("/api/rewards/daily-pack");
-            return response.data;
+            return client.api.rewards.claimDailyPack({});
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
             queryClient.invalidateQueries({ queryKey: PACKS_QUERY_KEY });
             notifySuccess("Paquet quotidien obtenu !");
             setDismissed(true);
-        },
-        onError: () => {
-            notifyError("Impossible de réclamer le paquet quotidien");
         },
     });
 
@@ -40,7 +35,7 @@ export const DailyPackModal = observer(() => {
 
     return (
         <Modal
-            opened={shouldShow}
+            opened={shouldShow ?? false}
             onClose={() => setDismissed(true)}
             title="Paquet quotidien"
             centered

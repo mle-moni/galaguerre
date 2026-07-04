@@ -197,6 +197,21 @@ export class EventSchema extends BaseModel {
     declare updatedAt: DateTime | null;
 }
 
+export class FriendRequestSchema extends BaseModel {
+    static $columns = ["createdAt", "fromUserId", "id", "toUserId", "updatedAt"] as const;
+    $columns = FriendRequestSchema.$columns;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime;
+    @column()
+    declare fromUserId: number;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column()
+    declare toUserId: number;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime | null;
+}
+
 export class FriendshipSchema extends BaseModel {
     static $columns = ["createdAt", "friendId", "id", "updatedAt", "userId"] as const;
     $columns = FriendshipSchema.$columns;
@@ -290,6 +305,54 @@ export class UserCardSchema extends BaseModel {
     declare userId: number;
 }
 
+export class UserDailyQuestSchema extends BaseModel {
+    static $columns = [
+        "claimedAt",
+        "completedAt",
+        "createdAt",
+        "id",
+        "params",
+        "progress",
+        "questDate",
+        "questType",
+        "rewardAmount",
+        "rewardType",
+        "slot",
+        "targetValue",
+        "updatedAt",
+        "userId",
+    ] as const;
+    $columns = UserDailyQuestSchema.$columns;
+    @column.dateTime()
+    declare claimedAt: DateTime | null;
+    @column.dateTime()
+    declare completedAt: DateTime | null;
+    @column.dateTime({ autoCreate: true })
+    declare createdAt: DateTime | null;
+    @column({ isPrimary: true })
+    declare id: number;
+    @column()
+    declare params: any | null;
+    @column()
+    declare progress: number;
+    @column.date()
+    declare questDate: DateTime;
+    @column()
+    declare questType: string;
+    @column()
+    declare rewardAmount: number;
+    @column()
+    declare rewardType: string;
+    @column()
+    declare slot: number;
+    @column()
+    declare targetValue: number;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime | null;
+    @column()
+    declare userId: number;
+}
+
 export class UserSchema extends BaseModel {
     static $columns = [
         "createdAt",
@@ -299,7 +362,6 @@ export class UserSchema extends BaseModel {
         "id",
         "isSuperAdmin",
         "lastDailyPackClaimedOn",
-        "lastVictoryPackGrantedOn",
         "losses",
         "onboardingCompletedAt",
         "password",
@@ -323,8 +385,6 @@ export class UserSchema extends BaseModel {
     declare isSuperAdmin: boolean | null;
     @column.date()
     declare lastDailyPackClaimedOn: DateTime | null;
-    @column.date()
-    declare lastVictoryPackGrantedOn: DateTime | null;
     @column()
     declare losses: number;
     @column.dateTime()

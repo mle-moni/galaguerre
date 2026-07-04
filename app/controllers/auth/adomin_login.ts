@@ -4,22 +4,24 @@ import vine, { SimpleMessagesProvider } from "@vinejs/vine";
 import { DEFAULT_MESSAGE_PROVIDER_CONFIG } from "#adomin/validation/default_validator";
 import User from "#models/user";
 
-const loginSchema = vine.compile(
-    vine.object({
-        email: vine.string().trim(),
-        password: vine.string().trim(),
-    }),
-);
+export const loginSchema = vine.create({
+    email: vine.string().trim(),
+    password: vine.string().trim(),
+});
 
-const messagesProvider = new SimpleMessagesProvider(DEFAULT_MESSAGE_PROVIDER_CONFIG, {
+export const loginMessagesProvider = new SimpleMessagesProvider(DEFAULT_MESSAGE_PROVIDER_CONFIG, {
     password: "mot de passe",
 });
 
-export const adominLogin = async ({ request }: HttpContext) => {
-    const { email, password } = await request.validateUsing(loginSchema, { messagesProvider });
-
+export const createLoginToken = async (email: string, password: string) => {
     const user = await User.verifyCredentials(email, password);
-    const token = await User.accessTokens.create(user);
+    return User.accessTokens.create(user);
+};
 
-    return token;
+export const adominLogin = async ({ request }: HttpContext) => {
+    const { email, password } = await request.validateUsing(loginSchema, {
+        messagesProvider: loginMessagesProvider,
+    });
+
+    return createLoginToken(email, password);
 };

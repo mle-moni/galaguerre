@@ -12,7 +12,7 @@ const modelsEnum = getFlatViews()
     })
     .filter(isNotNull);
 
-const modelNameSchema = vine.compile(vine.object({ model: vine.enum(modelsEnum) }));
+const modelNameSchema = vine.create({ model: vine.enum(modelsEnum) });
 
 export const validateModelName = (data: unknown) => {
     return modelNameSchema.validate(data);

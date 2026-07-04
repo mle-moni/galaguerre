@@ -1,8 +1,7 @@
-import type { ApiGame } from "#api_types/game.types";
-import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
+import { useApiQuery } from "~/hooks/use_api_query";
 import { _assert } from "~/helpers/assertions";
-import { privateAxios } from "~/services/axios";
+import { client } from "~/services/client";
 import { GAME_STORE } from "~/stores/store_singletons";
 import type { GameStore } from "~/stores/GameStore";
 import type { ReplayStore } from "~/stores/ReplayStore";
@@ -19,14 +18,13 @@ export const useGameState = (
 ) => {
     const { asUserId, refetchInterval } = options;
 
-    const query = useQuery({
+    const query = useApiQuery({
         queryKey: getGameStateQueryKey(gameId, asUserId),
         queryFn: async () => {
-            const response = await privateAxios.get<ApiGame>(`/api/games/${gameId}`, {
-                params: asUserId ? { asUserId } : undefined,
+            return client.api.games.show({
+                params: { id: gameId },
+                query: asUserId ? { asUserId } : {},
             });
-
-            return response.data;
         },
         refetchInterval,
         refetchOnWindowFocus: true,
@@ -35,7 +33,9 @@ export const useGameState = (
     return query;
 };
 
-export const GameStateContext = createContext<ApiGame | null>(null);
+export const GameStateContext = createContext<Awaited<
+    ReturnType<typeof client.api.games.show>
+> | null>(null);
 
 export const useGameContext = () => {
     const replayStore = useContext(ReplayStoreContext);

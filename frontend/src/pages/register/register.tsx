@@ -1,11 +1,12 @@
 import { Button, PasswordInput, TextInput } from "@mantine/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { AuthLayout } from "~/components/layout/auth_layout";
+import { useApiMutation } from "~/hooks/use_api_mutation";
 import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
-import { privateAxios, setToken } from "~/services/axios";
+import { client, setToken } from "~/services/client";
 import { notifyError } from "~/services/toasts";
 
 export const RegisterPage = observer(() => {
@@ -14,10 +15,9 @@ export const RegisterPage = observer(() => {
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
-    const registerMutation = useMutation({
-        mutationFn: async (data: FormData) => {
-            const response = await privateAxios.post("/api/auth/register", data);
-            return response.data;
+    const registerMutation = useApiMutation({
+        mutationFn: async (data: { email: string; password: string; pseudo: string }) => {
+            return client.api.auth.register({ body: data });
         },
         onSuccess: async (data) => {
             setToken(data.token);
@@ -36,7 +36,11 @@ export const RegisterPage = observer(() => {
             return;
         }
 
-        registerMutation.mutate(formData);
+        registerMutation.mutate({
+            email: formData.get("email") as string,
+            password,
+            pseudo: formData.get("pseudo") as string,
+        });
     };
 
     if (redirectTo) return <Navigate to={redirectTo} replace />;

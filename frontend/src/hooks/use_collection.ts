@@ -1,48 +1,39 @@
-import type {
-    ApiBuyCardResponse,
-    ApiCollectionResponse,
-    ApiDuplicatesPreviewResponse,
-    ApiOpenPackResponse,
-    ApiSellCardResponse,
-    ApiSellDuplicatesResponse,
-} from "#api_types/collection.types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { privateAxios } from "~/services/axios";
+import { useQueryClient } from "@tanstack/react-query";
+import { DAILY_QUESTS_QUERY_KEY } from "~/hooks/use_daily_quests";
+import { useApiMutation } from "~/hooks/use_api_mutation";
+import { useApiQuery } from "~/hooks/use_api_query";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
+import { client } from "~/services/client";
 
 export const COLLECTION_QUERY_KEY = ["collection"] as const;
 export const PACKS_QUERY_KEY = ["packs"] as const;
 export const DUPLICATES_PREVIEW_QUERY_KEY = ["collection", "duplicates-preview"] as const;
 
 export const useCollectionQuery = (options?: { enabled?: boolean }) => {
-    return useQuery({
+    return useApiQuery({
         queryKey: COLLECTION_QUERY_KEY,
         queryFn: async () => {
-            const response = await privateAxios.get<ApiCollectionResponse>("/api/collection");
-            return response.data.entries;
+            const data = await client.api.collection.index({});
+            return data.entries;
         },
         enabled: options?.enabled ?? true,
     });
 };
 
 export const usePacksQuery = () => {
-    return useQuery({
+    return useApiQuery({
         queryKey: PACKS_QUERY_KEY,
         queryFn: async () => {
-            const response = await privateAxios.get<{ unopenedCount: number }>("/api/packs");
-            return response.data;
+            return client.api.collection.packs({});
         },
     });
 };
 
 export const useDuplicatesPreviewQuery = (enabled: boolean) => {
-    return useQuery({
+    return useApiQuery({
         queryKey: DUPLICATES_PREVIEW_QUERY_KEY,
         queryFn: async () => {
-            const response = await privateAxios.get<ApiDuplicatesPreviewResponse>(
-                "/api/collection/duplicates-preview",
-            );
-            return response.data;
+            return client.api.collection.duplicatesPreview({});
         },
         enabled,
     });
@@ -51,12 +42,10 @@ export const useDuplicatesPreviewQuery = (enabled: boolean) => {
 export const useSellDuplicatesMutation = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async () => {
-            const response = await privateAxios.post<ApiSellDuplicatesResponse>(
-                "/api/collection/sell-duplicates",
-            );
-            return response.data;
+            return client.api.collection.sellDuplicates({});
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: COLLECTION_QUERY_KEY });
@@ -69,15 +58,10 @@ export const useSellDuplicatesMutation = () => {
 export const useBuyCardMutation = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async (cardId: number) => {
-            const response = await privateAxios.post<ApiBuyCardResponse>(
-                "/api/collection/buy-card",
-                {
-                    cardId,
-                },
-            );
-            return response.data;
+            return client.api.collection.buyCard({ body: { cardId } });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: COLLECTION_QUERY_KEY });
@@ -89,15 +73,10 @@ export const useBuyCardMutation = () => {
 export const useSellCardMutation = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async (cardId: number) => {
-            const response = await privateAxios.post<ApiSellCardResponse>(
-                "/api/collection/sell-card",
-                {
-                    cardId,
-                },
-            );
-            return response.data;
+            return client.api.collection.sellCard({ body: { cardId } });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: COLLECTION_QUERY_KEY });
@@ -109,14 +88,16 @@ export const useSellCardMutation = () => {
 export const useOpenPackMutation = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async () => {
-            const response = await privateAxios.post<ApiOpenPackResponse>("/api/packs/open");
-            return response.data.cards;
+            const data = await client.api.collection.openPack({});
+            return data.cards;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: COLLECTION_QUERY_KEY });
             queryClient.invalidateQueries({ queryKey: PACKS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: DAILY_QUESTS_QUERY_KEY });
         },
     });
 };
@@ -124,12 +105,10 @@ export const useOpenPackMutation = () => {
 export const useBuyPackMutation = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useApiMutation({
+        showErrorToast: false,
         mutationFn: async () => {
-            const response = await privateAxios.post<{ goldCoins: number; unopenedCount: number }>(
-                "/api/packs/buy",
-            );
-            return response.data;
+            return client.api.rewards.buyPack({});
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });

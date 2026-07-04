@@ -2,10 +2,9 @@ import type { UpdateDeckPayload } from "#api_types/deck.types";
 import Deck from "#models/deck";
 import Game from "#models/game";
 import type { HttpContext } from "@adonisjs/core/http";
-import vine, { SimpleMessagesProvider } from "@vinejs/vine";
-import { DEFAULT_MESSAGE_PROVIDER_CONFIG } from "#adomin/validation/default_validator";
 import { validateDeckOwnership } from "#services/collection/validate_deck_ownership";
 import { validateDeckCompositionForSave } from "../../galaguerre/validation/validate_deck_composition.js";
+import { updateDeckMessagesProvider, updateDeckSchema } from "./deck_validators.js";
 import { serializeDeck } from "./serialize_deck.js";
 import {
     findUserDeck,
@@ -14,22 +13,6 @@ import {
     syncDeckCards,
     validateDeckCardEntries,
 } from "./deck_utils.js";
-
-const deckCardEntrySchema = vine.object({
-    cardId: vine.number(),
-    count: vine.number().min(1).max(2),
-});
-
-const updateDeckSchema = vine.compile(
-    vine.object({
-        name: vine.string().trim().minLength(1).maxLength(50),
-        cards: vine.array(deckCardEntrySchema),
-    }),
-);
-
-const messagesProvider = new SimpleMessagesProvider(DEFAULT_MESSAGE_PROVIDER_CONFIG, {
-    name: "nom",
-});
 
 export default class DecksController {
     async index({ auth }: HttpContext) {
@@ -71,7 +54,7 @@ export default class DecksController {
         if (!deck) return response.notFound({ error: "Deck introuvable" });
 
         const payload = (await request.validateUsing(updateDeckSchema, {
-            messagesProvider,
+            messagesProvider: updateDeckMessagesProvider,
         })) as UpdateDeckPayload;
 
         const cardEntries = await validateDeckCardEntries(payload.cards);

@@ -1,7 +1,11 @@
-import type { ApiFriend } from "#api_types/friend.types";
+import type { ApiFriend, ApiFriendRequest } from "#api_types/friend.types";
 import { Link } from "react-router-dom";
 import { UserAvatar } from "~/components/user_avatar";
-import { HOME_MOCK_INVITATIONS, type HomeOnlineFriend } from "../home_mock_data";
+import {
+    useAcceptFriendRequestMutation,
+    useDeclineFriendRequestMutation,
+} from "~/hooks/use_friend_requests";
+import type { HomeOnlineFriend } from "../home_mock_data";
 import { HomePanel } from "./home_panel";
 
 const toOnlineFriend = (friend: ApiFriend): HomeOnlineFriend => ({
@@ -31,18 +35,62 @@ const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => (
     </div>
 );
 
+const FriendRequestRow = ({ request }: { request: ApiFriendRequest }) => {
+    const acceptMutation = useAcceptFriendRequestMutation();
+    const declineMutation = useDeclineFriendRequestMutation();
+    const isLoading =
+        (acceptMutation.isPending && acceptMutation.variables === request.id) ||
+        (declineMutation.isPending && declineMutation.variables === request.id);
+
+    return (
+        <div className="home-invite">
+            <p className="home-invite__text">
+                <strong>{request.fromPseudo ?? `Joueur #${request.fromUserId}`}</strong> vous invite
+                — Demande d'ami
+            </p>
+            <div className="home-invite__actions">
+                <button
+                    type="button"
+                    className="home-invite__btn home-invite__btn--accept"
+                    aria-label="Accepter"
+                    disabled={isLoading}
+                    onClick={() => acceptMutation.mutate(request.id)}
+                >
+                    ✓
+                </button>
+                <button
+                    type="button"
+                    className="home-invite__btn home-invite__btn--decline"
+                    aria-label="Refuser"
+                    disabled={isLoading}
+                    onClick={() => declineMutation.mutate(request.id)}
+                >
+                    ✕
+                </button>
+            </div>
+        </div>
+    );
+};
+
 interface HomeRightSidebarProps {
     friends: ApiFriend[];
-    isLoading: boolean;
+    isLoadingFriends: boolean;
+    friendRequests: ApiFriendRequest[];
+    isLoadingRequests: boolean;
 }
 
-export const HomeRightSidebar = ({ friends, isLoading }: HomeRightSidebarProps) => {
+export const HomeRightSidebar = ({
+    friends,
+    isLoadingFriends,
+    friendRequests,
+    isLoadingRequests,
+}: HomeRightSidebarProps) => {
     const onlineFriends = friends.slice(0, 5).map(toOnlineFriend);
 
     return (
         <aside className="flex flex-col gap-3">
             <HomePanel title="Amis en Ligne">
-                {isLoading ? (
+                {isLoadingFriends ? (
                     <p className="home-panel__muted">Chargement…</p>
                 ) : onlineFriends.length === 0 ? (
                     <p className="home-panel__muted">Aucun ami pour le moment.</p>
@@ -55,29 +103,15 @@ export const HomeRightSidebar = ({ friends, isLoading }: HomeRightSidebarProps) 
             </HomePanel>
 
             <HomePanel title="Invitations">
-                {HOME_MOCK_INVITATIONS.map((invite) => (
-                    <div key={invite.id} className="home-invite">
-                        <p className="home-invite__text">
-                            <strong>{invite.fromPseudo}</strong> vous invite — {invite.mode}
-                        </p>
-                        <div className="home-invite__actions">
-                            <button
-                                type="button"
-                                className="home-invite__btn home-invite__btn--accept"
-                                aria-label="Accepter"
-                            >
-                                ✓
-                            </button>
-                            <button
-                                type="button"
-                                className="home-invite__btn home-invite__btn--decline"
-                                aria-label="Refuser"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                {isLoadingRequests ? (
+                    <p className="home-panel__muted">Chargement…</p>
+                ) : friendRequests.length === 0 ? (
+                    <p className="home-panel__muted">Aucune invitation.</p>
+                ) : (
+                    friendRequests.map((request) => (
+                        <FriendRequestRow key={request.id} request={request} />
+                    ))
+                )}
             </HomePanel>
         </aside>
     );

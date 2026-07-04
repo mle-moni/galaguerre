@@ -1,11 +1,11 @@
 import type { ApiGame, SpotOwner } from "#api_types/game.types";
 import type { GamePresentationUpdate, NarrativeBeat } from "#api_types/game_narrative.types";
 import { makeAutoObservable } from "mobx";
-import { choreographShots, isCombatLungePhase } from "~/pages/play/animations/choreograph_shots.js";
-import { effectsToShots } from "~/pages/play/animations/effects_to_shots.js";
-import { readGameAnimationSnapshot } from "~/pages/play/animations/game_animation_snapshot.js";
-import { resolveHeroRect } from "~/pages/play/animations/resolve_rects.js";
-import { extractPlayedCardFromBeat } from "~/pages/play/hud/played_card_reveal/extract_played_card_from_beat.js";
+import { choreographShots, isCombatLungePhase } from "~/pages/play/animations/choreograph_shots";
+import { effectsToShots } from "~/pages/play/animations/effects_to_shots";
+import { readGameAnimationSnapshot } from "~/pages/play/animations/game_animation_snapshot";
+import { resolveHeroRect } from "~/pages/play/animations/resolve_rects";
+import { extractPlayedCardFromBeat } from "~/pages/play/hud/played_card_reveal/extract_played_card_from_beat";
 import { ANIMATION_STORE } from "./store_singletons.js";
 import type { GameStore } from "./GameStore.js";
 

@@ -1,7 +1,8 @@
+import type { ApiCardSet } from "#api_types/deck.types";
 import CardSet from "#models/card_set";
 import type { HttpContext } from "@adonisjs/core/http";
 
-export const listActiveCardSets = async (_ctx: HttpContext) => {
+export const listActiveCardSets = async (_ctx: HttpContext): Promise<ApiCardSet[]> => {
     const cardSets = await CardSet.query()
         .where("isActive", true)
         .orderBy("name", "asc")
