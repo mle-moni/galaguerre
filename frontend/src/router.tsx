@@ -72,6 +72,7 @@ const router = createBrowserRouter([
                     {
                         path: "/decks",
                         element: <DecksPage />,
+                        handle: { fillViewport: true },
                     },
                     {
                         path: "/decks/s/:code",

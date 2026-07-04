@@ -1,30 +1,65 @@
 import { Button, Modal, Text } from "@mantine/core";
-import { IconEdit, IconPlus, IconShare, IconTrash } from "@tabler/icons-react";
-import clsx from "clsx";
+import { IconPlus } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CenteredLoader } from "~/components/centered_loader";
+import { ShareDeckModal } from "~/components/decks/share_deck_modal";
+import { useCardsQuery } from "~/hooks/use_cards";
 import {
     useCreateDeckMutation,
     useDecksQuery,
     useDeleteDeckMutation,
     useSelectDeckMutation,
 } from "~/hooks/use_decks";
-import { ShareDeckModal } from "~/components/decks/share_deck_modal";
+import { DeckListItem } from "./components/deck_list_item";
+import { DecksSidebar } from "./components/decks_sidebar";
+import "./decks_page.css";
 
 export const DecksPage = observer(() => {
     const navigate = useNavigate();
     const decksQuery = useDecksQuery();
+    const cardsQuery = useCardsQuery();
     const createMutation = useCreateDeckMutation();
     const deleteMutation = useDeleteDeckMutation();
     const selectMutation = useSelectDeckMutation();
     const [deckToDelete, setDeckToDelete] = useState<number | null>(null);
     const [deckToShare, setDeckToShare] = useState<number | null>(null);
+    const [deckNameFilter, setDeckNameFilter] = useState("");
+    const [cardNameFilter, setCardNameFilter] = useState("");
 
-    if (decksQuery.isLoading) return <CenteredLoader absolute />;
+    const catalogById = useMemo(
+        () => new Map((cardsQuery.data ?? []).map((card) => [card.id, card])),
+        [cardsQuery.data],
+    );
+
+    if (decksQuery.isLoading || cardsQuery.isLoading) return <CenteredLoader absolute />;
 
     const decks = decksQuery.data ?? [];
+    const normalizedDeckNameFilter = deckNameFilter.trim().toLowerCase();
+    const normalizedCardNameFilter = cardNameFilter.trim().toLowerCase();
+
+    const filteredDecks = decks
+        .filter((deck) => {
+            const matchesDeckName =
+                !normalizedDeckNameFilter ||
+                deck.name.toLowerCase().includes(normalizedDeckNameFilter);
+
+            const matchesCardName =
+                !normalizedCardNameFilter ||
+                deck.cards.some(({ cardId }) =>
+                    catalogById.get(cardId)?.label.toLowerCase().includes(normalizedCardNameFilter),
+                );
+
+            return matchesDeckName && matchesCardName;
+        })
+        .sort((a, b) => {
+            if (a.selected !== b.selected) return a.selected ? -1 : 1;
+            return 0;
+        });
+
+    const activeDeck = decks.find((deck) => deck.selected);
+    const totalCards = decks.reduce((sum, deck) => sum + deck.cardCount, 0);
 
     const handleCreate = async () => {
         const deck = await createMutation.mutateAsync();
@@ -37,108 +72,95 @@ export const DecksPage = observer(() => {
         setDeckToDelete(null);
     };
 
+    const handleResetFilters = () => {
+        setDeckNameFilter("");
+        setCardNameFilter("");
+    };
+
     return (
         <>
-            <div className="max-w-3xl mx-auto">
-                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-6">
-                    <h1 className="text-2xl font-bold text-white m-0">Mes decks</h1>
-                    <Button
-                        className="gg-btn-primary w-full sm:w-auto"
-                        leftSection={<IconPlus size={16} />}
-                        loading={createMutation.isPending}
-                        onClick={handleCreate}
-                    >
-                        Nouveau deck
-                    </Button>
-                </div>
+            <div className="decks-page">
+                <div className="decks-page__bg" aria-hidden="true" />
+                <div className="decks-page__overlay" aria-hidden="true" />
 
-                {decks.length === 0 ? (
-                    <div className="gg-panel p-8 text-center">
-                        <p className="text-white/80 m-0 mb-4">
-                            Vous n'avez pas encore de deck. Créez-en un pour commencer à jouer.
-                        </p>
-                        <Button className="gg-btn-primary" onClick={handleCreate}>
-                            Créer mon premier deck
-                        </Button>
-                    </div>
-                ) : (
-                    <div className="flex flex-col gap-3">
-                        {decks.map((deck) => (
-                            <div key={deck.id} className="gg-deck-card-item">
-                                <div className="gg-deck-card-item__info">
-                                    <div className="gg-deck-card-item__title-row">
-                                        <span className="font-semibold text-white text-lg leading-tight">
-                                            {deck.name}
-                                        </span>
-                                        {deck.selected && (
-                                            <span className="gg-badge gg-badge--active">Actif</span>
-                                        )}
-                                        <span
-                                            className={clsx(
-                                                "gg-badge",
-                                                deck.valid
-                                                    ? "gg-badge--valid"
-                                                    : "gg-badge--invalid",
-                                            )}
-                                        >
-                                            {deck.valid ? "Valide" : "Invalide"}
-                                        </span>
-                                    </div>
-                                    <p className="gg-deck-card-item__meta">
-                                        {deck.cardCount} cartes
-                                    </p>
-                                    {!deck.valid && deck.compositionErrors.length > 0 && (
-                                        <p className="text-red-300 text-xs m-0 mt-1">
-                                            {deck.compositionErrors[0]}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className="gg-deck-card-item__actions">
-                                    {!deck.selected && (
-                                        <Button
-                                            size="xs"
-                                            className="gg-btn-primary"
-                                            loading={selectMutation.isPending}
-                                            disabled={!deck.valid}
-                                            onClick={() => selectMutation.mutate(deck.id)}
-                                        >
-                                            Sélectionner
-                                        </Button>
-                                    )}
-                                    <Button
-                                        size="xs"
-                                        variant="outline"
-                                        color="gold"
-                                        leftSection={<IconShare size={14} />}
-                                        onClick={() => setDeckToShare(deck.id)}
-                                    >
-                                        Partager
-                                    </Button>
-                                    <Button
-                                        component={Link}
-                                        to={`/decks/${deck.id}`}
-                                        size="xs"
-                                        variant="outline"
-                                        color="gold"
-                                        leftSection={<IconEdit size={14} />}
-                                    >
-                                        Éditer
-                                    </Button>
-                                    <Button
-                                        size="xs"
-                                        variant="outline"
-                                        color="red"
-                                        leftSection={<IconTrash size={14} />}
-                                        onClick={() => setDeckToDelete(deck.id)}
-                                        disabled={decks.length <= 1}
-                                    >
-                                        Supprimer
-                                    </Button>
-                                </div>
+                <div className="decks-page__content">
+                    <header className="decks-page__header">
+                        <div className="decks-page__header-spacer" />
+                        <div className="decks-page__title-wrap">
+                            <span className="decks-page__title-line" aria-hidden="true" />
+                            <h1 className="decks-page__title">Mes Decks</h1>
+                            <span className="decks-page__title-line" aria-hidden="true" />
+                        </div>
+                        <button
+                            type="button"
+                            className="decks-page__new-btn"
+                            disabled={createMutation.isPending}
+                            onClick={() => void handleCreate()}
+                        >
+                            <IconPlus size={16} />
+                            Nouveau deck
+                        </button>
+                    </header>
+
+                    <div className="decks-page__body">
+                        <DecksSidebar
+                            deckCount={decks.length}
+                            activeDeckName={activeDeck?.name ?? null}
+                            totalCards={totalCards}
+                            deckNameFilter={deckNameFilter}
+                            cardNameFilter={cardNameFilter}
+                            onDeckNameFilterChange={setDeckNameFilter}
+                            onCardNameFilterChange={setCardNameFilter}
+                            onResetFilters={handleResetFilters}
+                        />
+
+                        {decks.length === 0 ? (
+                            <div className="decks-page__empty">
+                                <p>
+                                    Vous n&apos;avez pas encore de deck. Créez-en un pour commencer
+                                    à jouer.
+                                </p>
+                                <button
+                                    type="button"
+                                    className="decks-page__new-btn"
+                                    disabled={createMutation.isPending}
+                                    onClick={() => void handleCreate()}
+                                >
+                                    <IconPlus size={16} />
+                                    Créer mon premier deck
+                                </button>
                             </div>
-                        ))}
+                        ) : (
+                            <div className="decks-page__list">
+                                {filteredDecks.length === 0 ? (
+                                    <div className="decks-page__empty">
+                                        <p>Aucun deck ne correspond à vos filtres.</p>
+                                        <button
+                                            type="button"
+                                            className="decks-page__new-btn"
+                                            onClick={handleResetFilters}
+                                        >
+                                            Réinitialiser les filtres
+                                        </button>
+                                    </div>
+                                ) : (
+                                    filteredDecks.map((deck) => (
+                                        <DeckListItem
+                                            key={deck.id}
+                                            deck={deck}
+                                            catalogById={catalogById}
+                                            canDelete={decks.length > 1}
+                                            isSelecting={selectMutation.isPending}
+                                            onSelect={() => selectMutation.mutate(deck.id)}
+                                            onShare={() => setDeckToShare(deck.id)}
+                                            onDelete={() => setDeckToDelete(deck.id)}
+                                        />
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
 
             <Modal
