@@ -70,7 +70,7 @@
 .gg-catalog-card-slot {
     position: relative;
     border-radius: 10px;
-    padding: 6px;
+    padding: 6px 6px 12px;
     background: rgba(42, 79, 122, 0.35);
     border: 1px solid rgba(240, 184, 64, 0.2);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
@@ -97,6 +97,7 @@
     cursor: zoom-in;
     container-type: inline-size;
     width: 100%;
+    overflow: visible;
 }
 
 .gg-catalog-card-slot__preview > div,

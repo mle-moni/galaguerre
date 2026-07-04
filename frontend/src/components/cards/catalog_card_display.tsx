@@ -48,6 +48,7 @@ interface CatalogCardDisplayProps {
     style?: CSSProperties;
     onClick?: () => void;
     overlay?: React.ReactNode;
+    copyCount?: number;
 }
 
 export const CatalogCardDisplay = ({
@@ -58,6 +59,7 @@ export const CatalogCardDisplay = ({
     style,
     onClick,
     overlay,
+    copyCount,
 }: CatalogCardDisplayProps) => {
     if (variant === "artwork") {
         return (
@@ -92,6 +94,7 @@ export const CatalogCardDisplay = ({
                 className={className}
                 wrapper={wrapper}
                 imageLoading="lazy"
+                copyCount={copyCount}
             />
         </div>
     );

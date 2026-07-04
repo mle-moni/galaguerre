@@ -9,9 +9,11 @@ import {
 } from "~/helpers/minion_combat";
 import "./card_faces.css";
 
+import { CardCopyCountBadge } from "./card_copy_count_badge.jsx";
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
 import { CardFaceLabel } from "./card_face_label.jsx";
 import { CardFaceDescription } from "./card_face_description.jsx";
+import { CardFaceTypeLabel } from "./card_face_type_label.jsx";
 import { CardRarityBadge } from "./card_legendary_badge.jsx";
 
 interface MinionCardFaceProps {
@@ -31,6 +33,7 @@ interface MinionCardFaceProps {
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
     imageLoading?: "eager" | "lazy";
+    copyCount?: number;
 }
 
 export const MinionCardFace = ({
@@ -50,6 +53,7 @@ export const MinionCardFace = ({
     onPointerDown,
     wrapper = (content) => content,
     imageLoading,
+    copyCount,
 }: MinionCardFaceProps) => {
     const maxAttacks = getMinionCardMaxAttacks(card);
     const showWindfuryBadge =
@@ -67,7 +71,7 @@ export const MinionCardFace = ({
             data-playing-card-id={card.uuid}
             style={style}
             className={clsx(
-                "minion-card-face playing-card-face relative rounded bg-[#1e3a5f]",
+                "minion-card-face playing-card-face relative",
                 attackStatus && `minion-card-face--${attackStatus}`,
                 className,
             )}
@@ -100,6 +104,7 @@ export const MinionCardFace = ({
                 <div className="playing-card-face__text">
                     {card.rarity !== "COMMON" && <CardRarityBadge rarity={card.rarity} />}
                     <CardFaceLabel label={card.label} />
+                    <CardFaceTypeLabel type="MINION" />
                     <CardFaceDescription
                         card={card}
                         spellPower={spellPower}
@@ -118,6 +123,7 @@ export const MinionCardFace = ({
                 </div>
                 <div className="health">{health}</div>
             </div>
+            {copyCount !== undefined && <CardCopyCountBadge count={copyCount} />}
         </div>
     );
 

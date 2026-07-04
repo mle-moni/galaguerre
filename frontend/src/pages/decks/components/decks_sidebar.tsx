@@ -39,10 +39,6 @@ export const DecksSidebar = ({
                         </span>
                     </div>
                     <div className="decks-sidebar__stat">
-                        <span className="decks-sidebar__stat-label">Cartes totales</span>
-                        <span className="decks-sidebar__stat-value">{totalCards}</span>
-                    </div>
-                    <div className="decks-sidebar__stat">
                         <span className="decks-sidebar__stat-label">Créés par vous</span>
                         <span className="decks-sidebar__stat-value">{deckCount}</span>
                     </div>

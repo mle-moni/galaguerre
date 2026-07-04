@@ -1,8 +1,15 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import { getGoldCoinsPerCardBuy, getGoldCoinsPerDuplicateSell } from "#api_types/card_rarity.types";
-import { CARD_TAG_LABELS } from "#api_types/card.types";
+import { CARD_TAG_LABELS, type CardTag } from "#api_types/card.types";
 import { Button, Collapse, SegmentedControl, Select, TextInput, Tooltip } from "@mantine/core";
-import { IconChevronDown, IconChevronUp, IconMinus, IconPlus } from "@tabler/icons-react";
+import {
+    IconChevronDown,
+    IconChevronUp,
+    IconMinus,
+    IconPlus,
+    IconSearch,
+    IconShield,
+} from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -13,6 +20,7 @@ import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_p
 import { CenteredLoader } from "~/components/centered_loader";
 import { BuyCardModal } from "~/components/catalogue/buy_card_modal";
 import { SellCardModal } from "~/components/catalogue/sell_card_modal";
+import { CollectionFiltersSidebar } from "~/pages/collection/components/collection_filters_sidebar";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
@@ -43,6 +51,7 @@ const cardMatchesSearch = (card: ApiCatalogCard, query: string) => {
 
 export interface CatalogueProps {
     className?: string;
+    variant?: "default" | "collection";
     headerTitle?: string | false;
     includeNonCollectible?: boolean;
     composition?: Map<number, number>;
@@ -104,13 +113,41 @@ const catalogueOwnershipFilterStyles = {
     },
 };
 
-const OwnedCountBadge = ({ count }: { count: number }) => (
-    <Tooltip label="Nombre d'exemplaires possédé" withArrow>
-        <span className="gg-catalog-card-slot__count gg-catalog-card-slot__count--owned">
-            ×{count}
-        </span>
-    </Tooltip>
-);
+const collectionOwnershipFilterStyles = {
+    root: {
+        backgroundColor: "rgba(255, 255, 255, 0.75)",
+        border: "1px solid rgba(201, 162, 39, 0.55)",
+        padding: 4,
+        height: 36,
+        boxSizing: "border-box" as const,
+        alignItems: "center",
+    },
+    label: {
+        fontWeight: 700,
+        fontSize: 11,
+        lineHeight: "26px",
+        padding: "0 10px",
+        color: "#2c2416",
+        letterSpacing: "0.04em",
+        textTransform: "uppercase" as const,
+    },
+    indicator: {
+        backgroundColor: "#1a4a8a",
+        boxShadow: "none",
+    },
+};
+
+const OwnedCountBadge = ({ count }: { count: number }) => {
+    if (count <= 1) return null;
+
+    return (
+        <Tooltip label="Nombre d'exemplaires possédés" withArrow>
+            <span className="gg-catalog-card-slot__count gg-catalog-card-slot__count--owned">
+                x{count}
+            </span>
+        </Tooltip>
+    );
+};
 
 const CatalogRarityBadge = ({
     rarity,
@@ -317,8 +354,10 @@ const CatalogCardItem = ({
                     }
                 }}
             >
-                <CatalogCardDisplay card={card} />
-                {showOwnedBadge && <OwnedCountBadge count={ownedCount} />}
+                <CatalogCardDisplay
+                    card={card}
+                    copyCount={showOwnedBadge ? ownedCount : undefined}
+                />
             </div>
             {interactive && count > 0 && onRemove && (
                 <button
@@ -366,6 +405,7 @@ const CatalogCardItem = ({
 export const Catalogue = observer(
     ({
         className,
+        variant = "default",
         headerTitle = "Catalogue",
         includeNonCollectible = false,
         composition,
@@ -399,7 +439,9 @@ export const Catalogue = observer(
         const [buyModalCard, setBuyModalCard] = useState<ApiCatalogCard | null>(null);
         const [sellModalCard, setSellModalCard] = useState<ApiCatalogCard | null>(null);
         const [showFilters, setShowFilters] = useState(false);
+        const [tagFilter, setTagFilter] = useState<CardTag | null>(null);
 
+        const isCollection = variant === "collection";
         const isControlledCostFilter = onCostFilterChange !== undefined;
         const costFilter = isControlledCostFilter
             ? controlledCostFilter ?? null
@@ -425,6 +467,7 @@ export const Catalogue = observer(
             if (search && !cardMatchesSearch(card, search)) return false;
             if (typeFilter !== "ALL" && card.type !== typeFilter) return false;
             if (costFilter !== null && card.cost !== Number(costFilter)) return false;
+            if (tagFilter !== null && !card.tags.includes(tagFilter)) return false;
             if ((ownedOnly || showOwnedOnly) && (ownedCounts?.get(card.id) ?? 0) === 0) {
                 return false;
             }
@@ -443,7 +486,58 @@ export const Catalogue = observer(
             label: set.name,
         }));
 
-        const filterControls = (
+        const ownershipFilterStyles = isCollection
+            ? collectionOwnershipFilterStyles
+            : catalogueOwnershipFilterStyles;
+
+        const filterControls = isCollection ? (
+            <div className="collection-catalogue__filters">
+                <Select
+                    value={selectedSetId ?? ""}
+                    onChange={(value) => setSelectedSetId(value || null)}
+                    data={cardSetOptions}
+                    className="collection-catalogue__set-select"
+                    leftSection={<IconShield size={16} color="#1a4a8a" />}
+                    disabled={cardSetOptions.length === 0}
+                />
+                <TextInput
+                    placeholder="Rechercher une carte..."
+                    value={search}
+                    onChange={(e) => setSearch(e.currentTarget.value)}
+                    className="collection-catalogue__search"
+                    leftSection={<IconSearch size={16} color="rgba(44, 36, 22, 0.45)" />}
+                />
+                <Select
+                    value={typeFilter}
+                    onChange={(v) => setTypeFilter((v as CardTypeFilter) ?? "ALL")}
+                    data={[
+                        { value: "ALL", label: "Tous types" },
+                        { value: "MINION", label: CARD_TYPE_FILTER_LABELS.MINION },
+                        { value: "SPELL", label: CARD_TYPE_FILTER_LABELS.SPELL },
+                        { value: "WEAPON", label: CARD_TYPE_FILTER_LABELS.WEAPON },
+                    ]}
+                    className="collection-catalogue__type-select"
+                />
+                <Select
+                    value={costFilter ?? ""}
+                    onChange={(v) => setCostFilter(v || null)}
+                    data={costOptions}
+                    className="collection-catalogue__cost-select"
+                />
+                {ownedCounts !== undefined && onShowOwnedOnlyChange && !ownedOnly && (
+                    <SegmentedControl
+                        value={showOwnedOnly ? "owned" : "all"}
+                        onChange={(value) => onShowOwnedOnlyChange(value === "owned")}
+                        data={[
+                            { value: "all", label: "Toutes" },
+                            { value: "owned", label: "Possédées" },
+                        ]}
+                        className="collection-catalogue__ownership"
+                        styles={ownershipFilterStyles}
+                    />
+                )}
+            </div>
+        ) : (
             <div className="flex flex-wrap gap-3 items-end">
                 <Select
                     label="Set de cartes"
@@ -475,7 +569,7 @@ export const Catalogue = observer(
                     value={costFilter ?? ""}
                     onChange={(v) => setCostFilter(v || null)}
                     data={costOptions}
-                    className="w-full sm:w-[140px]"
+                    className="w-full sm:w-[160px]"
                 />
                 {ownedCounts !== undefined && onShowOwnedOnlyChange && !ownedOnly && (
                     <SegmentedControl
@@ -486,7 +580,7 @@ export const Catalogue = observer(
                             { value: "owned", label: "Possédées" },
                         ]}
                         className="w-full sm:w-auto"
-                        styles={catalogueOwnershipFilterStyles}
+                        styles={ownershipFilterStyles}
                     />
                 )}
             </div>
@@ -495,6 +589,139 @@ export const Catalogue = observer(
         const showTradeActions =
             (canBuyCard !== undefined && onBuyCard !== undefined) ||
             (canSellCard !== undefined && onSellCard !== undefined);
+
+        const gridContent =
+            filteredCatalog.length === 0 ? (
+                <p
+                    className={
+                        isCollection
+                            ? "collection-catalogue__empty"
+                            : "text-white/50 text-sm m-0 w-full text-center py-8"
+                    }
+                >
+                    Aucune carte ne correspond à vos filtres.
+                </p>
+            ) : (
+                filteredCatalog.map((card) => {
+                    const canBuy = showTradeActions && (canBuyCard?.(card.id) ?? false);
+                    const canSell = showTradeActions && (canSellCard?.(card.id) ?? false);
+
+                    return (
+                        <CatalogCardItem
+                            key={card.id}
+                            card={card}
+                            count={composition?.get(card.id) ?? 0}
+                            ownedCount={
+                                ownedCounts === undefined ? null : ownedCounts.get(card.id) ?? 0
+                            }
+                            interactive={interactive}
+                            canAdd={canAddCard?.(card.id) ?? false}
+                            onAdd={onAdd ? () => onAdd(card.id) : undefined}
+                            onRemove={onRemove ? () => onRemove(card.id) : undefined}
+                            onViewArtwork={() => setArtworkCard(card)}
+                            isNarrowScreen={isNarrowScreen}
+                            isMobilePortrait={isMobilePortrait}
+                            showOwnedCount={ownedOnly || !interactive}
+                            canBuy={canBuy}
+                            onBuy={canBuy ? () => setBuyModalCard(card) : undefined}
+                            canSell={canSell}
+                            onSell={canSell ? () => setSellModalCard(card) : undefined}
+                        />
+                    );
+                })
+            );
+
+        const filtersSection = isNarrowScreen ? (
+            <>
+                <button
+                    type="button"
+                    className={
+                        isCollection
+                            ? "collection-catalogue__filters-toggle"
+                            : "gg-mana-curve-toggle"
+                    }
+                    onClick={() => setShowFilters((visible) => !visible)}
+                    aria-expanded={showFilters}
+                >
+                    <span className="truncate min-w-0 flex-1 text-left">Filtres</span>
+                    {showFilters ? (
+                        <IconChevronUp size={16} aria-hidden />
+                    ) : (
+                        <IconChevronDown size={16} aria-hidden />
+                    )}
+                </button>
+                <Collapse in={showFilters}>
+                    <div className="pt-1">{filterControls}</div>
+                </Collapse>
+            </>
+        ) : (
+            filterControls
+        );
+
+        if (isCollection) {
+            return (
+                <>
+                    <div className={clsx("collection-catalogue", className)}>
+                        <div className="collection-catalogue__body">
+                            <div className="shrink-0">{filtersSection}</div>
+                            <div className="collection-catalogue__main">
+                                <CollectionFiltersSidebar
+                                    tagFilter={tagFilter}
+                                    onTagFilterChange={setTagFilter}
+                                />
+                                <div
+                                    className={
+                                        isNarrowScreen
+                                            ? "collection-catalogue__grid gg-catalog-grid--list"
+                                            : "collection-catalogue__grid"
+                                    }
+                                >
+                                    {gridContent}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <CardArtworkModal
+                        card={artworkCard}
+                        opened={artworkCard !== null}
+                        onClose={() => setArtworkCard(null)}
+                    />
+
+                    <BuyCardModal
+                        card={buyModalCard}
+                        price={buyModalCard ? getGoldCoinsPerCardBuy(buyModalCard.rarity) : null}
+                        userGoldCoins={userGoldCoins}
+                        opened={buyModalCard !== null}
+                        onClose={() => setBuyModalCard(null)}
+                        onConfirm={async () => {
+                            if (!buyModalCard || !onBuyCard) return;
+                            await onBuyCard(buyModalCard.id);
+                            setBuyModalCard(null);
+                        }}
+                        isBuying={buyingCardId === buyModalCard?.id}
+                    />
+
+                    <SellCardModal
+                        card={sellModalCard}
+                        price={
+                            sellModalCard
+                                ? getGoldCoinsPerDuplicateSell(sellModalCard.rarity)
+                                : null
+                        }
+                        userGoldCoins={userGoldCoins}
+                        opened={sellModalCard !== null}
+                        onClose={() => setSellModalCard(null)}
+                        onConfirm={async () => {
+                            if (!sellModalCard || !onSellCard) return;
+                            await onSellCard(sellModalCard.id);
+                            setSellModalCard(null);
+                        }}
+                        isSelling={sellingCardId === sellModalCard?.id}
+                    />
+                </>
+            );
+        }
 
         return (
             <>
@@ -508,32 +735,7 @@ export const Catalogue = observer(
                         <div className="gg-panel-header shrink-0">{headerTitle}</div>
                     )}
                     <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
-                        <div className="shrink-0 mb-4">
-                            {isNarrowScreen ? (
-                                <>
-                                    <button
-                                        type="button"
-                                        className="gg-mana-curve-toggle"
-                                        onClick={() => setShowFilters((visible) => !visible)}
-                                        aria-expanded={showFilters}
-                                    >
-                                        <span className="truncate min-w-0 flex-1 text-left">
-                                            Filtres
-                                        </span>
-                                        {showFilters ? (
-                                            <IconChevronUp size={16} aria-hidden />
-                                        ) : (
-                                            <IconChevronDown size={16} aria-hidden />
-                                        )}
-                                    </button>
-                                    <Collapse in={showFilters}>
-                                        <div className="pt-1">{filterControls}</div>
-                                    </Collapse>
-                                </>
-                            ) : (
-                                filterControls
-                            )}
-                        </div>
+                        <div className="shrink-0 mb-4">{filtersSection}</div>
                         <div
                             className={
                                 isNarrowScreen
@@ -541,47 +743,7 @@ export const Catalogue = observer(
                                     : "gg-catalog-grid"
                             }
                         >
-                            {filteredCatalog.length === 0 ? (
-                                <p className="text-white/50 text-sm m-0 w-full text-center py-8">
-                                    Aucune carte ne correspond à vos filtres.
-                                </p>
-                            ) : (
-                                filteredCatalog.map((card) => {
-                                    const canBuy =
-                                        showTradeActions && (canBuyCard?.(card.id) ?? false);
-                                    const canSell =
-                                        showTradeActions && (canSellCard?.(card.id) ?? false);
-
-                                    return (
-                                        <CatalogCardItem
-                                            key={card.id}
-                                            card={card}
-                                            count={composition?.get(card.id) ?? 0}
-                                            ownedCount={
-                                                ownedCounts === undefined
-                                                    ? null
-                                                    : ownedCounts.get(card.id) ?? 0
-                                            }
-                                            interactive={interactive}
-                                            canAdd={canAddCard?.(card.id) ?? false}
-                                            onAdd={onAdd ? () => onAdd(card.id) : undefined}
-                                            onRemove={
-                                                onRemove ? () => onRemove(card.id) : undefined
-                                            }
-                                            onViewArtwork={() => setArtworkCard(card)}
-                                            isNarrowScreen={isNarrowScreen}
-                                            isMobilePortrait={isMobilePortrait}
-                                            showOwnedCount={ownedOnly || !interactive}
-                                            canBuy={canBuy}
-                                            onBuy={canBuy ? () => setBuyModalCard(card) : undefined}
-                                            canSell={canSell}
-                                            onSell={
-                                                canSell ? () => setSellModalCard(card) : undefined
-                                            }
-                                        />
-                                    );
-                                })
-                            )}
+                            {gridContent}
                         </div>
                     </div>
                 </div>

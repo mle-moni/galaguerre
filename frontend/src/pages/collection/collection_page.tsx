@@ -6,6 +6,7 @@ import {
 } from "#api_types/card_rarity.types";
 import { COLLECTION_MIN_CARDS } from "#api_types/collection.types";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
+import { IconBuildingStore, IconScale } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -25,6 +26,7 @@ import {
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
+import "./collection_page.css";
 
 const SELL_MODAL_RARITIES: CardRarity[] = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
 
@@ -132,55 +134,64 @@ export const CollectionPage = observer(() => {
 
     return (
         <>
-            <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 shrink-0">
-                    <h1 className="text-2xl font-bold text-white m-0">Collection</h1>
-                    <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:gap-3 sm:w-auto">
-                        <GoldCoinAmount amount={user.goldCoins} showLabel={false} iconSize={22} />
-                        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
-                            <Button
-                                variant="default"
-                                className="col-span-1 sm:flex-none"
-                                onClick={() => setSellModalOpened(true)}
-                            >
-                                <span className="max-[369px]:hidden">Vendre les doublons</span>
-                                <span className="hidden max-[369px]:inline">💰 Doublons</span>
-                            </Button>
-                            <Button
-                                component={Link}
-                                to="/collection/shop"
-                                variant="default"
-                                className="col-span-1 sm:flex-none"
-                            >
-                                Boutique
-                            </Button>
-                            <Button
-                                component={Link}
-                                to="/collection/packs"
-                                className="gg-btn-primary col-span-2 sm:col-span-1 sm:flex-none"
-                                disabled={unopenedCount === 0}
-                                leftSection={<PackIcon width={18} />}
-                            >
-                                Ouvrir des paquets ({unopenedCount})
-                            </Button>
-                        </div>
+            <div className="collection-page">
+                <div className="collection-page__bg" aria-hidden="true" />
+                <div className="collection-page__overlay" aria-hidden="true" />
+
+                <div className="collection-page__content">
+                    <div className="collection-page__panel">
+                        <header className="collection-page__header">
+                            <h1 className="collection-page__title">Ma collection</h1>
+                            <div className="collection-page__actions">
+                                <button
+                                    type="button"
+                                    className="collection-page__action-btn"
+                                    onClick={() => setSellModalOpened(true)}
+                                >
+                                    <IconScale size={16} aria-hidden />
+                                    Vendre les doublons
+                                </button>
+                                <Link to="/collection/shop" className="collection-page__action-btn">
+                                    <IconBuildingStore size={16} aria-hidden />
+                                    Boutique
+                                </Link>
+                                <Link
+                                    to="/collection/packs"
+                                    className="collection-page__action-btn collection-page__action-btn--primary"
+                                    aria-disabled={unopenedCount === 0}
+                                    onClick={(e) => {
+                                        if (unopenedCount === 0) e.preventDefault();
+                                    }}
+                                    style={
+                                        unopenedCount === 0
+                                            ? { pointerEvents: "none", opacity: 0.45 }
+                                            : undefined
+                                    }
+                                >
+                                    <PackIcon width={18} />
+                                    Ouvrir des paquets ({unopenedCount})
+                                </Link>
+                            </div>
+                        </header>
+
+                        <Catalogue
+                            variant="collection"
+                            headerTitle={false}
+                            includeNonCollectible
+                            ownedCounts={ownedCounts}
+                            showOwnedOnly={showOwnedOnly}
+                            onShowOwnedOnlyChange={setShowOwnedOnly}
+                            canBuyCard={canBuyCard}
+                            onBuyCard={handleBuyCard}
+                            buyingCardId={buyingCardId}
+                            canSellCard={canSellCard}
+                            onSellCard={handleSellCard}
+                            sellingCardId={sellingCardId}
+                            userGoldCoins={user.goldCoins}
+                            className="collection-catalogue"
+                        />
                     </div>
                 </div>
-                <Catalogue
-                    headerTitle={false}
-                    includeNonCollectible
-                    ownedCounts={ownedCounts}
-                    showOwnedOnly={showOwnedOnly}
-                    onShowOwnedOnlyChange={setShowOwnedOnly}
-                    canBuyCard={canBuyCard}
-                    onBuyCard={handleBuyCard}
-                    buyingCardId={buyingCardId}
-                    canSellCard={canSellCard}
-                    onSellCard={handleSellCard}
-                    sellingCardId={sellingCardId}
-                    userGoldCoins={user.goldCoins}
-                    className="flex-1 min-h-0"
-                />
             </div>
 
             <Modal
