@@ -102,3 +102,12 @@ export const autoResolvePendingDiscover = (
     const chosenUuid = pending.options[randomIndex]!.uuid;
     return resolveDiscoverChoice(game, player, chosenUuid);
 };
+
+export const autoResolveAllPendingDiscovers = (game: Game): { gameEnded: boolean } => {
+    while (game.data.pendingDiscover) {
+        const { gameEnded } = autoResolvePendingDiscover(game);
+        if (gameEnded) return { gameEnded: true };
+    }
+
+    return { gameEnded: false };
+};
