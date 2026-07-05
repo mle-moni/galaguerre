@@ -758,6 +758,7 @@
     }
 
     .home-hero {
+        order: -1;
         height: auto;
         flex-shrink: 0;
     }
