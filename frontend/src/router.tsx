@@ -110,7 +110,7 @@ const router = createBrowserRouter([
                     {
                         path: "/leaderboard",
                         element: <LeaderboardPage />,
-                        handle: { fillViewport: true },
+                        handle: { fillViewport: true, public: true },
                     },
                     {
                         path: "/friends",
