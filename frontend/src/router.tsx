@@ -96,10 +96,12 @@ const router = createBrowserRouter([
                     {
                         path: "/actualites",
                         element: <NewsListPage />,
+                        handle: { public: true },
                     },
                     {
                         path: "/actualites/:slug",
                         element: <NewsDetailPage />,
+                        handle: { public: true },
                     },
                     {
                         path: "/onboarding",

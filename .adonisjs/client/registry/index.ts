@@ -103,6 +103,15 @@ const routes = {
         ],
         types: placeholder as Registry["deck_shares.show"]["types"],
     },
+    "cards.index": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/cards",
+        tokens: [
+            { old: "/api/cards", type: 0, val: "api", end: "" },
+            { old: "/api/cards", type: 0, val: "cards", end: "" },
+        ],
+        types: placeholder as Registry["cards.index"]["types"],
+    },
     "auth.me": {
         methods: ["GET", "HEAD"],
         pattern: "/api/auth/me",
@@ -112,15 +121,6 @@ const routes = {
             { old: "/api/auth/me", type: 0, val: "me", end: "" },
         ],
         types: placeholder as Registry["auth.me"]["types"],
-    },
-    "cards.index": {
-        methods: ["GET", "HEAD"],
-        pattern: "/api/cards",
-        tokens: [
-            { old: "/api/cards", type: 0, val: "api", end: "" },
-            { old: "/api/cards", type: 0, val: "cards", end: "" },
-        ],
-        types: placeholder as Registry["cards.index"]["types"],
     },
     "card_sets.index": {
         methods: ["GET", "HEAD"],

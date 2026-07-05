@@ -99,9 +99,9 @@ export const RANDOM_DAILY_QUEST_DEFINITIONS: DailyQuestDefinition[] = [
     {
         type: "HEAL_HP",
         variants: [
-            { difficulty: "easy", target: 20, rewardType: "story_points", rewardAmount: 45 },
-            { difficulty: "medium", target: 40, rewardType: "story_points", rewardAmount: 65 },
-            { difficulty: "hard", target: 60, rewardType: "story_points", rewardAmount: 85 },
+            { difficulty: "easy", target: 15, rewardType: "story_points", rewardAmount: 50 },
+            { difficulty: "medium", target: 25, rewardType: "story_points", rewardAmount: 75 },
+            { difficulty: "hard", target: 40, rewardType: "story_points", rewardAmount: 100 },
         ],
     },
     {

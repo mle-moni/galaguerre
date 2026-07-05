@@ -2,6 +2,7 @@ import type { UIMatch } from "react-router";
 
 export interface AppRouteHandle {
     fillViewport?: boolean;
+    public?: boolean;
 }
 
 type AppUIMatch = UIMatch<unknown, AppRouteHandle>;

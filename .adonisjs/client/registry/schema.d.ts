@@ -223,22 +223,6 @@ export interface Registry {
             >;
         };
     };
-    "auth.me": {
-        methods: ["GET", "HEAD"];
-        pattern: "/api/auth/me";
-        types: {
-            body: {};
-            paramsTuple: [];
-            params: {};
-            query: {};
-            response: ExtractResponse<
-                Awaited<ReturnType<import("#controllers/auth/auth_controller").default["me"]>>
-            >;
-            errorResponse: ExtractErrorResponse<
-                Awaited<ReturnType<import("#controllers/auth/auth_controller").default["me"]>>
-            >;
-        };
-    };
     "cards.index": {
         methods: ["GET", "HEAD"];
         pattern: "/api/cards";
@@ -259,6 +243,22 @@ export interface Registry {
                       >
                   >
                 | { status: 422; response: { errors: SimpleError[] } };
+        };
+    };
+    "auth.me": {
+        methods: ["GET", "HEAD"];
+        pattern: "/api/auth/me";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<ReturnType<import("#controllers/auth/auth_controller").default["me"]>>
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<ReturnType<import("#controllers/auth/auth_controller").default["me"]>>
+            >;
         };
     };
     "card_sets.index": {

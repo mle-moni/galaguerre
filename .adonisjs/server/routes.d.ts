@@ -19,8 +19,8 @@ export type ScannedRoutes = {
             params: { userId: ParamValue; gameId: ParamValue };
         };
         "deck_shares.show": { paramsTuple: [ParamValue]; params: { code: ParamValue } };
-        "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
+        "auth.me": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
         "collection.index": { paramsTuple?: []; params?: {} };
         "collection.duplicates_preview": { paramsTuple?: []; params?: {} };
@@ -80,8 +80,8 @@ export type ScannedRoutes = {
             params: { userId: ParamValue; gameId: ParamValue };
         };
         "deck_shares.show": { paramsTuple: [ParamValue]; params: { code: ParamValue } };
-        "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
+        "auth.me": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
         "collection.index": { paramsTuple?: []; params?: {} };
         "collection.duplicates_preview": { paramsTuple?: []; params?: {} };
@@ -112,8 +112,8 @@ export type ScannedRoutes = {
             params: { userId: ParamValue; gameId: ParamValue };
         };
         "deck_shares.show": { paramsTuple: [ParamValue]; params: { code: ParamValue } };
-        "auth.me": { paramsTuple?: []; params?: {} };
         "cards.index": { paramsTuple?: []; params?: {} };
+        "auth.me": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
         "collection.index": { paramsTuple?: []; params?: {} };
         "collection.duplicates_preview": { paramsTuple?: []; params?: {} };

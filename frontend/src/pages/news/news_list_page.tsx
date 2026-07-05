@@ -1,10 +1,13 @@
 import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
+import { useUser } from "~/hooks/use_user";
 import { GALAGUERRE_NEWS } from "~/news/galaguerre_news";
 import { formatNewsPublishedAt } from "~/news/format_news_published_at";
 import "./news_page.css";
 
 export const NewsListPage = observer(() => {
+    const user = useUser();
+
     return (
         <div className="max-w-2xl mx-auto">
             <div className="gg-panel">
@@ -35,8 +38,8 @@ export const NewsListPage = observer(() => {
                         </div>
                     )}
 
-                    <Link to="/" className="news-back-link">
-                        Retour à l&apos;accueil
+                    <Link to={user ? "/" : "/login"} className="news-back-link">
+                        {user ? "Retour à l'accueil" : "Se connecter"}
                     </Link>
                 </div>
             </div>

@@ -1,11 +1,13 @@
 import { observer } from "mobx-react-lite";
 import { Link, useParams } from "react-router-dom";
+import { useUser } from "~/hooks/use_user";
 import { getNewsBySlug } from "~/news/galaguerre_news";
 import { formatNewsPublishedAt, formatNewsPublishedAtLong } from "~/news/format_news_published_at";
 import "./news_page.css";
 
 export const NewsDetailPage = observer(() => {
     const { slug } = useParams();
+    const user = useUser();
     const entry = slug ? getNewsBySlug(slug) : undefined;
 
     if (!entry) {
@@ -39,6 +41,9 @@ export const NewsDetailPage = observer(() => {
                     </div>
                     <Link to="/actualites" className="news-back-link">
                         Toutes les actualités
+                    </Link>
+                    <Link to={user ? "/" : "/login"} className="news-back-link">
+                        {user ? "Retour à l'accueil" : "Se connecter"}
                     </Link>
                 </div>
             </div>
