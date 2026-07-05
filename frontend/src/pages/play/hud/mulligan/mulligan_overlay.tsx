@@ -39,6 +39,7 @@ export const MulliganOverlay = observer(() => {
             title={undefined}
             overlayProps={{ backgroundOpacity: 0.75 }}
             classNames={{
+                inner: "mulligan-overlay__modal-inner",
                 content: "mulligan-overlay__modal-content",
                 header: "mulligan-overlay__modal-header",
                 body: "mulligan-overlay__modal-body",

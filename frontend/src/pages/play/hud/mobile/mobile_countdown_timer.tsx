@@ -1,9 +1,6 @@
 import { Popover, Text } from "@mantine/core";
 import { useState, type MouseEvent } from "react";
-import {
-    CountdownTimerFace,
-    useCountdownTimer,
-} from "../countdown_timer/countdown_timer.jsx";
+import { CountdownTimerFace, useCountdownTimer } from "../countdown_timer/countdown_timer.jsx";
 import "../countdown_timer/countdown_timer.css";
 
 interface MobileCountdownTimerProps {

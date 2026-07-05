@@ -9,6 +9,18 @@
 	gap: 0.375rem;
 }
 
+.decks-infos__turn-row {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	width: 100%;
+}
+
+.decks-infos__turn-row .countdown-timer {
+	--countdown-timer-size: 56px;
+	flex-shrink: 0;
+}
+
 .decks-infos__turn-banner {
 	font-family: var(--font-display);
 	font-size: 0.8rem;
@@ -24,7 +36,8 @@
 	box-shadow:
 		0 0 8px rgba(240, 184, 64, 0.35),
 		inset 0 1px 0 rgba(255, 255, 255, 0.35);
-	width: 100%;
+	flex: 1;
+	min-width: 0;
 }
 
 .deck-infos-row {
@@ -50,47 +63,9 @@
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-.decks-infos__opponent-deck {
-	position: relative;
-	width: 100%;
-}
-
-.decks-infos__opponent-timer {
-	position: absolute;
-	bottom: 100%;
-	left: 0;
-	right: 0;
-	margin-bottom: 0.375rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	pointer-events: none;
-}
-
-.decks-infos__opponent-timer .countdown-timer {
-	--countdown-timer-size: 56px;
-}
-
 .decks-infos__pass-turn {
-	position: relative;
 	width: 100%;
 	margin-top: 0.25rem;
-}
-
-.decks-infos__player-timer {
-	position: absolute;
-	bottom: 100%;
-	left: 0;
-	right: 0;
-	margin-bottom: 0.375rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	pointer-events: none;
-}
-
-.decks-infos__player-timer .countdown-timer {
-	--countdown-timer-size: 56px;
 }
 
 .decks-infos__pass-turn-btn-wrap {

@@ -19,11 +19,11 @@ export const DecksInfos = observer(({ me, opponent }: DecksInfosProps) => {
         <div className="decks-infos">
             <br />
             <br />
-            <div className="decks-infos__opponent-deck">
-                <OpponentTurnTimer />
-                <DeckInfosRow player={opponent} animationOwner="OPPONENT" />
+            <DeckInfosRow player={opponent} animationOwner="OPPONENT" />
+            <div className="decks-infos__turn-row">
+                <TurnTimer />
+                <p className="decks-infos__turn-banner">Tour {currentRound}</p>
             </div>
-            <p className="decks-infos__turn-banner">Tour {currentRound}</p>
             <DeckInfosRow player={me} animationOwner="PLAYER" />
             <PassTurnSection />
         </div>
@@ -53,18 +53,18 @@ const DeckInfosRow = observer(({ player, animationOwner }: DeckInfosRowProps) =>
     );
 });
 
-const OpponentTurnTimer = observer(() => {
+const TurnTimer = observer(() => {
     const { store } = useGameContext();
 
-    if (store.isMyTurn) return null;
-
     return (
-        <div className="decks-infos__opponent-timer">
-            <CountdownTimer
-                endsAt={store.game.data.turnEndsAt}
-                title="Temps restant pour le tour de l'adversaire"
-            />
-        </div>
+        <CountdownTimer
+            endsAt={store.game.data.turnEndsAt}
+            title={
+                store.isMyTurn
+                    ? "Temps restant pour votre tour"
+                    : "Temps restant pour le tour de l'adversaire"
+            }
+        />
     );
 });
 
@@ -73,14 +73,6 @@ const PassTurnSection = observer(() => {
 
     return (
         <div className="decks-infos__pass-turn">
-            {store.isMyTurn && (
-                <div className="decks-infos__player-timer">
-                    <CountdownTimer
-                        endsAt={store.game.data.turnEndsAt}
-                        title="Temps restant pour votre tour"
-                    />
-                </div>
-            )}
             <div className="decks-infos__pass-turn-btn-wrap">
                 <button
                     type="button"

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { IconHeart } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import type { PointerEvent } from "react";
+import { CardPreviewLink } from "~/components/cards/card_preview_link";
 import { UserAvatar } from "~/components/user_avatar";
 import { useGameContext } from "~/hooks/use_game_state";
 import {
@@ -169,20 +170,16 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
                         </div>
                     )}
                     {player.weaponState && (
-                        <div
-                            className="hero-panel__stat"
-                            title={
-                                player.weaponState.originalCard.label ??
-                                `Arme ${player.weaponState.damage}/${player.weaponState.durability}`
-                            }
-                        >
+                        <div className="hero-panel__stat">
                             <span className="hero-panel__stat-badge hero-panel__stat-badge--weapon-damage">
                                 {player.weaponState.damage}
                             </span>
                             <span className="hero-panel__stat-badge hero-panel__stat-badge--weapon-durability">
                                 {player.weaponState.durability}
                             </span>
-                            <span className="hero-panel__stat-label">arme</span>
+                            <CardPreviewLink card={player.weaponState.originalCard}>
+                                <span className="hero-panel__stat-label">arme</span>
+                            </CardPreviewLink>
                         </div>
                     )}
                 </div>

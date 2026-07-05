@@ -15,6 +15,12 @@
     padding: 0;
 }
 
+@media (max-width: 640px) {
+    .mulligan-overlay__modal-inner {
+        align-items: flex-start;
+    }
+}
+
 @media (min-width: 641px) {
     .mulligan-overlay__modal-content {
         --modal-size: min(
@@ -421,9 +427,18 @@
 }
 
 @media (max-width: 640px) {
+    .mulligan-overlay__modal-content {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        width: calc(100vw - 2rem);
+    }
+
     .mulligan-overlay__panel {
         padding: 2.5rem 1rem 1.25rem;
         gap: 1rem;
+        margin-top: 0.5rem;
+        overflow: visible;
     }
 
     .mulligan-overlay__actions {
