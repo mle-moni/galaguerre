@@ -3,7 +3,7 @@ import type { GamePlayer } from "#api_types/game.types";
 import clsx from "clsx";
 import { IconHeart } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
-import type { PointerEvent } from "react";
+import { useRef, type MouseEvent, type PointerEvent } from "react";
 import { CardPreviewLink } from "~/components/cards/card_preview_link";
 import { UserAvatar } from "~/components/user_avatar";
 import { useGameContext } from "~/hooks/use_game_state";
@@ -24,6 +24,7 @@ interface PlayerInfosProps {
 
 export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOpponent = false }) => {
     const { store, authoritativeGame } = useGameContext();
+    const suppressWeaponButtonClickRef = useRef(false);
     const maxMana = getMaxMana(authoritativeGame.data.currentRound);
 
     const playerBorderColor = store.playerInfosStore.getBorderColor({
@@ -63,20 +64,86 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
         e.preventDefault();
     };
 
-    const handleWeaponAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const beginWeaponAttackDrag = (
+        event: PointerEvent<HTMLElement>,
+        originElement: HTMLElement,
+    ) => {
         if (!canAttackWithWeapon) return;
 
         event.preventDefault();
-        event.currentTarget.setPointerCapture(event.pointerId);
+        originElement.setPointerCapture(event.pointerId);
 
-        const rect = event.currentTarget.getBoundingClientRect();
+        const rect = originElement.getBoundingClientRect();
         const origin = {
             x: rect.left + rect.width / 2,
             y: rect.top + rect.height / 2,
         };
 
+        store.targetSelectionStore.disarm();
+        store.cardDragStore.clearMinionPlayHint();
+        store.minionDragStore.cancelAttack();
         store.weaponDragStore.startAttack();
         store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
+    };
+
+    const handleWeaponAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+        if (!canAttackWithWeapon) return;
+
+        if (event.target instanceof Element && event.target.closest("[data-weapon-attack]")) {
+            return;
+        }
+
+        beginWeaponAttackDrag(event, event.currentTarget);
+    };
+
+    const handleWeaponAttackButtonPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+        if (!canAttackWithWeapon) return;
+
+        event.stopPropagation();
+
+        const heroPanel = event.currentTarget.closest(".hero-panel");
+        if (!(heroPanel instanceof HTMLElement)) return;
+
+        const startX = event.clientX;
+        const startY = event.clientY;
+        let dragStarted = false;
+
+        const onPointerMove = (moveEvent: PointerEvent) => {
+            if (dragStarted) return;
+            if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 5) return;
+
+            dragStarted = true;
+            suppressWeaponButtonClickRef.current = true;
+            beginWeaponAttackDrag(moveEvent, heroPanel);
+            document.removeEventListener("pointermove", onPointerMove);
+        };
+
+        const onPointerUp = () => {
+            document.removeEventListener("pointermove", onPointerMove);
+        };
+
+        document.addEventListener("pointermove", onPointerMove);
+        document.addEventListener("pointerup", onPointerUp, { once: true });
+    };
+
+    const handleWeaponAttackButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+        event.preventDefault();
+
+        if (suppressWeaponButtonClickRef.current) {
+            suppressWeaponButtonClickRef.current = false;
+            return;
+        }
+
+        if (store.weaponDragStore.isAttacking) {
+            store.weaponDragStore.cancelAttack();
+            return;
+        }
+
+        store.targetSelectionStore.disarm();
+        store.cardDragStore.clearMinionPlayHint();
+        store.minionDragStore.cancelAttack();
+        store.weaponDragStore.startAttack();
     };
 
     const heroSpotOwner = isOpponent ? "OPPONENT" : "PLAYER";
@@ -177,9 +244,28 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
                             <span className="hero-panel__stat-badge hero-panel__stat-badge--weapon-durability">
                                 {player.weaponState.durability}
                             </span>
-                            <CardPreviewLink card={player.weaponState.originalCard}>
-                                <span className="hero-panel__stat-label">arme</span>
-                            </CardPreviewLink>
+                            <div className="hero-panel__weapon-actions">
+                                <CardPreviewLink card={player.weaponState.originalCard}>
+                                    <span className="hero-panel__stat-label">arme</span>
+                                </CardPreviewLink>
+                                {!isOpponent && canAttackWithWeapon && (
+                                    <button
+                                        type="button"
+                                        className={clsx(
+                                            "hero-panel__weapon-attack",
+                                            store.weaponDragStore.isAttacking &&
+                                                "hero-panel__weapon-attack--active",
+                                        )}
+                                        data-weapon-attack
+                                        aria-label="Attaquer avec l'arme"
+                                        aria-pressed={store.weaponDragStore.isAttacking}
+                                        onPointerDown={handleWeaponAttackButtonPointerDown}
+                                        onClick={handleWeaponAttackButtonClick}
+                                    >
+                                        ⚔️
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

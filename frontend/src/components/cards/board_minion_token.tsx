@@ -4,7 +4,6 @@ import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
 import { getMinionCardMaxAttacks, type MinionAttackStatus } from "~/helpers/minion_combat";
 import { BoardMinionEffectIcons } from "./board_minion_effect_icons.jsx";
-import { BoardMinionTauntOutline } from "./board_minion_taunt_outline.jsx";
 import "./board_minion_token.css";
 
 interface BoardMinionTokenProps {
@@ -54,7 +53,6 @@ export const BoardMinionToken = ({
             onPointerDown={onPointerDown}
             onClick={onClick}
         >
-            {hasTaunt && <BoardMinionTauntOutline />}
             <BoardMinionEffectIcons card={card} />
             {attackStatus === "sleeping" && (
                 <span className="board-minion-token__sleep-icon" aria-hidden>
