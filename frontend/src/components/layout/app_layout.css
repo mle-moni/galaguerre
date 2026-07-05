@@ -327,6 +327,13 @@
     cursor: not-allowed;
 }
 
+@media (max-width: 1279px) {
+    .app-layout__content:not(.app-layout__content--fill) {
+        flex: none;
+        min-height: auto;
+    }
+}
+
 @media (max-width: 767px) {
     .app-header {
         flex-wrap: nowrap;
