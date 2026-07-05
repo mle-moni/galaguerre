@@ -1,4 +1,5 @@
 import type { GamePlayer } from "#api_types/game.types";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
 import { MobileCountdownTimer } from "./mobile_countdown_timer.jsx";
@@ -19,14 +20,18 @@ export const MobileOpponentBar = observer(({ opponent }: MobileOpponentBarProps)
                 deckCount={opponent.deckCards.length}
                 handCount={opponent.hand.length}
             />
-            <div className="mobile-bar__actions">
-                {!store.isMyTurn && (
-                    <MobileCountdownTimer
-                        endsAt={store.game.data.turnEndsAt}
-                        label="Temps restant"
-                        description="Temps qu'il reste à l'adversaire pour jouer son tour."
-                    />
+            <div
+                className={clsx(
+                    "mobile-bar__actions",
+                    store.isMyTurn && "mobile-bar__actions--hidden",
                 )}
+                aria-hidden={store.isMyTurn}
+            >
+                <MobileCountdownTimer
+                    endsAt={store.game.data.turnEndsAt}
+                    label="Temps restant"
+                    description="Temps qu'il reste à l'adversaire pour jouer son tour."
+                />
             </div>
         </div>
     );
