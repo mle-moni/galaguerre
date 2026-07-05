@@ -68,8 +68,7 @@
 }
 
 .decks-infos__opponent-timer .countdown-timer {
-	font-size: 0.75rem;
-	color: var(--gg-gold);
+	--countdown-timer-size: 56px;
 }
 
 .decks-infos__pass-turn {
@@ -91,8 +90,7 @@
 }
 
 .decks-infos__player-timer .countdown-timer {
-	font-size: 0.7rem;
-	color: var(--gg-text-muted);
+	--countdown-timer-size: 56px;
 }
 
 .decks-infos__pass-turn-btn-wrap {

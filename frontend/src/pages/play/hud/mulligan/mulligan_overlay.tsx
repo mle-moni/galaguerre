@@ -1,5 +1,4 @@
 import { Modal } from "@mantine/core";
-import { IconHourglass } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { CoinCardLink } from "~/components/cards/coin_card_link";
@@ -75,7 +74,6 @@ export const MulliganOverlay = observer(() => {
                     ) : null}
 
                     <div className="mulligan-overlay__timer">
-                        <IconHourglass size={18} stroke={1.75} aria-hidden="true" />
                         <CountdownTimer
                             endsAt={store.authoritativeGame.data.mulliganEndsAt}
                             label="Temps restant :"

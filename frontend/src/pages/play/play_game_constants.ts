@@ -1,5 +1,6 @@
 export const PLAY_MANA_MEDALLION_URL = "/game/mana-medallion.webp";
 export const PLAY_DECK_ICON_URL = "/game/deck-actif.webp";
+export const PLAY_TIMER_URL = "/game/timer.webp";
 
 export const MAX_MANA = 10;
 

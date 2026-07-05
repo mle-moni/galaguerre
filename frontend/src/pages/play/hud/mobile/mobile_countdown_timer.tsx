@@ -1,6 +1,10 @@
 import { Popover, Text } from "@mantine/core";
 import { useState, type MouseEvent } from "react";
-import { useCountdownTimer } from "../countdown_timer/countdown_timer.jsx";
+import {
+    CountdownTimerFace,
+    useCountdownTimer,
+} from "../countdown_timer/countdown_timer.jsx";
+import "../countdown_timer/countdown_timer.css";
 
 interface MobileCountdownTimerProps {
     endsAt?: number;
@@ -35,7 +39,7 @@ export const MobileCountdownTimer = ({ endsAt, label, description }: MobileCount
                     onClick={handleClick}
                     aria-label={label}
                 >
-                    {secondsLeft}s
+                    <CountdownTimerFace seconds={secondsLeft} />
                 </span>
             </Popover.Target>
             <Popover.Dropdown onClick={(event) => event.stopPropagation()}>

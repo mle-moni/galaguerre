@@ -180,9 +180,14 @@
 }
 
 .mulligan-overlay__timer .countdown-timer {
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
+	--countdown-timer-size: 48px;
+	color: #2c2416;
+}
+
+.mulligan-overlay__timer .countdown-timer__label {
+	font-size: inherit;
+	font-weight: inherit;
+	color: inherit;
 }
 
 .mulligan-overlay__waiting {

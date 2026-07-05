@@ -28,15 +28,12 @@
 }
 
 .mobile-bar .countdown-timer {
-	color: #fff;
+	--countdown-timer-size: 48px;
 }
 
 .mobile-bar__timer {
 	cursor: pointer;
 	touch-action: manipulation;
-	font-size: 0.875rem;
-	font-weight: 600;
-	font-variant-numeric: tabular-nums;
 }
 
 .mobile-bar__pseudo {
