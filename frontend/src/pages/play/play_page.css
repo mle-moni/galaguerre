@@ -14,7 +14,7 @@ html.play-page-active body {
 
 @media (max-width: 640px) and (orientation: portrait) {
 	.play-page {
-		background-image: url("/game/play-background-mobile.webp");
+		background: #0f172a;
 	}
 }
 

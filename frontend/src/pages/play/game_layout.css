@@ -35,6 +35,11 @@
 		--spot-h: calc(var(--board-minion-h) + 6px);
 		--hand-gap: -10px;
 		--hand-height: calc(var(--card-h-hand) + 32px);
+		--mobile-player-bar-height: 5.5rem;
+		--mobile-bottom-height: calc(
+			var(--mobile-player-bar-height) + var(--hand-height) +
+				max(8px, env(safe-area-inset-bottom))
+		);
 	}
 }
 

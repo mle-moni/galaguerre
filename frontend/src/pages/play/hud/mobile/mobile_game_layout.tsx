@@ -45,17 +45,19 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(
                     <PlayedCardReveal />
                     <DiscoverOpponentIndicator />
                     <Board />
+                    {!spectating && <ArmedCardHint isMobile />}
                 </div>
-                <MobilePlayerBar me={me} />
-                <div className="mobile-game-layout__hand-area">
-                    <PlayerHand player={me} isMobile />
+                <div className="mobile-game-layout__bottom">
+                    <MobilePlayerBar me={me} />
+                    <div className="mobile-game-layout__hand-area">
+                        <PlayerHand player={me} isMobile />
+                    </div>
                 </div>
 
                 <GameFinalScreen />
                 {!spectating && <MulliganOverlay />}
                 {!spectating && <DiscoverOverlay />}
                 {!spectating && <OnboardingCoach />}
-                {!spectating && <ArmedCardHint isMobile />}
                 {!spectating && <TargetingArrowOverlay />}
                 <GameAnimationOverlay />
             </div>

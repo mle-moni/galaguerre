@@ -28,6 +28,6 @@
 
 @media (max-width: 640px) {
     .mobile-game-layout .onboarding-coach {
-        bottom: calc(7.5rem + env(safe-area-inset-bottom, 0px));
+        bottom: calc(var(--mobile-bottom-height) + 0.5rem);
     }
 }

@@ -34,6 +34,7 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
                 </span>
                 {isMobile && (
                     <Button
+                        className="armed-card-hint__cancel"
                         size="compact-xs"
                         variant="subtle"
                         color="yellow"
@@ -52,6 +53,7 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
                 <span>Touchez une cible ennemie pour attaquer</span>
                 {isMobile && (
                     <Button
+                        className="armed-card-hint__cancel"
                         size="compact-xs"
                         variant="subtle"
                         color="yellow"
@@ -70,6 +72,7 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
                 <span>Touchez une cible ennemie pour attaquer avec votre arme</span>
                 {isMobile && (
                     <Button
+                        className="armed-card-hint__cancel"
                         size="compact-xs"
                         variant="subtle"
                         color="yellow"
@@ -96,7 +99,13 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
         <div className={hintClassName} role="status">
             <span>{hint}</span>
             {isMobile && (
-                <Button size="compact-xs" variant="subtle" color="yellow" onClick={handleCancel}>
+                <Button
+                    className="armed-card-hint__cancel"
+                    size="compact-xs"
+                    variant="subtle"
+                    color="yellow"
+                    onClick={handleCancel}
+                >
                     Annuler
                 </Button>
             )}
