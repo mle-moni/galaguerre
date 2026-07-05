@@ -27,6 +27,7 @@ import { useCardsQuery } from "~/hooks/use_cards";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
 import "./collection_page.css";
+import "~/components/catalogue/catalogue_light.css";
 
 const SELL_MODAL_RARITIES: CardRarity[] = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
 

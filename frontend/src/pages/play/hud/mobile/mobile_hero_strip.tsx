@@ -1,6 +1,8 @@
 import type { GamePlayer } from "#api_types/game.types";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
+import { CardPreviewSheet } from "~/components/cards/card_preview_sheet";
 import { useGameContext } from "~/hooks/use_game_state";
 import "~/components/targeting/targeting.css";
 import "~/pages/play/animations/hero_death_animations.css";
@@ -17,6 +19,7 @@ interface MobileHeroStripProps {
 export const MobileHeroStrip = observer(
     ({ player, isOpponent = false, deckCount, handCount }: MobileHeroStripProps) => {
         const { store } = useGameContext();
+        const [weaponSheetOpened, setWeaponSheetOpened] = useState(false);
 
         const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
         const weaponAttackBorderColor =
@@ -43,8 +46,23 @@ export const MobileHeroStrip = observer(
         const heroSpotOwner = isOpponent ? "OPPONENT" : "PLAYER";
         const isDying = store.narrativeDirector.dyingHeroOwners.includes(heroSpotOwner);
 
+        const isHeroStripControl = (target: EventTarget | null) => {
+            const element =
+                target instanceof Element
+                    ? target
+                    : target instanceof Node
+                      ? target.parentElement
+                      : null;
+
+            return (
+                element?.closest("[data-stat-badge]") ||
+                element?.closest("[data-weapon-preview]") ||
+                element?.closest("[data-weapon-attack]")
+            );
+        };
+
         const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-            if (event.target instanceof Element && event.target.closest("[data-stat-badge]")) {
+            if (isHeroStripControl(event.target) || weaponSheetOpened) {
                 return;
             }
 
@@ -62,6 +80,31 @@ export const MobileHeroStrip = observer(
             }
 
             store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
+        };
+
+        const handleWeaponPreviewClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            event.preventDefault();
+            setWeaponSheetOpened(true);
+        };
+
+        const handleWeaponPreviewPointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+        };
+
+        const handleWeaponAttackClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            event.preventDefault();
+
+            if (store.weaponDragStore.isAttacking) {
+                store.weaponDragStore.cancelAttack();
+                return;
+            }
+
+            store.targetSelectionStore.disarm();
+            store.cardDragStore.clearMinionPlayHint();
+            store.minionDragStore.cancelAttack();
+            store.weaponDragStore.startAttack();
         };
 
         const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -89,7 +132,67 @@ export const MobileHeroStrip = observer(
                 onDrop={handleClick}
                 onClick={handleClick}
             >
-                <span className="mobile-bar__pseudo">{player.pseudo}</span>
+                <div className="mobile-bar__identity">
+                    <span className="mobile-bar__pseudo">{player.pseudo}</span>
+                    {player.weaponState && (
+                        <div className="mobile-bar__weapon">
+                            <MobileStatBadge
+                                value={player.weaponState.damage}
+                                label="Dégâts de l'arme"
+                                description={
+                                    weaponLabel
+                                        ? `Dégâts infligés par ${weaponLabel} à chaque attaque.`
+                                        : "Dégâts infligés par l'arme équipée à chaque attaque."
+                                }
+                                className="mobile-bar__badge--weapon-damage"
+                            />
+                            <MobileStatBadge
+                                value={player.weaponState.durability}
+                                label="Durabilité de l'arme"
+                                description={
+                                    weaponLabel
+                                        ? `Coups restants avant que ${weaponLabel} se brise.`
+                                        : "Coups restants avant que l'arme se brise."
+                                }
+                                className="mobile-bar__badge--weapon-durability"
+                            />
+                            <button
+                                type="button"
+                                className="mobile-bar__weapon-preview"
+                                data-weapon-preview
+                                aria-label={
+                                    weaponLabel ? `Voir ${weaponLabel}` : "Voir l'arme équipée"
+                                }
+                                onPointerDown={handleWeaponPreviewPointerDown}
+                                onClick={handleWeaponPreviewClick}
+                            >
+                                i
+                            </button>
+                            {!isOpponent && canAttackWithWeapon && (
+                                <button
+                                    type="button"
+                                    className={clsx(
+                                        "mobile-bar__weapon-attack",
+                                        store.weaponDragStore.isAttacking &&
+                                            "mobile-bar__weapon-attack--active",
+                                    )}
+                                    data-weapon-attack
+                                    aria-label="Attaquer avec l'arme"
+                                    aria-pressed={store.weaponDragStore.isAttacking}
+                                    onPointerDown={(event) => event.stopPropagation()}
+                                    onClick={handleWeaponAttackClick}
+                                >
+                                    ⚔️
+                                </button>
+                            )}
+                            <CardPreviewSheet
+                                card={player.weaponState.originalCard}
+                                opened={weaponSheetOpened}
+                                onClose={() => setWeaponSheetOpened(false)}
+                            />
+                        </div>
+                    )}
+                </div>
                 <div className="mobile-bar__stats">
                     <MobileStatBadge
                         value={player.health}
@@ -103,30 +206,6 @@ export const MobileHeroStrip = observer(
                         description="Ressource dépensée pour jouer des cartes. Le maximum augmente chaque tour."
                         className="mobile-bar__badge--mana"
                     />
-                    {player.weaponState && (
-                        <>
-                            <MobileStatBadge
-                                value={player.weaponState.damage}
-                                label="Dégâts de l'arme"
-                                description={
-                                    weaponLabel
-                                        ? `Dégâts infligés par ${weaponLabel} à chaque attaque.`
-                                        : "Dégâts infligés par l'arme équipée à chaque attaque."
-                                }
-                                className="mobile-bar__badge--health"
-                            />
-                            <MobileStatBadge
-                                value={player.weaponState.durability}
-                                label="Durabilité de l'arme"
-                                description={
-                                    weaponLabel
-                                        ? `Coups restants avant que ${weaponLabel} se brise.`
-                                        : "Coups restants avant que l'arme se brise."
-                                }
-                                className="mobile-bar__badge--mana"
-                            />
-                        </>
-                    )}
                     {deckCount !== undefined && (
                         <MobileStatBadge
                             value={deckCount}

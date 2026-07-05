@@ -23,6 +23,8 @@ import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 import { notifyError, notifySuccess } from "~/services/toasts";
 import { ShareDeckModal } from "~/components/decks/share_deck_modal";
+import "~/components/catalogue/catalogue_light.css";
+import "./deck_builder_page.css";
 
 const entriesToMap = (entries: ApiDeckCardEntry[]) => {
     const map = new Map<number, number>();
@@ -81,6 +83,7 @@ export const DeckBuilderPage = observer(() => {
     const currentName = deckName ?? deck.name;
     const currentComposition = composition ?? entriesToMap(deck.cards);
     const totalCards = getTotalCards(currentComposition);
+    const isCardCountInvalid = totalCards > DECK_MAX_CARDS || totalCards < DECK_MIN_CARDS;
 
     const canAddCard = (cardId: number) => {
         if (!catalogById.has(cardId)) return false;
@@ -142,6 +145,8 @@ export const DeckBuilderPage = observer(() => {
 
     const catalogPanel = (
         <Catalogue
+            variant="deckBuilder"
+            headerTitle={false}
             composition={currentComposition}
             canAddCard={canAddCard}
             onAdd={addCard}
@@ -150,27 +155,27 @@ export const DeckBuilderPage = observer(() => {
             onCostFilterChange={setCostFilter}
             ownedCounts={ownedCounts}
             ownedOnly
-            className="lg:col-span-2 flex flex-col flex-1 min-h-0 lg:h-full"
+            className="flex flex-col flex-1 min-h-0 lg:h-full"
         />
     );
 
     const compositionPanel = (
-        <div className="gg-panel flex flex-col flex-1 min-h-0 lg:h-full overflow-hidden">
-            <div className="gg-panel-header shrink-0 flex justify-between items-center">
+        <div className="deck-builder-page__composition">
+            <div className="deck-builder-page__composition-header">
                 <span>Composition</span>
                 <span
-                    className={`text-sm font-normal ${totalCards > DECK_MAX_CARDS || totalCards < DECK_MIN_CARDS ? "text-red-400" : "text-white/70"}`}
+                    className={`deck-builder-page__composition-count${isCardCountInvalid ? " deck-builder-page__composition-count--error" : ""}`}
                 >
                     {totalCards}/{DECK_MAX_CARDS}
                 </span>
             </div>
-            <div className="gg-panel-body flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="deck-builder-page__composition-body">
                 <div className="shrink-0">
                     {isNarrowScreen ? (
                         <>
                             <button
                                 type="button"
-                                className="gg-mana-curve-toggle"
+                                className="collection-catalogue__filters-toggle"
                                 onClick={() => setShowManaCurve((visible) => !visible)}
                                 aria-expanded={showManaCurve}
                             >
@@ -183,6 +188,7 @@ export const DeckBuilderPage = observer(() => {
                             </button>
                             <Collapse in={showManaCurve}>
                                 <ManaCurveChart
+                                    variant="light"
                                     composition={currentComposition}
                                     catalogById={catalogById}
                                     selectedCost={costFilter !== null ? Number(costFilter) : null}
@@ -192,6 +198,7 @@ export const DeckBuilderPage = observer(() => {
                         </>
                     ) : (
                         <ManaCurveChart
+                            variant="light"
                             composition={currentComposition}
                             catalogById={catalogById}
                             selectedCost={costFilter !== null ? Number(costFilter) : null}
@@ -200,7 +207,7 @@ export const DeckBuilderPage = observer(() => {
                     )}
                 </div>
                 {compositionEntries.length === 0 ? (
-                    <p className="text-white/60 text-sm m-0">
+                    <p className="deck-builder-page__muted">
                         Cliquez sur + pour ajouter une carte, ou sur une carte pour voir
                         l&apos;illustration.
                     </p>
@@ -213,10 +220,10 @@ export const DeckBuilderPage = observer(() => {
                                     <div key={cardId} className="gg-composition-row">
                                         <div className="gg-composition-row__actions">
                                             <div className="flex-1 min-w-0 w-full text-center">
-                                                <p className="text-white text-sm font-medium m-0 truncate">
+                                                <p className="deck-builder-page__muted text-sm font-medium m-0 truncate">
                                                     Carte non collectionnable (#{cardId})
                                                 </p>
-                                                <p className="text-red-300 text-xs m-0">
+                                                <p className="deck-builder-page__error-text">
                                                     Cette carte ne peut pas figurer dans un deck
                                                 </p>
                                             </div>
@@ -289,77 +296,84 @@ export const DeckBuilderPage = observer(() => {
 
     return (
         <>
-            <div className="max-w-7xl mx-auto w-full flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end justify-between shrink-0">
-                    <TextInput
-                        label="Nom du deck"
-                        value={currentName}
-                        onChange={(e) => {
-                            setDeckName(e.currentTarget.value);
-                            if (composition === null) setComposition(entriesToMap(deck.cards));
-                        }}
-                        className="w-full sm:flex-1 sm:min-w-[200px]"
-                        styles={{ label: { color: "#1e3a5f", fontWeight: 600 } }}
-                    />
-                    <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                            variant="outline"
-                            color="gold"
-                            className="w-full sm:w-auto"
-                            leftSection={<IconShare size={16} />}
-                            onClick={() => setShareDeckId(deckId)}
-                        >
-                            Partager
-                        </Button>
-                        <Button
-                            variant="outline"
-                            color="navy"
-                            className="w-full sm:w-auto"
-                            onClick={() => navigate("/decks")}
-                        >
-                            Retour
-                        </Button>
-                        <Button
-                            className="gg-btn-primary w-full sm:w-auto"
-                            loading={updateMutation.isPending}
-                            onClick={handleSave}
-                        >
-                            Sauvegarder
-                        </Button>
+            <div className="deck-builder-page">
+                <div className="deck-builder-page__bg" aria-hidden="true" />
+                <div className="deck-builder-page__overlay" aria-hidden="true" />
+
+                <div className="deck-builder-page__content">
+                    <div className="deck-builder-page__panel">
+                        <header className="deck-builder-page__header">
+                            <TextInput
+                                label="Nom du deck"
+                                value={currentName}
+                                onChange={(e) => {
+                                    setDeckName(e.currentTarget.value);
+                                    if (composition === null) {
+                                        setComposition(entriesToMap(deck.cards));
+                                    }
+                                }}
+                                className="deck-builder-page__name-input"
+                            />
+                            <div className="deck-builder-page__actions">
+                                <button
+                                    type="button"
+                                    className="deck-builder-page__action-btn"
+                                    onClick={() => setShareDeckId(deckId)}
+                                >
+                                    <IconShare size={16} aria-hidden />
+                                    Partager
+                                </button>
+                                <button
+                                    type="button"
+                                    className="deck-builder-page__action-btn"
+                                    onClick={() => navigate("/decks")}
+                                >
+                                    Retour
+                                </button>
+                                <button
+                                    type="button"
+                                    className="deck-builder-page__action-btn deck-builder-page__action-btn--primary"
+                                    disabled={updateMutation.isPending}
+                                    onClick={() => void handleSave()}
+                                >
+                                    {updateMutation.isPending ? "Sauvegarde…" : "Sauvegarder"}
+                                </button>
+                            </div>
+                        </header>
+
+                        <div className="deck-builder-page__body">
+                            {isNarrowScreen ? (
+                                <Tabs
+                                    defaultValue="catalog"
+                                    variant="pills"
+                                    color="navy"
+                                    classNames={{
+                                        root: "gg-deck-builder-tabs flex flex-1 min-h-0 flex-col overflow-hidden",
+                                        panel: "gg-deck-builder-tabs__panel",
+                                    }}
+                                >
+                                    <Tabs.List grow>
+                                        <Tabs.Tab value="catalog">Catalogue</Tabs.Tab>
+                                        <Tabs.Tab value="composition">
+                                            Composition ({totalCards}/{DECK_MAX_CARDS})
+                                        </Tabs.Tab>
+                                    </Tabs.List>
+                                    <Tabs.Panel value="catalog" pt="sm">
+                                        {catalogPanel}
+                                    </Tabs.Panel>
+                                    <Tabs.Panel value="composition" pt="sm">
+                                        {compositionPanel}
+                                    </Tabs.Panel>
+                                </Tabs>
+                            ) : (
+                                <div className="deck-builder-page__grid">
+                                    {catalogPanel}
+                                    {compositionPanel}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-
-                {isNarrowScreen ? (
-                    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-                        <Tabs
-                            defaultValue="catalog"
-                            variant="pills"
-                            color="navy"
-                            classNames={{
-                                root: "gg-deck-builder-tabs",
-                                panel: "gg-deck-builder-tabs__panel",
-                            }}
-                        >
-                            <Tabs.List grow>
-                                <Tabs.Tab value="catalog">Catalogue</Tabs.Tab>
-                                <Tabs.Tab value="composition">
-                                    Composition ({totalCards}/{DECK_MAX_CARDS})
-                                </Tabs.Tab>
-                            </Tabs.List>
-                            <Tabs.Panel value="catalog" pt="sm">
-                                {catalogPanel}
-                            </Tabs.Panel>
-                            <Tabs.Panel value="composition" pt="sm">
-                                {compositionPanel}
-                            </Tabs.Panel>
-                        </Tabs>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch flex-1 min-h-0 overflow-hidden">
-                        {catalogPanel}
-                        {compositionPanel}
-                    </div>
-                )}
             </div>
 
             <ShareDeckModal deckId={shareDeckId} onClose={() => setShareDeckId(null)} />

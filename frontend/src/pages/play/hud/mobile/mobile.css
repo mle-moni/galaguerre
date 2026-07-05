@@ -60,8 +60,15 @@
 	touch-action: manipulation;
 }
 
-.mobile-bar__pseudo {
+.mobile-bar__identity {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
 	flex: 1;
+	min-width: 0;
+}
+
+.mobile-bar__pseudo {
 	min-width: 0;
 	font-size: 0.875rem;
 	font-weight: 700;
@@ -69,6 +76,66 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.mobile-bar__weapon {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	flex-shrink: 0;
+}
+
+.mobile-bar__weapon-preview {
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	touch-action: manipulation;
+	padding: 0;
+	flex-shrink: 0;
+}
+
+.mobile-bar__weapon-preview:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+.mobile-bar__weapon-attack {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	background: rgba(0, 0, 0, 0.45);
+	font-size: 1rem;
+	line-height: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	touch-action: manipulation;
+	padding: 0;
+	flex-shrink: 0;
+}
+
+.mobile-bar__weapon-attack:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+.mobile-bar__weapon-attack--active {
+	border-color: #fbbf24;
+	background: rgba(251, 191, 36, 0.25);
+	box-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+	animation: mobile-hero-target-pulse 900ms ease-in-out infinite;
 }
 
 .mobile-bar__stats {
@@ -98,6 +165,16 @@
 
 .mobile-bar__badge--mana {
 	background-color: #e3b42a;
+}
+
+.mobile-bar__badge--weapon-damage {
+	background-color: #e32a2a;
+	color: #fff;
+}
+
+.mobile-bar__badge--weapon-durability {
+	background-color: #c0c0c0;
+	color: #000;
 }
 
 .mobile-bar__badge--deck {
@@ -298,6 +375,10 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.mobile-bar__hero-target--interactive {
+		animation: none;
+	}
+
+	.mobile-bar__weapon-attack--active {
 		animation: none;
 	}
 }

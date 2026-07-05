@@ -51,7 +51,7 @@ const cardMatchesSearch = (card: ApiCatalogCard, query: string) => {
 
 export interface CatalogueProps {
     className?: string;
-    variant?: "default" | "collection";
+    variant?: "default" | "collection" | "deckBuilder";
     headerTitle?: string | false;
     includeNonCollectible?: boolean;
     composition?: Map<number, number>;
@@ -442,6 +442,8 @@ export const Catalogue = observer(
         const [tagFilter, setTagFilter] = useState<CardTag | null>(null);
 
         const isCollection = variant === "collection";
+        const isDeckBuilder = variant === "deckBuilder";
+        const isLightCatalogue = isCollection || isDeckBuilder;
         const isControlledCostFilter = onCostFilterChange !== undefined;
         const costFilter = isControlledCostFilter
             ? controlledCostFilter ?? null
@@ -486,11 +488,11 @@ export const Catalogue = observer(
             label: set.name,
         }));
 
-        const ownershipFilterStyles = isCollection
+        const ownershipFilterStyles = isLightCatalogue
             ? collectionOwnershipFilterStyles
             : catalogueOwnershipFilterStyles;
 
-        const filterControls = isCollection ? (
+        const filterControls = isLightCatalogue ? (
             <div className="collection-catalogue__filters">
                 <Select
                     value={selectedSetId ?? ""}
@@ -594,7 +596,7 @@ export const Catalogue = observer(
             filteredCatalog.length === 0 ? (
                 <p
                     className={
-                        isCollection
+                        isLightCatalogue
                             ? "collection-catalogue__empty"
                             : "text-white/50 text-sm m-0 w-full text-center py-8"
                     }
@@ -636,7 +638,7 @@ export const Catalogue = observer(
                 <button
                     type="button"
                     className={
-                        isCollection
+                        isLightCatalogue
                             ? "collection-catalogue__filters-toggle"
                             : "gg-mana-curve-toggle"
                     }
@@ -658,17 +660,24 @@ export const Catalogue = observer(
             filterControls
         );
 
-        if (isCollection) {
+        if (isLightCatalogue) {
             return (
                 <>
                     <div className={clsx("collection-catalogue", className)}>
                         <div className="collection-catalogue__body">
                             <div className="shrink-0">{filtersSection}</div>
-                            <div className="collection-catalogue__main">
-                                <CollectionFiltersSidebar
-                                    tagFilter={tagFilter}
-                                    onTagFilterChange={setTagFilter}
-                                />
+                            <div
+                                className={clsx(
+                                    "collection-catalogue__main",
+                                    isDeckBuilder && "collection-catalogue__main--no-sidebar",
+                                )}
+                            >
+                                {isCollection && (
+                                    <CollectionFiltersSidebar
+                                        tagFilter={tagFilter}
+                                        onTagFilterChange={setTagFilter}
+                                    />
+                                )}
                                 <div
                                     className={
                                         isNarrowScreen
@@ -688,37 +697,45 @@ export const Catalogue = observer(
                         onClose={() => setArtworkCard(null)}
                     />
 
-                    <BuyCardModal
-                        card={buyModalCard}
-                        price={buyModalCard ? getGoldCoinsPerCardBuy(buyModalCard.rarity) : null}
-                        userGoldCoins={userGoldCoins}
-                        opened={buyModalCard !== null}
-                        onClose={() => setBuyModalCard(null)}
-                        onConfirm={async () => {
-                            if (!buyModalCard || !onBuyCard) return;
-                            await onBuyCard(buyModalCard.id);
-                            setBuyModalCard(null);
-                        }}
-                        isBuying={buyingCardId === buyModalCard?.id}
-                    />
+                    {isCollection && (
+                        <>
+                            <BuyCardModal
+                                card={buyModalCard}
+                                price={
+                                    buyModalCard
+                                        ? getGoldCoinsPerCardBuy(buyModalCard.rarity)
+                                        : null
+                                }
+                                userGoldCoins={userGoldCoins}
+                                opened={buyModalCard !== null}
+                                onClose={() => setBuyModalCard(null)}
+                                onConfirm={async () => {
+                                    if (!buyModalCard || !onBuyCard) return;
+                                    await onBuyCard(buyModalCard.id);
+                                    setBuyModalCard(null);
+                                }}
+                                isBuying={buyingCardId === buyModalCard?.id}
+                            />
 
-                    <SellCardModal
-                        card={sellModalCard}
-                        price={
-                            sellModalCard
-                                ? getGoldCoinsPerDuplicateSell(sellModalCard.rarity)
-                                : null
-                        }
-                        userGoldCoins={userGoldCoins}
-                        opened={sellModalCard !== null}
-                        onClose={() => setSellModalCard(null)}
-                        onConfirm={async () => {
-                            if (!sellModalCard || !onSellCard) return;
-                            await onSellCard(sellModalCard.id);
-                            setSellModalCard(null);
-                        }}
-                        isSelling={sellingCardId === sellModalCard?.id}
-                    />
+                            <SellCardModal
+                                card={sellModalCard}
+                                price={
+                                    sellModalCard
+                                        ? getGoldCoinsPerDuplicateSell(sellModalCard.rarity)
+                                        : null
+                                }
+                                userGoldCoins={userGoldCoins}
+                                opened={sellModalCard !== null}
+                                onClose={() => setSellModalCard(null)}
+                                onConfirm={async () => {
+                                    if (!sellModalCard || !onSellCard) return;
+                                    await onSellCard(sellModalCard.id);
+                                    setSellModalCard(null);
+                                }}
+                                isSelling={sellingCardId === sellModalCard?.id}
+                            />
+                        </>
+                    )}
                 </>
             );
         }
