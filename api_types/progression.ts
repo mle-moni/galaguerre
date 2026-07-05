@@ -196,8 +196,18 @@ export const getProgressionVisibleLevels = (
     return Array.from({ length: end - start + 1 }, (_, index) => start + index);
 };
 
-export const getDefaultProgressionViewStart = (currentLevel: number): number =>
-    Math.max(1, Math.min(currentLevel, MAX_LEVEL));
+export const getDefaultProgressionViewStart = (
+    currentLevel: number,
+    claimedLevels: Iterable<number> = [],
+): number => {
+    const claimed = new Set(claimedLevels);
+    for (let level = 1; level < currentLevel; level++) {
+        if (!claimed.has(level)) {
+            return level;
+        }
+    }
+    return Math.max(1, Math.min(currentLevel, MAX_LEVEL));
+};
 
 export const isProgressionLevelClaimable = (level: number, currentLevel: number): boolean =>
     level >= 1 && level < currentLevel;

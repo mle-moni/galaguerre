@@ -1,6 +1,5 @@
 import type { ApiDailyQuest } from "#api_types/daily_quests.types";
 import { Button, Loader, Text } from "@mantine/core";
-import { IconCheck } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { DailyQuestTitle } from "~/components/daily_quests/daily_quest_title";
 import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
@@ -41,10 +40,13 @@ const QuestRow = ({ quest }: { quest: ApiDailyQuest }) => {
 
     return (
         <div className={`home-quest${claimed ? " home-quest--claimed" : ""}`}>
-            <div className="home-quest__icon">{claimed ? <IconCheck size={14} /> : "⚔"}</div>
+            <div className="home-quest__icon">{claimed ? "✔️" : "📜"}</div>
             <div className="home-quest__content">
                 <p className="home-quest__title">
-                    <DailyQuestTitle quest={quest} /> ({quest.progress}/{quest.target})
+                    <span className="home-quest__title-text">
+                        <DailyQuestTitle quest={quest} />
+                    </span>{" "}
+                    ({quest.progress}/{quest.target})
                 </p>
                 <div className="home-quest__bar-track">
                     <div className="home-quest__bar-fill" style={{ width: `${pct}%` }} />

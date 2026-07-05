@@ -75,13 +75,14 @@ const ProgressionMilestone = ({
 export const HomeBottomSection = () => {
     const user = useUser();
     const progression = user?.progression;
-    const claimedLevels = new Set(user?.claimedProgressionLevels ?? []);
+    const claimedProgressionLevels = user?.claimedProgressionLevels ?? [];
+    const claimedLevels = new Set(claimedProgressionLevels);
     const [viewStart, setViewStart] = useState(1);
 
     useEffect(() => {
         if (!progression) return;
-        setViewStart(getDefaultProgressionViewStart(progression.level));
-    }, [progression?.level]);
+        setViewStart(getDefaultProgressionViewStart(progression.level, claimedProgressionLevels));
+    }, [progression?.level, claimedProgressionLevels]);
 
     if (!progression) {
         return (
@@ -99,9 +100,9 @@ export const HomeBottomSection = () => {
             ? 100
             : (progression.xpInLevel / progression.xpToNextLevel) * 100;
     const visibleLevels = getProgressionVisibleLevels(viewStart);
-    const defaultViewStart = getDefaultProgressionViewStart(progression.level);
+    const maxViewStart = progression.level;
     const canScrollLeft = viewStart > 1;
-    const canScrollRight = viewStart < defaultViewStart;
+    const canScrollRight = viewStart < maxViewStart;
 
     return (
         <section className="home-bottom">
@@ -158,7 +159,7 @@ export const HomeBottomSection = () => {
                             aria-label="Revenir aux niveaux récents"
                             className="home-progression-panel__nav-btn"
                             onClick={() =>
-                                setViewStart((current) => Math.min(defaultViewStart, current + 1))
+                                setViewStart((current) => Math.min(maxViewStart, current + 1))
                             }
                         >
                             <IconChevronRight size={16} />

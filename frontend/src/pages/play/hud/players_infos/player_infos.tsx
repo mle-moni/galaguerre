@@ -3,7 +3,7 @@ import type { GamePlayer } from "#api_types/game.types";
 import clsx from "clsx";
 import { IconHeart } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
-import { useRef, type MouseEvent, type PointerEvent } from "react";
+import { useRef, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { CardPreviewLink } from "~/components/cards/card_preview_link";
 import { UserAvatar } from "~/components/user_avatar";
 import { useGameContext } from "~/hooks/use_game_state";
@@ -65,7 +65,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
     };
 
     const beginWeaponAttackDrag = (
-        event: PointerEvent<HTMLElement>,
+        event: PointerEvent | ReactPointerEvent<HTMLElement>,
         originElement: HTMLElement,
     ) => {
         if (!canAttackWithWeapon) return;
@@ -86,7 +86,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
         store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
 
-    const handleWeaponAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const handleWeaponAttackPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
         if (!canAttackWithWeapon) return;
 
         if (event.target instanceof Element && event.target.closest("[data-weapon-attack]")) {
@@ -96,7 +96,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
         beginWeaponAttackDrag(event, event.currentTarget);
     };
 
-    const handleWeaponAttackButtonPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    const handleWeaponAttackButtonPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
         if (!canAttackWithWeapon) return;
 
         event.stopPropagation();

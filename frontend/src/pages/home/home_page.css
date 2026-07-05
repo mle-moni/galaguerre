@@ -177,6 +177,14 @@
     opacity: 0.65;
 }
 
+.home-quest--claimed .home-quest__title-text {
+    text-decoration: line-through;
+}
+
+.home-quest--claimed .home-quest__title-text .card-preview-link {
+    text-decoration: line-through;
+}
+
 .home-quest__loading {
     display: flex;
     justify-content: center;

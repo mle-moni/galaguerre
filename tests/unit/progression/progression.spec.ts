@@ -97,8 +97,13 @@ test.group("progression", () => {
         assert.deepEqual(getProgressionVisibleLevels(98), [98, 99, 100]);
     });
 
-    test("getDefaultProgressionViewStart anchors on current level", ({ assert }) => {
+    test("getDefaultProgressionViewStart shows lowest unclaimed reward or current level", ({
+        assert,
+    }) => {
         assert.equal(getDefaultProgressionViewStart(1), 1);
-        assert.equal(getDefaultProgressionViewStart(42), 42);
+        assert.equal(getDefaultProgressionViewStart(42, [1, 2, 3]), 42);
+        assert.equal(getDefaultProgressionViewStart(42, [1, 2, 4]), 3);
+        assert.equal(getDefaultProgressionViewStart(10, []), 1);
+        assert.equal(getDefaultProgressionViewStart(10, [1, 2, 3]), 4);
     });
 });
