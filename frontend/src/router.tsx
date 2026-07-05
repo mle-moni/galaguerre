@@ -108,6 +108,7 @@ const router = createBrowserRouter([
                     {
                         path: "/leaderboard",
                         element: <LeaderboardPage />,
+                        handle: { fillViewport: true },
                     },
                     {
                         path: "/friends",
