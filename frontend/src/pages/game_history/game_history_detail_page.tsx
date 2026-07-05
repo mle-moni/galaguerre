@@ -1,14 +1,12 @@
-import type {
-    ApiGameHistoryPlayer,
-    GameHistoryResult,
-} from "#api_types/game_history.types";
+import type { ApiGameHistoryPlayer } from "#api_types/game_history.types";
 import type { GameRatingPlayerResult } from "#api_types/game.types";
-import { IconChevronLeft, IconCrown, IconFlame, IconSwords } from "@tabler/icons-react";
+import { IconChevronLeft, IconCrown, IconSwords } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useMemo, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FriendActionButton } from "~/components/friends/friend_action_button";
+import { GameHistoryResultBadge } from "~/components/game_history_result_badge";
 import { GameStatsTable } from "~/components/game_stats_table";
 import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
@@ -18,12 +16,6 @@ import { useFriendsQuery } from "~/hooks/use_friends";
 import { useGameHistoryDetailQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
 import "./game_history_detail_page.css";
-
-const RESULT_LABELS: Record<GameHistoryResult, string> = {
-    WIN: "Victoire",
-    LOSS: "Défaite",
-    DRAW: "Nul",
-};
 
 const formatDate = (isoDate: string) =>
     new Date(isoDate).toLocaleString("fr-FR", {
@@ -50,25 +42,6 @@ const getOpponentRating = (
         playerRating.delta === ratingResult.playerOne.delta;
 
     return isPlayerOne ? ratingResult.playerTwo : ratingResult.playerOne;
-};
-
-const GameHistoryResultBadge = ({ result }: { result: GameHistoryResult }) => {
-    const badgeClass = clsx(
-        "game-history-result-badge",
-        result === "WIN" && "game-history-result-badge--win",
-        result === "LOSS" && "game-history-result-badge--loss",
-        result === "DRAW" && "game-history-result-badge--draw",
-    );
-
-    return (
-        <span className={badgeClass}>
-            {result === "WIN" && <IconCrown size={12} />}
-            {result === "LOSS" && <IconFlame size={12} />}
-            {RESULT_LABELS[result]}
-            {result === "WIN" && <IconCrown size={12} />}
-            {result === "LOSS" && <IconFlame size={12} />}
-        </span>
-    );
 };
 
 const GameHistoryPlayerCell = ({
@@ -170,10 +143,7 @@ export const GameHistoryDetailPage = observer(() => {
     );
 
     const opponentRating = useMemo(
-        () =>
-            detail
-                ? getOpponentRating(detail.playerRating, detail.ratingResult)
-                : null,
+        () => (detail ? getOpponentRating(detail.playerRating, detail.ratingResult) : null),
         [detail],
     );
 
@@ -254,9 +224,7 @@ export const GameHistoryDetailPage = observer(() => {
                         isWinner={playerIsWinner}
                         isCurrentUser={playerIsCurrentUser}
                         isFriend={friendIds.has(detail.player.userId)}
-                        showFriendButton={
-                            !playerIsCurrentUser && currentUser !== null
-                        }
+                        showFriendButton={!playerIsCurrentUser && currentUser !== null}
                         side="left"
                         rating={detail.playerRating}
                     />
@@ -266,9 +234,7 @@ export const GameHistoryDetailPage = observer(() => {
                         isWinner={opponentIsWinner}
                         isCurrentUser={opponentIsCurrentUser}
                         isFriend={friendIds.has(detail.opponent.userId)}
-                        showFriendButton={
-                            !opponentIsCurrentUser && currentUser !== null
-                        }
+                        showFriendButton={!opponentIsCurrentUser && currentUser !== null}
                         side="right"
                         rating={opponentRating}
                     />

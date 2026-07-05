@@ -117,6 +117,7 @@ const router = createBrowserRouter([
                     {
                         path: "/game-history/:userId",
                         element: <GameHistoryListPage />,
+                        handle: { fillViewport: true },
                     },
                     {
                         path: "/game-history/:userId/:gameId",

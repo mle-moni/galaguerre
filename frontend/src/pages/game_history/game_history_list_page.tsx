@@ -1,15 +1,18 @@
-import type { ApiGameHistoryEntry, GameHistoryResult } from "#api_types/game_history.types";
-import { Badge, Table } from "@mantine/core";
+import type { ApiGameHistoryEntry } from "#api_types/game_history.types";
+import { IconSwords } from "@tabler/icons-react";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FriendActionButton } from "~/components/friends/friend_action_button";
 import { CenteredLoader } from "~/components/centered_loader";
-import { ResponsiveTable } from "~/components/responsive_table";
-import { PlayerNameLink } from "~/components/player_name_link";
+import { GameHistoryResultBadge } from "~/components/game_history_result_badge";
+import { formatPlayerName, PlayerNameLink } from "~/components/player_name_link";
+import { UserAvatar } from "~/components/user_avatar";
 import { useFriendsQuery } from "~/hooks/use_friends";
 import { useGameHistoryListQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
+import "./game_history_list_page.css";
 
 const formatEloDelta = (delta: number | null) => {
     if (delta === null) return "—";
@@ -25,24 +28,6 @@ const formatDate = (isoDate: string) =>
         minute: "2-digit",
     });
 
-const RESULT_LABELS: Record<GameHistoryResult, string> = {
-    WIN: "Victoire",
-    LOSS: "Défaite",
-    DRAW: "Nul",
-};
-
-const RESULT_COLORS: Record<GameHistoryResult, string> = {
-    WIN: "green",
-    LOSS: "red",
-    DRAW: "gray",
-};
-
-const ResultBadge = ({ result }: { result: GameHistoryResult }) => (
-    <Badge color={RESULT_COLORS[result]} variant="light">
-        {RESULT_LABELS[result]}
-    </Badge>
-);
-
 const GameHistoryRow = ({
     entry,
     friendIds,
@@ -51,29 +36,79 @@ const GameHistoryRow = ({
     entry: ApiGameHistoryEntry;
     friendIds: Set<number>;
     onSelect: (gameId: number) => void;
-}) => (
-    <Table.Tr style={{ cursor: "pointer" }} onClick={() => onSelect(entry.gameId)}>
-        <Table.Td>{formatDate(entry.finishedAt)}</Table.Td>
-        <Table.Td>
-            <span className="inline-flex items-center gap-2">
-                <PlayerNameLink
-                    pseudo={entry.opponentPseudo}
-                    userId={entry.opponentUserId}
-                    className="text-white no-underline hover:underline"
-                    stopPropagation
-                />
-                <FriendActionButton
-                    userId={entry.opponentUserId}
-                    isFriend={friendIds.has(entry.opponentUserId)}
-                />
-            </span>
-        </Table.Td>
-        <Table.Td>
-            <ResultBadge result={entry.result} />
-        </Table.Td>
-        <Table.Td>{formatEloDelta(entry.eloDelta)}</Table.Td>
-        <Table.Td className="hidden sm:table-cell">{entry.roundCount}</Table.Td>
-    </Table.Tr>
+}) => {
+    const isFriend = friendIds.has(entry.opponentUserId);
+    const eloClass =
+        entry.eloDelta === null
+            ? "game-history-list-elo--neutral"
+            : entry.eloDelta > 0
+              ? "game-history-list-elo--positive"
+              : entry.eloDelta < 0
+                ? "game-history-list-elo--negative"
+                : "game-history-list-elo--neutral";
+
+    return (
+        <tr onClick={() => onSelect(entry.gameId)}>
+            <td>
+                <span className="game-history-list-date">
+                    <IconSwords size={16} className="game-history-list-date__icon" />
+                    {formatDate(entry.finishedAt)}
+                </span>
+            </td>
+            <td>
+                <span className="game-history-list-opponent">
+                    <UserAvatar
+                        pseudo={entry.opponentPseudo}
+                        userId={entry.opponentUserId}
+                        className="game-history-list-opponent__avatar"
+                        alt=""
+                    />
+                    <PlayerNameLink
+                        pseudo={entry.opponentPseudo}
+                        userId={entry.opponentUserId}
+                        className="game-history-list-opponent__name"
+                        stopPropagation
+                    />
+                    {isFriend && <span className="game-history-list-friend-badge">Ami</span>}
+                </span>
+            </td>
+            <td>
+                <GameHistoryResultBadge result={entry.result} />
+            </td>
+            <td>
+                <span className={clsx("game-history-list-elo", eloClass)}>
+                    {formatEloDelta(entry.eloDelta)}
+                </span>
+            </td>
+            <td className="game-history-list-table__col--hide-sm">{entry.roundCount}</td>
+            <td className="game-history-list-table__col--right">
+                <button
+                    type="button"
+                    className="game-history-list-row-action"
+                    aria-label={`Voir la partie contre ${formatPlayerName(entry.opponentPseudo, entry.opponentUserId)}`}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onSelect(entry.gameId);
+                    }}
+                >
+                    ›
+                </button>
+            </td>
+        </tr>
+    );
+};
+
+const GameHistoryListShell = ({ children }: { children: ReactNode }) => (
+    <div className="game-history-list-page">
+        <div className="game-history-list-page__bg" aria-hidden="true" />
+        <div className="game-history-list-page__overlay" aria-hidden="true" />
+        <div className="game-history-list-page__content">
+            <div className="game-history-list-panel">
+                <div className="game-history-list-panel__corners" aria-hidden="true" />
+                {children}
+            </div>
+        </div>
+    </div>
 );
 
 export const GameHistoryListPage = observer(() => {
@@ -90,9 +125,9 @@ export const GameHistoryListPage = observer(() => {
 
     if (!Number.isFinite(userId) || userId <= 0) {
         return (
-            <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
-                <p className="text-white/80 m-0">Joueur invalide.</p>
-            </div>
+            <GameHistoryListShell>
+                <p className="game-history-list-panel__message">Joueur invalide.</p>
+            </GameHistoryListShell>
         );
     }
 
@@ -100,90 +135,88 @@ export const GameHistoryListPage = observer(() => {
 
     if (historyQuery.isError || !historyQuery.data) {
         return (
-            <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
-                <p className="text-white/80 m-0">Joueur introuvable.</p>
-            </div>
+            <GameHistoryListShell>
+                <p className="game-history-list-panel__message">Joueur introuvable.</p>
+            </GameHistoryListShell>
         );
     }
 
     const { user, games } = historyQuery.data;
     const isOwnHistory = currentUser?.id === user.userId;
+    const playerName = formatPlayerName(user.pseudo, user.userId);
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-white m-0">
-                    Historique de{" "}
-                    <PlayerNameLink
-                        pseudo={user.pseudo}
-                        userId={user.userId}
-                        className="text-white no-underline hover:underline"
-                    />
-                    {isOwnHistory && <span className="text-gg-gold text-base ml-2">(vous)</span>}
+        <GameHistoryListShell>
+            <header className="game-history-list-panel__header">
+                <h1 className="game-history-list-panel__title">
+                    {playerName} : historique des parties
+                    {isOwnHistory && (
+                        <span className="game-history-list-panel__title-you"> (vous)</span>
+                    )}
                 </h1>
+                <p className="game-history-list-panel__subtitle">
+                    Elo {user.elo} — {user.wins}V / {user.losses}D
+                </p>
                 {!isOwnHistory && (
-                    <FriendActionButton
-                        userId={user.userId}
-                        isFriend={friendIds.has(user.userId)}
-                        size="md"
-                    />
+                    <div className="game-history-list-panel__header-actions">
+                        <FriendActionButton
+                            userId={user.userId}
+                            isFriend={friendIds.has(user.userId)}
+                            size="md"
+                        />
+                    </div>
+                )}
+            </header>
+
+            <div className="game-history-list-panel__body">
+                {games.length === 0 ? (
+                    <p className="game-history-list-empty">
+                        Aucune partie terminée pour le moment.
+                    </p>
+                ) : (
+                    <div className="game-history-list-table-frame">
+                        <div className="game-history-list-table-scroll">
+                            <table className="game-history-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Adversaire</th>
+                                        <th>Résultat</th>
+                                        <th>Elo</th>
+                                        <th className="game-history-list-table__col--hide-sm">
+                                            Tours
+                                        </th>
+                                        <th aria-hidden="true" />
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {games.map((entry) => (
+                                        <GameHistoryRow
+                                            key={entry.gameId}
+                                            entry={entry}
+                                            friendIds={friendIds}
+                                            onSelect={(gameId) =>
+                                                navigate(`/game-history/${userId}/${gameId}`)
+                                            }
+                                        />
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {currentUser && !isOwnHistory && (
+                    <div className="game-history-list-footer">
+                        <Link
+                            to={`/game-history/${currentUser.id}`}
+                            className="game-history-list-footer__link"
+                        >
+                            Voir mon historique
+                        </Link>
+                    </div>
                 )}
             </div>
-            <p className="text-white/70 m-0 mb-6">
-                Elo : {user.elo} — {user.wins}V / {user.losses}D
-            </p>
-
-            {games.length === 0 ? (
-                <div className="gg-panel p-8 text-center">
-                    <p className="text-white/80 m-0">Aucune partie terminée pour le moment.</p>
-                </div>
-            ) : (
-                <div className="gg-panel overflow-hidden">
-                    <ResponsiveTable minWidth={520}>
-                        <Table
-                            striped
-                            stripedColor="rgba(255, 255, 255, 0.06)"
-                            highlightOnHover
-                            highlightOnHoverColor="rgba(255, 255, 255, 0.1)"
-                            withTableBorder={false}
-                            styles={{
-                                th: { color: "rgba(255,255,255,0.7)", fontWeight: 600 },
-                                td: { color: "white" },
-                            }}
-                        >
-                            <Table.Thead>
-                                <Table.Tr>
-                                    <Table.Th>Date</Table.Th>
-                                    <Table.Th>Adversaire</Table.Th>
-                                    <Table.Th>Résultat</Table.Th>
-                                    <Table.Th>Elo</Table.Th>
-                                    <Table.Th className="hidden sm:table-cell">Tours</Table.Th>
-                                </Table.Tr>
-                            </Table.Thead>
-                            <Table.Tbody>
-                                {games.map((entry) => (
-                                    <GameHistoryRow
-                                        key={entry.gameId}
-                                        entry={entry}
-                                        friendIds={friendIds}
-                                        onSelect={(gameId) =>
-                                            navigate(`/game-history/${userId}/${gameId}`)
-                                        }
-                                    />
-                                ))}
-                            </Table.Tbody>
-                        </Table>
-                    </ResponsiveTable>
-                </div>
-            )}
-
-            {currentUser && !isOwnHistory && (
-                <p className="text-white/60 text-sm mt-4 mb-0">
-                    <Link to={`/game-history/${currentUser.id}`} className="text-gg-gold">
-                        Voir mon historique
-                    </Link>
-                </p>
-            )}
-        </div>
+        </GameHistoryListShell>
     );
 });

@@ -27,11 +27,7 @@ const renderColumnLabel = (
     linkToHistory: boolean,
 ) => {
     const nameLink = linkToHistory ? (
-        <PlayerNameLink
-            pseudo={player.pseudo}
-            userId={player.userId}
-            className="text-white"
-        />
+        <PlayerNameLink pseudo={player.pseudo} userId={player.userId} className="text-white" />
     ) : (
         <>{player.pseudo ?? `Joueur #${player.userId}`}</>
     );
@@ -93,14 +89,16 @@ const ParchmentGameStatsTable = ({
                                     <td className="game-history-stats-table__label">{label}</td>
                                     <td
                                         className={clsx(
-                                            playerALeads && "game-history-stats-table__value--leads",
+                                            playerALeads &&
+                                                "game-history-stats-table__value--leads",
                                         )}
                                     >
                                         {playerAValue}
                                     </td>
                                     <td
                                         className={clsx(
-                                            playerBLeads && "game-history-stats-table__value--leads",
+                                            playerBLeads &&
+                                                "game-history-stats-table__value--leads",
                                         )}
                                     >
                                         {playerBValue}

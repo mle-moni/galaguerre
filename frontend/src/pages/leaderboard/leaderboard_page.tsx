@@ -50,12 +50,7 @@ const LeaderboardPlayerCell = ({
     isCurrentUser: boolean;
 }) => (
     <span className="leaderboard-player">
-        <UserAvatar
-            pseudo={pseudo}
-            userId={userId}
-            className="leaderboard-player__avatar"
-            alt=""
-        />
+        <UserAvatar pseudo={pseudo} userId={userId} className="leaderboard-player__avatar" alt="" />
         <PlayerNameLink
             pseudo={pseudo}
             userId={userId}
@@ -116,9 +111,7 @@ const EloLeaderboardTable = ({
                         return (
                             <tr
                                 key={entry.userId}
-                                className={clsx(
-                                    isCurrentUser && "leaderboard-table__row--current",
-                                )}
+                                className={clsx(isCurrentUser && "leaderboard-table__row--current")}
                             >
                                 <td>
                                     <LeaderboardRank rank={entry.rank} />
@@ -180,9 +173,7 @@ const SpeedrunLeaderboardTable = ({
                         return (
                             <tr
                                 key={entry.userId}
-                                className={clsx(
-                                    isCurrentUser && "leaderboard-table__row--current",
-                                )}
+                                className={clsx(isCurrentUser && "leaderboard-table__row--current")}
                             >
                                 <td>
                                     <LeaderboardRank rank={entry.rank} />
