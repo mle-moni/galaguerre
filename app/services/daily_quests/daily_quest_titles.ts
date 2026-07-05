@@ -18,8 +18,8 @@ export const getDailyQuestTitle = (quest: UserDailyQuest): string => {
             return `Gagner ${quest.targetValue} parties`;
         case "WIN_WITH_CARD":
             return cardName
-                ? `Gagner une partie avec ${cardName}`
-                : "Gagner une partie avec une carte spécifique";
+                ? `Gagner une partie en ayant joué ${cardName}`
+                : "Gagner une partie en ayant joué une carte spécifique";
         case "OPEN_PACK":
             return quest.targetValue === 1
                 ? "Ouvrir 1 paquet"

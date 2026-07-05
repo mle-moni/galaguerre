@@ -236,7 +236,9 @@ export const LeaderboardPage = observer(() => {
                     <header className="leaderboard-panel__header">
                         <h1 className="leaderboard-panel__title">Classement</h1>
                         <p className="leaderboard-panel__subtitle">
-                            Affrontez les meilleurs et gravissez les rangs !
+                            {activeTab === "ai-speedrun"
+                                ? "Jouez contre l'IA et gagnez la partie le plus rapidement possible !"
+                                : "Affrontez les meilleurs et gravissez les rangs !"}
                         </p>
                     </header>
 

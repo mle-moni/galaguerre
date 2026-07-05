@@ -5,6 +5,8 @@ import { getDailyQuestTitle } from "#services/daily_quests/daily_quest_titles";
 export const serializeDailyQuest = (quest: UserDailyQuest): ApiDailyQuest => ({
     id: quest.id,
     title: getDailyQuestTitle(quest),
+    questType: quest.questType,
+    params: quest.params,
     progress: quest.progress,
     target: quest.targetValue,
     rewardType: quest.rewardType,

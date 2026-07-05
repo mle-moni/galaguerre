@@ -26,6 +26,8 @@ export interface DailyQuestParams {
 export interface ApiDailyQuest {
     id: number;
     title: string;
+    questType: DailyQuestType;
+    params: DailyQuestParams | null;
     progress: number;
     target: number;
     rewardType: DailyQuestRewardType;
