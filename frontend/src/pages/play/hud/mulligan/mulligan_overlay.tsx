@@ -1,7 +1,7 @@
 import { Modal } from "@mantine/core";
-import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { CoinCardLink } from "~/components/cards/coin_card_link";
+import { MarkedDiscardCard } from "~/components/cards/marked_discard_card";
 import { PlayerCardFace } from "~/components/cards/player_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useOnboardingGame } from "~/hooks/use_onboarding_game";
@@ -92,13 +92,21 @@ export const MulliganOverlay = observer(() => {
                                     card.uuid,
                                 );
 
+                                const cardFace = (
+                                    <PlayerCardFace
+                                        card={card}
+                                        size="full"
+                                        spellPower={store.me.spellPower}
+                                        attack={card.type === "MINION" ? card.attack : undefined}
+                                        health={card.type === "MINION" ? card.health : undefined}
+                                    />
+                                );
+
                                 return (
                                     <button
                                         key={card.uuid}
                                         type="button"
-                                        className={clsx("mulligan-overlay__card", {
-                                            "mulligan-overlay__card--discarded": isSelected,
-                                        })}
+                                        className="mulligan-overlay__card"
                                         onClick={() => store.toggleMulliganCard(card.uuid)}
                                         aria-pressed={isSelected}
                                         aria-label={
@@ -106,29 +114,12 @@ export const MulliganOverlay = observer(() => {
                                         }
                                     >
                                         {isSelected ? (
-                                            <span className="mulligan-overlay__replace-banner">
-                                                À remplacer
-                                            </span>
-                                        ) : null}
-                                        <div className="mulligan-overlay__card-face">
-                                            <PlayerCardFace
-                                                card={card}
-                                                size="full"
-                                                spellPower={store.me.spellPower}
-                                                attack={
-                                                    card.type === "MINION" ? card.attack : undefined
-                                                }
-                                                health={
-                                                    card.type === "MINION" ? card.health : undefined
-                                                }
-                                            />
-                                        </div>
-                                        {isSelected ? (
-                                            <div
-                                                className="mulligan-overlay__discard-mark"
-                                                aria-hidden
-                                            />
-                                        ) : null}
+                                            <MarkedDiscardCard bannerText="À remplacer">
+                                                {cardFace}
+                                            </MarkedDiscardCard>
+                                        ) : (
+                                            cardFace
+                                        )}
                                     </button>
                                 );
                             })}

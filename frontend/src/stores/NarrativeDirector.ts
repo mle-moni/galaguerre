@@ -5,7 +5,7 @@ import { choreographShots, isCombatLungePhase } from "~/pages/play/animations/ch
 import { effectsToShots } from "~/pages/play/animations/effects_to_shots";
 import { readGameAnimationSnapshot } from "~/pages/play/animations/game_animation_snapshot";
 import { resolveHeroRect } from "~/pages/play/animations/resolve_rects";
-import { extractPlayedCardFromBeat } from "~/pages/play/hud/played_card_reveal/extract_played_card_from_beat";
+import { extractCardRevealFromBeat } from "~/pages/play/hud/played_card_reveal/extract_played_card_from_beat";
 import { ANIMATION_STORE } from "./store_singletons.js";
 import type { GameStore } from "./GameStore.js";
 
@@ -207,18 +207,19 @@ export class NarrativeDirector {
                         this.mergeGameData(authoritativeGame, beat.stateAfter),
                     );
                     await waitForLayout();
+                }
 
-                    const playedCard = extractPlayedCardFromBeat(
-                        beat,
-                        authoritativeGame,
-                        this.gameStore.user.id,
+                const cardReveal = extractCardRevealFromBeat(
+                    beat,
+                    authoritativeGame,
+                    this.gameStore.user.id,
+                );
+                if (cardReveal && (revealStateFirst || beat.kind === "OVERDRAW")) {
+                    this.gameStore.playedCardRevealStore.reveal(
+                        cardReveal.card,
+                        cardReveal.playerId,
+                        cardReveal.variant,
                     );
-                    if (playedCard) {
-                        this.gameStore.playedCardRevealStore.reveal(
-                            playedCard.card,
-                            playedCard.playerId,
-                        );
-                    }
                 }
 
                 if (!reducedMotion) {

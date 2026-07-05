@@ -1,5 +1,12 @@
 import type { ApiGame, GameData, PlayerCard, SpotOwner } from "#api_types/game.types";
 import type { NarrativeBeat, NarrativeEffect } from "#api_types/game_narrative.types";
+import type { PlayedCardRevealVariant } from "~/stores/PlayedCardRevealStore";
+
+export type CardRevealFromBeat = {
+    card: PlayerCard;
+    playerId: number;
+    variant: PlayedCardRevealVariant;
+};
 
 const findCardInGameData = (gameData: GameData, cardUuid: string): PlayerCard | undefined => {
     for (const player of [gameData.playerOne, gameData.playerTwo]) {
@@ -34,19 +41,17 @@ const getPlayerIdForOwner = (
     return isMe ? gameData.playerTwo.userId : gameData.playerOne.userId;
 };
 
-export const extractPlayedCardFromBeat = (
+const extractPlayCardFromBeat = (
     beat: NarrativeBeat,
     authoritativeGame: ApiGame,
     viewerUserId: number,
-): { card: PlayerCard; playerId: number } | null => {
-    if (beat.kind !== "PLAY_CARD") return null;
-
+): CardRevealFromBeat | null => {
     if (beat.logEntryId) {
         const entry = authoritativeGame.data.actionLog?.find(
             (logEntry) => logEntry.id === beat.logEntryId,
         );
         if (entry?.type === "PLAY_CARD" && entry.card) {
-            return { card: entry.card, playerId: entry.playerId };
+            return { card: entry.card, playerId: entry.playerId, variant: "played" };
         }
     }
 
@@ -64,5 +69,60 @@ export const extractPlayedCardFromBeat = (
     return {
         card,
         playerId: getPlayerIdForOwner(authoritativeGame.data, moveFromHand.owner, viewerUserId),
+        variant: "played",
     };
+};
+
+const extractOverdrawFromBeat = (
+    beat: NarrativeBeat,
+    authoritativeGame: ApiGame,
+    viewerUserId: number,
+): CardRevealFromBeat | null => {
+    if (beat.logEntryId) {
+        const entry = authoritativeGame.data.actionLog?.find(
+            (logEntry) => logEntry.id === beat.logEntryId,
+        );
+        if (entry?.type === "OVERDRAW" && entry.card) {
+            return { card: entry.card, playerId: entry.playerId, variant: "overdraw" };
+        }
+    }
+
+    const overdrawEffect = beat.effects.find(
+        (effect): effect is Extract<NarrativeEffect, { type: "OVERDRAW" }> =>
+            effect.type === "OVERDRAW",
+    );
+    if (!overdrawEffect) return null;
+
+    return {
+        card: overdrawEffect.card,
+        playerId: getPlayerIdForOwner(authoritativeGame.data, overdrawEffect.owner, viewerUserId),
+        variant: "overdraw",
+    };
+};
+
+export const extractCardRevealFromBeat = (
+    beat: NarrativeBeat,
+    authoritativeGame: ApiGame,
+    viewerUserId: number,
+): CardRevealFromBeat | null => {
+    if (beat.kind === "PLAY_CARD") {
+        return extractPlayCardFromBeat(beat, authoritativeGame, viewerUserId);
+    }
+
+    if (beat.kind === "OVERDRAW") {
+        return extractOverdrawFromBeat(beat, authoritativeGame, viewerUserId);
+    }
+
+    return null;
+};
+
+/** @deprecated Use extractCardRevealFromBeat */
+export const extractPlayedCardFromBeat = (
+    beat: NarrativeBeat,
+    authoritativeGame: ApiGame,
+    viewerUserId: number,
+): { card: PlayerCard; playerId: number } | null => {
+    const reveal = extractCardRevealFromBeat(beat, authoritativeGame, viewerUserId);
+    if (!reveal || reveal.variant !== "played") return null;
+    return { card: reveal.card, playerId: reveal.playerId };
 };

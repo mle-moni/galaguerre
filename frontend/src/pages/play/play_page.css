@@ -6,10 +6,16 @@ html.play-page-active body {
 .play-page {
 	width: 100vw;
 	height: 100dvh;
-	background: url("/game/play-background.webp") center / cover no-repeat;
+	background: url("/game/play-background-hq.webp") center / cover no-repeat;
 	padding-left: env(safe-area-inset-left);
 	padding-right: env(safe-area-inset-right);
 	overflow: hidden;
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+	.play-page {
+		background-image: url("/game/play-background-mobile.webp");
+	}
 }
 
 .play-page--offline {
