@@ -7,9 +7,15 @@ interface MobileCountdownTimerProps {
     endsAt?: number;
     label: string;
     description: string;
+    displayOffsetSeconds?: number;
 }
 
-export const MobileCountdownTimer = ({ endsAt, label, description }: MobileCountdownTimerProps) => {
+export const MobileCountdownTimer = ({
+    endsAt,
+    label,
+    description,
+    displayOffsetSeconds = 0,
+}: MobileCountdownTimerProps) => {
     const secondsLeft = useCountdownTimer(endsAt);
     const [opened, setOpened] = useState(false);
 
@@ -36,7 +42,10 @@ export const MobileCountdownTimer = ({ endsAt, label, description }: MobileCount
                     onClick={handleClick}
                     aria-label={label}
                 >
-                    <CountdownTimerFace seconds={secondsLeft} />
+                    <CountdownTimerFace
+                        seconds={secondsLeft}
+                        displayOffsetSeconds={displayOffsetSeconds}
+                    />
                 </span>
             </Popover.Target>
             <Popover.Dropdown onClick={(event) => event.stopPropagation()}>

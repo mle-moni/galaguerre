@@ -6,6 +6,7 @@ import { PlayerCardFace } from "~/components/cards/player_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
+import { TURN_TIMER_DISPLAY_OFFSET_SECONDS } from "../../play_game_constants.js";
 import "./discover_overlay.css";
 
 const DiscoverCardChoices = ({
@@ -83,6 +84,7 @@ export const DiscoverOverlay = observer(() => {
 
                     <CountdownTimer
                         endsAt={store.authoritativeGame.data.turnEndsAt}
+                        displayOffsetSeconds={TURN_TIMER_DISPLAY_OFFSET_SECONDS}
                         label="Temps restant :"
                     />
 

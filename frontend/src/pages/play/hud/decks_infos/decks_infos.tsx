@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { CARD_BACK_IMAGE_URL } from "~/components/cards/card_back_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
+import { TURN_TIMER_DISPLAY_OFFSET_SECONDS } from "../../play_game_constants.js";
 import "./decks_infos.css";
 
 interface DecksInfosProps {
@@ -59,6 +60,7 @@ const TurnTimer = observer(() => {
     return (
         <CountdownTimer
             endsAt={store.game.data.turnEndsAt}
+            displayOffsetSeconds={TURN_TIMER_DISPLAY_OFFSET_SECONDS}
             title={
                 store.isMyTurn
                     ? "Temps restant pour votre tour"

@@ -6,11 +6,17 @@ interface CountdownTimerProps {
     endsAt?: number;
     label?: string;
     title?: string;
+    displayOffsetSeconds?: number;
 }
 
 interface CountdownTimerFaceProps {
     seconds: number;
     title?: string;
+    displayOffsetSeconds?: number;
+}
+
+export function getDisplayedCountdownSeconds(seconds: number, displayOffsetSeconds = 0): number {
+    return Math.max(0, seconds - displayOffsetSeconds);
 }
 
 export function useCountdownTimer(endsAt?: number) {
@@ -36,20 +42,30 @@ export function useCountdownTimer(endsAt?: number) {
     return secondsLeft;
 }
 
-export const CountdownTimerFace = ({ seconds, title }: CountdownTimerFaceProps) => {
-    const digits = String(seconds).length;
+export const CountdownTimerFace = ({
+    seconds,
+    title,
+    displayOffsetSeconds = 0,
+}: CountdownTimerFaceProps) => {
+    const displayedSeconds = getDisplayedCountdownSeconds(seconds, displayOffsetSeconds);
+    const digits = String(displayedSeconds).length;
 
     return (
         <span className="countdown-timer__face" title={title}>
             <img src={PLAY_TIMER_URL} alt="" className="countdown-timer__icon" draggable={false} />
             <span className="countdown-timer__value" data-digits={digits} aria-hidden="true">
-                {seconds}
+                {displayedSeconds}
             </span>
         </span>
     );
 };
 
-export const CountdownTimer = ({ endsAt, label, title }: CountdownTimerProps) => {
+export const CountdownTimer = ({
+    endsAt,
+    label,
+    title,
+    displayOffsetSeconds = 0,
+}: CountdownTimerProps) => {
     const secondsLeft = useCountdownTimer(endsAt);
 
     if (secondsLeft === null) return null;
@@ -57,7 +73,7 @@ export const CountdownTimer = ({ endsAt, label, title }: CountdownTimerProps) =>
     return (
         <span className="countdown-timer" title={title}>
             {label ? <span className="countdown-timer__label">{label}</span> : null}
-            <CountdownTimerFace seconds={secondsLeft} />
+            <CountdownTimerFace seconds={secondsLeft} displayOffsetSeconds={displayOffsetSeconds} />
         </span>
     );
 };

@@ -191,4 +191,32 @@
 		--spot-w: calc(var(--board-minion-w) + 6px);
 		--spot-h: calc(var(--board-minion-h) + 6px);
 	}
+
+	.board-minion-variant--rect .board-row--full {
+		--board-available-w: calc(
+			100vw - env(safe-area-inset-left) - env(safe-area-inset-right) -
+				6 * var(--board-minion-gap)
+		);
+		--board-minion-w: min(
+			clamp(80px, 24vw, 104px),
+			calc(var(--board-available-w) / 7)
+		);
+		--board-minion-h: calc(var(--board-minion-w) * 5 / 8);
+		--board-stat-badge: min(
+			clamp(18px, 5vw, 24px),
+			calc(var(--board-minion-w) * 0.32)
+		);
+		--spot-w: calc(var(--board-minion-w) + 6px);
+		--spot-h: calc(var(--board-minion-h) + 6px);
+	}
+
+	.board-row--full .board-minion-token {
+		border-width: 2px;
+	}
+
+	.board-row--full .board-minion-token__effect {
+		width: 11px;
+		height: 11px;
+		font-size: 7px;
+	}
 }

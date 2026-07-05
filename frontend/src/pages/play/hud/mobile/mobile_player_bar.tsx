@@ -3,6 +3,7 @@ import { Button } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
+import { TURN_TIMER_DISPLAY_OFFSET_SECONDS } from "../../play_game_constants.js";
 import { MobileCountdownTimer } from "./mobile_countdown_timer.jsx";
 import { MobileHeroStrip } from "./mobile_hero_strip.jsx";
 
@@ -25,6 +26,7 @@ export const MobilePlayerBar = observer(({ me }: MobilePlayerBarProps) => {
             >
                 <MobileCountdownTimer
                     endsAt={store.game.data.turnEndsAt}
+                    displayOffsetSeconds={TURN_TIMER_DISPLAY_OFFSET_SECONDS}
                     label="Temps restant"
                     description="Temps qu'il vous reste pour jouer. À 0, votre tour se termine automatiquement."
                 />

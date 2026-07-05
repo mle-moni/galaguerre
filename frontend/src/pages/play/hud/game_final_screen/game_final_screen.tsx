@@ -6,11 +6,11 @@ import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { LEADERBOARD_QUERY_KEY, AI_SPEEDRUN_LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
 import { PACKS_QUERY_KEY } from "~/hooks/use_collection";
-import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useOnboardingGame } from "~/hooks/use_onboarding_game";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { client } from "~/services/client";
 import { clearCurrentGameId } from "~/services/clear_current_game_id";
+import { startGameSearch } from "~/services/matchmaking";
 import { queryClient } from "~/services/query_client";
 import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
 import type { ApiUser } from "#api_types/auth.types";
@@ -24,12 +24,13 @@ export const GameFinalScreen = observer(() => {
     const navigate = useNavigate();
     const isMobilePortrait = useIsMobilePortrait();
     const isOnboardingGame = useOnboardingGame();
-    const { startSearch, isStarting: isStartingSearch } = useMatchmaking();
     const isTraining = store.game.data.isTraining ?? false;
     const ButtonsLayout = isMobilePortrait ? Stack : Group;
 
-    const invalidatePostGameQueries = () => {
-        queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+    const invalidatePostGameQueries = (options?: { includeUser?: boolean }) => {
+        if (options?.includeUser !== false) {
+            queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+        }
         queryClient.invalidateQueries({ queryKey: PACKS_QUERY_KEY });
         queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY });
         if (isTraining && store.isUserWinner) {
@@ -37,9 +38,9 @@ export const GameFinalScreen = observer(() => {
         }
     };
 
-    const leaveFinishedGame = () => {
+    const leaveFinishedGame = (options?: { includeUser?: boolean }) => {
         clearCurrentGameId(queryClient, store.game.id);
-        invalidatePostGameQueries();
+        invalidatePostGameQueries(options);
     };
 
     const startTrainingMutation = useApiMutation({
@@ -51,7 +52,25 @@ export const GameFinalScreen = observer(() => {
                 if (!oldUser) return oldUser;
                 return { ...oldUser, currentGameId: data.gameId };
             });
+            void queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
             navigate("/play");
+        },
+    });
+
+    const replaySearchMutation = useApiMutation({
+        mutationFn: startGameSearch,
+        onSuccess: (data) => {
+            if (!data.searchSessionId) {
+                void queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+                return;
+            }
+
+            queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
+                if (!oldUser) return oldUser;
+                return { ...oldUser, matchmakingSearchSessionId: data.searchSessionId ?? null };
+            });
+            void queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+            navigate("/matchmaking");
         },
     });
 
@@ -70,15 +89,15 @@ export const GameFinalScreen = observer(() => {
     };
 
     const handleReplay = () => {
-        leaveFinishedGame();
+        void queryClient.cancelQueries({ queryKey: USER_QUERY_KEY });
+        leaveFinishedGame({ includeUser: false });
 
         if (isTraining) {
             startTrainingMutation.mutate();
             return;
         }
 
-        startSearch();
-        navigate("/matchmaking");
+        replaySearchMutation.mutate();
     };
 
     const ratingResult = store.game.data.ratingResult;
@@ -178,7 +197,9 @@ export const GameFinalScreen = observer(() => {
                     <ButtonsLayout gap="sm" mt="sm" w={isMobilePortrait ? "100%" : undefined}>
                         <Button
                             onClick={handleReplay}
-                            loading={startTrainingMutation.isPending || isStartingSearch}
+                            loading={
+                                startTrainingMutation.isPending || replaySearchMutation.isPending
+                            }
                         >
                             Rejouer
                         </Button>

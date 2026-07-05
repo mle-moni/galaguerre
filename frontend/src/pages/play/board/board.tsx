@@ -2,7 +2,7 @@ import "./board.css";
 import "~/components/targeting/targeting.css";
 
 import type { SpotOwner } from "#api_types/game.types";
-import { getOccupiedBoardEntries } from "#api_types/board";
+import { getOccupiedBoardEntries, MAX_BOARD_MINIONS } from "#api_types/board";
 import type { MinionCard } from "#api_types/game.types";
 
 import clsx from "clsx";
@@ -56,11 +56,17 @@ const BoardSide = observer(({ spotOwner }: BoardSideProps) => {
     const { store } = useGameContext();
     const board = spotOwner === "OPPONENT" ? store.opponent.board : store.me.board;
     const entries = getOccupiedBoardEntries(board);
+    const isBoardFull = entries.length === MAX_BOARD_MINIONS;
 
     if (spotOwner === "OPPONENT") {
         return (
             <div className="board-side flex-1 min-h-0 w-full flex justify-center items-center">
-                <div className="board-row board-row--centered">
+                <div
+                    className={clsx(
+                        "board-row board-row--centered",
+                        isBoardFull && "board-row--full",
+                    )}
+                >
                     {entries.map((entry) => (
                         <BoardMinionSlot
                             key={entry.minion.uuid}
@@ -153,6 +159,7 @@ const BoardSide = observer(({ spotOwner }: BoardSideProps) => {
                     className={clsx(
                         "board-row board-row--centered",
                         isEmptyBoard && "board-player-drop-row",
+                        isBoardFull && "board-row--full",
                     )}
                     data-player-board-row
                     data-spot-owner={spotOwner}

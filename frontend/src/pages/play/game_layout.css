@@ -41,6 +41,23 @@
 				max(8px, env(safe-area-inset-bottom))
 		);
 	}
+
+	.board-row--full {
+		--board-available-w: calc(
+			100vw - env(safe-area-inset-left) - env(safe-area-inset-right)
+		);
+		--board-minion-w: min(
+			clamp(52px, 15vw, 66px),
+			calc(var(--board-available-w) / 7)
+		);
+		--board-minion-h: calc(var(--board-minion-w) * 1.12);
+		--board-stat-badge: min(
+			clamp(16px, 4.5vw, 20px),
+			calc(var(--board-minion-w) * 0.32)
+		);
+		--spot-w: calc(var(--board-minion-w) + 6px);
+		--spot-h: calc(var(--board-minion-h) + 6px);
+	}
 }
 
 .card-hand .playing-card-face .cost,
