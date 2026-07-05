@@ -1,20 +1,159 @@
-import type { GameHistoryResult } from "#api_types/game_history.types";
-import { Button, Stack, Text } from "@mantine/core";
+import type {
+    ApiGameHistoryPlayer,
+    GameHistoryResult,
+} from "#api_types/game_history.types";
+import type { GameRatingPlayerResult } from "#api_types/game.types";
+import { IconChevronLeft, IconCrown, IconFlame, IconSwords } from "@tabler/icons-react";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
+import { FriendActionButton } from "~/components/friends/friend_action_button";
 import { GameStatsTable } from "~/components/game_stats_table";
 import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
+import { UserAvatar } from "~/components/user_avatar";
+import { formatGameDuration } from "~/helpers/format_game_duration";
+import { useFriendsQuery } from "~/hooks/use_friends";
 import { useGameHistoryDetailQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
-import { formatGameDuration } from "~/helpers/format_game_duration";
+import "./game_history_detail_page.css";
 
-const RESULT_SUMMARY: Record<GameHistoryResult, string> = {
+const RESULT_LABELS: Record<GameHistoryResult, string> = {
     WIN: "Victoire",
     LOSS: "Défaite",
-    DRAW: "Match nul",
+    DRAW: "Nul",
 };
+
+const formatDate = (isoDate: string) =>
+    new Date(isoDate).toLocaleString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+
+const formatEloDelta = (delta: number) => (delta > 0 ? `+${delta}` : `${delta}`);
+
+const getOpponentRating = (
+    playerRating: GameRatingPlayerResult | null,
+    ratingResult: { playerOne: GameRatingPlayerResult; playerTwo: GameRatingPlayerResult } | null,
+): GameRatingPlayerResult | null => {
+    if (!playerRating || !ratingResult) {
+        return null;
+    }
+
+    const isPlayerOne =
+        playerRating.eloBefore === ratingResult.playerOne.eloBefore &&
+        playerRating.eloAfter === ratingResult.playerOne.eloAfter &&
+        playerRating.delta === ratingResult.playerOne.delta;
+
+    return isPlayerOne ? ratingResult.playerTwo : ratingResult.playerOne;
+};
+
+const GameHistoryResultBadge = ({ result }: { result: GameHistoryResult }) => {
+    const badgeClass = clsx(
+        "game-history-result-badge",
+        result === "WIN" && "game-history-result-badge--win",
+        result === "LOSS" && "game-history-result-badge--loss",
+        result === "DRAW" && "game-history-result-badge--draw",
+    );
+
+    return (
+        <span className={badgeClass}>
+            {result === "WIN" && <IconCrown size={12} />}
+            {result === "LOSS" && <IconFlame size={12} />}
+            {RESULT_LABELS[result]}
+            {result === "WIN" && <IconCrown size={12} />}
+            {result === "LOSS" && <IconFlame size={12} />}
+        </span>
+    );
+};
+
+const GameHistoryPlayerCell = ({
+    player,
+    isWinner,
+    isCurrentUser,
+    isFriend,
+    showFriendButton,
+    side,
+    rating,
+}: {
+    player: ApiGameHistoryPlayer;
+    isWinner: boolean;
+    isCurrentUser: boolean;
+    isFriend: boolean;
+    showFriendButton: boolean;
+    side: "left" | "right";
+    rating: GameRatingPlayerResult | null;
+}) => (
+    <div
+        className={clsx(
+            "game-history-detail-player",
+            side === "left" && "game-history-detail-player--left",
+            side === "right" && "game-history-detail-player--right",
+            isWinner && "game-history-detail-player--winner",
+        )}
+    >
+        <div className="game-history-detail-player__row">
+            {isWinner && <IconCrown size={16} className="game-history-detail-player__crown" />}
+            <UserAvatar
+                pseudo={player.pseudo}
+                userId={player.userId}
+                className="game-history-detail-player__avatar"
+                alt=""
+            />
+            <span className="inline-flex items-center gap-1 min-w-0">
+                <PlayerNameLink
+                    pseudo={player.pseudo}
+                    userId={player.userId}
+                    className={clsx(
+                        "game-history-detail-player__name",
+                        isCurrentUser && "game-history-detail-player__name--current",
+                    )}
+                />
+                {showFriendButton && (
+                    <FriendActionButton userId={player.userId} isFriend={isFriend} />
+                )}
+            </span>
+        </div>
+        {rating && (
+            <span className="game-history-detail-player__elo">
+                <span
+                    className={clsx(
+                        "game-history-detail-player__elo-delta",
+                        rating.delta > 0 && "game-history-detail-player__elo-delta--positive",
+                        rating.delta < 0 && "game-history-detail-player__elo-delta--negative",
+                    )}
+                >
+                    {formatEloDelta(rating.delta)}
+                </span>{" "}
+                Elo ({rating.eloBefore} → {rating.eloAfter})
+            </span>
+        )}
+    </div>
+);
+
+const GameHistoryDetailShell = ({
+    children,
+    backLink,
+}: {
+    children: ReactNode;
+    backLink?: ReactNode;
+}) => (
+    <div className="game-history-detail-page">
+        <div className="game-history-detail-page__bg" aria-hidden="true" />
+        <div className="game-history-detail-page__overlay" aria-hidden="true" />
+        <div className="game-history-detail-page__content">
+            {backLink}
+            <div className="game-history-detail-panel">
+                <div className="game-history-detail-panel__corners" aria-hidden="true" />
+                {children}
+            </div>
+        </div>
+    </div>
+);
 
 export const GameHistoryDetailPage = observer(() => {
     const { userId: userIdParam, gameId: gameIdParam } = useParams();
@@ -22,26 +161,27 @@ export const GameHistoryDetailPage = observer(() => {
     const gameId = Number(gameIdParam);
     const currentUser = useUser();
     const detailQuery = useGameHistoryDetailQuery(userId, gameId);
+    const friendsQuery = useFriendsQuery();
 
     const detail = detailQuery.data;
-    const isDraw = detail?.result === "DRAW";
-    const winner = useMemo(() => {
-        if (!detail || detail.winnerId === null) {
-            return null;
-        }
+    const friendIds = useMemo(
+        () => new Set((friendsQuery.data ?? []).map((friend) => friend.userId)),
+        [friendsQuery.data],
+    );
 
-        if (detail.winnerId === detail.player.userId) {
-            return detail.player;
-        }
-
-        return detail.opponent;
-    }, [detail]);
+    const opponentRating = useMemo(
+        () =>
+            detail
+                ? getOpponentRating(detail.playerRating, detail.ratingResult)
+                : null,
+        [detail],
+    );
 
     if (!Number.isFinite(userId) || userId <= 0 || !Number.isFinite(gameId) || gameId <= 0) {
         return (
-            <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
-                <p className="text-white/80 m-0">Partie invalide.</p>
-            </div>
+            <GameHistoryDetailShell>
+                <p className="game-history-detail-panel__message">Partie invalide.</p>
+            </GameHistoryDetailShell>
         );
     }
 
@@ -49,81 +189,112 @@ export const GameHistoryDetailPage = observer(() => {
 
     if (detailQuery.isError || !detailQuery.data || !detail) {
         return (
-            <div className="gg-panel p-8 text-center max-w-3xl mx-auto">
-                <p className="text-white/80 m-0">Partie introuvable.</p>
-            </div>
+            <GameHistoryDetailShell>
+                <p className="game-history-detail-panel__message">Partie introuvable.</p>
+            </GameHistoryDetailShell>
         );
     }
 
+    const isDraw = detail.result === "DRAW";
+    const playerIsWinner = detail.winnerId === detail.player.userId;
+    const opponentIsWinner = detail.winnerId === detail.opponent.userId;
+    const playerIsCurrentUser = currentUser?.id === detail.player.userId;
+    const opponentIsCurrentUser = currentUser?.id === detail.opponent.userId;
+    const showEloUnchanged = isDraw || detail.ratingResult === null;
+
     return (
-        <div className="max-w-4xl mx-auto">
-            <h1 className="text-xl sm:text-2xl font-bold text-white m-0 mb-6">
-                Partie #{detail.gameId}
-            </h1>
-
-            <div className="gg-panel p-6">
-                <Stack gap="sm">
-                    <Text size="lg" fw={600}>
-                        {RESULT_SUMMARY[detail.result]}
-                        {!isDraw && winner && (
-                            <>
-                                {" — "}
-                                <PlayerNameLink
-                                    pseudo={winner.pseudo}
-                                    userId={winner.userId}
-                                    className="text-inherit no-underline hover:underline"
-                                />{" "}
-                                remporte la partie
-                            </>
-                        )}
-                    </Text>
-
-                    <Text size="sm" c="dimmed">
-                        <PlayerNameLink
-                            pseudo={detail.player.pseudo}
-                            userId={detail.player.userId}
-                            className="text-inherit no-underline hover:underline"
-                        />
-                        {" VS "}
-                        <PlayerNameLink
-                            pseudo={detail.opponent.pseudo}
-                            userId={detail.opponent.userId}
-                            className="text-inherit no-underline hover:underline"
-                        />
-                    </Text>
-
-                    <Text size="sm" c="dimmed">
-                        {formatGameDuration(detail.createdAt, detail.finishedAt)} —{" "}
-                        {detail.roundCount} tours
-                    </Text>
-
-                    {isDraw && (
-                        <Text size="sm" c="dimmed">
-                            Match nul — Elo inchangé
-                        </Text>
+        <GameHistoryDetailShell
+            backLink={
+                <Link to={`/game-history/${userId}`} className="game-history-detail-back">
+                    <IconChevronLeft size={16} />
+                    Historique de {detail.user.pseudo ?? `Joueur #${userId}`}
+                </Link>
+            }
+        >
+            <div className="game-history-detail-panel__body">
+                <div className="game-history-detail-summary">
+                    <span className="game-history-detail-summary__date">
+                        <IconSwords size={16} className="game-history-detail-summary__date-icon" />
+                        {formatDate(detail.finishedAt)}
+                    </span>
+                    <GameHistoryResultBadge result={detail.result} />
+                    {detail.playerRating && (
+                        <span className="game-history-detail-summary__elo">
+                            <span
+                                className={clsx(
+                                    "game-history-detail-summary__elo-delta",
+                                    detail.playerRating.delta > 0 &&
+                                        "game-history-detail-summary__elo-delta--positive",
+                                    detail.playerRating.delta < 0 &&
+                                        "game-history-detail-summary__elo-delta--negative",
+                                )}
+                            >
+                                {formatEloDelta(detail.playerRating.delta)}
+                            </span>
+                            <span className="game-history-detail-summary__elo-detail">
+                                Elo : {detail.playerRating.eloBefore} →{" "}
+                                {detail.playerRating.eloAfter}
+                            </span>
+                        </span>
                     )}
+                    <span className="game-history-detail-summary__meta">
+                        {detail.roundCount} tours ·{" "}
+                        {formatGameDuration(detail.createdAt, detail.finishedAt)}
+                    </span>
+                    {showEloUnchanged && (
+                        <span className="game-history-detail-summary__elo-note">
+                            {isDraw ? "Match nul — Elo inchangé" : "Elo inchangé"}
+                        </span>
+                    )}
+                </div>
 
-                    <GameStatsTable
-                        playerA={detail.player}
-                        playerB={detail.opponent}
-                        winnerUserId={detail.winnerId}
-                        highlightUserId={currentUser?.id}
-                        linkToHistory
-                        onDarkBackground
+                <div className="game-history-detail-matchup">
+                    <GameHistoryPlayerCell
+                        player={detail.player}
+                        isWinner={playerIsWinner}
+                        isCurrentUser={playerIsCurrentUser}
+                        isFriend={friendIds.has(detail.player.userId)}
+                        showFriendButton={
+                            !playerIsCurrentUser && currentUser !== null
+                        }
+                        side="left"
+                        rating={detail.playerRating}
                     />
+                    <span className="game-history-detail-matchup__vs">VS</span>
+                    <GameHistoryPlayerCell
+                        player={detail.opponent}
+                        isWinner={opponentIsWinner}
+                        isCurrentUser={opponentIsCurrentUser}
+                        isFriend={friendIds.has(detail.opponent.userId)}
+                        showFriendButton={
+                            !opponentIsCurrentUser && currentUser !== null
+                        }
+                        side="right"
+                        rating={opponentRating}
+                    />
+                </div>
 
-                    {detail.hasReplay && (
-                        <Button
-                            component={Link}
-                            to={`/game-history/${userId}/${gameId}/replay`}
-                            variant="light"
-                            mt="sm"
-                        >
-                            Voir le replay
-                        </Button>
-                    )}
-                </Stack>
+                <GameStatsTable
+                    playerA={detail.player}
+                    playerB={detail.opponent}
+                    winnerUserId={detail.winnerId}
+                    highlightUserId={currentUser?.id}
+                    linkToHistory
+                    onParchmentBackground
+                />
+
+                {detail.hasReplay && (
+                    <Link
+                        to={`/game-history/${userId}/${gameId}/replay`}
+                        className="game-history-detail-replay"
+                    >
+                        Voir le replay
+                        <span className="game-history-detail-replay__chevron" aria-hidden="true">
+                            ›
+                        </span>
+                    </Link>
+                )}
             </div>
-        </div>
+        </GameHistoryDetailShell>
     );
 });

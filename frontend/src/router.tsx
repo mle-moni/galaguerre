@@ -121,6 +121,7 @@ const router = createBrowserRouter([
                     {
                         path: "/game-history/:userId/:gameId",
                         element: <GameHistoryDetailPage />,
+                        handle: { fillViewport: true },
                     },
                     {
                         path: "/game-history/:userId/:gameId/replay",
