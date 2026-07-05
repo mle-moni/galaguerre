@@ -14,8 +14,9 @@ test.group("sell card with gold coins", (group) => {
     test("sells one copy and credits gold", async ({ assert }) => {
         await syncCards();
 
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const user = await User.create({
-            email: "sell-one@test.fr",
+            email: `sell-one-${unique}@test.fr`,
             pseudo: "sell-one",
             password: "test",
             goldCoins: 0,
@@ -23,19 +24,21 @@ test.group("sell card with gold coins", (group) => {
 
         await grantStarterCollectionForUser(user.id);
 
+        const ownedCardIds = (await UserCard.query().where("userId", user.id)).map(
+            (row) => row.cardId,
+        );
         const commonCard = await Card.query()
+            .whereIn("id", ownedCardIds)
             .where("isCollectible", true)
             .where("rarity", "COMMON")
             .firstOrFail();
 
         const existing = await UserCard.query()
             .where({ userId: user.id, cardId: commonCard.id })
-            .first();
-        const previousCount = existing?.count ?? 0;
-        await UserCard.updateOrCreate(
-            { userId: user.id, cardId: commonCard.id },
-            { count: previousCount + 1 },
-        );
+            .firstOrFail();
+        const previousCount = existing.count;
+        existing.count = previousCount + 1;
+        await existing.save();
 
         const result = await sellCardWithGoldCoins(user.id, commonCard.id);
 

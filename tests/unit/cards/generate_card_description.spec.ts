@@ -15,7 +15,6 @@ test.group("generate_card_description", () => {
     test("generates minion description with powers and battlecry", ({ assert }) => {
         const description = generateCardDescriptionFromData(findCard(65).data);
 
-        assert.include(description, "Monstre 1/3");
         assert.include(description, "Provocation");
         assert.include(description, "Cri de guerre");
     });

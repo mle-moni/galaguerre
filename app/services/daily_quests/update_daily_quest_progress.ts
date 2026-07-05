@@ -1,5 +1,5 @@
 import type { GameLogEntry, GamePlayer, GamePlayerStats } from "#api_types/game.types";
-import type Game from "#models/game";
+import Game from "#models/game";
 import UserDailyQuest from "#models/user_daily_quest";
 import { getOrGenerateDailyQuests } from "#services/daily_quests/get_or_generate_daily_quests";
 import { getWinnerUserId } from "#services/elo";
@@ -95,6 +95,7 @@ const saveUpdatedQuests = async (quests: UserDailyQuest[]): Promise<void> => {
 };
 
 export const updateDailyQuestProgressForGame = async (game: Game): Promise<void> => {
+    if (!(game instanceof Game)) return;
     if (!gameQualifiesForRewards(game)) return;
 
     const winnerUserId = getWinnerUserId(game);

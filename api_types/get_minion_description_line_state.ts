@@ -23,7 +23,6 @@ export const getActiveMinionEffectNames = (card: MinionCard): string[] => {
 
 export const isMinionDescriptionLineDisabled = (
     line: string,
-    lineIndex: number,
     activeEffects: string[],
     isSilenced = false,
 ): boolean => {
@@ -32,5 +31,5 @@ export const isMinionDescriptionLineDisabled = (
         return !activeEffects.includes(effectName);
     }
 
-    return isSilenced && lineIndex > 0;
+    return isSilenced && effectName === null;
 };

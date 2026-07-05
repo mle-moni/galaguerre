@@ -1,5 +1,5 @@
 import type { GameRewardPlayerResult, GameRewardResult } from "#api_types/rewards.types";
-import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
+import { computePlayerGoldReward } from "#api_types/rewards.types";
 import Game from "#models/game";
 import User from "#models/user";
 import { getWinnerUserId } from "#services/elo";
@@ -11,23 +11,21 @@ const EMPTY_REWARD: GameRewardPlayerResult = { goldCoins: 0, packs: 0 };
 
 const isHumanUserId = (userId: number): boolean => userId !== TRAINING_AI_USER_ID;
 
-const computePlayerReward = (isWinner: boolean, isDraw: boolean): GameRewardPlayerResult => {
-    if (isDraw) {
-        return { goldCoins: GOLD_COINS_PER_DEFEAT, packs: 0 };
-    }
-
-    if (isWinner) {
-        return { goldCoins: GOLD_COINS_PER_VICTORY, packs: 0 };
-    }
-
-    return { goldCoins: GOLD_COINS_PER_DEFEAT, packs: 0 };
-};
+const computePlayerReward = (
+    isWinner: boolean,
+    isDraw: boolean,
+    isTraining: boolean,
+): GameRewardPlayerResult => ({
+    goldCoins: computePlayerGoldReward({ isWinner, isDraw, isTraining }),
+    packs: 0,
+});
 
 export const applyGameRewards = async (game: Game): Promise<void> => {
     if (!(game instanceof Game)) return;
 
     const winnerUserId = getWinnerUserId(game);
     const isDraw = winnerUserId === null;
+    const isTraining = game.data.isTraining === true;
 
     const humanUserIds = [game.data.playerOne.userId, game.data.playerTwo.userId].filter(
         isHumanUserId,
@@ -55,11 +53,13 @@ export const applyGameRewards = async (game: Game): Promise<void> => {
         const playerOneReward = computePlayerReward(
             !isDraw && winnerUserId === game.data.playerOne.userId,
             isDraw,
+            isTraining,
         );
 
         const playerTwoReward = computePlayerReward(
             !isDraw && winnerUserId === game.data.playerTwo.userId,
             isDraw,
+            isTraining,
         );
 
         for (const userId of humanUserIds) {

@@ -271,7 +271,7 @@ export const WEEKLY_RECAPS: WeeklyRecapData[] = [
     {
         week: "2026-W27",
         slug: "recap-2026-w27",
-        publishedAt: "2026-07-05T18:00:00+02:00",
+        publishedAt: "2026-07-05T10:00:00+02:00",
         newCardIds: [149, 150, 151, 152, 153, 154, 156, 155, 157, 158, 159],
         buffs: [],
         nerfs: [

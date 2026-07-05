@@ -24,12 +24,7 @@ export const MinionDescriptionContent = ({
         <div className={className}>
             {parts.map((part, index) => {
                 const normalizedPart = part.replace(/\.$/, "");
-                const isDisabled = isMinionDescriptionLineDisabled(
-                    part,
-                    index,
-                    activeEffects,
-                    isSilenced,
-                );
+                const isDisabled = isMinionDescriptionLineDisabled(part, activeEffects, isSilenced);
 
                 return (
                     <Fragment key={index}>

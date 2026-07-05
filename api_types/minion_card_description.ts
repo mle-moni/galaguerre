@@ -156,8 +156,6 @@ export const getWeaponCardDescription = (
 };
 
 export const buildMinionCardDescriptionParts = (
-    attack: number,
-    health: number,
     effects: string[],
     battlecryLines: string[] = [],
     deathrattleLines: string[] = [],
@@ -165,7 +163,6 @@ export const buildMinionCardDescriptionParts = (
     dynamicCost: DynamicCostSnapshot | null = null,
 ): string[] => {
     return [
-        `Monstre ${attack}/${health}.`,
         ...getDynamicCostDescription(dynamicCost),
         ...effects.map(formatEffectLine),
         ...passiveLines,
@@ -175,8 +172,8 @@ export const buildMinionCardDescriptionParts = (
 };
 
 export const getMinionCardDescription = (
-    attack: number,
-    health: number,
+    _attack: number,
+    _health: number,
     effects: string[],
     battlecryLines: string[] = [],
     deathrattleLines: string[] = [],
@@ -185,8 +182,6 @@ export const getMinionCardDescription = (
 ): string => {
     return joinCardDescriptionParts(
         buildMinionCardDescriptionParts(
-            attack,
-            health,
             effects,
             battlecryLines,
             deathrattleLines,
@@ -198,8 +193,6 @@ export const getMinionCardDescription = (
 
 export const getMinionDescriptionPartsFromCard = (card: MinionCard): string[] => {
     return buildMinionCardDescriptionParts(
-        card.attack,
-        card.health,
         card.effects?.length ? card.effects : getMinionPowerEffects(card.minionPowers),
         getBattlecryDescription(card.battlecryActions),
         getDeathrattleDescription(card.deathrattleActions),

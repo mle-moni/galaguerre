@@ -1,4 +1,8 @@
-import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
+import {
+    GOLD_COINS_PER_DEFEAT,
+    GOLD_COINS_PER_VICTORY,
+    GOLD_COINS_TRAINING_VICTORY,
+} from "#api_types/rewards.types";
 import { terminateGame } from "#controllers/games/terminate_game";
 import Game from "#models/game";
 import User from "#models/user";
@@ -103,7 +107,7 @@ test.group("apply game rewards", (group) => {
         await applyGameRewards(game);
         await human.refresh();
 
-        assert.equal(human.goldCoins, GOLD_COINS_PER_VICTORY);
+        assert.equal(human.goldCoins, GOLD_COINS_TRAINING_VICTORY);
         assert.equal(game.data.rewardResult?.playerOne.packs, 0);
         assert.equal(game.data.rewardResult?.playerTwo.goldCoins, 0);
         assert.equal(game.data.rewardResult?.playerTwo.packs, 0);

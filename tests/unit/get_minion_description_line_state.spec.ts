@@ -27,7 +27,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
         hasDivineShield: false,
     },
     effects: [],
-    description: "Monstre 2/2. Immunité : Bloque la première source de dégâts reçue. Discrétion.",
+    description: "Immunité : Bloque la première source de dégâts reçue. Discrétion.",
     battlecryActions: [],
     deathrattleActions: [],
     passives: [],
@@ -50,15 +50,13 @@ test.group("get_minion_description_line_state", () => {
 
         const activeEffects = getActiveMinionEffectNames(card);
 
-        assert.isFalse(isMinionDescriptionLineDisabled("Monstre 2/2.", 0, activeEffects));
         assert.isTrue(
             isMinionDescriptionLineDisabled(
                 "Immunité : Bloque la première source de dégâts reçue.",
-                1,
                 activeEffects,
             ),
         );
-        assert.isTrue(isMinionDescriptionLineDisabled("Discrétion", 2, activeEffects));
+        assert.isTrue(isMinionDescriptionLineDisabled("Discrétion", activeEffects));
     });
 
     test("keeps active keyword lines enabled", ({ assert }) => {
@@ -79,11 +77,10 @@ test.group("get_minion_description_line_state", () => {
         assert.isFalse(
             isMinionDescriptionLineDisabled(
                 "Immunité : Bloque la première source de dégâts reçue.",
-                1,
                 activeEffects,
             ),
         );
-        assert.isFalse(isMinionDescriptionLineDisabled("Discrétion", 2, activeEffects));
+        assert.isFalse(isMinionDescriptionLineDisabled("Discrétion", activeEffects));
     });
 
     test("silence disables all non-base lines", ({ assert }) => {
@@ -102,12 +99,11 @@ test.group("get_minion_description_line_state", () => {
         const activeEffects = getActiveMinionEffectNames(card);
 
         assert.isTrue(
-            isMinionDescriptionLineDisabled("Passif : pioche 1 carte.", 1, activeEffects, true),
+            isMinionDescriptionLineDisabled("Passif : pioche 1 carte.", activeEffects, true),
         );
         assert.isTrue(
             isMinionDescriptionLineDisabled(
                 "Immunité : Bloque la première source de dégâts reçue.",
-                1,
                 [],
                 true,
             ),

@@ -2,24 +2,30 @@ import {
     GOLD_COINS_PER_DEFEAT,
     GOLD_COINS_PER_PACK,
     GOLD_COINS_PER_VICTORY,
+    GOLD_COINS_TRAINING_DEFEAT,
+    GOLD_COINS_TRAINING_VICTORY,
 } from "#api_types/rewards.types";
 import { Group, Modal, Stack, Text } from "@mantine/core";
+import { IconExternalLink } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
-import { useBuyPackMutation } from "~/hooks/use_collection";
+import { useBuyPackMutation, usePacksQuery } from "~/hooks/use_collection";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
 import "./collection_shop_page.css";
 
 export const CollectionShopPage = observer(() => {
     const user = useUser()!;
+    const packsQuery = usePacksQuery();
     const buyPackMutation = useBuyPackMutation();
     const [helpOpened, setHelpOpened] = useState(false);
 
     const goldCoins = user.goldCoins;
+    const unopenedCount = packsQuery.data?.unopenedCount ?? 0;
     const canAfford = goldCoins >= GOLD_COINS_PER_PACK;
 
     const handleBuy = async () => {
@@ -49,6 +55,28 @@ export const CollectionShopPage = observer(() => {
                             {goldCoins.toLocaleString("fr-FR")}
                         </span>
                     </div>
+
+                    {unopenedCount > 0 ? (
+                        <div className="shop-balance">
+                            <div className="shop-balance__label">
+                                <PackIcon width={28} />
+                                <span>Vos paquets</span>
+                            </div>
+                            <div className="shop-balance__amount-row">
+                                <span className="shop-balance__amount">
+                                    {unopenedCount.toLocaleString("fr-FR")}
+                                </span>
+                                <Link
+                                    to="/collection/packs"
+                                    className="shop-balance__open-btn"
+                                    aria-label="Ouvrir des paquets"
+                                    title="Ouvrir des paquets"
+                                >
+                                    <IconExternalLink size={18} aria-hidden />
+                                </Link>
+                            </div>
+                        </div>
+                    ) : null}
 
                     <div className="shop-product">
                         <div className="shop-product__corners" aria-hidden="true" />
@@ -115,6 +143,9 @@ export const CollectionShopPage = observer(() => {
                 centered
             >
                 <Stack gap="sm">
+                    <Text size="sm" fw={600}>
+                        Partie classée
+                    </Text>
                     <Text size="sm" c="dimmed">
                         Victoire :{" "}
                         <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
@@ -129,7 +160,24 @@ export const CollectionShopPage = observer(() => {
                             <span>+{GOLD_COINS_PER_DEFEAT}</span>
                         </Group>
                     </Text>
+                    <Text size="sm" fw={600} mt="xs">
+                        Partie VS IA
+                    </Text>
                     <Text size="sm" c="dimmed">
+                        Victoire :{" "}
+                        <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
+                            <GoldCoinIcon size={16} />
+                            <span>+{GOLD_COINS_TRAINING_VICTORY}</span>
+                        </Group>
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        Défaite ou match nul :{" "}
+                        <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
+                            <GoldCoinIcon size={16} />
+                            <span>+{GOLD_COINS_TRAINING_DEFEAT}</span>
+                        </Group>
+                    </Text>
+                    <Text size="sm" c="dimmed" mt="xs">
                         Complétez les quêtes journalières sur l&apos;accueil pour gagner des story
                         points et des paquets.
                     </Text>

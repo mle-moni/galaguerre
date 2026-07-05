@@ -9,7 +9,7 @@ test.group("minion_card_metadata", () => {
     test("getMinionCardDescription includes minion power effect details", ({ assert }) => {
         const description = getMinionCardDescription(1, 2, ["Provocation"], []);
 
-        assert.equal(description, "Monstre 1/2. Provocation.");
+        assert.equal(description, "Provocation.");
     });
 
     test("getMinionCardDescription includes battlecry lines", ({ assert }) => {
@@ -20,10 +20,7 @@ test.group("minion_card_metadata", () => {
             ["Cri de guerre : Inflige 2 dégâts au héros adverse."],
         );
 
-        assert.equal(
-            description,
-            "Monstre 2/2. Cri de guerre : Inflige 2 dégâts au héros adverse.",
-        );
+        assert.equal(description, "Cri de guerre : Inflige 2 dégâts au héros adverse.");
     });
 
     test("getMinionCardDescription combines provocation and deathrattle in one line", ({
@@ -39,14 +36,14 @@ test.group("minion_card_metadata", () => {
 
         assert.equal(
             description,
-            "Monstre 4/4. Provocation. Dernier souffle : Inflige 2 dégâts à tous les personnages.",
+            "Provocation. Dernier souffle : Inflige 2 dégâts à tous les personnages.",
         );
     });
 
     test("getMinionCardDescription omits optional sections when empty", ({ assert }) => {
         const description = getMinionCardDescription(2, 1, [], []);
 
-        assert.equal(description, "Monstre 2/1.");
+        assert.equal(description, "");
     });
 
     test("getWeaponCardDescription joins deathrattle on the same line", ({ assert }) => {
@@ -62,7 +59,7 @@ test.group("minion_card_metadata", () => {
             reductions: [{ source: "HAND_CARD_COUNT", amountPer: 1 }],
         });
 
-        assert.equal(description, "Monstre 8/8. Coût réduit de 1 pour chaque carte en main.");
+        assert.equal(description, "Coût réduit de 1 pour chaque carte en main.");
     });
 
     test("getDynamicCostDescription supports all reduction sources", ({ assert }) => {
