@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { ResponsiveTable } from "~/components/responsive_table";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { STAT_ROWS } from "~/helpers/player_stats";
+import "./game_stats_table.css";
 
 export interface GameStatsTablePlayer {
     userId: number;

@@ -28,5 +28,6 @@ export const GameFinalStatsTable = ({
         }}
         winnerUserId={winnerUserId}
         highlightUserId={highlightUserId ?? me.userId}
+        onParchmentBackground
     />
 );

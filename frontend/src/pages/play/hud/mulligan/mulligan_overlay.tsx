@@ -1,4 +1,5 @@
-import { Button, Modal, Stack, Text } from "@mantine/core";
+import { Modal } from "@mantine/core";
+import { IconHourglass } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { CoinCardLink } from "~/components/cards/coin_card_link";
@@ -15,10 +16,17 @@ export const MulliganOverlay = observer(() => {
 
     if (!store.isMulligan) return null;
 
+    const selectedCount = store.mulliganSelectedCardIds.length;
+
     const handleConfirm = () => {
         emitSocketEventToServer("game:mulligan", {
             cardIds: store.mulliganSelectedCardIds.slice(),
         });
+        store.confirmMulliganLocally();
+    };
+
+    const handleKeepAll = () => {
+        emitSocketEventToServer("game:mulligan", { cardIds: [] });
         store.confirmMulliganLocally();
     };
 
@@ -29,42 +37,54 @@ export const MulliganOverlay = observer(() => {
             withCloseButton={false}
             centered
             size="xl"
-            title="Mulligan"
+            title={undefined}
             overlayProps={{ backgroundOpacity: 0.75 }}
-            classNames={{ content: "mulligan-overlay__modal-content" }}
+            classNames={{
+                content: "mulligan-overlay__modal-content",
+                header: "mulligan-overlay__modal-header",
+                body: "mulligan-overlay__modal-body",
+            }}
         >
-            <Stack gap="md">
-                <Text ta="center" fw={600} component="div">
-                    {store.goesFirst ? (
-                        "Vous commencez"
-                    ) : (
-                        <>
-                            Votre adversaire commence, vous recevrez{" "}
-                            <CoinCardLink>un Ticket Restaurant</CoinCardLink> en contrepartie
-                        </>
-                    )}
-                </Text>
+            <div className="mulligan-overlay__panel">
+                <div className="mulligan-overlay__corners" aria-hidden="true" />
+                <span className="mulligan-overlay__gem" aria-hidden="true" />
+                <span className="mulligan-overlay__badge">Mulligan</span>
 
-                <Text size="sm" c="dimmed">
-                    Cliquez sur les cartes à échanger — elles seront barrées en rouge.
-                </Text>
+                <header className="mulligan-overlay__header">
+                    <p className="mulligan-overlay__title">
+                        {store.goesFirst ? (
+                            "Vous commencez"
+                        ) : (
+                            <>
+                                Votre adversaire commence — vous recevez{" "}
+                                <CoinCardLink>un Ticket Restaurant</CoinCardLink> en contrepartie
+                            </>
+                        )}
+                    </p>
 
-                {isOnboardingGame ? (
-                    <Text size="sm" c="dimmed">
-                        Conseil : gardez les cartes à 1 mana (Stagiaire Dev) ; échangez les cartes à
-                        3+ mana que vous ne pouvez pas jouer ce tour.
-                    </Text>
-                ) : null}
+                    <p className="mulligan-overlay__subtitle">
+                        Choisissez les cartes à échanger. Les cartes sélectionnées seront remplacées
+                        au début de la partie.
+                    </p>
 
-                <CountdownTimer
-                    endsAt={store.authoritativeGame.data.mulliganEndsAt}
-                    label="Temps restant :"
-                />
+                    {isOnboardingGame ? (
+                        <p className="mulligan-overlay__tip">
+                            Conseil : gardez les cartes à 1 mana (Stagiaire Dev) ; échangez les
+                            cartes à 3+ mana que vous ne pouvez pas jouer ce tour.
+                        </p>
+                    ) : null}
+
+                    <div className="mulligan-overlay__timer">
+                        <IconHourglass size={18} stroke={1.75} aria-hidden="true" />
+                        <CountdownTimer
+                            endsAt={store.authoritativeGame.data.mulliganEndsAt}
+                            label="Temps restant :"
+                        />
+                    </div>
+                </header>
 
                 {store.hasConfirmedMulligan ? (
-                    <Text ta="center" fw={600}>
-                        En attente de l&apos;adversaire...
-                    </Text>
+                    <p className="mulligan-overlay__waiting">En attente de l&apos;adversaire…</p>
                 ) : (
                     <>
                         <div className="mulligan-overlay__cards">
@@ -86,6 +106,11 @@ export const MulliganOverlay = observer(() => {
                                             isSelected ? `${card.label}, à remplacer` : card.label
                                         }
                                     >
+                                        {isSelected ? (
+                                            <span className="mulligan-overlay__replace-banner">
+                                                À remplacer
+                                            </span>
+                                        ) : null}
                                         <div className="mulligan-overlay__card-face">
                                             <PlayerCardFace
                                                 card={card}
@@ -110,16 +135,36 @@ export const MulliganOverlay = observer(() => {
                             })}
                         </div>
 
-                        <Text size="sm" ta="center">
-                            {store.mulliganSelectedCardIds.length} carte(s) à remplacer
-                        </Text>
+                        <footer className="mulligan-overlay__footer">
+                            <div className="mulligan-overlay__count-divider">
+                                <span>
+                                    — {selectedCount} carte{selectedCount !== 1 ? "s" : ""} à
+                                    remplacer —
+                                </span>
+                            </div>
 
-                        <Button fullWidth onClick={handleConfirm}>
-                            Confirmer
-                        </Button>
+                            <div className="mulligan-overlay__actions">
+                                <button
+                                    type="button"
+                                    className="mulligan-overlay__confirm-btn"
+                                    onClick={handleConfirm}
+                                >
+                                    <span className="mulligan-overlay__confirm-btn-gem mulligan-overlay__confirm-btn-gem--left" />
+                                    Confirmer
+                                    <span className="mulligan-overlay__confirm-btn-gem mulligan-overlay__confirm-btn-gem--right" />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="mulligan-overlay__keep-all-btn"
+                                    onClick={handleKeepAll}
+                                >
+                                    Tout garder
+                                </button>
+                            </div>
+                        </footer>
                     </>
                 )}
-            </Stack>
+            </div>
         </Modal>
     );
 });

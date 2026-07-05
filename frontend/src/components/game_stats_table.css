@@ -1,0 +1,67 @@
+.game-history-stats-frame {
+    border: 1px solid rgba(201, 162, 39, 0.55);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.35);
+    overflow: hidden;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.game-history-stats-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.game-history-stats-table {
+    width: 100%;
+    min-width: 400px;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.game-history-stats-table thead th {
+    padding: 0.65rem 0.85rem;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: left;
+    color: white;
+    background: linear-gradient(180deg, #1e3a5f 0%, #1a3355 100%);
+    border-bottom: 1px solid rgba(201, 162, 39, 0.35);
+    white-space: nowrap;
+}
+
+.game-history-stats-table tbody td {
+    padding: 0.55rem 0.85rem;
+    color: #2c2416;
+    border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+    vertical-align: middle;
+}
+
+.game-history-stats-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.game-history-stats-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.game-history-stats-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.game-history-stats-table__label {
+    color: rgba(44, 36, 22, 0.75);
+}
+
+.game-history-stats-table__value--leads {
+    font-weight: 700;
+    color: #2d6a3e;
+}
+
+@media (max-width: 639px) {
+    .game-history-stats-table {
+        min-width: 360px;
+    }
+}
