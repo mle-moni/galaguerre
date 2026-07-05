@@ -68,6 +68,7 @@ const router = createBrowserRouter([
                     {
                         path: "/collection/shop",
                         element: <CollectionShopPage />,
+                        handle: { fillViewport: true },
                     },
                     {
                         path: "/decks",

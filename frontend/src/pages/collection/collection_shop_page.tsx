@@ -3,15 +3,16 @@ import {
     GOLD_COINS_PER_PACK,
     GOLD_COINS_PER_VICTORY,
 } from "#api_types/rewards.types";
-import { ActionIcon, Button, Center, Group, Modal, Paper, Stack, Text } from "@mantine/core";
-import { IconQuestionMark } from "@tabler/icons-react";
+import { Group, Modal, Stack, Text } from "@mantine/core";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { GoldCoinAmount, GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
+import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
 import { useBuyPackMutation } from "~/hooks/use_collection";
 import { useUser } from "~/hooks/use_user";
 import { notifyError, notifySuccess } from "~/services/toasts";
+import "./collection_shop_page.css";
 
 export const CollectionShopPage = observer(() => {
     const user = useUser()!;
@@ -31,82 +32,109 @@ export const CollectionShopPage = observer(() => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto w-full">
-            <h1 className="text-2xl font-bold text-white mb-6">Boutique</h1>
+        <>
+            <div className="shop-page">
+                <div className="shop-page__bg" aria-hidden="true" />
+                <div className="shop-page__overlay" aria-hidden="true" />
 
-            <Stack gap="lg">
-                <Group gap="xs" wrap="nowrap" align="center">
-                    <GoldCoinIcon size={48} />
-                    <Text size="lg" fw={600}>
-                        x {goldCoins}
-                    </Text>
-                </Group>
+                <div className="shop-page__content">
+                    <h1 className="shop-page__title">Boutique</h1>
 
-                <Modal
-                    opened={helpOpened}
-                    onClose={() => setHelpOpened(false)}
-                    title="Comment gagner des story points ?"
-                    centered
-                >
-                    <Stack gap="sm">
-                        <Text size="sm" c="dimmed">
-                            Victoire :{" "}
-                            <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
-                                <GoldCoinIcon size={16} />
-                                <span>+{GOLD_COINS_PER_VICTORY}</span>
-                            </Group>
-                        </Text>
-                        <Text size="sm" c="dimmed">
-                            Défaite ou match nul :{" "}
-                            <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
-                                <GoldCoinIcon size={16} />
-                                <span>+{GOLD_COINS_PER_DEFEAT}</span>
-                            </Group>
-                        </Text>
-                        <Text size="sm" c="dimmed">
-                            Complétez les quêtes journalières sur l&apos;accueil pour gagner des
-                            story points et des paquets.
-                        </Text>
-                    </Stack>
-                </Modal>
+                    <div className="shop-balance">
+                        <div className="shop-balance__label">
+                            <GoldCoinIcon size={28} tooltip={false} />
+                            <span>Vos story points</span>
+                        </div>
+                        <span className="shop-balance__amount">
+                            {goldCoins.toLocaleString("fr-FR")}
+                        </span>
+                    </div>
 
-                <Paper withBorder p="lg" radius="md">
-                    <Stack gap="sm">
-                        <Center>
-                            <PackIcon width={120} />
-                        </Center>
-                        <Text fw={600}>Paquet de cartes</Text>
-                        <Text size="sm" c="dimmed">
-                            5 cartes aléatoires pour enrichir votre collection.
-                        </Text>
-                        <Group gap="xs" wrap="nowrap" align="center">
-                            <GoldCoinAmount
-                                amount={GOLD_COINS_PER_PACK}
-                                showLabel
-                                iconSize={20}
-                                textProps={{ c: "dark", fw: 600 }}
-                            />
-                            <ActionIcon
-                                variant="transparent"
-                                size="sm"
-                                className="text-gray-400"
-                                aria-label="Comment gagner des story points"
-                                onClick={() => setHelpOpened(true)}
-                            >
-                                <IconQuestionMark size={18} />
-                            </ActionIcon>
-                        </Group>
-                        <Button
+                    <div className="shop-product">
+                        <div className="shop-product__corners" aria-hidden="true" />
+
+                        <div className="shop-product__body">
+                            <div className="shop-product__info">
+                                <h2 className="shop-product__name">
+                                    Paquet
+                                    <br />
+                                    de cartes
+                                </h2>
+
+                                <div className="shop-product__divider" aria-hidden="true">
+                                    <span className="shop-product__divider-diamond" />
+                                </div>
+
+                                <p className="shop-product__description">
+                                    5 cartes aléatoires pour enrichir votre collection.
+                                </p>
+
+                                <div className="shop-product__price-row">
+                                    <span className="shop-product__price">
+                                        <GoldCoinIcon size={20} tooltip={false} />
+                                        {GOLD_COINS_PER_PACK} story points
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="shop-product__info-btn"
+                                        aria-label="Comment gagner des story points"
+                                        onClick={() => setHelpOpened(true)}
+                                    >
+                                        i
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="shop-product__visual">
+                                <div className="shop-product__visual-glow" aria-hidden="true" />
+                                <div className="shop-product__pack">
+                                    <PackIcon width={240} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            className={clsx(
+                                "shop-product__buy",
+                                buyPackMutation.isPending && "shop-product__buy--loading",
+                            )}
                             onClick={handleBuy}
-                            loading={buyPackMutation.isPending}
-                            disabled={!canAfford}
-                            className="gg-btn-primary w-full sm:w-auto"
+                            disabled={!canAfford || buyPackMutation.isPending}
                         >
-                            Acheter
-                        </Button>
-                    </Stack>
-                </Paper>
-            </Stack>
-        </div>
+                            {buyPackMutation.isPending ? "Achat…" : "Acheter"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <Modal
+                opened={helpOpened}
+                onClose={() => setHelpOpened(false)}
+                title="Comment gagner des story points ?"
+                centered
+            >
+                <Stack gap="sm">
+                    <Text size="sm" c="dimmed">
+                        Victoire :{" "}
+                        <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
+                            <GoldCoinIcon size={16} />
+                            <span>+{GOLD_COINS_PER_VICTORY}</span>
+                        </Group>
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        Défaite ou match nul :{" "}
+                        <Group component="span" gap={4} wrap="nowrap" display="inline-flex">
+                            <GoldCoinIcon size={16} />
+                            <span>+{GOLD_COINS_PER_DEFEAT}</span>
+                        </Group>
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        Complétez les quêtes journalières sur l&apos;accueil pour gagner des story
+                        points et des paquets.
+                    </Text>
+                </Stack>
+            </Modal>
+        </>
     );
 });
