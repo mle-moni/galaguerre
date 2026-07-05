@@ -1,0 +1,30 @@
+.play-desktop-layout {
+	--play-sidebar-w: 172px;
+	--play-panel-bg: rgba(15, 30, 60, 0.82);
+	--play-panel-border: rgba(240, 184, 64, 0.55);
+	--play-panel-glow: rgba(100, 180, 255, 0.2);
+}
+
+.play-desktop-layout__sidebar {
+	width: var(--play-sidebar-w);
+	flex-shrink: 0;
+}
+
+.play-desktop-layout__board-column {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	min-width: 0;
+	position: relative;
+}
+
+.play-sidebar-vs {
+	font-family: var(--font-display);
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	color: var(--gg-gold);
+	text-shadow: 0 0 8px rgba(240, 184, 64, 0.4);
+	margin: 0.5rem 0;
+}

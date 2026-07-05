@@ -1,8 +1,10 @@
 import type { GamePlayer } from "#api_types/game.types";
-
-import { Text } from "@mantine/core";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import { DeckInfos } from "./deck_infos.jsx";
+import { CARD_BACK_IMAGE_URL } from "~/components/cards/card_back_face";
+import { useGameContext } from "~/hooks/use_game_state";
+import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
+import "./decks_infos.css";
 
 interface DecksInfosProps {
     me: GamePlayer;
@@ -10,11 +12,102 @@ interface DecksInfosProps {
 }
 
 export const DecksInfos = observer(({ me, opponent }: DecksInfosProps) => {
+    const { authoritativeGame } = useGameContext();
+    const currentRound = authoritativeGame.data.currentRound;
+
     return (
-        <div className="flex-1 mx-1 flex flex-col items-center justify-center ">
-            <DeckInfos player={opponent} isOpponent />
-            <Text className="m-2">VS</Text>
-            <DeckInfos player={me} />
+        <div className="decks-infos">
+            <br />
+            <br />
+            <div className="decks-infos__opponent-deck">
+                <OpponentTurnTimer />
+                <DeckInfosRow player={opponent} animationOwner="OPPONENT" />
+            </div>
+            <p className="decks-infos__turn-banner">Tour {currentRound}</p>
+            <DeckInfosRow player={me} animationOwner="PLAYER" />
+            <PassTurnSection />
         </div>
     );
 });
+
+interface DeckInfosRowProps {
+    player: GamePlayer;
+    animationOwner: "OPPONENT" | "PLAYER";
+}
+
+const DeckInfosRow = observer(({ player, animationOwner }: DeckInfosRowProps) => {
+    const numberOfCards = player.deckCards.length;
+    const iconSize = getIconSize(numberOfCards);
+
+    return (
+        <div className="deck-infos-row" data-animation-deck data-animation-owner={animationOwner}>
+            <span className="deck-infos-row__count">{numberOfCards}</span>
+            <img
+                className="deck-infos-row__card-back"
+                src={CARD_BACK_IMAGE_URL}
+                alt=""
+                draggable={false}
+                style={{ height: iconSize, aspectRatio: "5 / 7" }}
+            />
+        </div>
+    );
+});
+
+const OpponentTurnTimer = observer(() => {
+    const { store } = useGameContext();
+
+    if (store.isMyTurn) return null;
+
+    return (
+        <div className="decks-infos__opponent-timer">
+            <CountdownTimer
+                endsAt={store.game.data.turnEndsAt}
+                title="Temps restant pour le tour de l'adversaire"
+            />
+        </div>
+    );
+});
+
+const PassTurnSection = observer(() => {
+    const { store } = useGameContext();
+
+    return (
+        <div className="decks-infos__pass-turn">
+            {store.isMyTurn && (
+                <div className="decks-infos__player-timer">
+                    <CountdownTimer
+                        endsAt={store.game.data.turnEndsAt}
+                        title="Temps restant pour votre tour"
+                    />
+                </div>
+            )}
+            <div className="decks-infos__pass-turn-btn-wrap">
+                <button
+                    type="button"
+                    className={clsx(
+                        "pass-turn-button",
+                        store.isPassTurnPending && "pass-turn-button--loading",
+                    )}
+                    disabled={!store.canPassTurn || store.isPassTurnPending}
+                    onClick={() => store.requestPassTurn()}
+                >
+                    Terminer
+                </button>
+            </div>
+        </div>
+    );
+});
+
+const getIconSize = (numCards: number): number => {
+    const NUM_CARDS_MIN = 0;
+    const NUM_CARDS_MAX = 30;
+    const MIN_SIZE = 44;
+    const MAX_SIZE = 88;
+
+    const numCardOrMax = numCards > NUM_CARDS_MAX ? NUM_CARDS_MAX : numCards;
+
+    return (
+        MIN_SIZE +
+        ((numCardOrMax - NUM_CARDS_MIN) / (NUM_CARDS_MAX - NUM_CARDS_MIN)) * (MAX_SIZE - MIN_SIZE)
+    );
+};

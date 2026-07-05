@@ -87,7 +87,7 @@ export const runWeaponActionInMemory = async (
             if (!targetMinionInfos) {
                 emitSocketEvent(
                     "notify_error",
-                    { error: "Vous ne pouvez pas attaquer ce serviteur ici" },
+                    { error: "Vous ne pouvez pas attaquer ce monstre ici" },
                     TEST_SOCKET_ID,
                 );
                 return { game, errors: getErrors() };

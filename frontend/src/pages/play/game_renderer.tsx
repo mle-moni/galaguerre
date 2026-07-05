@@ -9,13 +9,13 @@ import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 
 import { GameAnimationOverlay } from "./animations/game_animation_overlay.jsx";
-import { GameHudControls } from "./hud/game_hud_controls/game_hud_controls.jsx";
 import { ArmedCardHint } from "./hud/armed_card_hint/armed_card_hint.jsx";
 import { ActionTimeline } from "./hud/action_timeline/action_timeline.jsx";
 import { MobileGameLayout } from "./hud/mobile/mobile_game_layout.jsx";
 import { Board } from "./board/board.jsx";
 import { DecksInfos } from "./hud/decks_infos/decks_infos.jsx";
 import { GameFinalScreen } from "./hud/game_final_screen/game_final_screen.jsx";
+import { GameHudControls } from "./hud/game_hud_controls/game_hud_controls.jsx";
 import { MulliganOverlay } from "./hud/mulligan/mulligan_overlay.jsx";
 import { DiscoverOverlay } from "./hud/discover/discover_overlay.jsx";
 import { DiscoverOpponentIndicator } from "./hud/discover/discover_opponent_indicator.jsx";
@@ -24,6 +24,7 @@ import { PlayedCardReveal } from "./hud/played_card_reveal/played_card_reveal.js
 import { PlayerHand } from "./hud/player_hand/player_hand.jsx";
 import { PlayersInfos } from "./hud/players_infos/players_infos.jsx";
 import "./game_layout.css";
+import "./play_desktop_theme.css";
 
 interface GameRendererProps {
     game: ApiGame;
@@ -41,14 +42,14 @@ const DesktopGameLayout = observer<GameRendererProps>(({ spectating = false }) =
     const opponent = store.opponent;
 
     return (
-        <div className="h-full relative">
-            {!spectating && <GameHudControls />}
+        <div className="play-desktop-layout h-full relative">
             <ActionTimeline />
+            {!spectating && <GameHudControls />}
             <div className="flex h-full">
-                <div className="flex justify-center w-[124px] shrink-0">
+                <div className="play-desktop-layout__sidebar flex justify-center">
                     <PlayersInfos me={me} opponent={opponent} />
                 </div>
-                <div className="bg-blue-400 flex-1 flex flex-col min-h-0 relative">
+                <div className="play-desktop-layout__board-column">
                     <PlayedCardReveal />
                     <div
                         className="desktop-hand-reserve desktop-hand-reserve--top"
@@ -63,7 +64,7 @@ const DesktopGameLayout = observer<GameRendererProps>(({ spectating = false }) =
                         aria-hidden="true"
                     />
                 </div>
-                <div className="flex justify-center w-[124px]">
+                <div className="play-desktop-layout__sidebar flex justify-center">
                     <DecksInfos me={me} opponent={opponent} />
                 </div>
             </div>

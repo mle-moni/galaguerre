@@ -25,7 +25,7 @@ export const getDailyQuestTitle = (quest: UserDailyQuest): string => {
                 ? "Ouvrir 1 paquet"
                 : `Ouvrir ${quest.targetValue} paquets`;
         case "PLAY_MINIONS":
-            return `Poser ${quest.targetValue} serviteurs`;
+            return `Poser ${quest.targetValue} monstres`;
         case "DEAL_DAMAGE":
             return `Infliger ${quest.targetValue} dégâts`;
         case "DRAW_CARDS":

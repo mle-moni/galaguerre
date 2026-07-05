@@ -28,7 +28,7 @@ export const GameHudControls = observer(() => {
                     aria-label="Abandonner la partie"
                     onClick={() => setConfirmOpened(true)}
                 >
-                    <IconFlag size={22} />
+                    <IconFlag size={20} />
                 </button>
                 <button
                     type="button"
@@ -36,7 +36,7 @@ export const GameHudControls = observer(() => {
                     aria-label="Glossaire des mots-clés"
                     onClick={() => setGlossaryOpened(true)}
                 >
-                    <IconQuestionMark size={22} />
+                    <IconQuestionMark size={20} />
                 </button>
             </div>
 

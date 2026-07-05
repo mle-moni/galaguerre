@@ -35,21 +35,15 @@ const BoardDivider = observer(() => {
     const ropeProgress = useTurnRopeProgress(store.game.data.turnEndsAt);
     const isRopeActive = ropeProgress > 0;
 
+    if (!isRopeActive) return null;
+
     return (
         <div
-            className={clsx(
-                "board-divider w-full flex-shrink-0",
-                isRopeActive && "board-divider--rope",
-            )}
-            style={
-                isRopeActive
-                    ? ({ "--board-divider-rope-progress": ropeProgress } as CSSProperties)
-                    : undefined
-            }
+            className="board-divider w-full flex-shrink-0"
+            style={{ "--board-divider-rope-progress": ropeProgress } as CSSProperties}
             aria-hidden
         >
-            <div className="board-divider__neutral" />
-            {isRopeActive && <div className="board-divider__rope" />}
+            <div className="board-divider__rope" />
         </div>
     );
 });

@@ -80,7 +80,7 @@ const formatScaledPassiveBoostDescription = (passiveBoost: PassiveBoostSnapshot)
     }
 
     const tagPart = target?.tag ? ` ${formatTagChip(target.tag)}` : "";
-    return `Passif : Gagne ${parts.join(", ")} pour chaque autre serviteur${tagPart} sur le plateau.`;
+    return `Passif : Gagne ${parts.join(", ")} pour chaque autre monstre${tagPart} sur le plateau.`;
 };
 
 export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => {

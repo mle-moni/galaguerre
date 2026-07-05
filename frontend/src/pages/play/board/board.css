@@ -45,6 +45,7 @@
 .board-insertion-zone--active {
 	width: calc(var(--board-minion-w) * 0.45);
 	min-width: 24px;
+	min-height: var(--board-minion-h);
 }
 
 .board-insertion-zone--active.board-insertion-zone--primary {
@@ -171,34 +172,24 @@
 .board-divider {
 	--board-divider-dash: 10px;
 	--board-divider-gap: 8px;
-	--board-divider-neutral: rgba(255, 255, 255, 0.55);
 	--board-divider-rope: #ef4444;
 	position: relative;
 	height: 2px;
 	margin: 0.125rem 0;
 }
 
-.board-divider__neutral,
 .board-divider__rope {
 	position: absolute;
 	inset: 0;
 	background: repeating-linear-gradient(
 		90deg,
-		var(--board-divider-color) 0,
-		var(--board-divider-color) var(--board-divider-dash),
+		var(--board-divider-rope) 0,
+		var(--board-divider-rope) var(--board-divider-dash),
 		transparent var(--board-divider-dash),
 		transparent calc(var(--board-divider-dash) + var(--board-divider-gap))
 	);
-}
-
-.board-divider__neutral {
-	--board-divider-color: var(--board-divider-neutral);
-}
-
-.board-divider__rope {
-	--board-divider-color: var(--board-divider-rope);
-	clip-path: inset(0 calc((1 - var(--board-divider-rope-progress, 0)) * 100%) 0 0);
 	filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.55));
+	clip-path: inset(0 calc((1 - var(--board-divider-rope-progress, 0)) * 100%) 0 0);
 	will-change: clip-path;
 }
 

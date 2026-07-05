@@ -35,15 +35,15 @@ const withTrainingGame = (data: GameData): Game =>
 
 const getMinionAttackError = (minion: MinionState, currentRound: number): string => {
     if (minion.attack <= 0) {
-        return "Ce serviteur ne peut pas attaquer sans points d'attaque";
+        return "Ce monstre ne peut pas attaquer sans points d'attaque";
     }
     if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) {
-        return "Ce serviteur n'est pas encore prêt à attaquer";
+        return "Ce monstre n'est pas encore prêt à attaquer";
     }
     if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion)) {
-        return "Ce serviteur a déjà attaqué ce tour";
+        return "Ce monstre a déjà attaqué ce tour";
     }
-    return "Ce serviteur n'est pas encore prêt à attaquer";
+    return "Ce monstre n'est pas encore prêt à attaquer";
 };
 
 export const runMinionActionInMemory = async (
@@ -103,7 +103,7 @@ export const runMinionActionInMemory = async (
             if (!targetMinionInfos) {
                 emitSocketEvent(
                     "notify_error",
-                    { error: "Vous ne pouvez pas jouer ce serviteur ici" },
+                    { error: "Vous ne pouvez pas jouer ce monstre ici" },
                     TEST_SOCKET_ID,
                 );
                 return { game, errors: getErrors() };

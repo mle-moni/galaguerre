@@ -1,5 +1,6 @@
 import "../play/play_page.css";
 import "../play/game_layout.css";
+import "../play/play_desktop_theme.css";
 
 import { observer } from "mobx-react-lite";
 import { useContext } from "react";
@@ -21,12 +22,12 @@ const DesktopReplayLayout = observer(() => {
     const opponent = replayStore.opponent;
 
     return (
-        <div className="h-full relative">
+        <div className="play-desktop-layout h-full relative">
             <div className="flex h-full">
-                <div className="flex justify-center w-[124px] shrink-0">
+                <div className="play-desktop-layout__sidebar flex justify-center">
                     <PlayersInfos me={me} opponent={opponent} />
                 </div>
-                <div className="bg-blue-400 flex-1 flex flex-col min-h-0 relative">
+                <div className="play-desktop-layout__board-column">
                     <PlayedCardReveal />
                     <div
                         className="desktop-hand-reserve desktop-hand-reserve--top"
@@ -40,7 +41,7 @@ const DesktopReplayLayout = observer(() => {
                         aria-hidden="true"
                     />
                 </div>
-                <div className="flex justify-center w-[124px]">
+                <div className="play-desktop-layout__sidebar flex justify-center">
                     <DecksInfos me={me} opponent={opponent} />
                 </div>
             </div>

@@ -756,7 +756,7 @@ test.group("minion combat", () => {
             owner: "OPPONENT",
         });
 
-        assertError(assert, "Ce serviteur a déjà attaqué ce tour");
+        assertError(assert, "Ce monstre a déjà attaqué ce tour");
         assertPlayerHealth(assert, third.game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
     });
 
@@ -782,7 +782,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.attacker, minionUuid: null, owner: "OPPONENT" },
         );
 
-        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertError(assert, "Ce monstre n'est pas encore prêt à attaquer");
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
@@ -810,7 +810,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.attacker, minionUuid: null, owner: "OPPONENT" },
         );
 
-        assertError(assert, "Ce serviteur ne peut pas attaquer sans points d'attaque");
+        assertError(assert, "Ce monstre ne peut pas attaquer sans points d'attaque");
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
@@ -858,7 +858,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.attacker, minionUuid: MINION_IDS.target, owner: "OPPONENT" },
         );
 
-        assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
+        assertError(assert, "Vous devez d'abord attaquer un monstre avec Provocation");
         assertBoardIndex(assert, game, "playerTwo", 0, { health: 4 });
         assertBoardIndex(assert, game, "playerTwo", 1, { health: 3 });
     });
@@ -886,7 +886,7 @@ test.group("minion combat", () => {
 
         assertError(
             assert,
-            "J'aurai pu te laisser attaquer ton propre serviteur mais j'ai décidé d'être clément...",
+            "J'aurai pu te laisser attaquer ton propre monstre mais j'ai décidé d'être clément...",
         );
         assertBoardIndex(assert, game, "playerOne", 0, { health: 1 });
     });
@@ -898,7 +898,7 @@ test.group("minion combat", () => {
             owner: "OPPONENT",
         });
 
-        assertError(assert, "Ce serviteur n'est pas sur le plateau (gros con)");
+        assertError(assert, "Ce monstre n'est pas sur le plateau (gros con)");
     });
 
     test("rejects attack on an empty opponent spot", async ({ assert }) => {
@@ -922,7 +922,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.attacker, minionUuid: MINION_IDS.target, owner: "OPPONENT" },
         );
 
-        assertError(assert, "Vous ne pouvez pas jouer ce serviteur ici");
+        assertError(assert, "Vous ne pouvez pas jouer ce monstre ici");
         assertBoardIndex(assert, game, "playerOne", 0, { health: 1 });
     });
 
@@ -953,7 +953,7 @@ test.group("minion combat", () => {
             owner: "OPPONENT",
         });
 
-        assertError(assert, "Ce serviteur a déjà attaqué ce tour");
+        assertError(assert, "Ce monstre a déjà attaqué ce tour");
         assertPlayerHealth(assert, second.game, "playerTwo", DEFAULT_HERO_HEALTH - 1);
     });
 
@@ -978,7 +978,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.target, minionUuid: MINION_IDS.target, owner: "OPPONENT" },
         );
 
-        assertError(assert, "Ce serviteur n'est pas sur le plateau (gros con)");
+        assertError(assert, "Ce monstre n'est pas sur le plateau (gros con)");
     });
 
     test("rejects attacking own hero with owner PLAYER", async ({ assert }) => {
@@ -1071,7 +1071,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.attacker, minionUuid: "stealth-minion", owner: "OPPONENT" },
         );
 
-        assertError(assert, "Ce serviteur ne peut pas être ciblé");
+        assertError(assert, "Ce monstre ne peut pas être ciblé");
         assertBoardIndex(assert, game, "playerTwo", 0, { health: 3 });
     });
 
@@ -1223,7 +1223,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.attacker, minionUuid: null, owner: "OPPONENT" },
         );
 
-        assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
+        assertError(assert, "Vous devez d'abord attaquer un monstre avec Provocation");
         assertPlayerHealth(assert, gameAfterRejectedHero, "playerTwo", DEFAULT_HERO_HEALTH);
 
         const { game } = await runMinionActionOnGameInMemory(gameAfterRejectedHero, "playerOne", {
@@ -1312,7 +1312,7 @@ test.group("minion combat", () => {
             { minionId: MINION_IDS.attacker, minionUuid: "stealth-taunt", owner: "OPPONENT" },
         );
 
-        assertError(assert, "Ce serviteur ne peut pas être ciblé");
+        assertError(assert, "Ce monstre ne peut pas être ciblé");
         assertBoardIndex(assert, gameAfterStealthReject, "playerTwo", 1, { health: 3 });
     });
 });

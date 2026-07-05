@@ -2,52 +2,107 @@
 	animation: hero-target-pulse 900ms ease-in-out infinite;
 }
 
-.hero-panel {
-	border: 2px solid white;
-	border-radius: 8px;
+.hero-panel-wrapper {
 	width: 100%;
-	padding: 8px;
-	background-color: rgba(30, 58, 95, 0.85);
+}
+
+.hero-panel {
+	border: 2px solid var(--play-panel-border, rgba(240, 184, 64, 0.55));
+	border-radius: 12px;
+	width: 100%;
+	padding: 0.625rem 0.5rem;
+	background: var(--play-panel-bg, rgba(15, 30, 60, 0.82));
+	box-shadow:
+		0 0 0 1px rgba(240, 184, 64, 0.2),
+		0 4px 16px rgba(0, 0, 0, 0.35),
+		inset 0 1px 0 rgba(255, 255, 255, 0.06);
+	color: var(--gg-text-on-dark);
+}
+
+.hero-panel__title {
+	font-family: var(--font-display);
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	text-align: center;
+	color: var(--gg-gold);
+	margin-bottom: 0.5rem;
+}
+
+.hero-panel__avatar-wrap {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 0.5rem;
+}
+
+.hero-panel__avatar {
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	border: 2px solid var(--gg-gold);
+	box-shadow: 0 0 10px var(--play-panel-glow, rgba(100, 180, 255, 0.2));
 }
 
 .hero-panel__pseudo {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	margin-bottom: 8px;
+	font-size: 0.7rem;
+	text-align: center;
+	color: var(--gg-text-muted);
+	margin-bottom: 0.5rem;
 }
 
 .hero-panel__stats {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 0.375rem;
 }
 
 .hero-panel__stat {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 0.375rem;
+}
+
+.hero-panel__stat-icon {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	object-fit: contain;
+}
+
+.hero-panel__stat-icon--heart {
+	color: #ef4444;
+}
+
+.hero-panel__stat-value {
+	font-size: 0.8rem;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--gg-text-on-dark);
+}
+
+.hero-panel__stat-label {
+	font-size: 0.65rem;
+	line-height: 1.2;
+	color: var(--gg-text-muted);
+	flex: 1;
+	min-width: 0;
 }
 
 .hero-panel__stat-badge {
-	width: 25px;
-	height: 25px;
+	width: 22px;
+	height: 22px;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 12px;
+	font-size: 0.65rem;
 	font-weight: bold;
-	border: 2px solid #000;
+	border: 1px solid rgba(0, 0, 0, 0.4);
 	flex-shrink: 0;
-}
-
-.hero-panel__stat-badge--health {
-	background-color: #2ae32a;
-}
-
-.hero-panel__stat-badge--mana {
-	background-color: #e3b42a;
 }
 
 .hero-panel__stat-badge--spell-power {
@@ -57,10 +112,12 @@
 
 .hero-panel__stat-badge--weapon-damage {
 	background-color: #e32a2a;
+	color: #fff;
 }
 
 .hero-panel__stat-badge--weapon-durability {
 	background-color: #c0c0c0;
+	color: #000;
 }
 
 .hero-panel--weapon-draggable {
@@ -69,12 +126,6 @@
 
 .hero-panel--weapon-draggable:active {
 	cursor: grabbing;
-}
-
-.hero-panel__stat-label {
-	font-size: 12px;
-	line-height: 1;
-	color: #fff;
 }
 
 @keyframes hero-target-pulse {

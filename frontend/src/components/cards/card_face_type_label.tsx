@@ -1,7 +1,7 @@
 import type { PlayerCard } from "#api_types/game.types";
 
 const CARD_FACE_TYPE_LABELS: Record<PlayerCard["type"], string> = {
-    MINION: "SERVITEUR",
+    MINION: "MONSTRE",
     SPELL: "SORT",
     WEAPON: "ARME",
 };

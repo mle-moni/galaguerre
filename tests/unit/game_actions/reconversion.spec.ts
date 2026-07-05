@@ -679,7 +679,7 @@ test.group("RECONVERSION summoning sickness", () => {
             owner: "OPPONENT",
         });
 
-        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertError(assert, "Ce monstre n'est pas encore prêt à attaquer");
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
@@ -718,7 +718,7 @@ test.group("RECONVERSION summoning sickness", () => {
             owner: "OPPONENT",
         });
 
-        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertError(assert, "Ce monstre n'est pas encore prêt à attaquer");
         assertBoardIndex(assert, gameAfterReconversion, "playerOne", 0, { health: 1 });
         assertBoardIndex(assert, gameAfterReconversion, "playerTwo", 0, { health: 3 });
     });

@@ -43,7 +43,7 @@ export const weaponToMinionAction = async ({
         emitSocketEvent(
             "notify_error",
             {
-                error: "J'aurai pu te laisser attaquer ton propre serviteur mais j'ai décidé d'être clément...",
+                error: "J'aurai pu te laisser attaquer ton propre monstre mais j'ai décidé d'être clément...",
             },
             socketId,
         );
@@ -57,7 +57,7 @@ export const weaponToMinionAction = async ({
     if (boardIndex === -1) {
         emitSocketEvent(
             "notify_error",
-            { error: "Vous ne pouvez pas attaquer ce serviteur ici" },
+            { error: "Vous ne pouvez pas attaquer ce monstre ici" },
             socketId,
         );
         return;

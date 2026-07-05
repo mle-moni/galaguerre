@@ -196,7 +196,7 @@ test.group("game scenarios", () => {
             },
         );
 
-        assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
+        assertError(assert, "Vous devez d'abord attaquer un monstre avec Provocation");
         assertPlayerHealth(assert, blocked.game, "playerTwo", DEFAULT_HERO_HEALTH);
 
         const killTaunt = await runMinionActionOnGameInMemory(blocked.game, "playerOne", {

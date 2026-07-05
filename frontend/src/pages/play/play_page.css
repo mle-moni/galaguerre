@@ -6,7 +6,7 @@ html.play-page-active body {
 .play-page {
 	width: 100vw;
 	height: 100dvh;
-	background-color: #da9854;
+	background: url("/game/play-background.webp") center / cover no-repeat;
 	padding-left: env(safe-area-inset-left);
 	padding-right: env(safe-area-inset-right);
 	overflow: hidden;

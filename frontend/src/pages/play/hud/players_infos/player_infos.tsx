@@ -1,21 +1,29 @@
 import type { GamePlayer } from "#api_types/game.types";
 
 import clsx from "clsx";
-import { Text } from "@mantine/core";
+import { IconHeart } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import type { PointerEvent } from "react";
+import { UserAvatar } from "~/components/user_avatar";
 import { useGameContext } from "~/hooks/use_game_state";
+import {
+    getMaxMana,
+    PLAY_DECK_ICON_URL,
+    PLAY_MANA_MEDALLION_URL,
+} from "~/pages/play/play_game_constants";
 import "~/components/targeting/targeting.css";
 import "~/pages/play/animations/hero_death_animations.css";
 import "./player_infos.css";
 
 interface PlayerInfosProps {
     player: GamePlayer;
+    label: string;
     isOpponent?: boolean;
 }
 
-export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = false }) => {
-    const { store } = useGameContext();
+export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOpponent = false }) => {
+    const { store, authoritativeGame } = useGameContext();
+    const maxMana = getMaxMana(authoritativeGame.data.currentRound);
 
     const playerBorderColor = store.playerInfosStore.getBorderColor({
         isOpponent,
@@ -72,6 +80,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
 
     const heroSpotOwner = isOpponent ? "OPPONENT" : "PLAYER";
     const isDying = store.narrativeDirector.dyingHeroOwners.includes(heroSpotOwner);
+    const deckCount = player.deckCards.length;
 
     return (
         <div
@@ -79,8 +88,8 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
             data-spot-id="hero"
             data-spot-owner={isOpponent ? "OPPONENT" : "PLAYER"}
             className={clsx(
-                "w-full mx-2",
-                heroHighlight === "none" && "border-2 border-dashed",
+                "hero-panel-wrapper",
+                heroHighlight === "none" && "border-2 border-dashed rounded-xl",
                 heroHighlight === "none" && isInteractiveTarget && "hero-target--interactive",
                 heroHighlight === "valid" && "target-zone--valid",
                 heroHighlight === "invalid" && "target-zone--invalid",
@@ -99,25 +108,54 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, isOpponent = fa
                     isDying && "hero-target--dying",
                 )}
                 style={{
-                    borderColor: playerBorderColor,
+                    borderColor: playerBorderColor !== "white" ? playerBorderColor : undefined,
                 }}
                 onPointerDown={canAttackWithWeapon ? handleWeaponAttackPointerDown : undefined}
             >
-                <Text className="hero-panel__pseudo" size="lg" ta="center" fw={700}>
+                <p className="hero-panel__title">{label}</p>
+                <div className="hero-panel__avatar-wrap">
+                    <UserAvatar
+                        pseudo={player.pseudo}
+                        userId={player.userId}
+                        className="hero-panel__avatar"
+                        alt={player.pseudo}
+                    />
+                </div>
+                <p className="hero-panel__pseudo" title={player.pseudo}>
                     {player.pseudo}
-                </Text>
+                </p>
                 <div className="hero-panel__stats">
                     <div className="hero-panel__stat">
-                        <span className="hero-panel__stat-badge hero-panel__stat-badge--health">
-                            {player.health}
-                        </span>
-                        <span className="hero-panel__stat-label">pdv</span>
+                        <IconHeart
+                            className="hero-panel__stat-icon hero-panel__stat-icon--heart"
+                            size={18}
+                            stroke={2}
+                            aria-hidden
+                        />
+                        <span className="hero-panel__stat-value">{player.health}</span>
                     </div>
                     <div className="hero-panel__stat">
-                        <span className="hero-panel__stat-badge hero-panel__stat-badge--mana">
-                            {player.mana}
+                        <img
+                            src={PLAY_MANA_MEDALLION_URL}
+                            alt=""
+                            className="hero-panel__stat-icon"
+                            draggable={false}
+                        />
+                        <span className="hero-panel__stat-value">
+                            {player.mana} / {maxMana}
                         </span>
-                        <span className="hero-panel__stat-label">mana</span>
+                    </div>
+                    <div className="hero-panel__stat">
+                        <img
+                            src={PLAY_DECK_ICON_URL}
+                            alt=""
+                            className="hero-panel__stat-icon"
+                            draggable={false}
+                        />
+                        <span className="hero-panel__stat-label">
+                            {deckCount} Carte{deckCount !== 1 ? "s" : ""} restante
+                            {deckCount !== 1 ? "s" : ""}
+                        </span>
                     </div>
                     {player.spellPower > 0 && (
                         <div

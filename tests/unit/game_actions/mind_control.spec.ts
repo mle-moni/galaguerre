@@ -439,7 +439,7 @@ test.group("MIND_CONTROL summoning sickness", () => {
             owner: "OPPONENT",
         });
 
-        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertError(assert, "Ce monstre n'est pas encore prêt à attaquer");
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
     });
 
@@ -475,7 +475,7 @@ test.group("MIND_CONTROL summoning sickness", () => {
             owner: "OPPONENT",
         });
 
-        assertError(assert, "Ce serviteur n'est pas encore prêt à attaquer");
+        assertError(assert, "Ce monstre n'est pas encore prêt à attaquer");
         assertBoardIndex(assert, gameAfterSteal, "playerOne", 0, { health: 5 });
         assertBoardIndex(assert, gameAfterSteal, "playerTwo", 0, { health: 3 });
     });

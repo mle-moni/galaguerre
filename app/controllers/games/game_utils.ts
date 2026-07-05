@@ -154,7 +154,7 @@ export const ensureMinionFoundInBoard = (
     if (!minion) {
         emitSocketEvent(
             "notify_error",
-            { error: "Ce serviteur n'est pas sur le plateau (gros con)" },
+            { error: "Ce monstre n'est pas sur le plateau (gros con)" },
             socketId,
         );
     }
@@ -259,7 +259,7 @@ export const ensureValidAttackTarget = (
         if (!targetMinion || owner !== "OPPONENT") {
             emitSocketEvent(
                 "notify_error",
-                { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+                { error: "Vous devez d'abord attaquer un monstre avec Provocation" },
                 socketId,
             );
             return false;
@@ -268,7 +268,7 @@ export const ensureValidAttackTarget = (
         if (!getMinionHasTaunt(targetMinion)) {
             emitSocketEvent(
                 "notify_error",
-                { error: "Vous devez d'abord attaquer un serviteur avec Provocation" },
+                { error: "Vous devez d'abord attaquer un monstre avec Provocation" },
                 socketId,
             );
             return false;
@@ -276,7 +276,7 @@ export const ensureValidAttackTarget = (
     }
 
     if (targetMinion && owner === "OPPONENT" && !canOpponentDirectlyTargetMinion(targetMinion)) {
-        emitSocketEvent("notify_error", { error: "Ce serviteur ne peut pas être ciblé" }, socketId);
+        emitSocketEvent("notify_error", { error: "Ce monstre ne peut pas être ciblé" }, socketId);
         return false;
     }
 

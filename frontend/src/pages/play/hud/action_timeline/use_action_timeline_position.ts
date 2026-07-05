@@ -1,8 +1,8 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "galaguerre:action-timeline-position";
-const DEFAULT_LEFT = 8;
-const DEFAULT_BOTTOM_OFFSET = 200;
+const DEFAULT_LEFT = 12;
+const DEFAULT_BOTTOM_OFFSET = 220;
 
 export interface TimelinePosition {
     x: number;

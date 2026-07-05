@@ -202,7 +202,7 @@ test.group("weapon combat", () => {
             { minionUuid: null, owner: "OPPONENT" },
         );
 
-        assertError(assert, "Vous devez d'abord attaquer un serviteur avec Provocation");
+        assertError(assert, "Vous devez d'abord attaquer un monstre avec Provocation");
     });
 
     test("allows hero attack when only taunt minion has stealth", async ({ assert }) => {

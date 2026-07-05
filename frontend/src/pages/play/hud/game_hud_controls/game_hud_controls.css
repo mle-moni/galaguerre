@@ -9,25 +9,33 @@
 }
 
 .game-hud-fab {
-	width: 44px;
-	height: 44px;
+	width: 40px;
+	height: 40px;
 	border-radius: 50%;
-	border: none;
-	background: rgba(0, 0, 0, 0.65);
-	color: #fff;
+	border: 2px solid var(--gg-gold);
+	background: rgba(15, 30, 60, 0.88);
+	color: var(--gg-gold);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 	touch-action: manipulation;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+	transition:
+		background-color 0.15s ease,
+		box-shadow 0.15s ease;
 }
 
 .game-hud-fab--abandon:hover {
 	background: rgba(127, 29, 29, 0.85);
+	color: #fff;
+	border-color: #fca5a5;
 }
 
 .game-hud-fab--glossary:hover {
 	background: rgba(30, 58, 138, 0.85);
+	color: #fff;
+	border-color: #93c5fd;
 }
 
 @media (max-width: 640px) and (orientation: portrait) {

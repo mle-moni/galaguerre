@@ -60,7 +60,7 @@ export const gameWeaponAction = async (
     if (!targetMinionInfos) {
         emitSocketEvent(
             "notify_error",
-            { error: "Vous ne pouvez pas attaquer ce serviteur ici" },
+            { error: "Vous ne pouvez pas attaquer ce monstre ici" },
             socketId,
         );
         return;

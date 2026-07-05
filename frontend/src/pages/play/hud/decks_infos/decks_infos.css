@@ -1,0 +1,177 @@
+.decks-infos {
+	flex: 1;
+	width: 100%;
+	padding: 0.5rem 0.25rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.375rem;
+}
+
+.decks-infos__turn-banner {
+	font-family: var(--font-display);
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	text-align: center;
+	color: #2c2416;
+	background: linear-gradient(180deg, #f0d878 0%, #d4af37 50%, #b8942a 100%);
+	border: 1px solid rgba(201, 162, 39, 0.8);
+	border-radius: 6px;
+	padding: 0.375rem 0.75rem;
+	box-shadow:
+		0 0 8px rgba(240, 184, 64, 0.35),
+		inset 0 1px 0 rgba(255, 255, 255, 0.35);
+	width: 100%;
+}
+
+.deck-infos-row {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	width: 100%;
+	gap: 0.25rem;
+	min-height: 96px;
+}
+
+.deck-infos-row__count {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--gg-text-on-dark);
+	font-variant-numeric: tabular-nums;
+}
+
+.deck-infos-row__card-back {
+	border-radius: 4px;
+	object-fit: cover;
+	flex-shrink: 0;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.decks-infos__opponent-deck {
+	position: relative;
+	width: 100%;
+}
+
+.decks-infos__opponent-timer {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	right: 0;
+	margin-bottom: 0.375rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.decks-infos__opponent-timer .countdown-timer {
+	font-size: 0.75rem;
+	color: var(--gg-gold);
+}
+
+.decks-infos__pass-turn {
+	position: relative;
+	width: 100%;
+	margin-top: 0.25rem;
+}
+
+.decks-infos__player-timer {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	right: 0;
+	margin-bottom: 0.375rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.decks-infos__player-timer .countdown-timer {
+	font-size: 0.7rem;
+	color: var(--gg-text-muted);
+}
+
+.decks-infos__pass-turn-btn-wrap {
+	width: 100%;
+	--pass-turn-chevron: 16px;
+	filter: drop-shadow(0 1px 0 rgba(201, 162, 39, 0.25));
+}
+
+.pass-turn-button {
+	position: relative;
+	width: 100%;
+	height: 44px;
+	padding: 0.5rem 1.25rem;
+	font-family: var(--font-display);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	border: none;
+	cursor: pointer;
+	touch-action: manipulation;
+	color: white;
+	background: linear-gradient(180deg, #4a9fd4 0%, #2a6cb8 45%, #1a4a8a 100%);
+	box-shadow:
+		0 0 14px rgba(74, 159, 212, 0.55),
+		inset 0 1px 0 rgba(255, 255, 255, 0.28),
+		inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+	filter: drop-shadow(0 0 6px rgba(74, 159, 212, 0.45));
+	clip-path: polygon(
+		0 50%,
+		var(--pass-turn-chevron) 0,
+		calc(100% - var(--pass-turn-chevron)) 0,
+		100% 50%,
+		calc(100% - var(--pass-turn-chevron)) 100%,
+		var(--pass-turn-chevron) 100%
+	);
+	transition:
+		background 0.18s ease,
+		filter 0.18s ease,
+		opacity 0.18s ease;
+}
+
+.pass-turn-button:hover:not(:disabled) {
+	background: linear-gradient(180deg, #5aafe4 0%, #3a7cc8 45%, #2a5a9a 100%);
+	filter: drop-shadow(0 0 8px rgba(74, 159, 212, 0.6));
+}
+
+.pass-turn-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.pass-turn-button--loading {
+	pointer-events: none;
+	color: transparent;
+}
+
+.pass-turn-button--loading::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 16px;
+	height: 16px;
+	margin: -8px 0 0 -8px;
+	border-radius: 50%;
+	border: 2px solid transparent;
+	border-top-color: white;
+	animation: pass-turn-spin 700ms linear infinite;
+}
+
+@keyframes pass-turn-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pass-turn-button--loading::after {
+		animation: none;
+	}
+}
