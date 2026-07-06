@@ -425,3 +425,7 @@ Format compact pour construction de deck par LLM.
 ### #161 La Phonebox
 - Coût: 2 | Type: MINION | Stats: 0/4 [Provocation] | Rareté: Commune | Famille: —
 - Provocation. Passif : Donne Discrétion à vos serviteurs adjacents.
+
+### #162 Princesse
+- Coût: 2 | Type: MINION | Stats: 1/1 [Provocation] | Rareté: Légendaire | Famille: Pets
+- Provocation. Dernier souffle : Donne +2 attaque, Immunité à un monstre allié aléatoire 🐾 Pets.

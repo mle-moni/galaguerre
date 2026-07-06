@@ -553,6 +553,15 @@ export const randomEnemyCharacter = (): TargetDefinition =>
         targetSelectionMode: "RANDOM",
     });
 
+export const randomAllyMinionWithTag = (tag: CardTag): TargetDefinition =>
+    baseTarget({
+        type: "MINION",
+        targetTeam: "PLAYER",
+        tag,
+        maxTargets: 1,
+        targetSelectionMode: "RANDOM",
+    });
+
 export const otherCharacters = (): TargetDefinition =>
     baseTarget({ type: "ALL", targetTeam: "ALL", excludeSelf: true });
 
@@ -632,6 +641,12 @@ export const boostAttackWithStealth = (attack: number): BoostDefinition =>
 
 export const boostDivineShield = (): BoostDefinition =>
     boostStats({
+        minionPowers: { hasDivineShield: true },
+    });
+
+export const boostAttackWithDivineShield = (attack: number): BoostDefinition =>
+    boostStats({
+        attack,
         minionPowers: { hasDivineShield: true },
     });
 

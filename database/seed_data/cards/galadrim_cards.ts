@@ -45,6 +45,7 @@ import {
     otherAllyMinions,
     otherAllyMinionsWithTag,
     otherMinionsWithTag,
+    randomAllyMinionWithTag,
     randomEnemyCharacter,
     randomEnemyMinion,
     randomEnemyTargets,
@@ -63,6 +64,7 @@ import {
     targetedAnyMinionWithComparison,
     targetedEnemyMinion,
     type CardSeedEntry,
+    boostAttackWithDivineShield,
     boostDivineShield,
 } from "./define_card.js";
 
@@ -736,6 +738,25 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 hasCharge: true,
             },
             passives: [boostPassive(boostAttack(1), otherMinionsWithTag("PETS"), true)],
+        },
+        { rarity: "LEGENDARY" },
+    ),
+    defineMinion(
+        162,
+        {
+            ...gal("Princesse", 2),
+            imageUrl: "/card-covers/galadrim/princesse.webp",
+            attack: 1,
+            health: 1,
+        },
+        {
+            tags: ["PETS"],
+            minionPowers: {
+                hasTaunt: true,
+            },
+            deathrattleActions: [
+                boostAction(boostAttackWithDivineShield(2), randomAllyMinionWithTag("PETS")),
+            ],
         },
         { rarity: "LEGENDARY" },
     ),
