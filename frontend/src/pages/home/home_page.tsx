@@ -17,20 +17,22 @@ export const HomePage = observer(() => {
     const playTarget = user.currentGameId ? "/play" : "/matchmaking";
 
     return (
-        <>
+        <div className="home-page">
             <div className="home-grid">
                 <HomeLeftSidebar />
-                <HomeHero playTarget={playTarget} />
-                <HomeRightSidebar
-                    friends={friendsQuery.data ?? []}
-                    isLoadingFriends={friendsQuery.isLoading}
-                    friendRequests={friendRequestsQuery.data ?? []}
-                    isLoadingRequests={friendRequestsQuery.isLoading}
-                    gameInvites={gameInvitesQuery.data ?? []}
-                    isLoadingGameInvites={gameInvitesQuery.isLoading}
-                />
+                <div className="home-grid__stack">
+                    <HomeHero playTarget={playTarget} />
+                    <HomeRightSidebar
+                        friends={friendsQuery.data ?? []}
+                        isLoadingFriends={friendsQuery.isLoading}
+                        friendRequests={friendRequestsQuery.data ?? []}
+                        isLoadingRequests={friendRequestsQuery.isLoading}
+                        gameInvites={gameInvitesQuery.data ?? []}
+                        isLoadingGameInvites={gameInvitesQuery.isLoading}
+                    />
+                </div>
             </div>
             <HomeBottomSection />
-        </>
+        </div>
     );
 });
