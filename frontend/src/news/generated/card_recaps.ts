@@ -310,4 +310,14 @@ export const CARD_RECAPS: CardRecapData[] = [
         ],
         imageUrl: "/card-covers/galadrim/recherche-google.webp",
     },
+    {
+        date: "2026-07-06",
+        slug: "recap-2026-07-06",
+        publishedAt: "2026-07-06T18:00:00+02:00",
+        untilCommitHash: "7e66f1162357d3d0e4ced4289b66ec732b2ef853",
+        newCardIds: [160, 162, 161],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/stagiaire-x.webp",
+    },
 ];
