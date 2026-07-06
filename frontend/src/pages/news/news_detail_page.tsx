@@ -14,7 +14,7 @@ export const NewsDetailPage = observer(() => {
         return (
             <div className="gg-panel p-8 text-center max-w-2xl mx-auto">
                 <p className="text-white/80 m-0">Actualité introuvable.</p>
-                <Link to="/actualites" className="news-back-link">
+                <Link to="/actualites" className="news-back-link news-back-link--standalone">
                     Voir toutes les actualités
                 </Link>
             </div>
@@ -39,12 +39,14 @@ export const NewsDetailPage = observer(() => {
                     <div className="news-detail__prose">
                         <Content />
                     </div>
-                    <Link to="/actualites" className="news-back-link">
-                        Toutes les actualités
-                    </Link>
-                    <Link to={user ? "/" : "/login"} className="news-back-link">
-                        {user ? "Retour à l'accueil" : "Se connecter"}
-                    </Link>
+                    <div className="news-back-links">
+                        <Link to="/actualites" className="news-back-link">
+                            Toutes les actualités
+                        </Link>
+                        <Link to={user ? "/" : "/login"} className="news-back-link">
+                            {user ? "Retour à l'accueil" : "Se connecter"}
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

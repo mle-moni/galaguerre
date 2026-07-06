@@ -102,13 +102,34 @@
     margin-bottom: 0;
 }
 
+.news-detail__prose a {
+    color: var(--gg-gold);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.news-detail__prose a:hover {
+    color: var(--gg-gold-hover);
+}
+
+.news-back-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    margin-top: 1.25rem;
+}
+
 .news-back-link {
     display: inline-block;
-    margin-top: 1.25rem;
     color: var(--gg-gold);
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
+}
+
+.news-back-link--standalone {
+    margin-top: 1.25rem;
 }
 
 .news-back-link:hover {
