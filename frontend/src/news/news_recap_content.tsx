@@ -3,7 +3,7 @@ import { CenteredLoader } from "~/components/centered_loader";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { formatBalanceChange } from "./format_balance_change.js";
-import type { NewsBalanceEntry, WeeklyRecapData } from "./generated/weekly_recaps.js";
+import type { NewsBalanceEntry, CardRecapData } from "./generated/card_recaps.js";
 import "./news_recap_cards.css";
 
 const NewsRecapCard = ({
@@ -49,7 +49,7 @@ const NewsRecapCardById = ({
     return <NewsRecapCard card={card} changes={changes} tone={tone} />;
 };
 
-export const NewsRecapContent = ({ recap }: { recap: WeeklyRecapData }) => {
+export const NewsRecapContent = ({ recap }: { recap: CardRecapData }) => {
     const cardsQuery = useCardsQuery({ includeNonCollectible: true });
 
     if (cardsQuery.isLoading) return <CenteredLoader />;
@@ -61,10 +61,7 @@ export const NewsRecapContent = ({ recap }: { recap: WeeklyRecapData }) => {
 
     return (
         <>
-            <p>
-                Récapitulatif hebdomadaire des changements de cartes détectés dans l&apos;historique
-                du jeu.
-            </p>
+            <p>Récapitulatif des changements de cartes depuis la dernière mise à jour.</p>
 
             {hasNewCards && (
                 <section className="news-recap-section">
@@ -112,13 +109,13 @@ export const NewsRecapContent = ({ recap }: { recap: WeeklyRecapData }) => {
             )}
 
             {!hasNewCards && !hasBuffs && !hasNerfs && (
-                <p className="news-recap-empty">Aucun changement de carte cette semaine.</p>
+                <p className="news-recap-empty">Aucun changement de carte.</p>
             )}
         </>
     );
 };
 
-export const createNewsRecapContent = (recap: WeeklyRecapData) => {
+export const createNewsRecapContent = (recap: CardRecapData) => {
     const RecapContent = () => <NewsRecapContent recap={recap} />;
     return RecapContent;
 };

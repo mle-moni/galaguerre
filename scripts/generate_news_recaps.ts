@@ -1,11 +1,12 @@
 import { execSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CARDS_FILE = "database/seed_data/cards/galadrim_cards.ts";
-const OUTPUT = path.join(ROOT, "frontend/src/news/generated/weekly_recaps.ts");
+const OUTPUT = path.join(ROOT, "frontend/src/news/generated/card_recaps.ts");
+const LEGACY_OUTPUT = path.join(ROOT, "frontend/src/news/generated/weekly_recaps.ts");
 
 type ParsedCard = {
     id: number;
@@ -31,16 +32,31 @@ type BalanceEntry = {
     changes: BalanceChange[];
 };
 
-type WeeklyRecapBase = {
-    week: string;
+type CardRecapBase = {
+    date: string;
     slug: string;
     publishedAt: string;
+    untilCommitHash: string;
     newCardIds: number[];
     buffs: BalanceEntry[];
     nerfs: BalanceEntry[];
 };
 
-const getRecapImageUrl = (recap: WeeklyRecapBase, cardsById: Map<number, ParsedCard>): string => {
+type CardRecapWithImage = CardRecapBase & { imageUrl: string };
+
+type LegacyRecap = {
+    week?: string;
+    date?: string;
+    slug: string;
+    publishedAt: string;
+    untilCommitHash?: string;
+    imageUrl?: string;
+    newCardIds: number[];
+    buffs: BalanceEntry[];
+    nerfs: BalanceEntry[];
+};
+
+const getRecapImageUrl = (recap: CardRecapBase, cardsById: Map<number, ParsedCard>): string => {
     const featuredId =
         recap.newCardIds[0] ?? recap.buffs[0]?.id ?? recap.nerfs[0]?.id ?? recap.newCardIds.at(-1);
 
@@ -102,22 +118,9 @@ const isoWeekKey = (dateStr: string): string => {
     return `${utc.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 };
 
-const weekEndIso = (weekKey: string): string => {
-    const [year, weekNumber] = weekKey.split("-W");
-    const simple = new Date(Date.UTC(Number(year), 0, 1 + (Number(weekNumber) - 1) * 7));
-    const dow = simple.getUTCDay();
-    const isoWeekStart = new Date(simple);
-    if (dow <= 4) {
-        isoWeekStart.setUTCDate(simple.getUTCDate() - simple.getUTCDay() + 1);
-    } else {
-        isoWeekStart.setUTCDate(simple.getUTCDate() + 8 - simple.getUTCDay());
-    }
-    const end = new Date(isoWeekStart);
-    end.setUTCDate(isoWeekStart.getUTCDate() + 6);
-    end.setUTCHours(18, 0, 0, 0);
-    const pad = (value: number) => String(value).padStart(2, "0");
-    return `${end.getUTCFullYear()}-${pad(end.getUTCMonth() + 1)}-${pad(end.getUTCDate())}T${pad(end.getUTCHours())}:00:00+02:00`;
-};
+const dateFromPublishedAt = (publishedAt: string): string => publishedAt.slice(0, 10);
+
+const formatPublishedAt = (date: string): string => `${date}T18:00:00+02:00`;
 
 const scoreChanges = (changes: BalanceChange[]): number => {
     let score = 0;
@@ -154,7 +157,59 @@ const mergeBalance = (
     return { buffs, nerfs };
 };
 
-const generateRecaps = (): WeeklyRecapBase[] => {
+const gitShowCards = (ref: string): Map<number, ParsedCard> | null => {
+    try {
+        const content = execSync(`git show ${ref}:${CARDS_FILE}`, {
+            cwd: ROOT,
+            encoding: "utf8",
+            maxBuffer: 10 * 1024 * 1024,
+        });
+        return parseCards(content);
+    } catch {
+        return null;
+    }
+};
+
+const getHeadHash = (): string =>
+    execSync("git rev-parse HEAD", { cwd: ROOT, encoding: "utf8" }).trim();
+
+const getCommitDate = (hash: string): string => {
+    const date = execSync(`git log -1 --format='%ai' ${hash}`, {
+        cwd: ROOT,
+        encoding: "utf8",
+    }).trim();
+    return date.slice(0, 10);
+};
+
+const diffCards = (
+    previous: Map<number, ParsedCard>,
+    current: Map<number, ParsedCard>,
+): { newCards: Map<number, ParsedCard>; balanceRaw: BalanceEntry[] } => {
+    const newCards = new Map<number, ParsedCard>();
+    const balanceRaw: BalanceEntry[] = [];
+
+    for (const [id, card] of current) {
+        if (!previous.has(id)) {
+            newCards.set(id, card);
+            continue;
+        }
+
+        const old = previous.get(id)!;
+        const changes: BalanceChange[] = [];
+        for (const field of ["cost", "attack", "health", "damage", "durability"] as const) {
+            if (old[field] !== card[field] && (old[field] != null || card[field] != null)) {
+                changes.push({ field, from: old[field], to: card[field] });
+            }
+        }
+        if (changes.length > 0) {
+            balanceRaw.push({ id, label: card.label, changes });
+        }
+    }
+
+    return { newCards, balanceRaw };
+};
+
+const buildWeekLastCommitMap = (): Map<string, string> => {
     const log = execSync(`git log --reverse --format='%H %ai' -- ${CARDS_FILE}`, {
         cwd: ROOT,
         encoding: "utf8",
@@ -163,85 +218,107 @@ const generateRecaps = (): WeeklyRecapBase[] => {
         .split("\n")
         .filter(Boolean);
 
-    let previous = new Map<number, ParsedCard>();
-    const weeks = new Map<
-        string,
-        { newCards: Map<number, ParsedCard>; balanceRaw: BalanceEntry[] }
-    >();
-
+    const weekLastCommit = new Map<string, string>();
     for (const line of log) {
         const [hash, date] = line.split(" ");
-        let content: string;
-        try {
-            content = execSync(`git show ${hash}:${CARDS_FILE}`, {
-                cwd: ROOT,
-                encoding: "utf8",
-                maxBuffer: 10 * 1024 * 1024,
-            });
-        } catch {
-            continue;
-        }
-
-        const cards = parseCards(content);
-        const week = isoWeekKey(date);
-        if (!weeks.has(week)) {
-            weeks.set(week, { newCards: new Map(), balanceRaw: [] });
-        }
-        const bucket = weeks.get(week)!;
-
-        for (const [id, card] of cards) {
-            if (!previous.has(id)) {
-                bucket.newCards.set(id, card);
-                continue;
-            }
-
-            const old = previous.get(id)!;
-            const changes: BalanceChange[] = [];
-            for (const field of ["cost", "attack", "health", "damage", "durability"] as const) {
-                if (old[field] !== card[field] && (old[field] != null || card[field] != null)) {
-                    changes.push({ field, from: old[field], to: card[field] });
-                }
-            }
-            if (changes.length > 0) {
-                bucket.balanceRaw.push({ id, label: card.label, changes });
-            }
-        }
-
-        previous = cards;
+        weekLastCommit.set(isoWeekKey(date), hash);
     }
-
-    return [...weeks.entries()]
-        .map(([week, bucket]) => {
-            const { buffs, nerfs } = mergeBalance(bucket.balanceRaw);
-            return {
-                week,
-                slug: `recap-${week.toLowerCase()}`,
-                publishedAt: weekEndIso(week),
-                newCardIds: [...bucket.newCards.keys()],
-                buffs,
-                nerfs,
-            };
-        })
-        .filter((recap) => recap.newCardIds.length + recap.buffs.length + recap.nerfs.length > 0);
+    return weekLastCommit;
 };
 
-const recaps = generateRecaps();
-const latestCards = (() => {
-    try {
-        const content = execSync(`git show HEAD:${CARDS_FILE}`, {
-            cwd: ROOT,
-            encoding: "utf8",
-            maxBuffer: 10 * 1024 * 1024,
-        });
-        return parseCards(content);
-    } catch {
-        return new Map<number, ParsedCard>();
-    }
-})();
-const recapsWithImages = recaps.map((recap) => ({
+const readExistingRecaps = (): LegacyRecap[] => {
+    const filePath = existsSync(OUTPUT) ? OUTPUT : existsSync(LEGACY_OUTPUT) ? LEGACY_OUTPUT : null;
+    if (!filePath) return [];
+
+    const content = readFileSync(filePath, "utf8");
+    const match = content.match(/export const (?:CARD_RECAPS|WEEKLY_RECAPS).*= (\[[\s\S]*\]);/);
+    if (!match) return [];
+
+    return new Function(`return ${match[1]}`)() as LegacyRecap[];
+};
+
+const migrateRecap = (recap: LegacyRecap, weekLastCommit: Map<string, string>): CardRecapBase => {
+    const date = recap.date ?? dateFromPublishedAt(recap.publishedAt);
+    const untilCommitHash =
+        recap.untilCommitHash ??
+        (recap.week ? weekLastCommit.get(recap.week) : undefined) ??
+        getHeadHash();
+
+    return {
+        date,
+        slug: recap.slug,
+        publishedAt: recap.publishedAt,
+        untilCommitHash,
+        newCardIds: recap.newCardIds,
+        buffs: recap.buffs,
+        nerfs: recap.nerfs,
+    };
+};
+
+const nextSlug = (date: string, existingSlugs: Set<string>): string => {
+    const base = `recap-${date}`;
+    if (!existingSlugs.has(base)) return base;
+    let suffix = 2;
+    while (existingSlugs.has(`${base}-${suffix}`)) suffix++;
+    return `${base}-${suffix}`;
+};
+
+const computeRecapSince = (
+    sinceHash: string | null,
+    toHash: string,
+    existingSlugs: Set<string>,
+): CardRecapBase | null => {
+    if (sinceHash === toHash) return null;
+
+    const previous = sinceHash
+        ? gitShowCards(sinceHash) ?? new Map()
+        : new Map<number, ParsedCard>();
+    const current = gitShowCards(toHash);
+    if (!current) return null;
+
+    const { newCards, balanceRaw } = diffCards(previous, current);
+    const { buffs, nerfs } = mergeBalance(balanceRaw);
+    const changeCount = newCards.size + buffs.length + nerfs.length;
+    if (changeCount === 0) return null;
+
+    const date = getCommitDate(toHash);
+    return {
+        date,
+        slug: nextSlug(date, existingSlugs),
+        publishedAt: formatPublishedAt(date),
+        untilCommitHash: toHash,
+        newCardIds: [...newCards.keys()],
+        buffs,
+        nerfs,
+    };
+};
+
+const weekLastCommit = buildWeekLastCommitMap();
+const existingRaw = readExistingRecaps();
+const recaps: CardRecapBase[] = existingRaw.map((recap) => migrateRecap(recap, weekLastCommit));
+
+const lastHash = recaps.at(-1)?.untilCommitHash ?? null;
+const headHash = getHeadHash();
+const existingSlugs = new Set(recaps.map((recap) => recap.slug));
+const newRecap = computeRecapSince(lastHash, headHash, existingSlugs);
+
+if (newRecap) {
+    recaps.push(newRecap);
+    console.log(`Added new card recap: ${newRecap.slug}`);
+} else if (recaps.length === 0) {
+    console.log("No card changes detected.");
+} else {
+    console.log("No new card changes since last recap.");
+}
+
+const latestCards = gitShowCards("HEAD") ?? new Map<number, ParsedCard>();
+const recapsWithImages: CardRecapWithImage[] = recaps.map((recap) => ({
     ...recap,
-    imageUrl: getRecapImageUrl(recap, latestCards),
+    imageUrl:
+        existingRaw.find((raw) => raw.slug === recap.slug)?.imageUrl ??
+        getRecapImageUrl(recap, latestCards),
 }));
+
 const fileContents = `// Generated by scripts/generate_news_recaps.ts — do not edit manually.
 
 export type NewsBalanceChange = {
@@ -256,19 +333,20 @@ export type NewsBalanceEntry = {
     changes: NewsBalanceChange[];
 };
 
-export type WeeklyRecapData = {
-    week: string;
+export type CardRecapData = {
+    date: string;
     slug: string;
     publishedAt: string;
+    untilCommitHash: string;
     imageUrl: string;
     newCardIds: number[];
     buffs: NewsBalanceEntry[];
     nerfs: NewsBalanceEntry[];
 };
 
-export const WEEKLY_RECAPS: WeeklyRecapData[] = ${JSON.stringify(recapsWithImages, null, 4)};
+export const CARD_RECAPS: CardRecapData[] = ${JSON.stringify(recapsWithImages, null, 4)};
 `;
 
 mkdirSync(path.dirname(OUTPUT), { recursive: true });
 writeFileSync(OUTPUT, fileContents);
-console.log(`Wrote ${recapsWithImages.length} weekly recaps to ${OUTPUT}`);
+console.log(`Wrote ${recapsWithImages.length} card recaps to ${OUTPUT}`);

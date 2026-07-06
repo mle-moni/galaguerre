@@ -38,7 +38,10 @@ export const NewsListPage = observer(() => {
                         </div>
                     )}
 
-                    <Link to={user ? "/" : "/login"} className="news-back-link news-back-link--standalone">
+                    <Link
+                        to={user ? "/" : "/login"}
+                        className="news-back-link news-back-link--standalone"
+                    >
                         {user ? "Retour à l'accueil" : "Se connecter"}
                     </Link>
                 </div>

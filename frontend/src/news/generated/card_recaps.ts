@@ -12,21 +12,23 @@ export type NewsBalanceEntry = {
     changes: NewsBalanceChange[];
 };
 
-export type WeeklyRecapData = {
-    week: string;
+export type CardRecapData = {
+    date: string;
     slug: string;
     publishedAt: string;
+    untilCommitHash: string;
     imageUrl: string;
     newCardIds: number[];
     buffs: NewsBalanceEntry[];
     nerfs: NewsBalanceEntry[];
 };
 
-export const WEEKLY_RECAPS: WeeklyRecapData[] = [
+export const CARD_RECAPS: CardRecapData[] = [
     {
-        week: "2026-W24",
+        date: "2026-06-14",
         slug: "recap-2026-w24",
         publishedAt: "2026-06-14T18:00:00+02:00",
+        untilCommitHash: "1fb14d0a6663fad1fc4c5c15e57702cb8cd72881",
         newCardIds: [
             62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83,
             84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 106, 107, 108, 111, 113, 114, 115, 116,
@@ -49,9 +51,10 @@ export const WEEKLY_RECAPS: WeeklyRecapData[] = [
         imageUrl: "/card-covers/galadrim/stagiaire-dev.webp",
     },
     {
-        week: "2026-W25",
+        date: "2026-06-21",
         slug: "recap-2026-w25",
         publishedAt: "2026-06-21T18:00:00+02:00",
+        untilCommitHash: "7f8e996bfddba539d2c0d9d77c3254f92374776d",
         newCardIds: [
             130, 131, 136, 138, 137, 1, 132, 133, 134, 135, 120, 122, 123, 124, 126, 127, 128, 96,
             98, 101, 102, 104, 109, 110, 112,
@@ -61,9 +64,10 @@ export const WEEKLY_RECAPS: WeeklyRecapData[] = [
         imageUrl: "/card-covers/galadrim/avocat-d-affaires.webp",
     },
     {
-        week: "2026-W26",
+        date: "2026-06-28",
         slug: "recap-2026-w26",
         publishedAt: "2026-06-28T18:00:00+02:00",
+        untilCommitHash: "0eda9cd1877befa0ba514f38aa28a4770468c085",
         newCardIds: [97, 99, 100, 103, 105, 139, 140, 141, 142, 143, 144, 145, 146, 148, 147],
         buffs: [
             {
@@ -269,9 +273,10 @@ export const WEEKLY_RECAPS: WeeklyRecapData[] = [
         imageUrl: "/card-covers/galadrim/bug-en-prod.webp",
     },
     {
-        week: "2026-W27",
+        date: "2026-07-05",
         slug: "recap-2026-w27",
         publishedAt: "2026-07-05T18:00:00+02:00",
+        untilCommitHash: "cf735d52f38333680de6672612e9e66da190b379",
         newCardIds: [149, 150, 151, 152, 153, 154, 156, 155, 157, 158, 159],
         buffs: [],
         nerfs: [
@@ -304,5 +309,15 @@ export const WEEKLY_RECAPS: WeeklyRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/recherche-google.webp",
+    },
+    {
+        date: "2026-07-06",
+        slug: "recap-2026-07-06",
+        publishedAt: "2026-07-06T18:00:00+02:00",
+        untilCommitHash: "ffa08258b155e64089980ad37d58271030f852b4",
+        newCardIds: [160, 161],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/stagiaire-x.webp",
     },
 ];

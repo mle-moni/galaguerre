@@ -1,4 +1,4 @@
-import type { NewsBalanceChange } from "./generated/weekly_recaps.js";
+import type { NewsBalanceChange } from "./generated/card_recaps.js";
 
 const FIELD_LABELS: Record<NewsBalanceChange["field"], string> = {
     cost: "Coût",

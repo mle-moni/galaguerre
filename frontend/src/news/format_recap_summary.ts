@@ -1,6 +1,6 @@
-import type { WeeklyRecapData } from "./generated/weekly_recaps.js";
+import type { CardRecapData } from "./generated/card_recaps.js";
 
-export const formatRecapShortDescription = (recap: WeeklyRecapData): string => {
+export const formatRecapShortDescription = (recap: CardRecapData): string => {
     const parts: string[] = [];
     const newCount = recap.newCardIds.length;
     const buffCount = recap.buffs.length;
@@ -21,7 +21,7 @@ export const formatRecapShortDescription = (recap: WeeklyRecapData): string => {
     return parts.join(", ");
 };
 
-export const formatRecapTitle = (week: string): string => {
-    const [year, weekNumber] = week.split("-W");
-    return `Récap des cartes — semaine ${Number(weekNumber)} (${year})`;
+export const formatRecapTitle = (date: string): string => {
+    const [year, month, day] = date.split("-");
+    return `Récap des cartes du ${day}/${month}/${year}`;
 };

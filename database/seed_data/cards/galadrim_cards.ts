@@ -797,6 +797,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             },
             passives: [adjacentAllyAuraPassive(boostStealth())],
         },
+        { rarity: "RARE" },
     ),
 
     // --- play-card trigger minions ---
