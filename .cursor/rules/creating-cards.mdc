@@ -4,3 +4,5 @@ alwaysApply: true
 ---
 
 When you create a card, if an image is provided, optimise the image as a webp image with 75% quality with image magick, then delete the source image.
+
+After creating cards, always update "cards.md", with `yarn generate:cards-md`

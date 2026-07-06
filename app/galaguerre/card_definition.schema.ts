@@ -15,6 +15,7 @@ import {
     GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
     GALAGUERRE_PASSIVES_TYPES,
+    GALAGUERRE_TARGET_ADJACENCY,
     GALAGUERRE_TARGET_SELECTION_MODES,
     GALAGUERRE_TARGET_TEAMS,
     GALAGUERRE_TARGET_TYPES,
@@ -44,6 +45,7 @@ export const targetSchema = z.object({
     onlySelf: z.boolean().default(false),
     maxTargets: z.number().nullable(),
     targetSelectionMode: z.enum(GALAGUERRE_TARGET_SELECTION_MODES).nullable(),
+    adjacency: z.enum(GALAGUERRE_TARGET_ADJACENCY).nullable().default(null),
 });
 
 export const zMinionPowerSchema = z.object({

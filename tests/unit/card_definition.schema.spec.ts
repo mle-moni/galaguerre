@@ -301,6 +301,7 @@ test.group("card_definition.schema", () => {
                     onlySelf: true,
                     maxTargets: null,
                     targetSelectionMode: null,
+                    adjacency: null,
                 }),
             ],
         });

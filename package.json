@@ -20,7 +20,8 @@
         "typecheck": "tsc --noEmit",
         "frontend-typecheck": "cd frontend && yarn tsc --noEmit --project tsconfig.json",
         "generate:card-images": "node --experimental-strip-types scripts/generate_hs_card_ids.ts",
-        "generate:news-recaps": "node --experimental-strip-types scripts/generate_news_recaps.ts"
+        "generate:news-recaps": "node --experimental-strip-types scripts/generate_news_recaps.ts",
+        "generate:cards-md": "node ace test --reporters=dot --files=generate_cards_md"
     },
     "imports": {
         "#adomin/*": "./app/adomin/*.js",

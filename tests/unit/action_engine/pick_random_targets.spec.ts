@@ -24,6 +24,7 @@ test.group("pick_random_targets", () => {
                 createMinionTargetSnapshot("OPPONENT", {
                     maxTargets: 1,
                     targetSelectionMode: null,
+                    adjacency: null,
                 }),
             ),
         );

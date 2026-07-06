@@ -10,6 +10,7 @@ import {
     createCardFilterSnapshot,
     createComparisonSnapshot,
     createAllTargetSnapshot,
+    createBoostSnapshot,
     createHeroTargetSnapshot,
     createMinionTargetSnapshot,
     createReconvertParametersSnapshot,
@@ -601,6 +602,69 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Effet"),
             "Effet : Les deux joueurs perdent la partie.",
+        );
+    });
+
+    test("formats adjacent ally boost battlecry", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "BOOST",
+            isTargeted: false,
+            boost: createBoostSnapshot({
+                attack: 1,
+                health: 1,
+                minionPowers: {
+                    hasTaunt: true,
+                    hasCharge: false,
+                    hasWindfury: false,
+                    isPoisonous: false,
+                    hasStealth: false,
+                    hasDivineShield: false,
+                },
+            }),
+            target: createMinionTargetSnapshot("PLAYER", {
+                adjacency: "SOURCE",
+                excludeSelf: true,
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Cri de guerre"),
+            "Cri de guerre : Donne +1/+1, Provocation à vos serviteurs adjacents.",
+        );
+    });
+
+    test("formats adjacent enemy splash damage", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DAMAGE",
+            isTargeted: false,
+            damage: 2,
+            target: createMinionTargetSnapshot("OPPONENT", {
+                adjacency: "SELECTED_TARGET",
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Inflige 2 dégâts aux serviteurs adverses adjacents à la cible.",
+        );
+    });
+
+    test("formats adjacent ally passive stealth aura", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "BOOST",
+            isTargeted: false,
+            boost: createBoostSnapshot({
+                minionPowers: { hasStealth: true },
+            }),
+            target: createMinionTargetSnapshot("PLAYER", {
+                adjacency: "SOURCE",
+                excludeSelf: true,
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Passif"),
+            "Passif : Donne Discrétion à vos serviteurs adjacents.",
         );
     });
 });

@@ -1,12 +1,7 @@
-import type {
-    BoardState,
-    BoostSnapshot,
-    GamePlayer,
-    MinionState,
-    TargetSnapshot,
-} from "#api_types/game.types";
+import type { BoostSnapshot, GamePlayer, MinionState, TargetSnapshot } from "#api_types/game.types";
+import type { AdjacencyContext } from "#api_types/adjacent_targeting";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
-import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
+import { collectMatchingMinionTargets } from "./apply_mass_minion_effects.js";
 
 export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): void => {
     if (boost.attack !== null) {
@@ -66,15 +61,22 @@ export const applyBoostToHero = (player: GamePlayer, boost: BoostSnapshot): void
 };
 
 export const applyBoostToAllMinions = (
-    board: BoardState,
+    player: GamePlayer,
+    opponent: GamePlayer,
     target: TargetSnapshot,
     boost: BoostSnapshot,
-    isOpponentMinion: boolean,
     sourceMinion?: MinionState,
+    adjacencyContext?: AdjacencyContext,
 ): void => {
-    for (const minion of board) {
-        if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
-        if (!minionMatchesTarget(minion, target, isOpponentMinion)) continue;
+    const targets = collectMatchingMinionTargets(
+        player,
+        opponent,
+        target,
+        sourceMinion,
+        adjacencyContext,
+    );
+
+    for (const { minion } of targets) {
         applyBoostToMinion(minion, boost);
     }
 };

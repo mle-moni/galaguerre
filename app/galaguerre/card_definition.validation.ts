@@ -33,6 +33,7 @@ export type TargetDefinition = {
     onlySelf: boolean;
     maxTargets: number | null;
     targetSelectionMode: "RANDOM" | null;
+    adjacency: "SOURCE" | "SELECTED_TARGET" | null;
 };
 
 export type BoostDefinition = {
@@ -229,6 +230,48 @@ const validateTargetSelection = (
     }
 };
 
+const validateTargetAdjacency = (
+    target: TargetDefinition,
+    isTargeted: boolean,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.adjacency === null) return;
+
+    if (target.type !== "MINION") {
+        ctx.addIssue({
+            code: "custom",
+            message: "adjacency is only supported for MINION targets",
+            path: [...path, "adjacency"],
+        });
+        return;
+    }
+
+    if (isTargeted) {
+        ctx.addIssue({
+            code: "custom",
+            message: "adjacency is incompatible with isTargeted actions",
+            path: [...path, "adjacency"],
+        });
+    }
+
+    if (target.onlySelf) {
+        ctx.addIssue({
+            code: "custom",
+            message: "adjacency is incompatible with onlySelf",
+            path: [...path, "adjacency"],
+        });
+    }
+
+    if (target.maxTargets !== null || target.targetSelectionMode !== null) {
+        ctx.addIssue({
+            code: "custom",
+            message: "adjacency is incompatible with targetSelectionMode",
+            path: [...path, "adjacency"],
+        });
+    }
+};
+
 const validateTargetFilters = (
     target: TargetDefinition,
     isTargeted: boolean,
@@ -238,6 +281,7 @@ const validateTargetFilters = (
     validateTargetExcludeSelf(target, ctx, path);
     validateTargetOnlySelf(target, isTargeted, ctx, path);
     validateTargetSelection(target, isTargeted, ctx, path);
+    validateTargetAdjacency(target, isTargeted, ctx, path);
 
     if (target.comparison !== null || target.tag !== null) {
         if (target.type !== "MINION" && target.type !== "ALL") {

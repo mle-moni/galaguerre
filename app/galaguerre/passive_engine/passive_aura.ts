@@ -10,7 +10,10 @@ import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/targe
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 import type Game from "#models/game";
 import { findMinionOnPlayerBoard } from "../action_engine/find_minion_on_board.js";
-import { getTargetBoardEntries } from "../action_engine/apply_mass_minion_effects.js";
+import {
+    collectMatchingMinionTargets,
+    getTargetBoardEntries,
+} from "../action_engine/apply_mass_minion_effects.js";
 import { applyBoostToHero } from "../action_engine/apply_boost.js";
 import { revertBoostFromHero, revertBoostFromMinion } from "../action_engine/revert_boost.js";
 import { resolveHeroTargets } from "../action_engine/resolve_hero_target.js";
@@ -50,6 +53,22 @@ type ScaledBoostAmounts = {
     spellPower: number;
 };
 
+const collectPassiveAuraMinionTargets = (
+    game: Game,
+    sourceOwner: GamePlayer,
+    sourceMinion: MinionState,
+    target: PassiveBoostSnapshot["target"],
+) => {
+    if (!target || target.type !== "MINION") return [];
+
+    const opponent = getOpponent(game, sourceOwner);
+    return collectMatchingMinionTargets(sourceOwner, opponent, target, sourceMinion, {
+        player: sourceOwner,
+        opponent,
+        sourceMinion,
+    });
+};
+
 const countMatchingMinions = (
     game: Game,
     sourceOwner: GamePlayer,
@@ -57,6 +76,10 @@ const countMatchingMinions = (
     target: PassiveBoostSnapshot["target"],
 ): number => {
     if (!target) return 0;
+
+    if (target.type === "MINION") {
+        return collectPassiveAuraMinionTargets(game, sourceOwner, sourceMinion, target).length;
+    }
 
     const opponent = getOpponent(game, sourceOwner);
     let count = 0;
@@ -186,11 +209,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
     const targetBoardOwner = getBoardOwnerForMinion(game, minion);
     if (!targetBoardOwner) return;
 
-    const targetSpotOwner = getSpotOwner(game, targetBoardOwner);
-
     for (const sourceOwner of [game.data.playerOne, game.data.playerTwo]) {
-        const sourceOpponent = getOpponent(game, sourceOwner);
-
         for (const sourceMinion of sourceOwner.board) {
             if (sourceMinion.originalCard.type !== "MINION" || sourceMinion.isSilenced) {
                 continue;
@@ -201,29 +220,23 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
                 const { boost, target } = passiveBoost;
                 if (!boost.minionPowers || !target || target.type !== "MINION") continue;
 
-                for (const { board, isOpponent } of getTargetBoardEntries(
-                    target,
+                const matchingTargets = collectPassiveAuraMinionTargets(
+                    game,
                     sourceOwner,
-                    sourceOpponent,
-                )) {
-                    const boardSpotOwner = isOpponent
-                        ? getSpotOwner(game, sourceOpponent)
-                        : getSpotOwner(game, sourceOwner);
+                    sourceMinion,
+                    target,
+                );
+                const isAffected = matchingTargets.some(
+                    (entry) => entry.minion.uuid === minion.uuid,
+                );
+                if (!isAffected) continue;
 
-                    if (boardSpotOwner !== targetSpotOwner) continue;
-
-                    const boardMinion = board.find((entry) => entry.uuid === minion.uuid);
-                    if (!boardMinion) continue;
-                    if (shouldExcludeSourceMinion(target, sourceMinion, boardMinion)) continue;
-                    if (!minionMatchesTarget(boardMinion, target, isOpponent)) continue;
-
-                    if (boost.minionPowers.hasTaunt) keywords.hasTaunt = true;
-                    if (boost.minionPowers.hasCharge) keywords.hasCharge = true;
-                    if (boost.minionPowers.hasWindfury) keywords.hasWindfury = true;
-                    if (boost.minionPowers.isPoisonous) keywords.isPoisonous = true;
-                    if (boost.minionPowers.hasStealth) keywords.hasStealth = true;
-                    if (boost.minionPowers.hasDivineShield) keywords.hasDivineShield = true;
-                }
+                if (boost.minionPowers.hasTaunt) keywords.hasTaunt = true;
+                if (boost.minionPowers.hasCharge) keywords.hasCharge = true;
+                if (boost.minionPowers.hasWindfury) keywords.hasWindfury = true;
+                if (boost.minionPowers.isPoisonous) keywords.isPoisonous = true;
+                if (boost.minionPowers.hasStealth) keywords.hasStealth = true;
+                if (boost.minionPowers.hasDivineShield) keywords.hasDivineShield = true;
             }
         }
     }
@@ -303,19 +316,17 @@ const applyPassiveBoostAura = (
     }
 
     if (target.type === "MINION") {
-        for (const { board, isOpponent } of getTargetBoardEntries(target, sourceOwner, opponent)) {
-            const boardOwner = isOpponent ? opponent : sourceOwner;
-
-            for (const minion of board) {
-                if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
-                if (!minionMatchesTarget(minion, target, isOpponent)) continue;
-
-                applyAuraBoostToMinion(minion, passiveBoost);
-                recalculateMinionKeywords(game, minion);
-                trackAuraTarget(sourceMinion, minion, {
-                    owner: getSpotOwner(game, boardOwner),
-                });
-            }
+        for (const { owner, minion } of collectPassiveAuraMinionTargets(
+            game,
+            sourceOwner,
+            sourceMinion,
+            target,
+        )) {
+            applyAuraBoostToMinion(minion, passiveBoost);
+            recalculateMinionKeywords(game, minion);
+            trackAuraTarget(sourceMinion, minion, {
+                owner: getSpotOwner(game, owner),
+            });
         }
         return;
     }
@@ -356,8 +367,6 @@ export const applyExistingAurasToMinion = (
     if (!targetMinion) return;
 
     for (const sourceOwner of [game.data.playerOne, game.data.playerTwo]) {
-        const sourceOpponent = getOpponent(game, sourceOwner);
-
         for (const sourceMinion of sourceOwner.board) {
             if (sourceMinion.originalCard.type !== "MINION" || sourceMinion.isSilenced) {
                 continue;
@@ -368,25 +377,22 @@ export const applyExistingAurasToMinion = (
                 const { target } = passiveBoost;
                 if (!target || target.type !== "MINION") continue;
 
-                for (const { board, isOpponent } of getTargetBoardEntries(
-                    target,
+                const matchingTargets = collectPassiveAuraMinionTargets(
+                    game,
                     sourceOwner,
-                    sourceOpponent,
-                )) {
-                    const boardOwner = isOpponent ? sourceOpponent : sourceOwner;
-                    if (boardOwner !== targetOwner) continue;
+                    sourceMinion,
+                    target,
+                );
+                const isAffected = matchingTargets.some(
+                    (entry) => entry.minion.uuid === targetMinion.uuid,
+                );
+                if (!isAffected) continue;
 
-                    const minion = board[targetBoardIndex];
-                    if (!minion) continue;
-                    if (shouldExcludeSourceMinion(target, sourceMinion, minion)) continue;
-                    if (!minionMatchesTarget(minion, target, isOpponent)) continue;
-
-                    applyAuraBoostToMinion(minion, passiveBoost);
-                    recalculateMinionKeywords(game, minion);
-                    trackAuraTarget(sourceMinion, minion, {
-                        owner: getSpotOwner(game, targetOwner),
-                    });
-                }
+                applyAuraBoostToMinion(targetMinion, passiveBoost);
+                recalculateMinionKeywords(game, targetMinion);
+                trackAuraTarget(sourceMinion, targetMinion, {
+                    owner: getSpotOwner(game, targetOwner),
+                });
             }
         }
     }
@@ -406,16 +412,12 @@ export const revertAurasReceivedByMinion = (game: Game, targetMinion: MinionStat
             if (!hasTarget) continue;
 
             const card = sourceMinion.originalCard as MinionCard;
-            const isOpponent = targetBoardOwner !== sourceOwner;
 
             for (const passiveBoost of collectBoostPassives(card)) {
                 const { boost, target } = passiveBoost;
                 if (!target || (target.type !== "MINION" && target.type !== "ALL")) continue;
-                if (shouldExcludeSourceMinion(target, sourceMinion, targetMinion)) continue;
-                if (!minionMatchesTarget(targetMinion, target, isOpponent)) continue;
 
                 revertBoostFromMinion(targetMinion, boost);
-                recalculateMinionKeywords(game, targetMinion);
             }
 
             sourceMinion.auraAppliedTo = sourceMinion.auraAppliedTo.filter(
@@ -452,16 +454,11 @@ export const revertPassiveAurasForSource = (
         const targetMinion = findMinionOnPlayerBoard(targetOwner, appliedTarget.minionUuid);
         if (!targetMinion) continue;
 
-        const isOpponent = targetOwner !== sourceOwner;
-
         for (const passiveBoost of passiveBoosts) {
             const { boost, target } = passiveBoost;
             if (!target || (target.type !== "MINION" && target.type !== "ALL")) continue;
-            if (shouldExcludeSourceMinion(target, sourceMinion, targetMinion)) continue;
-            if (!minionMatchesTarget(targetMinion, target, isOpponent)) continue;
 
             revertBoostFromMinion(targetMinion, boost);
-            recalculateMinionKeywords(game, targetMinion);
         }
     }
 
@@ -479,4 +476,26 @@ export const revertPassiveAurasForSource = (
 
     sourceMinion.auraAppliedTo = [];
     sourceMinion.auraHeroSpellPowerAppliedTo = null;
+};
+
+export const reapplyAllPassiveAuras = (game: Game): void => {
+    for (const owner of [game.data.playerOne, game.data.playerTwo]) {
+        for (const sourceMinion of [...owner.board]) {
+            revertPassiveAurasForSource(game, owner, sourceMinion);
+        }
+    }
+
+    for (const owner of [game.data.playerOne, game.data.playerTwo]) {
+        for (let boardIndex = 0; boardIndex < owner.board.length; boardIndex++) {
+            applyPassiveAurasForSource(game, owner, boardIndex);
+        }
+    }
+
+    refreshScaledPassiveAuras(game);
+
+    for (const owner of [game.data.playerOne, game.data.playerTwo]) {
+        for (const minion of owner.board) {
+            recalculateMinionKeywords(game, minion);
+        }
+    }
 };

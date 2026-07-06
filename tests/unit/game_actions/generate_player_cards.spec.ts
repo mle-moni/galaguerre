@@ -52,6 +52,7 @@ test.group("generatePlayerCards", () => {
             onlySelf: false,
             maxTargets: null,
             targetSelectionMode: null,
+            adjacency: null,
         });
         assert.include(generated.description, "Cri de guerre : Inflige 4 dégâts au héros adverse.");
     });
@@ -97,6 +98,7 @@ test.group("generatePlayerCards", () => {
             onlySelf: false,
             maxTargets: null,
             targetSelectionMode: null,
+            adjacency: null,
         });
         assert.include(
             generated.description,

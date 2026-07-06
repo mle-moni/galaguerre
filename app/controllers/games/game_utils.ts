@@ -182,8 +182,6 @@ export const getMinionIsPoisonous = (minion: MinionState): boolean => {
     return minion.originalCard.minionPowers?.isPoisonous ?? false;
 };
 
-export { getMinionHasDivineShield } from "../../galaguerre/action_engine/apply_damage_to_minion.js";
-
 export const getMinionMaxAttacks = (minion: MinionState): number => {
     return getMinionHasWindfury(minion) ? 2 : 1;
 };

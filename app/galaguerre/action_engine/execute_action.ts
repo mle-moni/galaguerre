@@ -5,6 +5,7 @@ import {
     type GamePlayer,
     type MinionState,
 } from "#api_types/game.types";
+import type { AdjacencyContext } from "#api_types/adjacent_targeting";
 import { getActionTarget } from "#api_types/action_fields_utils";
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
@@ -33,11 +34,7 @@ import {
 } from "./evaluate_on_target_result.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
 import { isV1Action } from "./is_v1_action.js";
-import {
-    applyDamageToAllMinions,
-    applyHealToAllMinions,
-    getTargetBoardEntries,
-} from "./apply_mass_minion_effects.js";
+import { applyDamageToAllMinions, applyHealToAllMinions } from "./apply_mass_minion_effects.js";
 import { hasRandomLimitedTarget, pickRandomLimitedTargets } from "./pick_random_targets.js";
 import { resolveHeroTargets } from "./resolve_hero_target.js";
 import { resolveSelectedTarget, type ResolvedTarget } from "./resolve_selected_target.js";
@@ -48,6 +45,18 @@ import { resolveManaAmount } from "./resolve_mana_amount.js";
 import { recordGainMana, resolveSpotOwner } from "../game_narrative/narrative_effects.js";
 import { startDiscover } from "../discover/start_discover.js";
 import type { ExecuteActionOptions, ExecuteActionResult } from "../discover/discover_types.js";
+
+const buildAdjacencyContext = (
+    player: GamePlayer,
+    opponent: GamePlayer,
+    sourceMinion?: MinionState,
+    selectedTarget?: ActionTarget,
+): AdjacencyContext => ({
+    player,
+    opponent,
+    sourceMinion,
+    selectedTarget,
+});
 
 const applyEffectToResolvedTarget = (
     resolved: ResolvedTarget,
@@ -174,8 +183,11 @@ const executeNonTargetedV1Action = (
     damageBonus: number,
     sourceMinion?: MinionState,
     options?: ExecuteActionOptions,
+    selectedTarget?: ActionTarget,
 ): ExecuteActionResult => {
     if (!isV1Action(action)) return "ok";
+
+    const adjacencyContext = buildAdjacencyContext(player, opponent, sourceMinion, selectedTarget);
 
     switch (action.type) {
         case "DAMAGE": {
@@ -193,6 +205,7 @@ const executeNonTargetedV1Action = (
                     damage,
                     player,
                     sourceMinion,
+                    adjacencyContext,
                 );
                 break;
             }
@@ -206,6 +219,7 @@ const executeNonTargetedV1Action = (
                     damage,
                     player,
                     sourceMinion,
+                    adjacencyContext,
                 );
                 break;
             }
@@ -234,6 +248,7 @@ const executeNonTargetedV1Action = (
                     action.heal!,
                     player,
                     sourceMinion,
+                    adjacencyContext,
                 );
                 break;
             }
@@ -247,6 +262,7 @@ const executeNonTargetedV1Action = (
                     action.heal!,
                     player,
                     sourceMinion,
+                    adjacencyContext,
                 );
                 break;
             }
@@ -274,33 +290,23 @@ const executeNonTargetedV1Action = (
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
                     applyBoostToHero(target, action.boost);
                 }
-                for (const { board, isOpponent } of getTargetBoardEntries(
-                    action.target,
+                applyBoostToAllMinions(
                     player,
                     opponent,
-                )) {
-                    applyBoostToAllMinions(
-                        board,
-                        action.target,
-                        action.boost,
-                        isOpponent,
-                        sourceMinion,
-                    );
-                }
+                    action.target,
+                    action.boost,
+                    sourceMinion,
+                    adjacencyContext,
+                );
             } else if (action.target.type === "MINION") {
-                for (const { board, isOpponent } of getTargetBoardEntries(
-                    action.target,
+                applyBoostToAllMinions(
                     player,
                     opponent,
-                )) {
-                    applyBoostToAllMinions(
-                        board,
-                        action.target,
-                        action.boost,
-                        isOpponent,
-                        sourceMinion,
-                    );
-                }
+                    action.target,
+                    action.boost,
+                    sourceMinion,
+                    adjacencyContext,
+                );
             } else if (action.target.type === "HERO") {
                 for (const target of resolveHeroTargets(action.target, player, opponent)) {
                     applyBoostToHero(target, action.boost);
@@ -527,5 +533,6 @@ export const executeAction = (
         damageBonus,
         sourceMinion,
         options,
+        selectedTarget,
     );
 };

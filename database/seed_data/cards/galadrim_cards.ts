@@ -2,6 +2,7 @@ import { GALADRIM_CARD_SET_NAME } from "../card_set_names.js";
 import { getGaladrimCardImage } from "../galadrim_card_images.js";
 import {
     actionPassive,
+    adjacentAllyAuraPassive,
     allyHero,
     allyMinions,
     allMinions,
@@ -17,6 +18,7 @@ import {
     boostHealth,
     boostPassive,
     boostSpellPower,
+    boostStealth,
     costLessThan,
     costEquals,
     damageAction,
@@ -98,6 +100,21 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             minionPowers: {
                 hasStealth: true,
             },
+        },
+    ),
+    defineMinion(
+        160,
+        {
+            ...gal("Stagiaire de l'X", 1),
+            imageUrl: "/card-covers/galadrim/stagiaire-x.webp",
+            attack: 2,
+            health: 1,
+        },
+        {
+            minionPowers: {
+                hasCharge: true,
+            },
+            passives: [actionPassive("TURN_END", damageAction(1, selfMinion()))],
         },
     ),
     defineMinion(
@@ -764,6 +781,21 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 hasStealth: true,
             },
             passives: [actionPassive("TURN_END", boostAction(boostBoth(1, 1), selfMinion()))],
+        },
+    ),
+    defineMinion(
+        161,
+        {
+            ...gal("La Phonebox", 2),
+            imageUrl: "/card-covers/galadrim/phone-box.webp",
+            attack: 0,
+            health: 4,
+        },
+        {
+            minionPowers: {
+                hasTaunt: true,
+            },
+            passives: [adjacentAllyAuraPassive(boostStealth())],
         },
     ),
 

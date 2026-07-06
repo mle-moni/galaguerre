@@ -142,8 +142,31 @@ const formatMassMinionTeamLabel = (
     targetTeam: "PLAYER" | "OPPONENT" | "ALL",
     excludeSelf = false,
     onlySelf = false,
+    adjacency: TargetSnapshot["adjacency"] = null,
 ): string => {
     if (onlySelf) return "lui-même";
+
+    if (adjacency === "SOURCE") {
+        if (targetTeam === "PLAYER") {
+            return excludeSelf ? "vos serviteurs adjacents" : "vos monstres adjacents";
+        }
+        if (targetTeam === "OPPONENT") {
+            return excludeSelf
+                ? "les serviteurs adverses adjacents"
+                : "les monstres adverses adjacents";
+        }
+        return excludeSelf ? "les serviteurs adjacents" : "les monstres adjacents";
+    }
+
+    if (adjacency === "SELECTED_TARGET") {
+        if (targetTeam === "OPPONENT") {
+            return "les serviteurs adverses adjacents à la cible";
+        }
+        if (targetTeam === "PLAYER") {
+            return "vos serviteurs adjacents à la cible";
+        }
+        return "les serviteurs adjacents à la cible";
+    }
 
     if (targetTeam === "ALL") {
         return excludeSelf ? "tous les autres monstres" : "tous les monstres";
@@ -316,7 +339,7 @@ export const formatHealDamagePassiveTriggerLabel = (
     }
 
     if (type === "MINION") {
-        return `${eventLabel} sur ${formatMassMinionTeamLabel(targetTeam, excludeSelf, onlySelf)}`;
+        return `${eventLabel} sur ${formatMassMinionTeamLabel(targetTeam, excludeSelf, onlySelf, triggerTargetFilter.adjacency)}`;
     }
 
     return `${eventLabel} sur ${formatAllTeamLabel(targetTeam, excludeSelf, onlySelf)}`;
@@ -706,7 +729,7 @@ export const formatActionDescription = (
 
             if (action.target?.type === "MINION") {
                 return appendOnTargetResultClause(
-                    `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`,
+                    `${prefix} : Inflige ${damage} dégâts ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`,
                     action,
                 );
             }
@@ -758,7 +781,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Rend ${action.heal} PV ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
@@ -817,7 +840,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Donne ${effectText} ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
@@ -846,7 +869,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Réduit au silence ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Réduit au silence ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
@@ -871,7 +894,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Détruit ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Détruit ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
@@ -909,7 +932,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Reconvertit ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf)} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Reconvertit ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency)} en ${targetLabel}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
@@ -936,7 +959,7 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : ${conditionPrefix}prend le contrôle ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : ${conditionPrefix}prend le contrôle ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`;
             }
 
             return `${prefix} : ${conditionPrefix}prend le contrôle d'un monstre adverse.`;

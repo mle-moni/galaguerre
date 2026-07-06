@@ -189,6 +189,9 @@ export const GALAGUERRE_TARGET_SELECTION_MODES_OPTIONS = generateOptionsFromLabe
     GALAGUERRE_TARGET_SELECTION_MODES_LABEL_OBJ,
 );
 
+export const GALAGUERRE_TARGET_ADJACENCY = ["SOURCE", "SELECTED_TARGET"] as const;
+export type GalaguerreTargetAdjacency = GenerateTypeFromEnum<typeof GALAGUERRE_TARGET_ADJACENCY>;
+
 export const GALAGUERRE_DYNAMIC_COST_SOURCES = [
     "HAND_CARD_COUNT",
     "BOARD_MINION_COUNT",

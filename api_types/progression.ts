@@ -196,17 +196,52 @@ export const getProgressionVisibleLevels = (
     return Array.from({ length: end - start + 1 }, (_, index) => start + index);
 };
 
+const PROGRESSION_UNCLAIMED_NEARBY_THRESHOLD = PROGRESSION_LEVELS_AHEAD * 2;
+
 export const getDefaultProgressionViewStart = (
     currentLevel: number,
     claimedLevels: Iterable<number> = [],
 ): number => {
     const claimed = new Set(claimedLevels);
+    const cappedLevel = Math.max(1, Math.min(currentLevel, MAX_LEVEL));
+
+    if (currentLevel <= 1) {
+        return 1;
+    }
+
     for (let level = 1; level < currentLevel; level++) {
-        if (!claimed.has(level)) {
-            return level;
+        if (claimed.has(level)) {
+            continue;
+        }
+
+        for (let above = level + 1; above < currentLevel; above++) {
+            if (claimed.has(above)) {
+                return level;
+            }
         }
     }
-    return Math.max(1, Math.min(currentLevel, MAX_LEVEL));
+
+    let consecutiveClaimedPrefix = 0;
+    for (let level = 1; level < currentLevel; level++) {
+        if (!claimed.has(level)) {
+            break;
+        }
+        consecutiveClaimedPrefix = level;
+    }
+
+    if (consecutiveClaimedPrefix === 0) {
+        return 1;
+    }
+
+    const nextUnclaimedAfterPrefix = consecutiveClaimedPrefix + 1;
+    if (
+        nextUnclaimedAfterPrefix < currentLevel &&
+        currentLevel - nextUnclaimedAfterPrefix <= PROGRESSION_UNCLAIMED_NEARBY_THRESHOLD
+    ) {
+        return nextUnclaimedAfterPrefix;
+    }
+
+    return cappedLevel;
 };
 
 export const isProgressionLevelClaimable = (level: number, currentLevel: number): boolean =>

@@ -446,6 +446,7 @@ const baseTarget = (overrides: Partial<TargetDefinition>): TargetDefinition => (
     onlySelf: false,
     maxTargets: null,
     targetSelectionMode: null,
+    adjacency: null,
     ...overrides,
 });
 
@@ -469,6 +470,28 @@ export const allEnemies = (): TargetDefinition =>
 
 export const otherAllyMinions = (): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "PLAYER", excludeSelf: true });
+
+export const adjacentAllyMinions = (): TargetDefinition =>
+    baseTarget({
+        type: "MINION",
+        targetTeam: "PLAYER",
+        adjacency: "SOURCE",
+        excludeSelf: true,
+    });
+
+export const adjacentToSelectedTargetEnemyMinions = (): TargetDefinition =>
+    baseTarget({
+        type: "MINION",
+        targetTeam: "OPPONENT",
+        adjacency: "SELECTED_TARGET",
+    });
+
+export const adjacentToSelectedTargetAllyMinions = (): TargetDefinition =>
+    baseTarget({
+        type: "MINION",
+        targetTeam: "PLAYER",
+        adjacency: "SELECTED_TARGET",
+    });
 
 export const selfMinion = (): TargetDefinition =>
     baseTarget({ type: "MINION", targetTeam: "PLAYER", onlySelf: true });
@@ -686,6 +709,20 @@ export const boostPassive = (
     summonFilter: null,
     triggerTargetFilter: null,
 });
+
+export const boostAdjacentAlliesAction = (boost: BoostDefinition): CardActionDefinition =>
+    boostAction(boost, adjacentAllyMinions(), false);
+
+export const targetedDamageWithAdjacentEnemySplash = (
+    primaryDamage: number,
+    splashDamage: number,
+): CardActionDefinition[] => [
+    damageAction(primaryDamage, targetedEnemyMinion(), true),
+    damageAction(splashDamage, adjacentToSelectedTargetEnemyMinions(), false),
+];
+
+export const adjacentAllyAuraPassive = (boost: BoostDefinition): PassiveDefinition =>
+    boostPassive(boost, adjacentAllyMinions());
 
 export const defineMinion = (
     cardId: number,

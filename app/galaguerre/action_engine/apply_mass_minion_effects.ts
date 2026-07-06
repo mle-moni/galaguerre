@@ -1,4 +1,5 @@
 import type { BoardState, GamePlayer, MinionState, TargetSnapshot } from "#api_types/game.types";
+import { type AdjacencyContext, collectAdjacentMinionTargets } from "#api_types/adjacent_targeting";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
 import { findMinionIndexOnBoard } from "./find_minion_on_board.js";
@@ -22,7 +23,13 @@ export const collectMatchingMinionTargets = (
     opponent: GamePlayer,
     target: TargetSnapshot,
     sourceMinion?: MinionState,
+    adjacencyContext?: AdjacencyContext,
 ): MatchingMinionTarget[] => {
+    if (target.adjacency) {
+        if (!adjacencyContext) return [];
+        return collectAdjacentMinionTargets(target, adjacencyContext, sourceMinion);
+    }
+
     const results: MatchingMinionTarget[] = [];
 
     for (const { board, owner, isOpponent } of getTargetBoardEntries(target, player, opponent)) {
@@ -63,8 +70,15 @@ export const applyDamageToAllMinions = (
     damage: number,
     sourcePlayer: GamePlayer,
     sourceMinion?: MinionState,
+    adjacencyContext?: AdjacencyContext,
 ): { gameEnded: boolean } => {
-    const targets = collectMatchingMinionTargets(player, opponent, target, sourceMinion);
+    const targets = collectMatchingMinionTargets(
+        player,
+        opponent,
+        target,
+        sourceMinion,
+        adjacencyContext,
+    );
 
     for (const { owner, minion } of targets) {
         const boardIndex = findMinionIndexOnBoard(owner, minion.uuid);
@@ -95,8 +109,15 @@ export const applyHealToAllMinions = (
     heal: number,
     sourcePlayer: GamePlayer,
     sourceMinion?: MinionState,
+    adjacencyContext?: AdjacencyContext,
 ): { gameEnded: boolean } => {
-    const targets = collectMatchingMinionTargets(player, opponent, target, sourceMinion);
+    const targets = collectMatchingMinionTargets(
+        player,
+        opponent,
+        target,
+        sourceMinion,
+        adjacencyContext,
+    );
 
     for (const { owner, minion } of targets) {
         const boardIndex = findMinionIndexOnBoard(owner, minion.uuid);
