@@ -1,8 +1,6 @@
 import {
     XP_RANKED_DEFEAT,
     XP_RANKED_VICTORY,
-    XP_TRAINING_DEFEAT,
-    XP_TRAINING_VICTORY,
     computePlayerXpGain,
     getDefaultProgressionViewStart,
     getProgressionFromTotalXp,
@@ -13,7 +11,7 @@ import {
 import { test } from "@japa/runner";
 
 test.group("progression", () => {
-    test("computePlayerXpGain returns ranked and training values", ({ assert }) => {
+    test("computePlayerXpGain returns ranked values and no xp in training", ({ assert }) => {
         assert.equal(
             computePlayerXpGain({ isWinner: true, isDraw: false, isTraining: false }),
             XP_RANKED_VICTORY,
@@ -22,22 +20,13 @@ test.group("progression", () => {
             computePlayerXpGain({ isWinner: false, isDraw: false, isTraining: false }),
             XP_RANKED_DEFEAT,
         );
-        assert.equal(
-            computePlayerXpGain({ isWinner: true, isDraw: false, isTraining: true }),
-            XP_TRAINING_VICTORY,
-        );
-        assert.equal(
-            computePlayerXpGain({ isWinner: false, isDraw: false, isTraining: true }),
-            XP_TRAINING_DEFEAT,
-        );
+        assert.equal(computePlayerXpGain({ isWinner: true, isDraw: false, isTraining: true }), 0);
+        assert.equal(computePlayerXpGain({ isWinner: false, isDraw: false, isTraining: true }), 0);
         assert.equal(
             computePlayerXpGain({ isWinner: false, isDraw: true, isTraining: false }),
             XP_RANKED_DEFEAT,
         );
-        assert.equal(
-            computePlayerXpGain({ isWinner: false, isDraw: true, isTraining: true }),
-            XP_TRAINING_DEFEAT,
-        );
+        assert.equal(computePlayerXpGain({ isWinner: false, isDraw: true, isTraining: true }), 0);
     });
 
     test("getProgressionFromTotalXp uses 500 xp per level from 1 to 10", ({ assert }) => {

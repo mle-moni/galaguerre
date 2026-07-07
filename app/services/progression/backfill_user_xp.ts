@@ -12,19 +12,22 @@ const isHumanUserId = (userId: number): boolean => userId !== TRAINING_AI_USER_I
 const computeGameXpByUserId = (game: Game): Map<number, number> => {
     const xpByUserId = new Map<number, number>();
 
-    if (game.data.isOnboardingTutorial || !gameQualifiesForRewards(game)) {
+    if (
+        game.data.isOnboardingTutorial ||
+        game.data.isTraining === true ||
+        !gameQualifiesForRewards(game)
+    ) {
         return xpByUserId;
     }
 
     const winnerUserId = getWinnerUserId(game);
     const isDraw = winnerUserId === null;
-    const isTraining = game.data.isTraining === true;
 
     for (const userId of [game.data.playerOne.userId, game.data.playerTwo.userId]) {
         if (!isHumanUserId(userId)) continue;
 
         const isWinner = !isDraw && winnerUserId === userId;
-        const xp = computePlayerXpGain({ isWinner, isDraw, isTraining });
+        const xp = computePlayerXpGain({ isWinner, isDraw, isTraining: false });
         xpByUserId.set(userId, xp);
     }
 

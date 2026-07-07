@@ -1,9 +1,4 @@
-import {
-    XP_RANKED_DEFEAT,
-    XP_RANKED_VICTORY,
-    XP_TRAINING_DEFEAT,
-    XP_TRAINING_VICTORY,
-} from "#api_types/progression";
+import { XP_RANKED_DEFEAT, XP_RANKED_VICTORY } from "#api_types/progression";
 import Game from "#models/game";
 import User from "#models/user";
 import { applyGameXp } from "#services/progression/apply_game_xp";
@@ -37,7 +32,7 @@ test.group("apply game xp", (group) => {
         assert.equal(game.data.xpResult?.playerOne.xp, XP_RANKED_DEFEAT);
     });
 
-    test("training defeat gives 25 xp to human only", async ({ assert }) => {
+    test("training game gives no xp", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const human = await User.create({
             email: `xp-train-${unique}@test.fr`,
@@ -66,8 +61,8 @@ test.group("apply game xp", (group) => {
         await applyGameXp(game);
         await human.refresh();
 
-        assert.equal(human.xp, XP_TRAINING_DEFEAT);
-        assert.equal(game.data.xpResult?.playerOne.xp, XP_TRAINING_DEFEAT);
+        assert.equal(human.xp, 0);
+        assert.equal(game.data.xpResult?.playerOne.xp, 0);
         assert.equal(game.data.xpResult?.playerTwo.xp, 0);
     });
 
@@ -159,7 +154,7 @@ test.group("apply game xp", (group) => {
 
         assert.equal(playerOne.xp, XP_RANKED_DEFEAT);
         assert.equal(playerTwo.xp, XP_RANKED_VICTORY);
-        assert.equal(human.xp, XP_TRAINING_VICTORY);
+        assert.equal(human.xp, 0);
         void rankedWin;
     });
 });

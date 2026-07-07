@@ -143,7 +143,7 @@ export const GameFinalScreen = observer(() => {
                     </Text>
                 ) : isTraining ? (
                     <Text size="sm" c="dimmed">
-                        Partie d'entraînement — Elo inchangé
+                        Partie d'entraînement — Elo et XP inchangés
                     </Text>
                 ) : isDraw ? (
                     <Text size="sm" c="dimmed">

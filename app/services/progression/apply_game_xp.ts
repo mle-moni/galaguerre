@@ -24,7 +24,7 @@ export const applyGameXp = async (game: Game): Promise<void> => {
 
     if (humanUserIds.length === 0) return;
 
-    if (game.data.isOnboardingTutorial || !gameQualifiesForRewards(game)) {
+    if (game.data.isOnboardingTutorial || isTraining || !gameQualifiesForRewards(game)) {
         game.data = {
             ...game.data,
             xpResult: {
