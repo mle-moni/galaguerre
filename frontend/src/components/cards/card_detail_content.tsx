@@ -52,7 +52,7 @@ export const getCardDescription = (card: PlayerCard, spellPower = 0): string => 
             );
 
             return (
-                getSpellCardDescription(effectLines, card.castsWhenDrawn) ||
+                getSpellCardDescription(effectLines, card.castsWhenDrawn, card.labelTags) ||
                 card.description ||
                 card.label
             );

@@ -15,6 +15,7 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     minionPowers: {},
     effects: [],
     tags: [],
+    labelTags: [],
     description: "",
     battlecryActions: [],
     deathrattleActions: [],

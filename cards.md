@@ -24,6 +24,10 @@ Format compact pour construction de deck par LLM.
 
 - Développeur, PM, Sales, Parisien, Nantais, Lyonnais, Pets, Équipe support
 
+## Tags
+
+- Emoji : cartes générées, visibles dans le texte de la carte
+
 ## Cartes
 
 ### #1 Ticket Restaurant
@@ -433,3 +437,27 @@ Format compact pour construction de deck par LLM.
 ### #163 Copier-Coller
 - Coût: 2 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
 - Effet : Choisissez un monstre sur le plateau. Placez 3 copies de celui-ci dans votre deck.
+
+### #164 :rage-fist:
+- Coût: 1 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Emoji. Effet : Inflige 1 dégâts à un monstre. Effet : Donne +2 attaque à un monstre.
+
+### #165 :sadge:
+- Coût: 2 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Emoji. Effet : Réduit au silence à tous les monstres.
+
+### #166 :madge:
+- Coût: 3 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Emoji. Effet : Inflige 4 dégâts à un personnage.
+
+### #167 :pepe-dead:
+- Coût: 4 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Emoji. Effet : Détruit un monstre.
+
+### #168 :pogslide:
+- Coût: 5 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Emoji. Effet : Pioche 3 cartes.
+
+### #169 Head of Emojis
+- Coût: 8 | Type: MINION | Stats: 6/6 | Rareté: Légendaire | Famille: Développeur
+- Cri de guerre : Découvrez un sort Emoji. Puis, découvrez un autre sort Emoji.

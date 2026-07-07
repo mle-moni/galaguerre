@@ -14,6 +14,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
     dynamicCost: null,
     imageUrl: "",
     tags: [],
+    labelTags: [],
     rarity: "COMMON",
     type: "MINION",
     attack: 2,

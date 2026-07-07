@@ -1,5 +1,6 @@
 import type {
     CardActionSnapshot,
+    CardLabelTag,
     DynamicCostSnapshot,
     MinionCard,
     PassiveBoostSnapshot,
@@ -8,7 +9,7 @@ import type {
 import { getMinionPowerEffects } from "./get_minion_power_effects.js";
 import type { GalaguerreDynamicCostSource } from "../app/galaguerre/galaguerre.types.js";
 import { EFFECT_DESCRIPTIONS } from "./card_keyword_glossary.js";
-import { CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
+import { CARD_LABEL_TAG_LABELS, CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
 import {
     formatActionDescription,
     formatGroupedActionDescriptions,
@@ -52,9 +53,33 @@ export const joinCardDescriptionParts = (parts: string[]): string => {
     return `${normalized.join(". ")}.`;
 };
 
-export const getSpellCardDescription = (effectLines: string[], castsWhenDrawn = false): string => {
-    const parts = castsWhenDrawn ? [CAST_WHEN_DRAWN_LABEL, ...effectLines] : effectLines;
+export const formatLabelTagLines = (labelTags: CardLabelTag[]): string[] =>
+    labelTags.map((tag) => CARD_LABEL_TAG_LABELS[tag].label);
+
+export const getSpellCardDescription = (
+    effectLines: string[],
+    castsWhenDrawn = false,
+    labelTags: CardLabelTag[] = [],
+): string => {
+    const parts = [
+        ...formatLabelTagLines(labelTags),
+        ...(castsWhenDrawn ? [CAST_WHEN_DRAWN_LABEL] : []),
+        ...effectLines,
+    ];
     return joinCardDescriptionParts(parts);
+};
+
+export const getWeaponCardDescription = (
+    damage: number,
+    durability: number,
+    deathrattleLines: string[] = [],
+    labelTags: CardLabelTag[] = [],
+): string => {
+    return joinCardDescriptionParts([
+        ...formatLabelTagLines(labelTags),
+        `Arme ${damage}/${durability}.`,
+        ...deathrattleLines,
+    ]);
 };
 
 const formatTagChip = (tag: NonNullable<PassiveBoostSnapshot["target"]>["tag"]): string => {
@@ -145,14 +170,6 @@ export const getDynamicCostDescription = (dynamicCost: DynamicCostSnapshot | nul
     return dynamicCost.reductions.map(({ source, amountPer }) =>
         DYNAMIC_COST_REDUCTION_LABELS[source](amountPer),
     );
-};
-
-export const getWeaponCardDescription = (
-    damage: number,
-    durability: number,
-    deathrattleLines: string[] = [],
-): string => {
-    return joinCardDescriptionParts([`Arme ${damage}/${durability}.`, ...deathrattleLines]);
 };
 
 export const buildMinionCardDescriptionParts = (

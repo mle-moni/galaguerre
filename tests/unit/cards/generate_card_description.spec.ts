@@ -32,6 +32,13 @@ test.group("generate_card_description", () => {
         assert.equal(description, "Arme 1/4.");
     });
 
+    test("generates spell description with label tag prefix", ({ assert }) => {
+        const description = generateCardDescriptionFromData(findCard(167).data);
+
+        assert.include(description, "Emoji");
+        assert.include(description, "Effet : Détruit un monstre");
+    });
+
     test("buildSyncedCardInsert includes generatedDescription", ({ assert }) => {
         const entry = findCard(62);
         const insert = buildSyncedCardInsert(entry, 1);

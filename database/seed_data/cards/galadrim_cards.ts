@@ -58,6 +58,7 @@ import {
     silenceAction,
     summonCardId,
     spellDrawFilter,
+    spellDiscoverFilter,
     targetedAllyMinion,
     targetedAllyMinionWithComparison,
     targetedAnyCharacter,
@@ -243,6 +244,23 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["DEVELOPPEUR"],
             battlecryActions: [damageAction(5, targetedEnemyMinion(), true)],
         },
+    ),
+    defineMinion(
+        169,
+        {
+            ...gal("Head of Emojis", 8),
+            imageUrl: "/card-covers/galadrim/head-of-emojis.webp",
+            attack: 6,
+            health: 6,
+        },
+        {
+            tags: ["DEVELOPPEUR"],
+            battlecryActions: [
+                discoverAction(spellDiscoverFilter({ labelTags: ["EMOJI"] })),
+                discoverAction(spellDiscoverFilter({ labelTags: ["EMOJI"] })),
+            ],
+        },
+        { rarity: "LEGENDARY" },
     ),
 
     // --- PM minions ---
@@ -1358,5 +1376,63 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         163,
         { ...gal("Copier-Coller", 2), imageUrl: "/card-covers/galadrim/copier-coller.webp" },
         [deckCardAddFromTargetAction(3, targetedAnyMinion())],
+    ),
+    defineSpell(
+        164,
+        {
+            ...gal(":rage-fist:", 1),
+            imageUrl: "/card-covers/galadrim/rage-fist.webp",
+        },
+        [
+            damageAction(1, targetedAnyMinion(), true),
+            boostAction(boostAttack(2), targetedAnyMinion(), true),
+        ],
+        [],
+        { isCollectible: false },
+        { labelTags: ["EMOJI"] },
+    ),
+    defineSpell(
+        165,
+        {
+            ...gal(":sadge:", 2),
+            imageUrl: "/card-covers/galadrim/sadge.webp",
+        },
+        [silenceAction(allMinions())],
+        [],
+        { isCollectible: false },
+        { labelTags: ["EMOJI"] },
+    ),
+    defineSpell(
+        166,
+        {
+            ...gal(":madge:", 3),
+            imageUrl: "/card-covers/galadrim/madge.webp",
+        },
+        [damageAction(4, targetedAnyCharacter(), true)],
+        [],
+        { isCollectible: false },
+        { labelTags: ["EMOJI"] },
+    ),
+    defineSpell(
+        167,
+        {
+            ...gal(":pepe-dead:", 4),
+            imageUrl: "/card-covers/galadrim/pepe-dead.webp",
+        },
+        [destroyAction(targetedAnyMinion(), true)],
+        [],
+        { isCollectible: false },
+        { labelTags: ["EMOJI"] },
+    ),
+    defineSpell(
+        168,
+        {
+            ...gal(":pogslide:", 5),
+            imageUrl: "/card-covers/galadrim/pogslide.webp",
+        },
+        [drawAction(3)],
+        [],
+        { isCollectible: false },
+        { labelTags: ["EMOJI"] },
     ),
 ];

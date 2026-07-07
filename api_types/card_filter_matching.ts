@@ -12,6 +12,10 @@ export const deckCardMatchesFilter = (card: PlayerCard, filter: CardFilterSnapsh
         if (!card.tags.includes(tag)) return false;
     }
 
+    for (const labelTag of filter.labelTags) {
+        if (!card.labelTags.includes(labelTag)) return false;
+    }
+
     if (filter.rarity !== null && card.rarity !== filter.rarity) return false;
 
     return true;

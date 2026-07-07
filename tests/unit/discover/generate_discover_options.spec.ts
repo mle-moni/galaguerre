@@ -61,6 +61,20 @@ test.group("generate_discover_options", () => {
         assert.equal(new Set(uuids).size, uuids.length);
     });
 
+    test("includes non-collectible cards when filtering by label tags", ({ assert }) => {
+        const options = generateDiscoverOptions(
+            createCardFilterSnapshot({ type: "SPELL", labelTags: ["EMOJI"] }),
+            5,
+        );
+
+        assert.isAbove(options.length, 0);
+        for (const option of options) {
+            assert.equal(option.type, "SPELL");
+            assert.include(option.labelTags, "EMOJI");
+            assert.isFalse(isCardCollectible(option.cardId));
+        }
+    });
+
     test("applies rarity filters", ({ assert }) => {
         const options = generateDiscoverOptions(
             createCardFilterSnapshot({ type: "MINION", rarity: "LEGENDARY" }),

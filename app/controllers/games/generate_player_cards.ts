@@ -31,6 +31,7 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
             cost: card.data.cost,
             dynamicCost: card.data.dynamicCost,
             tags: card.data.tags,
+            labelTags: card.data.labelTags,
             rarity: card.rarity,
         };
 
@@ -48,6 +49,7 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
                         card.data.damage,
                         card.data.durability,
                         deathrattleLines,
+                        card.data.labelTags,
                     ),
                 };
             }
@@ -59,7 +61,8 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
                     ...base,
                     type: "SPELL",
                     description:
-                        getSpellCardDescription(effectLines, castsWhenDrawn) || card.data.name,
+                        getSpellCardDescription(effectLines, castsWhenDrawn, card.data.labelTags) ||
+                        card.data.name,
                     spellActions: card.data.spellActions,
                     castsWhenDrawn,
                 };

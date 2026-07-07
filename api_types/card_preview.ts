@@ -53,6 +53,7 @@ const buildMinionPreview = (entry: CardSeedEntry): MinionCard => {
         cost: data.cost,
         dynamicCost: data.dynamicCost,
         tags: data.tags,
+        labelTags: data.labelTags,
         rarity: entry.rarity ?? "COMMON",
         type: "MINION",
         health: data.health,
@@ -92,9 +93,11 @@ const buildSpellPreview = (entry: CardSeedEntry): SpellCard => {
         cost: data.cost,
         dynamicCost: data.dynamicCost,
         tags: data.tags,
+        labelTags: data.labelTags,
         rarity: entry.rarity ?? "COMMON",
         type: "SPELL",
-        description: getSpellCardDescription(effectLines, castsWhenDrawn) || data.name,
+        description:
+            getSpellCardDescription(effectLines, castsWhenDrawn, data.labelTags) || data.name,
         spellActions: data.spellActions,
         castsWhenDrawn,
     };
@@ -117,11 +120,17 @@ const buildWeaponPreview = (entry: CardSeedEntry): WeaponCard => {
         cost: data.cost,
         dynamicCost: data.dynamicCost,
         tags: data.tags,
+        labelTags: data.labelTags,
         rarity: entry.rarity ?? "COMMON",
         type: "WEAPON",
         damage: data.damage,
         durability: data.durability,
-        description: getWeaponCardDescription(data.damage, data.durability, deathrattleLines),
+        description: getWeaponCardDescription(
+            data.damage,
+            data.durability,
+            deathrattleLines,
+            data.labelTags,
+        ),
         deathrattleActions: data.deathrattleActions,
     };
 };

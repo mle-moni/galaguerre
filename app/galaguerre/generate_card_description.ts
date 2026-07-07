@@ -14,12 +14,19 @@ export const generateCardDescriptionFromData = (data: CardData): string => {
     switch (data.type) {
         case "WEAPON": {
             const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
-            return getWeaponCardDescription(data.damage, data.durability, deathrattleLines);
+            return getWeaponCardDescription(
+                data.damage,
+                data.durability,
+                deathrattleLines,
+                data.labelTags,
+            );
         }
         case "SPELL": {
             const effectLines = getSpellEffectDescription(data.spellActions);
             const castsWhenDrawn = data.castsWhenDrawn ?? false;
-            return getSpellCardDescription(effectLines, castsWhenDrawn) || data.name;
+            return (
+                getSpellCardDescription(effectLines, castsWhenDrawn, data.labelTags) || data.name
+            );
         }
         case "MINION": {
             const effects = getMinionPowerEffects(data.minionPowers);

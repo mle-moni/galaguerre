@@ -53,6 +53,7 @@ test.group("discover guards", () => {
                     cost: 1,
                     dynamicCost: null,
                     tags: [],
+                    labelTags: [],
                     rarity: "COMMON",
                     type: "MINION",
                     attack: 1,

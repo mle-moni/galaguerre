@@ -603,6 +603,21 @@ test.group("format_action_description", () => {
         ]);
     });
 
+    test("formats DISCOVER emoji spell filter", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DISCOVER",
+            discoverCardFilter: createCardFilterSnapshot({
+                type: "SPELL",
+                labelTags: ["EMOJI"],
+            }),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Cri de guerre"),
+            "Cri de guerre : Découvrez un sort Emoji.",
+        );
+    });
+
     test("formats DEFEAT opponent", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DEFEAT",

@@ -1,4 +1,5 @@
 import type { CardRarity } from "#api_types/card_rarity.types";
+import type { CardLabelTag } from "#galaguerre/card_label_tags";
 import type { CardTag } from "#galaguerre/card_tags";
 import type {
     CardActionDefinition,
@@ -236,6 +237,7 @@ export const reconvertParameters = (
     type: "MINION",
     comparison: null,
     tags: [],
+    labelTags: [],
     rarity: null,
     cardId: null,
     relativeToSource: false,
@@ -363,6 +365,7 @@ export const defaultMinionData = (): MinionCardData => ({
     schemaVersion: 1,
     type: "MINION",
     tags: [],
+    labelTags: [],
     name: "Test Card",
     cost: 1,
     dynamicCost: null,
@@ -379,6 +382,7 @@ export const defaultSpellData = (): SpellCardData => ({
     schemaVersion: 1,
     type: "SPELL",
     tags: [],
+    labelTags: [],
     name: "Test Card",
     cost: 1,
     dynamicCost: null,
@@ -391,6 +395,7 @@ export const defaultWeaponData = (): WeaponCardData => ({
     schemaVersion: 1,
     type: "WEAPON",
     tags: [],
+    labelTags: [],
     name: "Test Card",
     cost: 1,
     dynamicCost: null,
@@ -681,6 +686,7 @@ export const minionDrawFilter = (
     type: "MINION",
     comparison: comp,
     tags,
+    labelTags: [],
     rarity: null,
 });
 
@@ -694,6 +700,7 @@ export const minionDiscoverFilter = (
     type: "MINION",
     comparison: options.comparison ?? null,
     tags: options.tags ?? [],
+    labelTags: [],
     rarity: options.rarity ?? null,
 });
 
@@ -701,6 +708,21 @@ export const spellDrawFilter = (): CardFilterDefinition => ({
     type: "SPELL",
     comparison: null,
     tags: [],
+    labelTags: [],
+    rarity: null,
+});
+
+export const spellDiscoverFilter = (
+    options: {
+        labelTags?: CardLabelTag[];
+        tags?: CardTag[];
+        comparison?: ComparisonDefinition | null;
+    } = {},
+): CardFilterDefinition => ({
+    type: "SPELL",
+    comparison: options.comparison ?? null,
+    tags: options.tags ?? [],
+    labelTags: options.labelTags ?? [],
     rarity: null,
 });
 
@@ -711,6 +733,7 @@ export const cardDrawFilter = (
     type: "ANY",
     comparison: comp,
     tags,
+    labelTags: [],
     rarity: null,
 });
 

@@ -3,6 +3,7 @@ import type {
     CardActionFieldsSnapshot,
     CardActionSnapshot,
     CardFilterSnapshot,
+    CardLabelTag,
     CardTag,
     OnTargetResultDefinition,
     ReconvertParametersSnapshot,
@@ -10,7 +11,7 @@ import type {
 } from "./game.types.js";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 import { CARD_RARITY_LABELS } from "./card_rarity.types.js";
-import { CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
+import { CARD_LABEL_TAG_LABELS, CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
 import { hasActionTarget } from "./action_fields_utils.js";
 import { hasRandomLimitedTarget } from "./target_matching.js";
@@ -38,6 +39,9 @@ const formatTagChip = (tag: CardTag): string => {
 };
 
 const formatTagList = (tags: CardTag[]): string => tags.map(formatTagChip).join(", ");
+
+const formatLabelTagList = (labelTags: CardLabelTag[]): string =>
+    labelTags.map((tag) => CARD_LABEL_TAG_LABELS[tag].label).join(", ");
 
 const formatRarityFilterLabel = (rarity: NonNullable<CardFilterSnapshot["rarity"]>): string =>
     CARD_RARITY_LABELS[rarity].toLowerCase();
@@ -264,6 +268,9 @@ const formatDiscoverExtraFilterSuffix = (filter: CardFilterSnapshot): string => 
     if (filter.tags.length > 0) {
         parts.push(formatTagList(filter.tags));
     }
+    if (filter.labelTags.length > 0) {
+        parts.push(formatLabelTagList(filter.labelTags));
+    }
     if (filter.rarity !== null) {
         parts.push(formatRarityFilterLabel(filter.rarity));
     }
@@ -288,6 +295,9 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     }
     if (filter.tags.length > 0) {
         parts.push(formatTagList(filter.tags));
+    }
+    if (filter.labelTags.length > 0) {
+        parts.push(formatLabelTagList(filter.labelTags));
     }
     if (filter.rarity !== null) {
         parts.push(formatRarityFilterLabel(filter.rarity));
@@ -404,6 +414,7 @@ const formatReconvertTargetLabel = (parameters: ReconvertParametersSnapshot | nu
             type: parameters.type,
             comparison: parameters.comparison,
             tags: [],
+            labelTags: [],
             rarity: parameters.rarity,
         });
     }

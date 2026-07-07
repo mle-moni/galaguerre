@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CARD_LABEL_TAGS } from "./card_label_tags.js";
 import { CARD_TAGS } from "./card_tags.js";
 import {
     validateCardAction,
@@ -22,6 +23,8 @@ import {
 } from "./galaguerre.types.js";
 
 export const cardTagSchema = z.enum(CARD_TAGS);
+
+export const cardLabelTagSchema = z.enum(CARD_LABEL_TAGS);
 
 export const comparisonSchema = z
     .object({
@@ -70,6 +73,7 @@ export const cardFilterSchema = z.object({
     type: z.enum(GALAGUERRE_CARD_FILTER_TYPES),
     comparison: comparisonSchema.nullable(),
     tags: z.array(cardTagSchema),
+    labelTags: z.array(cardLabelTagSchema).default([]),
     rarity: z.enum(GALAGUERRE_CARD_RARITIES).nullable().default(null),
 });
 
@@ -313,6 +317,7 @@ export const dynamicCostSchema = z.object({
 const cardDataBaseSchema = z.object({
     schemaVersion: z.literal(1),
     tags: z.array(cardTagSchema),
+    labelTags: z.array(cardLabelTagSchema).default([]),
     name: z.string(),
     imageUrl: z.string(),
     cost: z.number().int().min(0),
@@ -348,6 +353,7 @@ export const cardDataSchema = z.discriminatedUnion("type", [
     weaponDataSchema,
 ]);
 
+export type { CardLabelTag } from "./card_label_tags.js";
 export type { CardTag } from "./card_tags.js";
 export type {
     ActionConditionDefinition,

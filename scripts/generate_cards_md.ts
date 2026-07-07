@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { CARD_RARITY_LABELS } from "#api_types/card_rarity.types";
 import { getAllCardTemplates } from "#api_types/card_preview";
+import { CARD_LABEL_TAG_LABELS } from "#galaguerre/card_label_tags";
 import { CARD_TAG_LABELS } from "#galaguerre/card_tags";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 
@@ -38,6 +39,12 @@ export const generateCardsMd = () => {
         "## Familles (tags)",
         "",
         "- Développeur, PM, Sales, Parisien, Nantais, Lyonnais, Pets, Équipe support",
+        "",
+        "## Tags",
+        "",
+        ...Object.values(CARD_LABEL_TAG_LABELS).map(
+            (entry) => `- ${entry.label} : cartes générées, visibles dans le texte de la carte`,
+        ),
         "",
         "## Cartes",
         "",

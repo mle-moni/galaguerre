@@ -7,6 +7,7 @@ import {
 import { V1_ACTION_TYPES } from "./action_engine/v1_action_types.js";
 import { GALAGUERRE_TARGET_SELECTION_MODES } from "./galaguerre.types.js";
 import type { CardRarity } from "#api_types/card_rarity.types";
+import type { CardLabelTag } from "./card_label_tags.js";
 import type { CardTag } from "./card_tags.js";
 import type { MinionPower } from "./card_definition.schema.ts";
 import type { CardActionDefinition } from "./card_definition.schema.ts";
@@ -47,6 +48,7 @@ export type CardFilterDefinition = {
     type: "MINION" | "SPELL" | "WEAPON" | "ANY";
     comparison: ComparisonDefinition | null;
     tags: CardTag[];
+    labelTags: CardLabelTag[];
     rarity: CardRarity | null;
 };
 

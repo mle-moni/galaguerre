@@ -17,6 +17,7 @@ const filterMinionTemplates = (
         type: parameters.type,
         comparison,
         tags: parameters.tags,
+        labelTags: parameters.labelTags,
         rarity: parameters.rarity,
     };
 

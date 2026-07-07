@@ -19,4 +19,9 @@ export type {
     CardData,
 } from "../app/galaguerre/card_definition.schema.js";
 
+export {
+    CARD_LABEL_TAGS,
+    CARD_LABEL_TAG_LABELS,
+} from "../app/galaguerre/card_label_tags.js";
+export type { CardLabelTag } from "../app/galaguerre/card_label_tags.js";
 export { CARD_TAGS, CARD_TAG_LABELS, isCardTagImageSymbol } from "../app/galaguerre/card_tags.js";

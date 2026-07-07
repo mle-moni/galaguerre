@@ -4,7 +4,7 @@ export const COIN_CARD_ID = 1;
 
 export type ComparisonOperator = "<" | ">" | "=";
 
-export type { CardTag } from "./card.types.js";
+export type { CardLabelTag, CardTag } from "./card.types.js";
 export type {
     CardActionSnapshot,
     CardActionFieldsSnapshot,
@@ -22,6 +22,7 @@ export type {
 
 import type {
     CardActionSnapshot,
+    CardLabelTag,
     CardTag,
     DynamicCostSnapshot,
     MinionPowerSnapshot,
@@ -46,6 +47,7 @@ export interface PlayerCardBase {
     cost: number;
     dynamicCost: DynamicCostSnapshot | null;
     tags: CardTag[];
+    labelTags: CardLabelTag[];
     rarity: CardRarity;
     generatedBy?: { cardId: number; label: string };
 }

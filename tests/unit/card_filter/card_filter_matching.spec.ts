@@ -60,6 +60,24 @@ test.group("card_filter_matching", () => {
         );
     });
 
+    test("deckCardMatchesFilter requires all label tags", ({ assert }) => {
+        const emojiSpell = createSpellCard({ labelTags: ["EMOJI"] });
+        const plainSpell = createSpellCard({ labelTags: [] });
+
+        assert.isTrue(
+            deckCardMatchesFilter(
+                emojiSpell,
+                createCardFilterSnapshot({ type: "SPELL", labelTags: ["EMOJI"] }),
+            ),
+        );
+        assert.isFalse(
+            deckCardMatchesFilter(
+                plainSpell,
+                createCardFilterSnapshot({ type: "SPELL", labelTags: ["EMOJI"] }),
+            ),
+        );
+    });
+
     test("deckCardMatchesFilter applies rarity filters", ({ assert }) => {
         const common = createMinionCard({ rarity: "COMMON" });
         const legendary = createMinionCard({ rarity: "LEGENDARY" });
