@@ -320,4 +320,14 @@ export const CARD_RECAPS: CardRecapData[] = [
         nerfs: [],
         imageUrl: "/card-covers/galadrim/stagiaire-x.webp",
     },
+    {
+        date: "2026-07-07",
+        slug: "recap-2026-07-07",
+        publishedAt: "2026-07-07T18:00:00+02:00",
+        untilCommitHash: "8e8263998ecd32bbaa1abd857abfe7228bab195a",
+        newCardIds: [169, 163, 164, 165, 166, 167, 168],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/head-of-emojis.webp",
+    },
 ];

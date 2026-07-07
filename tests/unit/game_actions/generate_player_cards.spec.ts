@@ -172,6 +172,7 @@ test.group("generatePlayerCards", () => {
             },
             rarity: null,
             tags: [],
+            labelTags: [],
         });
         assert.include(generated.description, "Cri de guerre : Pioche 1 carte Monstre + coût = 2.");
     });
