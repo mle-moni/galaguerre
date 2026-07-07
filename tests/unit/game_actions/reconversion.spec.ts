@@ -167,6 +167,53 @@ test.group("RECONVERSION action", () => {
         assert.equal(game.data.playerOne.health, 30);
     });
 
+    test("reconverted aura-buffed pet stays at legume 1/1 without subtracting aura", ({
+        assert,
+    }) => {
+        const pet = createMinionCard({ uuid: "pet", attack: 2, health: 2, tags: ["PETS"] });
+        const auraSource = createMinionCard({
+            uuid: "aura-source",
+            tags: ["PETS"],
+            passives: [
+                createPassiveSnapshot({
+                    type: "BOOST",
+                    triggersOn: null,
+                    passiveBoost: {
+                        boost: createBoostSnapshot({ attack: 2, health: 1 }),
+                        target: createMinionTargetSnapshot("PLAYER", {
+                            tag: "PETS",
+                            excludeSelf: true,
+                        }),
+                    },
+                }),
+            ],
+        });
+
+        const game = createGame(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        placeMinion(createEmptyBoard(), 0, createMinionState(pet)),
+                        1,
+                        createMinionState(auraSource),
+                    ),
+                },
+            }),
+        );
+
+        refreshAurasAfterMinionPlayed(game, game.data.playerOne, 1);
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 4, health: 3 });
+
+        applyLegumeReconversion(game, "playerOne", 0, game.data.playerOne.board[0]!);
+
+        assertBoardIndex(assert, game, "playerOne", 0, {
+            attack: 1,
+            health: 1,
+            maxHealth: 1,
+        });
+        assert.equal(game.data.playerOne.board[0]!.originalCard.cardId, LEGUME_CARD_ID);
+    });
+
     test("removes aura from reconverted source minion", ({ assert }) => {
         const ally = createMinionCard({ uuid: "ally", attack: 2, health: 2 });
         const auraSource = createMinionCard({

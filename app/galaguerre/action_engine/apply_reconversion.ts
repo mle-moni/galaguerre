@@ -17,6 +17,7 @@ import {
 import { getMinionCardDescription } from "#api_types/minion_card_description";
 import {
     recalculateMinionKeywords,
+    removeMinionFromAuraTracking,
     revertPassiveAurasForSource,
 } from "../passive_engine/passive_aura.js";
 import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
@@ -69,6 +70,7 @@ export const applyReconversionWithTemplate = (
     if (!minion || minion.originalCard.type !== "MINION") return;
 
     revertPassiveAurasForSource(game, owner, minion);
+    removeMinionFromAuraTracking(game, minion);
 
     const newCard = buildReconvertedMinionCard(template, minion.uuid);
     const minionPowers = newCard.minionPowers;
