@@ -292,10 +292,28 @@ export const deckCardAddAction = (
 ): CardActionDefinition => ({
     type: "DECK_CARD",
     isTargeted: false,
+    target: null,
     deckCardOperation: "ADD",
     deckPlacement: options.placement ?? "RANDOM",
     deckTargetTeam: options.targetTeam ?? "PLAYER",
     cardId,
+    copyCount,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const deckCardAddFromTargetAction = (
+    copyCount = 1,
+    target: TargetDefinition,
+    options: DeckCardActionOptions = {},
+): CardActionDefinition => ({
+    type: "DECK_CARD",
+    isTargeted: true,
+    target,
+    deckCardOperation: "ADD",
+    deckPlacement: options.placement ?? "RANDOM",
+    deckTargetTeam: options.targetTeam ?? "PLAYER",
+    cardId: null,
     copyCount,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
@@ -308,6 +326,7 @@ export const deckCardDeleteAction = (
 ): CardActionDefinition => ({
     type: "DECK_CARD",
     isTargeted: false,
+    target: null,
     deckCardOperation: "DELETE",
     deckPlacement: copyCount === null ? null : options.placement ?? "RANDOM",
     deckTargetTeam: options.targetTeam ?? "PLAYER",

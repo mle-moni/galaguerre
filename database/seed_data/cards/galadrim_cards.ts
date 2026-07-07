@@ -23,6 +23,7 @@ import {
     costEquals,
     damageAction,
     deckCardAddAction,
+    deckCardAddFromTargetAction,
     defeatAction,
     destroyAction,
     defineMinion,
@@ -1352,5 +1353,10 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [],
         { isCollectible: false },
         { castsWhenDrawn: true },
+    ),
+    defineSpell(
+        163,
+        { ...gal("Copier-Coller", 2), imageUrl: "/card-covers/galadrim/copier-coller.webp" },
+        [deckCardAddFromTargetAction(3, targetedAnyMinion())],
     ),
 ];

@@ -10,6 +10,7 @@ const TARGETED_V1_ACTION_TYPES = [
     "BREAK_WEAPON",
     "RECONVERSION",
     "MIND_CONTROL",
+    "DECK_CARD",
 ] as const;
 
 export const isTargetedV1Action = (action: CardActionSnapshot): boolean => {
@@ -39,6 +40,13 @@ export const isTargetedV1Action = (action: CardActionSnapshot): boolean => {
             return action.target.type === "MINION" || action.target.type === "ALL";
         case "MIND_CONTROL":
             return action.target.type === "MINION" || action.target.type === "ALL";
+        case "DECK_CARD":
+            return (
+                action.deckCardOperation === "ADD" &&
+                action.copyCount !== null &&
+                action.copyCount > 0 &&
+                action.target.type === "MINION"
+            );
         default:
             return false;
     }

@@ -354,6 +354,34 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats targeted DECK_CARD ADD from selected minion", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            isTargeted: true,
+            target: {
+                type: "MINION",
+                targetTeam: "ALL",
+                comparison: null,
+                tag: null,
+                excludeSelf: false,
+                onlySelf: false,
+                maxTargets: null,
+                targetSelectionMode: null,
+                adjacency: null,
+            },
+            deckCardOperation: "ADD",
+            deckPlacement: "RANDOM",
+            deckTargetTeam: "PLAYER",
+            cardId: null,
+            copyCount: 3,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Choisissez un monstre sur le plateau. Placez 3 copies de celui-ci dans votre deck.",
+        );
+    });
+
     test("formats DECK_CARD ADD single copy on top of opponent deck", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DECK_CARD",

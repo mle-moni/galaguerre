@@ -111,10 +111,12 @@ const applyDeckCardOperationToPlayer = (
     action: Extract<CardActionFieldsSnapshot, { type: "DECK_CARD" }>,
 ): void => {
     if (action.deckCardOperation === "ADD") {
+        if (action.cardId === null) return;
         addCardsToDeck(targetPlayer, action.cardId, action.copyCount!, action.deckPlacement!);
         return;
     }
 
+    if (action.cardId === null) return;
     removeCardsFromDeck(targetPlayer, action.cardId, action.copyCount, action.deckPlacement);
 };
 

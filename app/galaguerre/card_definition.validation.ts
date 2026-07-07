@@ -88,6 +88,7 @@ const TARGETED_ACTION_TYPES = [
     "BREAK_WEAPON",
     "RECONVERSION",
     "MIND_CONTROL",
+    "DECK_CARD",
 ] as const;
 
 const validateComparisonSnapshot = (
@@ -403,11 +404,48 @@ const validateSummonPayload = (
     validateSummonParameters(action.summonParameters, ctx, [...path, "summonParameters"]);
 };
 
+const validateDeckCardTarget = (
+    target: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.type !== "MINION") {
+        ctx.addIssue({
+            code: "custom",
+            message: "DECK_CARD target must be MINION",
+            path: [...path, "type"],
+        });
+    }
+};
+
 const validateDeckCardPayload = (
     action: Extract<CardActionDefinition, { type: "DECK_CARD" }>,
     ctx: z.RefinementCtx,
     path: (string | number)[],
 ) => {
+    if (action.isTargeted) {
+        if (action.cardId !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "Targeted DECK_CARD action must not set cardId",
+                path: [...path, "cardId"],
+            });
+        }
+        if (action.deckCardOperation !== "ADD") {
+            ctx.addIssue({
+                code: "custom",
+                message: "Targeted DECK_CARD action must use ADD operation",
+                path: [...path, "deckCardOperation"],
+            });
+        }
+    } else if (action.cardId === null || action.cardId <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "DECK_CARD action requires cardId when not targeted",
+            path: [...path, "cardId"],
+        });
+    }
+
     if (action.deckCardOperation === "ADD") {
         if (action.copyCount === null || action.copyCount <= 0) {
             ctx.addIssue({
@@ -655,6 +693,10 @@ const validateTargetedAction = (
             break;
         case "MIND_CONTROL":
             validateMindControlTarget(action.target, ctx, [...path, "target"]);
+            break;
+        case "DECK_CARD":
+            validateDeckCardPayload(action, ctx, path);
+            validateDeckCardTarget(action.target, ctx, [...path, "target"]);
             break;
     }
 

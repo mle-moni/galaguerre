@@ -976,7 +976,24 @@ export const formatActionDescription = (
             return `${prefix} : Invoque ${countLabel} (${targetLabel}) ${boardLabel}.`;
         }
         case "DECK_CARD": {
-            const cardName = formatDeckCardName(action.cardId);
+            if (action.isTargeted && action.deckCardOperation === "ADD") {
+                const copies = action.copyCount === 1 ? "1 copie" : `${action.copyCount} copies`;
+                const targetLabel =
+                    action.target?.targetTeam === "ALL"
+                        ? "un monstre sur le plateau"
+                        : `un monstre ${formatSingleMinionTeamLabel(action.target!.targetTeam)}`;
+
+                switch (action.deckPlacement) {
+                    case "TOP":
+                        return `${prefix} : Choisissez ${targetLabel}. Placez ${copies} de celui-ci en haut ${formatDeckCardAddLocationOn(action.deckTargetTeam)}.`;
+                    case "BOTTOM":
+                        return `${prefix} : Choisissez ${targetLabel}. Placez ${copies} de celui-ci en bas ${formatDeckCardAddLocationOn(action.deckTargetTeam)}.`;
+                    default:
+                        return `${prefix} : Choisissez ${targetLabel}. Placez ${copies} de celui-ci ${formatDeckCardAddLocationIn(action.deckTargetTeam)}.`;
+                }
+            }
+
+            const cardName = formatDeckCardName(action.cardId!);
             const deleteLocation = formatDeckCardDeleteLocation(action.deckTargetTeam);
 
             if (action.deckCardOperation === "DELETE") {

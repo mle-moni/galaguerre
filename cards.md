@@ -423,9 +423,13 @@ Format compact pour construction de deck par LLM.
 - Charge : Peut attaquer dès le tour où il est joué. Passif (fin de tour) : Inflige 1 dégâts à lui-même.
 
 ### #161 La Phonebox
-- Coût: 2 | Type: MINION | Stats: 0/4 [Provocation] | Rareté: Commune | Famille: —
+- Coût: 2 | Type: MINION | Stats: 0/4 [Provocation] | Rareté: Rare | Famille: —
 - Provocation. Passif : Donne Discrétion à vos serviteurs adjacents.
 
 ### #162 Princesse
 - Coût: 2 | Type: MINION | Stats: 1/1 [Provocation] | Rareté: Légendaire | Famille: Pets
 - Provocation. Dernier souffle : Donne +2 attaque, Immunité à un monstre allié aléatoire 🐾 Pets.
+
+### #163 Copier-Coller
+- Coût: 2 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
+- Effet : Choisissez un monstre sur le plateau. Placez 3 copies de celui-ci dans votre deck.

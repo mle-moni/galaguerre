@@ -11,7 +11,7 @@ import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
 import { breakWeapon } from "#controllers/games/play_card/break_weapon";
 import { drawCards } from "../draw_cards.js";
-import { executeDeckCardAction } from "../deck_card_operations.js";
+import { addCardsToDeck, executeDeckCardAction } from "../deck_card_operations.js";
 import { executeHandCardAction } from "../hand_card_operations.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyDamageToMinion } from "./apply_damage_to_minion.js";
@@ -168,6 +168,31 @@ const applyEffectToResolvedTarget = (
             const boardIndex = requireMinionIndex(sourceOwner, resolved.minion);
             if (boardIndex === -1) return { gameEnded: false };
             applyMindControlToMinion(game, player, sourceOwner, boardIndex);
+            return { gameEnded: false };
+        }
+        case "DECK_CARD": {
+            if (
+                resolved.type !== "MINION" ||
+                action.deckCardOperation !== "ADD" ||
+                action.copyCount === null ||
+                action.deckPlacement === null
+            ) {
+                return { gameEnded: false };
+            }
+
+            const cardId = resolved.minion.originalCard.cardId;
+            switch (action.deckTargetTeam) {
+                case "PLAYER":
+                    addCardsToDeck(player, cardId, action.copyCount, action.deckPlacement);
+                    break;
+                case "OPPONENT":
+                    addCardsToDeck(opponent, cardId, action.copyCount, action.deckPlacement);
+                    break;
+                case "ALL":
+                    addCardsToDeck(player, cardId, action.copyCount, action.deckPlacement);
+                    addCardsToDeck(opponent, cardId, action.copyCount, action.deckPlacement);
+                    break;
+            }
             return { gameEnded: false };
         }
         default:

@@ -162,11 +162,11 @@ const summonActionFieldsSchema = z.object({
 
 const deckCardActionFieldsSchema = z.object({
     type: z.literal("DECK_CARD"),
-    isTargeted: z.literal(false).default(false),
+    ...targetedActionBaseFields,
     deckCardOperation: z.enum(GALAGUERRE_DECK_CARD_OPERATIONS),
     deckPlacement: z.enum(GALAGUERRE_DECK_PLACEMENTS).nullable(),
     deckTargetTeam: z.enum(GALAGUERRE_TARGET_TEAMS).default("PLAYER"),
-    cardId: z.number().int().positive(),
+    cardId: z.number().int().positive().nullable(),
     copyCount: z.number().int().positive().nullable(),
     actionCondition: actionConditionSchema,
 });

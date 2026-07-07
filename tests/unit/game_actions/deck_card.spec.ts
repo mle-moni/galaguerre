@@ -1,14 +1,18 @@
 import { test } from "@japa/runner";
+import { targetedAnyMinion } from "../../../database/seed_data/cards/define_card.js";
 import {
     addCardsToDeck,
     removeCardsFromDeck,
 } from "../../../app/galaguerre/deck_card_operations.js";
 import {
     createCardActionSnapshot,
+    createEmptyBoard,
     createGameData,
     createGamePlayer,
     createMinionCard,
+    createMinionState,
     createSpellCard,
+    placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { runBattlecry } from "#tests/helpers/game/run_battlecry";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
@@ -287,6 +291,44 @@ test.group("deck_card spell", () => {
 
         assert.equal(game.data.playerOne.deckCards.length, 2);
         assert.equal(game.data.playerOne.deckCards[0]!.label, "Légume");
+    });
+
+    test("targeted ADD spell effect adds copies of selected minion to deck", ({ assert }) => {
+        const boardMinion = createMinionCard({
+            uuid: "board-minion",
+            cardId: LEGUME_CARD_ID,
+            label: "Légume",
+        });
+        const spell = createSpellCard({
+            spellActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    isTargeted: true,
+                    target: targetedAnyMinion(),
+                    deckCardOperation: "ADD",
+                    deckPlacement: "RANDOM",
+                    deckTargetTeam: "PLAYER",
+                    cardId: null,
+                    copyCount: 3,
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            playerOne: { hand: [spell], deckCards: [] },
+            playerTwo: {
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(boardMinion)),
+            },
+        });
+
+        const { game } = runSpellEffect(data, spell, {
+            actionTarget: { minionUuid: "board-minion", owner: "OPPONENT" },
+        });
+
+        assert.equal(game.data.playerOne.deckCards.length, 3);
+        assert.isTrue(
+            game.data.playerOne.deckCards.every((card) => card.cardId === LEGUME_CARD_ID),
+        );
     });
 });
 
