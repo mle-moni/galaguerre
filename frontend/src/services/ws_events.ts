@@ -19,6 +19,15 @@ import {
 
 let isReauthenticating = false;
 
+const WS_EVENTS_SETUP_KEY = "__galaguerre_ws_events_setup__";
+
+const hasRegisteredSocketEvents = () =>
+    Boolean((globalThis as Record<string, unknown>)[WS_EVENTS_SETUP_KEY]);
+
+const markSocketEventsRegistered = () => {
+    (globalThis as Record<string, unknown>)[WS_EVENTS_SETUP_KEY] = true;
+};
+
 const resyncGameState = (user: ApiUser) => {
     if (!user.currentGameId) return;
 
@@ -46,6 +55,9 @@ const reauthenticateAfterReconnect = async () => {
 };
 
 export const setupEvents = (socket: Socket) => {
+    if (hasRegisteredSocketEvents()) return;
+    markSocketEventsRegistered();
+
     socket.on("error", (error) => {
         console.error(error);
     });

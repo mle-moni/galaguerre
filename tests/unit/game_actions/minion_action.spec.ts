@@ -6,10 +6,16 @@ import {
     assertIsFinished,
     assertPlayerHealth,
 } from "#tests/helpers/game/assertions";
+import { applyBoostToMinion } from "#galaguerre/action_engine/apply_boost";
+import { refreshAurasAfterMinionPlayed } from "#galaguerre/passive_engine/refresh_passive_auras";
 import {
+    createBoostSnapshot,
+    createEmptyBoard,
     createGameData,
     createMinionCard,
     createMinionState,
+    createMinionTargetSnapshot,
+    createPassiveSnapshot,
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
@@ -64,6 +70,104 @@ test.group("minion combat", () => {
             attacksThisRound: 1,
         });
         assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
+    });
+
+    test("aura-buffed minion keeps combat damage after target death refreshes auras", async ({
+        assert,
+    }) => {
+        const auraSource = createMinionCard({
+            uuid: "aura-source",
+            attack: 1,
+            health: 4,
+            passives: [
+                createPassiveSnapshot({
+                    type: "BOOST",
+                    triggersOn: null,
+                    action: null,
+                    passiveBoost: {
+                        boost: createBoostSnapshot({ attack: 1, health: 1 }),
+                        target: createMinionTargetSnapshot("PLAYER", { excludeSelf: true }),
+                    },
+                }),
+            ],
+        });
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 1,
+            minionPowers: { hasCharge: true },
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 3,
+        });
+
+        const setupGame = createInMemoryGame({
+            ...createGameData({
+                playerOne: {
+                    board: placeMinion(
+                        placeMinion(createEmptyBoard(), 0, createMinionState(attackerCard)),
+                        1,
+                        createMinionState(auraSource),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(targetCard)),
+                },
+            }),
+            isTraining: true,
+        });
+        refreshAurasAfterMinionPlayed(setupGame, setupGame.data.playerOne, 1);
+
+        const { game } = await runMinionCombatOnGame(setupGame);
+
+        assertBoardIndex(assert, game, "playerOne", 0, {
+            attack: 4,
+            health: 1,
+            maxHealth: 2,
+            attacksThisRound: 1,
+        });
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
+    });
+
+    test("directly buffed minion takes counter damage after attacking", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 1,
+            minionPowers: { hasCharge: true },
+        });
+        const attacker = createMinionState(attackerCard);
+        applyBoostToMinion(attacker, createBoostSnapshot({ attack: 1, health: 1 }));
+
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 3,
+        });
+
+        const { game } = await runMinionCombat(
+            createGameData({
+                playerOne: {
+                    board: placeMinion(createGameData().playerOne.board, 0, attacker),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        0,
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+        );
+
+        assertBoardIndex(assert, game, "playerOne", 0, {
+            attack: 4,
+            health: 1,
+            attacksThisRound: 1,
+        });
+        assertBoardIndex(assert, game, "playerTwo", 0, null);
     });
 
     test("poisonous minion kills high health target", async ({ assert }) => {

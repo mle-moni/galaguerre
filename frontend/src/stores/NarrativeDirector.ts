@@ -5,6 +5,7 @@ import { choreographShots, isCombatLungePhase } from "~/pages/play/animations/ch
 import { effectsToShots } from "~/pages/play/animations/effects_to_shots";
 import { readGameAnimationSnapshot } from "~/pages/play/animations/game_animation_snapshot";
 import { resolveHeroRect } from "~/pages/play/animations/resolve_rects";
+import { beatPlaysCardFlight } from "~/pages/play/hud/played_card_reveal/beat_plays_card_flight";
 import { extractCardRevealFromBeat } from "~/pages/play/hud/played_card_reveal/extract_played_card_from_beat";
 import { ANIMATION_STORE } from "./store_singletons.js";
 import type { GameStore } from "./GameStore.js";
@@ -85,7 +86,6 @@ export class NarrativeDirector {
             return;
         }
 
-        this.dyingHeroOwners = deadOwners;
         this.isGameEndAnimationPlaying = true;
 
         if (managesNarrative) {
@@ -214,7 +214,11 @@ export class NarrativeDirector {
                     authoritativeGame,
                     this.gameStore.user.id,
                 );
-                if (cardReveal && (revealStateFirst || beat.kind === "OVERDRAW")) {
+                if (
+                    cardReveal &&
+                    (revealStateFirst || beat.kind === "OVERDRAW") &&
+                    !beatPlaysCardFlight(beat)
+                ) {
                     this.gameStore.playedCardRevealStore.reveal(
                         cardReveal.card,
                         cardReveal.playerId,

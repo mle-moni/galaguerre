@@ -193,15 +193,19 @@ test.group("collection api", (group) => {
 
         await grantStarterCollectionForUser(user.id);
 
+        const ownedCardIds = (await UserCard.query().where("userId", user.id)).map(
+            (row) => row.cardId,
+        );
         const commonCard = await Card.query()
+            .whereIn("id", ownedCardIds)
             .where("isCollectible", true)
             .where("rarity", "COMMON")
             .firstOrFail();
 
         const existing = await UserCard.query()
             .where({ userId: user.id, cardId: commonCard.id })
-            .first();
-        const previousCount = existing?.count ?? 0;
+            .firstOrFail();
+        const previousCount = existing.count;
         await UserCard.updateOrCreate(
             { userId: user.id, cardId: commonCard.id },
             { count: previousCount + 1 },

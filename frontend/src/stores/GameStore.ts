@@ -47,6 +47,7 @@ export class GameStore {
     discoverOverlayMinimized = false;
     private passTurnSubmittedAt: { state: ApiGame["data"]["state"]; round: number } | null = null;
     private discoverOverlaySessionKey: string | null = null;
+    private processedPresentationUpdateIds = new Set<string>();
 
     constructor() {
         makeAutoObservable(this);
@@ -176,6 +177,7 @@ export class GameStore {
             this.resetMulliganLocalState();
             this.resetDiscoverOverlayState();
             this.passTurnSubmittedAt = null;
+            this.processedPresentationUpdateIds.clear();
             this.narrativeDirector.clear();
             this.combatActionQueue.clear();
         } else if (game.data.state === "MULLIGAN") {
@@ -189,14 +191,35 @@ export class GameStore {
         return this;
     }
 
+    private rememberPresentationUpdateId(updateId: string) {
+        this.processedPresentationUpdateIds.add(updateId);
+
+        if (this.processedPresentationUpdateIds.size > 128) {
+            const oldestId = this.processedPresentationUpdateIds.values().next().value;
+            if (oldestId) {
+                this.processedPresentationUpdateIds.delete(oldestId);
+            }
+        }
+    }
+
     receiveUpdate(game: ApiGame, presentation?: GamePresentationUpdate) {
         const isNewGame = this._authoritativeGame?.id !== game.id;
         const wasAlreadyFinished = !isNewGame && this._authoritativeGame?.data.state === "FINISHED";
+
+        if (isNewGame) {
+            this.processedPresentationUpdateIds.clear();
+        }
+
         this._authoritativeGame = game;
         this.combatActionQueue.resetInFlight();
         this.syncDiscoverOverlayState(game);
 
         if (presentation) {
+            if (this.processedPresentationUpdateIds.has(presentation.updateId)) {
+                return;
+            }
+
+            this.rememberPresentationUpdateId(presentation.updateId);
             this.narrativeDirector.enqueue(presentation, game);
             if (game.data.pendingDiscover) {
                 this._displayGame = game;

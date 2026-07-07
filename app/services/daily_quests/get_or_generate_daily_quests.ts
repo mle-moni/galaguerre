@@ -48,6 +48,7 @@ const buildRandomQuestRow = async (
     slot: number,
     random: () => number,
     questType: UserDailyQuest["questType"],
+    excludedQuestTypes: readonly UserDailyQuest["questType"][] = [],
 ): Promise<QuestInsertRow> => {
     const definition = getQuestDefinition(questType);
     if (!definition) {
@@ -66,13 +67,25 @@ const buildRandomQuestRow = async (
                 cardName: card.data.name,
             };
         } else {
-            const fallbackType = pickRandomItem(
-                RANDOM_DAILY_QUEST_DEFINITIONS.filter(
-                    (definition) => definition.type !== "WIN_WITH_CARD",
-                ).map((definition) => definition.type),
+            const fallbackCandidates = RANDOM_DAILY_QUEST_DEFINITIONS.filter(
+                (definition) =>
+                    definition.type !== "WIN_WITH_CARD" &&
+                    !excludedQuestTypes.includes(definition.type),
+            ).map((definition) => definition.type);
+
+            if (fallbackCandidates.length === 0) {
+                throw new Error("No fallback quest types available");
+            }
+
+            const fallbackType = pickRandomItem(fallbackCandidates, random);
+            return buildRandomQuestRow(
+                userId,
+                questDate,
+                slot,
                 random,
+                fallbackType,
+                excludedQuestTypes,
             );
-            return buildRandomQuestRow(userId, questDate, slot, random, fallbackType);
         }
     }
 
@@ -98,13 +111,27 @@ const generateDailyQuestRows = async (
         RANDOM_DAILY_QUEST_DEFINITIONS.map((definition) => definition.type),
         random,
     );
-    const selectedTypes = shuffledTypes.slice(0, 2);
+    const firstRandomQuest = await buildRandomQuestRow(
+        userId,
+        questDate,
+        1,
+        random,
+        shuffledTypes[0]!,
+    );
+    const secondQuestType =
+        shuffledTypes.find(
+            (questType) => questType !== firstRandomQuest.questType && questType !== "WIN_GAME",
+        ) ?? shuffledTypes[1]!;
+    const secondRandomQuest = await buildRandomQuestRow(
+        userId,
+        questDate,
+        2,
+        random,
+        secondQuestType,
+        [firstRandomQuest.questType],
+    );
 
-    return [
-        buildFixedWinGameQuest(userId, questDate),
-        await buildRandomQuestRow(userId, questDate, 1, random, selectedTypes[0]!),
-        await buildRandomQuestRow(userId, questDate, 2, random, selectedTypes[1]!),
-    ];
+    return [buildFixedWinGameQuest(userId, questDate), firstRandomQuest, secondRandomQuest];
 };
 
 export const getOrGenerateDailyQuests = async (userId: number): Promise<UserDailyQuest[]> => {

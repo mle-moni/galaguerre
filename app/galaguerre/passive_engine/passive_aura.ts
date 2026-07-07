@@ -479,6 +479,14 @@ export const revertPassiveAurasForSource = (
 };
 
 export const reapplyAllPassiveAuras = (game: Game): void => {
+    const damageByMinionUuid = new Map<string, number>();
+
+    for (const owner of [game.data.playerOne, game.data.playerTwo]) {
+        for (const minion of owner.board) {
+            damageByMinionUuid.set(minion.uuid, minion.maxHealth - minion.health);
+        }
+    }
+
     for (const owner of [game.data.playerOne, game.data.playerTwo]) {
         for (const sourceMinion of [...owner.board]) {
             revertPassiveAurasForSource(game, owner, sourceMinion);
@@ -495,6 +503,10 @@ export const reapplyAllPassiveAuras = (game: Game): void => {
 
     for (const owner of [game.data.playerOne, game.data.playerTwo]) {
         for (const minion of owner.board) {
+            const damage = damageByMinionUuid.get(minion.uuid);
+            if (damage !== undefined && damage > 0) {
+                minion.health = Math.max(1, minion.maxHealth - damage);
+            }
             recalculateMinionKeywords(game, minion);
         }
     }
