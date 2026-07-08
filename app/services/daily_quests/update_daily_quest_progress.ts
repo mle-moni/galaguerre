@@ -4,6 +4,11 @@ import UserDailyQuest from "#models/user_daily_quest";
 import { getOrGenerateDailyQuests } from "#services/daily_quests/get_or_generate_daily_quests";
 import { getWinnerUserId } from "#services/elo";
 import { gameQualifiesForRewards } from "#services/rewards/game_qualifies_for_rewards";
+import {
+    hasDailyQuestsBeenApplied,
+    loadPersistedGameData,
+    syncProgressionMarkersFromPersisted,
+} from "#services/post_game/progression_idempotency";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { DateTime } from "luxon";
 
@@ -96,7 +101,23 @@ const saveUpdatedQuests = async (quests: UserDailyQuest[]): Promise<void> => {
 
 export const updateDailyQuestProgressForGame = async (game: Game): Promise<void> => {
     if (!(game instanceof Game)) return;
-    if (!gameQualifiesForRewards(game)) return;
+
+    const persistedData = await loadPersistedGameData(game.id);
+    if (persistedData) {
+        syncProgressionMarkersFromPersisted(game, persistedData);
+        if (hasDailyQuestsBeenApplied(persistedData)) {
+            return;
+        }
+    }
+
+    if (!gameQualifiesForRewards(game)) {
+        game.data = {
+            ...game.data,
+            dailyQuestProgressApplied: true,
+        };
+        await game.save();
+        return;
+    }
 
     const winnerUserId = getWinnerUserId(game);
     const humanPlayers = [game.data.playerOne, game.data.playerTwo].filter((player) =>
@@ -113,6 +134,12 @@ export const updateDailyQuestProgressForGame = async (game: Game): Promise<void>
         updateQuestsForPlayer(activeQuests, player, isWinner, game.data.actionLog);
         await saveUpdatedQuests(activeQuests);
     }
+
+    game.data = {
+        ...game.data,
+        dailyQuestProgressApplied: true,
+    };
+    await game.save();
 };
 
 export const updateDailyQuestProgressForPackOpen = async (

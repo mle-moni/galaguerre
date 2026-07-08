@@ -5,6 +5,7 @@ import { getTrainingGameHumanUserId } from "#services/onboarding/get_training_ga
 import { applyGameRewards } from "#services/rewards/apply_game_rewards";
 import { applyGameXp } from "#services/progression/apply_game_xp";
 import { updateDailyQuestProgressForGame } from "#services/daily_quests/update_daily_quest_progress";
+import { hasPostGameProgressionBeenApplied } from "#services/post_game/progression_idempotency";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import db from "@adonisjs/lucid/services/db";
 import { DateTime } from "luxon";
@@ -32,49 +33,51 @@ const claimGameFinish = async (game: Game): Promise<boolean> => {
     return true;
 };
 
-export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boolean }) => {
-    if (game.isFinished) return;
-
-    const claimed = await claimGameFinish(game);
-    if (!claimed) {
-        await game.refresh();
-        return;
-    }
-
-    clearAllGameTimers(game.id);
-    delete game.data.turnEndsAt;
-    delete game.data.mulliganEndsAt;
-
-    game.data.state = "FINISHED";
-    void finalizeGameReplay(game.id).catch((err) =>
-        console.error(`Replay finalize failed for game ${game.id}`, err),
-    );
-
+const applyPostGameProgression = async (game: Game): Promise<void> => {
     if (game.data.isTraining) {
         const winnerUserId = getWinnerUserId(game);
         game.winnerId = winnerUserId === TRAINING_AI_USER_ID ? null : winnerUserId;
-        await game.save();
 
         const humanUserId = getTrainingGameHumanUserId(game);
         if (humanUserId !== null && game instanceof Game) {
             await completeOnboardingIfNeeded(humanUserId);
         }
-
-        await applyGameRewards(game);
-        await applyGameXp(game);
-        await updateDailyQuestProgressForGame(game);
-
-        if (!options?.skipSendUpdate) {
-            sendGameUpdate(game);
-        }
-        return;
+    } else {
+        await applyGameResult(game);
     }
 
-    await applyGameResult(game);
     await applyGameRewards(game);
     await applyGameXp(game);
     await updateDailyQuestProgressForGame(game);
+
+    game.data = {
+        ...game.data,
+        state: "FINISHED",
+        postGameProgressionApplied: true,
+    };
     await game.save();
+};
+
+export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boolean }) => {
+    if (game.isFinished && hasPostGameProgressionBeenApplied(game.data)) return;
+
+    const claimed = await claimGameFinish(game);
+    if (!claimed) {
+        await game.refresh();
+        if (!game.isFinished) return;
+        if (hasPostGameProgressionBeenApplied(game.data)) return;
+    } else {
+        clearAllGameTimers(game.id);
+        delete game.data.turnEndsAt;
+        delete game.data.mulliganEndsAt;
+
+        game.data.state = "FINISHED";
+        void finalizeGameReplay(game.id).catch((err) =>
+            console.error(`Replay finalize failed for game ${game.id}`, err),
+        );
+    }
+
+    await applyPostGameProgression(game);
 
     if (!options?.skipSendUpdate) {
         sendGameUpdate(game);

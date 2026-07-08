@@ -104,6 +104,28 @@ test.group("daily quests", (group) => {
         assert.isNull(winQuest.claimedAt);
     });
 
+    test("updateDailyQuestProgressForGame is idempotent", async ({ assert }) => {
+        const { game, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                playerOne: { health: 0 },
+                playerTwo: { health: 5 },
+            }),
+        );
+
+        await getOrGenerateDailyQuests(playerTwo.id);
+        await updateDailyQuestProgressForGame(game);
+        await updateDailyQuestProgressForGame(game);
+
+        const winQuest = await UserDailyQuest.query()
+            .where("userId", playerTwo.id)
+            .where("questType", "WIN_GAME")
+            .firstOrFail();
+
+        assert.equal(winQuest.progress, 1);
+    });
+
     test("stat quests accumulate progress across game stats", async ({ assert }) => {
         const { game, playerOne } = await createTestGame(
             createGameData({

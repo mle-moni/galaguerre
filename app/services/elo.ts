@@ -1,6 +1,11 @@
 import type { GameRatingPlayerResult, GameRatingResult } from "#api_types/game.types";
 import type Game from "#models/game";
 import User from "#models/user";
+import {
+    hasRatingBeenApplied,
+    loadPersistedGameData,
+    syncProgressionMarkersFromPersisted,
+} from "#services/post_game/progression_idempotency";
 import db from "@adonisjs/lucid/services/db";
 
 export const DEFAULT_ELO = 1200;
@@ -44,6 +49,14 @@ const buildPlayerRatingResult = (eloBefore: number, delta: number): GameRatingPl
 
 export const applyGameResult = async (game: Game): Promise<void> => {
     const winnerUserId = getWinnerUserId(game);
+
+    const persistedData = await loadPersistedGameData(game.id);
+    if (persistedData) {
+        syncProgressionMarkersFromPersisted(game, persistedData);
+        if (hasRatingBeenApplied(persistedData)) {
+            return;
+        }
+    }
 
     if (winnerUserId === null) {
         game.winnerId = null;

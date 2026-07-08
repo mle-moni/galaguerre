@@ -4,6 +4,11 @@ import Game from "#models/game";
 import User from "#models/user";
 import { getWinnerUserId } from "#services/elo";
 import { gameQualifiesForRewards } from "#services/rewards/game_qualifies_for_rewards";
+import {
+    hasXpBeenApplied,
+    loadPersistedGameData,
+    syncProgressionMarkersFromPersisted,
+} from "#services/post_game/progression_idempotency";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import db from "@adonisjs/lucid/services/db";
 
@@ -13,6 +18,14 @@ const isHumanUserId = (userId: number): boolean => userId !== TRAINING_AI_USER_I
 
 export const applyGameXp = async (game: Game): Promise<void> => {
     if (!(game instanceof Game)) return;
+
+    const persistedData = await loadPersistedGameData(game.id);
+    if (persistedData) {
+        syncProgressionMarkersFromPersisted(game, persistedData);
+        if (hasXpBeenApplied(persistedData)) {
+            return;
+        }
+    }
 
     const winnerUserId = getWinnerUserId(game);
     const isDraw = winnerUserId === null;

@@ -103,6 +103,7 @@ test.group("elo", (group) => {
 
         game.isFinished = true;
         game.data.state = "FINISHED";
+        game.data.postGameProgressionApplied = true;
         await game.save();
 
         await terminateGame(game);
@@ -169,5 +170,56 @@ test.group("elo", (group) => {
         assert.exists(game.data.rewardResult);
         assert.equal(game.data.rewardResult!.playerTwo.goldCoins, GOLD_COINS_PER_VICTORY);
         assert.equal(game.data.rewardResult!.playerOne.goldCoins, GOLD_COINS_PER_DEFEAT);
+    });
+
+    test("applyGameResult is idempotent", async ({ assert }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                playerOne: { health: 0 },
+                playerTwo: { health: 3 },
+            }),
+        );
+
+        await applyGameResult(game);
+        await game.save();
+        await applyGameResult(game);
+        await game.save();
+
+        await playerOne.refresh();
+        await playerTwo.refresh();
+
+        assert.equal(playerTwo.wins, 1);
+        assert.equal(playerOne.losses, 1);
+    });
+
+    test("terminateGame completes missing progression on already finished game", async ({
+        assert,
+    }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                playerOne: { health: 0 },
+                playerTwo: { health: 3 },
+            }),
+        );
+
+        game.isFinished = true;
+        game.endedAt = game.createdAt;
+        await game.save();
+
+        await terminateGame(game);
+
+        await game.refresh();
+        await playerOne.refresh();
+        await playerTwo.refresh();
+
+        assert.isTrue(game.data.postGameProgressionApplied);
+        assert.equal(playerTwo.wins, 1);
+        assert.equal(playerOne.losses, 1);
+        assert.exists(game.data.ratingResult);
+        assert.exists(game.data.rewardResult);
     });
 });

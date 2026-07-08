@@ -265,6 +265,8 @@ export interface GameData {
     ratingResult?: GameRatingResult;
     rewardResult?: GameRewardResult;
     xpResult?: GameXpResult;
+    dailyQuestProgressApplied?: boolean;
+    postGameProgressionApplied?: boolean;
     isTraining?: boolean;
     isOnboardingTutorial?: boolean;
 }
