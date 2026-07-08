@@ -12,7 +12,11 @@ import { client } from "~/services/client";
 import { clearCurrentGameId } from "~/services/clear_current_game_id";
 import { startGameSearch } from "~/services/matchmaking";
 import { queryClient } from "~/services/query_client";
-import { formatGameDuration, getGameFinishedAt } from "~/helpers/format_game_duration";
+import {
+    formatGameDuration,
+    formatGameSpeedrunDuration,
+    getGameFinishedAt,
+} from "~/helpers/format_game_duration";
 import type { ApiUser } from "#api_types/auth.types";
 import { GameFinalStatsTable } from "./game_final_stats_table.tsx";
 import { GameLootSection } from "./game_loot_section.tsx";
@@ -158,7 +162,12 @@ export const GameFinalScreen = observer(() => {
 
                 <Text size="sm" c="dimmed">
                     Partie terminée au tour {store.game.data.currentRound} — Durée :{" "}
-                    {formatGameDuration(store.game.createdAt, getGameFinishedAt(store.game))}
+                    {isTraining
+                        ? formatGameSpeedrunDuration(
+                              store.game.createdAt,
+                              getGameFinishedAt(store.game),
+                          )
+                        : formatGameDuration(store.game.createdAt, getGameFinishedAt(store.game))}
                 </Text>
 
                 <GameFinalStatsTable

@@ -9,7 +9,7 @@ import { FriendActionButton } from "~/components/friends/friend_action_button";
 import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { UserAvatar } from "~/components/user_avatar";
-import { formatDurationSeconds } from "~/helpers/format_game_duration";
+import { formatSpeedrunDurationSeconds } from "~/helpers/format_game_duration";
 import { useFriendsQuery } from "~/hooks/use_friends";
 import { useAiSpeedrunLeaderboardQuery, useLeaderboardQuery } from "~/hooks/use_leaderboard";
 import { useUser } from "~/hooks/use_user";
@@ -186,7 +186,7 @@ const SpeedrunLeaderboardTable = ({
                                         isCurrentUser={isCurrentUser}
                                     />
                                 </td>
-                                <td>{formatDurationSeconds(entry.durationSeconds)}</td>
+                                <td>{formatSpeedrunDurationSeconds(entry.durationSeconds)}</td>
                                 <td className="leaderboard-table__col--hide-sm">
                                     {entry.roundCount} tours
                                 </td>

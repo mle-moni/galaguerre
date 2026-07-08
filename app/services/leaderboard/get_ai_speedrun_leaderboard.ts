@@ -16,7 +16,7 @@ export const getAiSpeedrunLeaderboard = async (): Promise<ApiAiSpeedrunLeaderboa
         WITH best_runs AS (
             SELECT DISTINCT ON (COALESCE(player_one_id, player_two_id))
                 COALESCE(player_one_id, player_two_id) AS user_id,
-                EXTRACT(EPOCH FROM (ended_at - created_at))::int AS duration_seconds,
+                EXTRACT(EPOCH FROM (ended_at - created_at)) AS duration_seconds,
                 (data->>'currentRound')::int AS round_count
             FROM games
             WHERE is_finished = true
