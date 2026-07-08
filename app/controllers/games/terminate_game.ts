@@ -6,21 +6,46 @@ import { applyGameRewards } from "#services/rewards/apply_game_rewards";
 import { applyGameXp } from "#services/progression/apply_game_xp";
 import { updateDailyQuestProgressForGame } from "#services/daily_quests/update_daily_quest_progress";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
+import db from "@adonisjs/lucid/services/db";
 import { DateTime } from "luxon";
 import { finalizeGameReplay } from "../../galaguerre/game_replay/game_replay_buffer.js";
 import { clearAllGameTimers } from "../../galaguerre/timers/game_timers.js";
 import { sendGameUpdate } from "./send_game_update.js";
 
+const claimGameFinish = async (game: Game): Promise<boolean> => {
+    const endedAt = DateTime.now();
+    const claimedRows = await db
+        .from("games")
+        .where("id", game.id)
+        .where("is_finished", false)
+        .update({
+            is_finished: true,
+            ended_at: endedAt.toSQL(),
+        });
+
+    if (Number(claimedRows) === 0) {
+        return false;
+    }
+
+    game.isFinished = true;
+    game.endedAt = endedAt;
+    return true;
+};
+
 export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boolean }) => {
     if (game.isFinished) return;
+
+    const claimed = await claimGameFinish(game);
+    if (!claimed) {
+        await game.refresh();
+        return;
+    }
 
     clearAllGameTimers(game.id);
     delete game.data.turnEndsAt;
     delete game.data.mulliganEndsAt;
 
     game.data.state = "FINISHED";
-    game.isFinished = true;
-    game.endedAt = DateTime.now();
     void finalizeGameReplay(game.id).catch((err) =>
         console.error(`Replay finalize failed for game ${game.id}`, err),
     );

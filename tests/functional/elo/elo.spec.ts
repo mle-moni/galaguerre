@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
 import { terminateGame } from "#controllers/games/terminate_game";
+import Game from "#models/game";
 import { applyGameResult, computeEloDeltas, DEFAULT_ELO, getWinnerUserId } from "#services/elo";
 import { createTestGame } from "#tests/helpers/game/game_factory";
 import { createGameData } from "#tests/helpers/game/fixtures";
@@ -113,6 +114,33 @@ test.group("elo", (group) => {
         assert.equal(playerTwo.wins, 0);
         assert.equal(playerOne.elo, DEFAULT_ELO);
         assert.equal(playerTwo.elo, DEFAULT_ELO);
+    });
+
+    test("double terminateGame from separate instances applies progression once", async ({
+        assert,
+    }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                playerOne: { health: 0 },
+                playerTwo: { health: 3 },
+            }),
+        );
+
+        const gameInstanceOne = await game.refresh();
+        const gameInstanceTwo = await Game.findOrFail(game.id);
+
+        await terminateGame(gameInstanceOne);
+        await terminateGame(gameInstanceTwo);
+
+        await playerOne.refresh();
+        await playerTwo.refresh();
+
+        assert.equal(playerTwo.wins, 1);
+        assert.equal(playerOne.losses, 1);
+        assert.equal(playerOne.wins, 0);
+        assert.equal(playerTwo.losses, 0);
     });
 
     test("terminateGame applies elo on first finish", async ({ assert }) => {
