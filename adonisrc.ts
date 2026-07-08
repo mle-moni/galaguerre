@@ -54,6 +54,7 @@ export default defineConfig({
         () => import("#start/game_timers"),
         () => import("#start/sync_cards"),
         () => import("#start/sync_events"),
+        () => import("#start/sync_user_wins_losses"),
     ],
 
     /*
