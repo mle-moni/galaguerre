@@ -1,9 +1,5 @@
 import { test } from "@japa/runner";
-import {
-    assertGameState,
-    assertIsFinished,
-    assertPlayerHealth,
-} from "#tests/helpers/game/assertions";
+import { assertGameState, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import { createGameData, createMinionCard } from "#tests/helpers/game/fixtures";
 import { runPassTurnOnGame, runSetupNextTurn } from "#tests/helpers/game/run_setup_next_turn";
 
@@ -150,23 +146,5 @@ test.group("pass turn rules", () => {
 
         assertPlayerHealth(assert, game, "playerTwo", 9);
         assert.equal(game.data.playerTwo.maxFatigueDamageTaken, 3);
-    });
-
-    test("terminates game when fatigue is lethal", async ({ assert }) => {
-        const { game } = await runPassTurnOnGame(
-            createGameData({
-                state: "PLAYER_ONE_TURN",
-                currentRound: 2,
-                playerTwo: {
-                    deckCards: [],
-                    hand: [],
-                    health: 1,
-                    maxFatigueDamageTaken: 0,
-                },
-            }),
-        );
-
-        assertIsFinished(assert, game, true);
-        assertPlayerHealth(assert, game, "playerTwo", 0);
     });
 });

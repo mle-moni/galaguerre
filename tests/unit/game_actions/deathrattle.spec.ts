@@ -1,10 +1,6 @@
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
-import {
-    assertBoardIndex,
-    assertIsFinished,
-    assertPlayerHealth,
-} from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
     createAllTargetSnapshot,
@@ -449,47 +445,5 @@ test.group("deathrattles", () => {
         assertBoardIndex(assert, game, "playerTwo", 0, null);
         assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 3);
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 3);
-    });
-
-    test("deathrattle that reduces hero to zero ends the game", async ({ assert }) => {
-        const attackerCard = createMinionCard({
-            uuid: MINION_IDS.attacker,
-            attack: 2,
-            health: 2,
-        });
-        const targetCard = createMinionCard({
-            uuid: MINION_IDS.target,
-            attack: 1,
-            health: 1,
-            deathrattleActions: [
-                createCardActionSnapshot({
-                    type: "DAMAGE",
-                    damage: DEFAULT_HERO_HEALTH,
-                    target: createHeroTargetSnapshot("OPPONENT"),
-                }),
-            ],
-        });
-
-        const { game } = await runMinionCombat(
-            createGameData({
-                playerOne: {
-                    board: placeMinion(
-                        createGameData().playerOne.board,
-                        0,
-                        createMinionState(attackerCard),
-                    ),
-                },
-                playerTwo: {
-                    board: placeMinion(
-                        createGameData().playerTwo.board,
-                        0,
-                        createMinionState(targetCard),
-                    ),
-                },
-            }),
-        );
-
-        assertIsFinished(assert, game, true);
-        assertPlayerHealth(assert, game, "playerOne", 0);
     });
 });

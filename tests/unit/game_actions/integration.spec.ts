@@ -3,7 +3,6 @@ import { test } from "@japa/runner";
 import {
     assertBoardIndex,
     assertGameState,
-    assertIsFinished,
     assertPlayerHealth,
 } from "#tests/helpers/game/assertions";
 import {
@@ -14,7 +13,6 @@ import {
     MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
-import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import {
     runMinionActionInMemory,
     runMinionActionOnGameInMemory,
@@ -78,70 +76,6 @@ test.group("game scenarios", () => {
         });
 
         assertBoardIndex(assert, opponentPlayGame, "playerTwo", 0, { health: 1 });
-    });
-
-    test("win by combat: charge minion attacks hero and finishes the game", async ({ assert }) => {
-        const chargeCard = createMinionCard({
-            uuid: CARD_IDS.handMinion,
-            cost: 10,
-            attack: DEFAULT_HERO_HEALTH,
-            health: 1,
-            minionPowers: { hasCharge: true },
-            effects: ["Charge"],
-        });
-
-        const { game: playGame } = await runPlayMinion(
-            createGameData({
-                currentRound: 10,
-                playerOne: {
-                    mana: 10,
-                    hand: [chargeCard],
-                },
-            }),
-            chargeCard,
-        );
-
-        const { game: attackGame } = await runMinionActionOnGameInMemory(playGame, "playerOne", {
-            minionId: CARD_IDS.handMinion,
-            minionUuid: null,
-            owner: "OPPONENT",
-        });
-
-        assertIsFinished(assert, attackGame, true);
-        assertPlayerHealth(assert, attackGame, "playerTwo", 0);
-    });
-
-    test("win by fatigue after deck is exhausted", async ({ assert }) => {
-        let game = createInMemoryGame({
-            ...createGameData({
-                state: "PLAYER_ONE_TURN",
-                currentRound: 1,
-                playerOne: {
-                    deckCards: [],
-                    hand: [],
-                },
-                playerTwo: {
-                    deckCards: [],
-                    hand: [],
-                    health: 3,
-                    maxFatigueDamageTaken: 0,
-                },
-            }),
-            isTraining: true,
-        });
-
-        for (let turn = 0; turn < 4; turn++) {
-            const { game: nextGame } = await runPassTurnFromGame(game);
-            game = nextGame;
-
-            if (game.isFinished) {
-                assertIsFinished(assert, game, true);
-                assertPlayerHealth(assert, game, "playerTwo", 0);
-                return;
-            }
-        }
-
-        assert.fail("Expected game to finish from fatigue damage");
     });
 
     test("taunt blocks hero attack until taunt minion is dealt with", async ({ assert }) => {

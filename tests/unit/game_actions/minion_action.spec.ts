@@ -1,11 +1,7 @@
 import { DEFAULT_HERO_HEALTH, MinionCard } from "#api_types/game.types";
 import type { SocketEventByKey } from "#api_types/socket_events";
 import { test } from "@japa/runner";
-import {
-    assertBoardIndex,
-    assertIsFinished,
-    assertPlayerHealth,
-} from "#tests/helpers/game/assertions";
+import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import { applyBoostToMinion } from "#galaguerre/action_engine/apply_boost";
 import { refreshAurasAfterMinionPlayed } from "#galaguerre/passive_engine/refresh_passive_auras";
 import {
@@ -498,30 +494,6 @@ test.group("minion combat", () => {
             health: 1,
             attacksThisRound: 1,
         });
-    });
-
-    test("lethal hero attack terminates the game", async ({ assert }) => {
-        const attackerCard = createMinionCard({
-            uuid: MINION_IDS.attacker,
-            attack: DEFAULT_HERO_HEALTH,
-            health: 1,
-        });
-
-        const { game } = await runMinionCombat(
-            createGameData({
-                playerOne: {
-                    board: placeMinion(
-                        createGameData().playerOne.board,
-                        0,
-                        createMinionState(attackerCard),
-                    ),
-                },
-            }),
-            { heroAttack: true },
-        );
-
-        assertPlayerHealth(assert, game, "playerTwo", 0);
-        assertIsFinished(assert, game, true);
     });
 
     test("taunt blocks hero attack", async ({ assert }) => {

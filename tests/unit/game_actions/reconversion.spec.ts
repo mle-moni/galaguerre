@@ -28,6 +28,7 @@ import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import { runMinionActionOnGameInMemory } from "#tests/helpers/game/run_minion_action_in_memory";
 import { runPassTurnFromGame } from "#tests/helpers/game/run_setup_next_turn";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
+import { withSeededRandom } from "#tests/helpers/deterministic_random";
 import { assertError } from "#tests/helpers/game/socket_event_collector";
 
 const createGame = (data: ReturnType<typeof createGameData>) => createInMemoryGame(data);
@@ -933,33 +934,36 @@ test.group("RECONVERSION enemy minion attack", () => {
         const enemyMinion = createMinionCard({ uuid: "budget-cut", attack: 5, health: 5, cost: 3 });
         const spell = createCoupeBudgetaireSpell();
 
-        const { game: gameAfterReconversion } = runSpellEffect(
-            createGameData({
-                currentRound: CURRENT_ROUND,
-                state: "PLAYER_ONE_TURN",
-                playerOne: { mana: 10, hand: [spell] },
-                playerTwo: {
-                    board: placeMinion(
-                        createEmptyBoard(),
-                        0,
-                        createMinionState(enemyMinion, { placedAtRound: 1 }),
-                    ),
-                },
-            }),
-            spell,
-        );
+        await withSeededRandom("coupe-budgetaire-reconversion", async () => {
+            const { game: gameAfterReconversion } = runSpellEffect(
+                createGameData({
+                    currentRound: CURRENT_ROUND,
+                    state: "PLAYER_ONE_TURN",
+                    playerOne: { mana: 10, hand: [spell] },
+                    playerTwo: {
+                        board: placeMinion(
+                            createEmptyBoard(),
+                            0,
+                            createMinionState(enemyMinion, { placedAtRound: 1 }),
+                        ),
+                    },
+                }),
+                spell,
+            );
 
-        assertBoardIndex(assert, gameAfterReconversion, "playerTwo", 0, { placedAtRound: 1 });
+            assertBoardIndex(assert, gameAfterReconversion, "playerTwo", 0, { placedAtRound: 1 });
+            assert.isAbove(gameAfterReconversion.data.playerTwo.board[0]!.attack, 0);
 
-        const { game: gameOnEnemyTurn } = await runPassTurnFromGame(gameAfterReconversion);
+            const { game: gameOnEnemyTurn } = await runPassTurnFromGame(gameAfterReconversion);
 
-        const { errors } = await runMinionActionOnGameInMemory(gameOnEnemyTurn, "playerTwo", {
-            minionId: "budget-cut",
-            minionUuid: null,
-            owner: "OPPONENT",
+            const { errors } = await runMinionActionOnGameInMemory(gameOnEnemyTurn, "playerTwo", {
+                minionId: "budget-cut",
+                minionUuid: null,
+                owner: "OPPONENT",
+            });
+
+            assert.deepEqual(errors, []);
+            assert.isBelow(gameOnEnemyTurn.data.playerOne.health, DEFAULT_HERO_HEALTH);
         });
-
-        assert.deepEqual(errors, []);
-        assert.isBelow(gameOnEnemyTurn.data.playerOne.health, DEFAULT_HERO_HEALTH);
     });
 });
