@@ -1274,6 +1274,16 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         { deathrattleActions: [damageAction(2, enemyMinions())] },
     ),
+    defineWeapon(
+        171,
+        {
+            ...gal("Gros Cahier des Charges", 2),
+            imageUrl: "/card-covers/galadrim/gros-cahier-des-charges.webp",
+            damage: 3,
+            durability: 2,
+        },
+        { cannotAttackHero: true },
+    ),
 
     // --- cartes non collectionnables ---
     defineMinion(

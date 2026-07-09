@@ -45,11 +45,13 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
                     damage: card.data.damage,
                     durability: card.data.durability,
                     deathrattleActions: card.data.deathrattleActions,
+                    cannotAttackHero: card.data.cannotAttackHero,
                     description: getWeaponCardDescription(
                         card.data.damage,
                         card.data.durability,
                         deathrattleLines,
                         card.data.labelTags,
+                        card.data.cannotAttackHero,
                     ),
                 };
             }

@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import { generateCardDescriptionFromData } from "#galaguerre/generate_card_description";
 import { buildSyncedCardInsert } from "#database/seed_helpers/build_synced_card_insert";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
+import { parseWeaponData } from "#galaguerre/card_definition.schema";
 
 const findCard = (id: number) => {
     const entry = GALADRIM_CARDS.find((card) => card.id === id);
@@ -30,6 +31,27 @@ test.group("generate_card_description", () => {
         const description = generateCardDescriptionFromData(findCard(106).data);
 
         assert.equal(description, "Arme 1/4.");
+    });
+
+    test("generates weapon description with cannot attack hero restriction", ({ assert }) => {
+        const description = generateCardDescriptionFromData(
+            parseWeaponData({
+                schemaVersion: 1,
+                type: "WEAPON",
+                tags: [],
+                labelTags: [],
+                name: "Agrafeuse Lourde",
+                cost: 2,
+                dynamicCost: null,
+                imageUrl: "https://example.com/weapon.png",
+                damage: 3,
+                durability: 2,
+                deathrattleActions: [],
+                cannotAttackHero: true,
+            }),
+        );
+
+        assert.equal(description, "Arme 3/2. Ne peut pas attaquer le héros adverse.");
     });
 
     test("generates spell description with label tag prefix", ({ assert }) => {

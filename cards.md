@@ -465,3 +465,7 @@ Format compact pour construction de deck par LLM.
 ### #170 Git Revert
 - Coût: 0 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
 - Effet : Renvoie un monstre allié dans votre main. Son coût est réduit de (2) cristaux.
+
+### #171 Gros Cahier des Charges
+- Coût: 2 | Type: WEAPON | Stats: 3/2 | Rareté: Commune | Famille: —
+- Arme 3/2. Ne peut pas attaquer le héros adverse.

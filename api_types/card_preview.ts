@@ -130,8 +130,10 @@ const buildWeaponPreview = (entry: CardSeedEntry): WeaponCard => {
             data.durability,
             deathrattleLines,
             data.labelTags,
+            data.cannotAttackHero,
         ),
         deathrattleActions: data.deathrattleActions,
+        cannotAttackHero: data.cannotAttackHero,
     };
 };
 

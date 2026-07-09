@@ -416,6 +416,7 @@ export const defaultWeaponData = (): WeaponCardData => ({
     damage: 1,
     durability: 1,
     deathrattleActions: [],
+    cannotAttackHero: false,
 });
 
 export const dynamicCostPerHandCard = (amountPer = 1): DynamicCostDefinition => ({

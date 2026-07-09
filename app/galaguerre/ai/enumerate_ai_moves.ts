@@ -24,6 +24,7 @@ import {
     canWeaponAttack,
     getMinionHasTaunt,
 } from "#controllers/games/game_utils";
+import { getWeaponCannotAttackHero } from "#api_types/weapon_combat";
 import type Game from "#models/game";
 
 export type AiMove =
@@ -116,6 +117,7 @@ const targetMatchesAllActions = (
 const enumerateAttackTargets = (
     opponentBoard: GamePlayer["board"],
     hasAttackableTaunt: boolean,
+    includeHeroTarget = true,
 ): Array<{ minionUuid: string | null; owner: "OPPONENT" }> => {
     if (hasAttackableTaunt) {
         return opponentBoard
@@ -128,9 +130,11 @@ const enumerateAttackTargets = (
             }));
     }
 
-    const targets: Array<{ minionUuid: string | null; owner: "OPPONENT" }> = [
-        { minionUuid: null, owner: "OPPONENT" },
-    ];
+    const targets: Array<{ minionUuid: string | null; owner: "OPPONENT" }> = [];
+
+    if (includeHeroTarget) {
+        targets.push({ minionUuid: null, owner: "OPPONENT" });
+    }
 
     for (const minion of opponentBoard) {
         if (canOpponentDirectlyTargetMinion(minion)) {
@@ -144,13 +148,17 @@ const enumerateAttackTargets = (
 const enumerateWeaponAttacks = (game: Game, player: GamePlayer, opponent: GamePlayer): AiMove[] => {
     const moves: AiMove[] = [];
     const currentRound = game.data.currentRound;
+    const weaponState = player.weaponState;
 
-    if (!canWeaponAttack(player, player.weaponState, currentRound)) {
+    if (!canWeaponAttack(player, weaponState, currentRound)) {
         return moves;
     }
 
     const hasAttackableTaunt = boardHasAttackableTaunt(opponent.board);
-    const targets = enumerateAttackTargets(opponent.board, hasAttackableTaunt);
+    const includeHeroTarget = weaponState
+        ? !getWeaponCannotAttackHero(weaponState.originalCard)
+        : true;
+    const targets = enumerateAttackTargets(opponent.board, hasAttackableTaunt, includeHeroTarget);
 
     for (const { minionUuid, owner } of targets) {
         moves.push({

@@ -4,8 +4,10 @@ import {
     canWeaponAttackBoardIndex,
     canWeaponAttackTarget,
     opponentBoardHasAttackableTaunt,
+    weaponHasAnyAttackTarget,
 } from "~/helpers/combat_target_validation";
 import { canWeaponAttack } from "~/helpers/weapon_combat";
+import { getWeaponCannotAttackHero } from "#api_types/weapon_combat";
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
@@ -101,6 +103,8 @@ export class WeaponDragStore {
 
         if (opponentBoardHasAttackableTaunt(this.gameStore)) return "red";
 
+        if (getWeaponCannotAttackHero(weaponState.originalCard)) return "red";
+
         return "green";
     }
 
@@ -108,13 +112,6 @@ export class WeaponDragStore {
         if (!this.gameStore.isMyTurn) return false;
         if (this.gameStore.combatActionQueue.isWeaponReserved()) return false;
 
-        const weaponState = this.gameStore.authoritativeMe.weaponState;
-        if (!weaponState) return false;
-
-        return canWeaponAttack(
-            this.gameStore.authoritativeMe,
-            weaponState,
-            this.gameStore.authoritativeGame.data.currentRound,
-        );
+        return weaponHasAnyAttackTarget(this.gameStore);
     }
 }

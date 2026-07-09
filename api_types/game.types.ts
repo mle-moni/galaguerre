@@ -98,6 +98,7 @@ export type WeaponCard = PlayerCardBase & {
     durability: number;
     description: string;
     deathrattleActions: CardActionSnapshot[];
+    cannotAttackHero?: boolean;
 };
 
 export type GameLogEntryType =

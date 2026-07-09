@@ -243,4 +243,77 @@ test.group("weapon combat", () => {
 
         assertError(assert, "Vous n'avez pas d'arme équipée");
     });
+
+    test("rejects hero attack when weapon cannot attack hero", async ({ assert }) => {
+        const weaponCard = createWeaponCard({ damage: 3, durability: 2, cannotAttackHero: true });
+
+        await runWeaponActionInMemory(
+            createGameData({
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                },
+            }),
+            "playerOne",
+            { minionUuid: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Cette arme ne peut pas attaquer le héros adverse");
+    });
+
+    test("allows minion attack when weapon cannot attack hero", async ({ assert }) => {
+        const weaponCard = createWeaponCard({ damage: 3, durability: 2, cannotAttackHero: true });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 2,
+            health: 4,
+        });
+
+        const { game } = await runWeaponCombat(
+            createGameData({
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        0,
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+            { targetIndex: 0 },
+        );
+
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
+        assertPlayerHealth(assert, game, "playerOne", DEFAULT_HERO_HEALTH - 2);
+        assert.equal(game.data.playerOne.weaponState!.durability, 1);
+    });
+
+    test("requires attacking taunt minion when weapon cannot attack hero", async ({ assert }) => {
+        const weaponCard = createWeaponCard({ damage: 3, durability: 2, cannotAttackHero: true });
+        const tauntCard = createMinionCard({
+            uuid: MINION_IDS.taunt,
+            minionPowers: { hasTaunt: true },
+            effects: ["Provocation"],
+        });
+
+        await runWeaponActionInMemory(
+            createGameData({
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        0,
+                        createMinionState(tauntCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionUuid: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Cette arme ne peut pas attaquer le héros adverse");
+    });
 });

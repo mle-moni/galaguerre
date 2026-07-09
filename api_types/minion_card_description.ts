@@ -74,10 +74,12 @@ export const getWeaponCardDescription = (
     durability: number,
     deathrattleLines: string[] = [],
     labelTags: CardLabelTag[] = [],
+    cannotAttackHero = false,
 ): string => {
     return joinCardDescriptionParts([
         ...formatLabelTagLines(labelTags),
         `Arme ${damage}/${durability}.`,
+        ...(cannotAttackHero ? ["Ne peut pas attaquer le héros adverse"] : []),
         ...deathrattleLines,
     ]);
 };

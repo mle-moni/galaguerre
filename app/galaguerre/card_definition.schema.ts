@@ -353,6 +353,7 @@ export const weaponDataSchema = cardDataBaseSchema.extend({
     damage: z.number().int().min(0),
     durability: z.number().int().min(1),
     deathrattleActions: z.array(deathrattleActionSchema),
+    cannotAttackHero: z.boolean().default(false),
 });
 
 export const cardDataSchema = z.discriminatedUnion("type", [

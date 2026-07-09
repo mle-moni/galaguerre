@@ -1,5 +1,6 @@
 import type { ActionTarget, BoardState, MinionState, SpotOwner } from "#api_types/game.types";
 import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
+import { getWeaponCannotAttackHero } from "#api_types/weapon_combat";
 import { canMinionAttack } from "~/helpers/minion_combat";
 import { canWeaponAttack } from "~/helpers/weapon_combat";
 import type { GameStore } from "~/stores/GameStore";
@@ -71,7 +72,10 @@ export const canWeaponAttackTarget = (store: GameStore, actionTarget: ActionTarg
     const opponentBoard = store.authoritativeOpponent.board;
     const hasAttackableTaunt = boardHasAttackableTaunt(opponentBoard);
 
-    if (actionTarget.minionUuid === null) return !hasAttackableTaunt;
+    if (actionTarget.minionUuid === null) {
+        if (getWeaponCannotAttackHero(weaponState.originalCard)) return false;
+        return !hasAttackableTaunt;
+    }
 
     const boardIndex = opponentBoard.findIndex((entry) => entry.uuid === actionTarget.minionUuid);
     if (boardIndex === -1) return false;
@@ -82,6 +86,34 @@ export const canWeaponAttackTarget = (store: GameStore, actionTarget: ActionTarg
     if (!hasAttackableTaunt) return true;
 
     return getMinionHasTaunt(targetMinion);
+};
+
+export const weaponHasAnyAttackTarget = (store: GameStore): boolean => {
+    const weaponState = store.authoritativeMe.weaponState;
+    if (!weaponState) return false;
+
+    if (
+        !canWeaponAttack(
+            store.authoritativeMe,
+            weaponState,
+            store.authoritativeGame.data.currentRound,
+        )
+    ) {
+        return false;
+    }
+
+    const opponentBoard = store.authoritativeOpponent.board;
+    const hasAttackableTaunt = boardHasAttackableTaunt(opponentBoard);
+
+    if (hasAttackableTaunt) {
+        return opponentBoard.some(
+            (minion) => getMinionHasTaunt(minion) && canOpponentDirectlyTargetMinion(minion),
+        );
+    }
+
+    if (!getWeaponCannotAttackHero(weaponState.originalCard)) return true;
+
+    return opponentBoard.some((minion) => canOpponentDirectlyTargetMinion(minion));
 };
 
 export const canMinionAttackBoardIndex = (

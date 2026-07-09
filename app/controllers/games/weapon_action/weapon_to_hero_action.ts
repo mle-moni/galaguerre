@@ -1,4 +1,5 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
+import { getWeaponCannotAttackHero } from "#api_types/weapon_combat";
 import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import { applyDamageToHero } from "../../../galaguerre/action_engine/apply_damage_to_hero.js";
 import {
@@ -29,6 +30,17 @@ export const weaponToHeroAction = async ({
             "notify_error",
             {
                 error: "J'aurai pu te laisser attaquer ton propre héros mais j'ai décidé d'être clément...",
+            },
+            socketId,
+        );
+        return;
+    }
+
+    if (getWeaponCannotAttackHero(weaponState.originalCard)) {
+        emitSocketEvent(
+            "notify_error",
+            {
+                error: "Cette arme ne peut pas attaquer le héros adverse",
             },
             socketId,
         );

@@ -19,6 +19,7 @@ export const generateCardDescriptionFromData = (data: CardData): string => {
                 data.durability,
                 deathrattleLines,
                 data.labelTags,
+                data.cannotAttackHero,
             );
         }
         case "SPELL": {
