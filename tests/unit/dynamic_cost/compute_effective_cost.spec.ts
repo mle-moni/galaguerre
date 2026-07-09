@@ -118,4 +118,33 @@ test.group("computeEffectiveCost", () => {
 
         assert.equal(computeEffectiveCost(card, player, opponent), 3);
     });
+
+    test("applies hand cost reduction without dynamic cost", ({ assert }) => {
+        const card = createMinionCard({
+            baseCost: 4,
+            cost: 4,
+            handCostReduction: 2,
+            dynamicCost: null,
+        });
+        const player = createGamePlayer(1, { hand: [card] });
+        const opponent = createGamePlayer(2);
+
+        assert.equal(computeEffectiveCost(card, player, opponent), 2);
+    });
+
+    test("refreshes hand cost reduction in hand", ({ assert }) => {
+        const card = createMinionCard({
+            uuid: "reverted-minion",
+            baseCost: 4,
+            cost: 4,
+            handCostReduction: 2,
+            dynamicCost: null,
+        });
+        const player = createGamePlayer(1, { hand: [card] });
+        const opponent = createGamePlayer(2);
+
+        refreshHandDynamicCosts(player, opponent);
+
+        assert.equal(card.cost, 2);
+    });
 });

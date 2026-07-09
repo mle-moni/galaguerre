@@ -155,6 +155,7 @@ type CardActionSnapshotOverrides = {
     subtype?: "TEMPORARY_CHANGE";
     amount?: number;
     amountScale?: { source: "OPPONENT_MINION_COUNT"; amountPer: number } | null;
+    costReduction?: number;
     target?: TargetSnapshot | null;
     onTargetResult?: CardActionSnapshot["onTargetResult"];
     actionCondition?: CardActionSnapshot["actionCondition"];
@@ -263,6 +264,15 @@ export const createCardActionSnapshot = (
                 type: "MIND_CONTROL",
                 isTargeted: overrides.isTargeted ?? false,
                 target: overrides.target ?? null,
+                actionCondition,
+                onTargetResult,
+            };
+        case "RETURN_TO_HAND":
+            return {
+                type: "RETURN_TO_HAND",
+                isTargeted: overrides.isTargeted ?? true,
+                target: overrides.target ?? null,
+                costReduction: overrides.costReduction ?? 2,
                 actionCondition,
                 onTargetResult,
             };

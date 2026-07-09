@@ -461,3 +461,7 @@ Format compact pour construction de deck par LLM.
 ### #169 Head of Emojis
 - Coût: 8 | Type: MINION | Stats: 6/6 | Rareté: Légendaire | Famille: Développeur
 - Cri de guerre : Découvrez un sort Emoji. Puis, découvrez un autre sort Emoji.
+
+### #170 Git Revert
+- Coût: 0 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
+- Effet : Renvoie un monstre allié dans votre main. Son coût est réduit de (2) cristaux.

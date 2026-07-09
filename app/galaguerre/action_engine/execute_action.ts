@@ -27,6 +27,7 @@ import {
     canMindControlTarget,
     canMindControlWithBoardSpace,
 } from "./apply_mind_control.js";
+import { applyReturnToHand } from "./apply_return_to_hand.js";
 import { evaluateActionCondition } from "./evaluate_action_condition.js";
 import {
     shouldTriggerOnTargetResult,
@@ -168,6 +169,14 @@ const applyEffectToResolvedTarget = (
             const boardIndex = requireMinionIndex(sourceOwner, resolved.minion);
             if (boardIndex === -1) return { gameEnded: false };
             applyMindControlToMinion(game, player, sourceOwner, boardIndex);
+            return { gameEnded: false };
+        }
+        case "RETURN_TO_HAND": {
+            if (resolved.type !== "MINION") return { gameEnded: false };
+            const owner = resolved.owner;
+            const boardIndex = requireMinionIndex(owner, resolved.minion);
+            if (boardIndex === -1) return { gameEnded: false };
+            applyReturnToHand(game, owner, boardIndex, resolved.minion, action.costReduction);
             return { gameEnded: false };
         }
         case "DECK_CARD": {

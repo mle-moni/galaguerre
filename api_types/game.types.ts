@@ -45,6 +45,7 @@ export interface PlayerCardBase {
     imageUrl: string;
     baseCost: number;
     cost: number;
+    handCostReduction?: number;
     dynamicCost: DynamicCostSnapshot | null;
     tags: CardTag[];
     labelTags: CardLabelTag[];

@@ -5,6 +5,7 @@ import type {
     MinionState,
     PlayerCard,
 } from "./game.types.js";
+import { getPrintedCardCost } from "./printed_card_cost.js";
 
 export type { ComparableStats };
 
@@ -44,8 +45,13 @@ export const matchesComparison = (
     return true;
 };
 
+const getPrintedMinionCost = (card: PlayerCard): number => {
+    const fallback = card.baseCost ?? card.cost;
+    return card.type === "MINION" ? getPrintedCardCost(card.cardId, fallback) : fallback;
+};
+
 export const getBoardMinionStats = (minion: MinionState): ComparableStats => ({
-    cost: minion.originalCard.baseCost ?? minion.originalCard.cost,
+    cost: getPrintedMinionCost(minion.originalCard),
     attack: minion.attack,
     health: minion.health,
 });

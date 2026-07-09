@@ -82,6 +82,11 @@ export const remapEffectForUser = (
                 fromOwner: remapSpotOwnerForUser(effect.fromOwner, forUserId, playerOneUserId),
                 toOwner: remapSpotOwnerForUser(effect.toOwner, forUserId, playerOneUserId),
             };
+        case "RETURN_TO_HAND":
+            return {
+                ...effect,
+                owner: remapSpotOwnerForUser(effect.owner, forUserId, playerOneUserId),
+            };
         case "TURN_BANNER": {
             const remappedOwner = remapSpotOwnerForUser(effect.owner, forUserId, playerOneUserId);
             return {

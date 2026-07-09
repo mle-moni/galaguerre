@@ -155,6 +155,12 @@ const mindControlActionFieldsSchema = z.object({
     ...targetedActionBaseFields,
 });
 
+const returnToHandActionFieldsSchema = z.object({
+    type: z.literal("RETURN_TO_HAND"),
+    ...targetedActionBaseFields,
+    costReduction: z.number().int().nonnegative(),
+});
+
 const summonActionFieldsSchema = z.object({
     type: z.literal("SUMMON"),
     isTargeted: z.literal(false).default(false),
@@ -224,6 +230,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     breakWeaponActionFieldsSchema,
     reconversionActionFieldsSchema,
     mindControlActionFieldsSchema,
+    returnToHandActionFieldsSchema,
     summonActionFieldsSchema,
     deckCardActionFieldsSchema,
     handCardActionFieldsSchema,
@@ -270,6 +277,7 @@ export const cardActionSchema = z
         breakWeaponActionFieldsSchema.extend(cardActionOnTargetResultField),
         reconversionActionFieldsSchema.extend(cardActionOnTargetResultField),
         mindControlActionFieldsSchema.extend(cardActionOnTargetResultField),
+        returnToHandActionFieldsSchema.extend(cardActionOnTargetResultField),
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),
         deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         handCardActionFieldsSchema.extend(cardActionOnTargetResultField),

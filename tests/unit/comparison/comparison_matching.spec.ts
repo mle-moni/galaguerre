@@ -122,6 +122,25 @@ test.group("comparison_matching", () => {
         });
     });
 
+    test("getBoardMinionStats uses catalog cost over git revert reduced base cost", ({
+        assert,
+    }) => {
+        const card = createMinionCard({
+            cardId: 67,
+            baseCost: 2,
+            cost: 2,
+            attack: 3,
+            health: 4,
+        });
+        const minion = createMinionState(card);
+
+        assert.deepEqual(getBoardMinionStats(minion), {
+            cost: 4,
+            attack: 3,
+            health: 4,
+        });
+    });
+
     test("getDeckCardStats uses printed minion stats", ({ assert }) => {
         const card = createMinionCard({ cost: 3, attack: 2, health: 4 });
 

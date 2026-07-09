@@ -79,6 +79,12 @@ export type NarrativeEffect =
           toOwner: SpotOwner;
           boardIndex: number;
       }
+    | {
+          type: "RETURN_TO_HAND";
+          owner: SpotOwner;
+          card: PlayerCard;
+          fromBoardIndex: number;
+      }
     | { type: "BREAK_WEAPON"; cardUuid: string; owner: SpotOwner }
     | { type: "TURN_BANNER"; owner: SpotOwner; label: string }
     | { type: "DRAW"; owner: SpotOwner; cardUuid?: string }

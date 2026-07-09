@@ -204,6 +204,12 @@ export const effectsToShots = (
                 shots.push({ type: "CARD_FLIGHT", card, from, to });
                 break;
             }
+            case "RETURN_TO_HAND": {
+                const from = resolveBoardSlotRect(effect.owner, effect.fromBoardIndex, snapshot);
+                const to = resolveHandRect(effect.owner, snapshot);
+                shots.push({ type: "CARD_FLIGHT", card: effect.card, from, to });
+                break;
+            }
             case "BREAK_WEAPON": {
                 const at = resolveHeroRect(effect.owner, snapshot);
                 shots.push({ type: "DEATH", at });

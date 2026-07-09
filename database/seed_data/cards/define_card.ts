@@ -231,6 +231,19 @@ export const mindControlAction = (
     onTargetResult: null,
 });
 
+export const returnToHandAction = (
+    costReduction: number,
+    target: TargetDefinition = targetedAllyMinion(),
+    isTargeted = true,
+): CardActionDefinition => ({
+    type: "RETURN_TO_HAND",
+    target,
+    isTargeted,
+    costReduction,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const reconvertParameters = (
     overrides: Partial<ReconvertParametersDefinition> = {},
 ): ReconvertParametersDefinition => ({

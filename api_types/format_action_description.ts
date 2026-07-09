@@ -975,6 +975,18 @@ export const formatActionDescription = (
 
             return `${prefix} : ${conditionPrefix}prend le contrôle d'un monstre adverse.`;
         }
+        case "RETURN_TO_HAND": {
+            const costLabel =
+                action.costReduction === 1 ? "(1) cristal" : `(${action.costReduction}) cristaux`;
+
+            if (action.isTargeted && action.target?.type === "MINION") {
+                const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
+                const teamPart = teamLabel ? ` ${teamLabel}` : "";
+                return `${prefix} : Renvoie un monstre${teamPart} dans votre main. Son coût est réduit de ${costLabel}.`;
+            }
+
+            return `${prefix} : Renvoie un monstre allié dans votre main. Son coût est réduit de ${costLabel}.`;
+        }
         case "SUMMON": {
             const count = action.summonCount ?? 1;
             const targetLabel = formatReconvertTargetLabel(action.summonParameters);

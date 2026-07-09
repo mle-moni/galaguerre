@@ -826,6 +826,43 @@ test.group("RECONVERSION summoning sickness", () => {
         assertBoardIndex(assert, gameAfterReconversion, "playerTwo", 0, { health: 1 });
     });
 
+    test("levée de fonds uses catalog cost after git revert cost reduction", ({ assert }) => {
+        const printedCost = 4;
+        const reducedCost = 2;
+        const expectedCost = printedCost + 2;
+        const expectedCardIds = getCollectibleMinionCardTemplates()
+            .filter((template) => template.cost === expectedCost)
+            .map((template) => template.cardId);
+
+        assert.isAbove(expectedCardIds.length, 0);
+
+        const allyMinion = createMinionCard({
+            uuid: "git-reverted-ally",
+            cardId: 67,
+            baseCost: reducedCost,
+            cost: reducedCost,
+            attack: 3,
+            health: 4,
+        });
+        const spell = createLeveeDeFondsSpell();
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [spell],
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(allyMinion)),
+                },
+            }),
+            spell,
+            { actionTarget: { minionUuid: "git-reverted-ally", owner: "PLAYER" } },
+        );
+
+        const reconverted = game.data.playerOne.board[0]!.originalCard;
+        assert.include(expectedCardIds, reconverted.cardId);
+        assert.equal(reconverted.cost, expectedCost);
+    });
+
     test("levée de fonds reconversion sets placedAtRound on ally", ({ assert }) => {
         const allyMinion = createMinionCard({ uuid: "funded-ally", attack: 3, health: 3, cost: 1 });
         const spell = createLeveeDeFondsSpell();

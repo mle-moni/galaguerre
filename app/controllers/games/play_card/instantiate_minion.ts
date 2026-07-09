@@ -1,4 +1,5 @@
 import type { MinionCard, MinionState } from "#api_types/game.types";
+import { clearHandCostReduction } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import {
     getMinionPowerEffects,
     normalizeMinionPowers,
@@ -6,6 +7,7 @@ import {
 
 export const instantiateMinion = (card: MinionCard, roundNumber: number): MinionState => {
     const minionPowers = normalizeMinionPowers(card.minionPowers);
+    const boardCard = clearHandCostReduction({ ...card });
 
     return {
         uuid: card.uuid,
@@ -33,7 +35,7 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
             hasDivineShield: false,
         },
         originalCard: {
-            ...card,
+            ...boardCard,
             minionPowers,
             effects: getMinionPowerEffects(minionPowers),
         },

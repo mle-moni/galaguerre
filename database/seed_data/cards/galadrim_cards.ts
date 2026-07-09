@@ -54,6 +54,7 @@ import {
     reconversionAction,
     reconvertParameters,
     relativeCostReconversion,
+    returnToHandAction,
     selfMinion,
     silenceAction,
     summonCardId,
@@ -1163,6 +1164,14 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [mindControlAction(targetedEnemyMinion(), true)],
         [],
         { rarity: "EPIC" },
+    ),
+    defineSpell(
+        170,
+        {
+            ...gal("Git Revert", 0),
+            imageUrl: "/card-covers/galadrim/git-revert.webp",
+        },
+        [returnToHandAction(2, targetedAllyMinion(), true)],
     ),
     defineMinion(
         129,

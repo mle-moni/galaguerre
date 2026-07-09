@@ -90,6 +90,7 @@ const TARGETED_ACTION_TYPES = [
     "BREAK_WEAPON",
     "RECONVERSION",
     "MIND_CONTROL",
+    "RETURN_TO_HAND",
     "DECK_CARD",
 ] as const;
 
@@ -367,6 +368,20 @@ const validateMindControlTarget = (
         ctx.addIssue({
             code: "custom",
             message: "MIND_CONTROL target must be MINION or ALL",
+            path: [...path, "type"],
+        });
+    }
+};
+
+const validateReturnToHandTarget = (
+    target: TargetDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (target.type !== "MINION") {
+        ctx.addIssue({
+            code: "custom",
+            message: "RETURN_TO_HAND target must be MINION",
             path: [...path, "type"],
         });
     }
@@ -696,6 +711,16 @@ const validateTargetedAction = (
         case "MIND_CONTROL":
             validateMindControlTarget(action.target, ctx, [...path, "target"]);
             break;
+        case "RETURN_TO_HAND":
+            validateReturnToHandTarget(action.target, ctx, [...path, "target"]);
+            if (action.costReduction < 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "RETURN_TO_HAND action requires costReduction >= 0",
+                    path: [...path, "costReduction"],
+                });
+            }
+            break;
         case "DECK_CARD":
             validateDeckCardPayload(action, ctx, path);
             validateDeckCardTarget(action.target, ctx, [...path, "target"]);
@@ -870,6 +895,34 @@ const validateNonTargetedAction = (
             }
             validateMindControlTarget(action.target, ctx, [...path, "target"]);
             validateTargetFilters(action.target, false, ctx, [...path, "target"]);
+            break;
+        }
+        case "RETURN_TO_HAND": {
+            if (!action.isTargeted) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "RETURN_TO_HAND action must be targeted",
+                    path: [...path, "isTargeted"],
+                });
+                return;
+            }
+            if (!action.target) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "RETURN_TO_HAND action requires a MINION target",
+                    path: [...path, "target"],
+                });
+                return;
+            }
+            validateReturnToHandTarget(action.target, ctx, [...path, "target"]);
+            validateTargetFilters(action.target, false, ctx, [...path, "target"]);
+            if (action.costReduction < 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "RETURN_TO_HAND action requires costReduction >= 0",
+                    path: [...path, "costReduction"],
+                });
+            }
             break;
         }
         case "SUMMON": {

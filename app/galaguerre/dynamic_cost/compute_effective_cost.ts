@@ -37,13 +37,19 @@ export const computeEffectiveCost = (
     owner: GamePlayer,
     opponent: GamePlayer,
 ): number => {
-    const reduction = computeReduction(card, owner, opponent);
-    return Math.max(0, card.baseCost - reduction);
+    const dynamicReduction = computeReduction(card, owner, opponent);
+    const handReduction = card.handCostReduction ?? 0;
+    return Math.max(0, card.baseCost - dynamicReduction - handReduction);
+};
+
+export const clearHandCostReduction = <T extends PlayerCard>(card: T): T => {
+    delete card.handCostReduction;
+    return card;
 };
 
 export const refreshHandDynamicCosts = (player: GamePlayer, opponent: GamePlayer): void => {
     for (const card of player.hand) {
-        if (card.dynamicCost) {
+        if (card.dynamicCost || (card.handCostReduction ?? 0) > 0) {
             card.cost = computeEffectiveCost(card, player, opponent);
         }
     }

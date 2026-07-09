@@ -508,6 +508,20 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats RETURN_TO_HAND targeted ally minion", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "RETURN_TO_HAND",
+            isTargeted: true,
+            costReduction: 2,
+            target: createMinionTargetSnapshot("PLAYER"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Git Revert"),
+            "Git Revert : Renvoie un monstre allié dans votre main. Son coût est réduit de (2) cristaux.",
+        );
+    });
+
     test("formats HAND_CARD ADD to opponent hand", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "HAND_CARD",
