@@ -139,7 +139,7 @@ export const setupEvents = (socket: Socket) => {
     subscribeToSocketEvent("game:update", ({ game, presentation }) => {
         GAME_STORE.receiveUpdate(game, presentation);
 
-        queryClient.setQueryData<ApiGame>(getGameStateQueryKey(game.id), (old) => {
+        queryClient.setQueriesData<ApiGame>({ queryKey: ["gameState", game.id] }, (old) => {
             if (!old) return game;
             if (new Date(game.updatedAt).getTime() < new Date(old.updatedAt).getTime()) {
                 return old;

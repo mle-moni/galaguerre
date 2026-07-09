@@ -3,9 +3,12 @@ import "../play/game_layout.css";
 
 import { Alert } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
+import clsx from "clsx";
 import { useEffect } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { AppLayoutFrame } from "~/components/layout/app_layout";
+import { useBoardMinionVariant } from "~/hooks/use_board_minion_variant";
+import { useSpectateWatch } from "~/hooks/use_spectate_watch";
 import { Game } from "~/pages/play/play_page";
 import { useUser } from "~/hooks/use_user";
 
@@ -13,6 +16,7 @@ const SPECTATE_REFETCH_INTERVAL_MS = 2000;
 
 export const SpectatePage = () => {
     const user = useUser();
+    const boardMinionVariant = useBoardMinionVariant();
     const { gameId: gameIdParam } = useParams();
     const [searchParams] = useSearchParams();
     const gameId = Number(gameIdParam);
@@ -24,6 +28,10 @@ export const SpectatePage = () => {
             document.documentElement.classList.remove("play-page-active");
         };
     }, []);
+
+    const canWatch =
+        Number.isFinite(gameId) && gameId > 0 && Number.isFinite(asUserId) && asUserId > 0;
+    useSpectateWatch(gameId, asUserId, canWatch);
 
     if (!user) return <Navigate to="/login" />;
 
@@ -52,7 +60,12 @@ export const SpectatePage = () => {
     }
 
     return (
-        <div className="play-page">
+        <div
+            className={clsx(
+                "play-page",
+                boardMinionVariant === "rect" && "board-minion-variant--rect",
+            )}
+        >
             <div className="absolute left-3 top-3 z-50 rounded bg-gg-navy px-3 py-2 text-white shadow-md">
                 <span className="inline-flex items-center gap-2 text-sm font-semibold">
                     <IconEye size={16} />

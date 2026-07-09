@@ -16,6 +16,8 @@ export interface SocketEventByKey {
 export type SocketEventKey = keyof SocketEventByKey;
 
 export interface ClientSocketEventByKey {
+    "game:watch": { gameId: number; asUserId: number };
+    "game:unwatch": Record<string, never>;
     "game:play_card": {
         cardId: string;
         boardIndex: number | null;

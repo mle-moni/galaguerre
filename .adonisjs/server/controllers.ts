@@ -102,6 +102,9 @@ export const controllers = {
         SendGameUpdate: () => import("#controllers/games/send_game_update"),
         SetupNextGameTurn: () => import("#controllers/games/setup_next_game_turn"),
         ShowGame: () => import("#controllers/games/show_game"),
+        spectator: {
+            GameWatch: () => import("#controllers/games/spectator/game_watch"),
+        },
         TerminateGame: () => import("#controllers/games/terminate_game"),
         weaponAction: {
             GameWeaponAction: () => import("#controllers/games/weapon_action/game_weapon_action"),

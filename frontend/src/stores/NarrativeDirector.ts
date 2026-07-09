@@ -74,7 +74,7 @@ export class NarrativeDirector {
     }
 
     async playGameEndExplosions(game: ApiGame): Promise<void> {
-        const deadOwners = getDeadHeroOwners(game, this.gameStore.user.id);
+        const deadOwners = getDeadHeroOwners(game, this.gameStore.me.userId);
         if (deadOwners.length === 0) return;
 
         const managesNarrative = !this.isPlaying;

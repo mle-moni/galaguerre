@@ -4,6 +4,7 @@ import { abandonGame } from "#controllers/games/abandon_game";
 import { gameMulligan } from "#controllers/games/mulligan/game_mulligan";
 import { gameDiscoverChoice } from "#controllers/games/discover/game_discover_choice";
 import { gameMinionAction } from "#controllers/games/minion_action/game_minion_action";
+import { gameUnwatch, gameWatch } from "#controllers/games/spectator/game_watch";
 import { gameWeaponAction } from "#controllers/games/weapon_action/game_weapon_action";
 import { passGameTurn } from "#controllers/games/pass_game_turn";
 import { gamePlayCard } from "#controllers/games/play_card/game_play_card";
@@ -81,6 +82,23 @@ export const joinAuthRestrictedEvents = (socket: Socket) => {
             cardUuid: vine.string(),
         }),
     );
+
+    subscribeToClientSocketEvent(
+        socket,
+        "game:watch",
+        (data) => gameWatch(socket.id, data),
+        vine.create({
+            gameId: vine.number().withoutDecimals().positive(),
+            asUserId: vine.number().withoutDecimals().positive(),
+        }),
+    );
+
+    subscribeToClientSocketEvent(
+        socket,
+        "game:unwatch",
+        () => gameUnwatch(socket.id),
+        vine.create({}),
+    );
 };
 
 export const partAuthRestrictedEvents = (socket: Socket) => {
@@ -92,4 +110,6 @@ export const partAuthRestrictedEvents = (socket: Socket) => {
     socket.removeAllListeners("game:abandon");
     socket.removeAllListeners("game:mulligan");
     socket.removeAllListeners("game:discover_choice");
+    socket.removeAllListeners("game:watch");
+    socket.removeAllListeners("game:unwatch");
 };
