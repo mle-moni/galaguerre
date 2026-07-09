@@ -330,4 +330,14 @@ export const CARD_RECAPS: CardRecapData[] = [
         nerfs: [],
         imageUrl: "/card-covers/galadrim/head-of-emojis.webp",
     },
+    {
+        date: "2026-07-09",
+        slug: "recap-2026-07-09",
+        publishedAt: "2026-07-09T18:00:00+02:00",
+        untilCommitHash: "f734f8903399527729a0dc3578f34e5d313cb819",
+        newCardIds: [170, 171],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/git-revert.webp",
+    },
 ];
