@@ -10,7 +10,7 @@ import {
     grantPackCardCopyForUser,
     grantStarterCollectionForUser,
 } from "#services/collection/grant_starter_collection_for_user";
-import { openCardPack } from "#services/collection/open_card_pack";
+import { NoUnopenedPackError, openCardPack } from "#services/collection/open_card_pack";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 
@@ -105,6 +105,44 @@ test.group("open card pack", (group) => {
             .firstOrFail();
 
         assert.equal(owned.count, 1);
+    });
+
+    test("only opens one pack when called concurrently with a single pack", async ({ assert }) => {
+        await syncCards();
+
+        const user = await User.create({
+            email: "pack-concurrent@test.fr",
+            pseudo: "pack-concurrent",
+            password: "test",
+        });
+
+        await grantStarterCollectionForUser(user.id);
+        await CardPack.create({ userId: user.id });
+
+        const ownedBefore = (await UserCard.query().where("userId", user.id)).reduce(
+            (sum, row) => sum + row.count,
+            0,
+        );
+
+        const results = await Promise.allSettled([openCardPack(user.id), openCardPack(user.id)]);
+
+        const fulfilled = results.filter((result) => result.status === "fulfilled");
+        const rejected = results.filter((result) => result.status === "rejected");
+
+        assert.lengthOf(fulfilled, 1);
+        assert.lengthOf(rejected, 1);
+        assert.instanceOf((rejected[0] as PromiseRejectedResult).reason, NoUnopenedPackError);
+
+        const ownedAfter = (await UserCard.query().where("userId", user.id)).reduce(
+            (sum, row) => sum + row.count,
+            0,
+        );
+        assert.equal(ownedAfter, ownedBefore + PACK_SIZE);
+
+        const openedPacks = await CardPack.query()
+            .where("userId", user.id)
+            .whereNotNull("openedAt");
+        assert.lengthOf(openedPacks, 1);
     });
 
     test("throws when user has no unopened pack", async ({ assert }) => {

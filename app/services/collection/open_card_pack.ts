@@ -29,6 +29,7 @@ export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> =>
             .where("userId", userId)
             .whereNull("openedAt")
             .orderBy("createdAt", "asc")
+            .forUpdate()
             .first();
 
         if (!pack) {
