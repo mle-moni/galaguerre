@@ -2,6 +2,7 @@ export interface HomeOnlineFriend {
     userId: number;
     pseudo: string | null;
     status: "online" | "in_game";
+    currentGameId: number | null;
     level: number;
     levelTitle: string;
 }

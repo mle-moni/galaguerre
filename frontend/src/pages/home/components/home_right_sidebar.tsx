@@ -1,6 +1,8 @@
 import type { ApiFriend, ApiFriendRequest } from "#api_types/friend.types";
 import type { ApiGameInvite } from "#api_types/game_invite.types";
-import { Link } from "react-router-dom";
+import { ActionIcon, Tooltip } from "@mantine/core";
+import { IconEye } from "@tabler/icons-react";
+import { Link, useNavigate } from "react-router-dom";
 import { UserAvatar } from "~/components/user_avatar";
 import { GameInviteButton } from "~/components/friends/game_invite_button";
 import {
@@ -18,6 +20,7 @@ const toOnlineFriend = (friend: ApiFriend): HomeOnlineFriend => ({
     userId: friend.userId,
     pseudo: friend.pseudo,
     status: friend.currentGameId !== null ? "in_game" : "online",
+    currentGameId: friend.currentGameId,
     level: friend.level,
     levelTitle: friend.levelTitle,
 });
@@ -28,40 +31,61 @@ const compareOnlineFriends = (left: ApiFriend, right: ApiFriend) => {
     return leftInGame - rightInGame;
 };
 
-const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => (
-    <div className="home-friend">
-        <div className="home-friend__avatar-wrap">
-            <UserAvatar
-                pseudo={friend.pseudo}
-                userId={friend.userId}
-                className="home-friend__avatar"
-            />
+const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => {
+    const navigate = useNavigate();
+
+    return (
+        <div className="home-friend">
+            <div className="home-friend__avatar-wrap">
+                <UserAvatar
+                    pseudo={friend.pseudo}
+                    userId={friend.userId}
+                    className="home-friend__avatar"
+                />
+                <span
+                    className={`home-friend__status home-friend__status--${friend.status === "in_game" ? "in_game" : "online"}`}
+                />
+            </div>
+            <div className="home-friend__info">
+                <span className="home-friend__name">
+                    {friend.pseudo ?? `Joueur #${friend.userId}`}
+                </span>
+                <span className="home-friend__level">
+                    Niv. {friend.level} · {friend.levelTitle}
+                </span>
+            </div>
             <span
-                className={`home-friend__status home-friend__status--${friend.status === "in_game" ? "in_game" : "online"}`}
-            />
-        </div>
-        <div className="home-friend__info">
-            <span className="home-friend__name">{friend.pseudo ?? `Joueur #${friend.userId}`}</span>
-            <span className="home-friend__level">
-                Niv. {friend.level} · {friend.levelTitle}
+                className={`home-friend__status-label${friend.status === "in_game" ? " home-friend__status-label--in_game" : ""}`}
+            >
+                {friend.status === "in_game" ? "En jeu" : "En ligne"}
             </span>
+            {friend.currentGameId !== null && (
+                <Tooltip label="Regarder la partie" withArrow>
+                    <ActionIcon
+                        aria-label="Regarder la partie"
+                        color="navy"
+                        onClick={() =>
+                            navigate(`/spectate/${friend.currentGameId}?asUserId=${friend.userId}`)
+                        }
+                        size="sm"
+                        variant="filled"
+                    >
+                        <IconEye size={16} />
+                    </ActionIcon>
+                </Tooltip>
+            )}
+            {friend.status === "online" && (
+                <GameInviteButton
+                    friend={{
+                        userId: friend.userId,
+                        isOnline: true,
+                        currentGameId: null,
+                    }}
+                />
+            )}
         </div>
-        <span
-            className={`home-friend__status-label${friend.status === "in_game" ? " home-friend__status-label--in_game" : ""}`}
-        >
-            {friend.status === "in_game" ? "En jeu" : "En ligne"}
-        </span>
-        {friend.status === "online" && (
-            <GameInviteButton
-                friend={{
-                    userId: friend.userId,
-                    isOnline: true,
-                    currentGameId: null,
-                }}
-            />
-        )}
-    </div>
-);
+    );
+};
 
 const FriendRequestRow = ({ request }: { request: ApiFriendRequest }) => {
     const acceptMutation = useAcceptFriendRequestMutation();
