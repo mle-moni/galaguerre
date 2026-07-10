@@ -211,7 +211,7 @@ export class NarrativeDirector {
                 const cardReveal = extractCardRevealFromBeat(
                     beat,
                     authoritativeGame,
-                    this.gameStore.user.id,
+                    this.gameStore.me.userId,
                 );
                 if (cardReveal && (revealStateFirst || beat.kind === "OVERDRAW")) {
                     this.gameStore.playedCardRevealStore.reveal(

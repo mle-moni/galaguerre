@@ -62,12 +62,7 @@ export const Game = ({
     return (
         <OnboardingGameProvider value={isOnboardingGame}>
             <GameStateContext.Provider value={gameQuery.data}>
-                <div
-                    className={clsx(
-                        "h-full",
-                        !spectating && !isSocketReady && "play-page--offline",
-                    )}
-                >
+                <div className={clsx("h-full", !isSocketReady && "play-page--offline")}>
                     <GameRenderer game={gameQuery.data} user={user} spectating={spectating} />
                 </div>
             </GameStateContext.Provider>

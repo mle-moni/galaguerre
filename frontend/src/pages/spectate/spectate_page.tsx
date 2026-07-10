@@ -6,13 +6,12 @@ import { IconEye } from "@tabler/icons-react";
 import clsx from "clsx";
 import { useEffect } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { ConnectionBanner } from "~/components/connection_banner";
 import { AppLayoutFrame } from "~/components/layout/app_layout";
 import { useBoardMinionVariant } from "~/hooks/use_board_minion_variant";
 import { useSpectateWatch } from "~/hooks/use_spectate_watch";
 import { Game } from "~/pages/play/play_page";
 import { useUser } from "~/hooks/use_user";
-
-const SPECTATE_REFETCH_INTERVAL_MS = 2000;
 
 export const SpectatePage = () => {
     const user = useUser();
@@ -66,19 +65,14 @@ export const SpectatePage = () => {
                 boardMinionVariant === "rect" && "board-minion-variant--rect",
             )}
         >
+            <ConnectionBanner />
             <div className="absolute left-3 top-3 z-50 rounded bg-gg-navy px-3 py-2 text-white shadow-md">
                 <span className="inline-flex items-center gap-2 text-sm font-semibold">
                     <IconEye size={16} />
                     Spectateur
                 </span>
             </div>
-            <Game
-                user={user}
-                gameId={gameId}
-                spectating
-                spectatingAsUserId={asUserId}
-                refetchInterval={SPECTATE_REFETCH_INTERVAL_MS}
-            />
+            <Game user={user} gameId={gameId} spectating spectatingAsUserId={asUserId} />
         </div>
     );
 };

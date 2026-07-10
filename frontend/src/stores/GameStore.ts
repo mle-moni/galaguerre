@@ -276,6 +276,12 @@ export class GameStore {
             return;
         }
 
+        if (this._isSpectating && isSocketReady()) {
+            this._authoritativeGame = game;
+            this.syncDiscoverOverlayState(game);
+            return;
+        }
+
         this.receiveUpdate(game);
     }
 
