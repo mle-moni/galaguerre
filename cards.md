@@ -36,7 +36,7 @@ Format compact pour construction de deck par LLM.
 
 ### #62 Stagiaire Dev
 - Coût: 1 | Type: MINION | Stats: 1/1 | Rareté: Commune | Famille: Développeur
-- Dernier souffle : Pioche 1 carte Sort.
+- Dernier souffle : Pioche un sort.
 
 ### #63 Dev Front-End
 - Coût: 2 | Type: MINION | Stats: 2/2 | Rareté: Commune | Famille: Développeur
@@ -44,7 +44,7 @@ Format compact pour construction de deck par LLM.
 
 ### #64 Dev Back-End
 - Coût: 2 | Type: MINION | Stats: 2/3 | Rareté: Commune | Famille: Développeur
-- Dernier souffle : Pioche 1 carte Monstre + 💻 Développeur.
+- Dernier souffle : Pioche un monstre Développeur 💻.
 
 ### #65 Dev Aigri
 - Coût: 3 | Type: MINION | Stats: 1/3 [Provocation] | Rareté: Commune | Famille: Développeur
@@ -72,7 +72,7 @@ Format compact pour construction de deck par LLM.
 
 ### #71 Scrum Master
 - Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Commune | Famille: PM
-- Passif : Donne +1/+1 à vos autres monstres 💻 Développeur.
+- Passif : Donne +1/+1 à vos autres monstres Développeur 💻.
 
 ### #72 PM Stressé
 - Coût: 3 | Type: MINION | Stats: 3/2 | Rareté: Commune | Famille: PM
@@ -124,7 +124,7 @@ Format compact pour construction de deck par LLM.
 
 ### #84 Recruteur RH
 - Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Commune | Famille: Équipe support
-- Cri de guerre : Pioche 1 carte Monstre + coût < 4.
+- Cri de guerre : Pioche un monstre coût < 4.
 
 ### #85 Manager Bienveillant
 - Coût: 4 | Type: MINION | Stats: 2/5 [Provocation] | Rareté: Commune | Famille: Équipe support
@@ -140,7 +140,7 @@ Format compact pour construction de deck par LLM.
 
 ### #88 Bobo Parisien
 - Coût: 3 | Type: MINION | Stats: 2/3 | Rareté: Commune | Famille: Parisien
-- Cri de guerre : Pioche 1 carte Sort.
+- Cri de guerre : Pioche un sort.
 
 ### #89 Nantais Détendu
 - Coût: 3 | Type: MINION | Stats: 3/4 | Rareté: Commune | Famille: Nantais
@@ -155,7 +155,7 @@ Format compact pour construction de deck par LLM.
 
 ### #92 Mascotte du Bureau
 - Coût: 1 | Type: MINION | Stats: 1/1 | Rareté: Commune | Famille: Pets
-- Passif : Donne +1/+1 à vos autres monstres 🐾 Pets.
+- Passif : Donne +1/+1 à vos autres monstres Pets 🐾.
 
 ### #93 Chat sur le Clavier
 - Coût: 2 | Type: MINION | Stats: 1/2 [Provocation] | Rareté: Commune | Famille: Pets
@@ -199,7 +199,7 @@ Format compact pour construction de deck par LLM.
 
 ### #103 Team Building
 - Coût: 3 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
-- Effet : Pioche 2 cartes Monstre.
+- Effet : Pioche 2 monstres.
 
 ### #104 Goodies Galadrim
 - Coût: 1 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
@@ -259,7 +259,7 @@ Format compact pour construction de deck par LLM.
 
 ### #118 Distributeur de Croquettes
 - Coût: 3 | Type: MINION | Stats: 0/4 | Rareté: Commune | Famille: —
-- Passif (monstre 🐾 Pets invoqué) : Pioche 1 carte.
+- Passif (monstre Pets 🐾 invoqué) : Pioche 1 carte.
 
 ### #119 DevOps en Sueur
 - Coût: 2 | Type: MINION | Stats: 3/2 | Rareté: Commune | Famille: —
@@ -289,7 +289,7 @@ Format compact pour construction de deck par LLM.
 
 ### #126 Congrès Tech
 - Coût: 5 | Type: SPELL | Stats: — | Rareté: Rare | Famille: —
-- Effet : Reconvertit tous les monstres en un monstre aléatoire Monstre + coût < 4 💻 Développeur.
+- Effet : Reconvertit tous les monstres en un monstre aléatoire Monstre coût < 4 Développeur 💻.
 
 ### #127 Contrat Freelance
 - Coût: 3 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
@@ -321,7 +321,7 @@ Format compact pour construction de deck par LLM.
 
 ### #134 Licenciement collectif
 - Coût: 8 | Type: SPELL | Stats: — | Rareté: Épique | Famille: —
-- Effet : Détruit à tous les monstres.
+- Effet : Détruit tous les monstres.
 
 ### #135 Optimisation Salariale
 - Coût: 1 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
@@ -397,11 +397,11 @@ Format compact pour construction de deck par LLM.
 
 ### #153 Zoothérapie
 - Coût: 3 | Type: SPELL | Stats: — | Rareté: Rare | Famille: —
-- Effet : Découvrez un monstre 🐾 Pets. Puis, découvrez un autre monstre 🐾 Pets.
+- Effet : Découvrez un monstre Pets 🐾. Puis, découvrez un autre monstre Pets 🐾.
 
 ### #154 Neva
 - Coût: 3 | Type: MINION | Stats: 2/3 | Rareté: Rare | Famille: Pets
-- Cri de guerre : Donne +2 PV à vos autres monstres 🐾 Pets.
+- Cri de guerre : Donne +2 PV à vos autres monstres Pets 🐾.
 
 ### #155 Plume
 - Coût: 1 | Type: MINION | Stats: 1/1 | Rareté: Commune | Famille: Pets | NON-COLLECTIONNABLE
@@ -412,15 +412,15 @@ Format compact pour construction de deck par LLM.
 
 ### #157 Koda
 - Coût: 1 | Type: MINION | Stats: 1/2 | Rareté: Rare | Famille: Pets
-- Passif (monstre 🐾 Pets invoqué) : Donne +1 attaque à lui-même.
+- Passif (monstre Pets 🐾 invoqué) : Donne +1 attaque à lui-même.
 
 ### #158 Aloy
 - Coût: 3 | Type: MINION | Stats: 3/3 | Rareté: Épique | Famille: Pets
-- Passif : Donne +2/+1 à vos autres monstres 🐾 Pets.
+- Passif : Donne +2/+1 à vos autres monstres Pets 🐾.
 
 ### #159 OG Sully
 - Coût: 4 | Type: MINION | Stats: 2/4 [Charge] | Rareté: Légendaire | Famille: Pets
-- Charge : Peut attaquer dès le tour où il est joué. Passif : Gagne +1 attaque pour chaque autre monstre 🐾 Pets sur le plateau.
+- Charge : Peut attaquer dès le tour où il est joué. Passif : Gagne +1 attaque pour chaque autre monstre Pets 🐾 sur le plateau.
 
 ### #160 Stagiaire de l'X
 - Coût: 1 | Type: MINION | Stats: 2/1 [Charge] | Rareté: Commune | Famille: —
@@ -432,7 +432,7 @@ Format compact pour construction de deck par LLM.
 
 ### #162 Princesse
 - Coût: 2 | Type: MINION | Stats: 1/1 [Provocation] | Rareté: Légendaire | Famille: Pets
-- Provocation. Dernier souffle : Donne +2 attaque, Immunité à un monstre allié aléatoire 🐾 Pets.
+- Provocation. Dernier souffle : Donne +2 attaque, Immunité à un monstre allié aléatoire Pets 🐾.
 
 ### #163 Copier-Coller
 - Coût: 2 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
@@ -444,7 +444,7 @@ Format compact pour construction de deck par LLM.
 
 ### #165 :sadge:
 - Coût: 2 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
-- Emoji. Effet : Réduit au silence à tous les monstres.
+- Emoji. Effet : Réduit au silence tous les monstres.
 
 ### #166 :madge:
 - Coût: 3 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
@@ -488,7 +488,7 @@ Format compact pour construction de deck par LLM.
 
 ### #176 Molly
 - Coût: 7 | Type: MINION | Stats: 4/6 | Rareté: Légendaire | Famille: Développeur, Pets
-- Passif : Donne +1 dégâts de sort au héros allié. Cri de guerre : Ajoute 1 copie de Jet de Ducros à votre main. Dernier souffle : Pioche 1 carte Monstre + 💻 Développeur OU Carte + 🐾 Pets.
+- Passif : Donne +1 dégâts de sort au héros allié. Cri de guerre : Ajoute 1 copie de Jet de Ducros à votre main. Dernier souffle : Pioche un monstre Développeur 💻 OU un monstre Pets 🐾.
 
 ### #177 Jean
 - Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur, Sales

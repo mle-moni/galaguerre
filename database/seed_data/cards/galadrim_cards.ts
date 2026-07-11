@@ -275,10 +275,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             passives: [boostPassive(boostSpellPower(1), allyHero())],
             battlecryActions: [handCardAddAction(120)],
             deathrattleActions: [
-                drawOrAction(1, [
-                    minionDrawFilter(["DEVELOPPEUR"]),
-                    cardDrawFilter(null, ["PETS"]),
-                ]),
+                drawOrAction(1, [minionDrawFilter(["DEVELOPPEUR"]), minionDrawFilter(["PETS"])]),
             ],
         },
         { rarity: "LEGENDARY" },

@@ -11,7 +11,7 @@ import type {
 } from "./game.types.js";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 import { CARD_RARITY_LABELS } from "./card_rarity.types.js";
-import { CARD_LABEL_TAG_LABELS, CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
+import { CARD_LABEL_TAG_LABELS, formatTagChip } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
 import { hasActionTarget } from "./action_fields_utils.js";
 import { hasRandomLimitedTarget } from "./target_matching.js";
@@ -23,6 +23,16 @@ const CARD_TYPE_LABELS: Record<CardFilterSnapshot["type"], string> = {
     ANY: "Carte",
 };
 
+const CARD_TYPE_DRAW_LABELS: Record<
+    CardFilterSnapshot["type"],
+    { singular: string; plural: string; article: string }
+> = {
+    MINION: { singular: "monstre", plural: "monstres", article: "un" },
+    SPELL: { singular: "sort", plural: "sorts", article: "un" },
+    WEAPON: { singular: "arme", plural: "armes", article: "une" },
+    ANY: { singular: "carte", plural: "cartes", article: "une" },
+};
+
 const formatDiscoverCardLabel = (
     filter: CardFilterSnapshot,
 ): { article: string; label: string } => {
@@ -30,12 +40,6 @@ const formatDiscoverCardLabel = (
         return { article: "une", label: "carte" };
     }
     return { article: "un", label: CARD_TYPE_LABELS[filter.type].toLowerCase() };
-};
-
-const formatTagChip = (tag: CardTag): string => {
-    const meta = CARD_TAG_LABELS[tag];
-    const prefix = isCardTagImageSymbol(meta.symbol) ? "" : `${meta.symbol} `;
-    return `${prefix}${meta.label}`;
 };
 
 const formatTagList = (tags: CardTag[]): string => tags.map(formatTagChip).join(", ");
@@ -113,7 +117,7 @@ const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
     }
 
     if (parts.length === 0) return "";
-    return ` ${parts.join(" + ")}`;
+    return ` ${parts.join(" ")}`;
 };
 
 const BATTLECRY_TRIGGER_COUNT_LABELS: Record<number, string> = {
@@ -299,7 +303,106 @@ const formatDiscoverExtraFilterSuffix = (filter: CardFilterSnapshot): string => 
         parts.push(formatRarityFilterLabel(filter.rarity));
     }
 
-    return parts.length > 0 ? ` ${parts.join(" + ")}` : "";
+    return parts.length > 0 ? ` ${parts.join(" ")}` : "";
+};
+
+const hasCardFilterConstraints = (filter: CardFilterSnapshot | null): boolean => {
+    if (!filter) return false;
+
+    return (
+        filter.type !== "ANY" ||
+        filter.comparison !== null ||
+        filter.tags.length > 0 ||
+        filter.labelTags.length > 0 ||
+        filter.rarity !== null
+    );
+};
+
+const hasDrawFilter = (
+    filter: CardFilterSnapshot | null,
+    alternatives: CardFilterSnapshot[],
+): boolean => alternatives.length > 0 || hasCardFilterConstraints(filter);
+
+const formatCardFilterQualifiers = (filter: CardFilterSnapshot): string => {
+    const parts: string[] = [];
+    const comparison = filter.comparison;
+
+    if (comparison?.attackComparison && comparison.attack !== null) {
+        parts.push(formatAttackComparisonLabel(comparison.attackComparison, comparison.attack));
+    }
+    if (comparison?.healthComparison && comparison.health !== null) {
+        parts.push(`pv ${comparison.healthComparison} ${comparison.health}`);
+    }
+    if (comparison?.costComparison && comparison.cost !== null) {
+        parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
+    }
+    if (filter.tags.length > 0) {
+        parts.push(formatTagList(filter.tags));
+    }
+    if (filter.labelTags.length > 0) {
+        parts.push(formatLabelTagList(filter.labelTags));
+    }
+    if (filter.rarity !== null) {
+        parts.push(formatRarityFilterLabel(filter.rarity));
+    }
+
+    return parts.join(" ");
+};
+
+const formatDrawTargetPhrase = (filter: CardFilterSnapshot, drawCount: number): string => {
+    const typeInfo = CARD_TYPE_DRAW_LABELS[filter.type];
+    const qualifiers = formatCardFilterQualifiers(filter);
+
+    if (drawCount === 1) {
+        const base = `${typeInfo.article} ${typeInfo.singular}`;
+        return qualifiers.length > 0 ? `${base} ${qualifiers}` : base;
+    }
+
+    const base = `${drawCount} ${typeInfo.plural}`;
+    return qualifiers.length > 0 ? `${base} ${qualifiers}` : base;
+};
+
+const formatDrawDescription = (
+    drawCount: number,
+    filter: CardFilterSnapshot | null,
+    alternatives: CardFilterSnapshot[],
+    capitalizeFirst = true,
+): string => {
+    const verb = capitalizeFirst ? "Pioche" : "pioche";
+
+    if (!hasDrawFilter(filter, alternatives)) {
+        const suffix = drawCount === 1 ? "carte" : "cartes";
+        return `${verb} ${drawCount} ${suffix}`;
+    }
+
+    if (alternatives.length > 0) {
+        const phrases = alternatives.map((alternative) =>
+            formatDrawTargetPhrase(alternative, drawCount),
+        );
+        return `${verb} ${phrases.join(" OU ")}`;
+    }
+
+    if (!filter) {
+        const suffix = drawCount === 1 ? "carte" : "cartes";
+        return `${verb} ${drawCount} ${suffix}`;
+    }
+
+    return `${verb} ${formatDrawTargetPhrase(filter, drawCount)}`;
+};
+
+const formatEnemyDrawDescription = (
+    enemyDrawCount: number,
+    filter: CardFilterSnapshot | null,
+    capitalizeFirst = true,
+): string => {
+    const verb = capitalizeFirst ? "L'adversaire pioche" : "l'adversaire pioche";
+
+    if (!hasCardFilterConstraints(filter)) {
+        const suffix = enemyDrawCount === 1 ? "carte" : "cartes";
+        return `${verb} ${enemyDrawCount} ${suffix}`;
+    }
+
+    return `${verb} ${formatDrawTargetPhrase(filter!, enemyDrawCount)}`;
 };
 
 const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
@@ -327,23 +430,7 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
         parts.push(formatRarityFilterLabel(filter.rarity));
     }
 
-    return ` ${parts.join(" + ")}`;
-};
-
-const formatOrCardFilterSuffix = (filters: CardFilterSnapshot[]): string => {
-    if (filters.length === 0) return "";
-    return filters.map((filter) => formatCardFilterSuffix(filter).trim()).join(" OU ");
-};
-
-const formatDrawFilterSuffix = (
-    filter: CardFilterSnapshot | null,
-    alternatives: CardFilterSnapshot[],
-): string => {
-    if (alternatives.length > 0) {
-        const orSuffix = formatOrCardFilterSuffix(alternatives);
-        return orSuffix.length > 0 ? ` ${orSuffix}` : "";
-    }
-    return formatCardFilterSuffix(filter);
+    return ` ${parts.join(" ")}`;
 };
 
 export const formatPlayCardPassiveTriggerLabel = (
@@ -564,13 +651,20 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
     switch (action.type) {
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) return null;
-            const suffix = action.drawCount === 1 ? "carte" : "cartes";
-            return `pioche ${action.drawCount} ${suffix}${formatDrawFilterSuffix(action.drawCardFilter, action.drawCardFilterAlternatives)}`;
+            return formatDrawDescription(
+                action.drawCount,
+                action.drawCardFilter,
+                action.drawCardFilterAlternatives,
+                false,
+            );
         }
         case "ENEMY_DRAW": {
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
-            const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
-            return `l'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}`;
+            return formatEnemyDrawDescription(
+                action.enemyDrawCount,
+                action.enemyDrawCardFilter,
+                false,
+            );
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
@@ -851,13 +945,11 @@ export const formatActionDescription = (
         }
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) return null;
-            const suffix = action.drawCount === 1 ? "carte" : "cartes";
-            return `${prefix} : Pioche ${action.drawCount} ${suffix}${formatDrawFilterSuffix(action.drawCardFilter, action.drawCardFilterAlternatives)}.`;
+            return `${prefix} : ${formatDrawDescription(action.drawCount, action.drawCardFilter, action.drawCardFilterAlternatives)}.`;
         }
         case "ENEMY_DRAW": {
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
-            const suffix = action.enemyDrawCount === 1 ? "carte" : "cartes";
-            return `${prefix} : L'adversaire pioche ${action.enemyDrawCount} ${suffix}${formatCardFilterSuffix(action.enemyDrawCardFilter)}.`;
+            return `${prefix} : ${formatEnemyDrawDescription(action.enemyDrawCount, action.enemyDrawCardFilter)}.`;
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
@@ -917,9 +1009,9 @@ export const formatActionDescription = (
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;
                 if (target.type === "MINION") {
-                    return `${prefix} : Réduit au silence ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
+                    return `${prefix} : Réduit au silence ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
                 }
-                return `${prefix} : Réduit au silence ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Réduit au silence ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
@@ -929,11 +1021,11 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Réduit au silence ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Réduit au silence ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Réduit au silence ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Réduit au silence ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             return `${prefix} : Réduit au silence un monstre.`;
@@ -942,9 +1034,9 @@ export const formatActionDescription = (
             if (action.target && hasRandomLimitedTarget(action.target)) {
                 const { target } = action;
                 if (target.type === "MINION") {
-                    return `${prefix} : Détruit ${withPrepositionA(formatRandomMinionLabel(target.targetTeam, target.maxTargets!))}${formatTargetFilterSuffix(action)}.`;
+                    return `${prefix} : Détruit ${formatRandomMinionLabel(target.targetTeam, target.maxTargets!)}${formatTargetFilterSuffix(action)}.`;
                 }
-                return `${prefix} : Détruit ${withPrepositionA(formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Détruit ${formatRandomAllLabel(target.targetTeam, target.maxTargets!, target.excludeSelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.isTargeted && action.target?.type === "MINION") {
@@ -954,11 +1046,11 @@ export const formatActionDescription = (
             }
 
             if (action.target?.type === "MINION") {
-                return `${prefix} : Détruit ${withPrepositionA(formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Détruit ${formatMassMinionTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf, action.target.adjacency)}${formatTargetFilterSuffix(action)}.`;
             }
 
             if (action.target?.type === "ALL") {
-                return `${prefix} : Détruit ${withPrepositionA(formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf))}${formatTargetFilterSuffix(action)}.`;
+                return `${prefix} : Détruit ${formatAllTeamLabel(action.target.targetTeam, action.target.excludeSelf, action.target.onlySelf)}${formatTargetFilterSuffix(action)}.`;
             }
 
             return `${prefix} : Détruit un monstre.`;

@@ -113,7 +113,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Cri de guerre"),
-            "Cri de guerre : Pioche 1 carte Monstre + 💻 Développeur.",
+            "Cri de guerre : Pioche un monstre Développeur 💻.",
         );
     });
 
@@ -123,13 +123,13 @@ test.group("format_action_description", () => {
             drawCount: 1,
             drawCardFilterAlternatives: [
                 createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
-                createCardFilterSnapshot({ type: "ANY", tags: ["PETS"] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["PETS"] }),
             ],
         });
 
         assert.equal(
             formatActionDescription(action, "Râle d'agonie"),
-            "Râle d'agonie : Pioche 1 carte Monstre + 💻 Développeur OU Carte + 🐾 Pets.",
+            "Râle d'agonie : Pioche un monstre Développeur 💻 OU un monstre Pets 🐾.",
         );
     });
 
@@ -159,7 +159,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Cri de guerre"),
-            "Cri de guerre : Inflige 2 dégâts à un monstre adverse 💻 Développeur.",
+            "Cri de guerre : Inflige 2 dégâts à un monstre adverse Développeur 💻.",
         );
     });
 
@@ -205,7 +205,7 @@ test.group("format_action_description", () => {
             formatPlayCardPassiveTriggerLabel(
                 createCardFilterSnapshot({ type: "MINION", tags: ["PETS"] }),
             ),
-            "monstre 🐾 Pets joué",
+            "monstre Pets 🐾 joué",
         );
     });
 
@@ -331,7 +331,19 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Détruit aux monstres adverses.",
+            "Effet : Détruit les monstres adverses.",
+        );
+    });
+
+    test("formats mass destroy on all minions without preposition", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DESTROY",
+            target: createMinionTargetSnapshot("ALL"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Effet"),
+            "Effet : Détruit tous les monstres.",
         );
     });
 
@@ -663,7 +675,7 @@ test.group("format_action_description", () => {
         ];
 
         assert.deepEqual(formatGroupedActionDescriptions(actions, "Effet"), [
-            "Effet : Découvrez un monstre 🐾 Pets. Puis, découvrez un autre monstre 🐾 Pets.",
+            "Effet : Découvrez un monstre Pets 🐾. Puis, découvrez un autre monstre Pets 🐾.",
         ]);
     });
 

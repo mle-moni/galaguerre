@@ -9,7 +9,7 @@ import type {
 import { getMinionPowerEffects } from "./get_minion_power_effects.js";
 import type { GalaguerreDynamicCostSource } from "../app/galaguerre/galaguerre.types.js";
 import { EFFECT_DESCRIPTIONS } from "./card_keyword_glossary.js";
-import { CARD_LABEL_TAG_LABELS, CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
+import { CARD_LABEL_TAG_LABELS, formatTagChip } from "./card.types.js";
 import {
     formatActionDescription,
     formatExtraBattlecryTriggersDescription,
@@ -84,13 +84,6 @@ export const getWeaponCardDescription = (
         ...(cannotAttackHero ? ["Ne peut pas attaquer le héros adverse"] : []),
         ...deathrattleLines,
     ]);
-};
-
-const formatTagChip = (tag: NonNullable<PassiveBoostSnapshot["target"]>["tag"]): string => {
-    if (!tag) return "";
-    const meta = CARD_TAG_LABELS[tag];
-    const prefix = isCardTagImageSymbol(meta.symbol) ? "" : `${meta.symbol} `;
-    return `${prefix}${meta.label}`;
 };
 
 const formatScaledPassiveBoostDescription = (passiveBoost: PassiveBoostSnapshot): string => {

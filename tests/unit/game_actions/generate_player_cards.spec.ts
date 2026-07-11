@@ -175,7 +175,7 @@ test.group("generatePlayerCards", () => {
             tags: [],
             labelTags: [],
         });
-        assert.include(generated.description, "Cri de guerre : Pioche 1 carte Monstre + coût = 2.");
+        assert.include(generated.description, "Cri de guerre : Pioche un monstre coût = 2.");
     });
 
     test("embeds spell actions from card data", ({ assert }) => {
