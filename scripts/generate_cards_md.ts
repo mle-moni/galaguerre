@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { CARD_RARITY_LABELS } from "#api_types/card_rarity.types";
 import { getAllCardTemplates } from "#api_types/card_preview";
 import { CARD_LABEL_TAG_LABELS } from "#galaguerre/card_label_tags";
-import { CARD_TAG_LABELS } from "#galaguerre/card_tags";
+import { CARD_TAGS, CARD_TAG_LABELS } from "#galaguerre/card_tags";
 import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 
 const OUTPUT = join(dirname(fileURLToPath(import.meta.url)), "../cards.md");
@@ -38,7 +38,7 @@ export const generateCardsMd = () => {
         "",
         "## Familles (tags)",
         "",
-        "- Développeur, PM, Sales, Parisien, Nantais, Lyonnais, Pets, Équipe support",
+        `- ${CARD_TAGS.map((tag) => CARD_TAG_LABELS[tag].label).join(", ")}`,
         "",
         "## Tags",
         "",

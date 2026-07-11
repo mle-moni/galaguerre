@@ -647,7 +647,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             health: 3,
         },
         {
-            tags: ["NANTAIS"],
+            tags: ["NANTAIS", "DESIGNER"],
             passives: [actionPassive("TURN_END", drawAction(1))],
         },
     ),

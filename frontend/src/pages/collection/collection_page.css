@@ -190,6 +190,50 @@
         0 0 12px rgba(240, 184, 64, 0.45);
 }
 
+.collection-filters-sidebar--inline {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    gap: 0.5rem;
+}
+
+.collection-filters-sidebar--inline .collection-filters-sidebar__label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: rgba(44, 36, 22, 0.65);
+}
+
+.collection-filters-sidebar--inline .collection-filters-sidebar__icons {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0.15rem 0.1rem 0.35rem;
+    margin: 0 -0.1rem;
+}
+
+.collection-filters-sidebar--inline .collection-filters-sidebar__icons::-webkit-scrollbar {
+    display: none;
+}
+
+.collection-filters-sidebar--inline .collection-filters-sidebar__icon-btn {
+    flex-shrink: 0;
+}
+
 @media (max-width: 900px) {
     .collection-filters-sidebar {
         flex-direction: row;
@@ -217,6 +261,10 @@
         overflow-x: auto;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
+    }
+
+    .collection-filters-sidebar__icon-btn {
+        flex-shrink: 0;
     }
 
     .collection-filters-sidebar__icons::-webkit-scrollbar {

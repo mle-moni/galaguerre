@@ -655,6 +655,14 @@ export const Catalogue = observer(
                 })
             );
 
+        const familyFilters = isCollection ? (
+            <CollectionFiltersSidebar
+                tagFilter={tagFilter}
+                onTagFilterChange={setTagFilter}
+                variant={isNarrowScreen ? "inline" : "sidebar"}
+            />
+        ) : null;
+
         const filtersSection = isNarrowScreen ? (
             <>
                 <button
@@ -675,7 +683,10 @@ export const Catalogue = observer(
                     )}
                 </button>
                 <Collapse in={showFilters}>
-                    <div className="pt-1">{filterControls}</div>
+                    <div className="pt-1 flex flex-col gap-3">
+                        {filterControls}
+                        {familyFilters}
+                    </div>
                 </Collapse>
             </>
         ) : (
@@ -694,12 +705,7 @@ export const Catalogue = observer(
                                     isDeckBuilder && "collection-catalogue__main--no-sidebar",
                                 )}
                             >
-                                {isCollection && (
-                                    <CollectionFiltersSidebar
-                                        tagFilter={tagFilter}
-                                        onTagFilterChange={setTagFilter}
-                                    />
-                                )}
+                                {isCollection && !isNarrowScreen && familyFilters}
                                 <div
                                     className={
                                         isNarrowScreen

@@ -22,7 +22,7 @@ Format compact pour construction de deck par LLM.
 
 ## Familles (tags)
 
-- Développeur, PM, Sales, Parisien, Nantais, Lyonnais, Pets, Équipe support
+- Développeur, PM, Sales, Designer, Parisien, Nantais, Lyonnais, Pets, Équipe support
 
 ## Tags
 
@@ -146,7 +146,7 @@ Format compact pour construction de deck par LLM.
 - Coût: 3 | Type: MINION | Stats: 3/4 | Rareté: Commune | Famille: Nantais
 
 ### #90 Nantais Créatif
-- Coût: 4 | Type: MINION | Stats: 3/3 | Rareté: Commune | Famille: Nantais
+- Coût: 4 | Type: MINION | Stats: 3/3 | Rareté: Commune | Famille: Nantais, Designer
 - Passif (fin de tour) : Pioche 1 carte.
 
 ### #91 Lyonnais Gourmand
