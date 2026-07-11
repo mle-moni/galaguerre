@@ -324,6 +324,14 @@ export const createCardActionSnapshot = (
                 actionCondition,
                 onTargetResult,
             };
+        case "NEXT_SPELL_COST_REDUCTION":
+            return {
+                type: "NEXT_SPELL_COST_REDUCTION",
+                isTargeted: false,
+                amount: overrides.amount ?? 2,
+                actionCondition,
+                onTargetResult,
+            };
         case "DEFEAT":
             return {
                 type: "DEFEAT",

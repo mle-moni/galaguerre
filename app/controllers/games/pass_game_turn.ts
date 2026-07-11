@@ -3,6 +3,10 @@ import { triggerPassives } from "../../galaguerre/passive_engine/trigger_passive
 import type { GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
 import {
+    clearNextSpellCostReduction,
+    refreshGameDynamicCosts,
+} from "../../galaguerre/dynamic_cost/compute_effective_cost.js";
+import {
     beginLoggedBeat,
     endCurrentBeat,
 } from "../../galaguerre/game_narrative/narrative_beats.js";
@@ -17,6 +21,8 @@ export const performPassTurn = async (game: Game, activePlayer: GamePlayer): Pro
         recordPassTurn(game, activePlayer);
         beginLoggedBeat(game, "PASS_TURN");
         const { gameEnded: turnEndGameEnded } = triggerPassives(game, "TURN_END", activePlayer);
+        clearNextSpellCostReduction(activePlayer);
+        refreshGameDynamicCosts(game.data);
         endCurrentBeat(game);
 
         if (turnEndGameEnded) {

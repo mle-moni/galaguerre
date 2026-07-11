@@ -975,6 +975,16 @@ const validateNonTargetedAction = (
             }
             break;
         }
+        case "NEXT_SPELL_COST_REDUCTION": {
+            if (action.amount <= 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "NEXT_SPELL_COST_REDUCTION action requires amount > 0",
+                    path: [...path, "amount"],
+                });
+            }
+            break;
+        }
         case "DEFEAT":
             break;
     }

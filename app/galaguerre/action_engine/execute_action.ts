@@ -28,6 +28,7 @@ import {
     canMindControlWithBoardSpace,
 } from "./apply_mind_control.js";
 import { applyReturnToHand } from "./apply_return_to_hand.js";
+import { refreshGameDynamicCosts } from "../dynamic_cost/compute_effective_cost.js";
 import { evaluateActionCondition } from "./evaluate_action_condition.js";
 import {
     shouldTriggerOnTargetResult,
@@ -429,6 +430,10 @@ const executeNonTargetedV1Action = (
                 player.mana += gain;
                 recordGainMana(resolveSpotOwner(game, player), gain);
             }
+            break;
+        case "NEXT_SPELL_COST_REDUCTION":
+            player.nextSpellCostReduction = (player.nextSpellCostReduction ?? 0) + action.amount;
+            refreshGameDynamicCosts(game.data);
             break;
         case "DEFEAT": {
             const { gameEnded } = applyDefeat(game, player, opponent, action.targetTeam);

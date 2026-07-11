@@ -39,7 +39,8 @@ export const computeEffectiveCost = (
 ): number => {
     const dynamicReduction = computeReduction(card, owner, opponent);
     const handReduction = card.handCostReduction ?? 0;
-    return Math.max(0, card.baseCost - dynamicReduction - handReduction);
+    const spellCostReduction = card.type === "SPELL" ? owner.nextSpellCostReduction ?? 0 : 0;
+    return Math.max(0, card.baseCost - dynamicReduction - handReduction - spellCostReduction);
 };
 
 export const clearHandCostReduction = <T extends PlayerCard>(card: T): T => {
@@ -47,9 +48,19 @@ export const clearHandCostReduction = <T extends PlayerCard>(card: T): T => {
     return card;
 };
 
+export const clearNextSpellCostReduction = (player: GamePlayer): void => {
+    delete player.nextSpellCostReduction;
+};
+
 export const refreshHandDynamicCosts = (player: GamePlayer, opponent: GamePlayer): void => {
+    const hasSpellCostReduction = (player.nextSpellCostReduction ?? 0) > 0;
+
     for (const card of player.hand) {
-        if (card.dynamicCost || (card.handCostReduction ?? 0) > 0) {
+        if (
+            card.dynamicCost ||
+            (card.handCostReduction ?? 0) > 0 ||
+            (hasSpellCostReduction && card.type === "SPELL")
+        ) {
             card.cost = computeEffectiveCost(card, player, opponent);
         }
     }

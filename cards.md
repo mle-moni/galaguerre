@@ -469,3 +469,7 @@ Format compact pour construction de deck par LLM.
 ### #171 Gros Cahier des Charges
 - Coût: 2 | Type: WEAPON | Stats: 3/2 | Rareté: Commune | Famille: —
 - Arme 3/2. Ne peut pas attaquer le héros adverse.
+
+### #172 Setup Technique
+- Coût: 0 | Type: SPELL | Stats: — | Rareté: Rare | Famille: —
+- Effet : Le prochain sort que vous lancez pendant ce tour coûte (2) cristaux de moins.

@@ -9,7 +9,11 @@ import {
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
 import { cardHasPlayableTarget } from "#api_types/target_matching";
-import { computeEffectiveCost } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
+import {
+    computeEffectiveCost,
+    clearNextSpellCostReduction,
+    refreshGameDynamicCosts,
+} from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { playerHasBoardSpace } from "../../../galaguerre/action_engine/apply_mind_control.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import {
@@ -95,6 +99,11 @@ export const playSpell = async ({
 
     const effectiveCost = computeEffectiveCost(card, player, opponent);
     card.cost = effectiveCost;
+    const hadSpellCostReduction = (player.nextSpellCostReduction ?? 0) > 0;
+    clearNextSpellCostReduction(player);
+    if (hadSpellCostReduction) {
+        refreshGameDynamicCosts(game.data);
+    }
     const spotOwner = resolvePlayerOwner(game, player);
 
     await runGameActionWithNarrative(game, async () => {

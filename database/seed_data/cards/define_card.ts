@@ -151,6 +151,14 @@ export const manaTemporaryChangeAction = (amount: number): CardActionDefinition 
     onTargetResult: null,
 });
 
+export const nextSpellCostReductionAction = (amount: number): CardActionDefinition => ({
+    type: "NEXT_SPELL_COST_REDUCTION",
+    isTargeted: false,
+    amount,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const defeatAction = (
     targetTeam: GalaguerreTargetTeam = "OPPONENT",
 ): CardActionDefinition => ({

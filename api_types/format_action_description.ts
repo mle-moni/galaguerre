@@ -502,6 +502,11 @@ const formatScaledManaTemporaryChange = (amountPer: number): string => {
     return `Ce tour-ci, gagnez ${amountPer} ${crystalLabel} pour chaque monstre adverse.`;
 };
 
+const formatNextSpellCostReduction = (amount: number): string => {
+    const costLabel = amount === 1 ? "(1) cristal" : `(${amount}) cristaux`;
+    return `Le prochain sort que vous lancez pendant ce tour coûte ${costLabel} de moins.`;
+};
+
 const formatManaActionText = (
     action: Extract<CardActionFieldsSnapshot, { type: "MANA" }>,
 ): string | null => {
@@ -1049,6 +1054,10 @@ export const formatActionDescription = (
             if (!text) return null;
             return prefix ? `${prefix} : ${text}` : text;
         }
+        case "NEXT_SPELL_COST_REDUCTION":
+            return prefix
+                ? `${prefix} : ${formatNextSpellCostReduction(action.amount)}`
+                : formatNextSpellCostReduction(action.amount);
         case "DEFEAT":
             return `${prefix} : ${formatDefeatDescription(action.targetTeam)}.`;
         default:

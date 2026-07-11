@@ -219,6 +219,13 @@ const defeatActionSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const nextSpellCostReductionActionFieldsSchema = z.object({
+    type: z.literal("NEXT_SPELL_COST_REDUCTION"),
+    isTargeted: z.literal(false).default(false),
+    amount: z.number().int().positive(),
+    actionCondition: actionConditionSchema,
+});
+
 const cardActionFieldsSchema = z.discriminatedUnion("type", [
     damageActionFieldsSchema,
     healActionFieldsSchema,
@@ -236,6 +243,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     handCardActionFieldsSchema,
     discoverActionFieldsSchema,
     manaActionFieldsSchema,
+    nextSpellCostReductionActionFieldsSchema,
     defeatActionSchema,
 ]);
 
@@ -283,6 +291,7 @@ export const cardActionSchema = z
         handCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         discoverActionFieldsSchema.extend(cardActionOnTargetResultField),
         manaActionFieldsSchema.extend(cardActionOnTargetResultField),
+        nextSpellCostReductionActionFieldsSchema.extend(cardActionOnTargetResultField),
         defeatActionSchema.extend(cardActionOnTargetResultField),
     ])
     .superRefine((action, ctx) => {

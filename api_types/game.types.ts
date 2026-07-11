@@ -209,6 +209,7 @@ export interface GamePlayer {
     heroLastAttackAtRound: number;
     health: number;
     spellPower: number;
+    nextSpellCostReduction?: number;
     mana: number;
     maxFatigueDamageTaken: number;
     stats: GamePlayerStats;

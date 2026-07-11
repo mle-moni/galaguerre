@@ -43,6 +43,7 @@ import {
     mindControlAction,
     manaTemporaryChangeAction,
     manaTemporaryChangePerOpponentMinionAction,
+    nextSpellCostReductionAction,
     otherAllyMinions,
     otherAllyMinionsWithTag,
     otherMinionsWithTag,
@@ -1172,6 +1173,16 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/git-revert.webp",
         },
         [returnToHandAction(2, targetedAllyMinion(), true)],
+    ),
+    defineSpell(
+        172,
+        {
+            ...gal("Setup Technique", 0),
+            imageUrl: "/card-covers/galadrim/setup-technique.webp",
+        },
+        [nextSpellCostReductionAction(2)],
+        [],
+        { rarity: "RARE" },
     ),
     defineMinion(
         129,

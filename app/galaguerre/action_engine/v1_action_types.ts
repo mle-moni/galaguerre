@@ -14,6 +14,7 @@ export const V1_ACTION_TYPES = [
     "HAND_CARD",
     "DISCOVER",
     "MANA",
+    "NEXT_SPELL_COST_REDUCTION",
     "DEFEAT",
 ] as const;
 export type V1ActionType = (typeof V1_ACTION_TYPES)[number];
