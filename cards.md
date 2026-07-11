@@ -473,3 +473,7 @@ Format compact pour construction de deck par LLM.
 ### #172 Setup Technique
 - Coût: 0 | Type: SPELL | Stats: — | Rareté: Rare | Famille: —
 - Effet : Le prochain sort que vous lancez pendant ce tour coûte (2) cristaux de moins.
+
+### #173 Responsable du staffing
+- Coût: 2 | Type: MINION | Stats: 3/2 | Rareté: Commune | Famille: Équipe support
+- Cri de guerre : Renvoie un monstre allié dans votre main.

@@ -522,6 +522,20 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats RETURN_TO_HAND without cost reduction", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "RETURN_TO_HAND",
+            isTargeted: true,
+            costReduction: 0,
+            target: createMinionTargetSnapshot("PLAYER"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Responsable du staffing"),
+            "Responsable du staffing : Renvoie un monstre allié dans votre main.",
+        );
+    });
+
     test("formats HAND_CARD ADD to opponent hand", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "HAND_CARD",

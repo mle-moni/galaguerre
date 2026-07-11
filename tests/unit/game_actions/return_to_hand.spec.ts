@@ -17,6 +17,7 @@ import {
 } from "#tests/helpers/game/fixtures";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 import { runPlayCardInMemory } from "#tests/helpers/game/run_play_card_in_memory";
+import { runBattlecry } from "#tests/helpers/game/run_battlecry";
 
 const createReturnToHandSpell = (costReduction = 2) =>
     createSpellCard({
@@ -368,5 +369,55 @@ test.group("RETURN_TO_HAND action", () => {
         assert.exists(twiceRevertedCard);
         assert.equal(twiceRevertedCard!.cost, 3);
         assert.equal(twiceRevertedCard!.handCostReduction, 2);
+    });
+
+    test("battlecry returns ally minion to hand without cost reduction", ({ assert }) => {
+        const allyMinion = createMinionCard({
+            uuid: "ally-to-bounce",
+            label: "Stagiaire",
+            baseCost: 3,
+            cost: 3,
+            attack: 2,
+            health: 2,
+        });
+        const staffingManager = createMinionCard({
+            uuid: "staffing-manager",
+            label: "Responsable du staffing",
+            baseCost: 2,
+            cost: 2,
+            attack: 3,
+            health: 2,
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "RETURN_TO_HAND",
+                    isTargeted: true,
+                    costReduction: 0,
+                    target: createMinionTargetSnapshot("PLAYER"),
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [staffingManager],
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(allyMinion)),
+                },
+            }),
+            staffingManager,
+            {
+                boardIndex: 1,
+                actionTarget: { minionUuid: "ally-to-bounce", owner: "PLAYER" },
+            },
+        );
+
+        assert.equal(game.data.playerOne.board.length, 1);
+        assert.equal(game.data.playerOne.board[0]!.uuid, "staffing-manager");
+        const returnedCard = game.data.playerOne.hand.find((card) => card.label === "Stagiaire");
+        assert.exists(returnedCard);
+        assert.equal(returnedCard!.baseCost, 3);
+        assert.equal(returnedCard!.handCostReduction, 0);
+        assert.equal(returnedCard!.cost, 3);
     });
 });

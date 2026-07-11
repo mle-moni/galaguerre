@@ -461,6 +461,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
     ),
     defineMinion(
+        173,
+        {
+            ...gal("Responsable du staffing", 2),
+            imageUrl: "/card-covers/galadrim/responsable-du-staffing.webp",
+            attack: 3,
+            health: 2,
+        },
+        {
+            tags: ["SUPPORT"],
+            battlecryActions: [returnToHandAction(0, targetedAllyMinion(), true)],
+        },
+    ),
+    defineMinion(
         84,
         {
             ...gal("Recruteur RH", 3),
