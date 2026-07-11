@@ -17,7 +17,7 @@ const MINION_POWER_EFFECTS = getMinionPowerEffects({
     hasDivineShield: true,
 });
 
-const BOARD_KEYWORD_NAMES = ["Cri de guerre", "Dernier souffle", "Effet déclenché"];
+const BOARD_KEYWORD_NAMES = ["Dernier souffle", "Effet déclenché"];
 
 test.group("card_keyword_glossary", () => {
     test("covers every minion power effect with symbol and description", ({ assert }) => {

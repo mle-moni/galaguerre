@@ -64,6 +64,8 @@
 }
 
 .decks-infos__pass-turn {
+	position: relative;
+	z-index: 11;
 	width: 100%;
 	margin-top: 0.25rem;
 }

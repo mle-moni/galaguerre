@@ -38,11 +38,6 @@ export const BoardMinionEffectIcons = ({ card }: { card: MinionCard }) => {
         icons.push({ key: "triggered", symbol: "⚡", title: titles });
     }
 
-    const hasTargetedBattlecry = (card.battlecryActions ?? []).some((action) => action.isTargeted);
-    if (hasTargetedBattlecry) {
-        icons.push({ key: "battlecry", symbol: "✨", title: "Cri de guerre" });
-    }
-
     if (icons.length === 0) return null;
 
     return (

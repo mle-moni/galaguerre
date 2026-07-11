@@ -11,7 +11,7 @@
 	justify-content: center;
 	gap: var(--hand-gap);
 	position: absolute;
-	left: 0;
-	width: 100%;
+	left: var(--play-sidebar-w);
+	width: calc(100% - 2 * var(--play-sidebar-w));
 	height: var(--hand-height);
 }
