@@ -993,7 +993,11 @@ export const formatActionDescription = (
             if (action.isTargeted && action.target?.type === "MINION") {
                 const teamLabel = formatSingleMinionTeamLabel(action.target.targetTeam);
                 const teamPart = teamLabel ? ` ${teamLabel}` : "";
-                return `${prefix} : Renvoie un monstre${teamPart} dans votre main.${costReductionSuffix}`;
+                const handLocation =
+                    action.target.targetTeam === "OPPONENT"
+                        ? "à la main adverse"
+                        : "dans votre main";
+                return `${prefix} : Renvoie un monstre${teamPart} ${handLocation}.${costReductionSuffix}`;
             }
 
             return `${prefix} : Renvoie un monstre allié dans votre main.${costReductionSuffix}`;

@@ -34,6 +34,21 @@ const createReturnToHandSpell = (costReduction = 2) =>
         ],
     });
 
+const createEnemyReturnToHandSpell = () =>
+    createSpellCard({
+        uuid: "pr-refusee",
+        cost: 2,
+        label: "PR Refusée",
+        spellActions: [
+            createCardActionSnapshot({
+                type: "RETURN_TO_HAND",
+                isTargeted: true,
+                costReduction: 0,
+                target: createMinionTargetSnapshot("OPPONENT"),
+            }),
+        ],
+    });
+
 const createFullHand = (count = MAX_HAND_SIZE) =>
     Array.from({ length: count }, (_, index) =>
         createMinionCard({ uuid: `hand-card-${index}`, label: `Hand ${index}`, cost: 1 }),
@@ -203,6 +218,47 @@ test.group("RETURN_TO_HAND action", () => {
         );
 
         assert.isFalse(hasTarget);
+    });
+
+    test("returns enemy minion to opponent hand", ({ assert }) => {
+        const enemyMinion = createMinionCard({
+            uuid: "enemy-minion",
+            label: "Stagiaire",
+            baseCost: 3,
+            cost: 3,
+            attack: 2,
+            health: 4,
+        });
+        const spell = createEnemyReturnToHandSpell();
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 2,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(enemyMinion)),
+                },
+            }),
+            spell,
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
+        );
+
+        assert.equal(game.data.playerTwo.board.length, 0);
+        assert.equal(game.data.playerOne.board.length, 0);
+        assert.equal(game.data.playerTwo.hand.length, 1);
+
+        const returnedCard = game.data.playerTwo.hand[0];
+        assert.equal(returnedCard.cardId, enemyMinion.cardId);
+        assert.equal(returnedCard.baseCost, 3);
+        assert.equal(returnedCard.handCostReduction, 0);
+        assert.equal(returnedCard.cost, 3);
+        assert.equal(returnedCard.type, "MINION");
+        if (returnedCard.type === "MINION") {
+            assert.equal(returnedCard.attack, 2);
+            assert.equal(returnedCard.health, 4);
+        }
     });
 
     test("git revert integration returns ally to caster hand", ({ assert }) => {

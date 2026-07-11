@@ -209,6 +209,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { rarity: "RARE" },
     ),
     defineMinion(
+        174,
+        {
+            ...gal("Dev en Passation", 3),
+            imageUrl: "/card-covers/galadrim/dev-en-passation.webp",
+            attack: 4,
+            health: 4,
+        },
+        {
+            tags: ["DEVELOPPEUR"],
+            deathrattleActions: [enemyDrawAction(1)],
+        },
+    ),
+    defineMinion(
         67,
         {
             ...gal("Dev Aguerri", 4),
@@ -1186,6 +1199,15 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             imageUrl: "/card-covers/galadrim/git-revert.webp",
         },
         [returnToHandAction(2, targetedAllyMinion(), true)],
+    ),
+    defineSpell(
+        175,
+        {
+            ...gal("PR Refusée", 2),
+            imageUrl: "/card-covers/galadrim/pr-refusee.webp",
+        },
+        [returnToHandAction(0, targetedEnemyMinion(), true)],
+        [],
     ),
     defineSpell(
         172,

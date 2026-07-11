@@ -477,3 +477,11 @@ Format compact pour construction de deck par LLM.
 ### #173 Responsable du staffing
 - Coût: 2 | Type: MINION | Stats: 3/2 | Rareté: Commune | Famille: Équipe support
 - Cri de guerre : Renvoie un monstre allié dans votre main.
+
+### #174 Dev en Passation
+- Coût: 3 | Type: MINION | Stats: 4/4 | Rareté: Commune | Famille: Développeur
+- Dernier souffle : L'adversaire pioche 1 carte.
+
+### #175 PR Refusée
+- Coût: 2 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
+- Effet : Renvoie un monstre adverse à la main adverse.

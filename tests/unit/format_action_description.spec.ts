@@ -536,6 +536,20 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats RETURN_TO_HAND targeted enemy minion", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "RETURN_TO_HAND",
+            isTargeted: true,
+            costReduction: 0,
+            target: createMinionTargetSnapshot("OPPONENT"),
+        });
+
+        assert.equal(
+            formatActionDescription(action, "PR Refusée"),
+            "PR Refusée : Renvoie un monstre adverse à la main adverse.",
+        );
+    });
+
     test("formats HAND_CARD ADD to opponent hand", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "HAND_CARD",
