@@ -14,13 +14,7 @@ export type CardTag = (typeof CARD_TAGS)[number];
 
 export const isCardTagImageSymbol = (symbol: string): boolean => symbol.startsWith("/");
 
-export const formatTagChip = (tag: CardTag): string => {
-    const meta = CARD_TAG_LABELS[tag];
-    if (isCardTagImageSymbol(meta.symbol)) {
-        return meta.label;
-    }
-    return `${meta.label} ${meta.symbol}`;
-};
+export const formatTagChip = (tag: CardTag): string => CARD_TAG_LABELS[tag].label;
 
 export const CARD_TAG_LABELS: Record<
     CardTag,

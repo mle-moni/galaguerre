@@ -9,7 +9,6 @@ import {
     createCardActionSnapshot,
     createCardFilterSnapshot,
     createComparisonSnapshot,
-    createAllTargetSnapshot,
     createBoostSnapshot,
     createHeroTargetSnapshot,
     createMinionTargetSnapshot,
@@ -82,14 +81,12 @@ test.group("format_action_description", () => {
         );
     });
 
-    test("formats random limited multi-target character damage as distinct targets", ({
-        assert,
-    }) => {
+    test("formats random limited multi-target minion damage as distinct targets", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DAMAGE",
             isTargeted: false,
             damage: 4,
-            target: createAllTargetSnapshot("OPPONENT", {
+            target: createMinionTargetSnapshot("OPPONENT", {
                 maxTargets: 3,
                 targetSelectionMode: "RANDOM",
             }),
@@ -97,7 +94,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Effet"),
-            "Effet : Inflige 4 dégâts à 3 personnages adverses aléatoires différents.",
+            "Effet : Inflige 4 dégâts à 3 monstres adverses aléatoires différents.",
         );
     });
 
@@ -113,7 +110,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Cri de guerre"),
-            "Cri de guerre : Pioche un monstre Développeur 💻.",
+            "Cri de guerre : Pioche un monstre Développeur.",
         );
     });
 
@@ -129,7 +126,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Râle d'agonie"),
-            "Râle d'agonie : Pioche un monstre Développeur 💻 OU un monstre Pets 🐾.",
+            "Râle d'agonie : Pioche un monstre Développeur OU un monstre Pets.",
         );
     });
 
@@ -159,7 +156,7 @@ test.group("format_action_description", () => {
 
         assert.equal(
             formatActionDescription(action, "Cri de guerre"),
-            "Cri de guerre : Inflige 2 dégâts à un monstre adverse Développeur 💻.",
+            "Cri de guerre : Inflige 2 dégâts à un monstre adverse Développeur.",
         );
     });
 
@@ -205,7 +202,7 @@ test.group("format_action_description", () => {
             formatPlayCardPassiveTriggerLabel(
                 createCardFilterSnapshot({ type: "MINION", tags: ["PETS"] }),
             ),
-            "monstre Pets 🐾 joué",
+            "monstre Pets joué",
         );
     });
 
@@ -675,7 +672,7 @@ test.group("format_action_description", () => {
         ];
 
         assert.deepEqual(formatGroupedActionDescriptions(actions, "Effet"), [
-            "Effet : Découvrez un monstre Pets 🐾. Puis, découvrez un autre monstre Pets 🐾.",
+            "Effet : Découvrez un monstre Pets. Puis, découvrez un autre monstre Pets.",
         ]);
     });
 

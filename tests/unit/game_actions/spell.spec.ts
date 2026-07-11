@@ -265,7 +265,7 @@ test.group("spell effects", () => {
         assert.equal(damagedCount, 1);
     });
 
-    test("Coupure Internet hits 3 distinct enemy characters for 4 damage each", ({ assert }) => {
+    test("Coupure Internet hits 3 distinct enemy minions for 4 damage each", ({ assert }) => {
         const enemyMinions = [0, 1, 2, 3].map((index) =>
             createMinionCard({ uuid: `enemy-${index}`, health: 10 }),
         );
@@ -276,7 +276,7 @@ test.group("spell effects", () => {
                     type: "DAMAGE",
                     isTargeted: false,
                     damage: 4,
-                    target: createAllTargetSnapshot("OPPONENT", {
+                    target: createMinionTargetSnapshot("OPPONENT", {
                         maxTargets: 3,
                         targetSelectionMode: "RANDOM",
                     }),
@@ -307,14 +307,9 @@ test.group("spell effects", () => {
         );
 
         assert.equal(game.data.playerOne.board[0]!.health, 10);
+        assert.equal(game.data.playerTwo.health, initialHeroHealth);
 
         let damagedCount = 0;
-        if (game.data.playerTwo.health === initialHeroHealth - 4) {
-            damagedCount++;
-        } else {
-            assert.equal(game.data.playerTwo.health, initialHeroHealth);
-        }
-
         for (const minion of game.data.playerTwo.board) {
             if (minion.health === 6) {
                 damagedCount++;
@@ -326,7 +321,9 @@ test.group("spell effects", () => {
         assert.equal(damagedCount, 3);
     });
 
-    test("Coupure Internet hits every eligible enemy when fewer than 3 exist", ({ assert }) => {
+    test("Coupure Internet hits every eligible enemy minion when fewer than 3 exist", ({
+        assert,
+    }) => {
         const enemyMinion = createMinionCard({ uuid: "enemy-only", health: 10 });
         const spell = createSpellCard({
             cost: 6,
@@ -335,7 +332,7 @@ test.group("spell effects", () => {
                     type: "DAMAGE",
                     isTargeted: false,
                     damage: 4,
-                    target: createAllTargetSnapshot("OPPONENT", {
+                    target: createMinionTargetSnapshot("OPPONENT", {
                         maxTargets: 3,
                         targetSelectionMode: "RANDOM",
                     }),
@@ -363,15 +360,8 @@ test.group("spell effects", () => {
             spell,
         );
 
-        let damagedCount = 0;
-        if (game.data.playerTwo.health === initialHeroHealth - 4) {
-            damagedCount++;
-        }
-        if (game.data.playerTwo.board[0]!.health === 6) {
-            damagedCount++;
-        }
-
-        assert.equal(damagedCount, 2);
+        assert.equal(game.data.playerTwo.health, initialHeroHealth);
+        assert.equal(game.data.playerTwo.board[0]!.health, 6);
     });
 
     test("random damage spell fizzles when no eligible minion exists", ({ assert }) => {

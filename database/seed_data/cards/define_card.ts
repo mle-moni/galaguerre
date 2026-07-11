@@ -605,6 +605,14 @@ export const randomEnemyMinion = (): TargetDefinition =>
         targetSelectionMode: "RANDOM",
     });
 
+export const randomEnemyMinions = (n: number): TargetDefinition =>
+    baseTarget({
+        type: "MINION",
+        targetTeam: "OPPONENT",
+        maxTargets: n,
+        targetSelectionMode: "RANDOM",
+    });
+
 export const randomEnemyCharacter = (): TargetDefinition =>
     baseTarget({
         type: "ALL",
