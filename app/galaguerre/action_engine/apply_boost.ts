@@ -58,6 +58,9 @@ export const applyBoostToHero = (player: GamePlayer, boost: BoostSnapshot): void
     if (boost.spellPower !== null) {
         player.spellPower += boost.spellPower;
     }
+    if (boost.extraBattlecryTriggers !== null) {
+        player.extraBattlecryTriggers += boost.extraBattlecryTriggers;
+    }
 };
 
 export const applyBoostToAllMinions = (

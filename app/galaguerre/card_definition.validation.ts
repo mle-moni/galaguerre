@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import {
     boostHasEffect,
+    boostHasExtraBattlecryTriggers,
     boostHasMinionStats,
     boostHasSpellPower,
 } from "./action_engine/boost_utils.js";
@@ -41,6 +42,7 @@ export type BoostDefinition = {
     attack: number | null;
     health: number | null;
     spellPower: number | null;
+    extraBattlecryTriggers: number | null;
     minionPowers: MinionPower | null;
 };
 
@@ -311,7 +313,7 @@ const validateBoostContent = (
         ctx.addIssue({
             code: "custom",
             message:
-                "BOOST requires at least one non-null effect (attack, health, spellPower, or minionPower)",
+                "BOOST requires at least one non-null effect (attack, health, spellPower, extraBattlecryTriggers, or minionPower)",
             path,
         });
     }
@@ -575,7 +577,12 @@ const validateBoostTargetCompatibility = (
     path: (string | number)[],
 ) => {
     if (target.type === "MINION") {
-        if (boostHasSpellPower(boost) && !boostHasMinionStats(boost)) return;
+        if (
+            (boostHasSpellPower(boost) || boostHasExtraBattlecryTriggers(boost)) &&
+            !boostHasMinionStats(boost)
+        ) {
+            return;
+        }
         if (boostHasSpellPower(boost)) {
             ctx.addIssue({
                 code: "custom",
@@ -583,11 +590,24 @@ const validateBoostTargetCompatibility = (
                 path,
             });
         }
+        if (boostHasExtraBattlecryTriggers(boost)) {
+            ctx.addIssue({
+                code: "custom",
+                message: "BOOST extraBattlecryTriggers cannot target MINION",
+                path,
+            });
+        }
         return;
     }
 
     if (target.type === "HERO") {
-        if (boostHasMinionStats(boost) && !boostHasSpellPower(boost)) return;
+        if (
+            boostHasMinionStats(boost) &&
+            !boostHasSpellPower(boost) &&
+            !boostHasExtraBattlecryTriggers(boost)
+        ) {
+            return;
+        }
         if (boostHasMinionStats(boost)) {
             ctx.addIssue({
                 code: "custom",
@@ -805,6 +825,17 @@ const validateNonTargetedAction = (
                     code: "custom",
                     message: "DRAW action requires drawCount > 0",
                     path: [...path, "drawCount"],
+                });
+            }
+            if (
+                action.drawCardFilterAlternatives.length > 0 &&
+                action.drawCardFilterAlternatives.length < 2
+            ) {
+                ctx.addIssue({
+                    code: "custom",
+                    message:
+                        "DRAW action with drawCardFilterAlternatives requires at least 2 filters",
+                    path: [...path, "drawCardFilterAlternatives"],
                 });
             }
             break;

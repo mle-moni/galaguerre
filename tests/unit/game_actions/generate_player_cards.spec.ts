@@ -134,6 +134,7 @@ test.group("generatePlayerCards", () => {
             health: 2,
             spellPower: null,
             minionPowers: null,
+            extraBattlecryTriggers: null,
         });
         assert.include(generated.description, "Cri de guerre : Donne +2/+2 à un monstre allié.");
     });

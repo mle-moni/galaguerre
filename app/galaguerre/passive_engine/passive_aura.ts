@@ -331,7 +331,10 @@ const applyPassiveBoostAura = (
         return;
     }
 
-    if (target.type === "HERO" && boost.spellPower !== null) {
+    if (
+        target.type === "HERO" &&
+        (boost.spellPower !== null || boost.extraBattlecryTriggers !== null)
+    ) {
         for (const hero of resolveHeroTargets(target, sourceOwner, opponent)) {
             applyBoostToHero(hero, boost);
         }

@@ -66,6 +66,7 @@ export const boostSchema = z.object({
     attack: z.number().nullable(),
     health: z.number().nullable(),
     spellPower: z.number().nullable(),
+    extraBattlecryTriggers: z.number().int().nonnegative().nullable(),
     minionPowers: zMinionPowerSchema.nullable(),
 });
 
@@ -112,6 +113,7 @@ const drawActionFieldsSchema = z.object({
     isTargeted: z.literal(false).default(false),
     drawCount: z.number(),
     drawCardFilter: cardFilterSchema.nullable(),
+    drawCardFilterAlternatives: z.array(cardFilterSchema).default([]),
     actionCondition: actionConditionSchema,
 });
 

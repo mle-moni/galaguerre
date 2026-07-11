@@ -18,6 +18,7 @@ import {
     boostHealth,
     boostPassive,
     boostSpellPower,
+    boostExtraBattlecryTriggers,
     boostStealth,
     costLessThan,
     costEquals,
@@ -32,6 +33,7 @@ import {
     discoverAction,
     cardDrawFilter,
     drawAction,
+    drawOrAction,
     enemyDrawAction,
     enemyHero,
     enemyMinions,
@@ -261,6 +263,27 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
     ),
     defineMinion(
+        176,
+        {
+            ...gal("Molly", 7),
+            imageUrl: "/card-covers/galadrim/molly.webp",
+            attack: 4,
+            health: 6,
+        },
+        {
+            tags: ["DEVELOPPEUR", "PETS"],
+            passives: [boostPassive(boostSpellPower(1), allyHero())],
+            battlecryActions: [handCardAddAction(120)],
+            deathrattleActions: [
+                drawOrAction(1, [
+                    minionDrawFilter(["DEVELOPPEUR"]),
+                    cardDrawFilter(null, ["PETS"]),
+                ]),
+            ],
+        },
+        { rarity: "LEGENDARY" },
+    ),
+    defineMinion(
         169,
         {
             ...gal("Head of Emojis", 8),
@@ -274,6 +297,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
                 discoverAction(spellDiscoverFilter({ labelTags: ["EMOJI"] })),
                 discoverAction(spellDiscoverFilter({ labelTags: ["EMOJI"] })),
             ],
+        },
+        { rarity: "LEGENDARY" },
+    ),
+    defineMinion(
+        177,
+        {
+            ...gal("Jean", 3),
+            imageUrl: "/card-covers/galadrim/jean.webp",
+            attack: 2,
+            health: 4,
+        },
+        {
+            tags: ["DEVELOPPEUR", "SALES"],
+            passives: [boostPassive(boostExtraBattlecryTriggers(1), allyHero())],
         },
         { rarity: "LEGENDARY" },
     ),

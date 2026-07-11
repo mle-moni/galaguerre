@@ -1,5 +1,9 @@
 import { test } from "@japa/runner";
-import { drawCards, drawOneCard } from "../../../app/galaguerre/draw_cards.js";
+import {
+    drawCards,
+    drawOneCard,
+    drawOneCardWithOrFilters,
+} from "../../../app/galaguerre/draw_cards.js";
 import {
     createCardFilterSnapshot,
     createComparisonSnapshot,
@@ -7,6 +11,10 @@ import {
     createMinionCard,
     createSpellCard,
 } from "#tests/helpers/game/fixtures";
+import {
+    resetRandomIntInRangeOverride,
+    setRandomIntInRangeOverride,
+} from "../../../app/utils/random.js";
 
 test.group("draw_cards", () => {
     test("drawOneCard without filter draws from top of deck", ({ assert }) => {
@@ -123,5 +131,102 @@ test.group("draw_cards", () => {
         assert.equal(player.hand[0]!.uuid, "minion");
         assert.equal(player.deckCards.length, 1);
         assert.equal(player.deckCards[0]!.uuid, "spell");
+    });
+
+    test("drawOneCardWithOrFilters draws from randomly chosen matching filter", ({ assert }) => {
+        const devMinion = createMinionCard({ uuid: "dev", tags: ["DEVELOPPEUR"] });
+        const petsMinion = createMinionCard({ uuid: "pets", tags: ["PETS"] });
+        const player = createGamePlayer(1, { deckCards: [devMinion, petsMinion], hand: [] });
+        const filters = [
+            createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+            createCardFilterSnapshot({ type: "ANY", tags: ["PETS"] }),
+        ];
+
+        setRandomIntInRangeOverride(() => 0);
+        drawOneCardWithOrFilters(player, filters);
+        resetRandomIntInRangeOverride();
+
+        assert.equal(player.hand.length, 1);
+        assert.equal(player.hand[0]!.uuid, "dev");
+        assert.equal(player.deckCards.length, 1);
+        assert.equal(player.deckCards[0]!.uuid, "pets");
+    });
+
+    test("drawOneCardWithOrFilters falls back to next filter when first has no match", ({
+        assert,
+    }) => {
+        const petsMinion = createMinionCard({ uuid: "pets", tags: ["PETS"] });
+        const neutral = createMinionCard({ uuid: "neutral", tags: [] });
+        const player = createGamePlayer(1, { deckCards: [neutral, petsMinion], hand: [] });
+        const filters = [
+            createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+            createCardFilterSnapshot({ type: "ANY", tags: ["PETS"] }),
+        ];
+
+        setRandomIntInRangeOverride(() => 0);
+        drawOneCardWithOrFilters(player, filters);
+        resetRandomIntInRangeOverride();
+
+        assert.equal(player.hand.length, 1);
+        assert.equal(player.hand[0]!.uuid, "pets");
+        assert.equal(player.deckCards.length, 1);
+        assert.equal(player.deckCards[0]!.uuid, "neutral");
+    });
+
+    test("drawOneCardWithOrFilters draws nothing when no filter matches", ({ assert }) => {
+        const spell = createSpellCard({ uuid: "spell" });
+        const player = createGamePlayer(1, {
+            deckCards: [spell],
+            hand: [],
+            health: 15,
+            maxFatigueDamageTaken: 0,
+        });
+        const filters = [
+            createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+            createCardFilterSnapshot({ type: "ANY", tags: ["PETS"] }),
+        ];
+
+        drawOneCardWithOrFilters(player, filters);
+
+        assert.equal(player.hand.length, 0);
+        assert.equal(player.deckCards.length, 1);
+        assert.equal(player.health, 15);
+        assert.equal(player.maxFatigueDamageTaken, 0);
+    });
+
+    test("drawOneCardWithOrFilters applies fatigue when deck is empty", ({ assert }) => {
+        const player = createGamePlayer(1, {
+            deckCards: [],
+            hand: [],
+            health: 15,
+            maxFatigueDamageTaken: 0,
+        });
+        const filters = [
+            createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+            createCardFilterSnapshot({ type: "ANY", tags: ["PETS"] }),
+        ];
+
+        drawOneCardWithOrFilters(player, filters);
+
+        assert.equal(player.hand.length, 0);
+        assert.equal(player.health, 14);
+        assert.equal(player.maxFatigueDamageTaken, 1);
+    });
+
+    test("drawCards with filter alternatives uses OR logic", ({ assert }) => {
+        const petsMinion = createMinionCard({ uuid: "pets", tags: ["PETS"] });
+        const neutral = createMinionCard({ uuid: "neutral", tags: [] });
+        const player = createGamePlayer(1, { deckCards: [neutral, petsMinion], hand: [] });
+        const filters = [
+            createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+            createCardFilterSnapshot({ type: "ANY", tags: ["PETS"] }),
+        ];
+
+        setRandomIntInRangeOverride(() => 0);
+        drawCards(player, 1, null, undefined, filters);
+        resetRandomIntInRangeOverride();
+
+        assert.equal(player.hand.length, 1);
+        assert.equal(player.hand[0]!.uuid, "pets");
     });
 });

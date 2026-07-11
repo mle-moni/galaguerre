@@ -101,6 +101,7 @@ export const createBoostSnapshot = (overrides: Partial<BoostSnapshot> = {}): Boo
     attack: null,
     health: null,
     spellPower: null,
+    extraBattlecryTriggers: null,
     minionPowers: null,
     ...overrides,
 });
@@ -137,6 +138,7 @@ type CardActionSnapshotOverrides = {
     drawCount?: number;
     enemyDrawCount?: number;
     drawCardFilter?: CardFilterSnapshot | null;
+    drawCardFilterAlternatives?: CardFilterSnapshot[];
     discoverCardFilter?: CardFilterSnapshot;
     optionCount?: number;
     enemyDrawCardFilter?: CardFilterSnapshot | null;
@@ -184,6 +186,7 @@ export const createCardActionSnapshot = (
                 isTargeted: false,
                 drawCount: overrides.drawCount ?? 1,
                 drawCardFilter: overrides.drawCardFilter ?? null,
+                drawCardFilterAlternatives: overrides.drawCardFilterAlternatives ?? [],
                 actionCondition,
                 onTargetResult,
             };
@@ -219,6 +222,7 @@ export const createCardActionSnapshot = (
                     attack: 1,
                     health: null,
                     spellPower: null,
+                    extraBattlecryTriggers: null,
                     minionPowers: null,
                 },
                 target: overrides.target ?? null,
@@ -454,6 +458,7 @@ export const createGamePlayer = (
     heroLastAttackAtRound: 0,
     health: DEFAULT_HERO_HEALTH,
     spellPower: 0,
+    extraBattlecryTriggers: 0,
     mana: 10,
     maxFatigueDamageTaken: 0,
     stats: { ...DEFAULT_PLAYER_STATS },

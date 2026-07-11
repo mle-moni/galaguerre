@@ -122,7 +122,13 @@ test.group("card_definition.schema", () => {
             ...defaultMinionData(),
             battlecryActions: [
                 boostAction(
-                    { attack: 1, health: null, spellPower: 1, minionPowers: null },
+                    {
+                        attack: 1,
+                        health: null,
+                        spellPower: 1,
+                        extraBattlecryTriggers: null,
+                        minionPowers: null,
+                    },
                     enemyMinions(),
                 ),
             ],

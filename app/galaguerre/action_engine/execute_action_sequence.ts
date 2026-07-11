@@ -20,6 +20,10 @@ export interface ExecuteActionSequenceOptions {
     selectedTarget?: ActionTarget;
     damageBonus?: number;
     sourceMinion?: MinionState;
+    battlecryContinuation?: {
+        actions: CardActionSnapshot[];
+        remainingIterations: number;
+    };
 }
 
 export const executeActionSequence = (
@@ -51,6 +55,7 @@ export const executeActionSequence = (
                     selectedTarget: options.selectedTarget,
                     damageBonus,
                     sourceMinionUuid: options.sourceMinion?.uuid,
+                    battlecryContinuation: options.battlecryContinuation,
                 },
             },
         );

@@ -31,6 +31,7 @@ export const startDiscover = (
                 selectedTarget: discoverContext.selectedTarget,
                 damageBonus: discoverContext.damageBonus,
                 sourceMinionUuid: discoverContext.sourceMinionUuid,
+                battlecryContinuation: discoverContext.battlecryContinuation,
             },
         },
     };

@@ -12,10 +12,12 @@ import { EFFECT_DESCRIPTIONS } from "./card_keyword_glossary.js";
 import { CARD_LABEL_TAG_LABELS, CARD_TAG_LABELS, isCardTagImageSymbol } from "./card.types.js";
 import {
     formatActionDescription,
+    formatExtraBattlecryTriggersDescription,
     formatGroupedActionDescriptions,
     formatHealDamagePassiveTriggerLabel,
     formatPlayCardPassiveTriggerLabel,
     formatSummonPassiveTriggerLabel,
+    isExtraBattlecryTriggersOnlyAllyHeroBoost,
 } from "./format_action_description.js";
 
 const PASSIVE_TRIGGER_LABELS: Record<
@@ -131,6 +133,15 @@ export const getPassiveDescription = (passives: PassiveSnapshot[]): string[] => 
             if (passive.type === "BOOST" && passive.passiveBoost) {
                 if (passive.passiveBoost.scaleToSource === true) {
                     return formatScaledPassiveBoostDescription(passive.passiveBoost);
+                }
+
+                if (
+                    isExtraBattlecryTriggersOnlyAllyHeroBoost(
+                        passive.passiveBoost.boost,
+                        passive.passiveBoost.target,
+                    )
+                ) {
+                    return `Passif : ${formatExtraBattlecryTriggersDescription(passive.passiveBoost.boost.extraBattlecryTriggers!)}`;
                 }
 
                 const actionLike: CardActionSnapshot = {

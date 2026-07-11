@@ -1,6 +1,7 @@
 import type { CardFilterSnapshot, GamePlayer, PlayerCard, SpellCard } from "#api_types/game.types";
 import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import type Game from "#models/game";
+import { randomIntInRange } from "../utils/random.js";
 import { applyDamageToHero } from "./action_engine/apply_damage_to_hero.js";
 import { executeCastWhenDrawn } from "./cast_when_drawn/execute_cast_when_drawn.js";
 import { recordCardDraw, recordFatigueDamage } from "./game_log/record_game_log.js";
@@ -128,11 +129,47 @@ export const drawOneCard = (
     handleDrawnCard(player, card!, game);
 };
 
+export const drawOneCardWithOrFilters = (
+    player: GamePlayer,
+    filters: CardFilterSnapshot[],
+    game?: Game,
+): void => {
+    if (filters.length === 0) {
+        drawOneCard(player, null, game);
+        return;
+    }
+
+    if (player.deckCards.length === 0) {
+        applyFatigue(player, game);
+        return;
+    }
+
+    const startIndex = randomIntInRange(0, filters.length - 1);
+    for (let i = 0; i < filters.length; i++) {
+        const filter = filters[(startIndex + i) % filters.length]!;
+        const matchIndex = player.deckCards.findIndex((card) =>
+            deckCardMatchesFilter(card, filter),
+        );
+        if (matchIndex === -1) continue;
+
+        const [card] = player.deckCards.splice(matchIndex, 1);
+        handleDrawnCard(player, card!, game);
+        return;
+    }
+};
+
 export const drawCards = (
     player: GamePlayer,
     count: number,
     filter?: CardFilterSnapshot | null,
     game?: Game,
+    filterAlternatives?: CardFilterSnapshot[] | null,
 ): void => {
-    for (let i = 0; i < count; i++) drawOneCard(player, filter, game);
+    for (let i = 0; i < count; i++) {
+        if (filterAlternatives && filterAlternatives.length > 0) {
+            drawOneCardWithOrFilters(player, filterAlternatives, game);
+        } else {
+            drawOneCard(player, filter, game);
+        }
+    }
 };

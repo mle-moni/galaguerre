@@ -313,7 +313,13 @@ const executeNonTargetedV1Action = (
             break;
         }
         case "DRAW":
-            drawCards(player, action.drawCount!, action.drawCardFilter, game);
+            drawCards(
+                player,
+                action.drawCount!,
+                action.drawCardFilter,
+                game,
+                action.drawCardFilterAlternatives,
+            );
             break;
         case "ENEMY_DRAW":
             drawCards(opponent, action.enemyDrawCount!, action.enemyDrawCardFilter, game);

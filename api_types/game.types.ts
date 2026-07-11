@@ -209,6 +209,7 @@ export interface GamePlayer {
     heroLastAttackAtRound: number;
     health: number;
     spellPower: number;
+    extraBattlecryTriggers: number;
     nextSpellCostReduction?: number;
     mana: number;
     maxFatigueDamageTaken: number;
@@ -243,6 +244,10 @@ export interface DiscoverContinuation {
         selectedTarget?: ActionTarget;
         damageBonus: number;
         sourceMinionUuid?: string;
+        battlecryContinuation?: {
+            actions: CardActionSnapshot[];
+            remainingIterations: number;
+        };
     };
 }
 

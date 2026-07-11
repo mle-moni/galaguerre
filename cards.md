@@ -485,3 +485,11 @@ Format compact pour construction de deck par LLM.
 ### #175 PR Refusée
 - Coût: 2 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
 - Effet : Renvoie un monstre adverse à la main adverse.
+
+### #176 Molly
+- Coût: 7 | Type: MINION | Stats: 4/6 | Rareté: Légendaire | Famille: Développeur, Pets
+- Passif : Donne +1 dégâts de sort au héros allié. Cri de guerre : Ajoute 1 copie de Jet de Ducros à votre main. Dernier souffle : Pioche 1 carte Monstre + 💻 Développeur OU Carte + 🐾 Pets.
+
+### #177 Jean
+- Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur, Sales
+- Passif : Vos Cris de guerre se déclenchent deux fois.

@@ -117,6 +117,22 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats draw with OR filter alternatives", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DRAW",
+            drawCount: 1,
+            drawCardFilterAlternatives: [
+                createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+                createCardFilterSnapshot({ type: "ANY", tags: ["PETS"] }),
+            ],
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Râle d'agonie"),
+            "Râle d'agonie : Pioche 1 carte Monstre + 💻 Développeur OU Carte + 🐾 Pets.",
+        );
+    });
+
     test("formats targeted damage to any minion without redundant team label", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DAMAGE",
@@ -197,7 +213,13 @@ test.group("format_action_description", () => {
         const action = createCardActionSnapshot({
             type: "BOOST",
             isTargeted: false,
-            boost: { attack: 1, health: 1, spellPower: null, minionPowers: null },
+            boost: {
+                attack: 1,
+                health: 1,
+                spellPower: null,
+                extraBattlecryTriggers: null,
+                minionPowers: null,
+            },
             target: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
         });
 

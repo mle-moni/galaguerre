@@ -14,6 +14,10 @@ export interface ExecuteActionDiscoverContext {
     selectedTarget?: ActionTarget;
     damageBonus: number;
     sourceMinionUuid?: string;
+    battlecryContinuation?: {
+        actions: CardActionSnapshot[];
+        remainingIterations: number;
+    };
 }
 
 export interface ExecuteActionOptions {

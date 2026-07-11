@@ -172,7 +172,13 @@ test.group("passive ACTION triggers", () => {
                     triggersOn: "TURN_END",
                     action: createCardActionSnapshot({
                         type: "BOOST",
-                        boost: { attack: 1, health: 1, spellPower: null, minionPowers: null },
+                        boost: {
+                            attack: 1,
+                            health: 1,
+                            spellPower: null,
+                            extraBattlecryTriggers: null,
+                            minionPowers: null,
+                        },
                         target: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
                     }),
                 }),

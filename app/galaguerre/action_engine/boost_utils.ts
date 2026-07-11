@@ -5,6 +5,7 @@ export const boostHasEffect = (boost: BoostSnapshot): boolean => {
         boost.attack !== null ||
         boost.health !== null ||
         boost.spellPower !== null ||
+        boost.extraBattlecryTriggers !== null ||
         boost.minionPowers !== null
     );
 };
@@ -17,4 +18,8 @@ export const boostHasMinionStats = (boost: BoostSnapshot): boolean => {
 
 export const boostHasSpellPower = (boost: BoostSnapshot): boolean => {
     return boost.spellPower !== null;
+};
+
+export const boostHasExtraBattlecryTriggers = (boost: BoostSnapshot): boolean => {
+    return boost.extraBattlecryTriggers !== null;
 };

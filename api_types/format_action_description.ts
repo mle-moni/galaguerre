@@ -116,6 +116,30 @@ const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
     return ` ${parts.join(" + ")}`;
 };
 
+const BATTLECRY_TRIGGER_COUNT_LABELS: Record<number, string> = {
+    2: "deux fois",
+    3: "trois fois",
+    4: "quatre fois",
+};
+
+export const formatExtraBattlecryTriggersDescription = (extraTriggers: number): string => {
+    const triggerCount = 1 + extraTriggers;
+    const countLabel = BATTLECRY_TRIGGER_COUNT_LABELS[triggerCount] ?? `${triggerCount} fois`;
+    return `Vos Cris de guerre se déclenchent ${countLabel}.`;
+};
+
+export const isExtraBattlecryTriggersOnlyAllyHeroBoost = (
+    boost: BoostSnapshot,
+    target: TargetSnapshot | null | undefined,
+): boolean =>
+    boost.extraBattlecryTriggers !== null &&
+    boost.attack === null &&
+    boost.health === null &&
+    boost.spellPower === null &&
+    boost.minionPowers === null &&
+    target?.type === "HERO" &&
+    target.targetTeam === "PLAYER";
+
 const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
     const parts: string[] = [];
 
@@ -304,6 +328,22 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     }
 
     return ` ${parts.join(" + ")}`;
+};
+
+const formatOrCardFilterSuffix = (filters: CardFilterSnapshot[]): string => {
+    if (filters.length === 0) return "";
+    return filters.map((filter) => formatCardFilterSuffix(filter).trim()).join(" OU ");
+};
+
+const formatDrawFilterSuffix = (
+    filter: CardFilterSnapshot | null,
+    alternatives: CardFilterSnapshot[],
+): string => {
+    if (alternatives.length > 0) {
+        const orSuffix = formatOrCardFilterSuffix(alternatives);
+        return orSuffix.length > 0 ? ` ${orSuffix}` : "";
+    }
+    return formatCardFilterSuffix(filter);
 };
 
 export const formatPlayCardPassiveTriggerLabel = (
@@ -525,7 +565,7 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) return null;
             const suffix = action.drawCount === 1 ? "carte" : "cartes";
-            return `pioche ${action.drawCount} ${suffix}${formatCardFilterSuffix(action.drawCardFilter)}`;
+            return `pioche ${action.drawCount} ${suffix}${formatDrawFilterSuffix(action.drawCardFilter, action.drawCardFilterAlternatives)}`;
         }
         case "ENEMY_DRAW": {
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
@@ -812,7 +852,7 @@ export const formatActionDescription = (
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) return null;
             const suffix = action.drawCount === 1 ? "carte" : "cartes";
-            return `${prefix} : Pioche ${action.drawCount} ${suffix}${formatCardFilterSuffix(action.drawCardFilter)}.`;
+            return `${prefix} : Pioche ${action.drawCount} ${suffix}${formatDrawFilterSuffix(action.drawCardFilter, action.drawCardFilterAlternatives)}.`;
         }
         case "ENEMY_DRAW": {
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;
@@ -826,6 +866,10 @@ export const formatActionDescription = (
         }
         case "BOOST": {
             if (!action.boost) return null;
+
+            if (isExtraBattlecryTriggersOnlyAllyHeroBoost(action.boost, action.target)) {
+                return `${prefix} : ${formatExtraBattlecryTriggersDescription(action.boost.extraBattlecryTriggers!)}`;
+            }
 
             const effectText = formatBoostStatSuffix(action.boost);
             if (!effectText) return null;

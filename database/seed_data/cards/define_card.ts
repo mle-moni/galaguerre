@@ -113,6 +113,20 @@ export const drawAction = (
     isTargeted: false,
     drawCount,
     drawCardFilter,
+    drawCardFilterAlternatives: [],
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const drawOrAction = (
+    drawCount: number,
+    filters: CardFilterDefinition[],
+): CardActionDefinition => ({
+    type: "DRAW",
+    isTargeted: false,
+    drawCount,
+    drawCardFilter: null,
+    drawCardFilterAlternatives: filters,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
 });
@@ -615,6 +629,7 @@ export const boostStats = (overrides: Partial<BoostDefinition> = {}): BoostDefin
     attack: null,
     health: null,
     spellPower: null,
+    extraBattlecryTriggers: null,
     minionPowers: null,
     ...overrides,
 });
@@ -627,6 +642,9 @@ export const boostBoth = (attack: number, health: number): BoostDefinition =>
     boostStats({ attack, health });
 
 export const boostSpellPower = (spellPower: number): BoostDefinition => boostStats({ spellPower });
+
+export const boostExtraBattlecryTriggers = (count: number): BoostDefinition =>
+    boostStats({ extraBattlecryTriggers: count });
 
 export const boostTaunt = (): BoostDefinition =>
     boostStats({

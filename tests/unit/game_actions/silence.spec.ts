@@ -131,6 +131,7 @@ test.group("SILENCE action", () => {
             attack: null,
             health: null,
             spellPower: null,
+            extraBattlecryTriggers: null,
             minionPowers: {
                 hasTaunt: true,
                 hasCharge: false,

@@ -18,4 +18,7 @@ export const revertBoostFromHero = (player: GamePlayer, boost: BoostSnapshot): v
     if (boost.spellPower !== null) {
         player.spellPower -= boost.spellPower;
     }
+    if (boost.extraBattlecryTriggers !== null) {
+        player.extraBattlecryTriggers -= boost.extraBattlecryTriggers;
+    }
 };
