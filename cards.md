@@ -492,4 +492,4 @@ Format compact pour construction de deck par LLM.
 
 ### #177 Jean
 - Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur, Sales
-- Passif : Vos Cris de guerre se déclenchent deux fois.
+- Passif : Vos Cris de guerre se déclenchent 1 fois de plus.

@@ -1,6 +1,6 @@
 .pack-opening-card {
     --card-w: 150px;
-    --card-h: calc(var(--card-w) * 1.4);
+    --card-h: calc(var(--card-w) * var(--card-height-ratio));
     --stat-badge: 14px;
 
     background: none;

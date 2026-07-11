@@ -48,7 +48,7 @@ const DeckInfosRow = observer(({ player, animationOwner }: DeckInfosRowProps) =>
                 src={CARD_BACK_IMAGE_URL}
                 alt=""
                 draggable={false}
-                style={{ height: iconSize, aspectRatio: "5 / 7" }}
+                style={{ height: iconSize, aspectRatio: "20 / 31" }}
             />
         </div>
     );

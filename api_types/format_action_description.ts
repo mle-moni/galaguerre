@@ -121,9 +121,9 @@ const formatTargetFilterSuffix = (action: CardActionSnapshot): string => {
 };
 
 const BATTLECRY_TRIGGER_COUNT_LABELS: Record<number, string> = {
-    2: "deux fois",
-    3: "trois fois",
-    4: "quatre fois",
+    2: "1 fois de plus",
+    3: "2 fois de plus",
+    4: "3 fois de plus",
 };
 
 export const formatExtraBattlecryTriggersDescription = (extraTriggers: number): string => {

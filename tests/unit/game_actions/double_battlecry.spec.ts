@@ -33,11 +33,11 @@ const createBattlecryDamageMinion = (overrides: { uuid?: string; cost?: number }
         ],
     });
 
-const createJeanOnBoard = () => {
+const createJeanOnBoard = (overrides: { uuid?: string } = {}) => {
     const jeanTemplate = getMinionCardTemplateById(177)!;
     return createMinionCard({
         ...jeanTemplate,
-        uuid: "jean-on-board",
+        uuid: overrides.uuid ?? "jean-on-board",
     });
 };
 
@@ -76,6 +76,33 @@ test.group("double battlecry", () => {
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 4);
     });
 
+    test("battlecry triggers three times with two Jeans on board", ({ assert }) => {
+        const jeanOne = createJeanOnBoard({ uuid: "jean-one" });
+        const jeanTwo = createJeanOnBoard({ uuid: "jean-two" });
+        const handCard = createBattlecryDamageMinion({ uuid: CARD_IDS.handMinion });
+
+        const board = placeMinion(
+            placeMinion(createEmptyBoard(), 0, createMinionState(jeanOne)),
+            1,
+            createMinionState(jeanTwo),
+        );
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: {
+                    mana: 10,
+                    hand: [handCard],
+                    board,
+                },
+                playerTwo: { health: DEFAULT_HERO_HEALTH },
+            }),
+            handCard,
+            { boardIndex: 2 },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 6);
+    });
+
     test("silencing Jean restores single battlecry trigger", ({ assert }) => {
         const jeanOnBoard = createJeanOnBoard();
         const handCard = createBattlecryDamageMinion({ uuid: CARD_IDS.handMinion });
@@ -112,6 +139,9 @@ test.group("double battlecry", () => {
 
     test("Jean card description mentions double battlecries", ({ assert }) => {
         const jeanTemplate = getMinionCardTemplateById(177)!;
-        assert.include(jeanTemplate.description, "Vos Cris de guerre se déclenchent deux fois.");
+        assert.include(
+            jeanTemplate.description,
+            "Vos Cris de guerre se déclenchent 1 fois de plus.",
+        );
     });
 });

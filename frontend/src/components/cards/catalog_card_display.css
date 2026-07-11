@@ -1,7 +1,7 @@
 .catalog-card-artwork {
     position: relative;
     width: var(--card-w, 72px);
-    height: calc(var(--card-h, calc(var(--card-w, 72px) * 1.4)) * 0.44);
+    height: calc(var(--card-h, calc(var(--card-w, 72px) * var(--card-height-ratio))) * var(--card-image-height-ratio));
     border-radius: 4px;
     overflow: hidden;
     flex-shrink: 0;
