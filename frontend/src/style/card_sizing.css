@@ -1,10 +1,8 @@
 :root {
-    --card-height-ratio: 1.55;
-    --card-image-height-ratio: 0.4;
     --card-w-full: 220px;
-    --card-h-full: 341px;
+    --card-h-full: 308px;
     --card-w-hand: 88px;
-    --card-h-hand: 136px;
+    --card-h-hand: 123px;
     --stat-badge-full: 36px;
     --stat-badge-hand: 16px;
     --card-w: var(--card-w-full);
@@ -20,27 +18,26 @@
 
 .card-composition {
     --card-w: 150px;
-    --card-h: calc(var(--card-w) * var(--card-height-ratio));
+    --card-h: calc(var(--card-w) * 1.4);
     --stat-badge: 14px;
 }
 
 @media (max-width: 639px) {
     :root {
-        --card-image-height-ratio: 0.38;
         --card-w-full: clamp(160px, 42vw, 200px);
-        --card-h-full: calc(var(--card-w-full) * var(--card-height-ratio));
+        --card-h-full: calc(var(--card-w-full) * 1.4);
         --stat-badge-full: clamp(24px, 6vw, 32px);
     }
 
     .card-hand {
         --card-w-hand: clamp(64px, 19vw, 80px);
-        --card-h-hand: calc(var(--card-w-hand) * var(--card-height-ratio));
+        --card-h-hand: calc(var(--card-w-hand) * 1.4);
         --stat-badge-hand: clamp(14px, 3.5vw, 16px);
     }
 
     .card-composition {
         --card-w: clamp(72px, 28vw, 120px);
-        --card-h: calc(var(--card-w) * var(--card-height-ratio));
+        --card-h: calc(var(--card-w) * 1.4);
     }
 }
 

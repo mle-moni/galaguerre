@@ -28,7 +28,7 @@
 }
 
 .playing-card-face__image-area {
-	height: calc(var(--card-h) * var(--card-image-height-ratio));
+	height: calc(var(--card-h) * 0.44);
 	flex-shrink: 0;
 	overflow: hidden;
 	border-radius: 7px 7px 0 0;
@@ -161,20 +161,6 @@
 	}
 }
 
-@media (max-width: 639px) {
-	.playing-card-face__text {
-		gap: calc(var(--card-w) * 0.01);
-	}
-
-	.playing-card-face__text > .card-rarity-badge {
-		margin-bottom: calc(var(--card-w) * 0.005);
-	}
-
-	.playing-card-face__body {
-		padding-top: calc(var(--card-w) * 0.02);
-	}
-}
-
 .card-face-description {
 	flex-shrink: 1;
 	min-height: 0;
@@ -187,32 +173,32 @@
 	overflow-wrap: anywhere;
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 6;
+	-webkit-line-clamp: 5;
 }
 
 .card-face-description--long {
 	font-size: calc(var(--card-w) * 0.05);
 	line-height: 1.25;
-	-webkit-line-clamp: 7;
+	-webkit-line-clamp: 6;
 }
 
 .card-face-description--very-long {
 	font-size: calc(var(--card-w) * 0.044);
 	line-height: 1.2;
-	-webkit-line-clamp: 8;
+	-webkit-line-clamp: 7;
 }
 
 @container (max-width: 100px) {
 	.card-face-description {
 		font-size: calc(var(--card-w) * 0.05);
 		line-height: 1.2;
-		-webkit-line-clamp: 7;
+		-webkit-line-clamp: 6;
 	}
 
 	.card-face-description--long,
 	.card-face-description--very-long {
 		font-size: calc(var(--card-w) * 0.046);
-		-webkit-line-clamp: 8;
+		-webkit-line-clamp: 7;
 	}
 }
 

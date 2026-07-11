@@ -108,7 +108,7 @@
 .gg-catalog-card-slot__preview .playing-card-face {
     width: 100%;
     --card-w: 100cqw;
-    --card-h: calc(100cqw * var(--card-height-ratio));
+    --card-h: calc(100cqw * 1.4);
     --stat-badge: calc(100cqw * 0.1636);
     height: var(--card-h);
 }
