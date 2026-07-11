@@ -111,8 +111,8 @@
 }
 
 .hero-panel__stat-badge--weapon-damage {
-	background-color: #e32a2a;
-	color: #fff;
+	background: linear-gradient(180deg, #f0d44b 0%, #c9a318 100%);
+	color: #111;
 }
 
 .hero-panel__stat-badge--weapon-durability {

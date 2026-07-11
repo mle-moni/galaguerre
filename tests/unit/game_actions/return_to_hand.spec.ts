@@ -261,6 +261,38 @@ test.group("RETURN_TO_HAND action", () => {
         }
     });
 
+    test("overdraws when opponent hand is full for PR Refusée", ({ assert }) => {
+        const enemyMinion = createMinionCard({
+            uuid: "enemy-minion",
+            cardId: 999,
+            baseCost: 3,
+            cost: 3,
+        });
+        const spell = createEnemyReturnToHandSpell();
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    mana: 2,
+                    hand: [spell],
+                },
+                playerTwo: {
+                    hand: createFullHand(MAX_HAND_SIZE),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(enemyMinion)),
+                },
+            }),
+            spell,
+            { actionTarget: { minionUuid: "enemy-minion", owner: "OPPONENT" } },
+        );
+
+        assert.equal(game.data.playerTwo.board.length, 0);
+        assert.equal(game.data.playerTwo.hand.length, MAX_HAND_SIZE);
+        assert.isFalse(game.data.playerTwo.hand.some((card) => card.cardId === enemyMinion.cardId));
+
+        const overdrawEntry = game.data.actionLog.find((entry) => entry.type === "OVERDRAW");
+        assert.exists(overdrawEntry);
+    });
+
     test("git revert integration returns ally to caster hand", ({ assert }) => {
         const allyMinion = createMinionCard({
             uuid: "integration-ally",

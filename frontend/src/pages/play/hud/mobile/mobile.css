@@ -160,7 +160,8 @@
 }
 
 .mobile-bar__badge--health {
-	background-color: #2ae32a;
+	background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+	color: #fff;
 }
 
 .mobile-bar__badge--mana {
@@ -168,8 +169,8 @@
 }
 
 .mobile-bar__badge--weapon-damage {
-	background-color: #e32a2a;
-	color: #fff;
+	background: linear-gradient(180deg, #f0d44b 0%, #c9a318 100%);
+	color: #111;
 }
 
 .mobile-bar__badge--weapon-durability {

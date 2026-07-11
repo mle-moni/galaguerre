@@ -255,8 +255,6 @@
 	width: var(--stat-badge);
 	height: var(--stat-badge);
 	border-radius: 50%;
-	background-color: #e32a2a;
-	color: #fff;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -266,9 +264,14 @@
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
+.attack {
+	background: linear-gradient(180deg, #f0d44b 0%, #c9a318 100%);
+	color: #111;
+}
+
 .health {
-	background-color: #2ae32a;
-	color: #000;
+	background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+	color: #fff;
 }
 
 .durability {

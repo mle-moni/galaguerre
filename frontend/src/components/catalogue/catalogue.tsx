@@ -1,5 +1,10 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
-import { getGoldCoinsPerCardBuy, getGoldCoinsPerDuplicateSell } from "#api_types/card_rarity.types";
+import {
+    CARD_RARITY_LABELS,
+    type CardRarity,
+    getGoldCoinsPerCardBuy,
+    getGoldCoinsPerDuplicateSell,
+} from "#api_types/card_rarity.types";
 import { CARD_TAG_LABELS, type CardTag } from "#api_types/card.types";
 import { Button, Collapse, SegmentedControl, Select, TextInput, Tooltip } from "@mantine/core";
 import {
@@ -27,12 +32,21 @@ import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 
 type CardTypeFilter = "ALL" | "MINION" | "SPELL" | "WEAPON";
+type CardRarityFilter = "ALL" | CardRarity;
 
 const CARD_TYPE_FILTER_LABELS: Record<Exclude<CardTypeFilter, "ALL">, string> = {
     MINION: "Monstres",
     SPELL: "Sorts",
     WEAPON: "Armes",
 };
+
+const CARD_RARITY_FILTER_OPTIONS = [
+    { value: "ALL", label: "Rareté (toutes)" },
+    ...(["COMMON", "RARE", "EPIC", "LEGENDARY"] as const).map((rarity) => ({
+        value: rarity,
+        label: CARD_RARITY_LABELS[rarity],
+    })),
+];
 
 const normalizeForSearch = (value: string) =>
     value
@@ -440,6 +454,7 @@ export const Catalogue = observer(
         const [sellModalCard, setSellModalCard] = useState<ApiCatalogCard | null>(null);
         const [showFilters, setShowFilters] = useState(false);
         const [tagFilter, setTagFilter] = useState<CardTag | null>(null);
+        const [rarityFilter, setRarityFilter] = useState<CardRarityFilter>("ALL");
 
         const isCollection = variant === "collection";
         const isDeckBuilder = variant === "deckBuilder";
@@ -469,6 +484,7 @@ export const Catalogue = observer(
             if (search && !cardMatchesSearch(card, search)) return false;
             if (typeFilter !== "ALL" && card.type !== typeFilter) return false;
             if (costFilter !== null && card.cost !== Number(costFilter)) return false;
+            if (rarityFilter !== "ALL" && card.rarity !== rarityFilter) return false;
             if (tagFilter !== null && !card.tags.includes(tagFilter)) return false;
             if ((ownedOnly || showOwnedOnly) && (ownedCounts?.get(card.id) ?? 0) === 0) {
                 return false;
@@ -525,6 +541,12 @@ export const Catalogue = observer(
                     onChange={(v) => setCostFilter(v || null)}
                     data={costOptions}
                     className="collection-catalogue__cost-select"
+                />
+                <Select
+                    value={rarityFilter}
+                    onChange={(v) => setRarityFilter((v as CardRarityFilter) ?? "ALL")}
+                    data={CARD_RARITY_FILTER_OPTIONS}
+                    className="collection-catalogue__rarity-select"
                 />
                 {ownedCounts !== undefined && onShowOwnedOnlyChange && !ownedOnly && (
                     <SegmentedControl

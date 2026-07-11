@@ -47,6 +47,11 @@
     flex-shrink: 0;
 }
 
+.collection-catalogue__filters .collection-catalogue__rarity-select {
+    width: 160px;
+    flex-shrink: 0;
+}
+
 .collection-catalogue__filters .collection-catalogue__ownership {
     flex-shrink: 0;
 }
@@ -180,6 +185,7 @@
     .collection-catalogue__filters .collection-catalogue__search,
     .collection-catalogue__filters .collection-catalogue__type-select,
     .collection-catalogue__filters .collection-catalogue__cost-select,
+    .collection-catalogue__filters .collection-catalogue__rarity-select,
     .collection-catalogue__filters .collection-catalogue__ownership {
         width: 100%;
         min-width: 0;
