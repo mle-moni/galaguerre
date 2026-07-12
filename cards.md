@@ -153,7 +153,7 @@ Format compact pour construction de deck par LLM.
 - Coût: 4 | Type: MINION | Stats: 3/5 | Rareté: Commune | Famille: Lyonnais
 - Dernier souffle : Rend 4 PV au héros allié.
 
-### #92 Mascotte du Bureau
+### #92 Sully JR
 - Coût: 1 | Type: MINION | Stats: 1/1 | Rareté: Commune | Famille: Pets
 - Passif : Donne +1/+1 à vos autres monstres Pets.
 

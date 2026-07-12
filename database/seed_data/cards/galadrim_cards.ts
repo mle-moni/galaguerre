@@ -701,8 +701,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineMinion(
         92,
         {
-            ...gal("Mascotte du Bureau", 1),
-            imageUrl: "/card-covers/galadrim/mascotte-du-bureau.webp",
+            ...gal("Sully JR", 1),
+            imageUrl: "/card-covers/galadrim/sully-jr.webp",
             attack: 1,
             health: 1,
         },
