@@ -5,7 +5,7 @@ import {
     createGameNarrativeRecorder,
     GameNarrativeRecorder,
 } from "#galaguerre/game_narrative/game_narrative_recorder";
-import { createGameData, createMinionCard } from "#tests/helpers/game/fixtures";
+import { createGameData, createMinionCard, createSpellCard } from "#tests/helpers/game/fixtures";
 import type { DateTime } from "luxon";
 
 const createMockGame = (data: GameData) => ({
@@ -109,5 +109,62 @@ test.group("filterPresentationForUser", () => {
         assert.equal(forPlayerOne.stateBefore.playerTwo.hand[0]!.label, "dummy card");
         assert.equal(forPlayerOne.beats[0]!.stateAfter.playerTwo.hand[0]!.label, "dummy card");
         assert.equal(forPlayerOne.beats[0]!.stateAfter.playerTwo.hand[1]!.label, "dummy card");
+    });
+
+    test("preserves dynamic spell costs for the viewed player in narrative checkpoints", async ({
+        assert,
+    }) => {
+        const recorder = new GameNarrativeRecorder();
+        const discountedSpell = createSpellCard({
+            uuid: "discounted-spell",
+            label: "Discounted Spell",
+            baseCost: 4,
+            cost: 2,
+        });
+        const remainingSpell = createSpellCard({
+            uuid: "remaining-spell",
+            label: "Remaining Spell",
+            baseCost: 2,
+            cost: 0,
+        });
+
+        const initialData = createGameData({
+            playerOne: {
+                userId: 1,
+                mana: 5,
+                hand: [discountedSpell, remainingSpell],
+                nextSpellCostReduction: 2,
+            },
+            playerTwo: { userId: 2 },
+        });
+        const game = createMockGame(initialData);
+
+        recorder.reset(initialData);
+        recorder.beginBeat("PLAY_CARD");
+        recorder.recordEffect({
+            type: "MOVE_CARD",
+            cardUuid: "discounted-spell",
+            owner: "PLAYER",
+            from: "HAND",
+            to: { type: "DISCARD" },
+        });
+        recorder.recordEffect({ type: "SPEND_MANA", owner: "PLAYER", amount: 2 });
+
+        game.data = createGameData({
+            playerOne: {
+                userId: 1,
+                mana: 3,
+                hand: [{ ...remainingSpell, cost: 2 }],
+            },
+            playerTwo: { userId: 2 },
+        });
+        recorder.endBeat(game);
+
+        const raw = recorder.build(game, "update-1");
+        assert.isNotNull(raw);
+
+        const forPlayerOne = buildPresentationForUser(raw!, 1);
+        assert.equal(forPlayerOne.beats[0]!.stateAfter.playerOne.hand[0]!.cost, 2);
+        assert.equal(forPlayerOne.stateAfter.playerOne.hand[0]!.cost, 2);
     });
 });

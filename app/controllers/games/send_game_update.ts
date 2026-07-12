@@ -52,6 +52,7 @@ export const sendGameUpdate = (game: Game, presentation?: GamePresentationUpdate
     if (game.data.isTraining) {
         const humanUserId = getTrainingHumanUserId(game);
         emitForUser(game, humanUserId, humanUserId, presentation);
+        emitForSpectators(game, presentation);
         scheduleAiDiscoverIfNeeded(game);
         return;
     }
