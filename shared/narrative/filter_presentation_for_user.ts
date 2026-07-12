@@ -6,6 +6,7 @@ import type {
     PlayerCard,
 } from "#api_types/game.types";
 import type { GamePresentationUpdate, NarrativeBeat } from "#api_types/game_narrative.types";
+import { normalizePresentationForReplay } from "./normalize_replay_game_data.js";
 import { remapEffectForUser } from "./remap_narrative_for_user.js";
 
 const hideCardData = (card: PlayerCard): PlayerCard => ({
@@ -30,8 +31,11 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     rarity: "COMMON",
 });
 
-const hideActionLogForUser = (actionLog: GameLogEntry[], forUserId: number): GameLogEntry[] =>
-    actionLog.map((entry) => {
+const hideActionLogForUser = (
+    actionLog: GameLogEntry[] | undefined,
+    forUserId: number,
+): GameLogEntry[] =>
+    (actionLog ?? []).map((entry) => {
         if (entry.type === "DRAW" && entry.card && entry.playerId !== forUserId) {
             return { ...entry, card: hideCardData(entry.card) };
         }
@@ -40,13 +44,14 @@ const hideActionLogForUser = (actionLog: GameLogEntry[], forUserId: number): Gam
     });
 
 export const hidePlayerDataForUser = (player: GamePlayer, forUserId: number): GamePlayer => {
-    const deckCards = player.deckCards.map(hideCardData);
-    const hiddenHand = player.hand.map(hideCardData);
+    const hand = player.hand ?? [];
+    const deckCards = (player.deckCards ?? []).map(hideCardData);
+    const hiddenHand = hand.map(hideCardData);
 
     return {
         ...player,
         deckCards,
-        hand: player.userId === forUserId ? player.hand : hiddenHand,
+        hand: player.userId === forUserId ? hand : hiddenHand,
     };
 };
 
@@ -84,7 +89,9 @@ const filterBeatForUser = (
     playerOneUserId: number,
 ): NarrativeBeat => ({
     ...beat,
-    effects: beat.effects.map((effect) => remapEffectForUser(effect, forUserId, playerOneUserId)),
+    effects: (beat.effects ?? []).map((effect) =>
+        remapEffectForUser(effect, forUserId, playerOneUserId),
+    ),
     stateAfter: hideGameDataForUser(beat.stateAfter, forUserId),
 });
 
@@ -92,14 +99,13 @@ export const filterPresentationForUser = (
     presentation: GamePresentationUpdate,
     forUserId: number,
 ): GamePresentationUpdate => {
-    const playerOneUserId = presentation.stateBefore.playerOne.userId;
+    const normalized = normalizePresentationForReplay(presentation);
+    const playerOneUserId = normalized.stateBefore.playerOne.userId;
 
     return {
-        ...presentation,
-        stateBefore: hideGameDataForUser(presentation.stateBefore, forUserId),
-        stateAfter: hideGameDataForUser(presentation.stateAfter, forUserId),
-        beats: presentation.beats.map((beat) =>
-            filterBeatForUser(beat, forUserId, playerOneUserId),
-        ),
+        ...normalized,
+        stateBefore: hideGameDataForUser(normalized.stateBefore, forUserId),
+        stateAfter: hideGameDataForUser(normalized.stateAfter, forUserId),
+        beats: normalized.beats.map((beat) => filterBeatForUser(beat, forUserId, playerOneUserId)),
     };
 };

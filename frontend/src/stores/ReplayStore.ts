@@ -100,7 +100,7 @@ export class ReplayStore {
     }
 
     get steps(): GamePresentationUpdate[] {
-        return this.replay?.replay.steps ?? [];
+        return this.replay?.replay?.steps ?? [];
     }
 
     get maxStepIndex() {
@@ -205,7 +205,10 @@ export class ReplayStore {
             throw new Error("ReplayStore not initialized");
         }
 
-        const filtered = hideGameDataForUser(data, this.perspectiveUserId);
+        const filtered = hideGameDataForUser(
+            normalizeGameDataForReplay(data),
+            this.perspectiveUserId,
+        );
 
         return {
             id: this.replay.gameId,

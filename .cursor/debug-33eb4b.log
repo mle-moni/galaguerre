@@ -1,0 +1,1 @@
+{"sessionId":"33eb4b","runId":"pre-fix","hypothesisId":"A","location":"use_replay_url_sync.ts:maxStepIndex","message":"Replay API shape before init","data":{"gameId":38,"hasReplayField":true,"stepsType":"object","stepsIsArray":true,"stepsLength":1,"maxStepIndex":1},"timestamp":1783884268271}
