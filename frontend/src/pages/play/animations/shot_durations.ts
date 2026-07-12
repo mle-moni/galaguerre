@@ -7,7 +7,7 @@ export const ANIMATION_TIMING = {
     ATTACK: { normal: 0.32, reduced: 0.16 },
     FLOATING_TEXT: { normal: 0.52, reduced: 0.28 },
     DEATH: { normal: 0.32, reduced: 0.16 },
-    HERO_EXPLOSION: { normal: 3, reduced: 1 },
+    HERO_EXPLOSION: { normal: 2, reduced: 1 },
     TURN_BANNER: { normal: 0.8, reduced: 0.5 },
     SOURCE_PULSE: { normal: 0.3, reduced: 0.14 },
 } as const;

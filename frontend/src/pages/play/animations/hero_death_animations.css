@@ -1,5 +1,5 @@
 .hero-target--dying {
-	animation: hero-death-shake 3s ease-in-out forwards;
+	animation: hero-death-shake 2s ease-in-out forwards;
 	transform-origin: center center;
 }
 
