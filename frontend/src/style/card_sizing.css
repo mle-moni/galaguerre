@@ -78,6 +78,14 @@
 .card-preview-sheet-content {
     display: flex;
     flex-direction: column;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+}
+
+.card-preview-sheet-header {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    flex-shrink: 0;
 }
 
 .card-preview-sheet-body {
@@ -86,7 +94,7 @@
     align-items: center;
     justify-content: center;
     min-height: 0;
-    padding: 0.75rem 1rem 1.25rem;
+    padding: 0.75rem 1rem max(1.25rem, env(safe-area-inset-bottom));
 }
 
 .card-preview-sheet__face {
@@ -94,7 +102,32 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    --card-w-full: min(calc(100vw - 2rem), calc((92dvh - 4.5rem) / 1.4));
+    --card-w-full: min(calc(100vw - 2rem), calc((100dvh - 5rem) / 1.4));
     --card-h-full: calc(var(--card-w-full) * 1.4);
     --stat-badge-full: calc(var(--card-w-full) * 0.164);
+}
+
+/* Detail modal: show full card text instead of game-style truncation */
+.card-preview-sheet__face .playing-card-face {
+    height: auto;
+    min-height: var(--card-h);
+}
+
+.card-preview-sheet__face .playing-card-face__body {
+    flex: 1;
+    overflow: visible;
+}
+
+.card-preview-sheet__face .playing-card-face__text {
+    flex: none;
+    justify-content: flex-start;
+    overflow: visible;
+}
+
+.card-preview-sheet__face .card-face-description {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    flex-shrink: 0;
 }

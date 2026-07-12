@@ -26,11 +26,12 @@ export const CardDetailSheet = ({
             opened={opened}
             onClose={onClose}
             position="bottom"
-            size="92dvh"
+            size="100%"
             title={card.label}
             withinPortal
             classNames={{
                 content: "card-preview-sheet-content",
+                header: "card-preview-sheet-header",
                 body: "card-preview-sheet-body",
             }}
         >
