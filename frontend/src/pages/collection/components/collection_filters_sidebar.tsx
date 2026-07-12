@@ -2,6 +2,7 @@ import { CARD_TAGS, CARD_TAG_LABELS, type CardTag } from "#api_types/card.types"
 import { Tooltip } from "@mantine/core";
 import clsx from "clsx";
 import { CardTagSymbol } from "~/components/cards/card_tag_symbol";
+import { CUELUME_TOGGLE } from "~/cuelume/sound_props";
 
 interface CollectionFiltersSidebarProps {
     tagFilter: CardTag | null;
@@ -53,6 +54,7 @@ export const CollectionFiltersSidebar = ({
                                 aria-pressed={isActive}
                                 onClick={() => handleToggle(tag)}
                                 style={{ backgroundColor: meta.backgroundColor }}
+                                {...CUELUME_TOGGLE}
                             >
                                 <CardTagSymbol symbol={meta.symbol} size={20} />
                             </button>

@@ -13,6 +13,7 @@ import { useUser } from "~/hooks/use_user";
 import { applyTrainingGameStarted } from "~/services/apply_training_game_started";
 import { client } from "~/services/client";
 import { getDeckFeaturedCard } from "~/utils/get_deck_featured_card";
+import { CUELUME_BUTTON } from "~/cuelume/sound_props";
 import "./match_making_page.css";
 
 const DECK_PLACEHOLDER_IMAGE = "/card-covers/galadrim/question_mark.webp";
@@ -129,6 +130,7 @@ export const MatchmakingPage = observer(() => {
                                         className="matchmaking-actions__btn matchmaking-actions__btn--search"
                                         disabled={!canSearch || isStarting}
                                         onClick={() => startSearch()}
+                                        {...CUELUME_BUTTON}
                                     >
                                         {isStarting ? (
                                             <Loader size={18} color="white" />
@@ -147,6 +149,7 @@ export const MatchmakingPage = observer(() => {
                                         className="matchmaking-actions__btn matchmaking-actions__btn--training"
                                         disabled={!canSearch || startTrainingMutation.isPending}
                                         onClick={() => startTrainingMutation.mutate()}
+                                        {...CUELUME_BUTTON}
                                     >
                                         {startTrainingMutation.isPending ? (
                                             <Loader size={18} color="#2c2416" />

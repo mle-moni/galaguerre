@@ -3,6 +3,7 @@ import { COLLECTION_MIN_CARDS } from "#api_types/collection.types";
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { GoldCoinAmount } from "~/components/rewards/gold_coin_icon";
+import { CUELUME_BUTTON, CUELUME_TOGGLE } from "~/cuelume/sound_props";
 
 interface SellCardModalProps {
     card: ApiCatalogCard | null;
@@ -49,10 +50,15 @@ export const SellCardModal = ({
                         <GoldCoinAmount amount={balanceAfterSell} showLabel={false} iconSize={16} />
                     </Group>
                     <Group justify="flex-end" gap="sm">
-                        <Button variant="default" onClick={onClose}>
+                        <Button variant="default" onClick={onClose} {...CUELUME_TOGGLE}>
                             Annuler
                         </Button>
-                        <Button className="gg-btn-primary" onClick={onConfirm} loading={isSelling}>
+                        <Button
+                            className="gg-btn-primary"
+                            onClick={onConfirm}
+                            loading={isSelling}
+                            {...CUELUME_BUTTON}
+                        >
                             Vendre
                         </Button>
                     </Group>

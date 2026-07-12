@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import { play } from "~/cuelume/index";
 import { getErrorMessage } from "../helpers/get_error_message.js";
 
 export const notifyApiError = (error: unknown, backupMessage?: string) => {
@@ -16,6 +17,7 @@ export const notifyError = (message: string) => {
 };
 
 export const notifySuccess = (message: string) => {
+    play("success");
     toast(message, {
         type: "success",
         position: "bottom-right",

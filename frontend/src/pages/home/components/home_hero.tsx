@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CUELUME_BUTTON } from "~/cuelume/sound_props";
 import { HOME_ASSETS } from "../home_mock_data.js";
 
 interface HomeHeroProps {
@@ -11,7 +12,7 @@ export const HomeHero = ({ playTarget }: HomeHeroProps) => (
         <div className="home-hero__overlay" />
 
         <div className="home-hero__content">
-            <Link to={playTarget} className="home-hero__cta">
+            <Link to={playTarget} className="home-hero__cta" {...CUELUME_BUTTON}>
                 Jouer maintenant
             </Link>
         </div>

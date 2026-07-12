@@ -3,6 +3,7 @@ import { IconCheck, IconCopy, IconShare } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useShareDeckMutation } from "~/hooks/use_deck_shares";
 import { notifyError, notifySuccess } from "~/services/toasts";
+import { CUELUME_BUTTON } from "~/cuelume/sound_props";
 
 interface ShareDeckModalProps {
     deckId: number | null;
@@ -86,6 +87,7 @@ export const ShareDeckModal = ({ deckId, onClose }: ShareDeckModalProps) => {
                         className="gg-btn-primary"
                         leftSection={<IconShare size={16} />}
                         onClick={handleShare}
+                        {...CUELUME_BUTTON}
                     >
                         Générer un lien
                     </Button>

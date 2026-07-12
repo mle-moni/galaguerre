@@ -23,6 +23,7 @@ import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 import { notifyError, notifySuccess } from "~/services/toasts";
 import { ShareDeckModal } from "~/components/decks/share_deck_modal";
+import { CUELUME_BUTTON } from "~/cuelume/sound_props";
 import "~/components/catalogue/catalogue_light.css";
 import "./deck_builder_page.css";
 
@@ -319,6 +320,7 @@ export const DeckBuilderPage = observer(() => {
                                     type="button"
                                     className="deck-builder-page__action-btn"
                                     onClick={() => setShareDeckId(deckId)}
+                                    {...CUELUME_BUTTON}
                                 >
                                     <IconShare size={16} aria-hidden />
                                     Partager
@@ -335,6 +337,7 @@ export const DeckBuilderPage = observer(() => {
                                     className="deck-builder-page__action-btn deck-builder-page__action-btn--primary"
                                     disabled={updateMutation.isPending}
                                     onClick={() => void handleSave()}
+                                    {...CUELUME_BUTTON}
                                 >
                                     {updateMutation.isPending ? "Sauvegarde…" : "Sauvegarder"}
                                 </button>

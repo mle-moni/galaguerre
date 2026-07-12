@@ -5,6 +5,8 @@ import { IconLogout } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { SoundToggle } from "~/components/cuelume/sound_toggle";
+import { CUELUME_BUTTON, CUELUME_NAV } from "~/cuelume/sound_props";
 import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
 import { UserAvatar } from "~/components/user_avatar";
@@ -64,6 +66,7 @@ const NavLinks = ({ playTarget, pathname, variant = "horizontal", onNavigate }: 
                         to={to!}
                         className={`${linkClassName}${isActive ? ` ${linkClassName}--active` : ""}`}
                         onClick={onNavigate}
+                        {...CUELUME_NAV}
                     >
                         {item.label}
                     </Link>
@@ -95,7 +98,7 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
 
     return (
         <header className="app-header">
-            <Link to="/" className="app-header__logo">
+            <Link to="/" className="app-header__logo" {...CUELUME_NAV}>
                 Galaguerre
             </Link>
 
@@ -113,6 +116,7 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                         to="/collection/packs"
                         className="app-header__currency app-header__currency--pack"
                         title="Paquets à ouvrir"
+                        {...CUELUME_NAV}
                     >
                         <PackIcon width={20} />
                         {unopenedPacks}
@@ -134,12 +138,15 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                     </div>
                 </div>
 
+                <SoundToggle />
+
                 <button
                     type="button"
                     className="app-header__logout"
                     aria-label="Déconnexion"
                     disabled={logoutMutation.isPending}
                     onClick={() => logoutMutation.mutate()}
+                    {...CUELUME_BUTTON}
                 >
                     <IconLogout size={16} />
                 </button>
@@ -201,6 +208,7 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                             className="app-header__drawer-logout"
                             disabled={logoutMutation.isPending}
                             onClick={() => logoutMutation.mutate()}
+                            {...CUELUME_BUTTON}
                         >
                             <IconLogout size={18} />
                             Déconnexion

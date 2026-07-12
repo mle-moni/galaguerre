@@ -8,6 +8,7 @@ import {
     catalogCardToPlayerCard,
 } from "~/components/cards/catalog_card_display";
 import { usePackOpeningFullSize } from "~/hooks/use_pack_opening_full_size";
+import { play } from "~/cuelume/index";
 import "./pack_opening_card.css";
 
 interface PackOpeningCardProps {
@@ -34,6 +35,7 @@ export const PackOpeningCard = ({
 
     const handleClick = () => {
         if (canFlip) {
+            play("bloom");
             onFlip();
             return;
         }

@@ -201,6 +201,20 @@
     align-items: center;
 }
 
+.app-header__sound-toggle {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.app-header__sound-toggle:hover {
+    color: white;
+}
+
 .app-header__logout:hover {
     color: white;
 }

@@ -3,6 +3,7 @@ import { Button } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useGameContext } from "~/hooks/use_game_state";
+import { CUELUME_TOGGLE } from "~/cuelume/sound_props";
 import { TURN_TIMER_DISPLAY_OFFSET_SECONDS } from "../../play_game_constants.js";
 import { MobileCountdownTimer } from "./mobile_countdown_timer.jsx";
 import { MobileHeroStrip } from "./mobile_hero_strip.jsx";
@@ -37,6 +38,7 @@ export const MobilePlayerBar = observer(({ me }: MobilePlayerBarProps) => {
                     disabled={!store.canPassTurn}
                     onClick={() => store.requestPassTurn()}
                     tabIndex={store.isMyTurn ? 0 : -1}
+                    {...CUELUME_TOGGLE}
                 >
                     Terminé
                 </Button>

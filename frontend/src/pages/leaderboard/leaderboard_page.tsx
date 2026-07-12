@@ -13,6 +13,7 @@ import { formatSpeedrunDurationSeconds } from "~/helpers/format_game_duration";
 import { useFriendsQuery } from "~/hooks/use_friends";
 import { useAiSpeedrunLeaderboardQuery, useLeaderboardQuery } from "~/hooks/use_leaderboard";
 import { useUser } from "~/hooks/use_user";
+import { CUELUME_TOGGLE } from "~/cuelume/sound_props";
 import "./leaderboard_page.css";
 
 type LeaderboardTab = "elo" | "ai-speedrun";
@@ -257,6 +258,7 @@ export const LeaderboardPage = observer(() => {
                                             : "leaderboard-tabs__btn--inactive",
                                     )}
                                     onClick={() => setActiveTab("elo")}
+                                    {...CUELUME_TOGGLE}
                                 >
                                     Elo
                                 </button>
@@ -272,6 +274,7 @@ export const LeaderboardPage = observer(() => {
                                             : "leaderboard-tabs__btn--inactive",
                                     )}
                                     onClick={() => setActiveTab("ai-speedrun")}
+                                    {...CUELUME_TOGGLE}
                                 >
                                     AI speedrun
                                 </button>

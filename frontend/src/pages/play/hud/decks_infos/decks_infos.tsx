@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { CARD_BACK_IMAGE_URL } from "~/components/cards/card_back_face";
 import { useGameContext } from "~/hooks/use_game_state";
+import { CUELUME_TOGGLE } from "~/cuelume/sound_props";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
 import { TURN_TIMER_DISPLAY_OFFSET_SECONDS } from "../../play_game_constants.js";
 import "./decks_infos.css";
@@ -84,6 +85,7 @@ const PassTurnSection = observer(() => {
                     )}
                     disabled={!store.canPassTurn || store.isPassTurnPending}
                     onClick={() => store.requestPassTurn()}
+                    {...CUELUME_TOGGLE}
                 >
                     Terminer
                 </button>

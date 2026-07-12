@@ -1,7 +1,9 @@
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { useApiMutation } from "~/hooks/use_api_mutation";
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { play } from "~/cuelume/index";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { LEADERBOARD_QUERY_KEY, AI_SPEEDRUN_LEADERBOARD_QUERY_KEY } from "~/hooks/use_leaderboard";
@@ -118,6 +120,11 @@ export const GameFinalScreen = observer(() => {
         store.me.userId === store.p1.userId
             ? store.game.data.xpResult?.playerOne.xp ?? 0
             : store.game.data.xpResult?.playerTwo.xp ?? 0;
+
+    useEffect(() => {
+        if (!store.showFinalScreen || store.isSpectating) return;
+        play(store.isUserWinner ? "success" : "droplet");
+    }, [store.showFinalScreen, store.isUserWinner, store.isSpectating]);
 
     return (
         <Modal

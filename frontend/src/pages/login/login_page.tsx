@@ -7,6 +7,7 @@ import { useApiMutation } from "~/hooks/use_api_mutation";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { useUser } from "~/hooks/use_user";
 import { client, setToken } from "~/services/client";
+import { CUELUME_BUTTON } from "~/cuelume/sound_props";
 
 export const LoginPage = observer(() => {
     const user = useUser();
@@ -69,6 +70,7 @@ export const LoginPage = observer(() => {
                     className="gg-btn-primary mt-2"
                     loading={loginMutation.isPending}
                     fullWidth
+                    {...CUELUME_BUTTON}
                 >
                     Se connecter
                 </Button>

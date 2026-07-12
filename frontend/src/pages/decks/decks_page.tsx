@@ -14,6 +14,7 @@ import {
 } from "~/hooks/use_decks";
 import { DeckListItem } from "./components/deck_list_item";
 import { DecksSidebar } from "./components/decks_sidebar";
+import { CUELUME_BUTTON, CUELUME_TOGGLE } from "~/cuelume/sound_props";
 import "./decks_page.css";
 
 export const DecksPage = observer(() => {
@@ -96,6 +97,7 @@ export const DecksPage = observer(() => {
                             className="decks-page__new-btn"
                             disabled={createMutation.isPending}
                             onClick={() => void handleCreate()}
+                            {...CUELUME_BUTTON}
                         >
                             <IconPlus size={16} />
                             Nouveau deck
@@ -125,6 +127,7 @@ export const DecksPage = observer(() => {
                                     className="decks-page__new-btn"
                                     disabled={createMutation.isPending}
                                     onClick={() => void handleCreate()}
+                                    {...CUELUME_BUTTON}
                                 >
                                     <IconPlus size={16} />
                                     Créer mon premier deck
@@ -139,6 +142,7 @@ export const DecksPage = observer(() => {
                                             type="button"
                                             className="decks-page__new-btn"
                                             onClick={handleResetFilters}
+                                            {...CUELUME_TOGGLE}
                                         >
                                             Réinitialiser les filtres
                                         </button>
@@ -173,10 +177,19 @@ export const DecksPage = observer(() => {
                     Cette action est irréversible.
                 </Text>
                 <div className="flex justify-end gap-2">
-                    <Button variant="default" onClick={() => setDeckToDelete(null)}>
+                    <Button
+                        variant="default"
+                        onClick={() => setDeckToDelete(null)}
+                        {...CUELUME_TOGGLE}
+                    >
                         Annuler
                     </Button>
-                    <Button color="red" loading={deleteMutation.isPending} onClick={handleDelete}>
+                    <Button
+                        color="red"
+                        loading={deleteMutation.isPending}
+                        onClick={handleDelete}
+                        {...CUELUME_BUTTON}
+                    >
                         Supprimer
                     </Button>
                 </div>

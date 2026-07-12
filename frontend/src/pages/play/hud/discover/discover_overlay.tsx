@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { PlayerCardFace } from "~/components/cards/player_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { emitSocketEventToServer } from "~/services/ws_client";
+import { play } from "~/cuelume/index";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
 import { TURN_TIMER_DISPLAY_OFFSET_SECONDS } from "../../play_game_constants.js";
 import "./discover_overlay.css";
@@ -52,6 +53,7 @@ export const DiscoverOverlay = observer(() => {
     const minimized = store.discoverOverlayMinimized;
 
     const handleChoose = (cardUuid: string) => {
+        play("chime");
         emitSocketEventToServer("game:discover_choice", { cardUuid });
     };
 

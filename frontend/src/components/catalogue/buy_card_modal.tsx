@@ -2,6 +2,7 @@ import { CARD_RARITY_LABELS } from "#api_types/card_rarity.types";
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { GoldCoinAmount } from "~/components/rewards/gold_coin_icon";
+import { CUELUME_BUTTON, CUELUME_TOGGLE } from "~/cuelume/sound_props";
 
 interface BuyCardModalProps {
     card: ApiCatalogCard | null;
@@ -49,7 +50,7 @@ export const BuyCardModal = ({
                         </Text>
                     )}
                     <Group justify="flex-end" gap="sm">
-                        <Button variant="default" onClick={onClose}>
+                        <Button variant="default" onClick={onClose} {...CUELUME_TOGGLE}>
                             Annuler
                         </Button>
                         <Button
@@ -57,6 +58,7 @@ export const BuyCardModal = ({
                             onClick={onConfirm}
                             loading={isBuying}
                             disabled={!canAfford}
+                            {...CUELUME_BUTTON}
                         >
                             Acheter
                         </Button>

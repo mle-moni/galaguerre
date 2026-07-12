@@ -6,6 +6,8 @@ import { PlayerCardFace } from "~/components/cards/player_card_face";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useOnboardingGame } from "~/hooks/use_onboarding_game";
 import { emitSocketEventToServer } from "~/services/ws_client";
+import { play } from "~/cuelume/index";
+import { CUELUME_TOGGLE } from "~/cuelume/sound_props";
 import { CountdownTimer } from "../countdown_timer/countdown_timer.jsx";
 import "./mulligan_overlay.css";
 
@@ -18,6 +20,7 @@ export const MulliganOverlay = observer(() => {
     const selectedCount = store.mulliganSelectedCardIds.length;
 
     const handleConfirm = () => {
+        play("success");
         emitSocketEventToServer("game:mulligan", {
             cardIds: store.mulliganSelectedCardIds.slice(),
         });
@@ -25,6 +28,7 @@ export const MulliganOverlay = observer(() => {
     };
 
     const handleKeepAll = () => {
+        play("success");
         emitSocketEventToServer("game:mulligan", { cardIds: [] });
         store.confirmMulliganLocally();
     };
@@ -112,6 +116,7 @@ export const MulliganOverlay = observer(() => {
                                         aria-label={
                                             isSelected ? `${card.label}, à remplacer` : card.label
                                         }
+                                        {...CUELUME_TOGGLE}
                                     >
                                         {isSelected ? (
                                             <MarkedDiscardCard bannerText="À remplacer">

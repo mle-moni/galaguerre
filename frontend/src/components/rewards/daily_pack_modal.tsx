@@ -9,6 +9,7 @@ import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
 import { client } from "~/services/client";
 import { queryClient } from "~/services/query_client";
 import { notifySuccess } from "~/services/toasts";
+import { CUELUME_BUTTON } from "~/cuelume/sound_props";
 
 const HIDDEN_ROUTES = new Set(["/play", "/login", "/register"]);
 
@@ -49,6 +50,7 @@ export const DailyPackModal = observer(() => {
                     onClick={() => claimMutation.mutate()}
                     loading={claimMutation.isPending}
                     className="gg-btn-primary"
+                    {...CUELUME_BUTTON}
                 >
                     Obtenir
                 </Button>

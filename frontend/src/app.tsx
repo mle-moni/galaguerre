@@ -9,6 +9,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { MotionConfig } from "motion/react";
 import { createRoot } from "react-dom/client";
 import { ToastContainer } from "react-toastify";
+import { CuelumeProvider } from "./components/cuelume/cuelume_provider.js";
 import { AppRouterProvider } from "./router.jsx";
 import { queryClient } from "./services/query_client.js";
 import { mantineTheme } from "./style/mantine_theme.js";
@@ -19,8 +20,10 @@ root.render(
     <MotionConfig reducedMotion="user">
         <MantineProvider theme={mantineTheme}>
             <QueryClientProvider client={queryClient}>
-                <ToastContainer />
-                <AppRouterProvider />
+                <CuelumeProvider>
+                    <ToastContainer />
+                    <AppRouterProvider />
+                </CuelumeProvider>
             </QueryClientProvider>
         </MantineProvider>
     </MotionConfig>,

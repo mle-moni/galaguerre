@@ -8,6 +8,7 @@ import { useApiMutation } from "~/hooks/use_api_mutation";
 import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
 import { client, setToken } from "~/services/client";
 import { notifyError } from "~/services/toasts";
+import { CUELUME_BUTTON } from "~/cuelume/sound_props";
 
 export const RegisterPage = observer(() => {
     const user = useUser();
@@ -95,6 +96,7 @@ export const RegisterPage = observer(() => {
                     className="gg-btn-primary mt-2"
                     loading={registerMutation.isPending}
                     fullWidth
+                    {...CUELUME_BUTTON}
                 >
                     Créer mon compte
                 </Button>

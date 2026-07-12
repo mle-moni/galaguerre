@@ -1,4 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
+import { SoundToggle } from "~/components/cuelume/sound_toggle";
+import { CUELUME_NAV } from "~/cuelume/sound_props";
 
 const NAV_ITEMS = [
     {
@@ -14,7 +16,7 @@ export const GuestAppHeader = () => {
 
     return (
         <header className="app-header">
-            <Link to="/actualites" className="app-header__logo">
+            <Link to="/actualites" className="app-header__logo" {...CUELUME_NAV}>
                 Galaguerre
             </Link>
 
@@ -27,6 +29,7 @@ export const GuestAppHeader = () => {
                             key={item.label}
                             to={item.to}
                             className={`app-header__nav-link${isActive ? " app-header__nav-link--active" : ""}`}
+                            {...CUELUME_NAV}
                         >
                             {item.label}
                         </Link>
@@ -35,10 +38,15 @@ export const GuestAppHeader = () => {
             </nav>
 
             <div className="app-header__right">
-                <Link to="/login" className="app-header__nav-link">
+                <SoundToggle />
+                <Link to="/login" className="app-header__nav-link" {...CUELUME_NAV}>
                     Connexion
                 </Link>
-                <Link to="/register" className="app-header__nav-link app-header__nav-link--active">
+                <Link
+                    to="/register"
+                    className="app-header__nav-link app-header__nav-link--active"
+                    {...CUELUME_NAV}
+                >
                     S&apos;inscrire
                 </Link>
             </div>
