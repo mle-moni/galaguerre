@@ -2,12 +2,14 @@ import { test } from "@japa/runner";
 import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import {
     computeEffectiveCost,
+    clearNextSpellCostReduction,
     refreshHandDynamicCosts,
 } from "#galaguerre/dynamic_cost/compute_effective_cost";
 import {
     createGamePlayer,
     createMinionCard,
     createMinionState,
+    createSpellCard,
     placeMinion,
 } from "../../helpers/game/fixtures.js";
 import type { DynamicCostDefinition } from "#galaguerre/card_definition.schema";
@@ -146,5 +148,29 @@ test.group("computeEffectiveCost", () => {
         refreshHandDynamicCosts(player, opponent);
 
         assert.equal(card.cost, 2);
+    });
+
+    test("restores spell costs after nextSpellCostReduction is cleared", ({ assert }) => {
+        const discountedSpell = createSpellCard({
+            uuid: "discounted-spell",
+            baseCost: 2,
+            cost: 0,
+        });
+        const otherSpell = createSpellCard({
+            uuid: "other-spell",
+            baseCost: 4,
+            cost: 2,
+        });
+        const player = createGamePlayer(1, {
+            hand: [discountedSpell, otherSpell],
+            nextSpellCostReduction: 2,
+        });
+        const opponent = createGamePlayer(2);
+
+        clearNextSpellCostReduction(player);
+        refreshHandDynamicCosts(player, opponent);
+
+        assert.equal(discountedSpell.cost, 2);
+        assert.equal(otherSpell.cost, 4);
     });
 });

@@ -66,6 +66,8 @@ test.group("Setup Technique", () => {
     test("the next spell costs 2 less mana", async ({ assert }) => {
         const setupTechnique = createSetupTechniqueCard();
         const followUpSpell = createDamageSpell(4);
+        const remainingSpell = createDamageSpell(2);
+        remainingSpell.uuid = "remaining-spell";
 
         const { game: afterSetup } = await runPlaySpell(
             createGameData({
@@ -73,14 +75,15 @@ test.group("Setup Technique", () => {
                 currentRound: 5,
                 playerOne: {
                     mana: 5,
-                    hand: [setupTechnique, followUpSpell],
+                    hand: [setupTechnique, followUpSpell, remainingSpell],
                 },
             }),
             setupTechnique,
         );
 
-        assert.equal(afterSetup.data.playerOne.hand.length, 1);
+        assert.equal(afterSetup.data.playerOne.hand.length, 2);
         assert.equal(afterSetup.data.playerOne.hand[0]!.cost, 2);
+        assert.equal(afterSetup.data.playerOne.hand[1]!.cost, 0);
 
         const spellToPlay = afterSetup.data.playerOne.hand[0]! as typeof followUpSpell;
         await playSpell({
@@ -94,7 +97,8 @@ test.group("Setup Technique", () => {
 
         assert.equal(afterSetup.data.playerOne.mana, 3);
         assert.isUndefined(afterSetup.data.playerOne.nextSpellCostReduction);
-        assert.equal(afterSetup.data.playerOne.hand.length, 0);
+        assert.equal(afterSetup.data.playerOne.hand.length, 1);
+        assert.equal(afterSetup.data.playerOne.hand[0]!.cost, 2);
     });
 
     test("playing two Setup Techniques in a row refreshes the discount", async ({ assert }) => {

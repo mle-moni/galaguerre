@@ -53,14 +53,8 @@ export const clearNextSpellCostReduction = (player: GamePlayer): void => {
 };
 
 export const refreshHandDynamicCosts = (player: GamePlayer, opponent: GamePlayer): void => {
-    const hasSpellCostReduction = (player.nextSpellCostReduction ?? 0) > 0;
-
     for (const card of player.hand) {
-        if (
-            card.dynamicCost ||
-            (card.handCostReduction ?? 0) > 0 ||
-            (hasSpellCostReduction && card.type === "SPELL")
-        ) {
+        if (card.dynamicCost || (card.handCostReduction ?? 0) > 0 || card.type === "SPELL") {
             card.cost = computeEffectiveCost(card, player, opponent);
         }
     }
