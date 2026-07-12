@@ -13,6 +13,7 @@ import { GALADRIM_CARDS } from "#database/seed_data/cards/galadrim_cards";
 import { CARD_RARITY_LABELS } from "./card_rarity.types.js";
 import { CARD_LABEL_TAG_LABELS, formatTagChip } from "./card.types.js";
 import { getDisplayedDamage } from "./get_effective_damage.js";
+import { cardFilterLabelTags, cardFilterTags } from "./card_filter_matching.js";
 import { hasActionTarget } from "./action_fields_utils.js";
 import { hasRandomLimitedTarget } from "./target_matching.js";
 
@@ -294,11 +295,11 @@ const formatDiscoverExtraFilterSuffix = (filter: CardFilterSnapshot): string => 
             parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
         }
     }
-    if (filter.tags.length > 0) {
-        parts.push(formatTagList(filter.tags));
+    if (cardFilterTags(filter).length > 0) {
+        parts.push(formatTagList(cardFilterTags(filter)));
     }
-    if (filter.labelTags.length > 0) {
-        parts.push(formatLabelTagList(filter.labelTags));
+    if (cardFilterLabelTags(filter).length > 0) {
+        parts.push(formatLabelTagList(cardFilterLabelTags(filter)));
     }
     if (filter.rarity !== null) {
         parts.push(formatRarityFilterLabel(filter.rarity));
@@ -313,16 +314,16 @@ const hasCardFilterConstraints = (filter: CardFilterSnapshot | null): boolean =>
     return (
         filter.type !== "ANY" ||
         filter.comparison !== null ||
-        filter.tags.length > 0 ||
-        filter.labelTags.length > 0 ||
+        cardFilterTags(filter).length > 0 ||
+        cardFilterLabelTags(filter).length > 0 ||
         filter.rarity !== null
     );
 };
 
 const hasDrawFilter = (
     filter: CardFilterSnapshot | null,
-    alternatives: CardFilterSnapshot[],
-): boolean => alternatives.length > 0 || hasCardFilterConstraints(filter);
+    alternatives: CardFilterSnapshot[] | null | undefined,
+): boolean => (alternatives ?? []).length > 0 || hasCardFilterConstraints(filter);
 
 const formatCardFilterQualifiers = (filter: CardFilterSnapshot): string => {
     const parts: string[] = [];
@@ -337,11 +338,11 @@ const formatCardFilterQualifiers = (filter: CardFilterSnapshot): string => {
     if (comparison?.costComparison && comparison.cost !== null) {
         parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
     }
-    if (filter.tags.length > 0) {
-        parts.push(formatTagList(filter.tags));
+    if (cardFilterTags(filter).length > 0) {
+        parts.push(formatTagList(cardFilterTags(filter)));
     }
-    if (filter.labelTags.length > 0) {
-        parts.push(formatLabelTagList(filter.labelTags));
+    if (cardFilterLabelTags(filter).length > 0) {
+        parts.push(formatLabelTagList(cardFilterLabelTags(filter)));
     }
     if (filter.rarity !== null) {
         parts.push(formatRarityFilterLabel(filter.rarity));
@@ -376,7 +377,7 @@ const formatDrawDescription = (
         return `${verb} ${drawCount} ${suffix}`;
     }
 
-    if (alternatives.length > 0) {
+    if (alternatives && alternatives.length > 0) {
         const phrases = alternatives.map((alternative) =>
             formatDrawTargetPhrase(alternative, drawCount),
         );
@@ -421,11 +422,11 @@ const formatCardFilterSuffix = (filter: CardFilterSnapshot | null): string => {
     if (comparison?.costComparison && comparison.cost !== null) {
         parts.push(`coût ${comparison.costComparison} ${comparison.cost}`);
     }
-    if (filter.tags.length > 0) {
-        parts.push(formatTagList(filter.tags));
+    if (cardFilterTags(filter).length > 0) {
+        parts.push(formatTagList(cardFilterTags(filter)));
     }
-    if (filter.labelTags.length > 0) {
-        parts.push(formatLabelTagList(filter.labelTags));
+    if (cardFilterLabelTags(filter).length > 0) {
+        parts.push(formatLabelTagList(cardFilterLabelTags(filter)));
     }
     if (filter.rarity !== null) {
         parts.push(formatRarityFilterLabel(filter.rarity));
@@ -440,8 +441,8 @@ export const formatPlayCardPassiveTriggerLabel = (
     if (!playCardFilter) return "carte jouée";
 
     const parts: string[] = [CARD_TYPE_LABELS[playCardFilter.type].toLowerCase()];
-    if (playCardFilter.tags.length > 0) {
-        parts.push(formatTagList(playCardFilter.tags));
+    if (cardFilterTags(playCardFilter).length > 0) {
+        parts.push(formatTagList(cardFilterTags(playCardFilter)));
     }
 
     const noun = parts.join(" ");
@@ -455,8 +456,8 @@ export const formatSummonPassiveTriggerLabel = (
     if (!summonFilter) return "monstre invoqué";
 
     const parts: string[] = [CARD_TYPE_LABELS[summonFilter.type].toLowerCase()];
-    if (summonFilter.tags.length > 0) {
-        parts.push(formatTagList(summonFilter.tags));
+    if (cardFilterTags(summonFilter).length > 0) {
+        parts.push(formatTagList(cardFilterTags(summonFilter)));
     }
 
     return `${parts.join(" ")} invoqué`;
@@ -547,8 +548,8 @@ const formatReconvertTargetLabel = (parameters: ReconvertParametersSnapshot | nu
         });
     }
 
-    if (parameters.tags.length > 0) {
-        label += ` ${formatTagList(parameters.tags)}`;
+    if (cardFilterTags(parameters).length > 0) {
+        label += ` ${formatTagList(cardFilterTags(parameters))}`;
     }
 
     return label;

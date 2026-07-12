@@ -130,6 +130,20 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats draw when stored filter is missing tags and labelTags arrays", ({ assert }) => {
+        const drawCardFilter = createCardFilterSnapshot({ type: "MINION" });
+        delete (drawCardFilter as { tags?: unknown }).tags;
+        delete (drawCardFilter as { labelTags?: unknown }).labelTags;
+
+        const action = createCardActionSnapshot({
+            type: "DRAW",
+            drawCount: 2,
+            drawCardFilter,
+        });
+
+        assert.equal(formatActionDescription(action, "Effet"), "Effet : Pioche 2 monstres.");
+    });
+
     test("formats targeted damage to any minion without redundant team label", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DAMAGE",

@@ -1,5 +1,11 @@
 import type { CardFilterSnapshot, PlayerCard } from "./game.types.js";
+import type { CardLabelTag, CardTag } from "./card.types.js";
 import { getDeckCardStats, matchesComparison } from "./comparison_matching.js";
+
+export const cardFilterTags = (filter: CardFilterSnapshot): CardTag[] => filter.tags ?? [];
+
+export const cardFilterLabelTags = (filter: CardFilterSnapshot): CardLabelTag[] =>
+    filter.labelTags ?? [];
 
 export const deckCardMatchesFilter = (card: PlayerCard, filter: CardFilterSnapshot): boolean => {
     if (filter.type !== "ANY" && card.type !== filter.type) return false;
@@ -8,11 +14,11 @@ export const deckCardMatchesFilter = (card: PlayerCard, filter: CardFilterSnapsh
         return false;
     }
 
-    for (const tag of filter.tags) {
+    for (const tag of cardFilterTags(filter)) {
         if (!card.tags.includes(tag)) return false;
     }
 
-    for (const labelTag of filter.labelTags) {
+    for (const labelTag of cardFilterLabelTags(filter)) {
         if (!card.labelTags.includes(labelTag)) return false;
     }
 

@@ -1,5 +1,5 @@
 import type { CardFilterSnapshot, PlayerCard } from "#api_types/game.types";
-import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
+import { deckCardMatchesFilter, cardFilterLabelTags } from "#api_types/card_filter_matching";
 import { getAllCardTemplates, getCollectibleCardTemplates } from "#api_types/card_preview";
 import { randomUUID } from "node:crypto";
 import { shuffleArray } from "../../utils/array.js";
@@ -16,7 +16,9 @@ export const generateDiscoverOptions = (
     if (optionCount <= 0) return [];
 
     const pool =
-        filter.labelTags.length > 0 ? getAllCardTemplates() : getCollectibleCardTemplates();
+        cardFilterLabelTags(filter).length > 0
+            ? getAllCardTemplates()
+            : getCollectibleCardTemplates();
     const matches = pool.filter((template) => deckCardMatchesFilter(template, filter));
 
     if (matches.length === 0) return [];
