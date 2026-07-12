@@ -1,18 +1,39 @@
 import { IconVolume, IconVolumeOff } from "@tabler/icons-react";
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import { setEnabled } from "~/cuelume/index";
 import { CUELUME_TOGGLE } from "~/cuelume/sound_props";
-import { readSoundEnabled, writeSoundEnabled } from "~/cuelume/preferences";
+import { readSoundEnabled, subscribeSoundEnabled, writeSoundEnabled } from "~/cuelume/preferences";
 
-export const SoundToggle = () => {
-    const [enabled, setEnabledState] = useState(readSoundEnabled);
+interface SoundToggleProps {
+    variant?: "icon" | "drawer";
+}
+
+export const SoundToggle = ({ variant = "icon" }: SoundToggleProps) => {
+    const enabled = useSyncExternalStore(subscribeSoundEnabled, readSoundEnabled, () => true);
 
     const toggle = () => {
         const next = !enabled;
-        setEnabledState(next);
         setEnabled(next);
         writeSoundEnabled(next);
     };
+
+    const label = enabled ? "Couper le son" : "Activer le son";
+
+    if (variant === "drawer") {
+        return (
+            <button
+                type="button"
+                className="app-header__drawer-sound-toggle"
+                onClick={toggle}
+                aria-pressed={enabled}
+                aria-label={label}
+                {...CUELUME_TOGGLE}
+            >
+                {enabled ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
+                {enabled ? "Son activé" : "Son coupé"}
+            </button>
+        );
+    }
 
     return (
         <button
@@ -20,8 +41,8 @@ export const SoundToggle = () => {
             className="app-header__sound-toggle"
             onClick={toggle}
             aria-pressed={enabled}
-            aria-label={enabled ? "Couper le son" : "Activer le son"}
-            title={enabled ? "Couper le son" : "Activer le son"}
+            aria-label={label}
+            title={label}
             {...CUELUME_TOGGLE}
         >
             {enabled ? <IconVolume size={20} /> : <IconVolumeOff size={20} />}

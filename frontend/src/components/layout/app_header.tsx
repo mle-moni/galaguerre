@@ -203,6 +203,8 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                             </div>
                         </div>
 
+                        <SoundToggle variant="drawer" />
+
                         <button
                             type="button"
                             className="app-header__drawer-logout"

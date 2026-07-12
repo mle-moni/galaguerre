@@ -345,6 +345,34 @@
     cursor: not-allowed;
 }
 
+.app-header__drawer-sound-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.app-header__drawer-sound-toggle:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.app-header__drawer-sound-toggle[aria-pressed="false"] {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 @media (max-width: 1279px) {
     .app-layout__content:not(.app-layout__content--fill) {
         flex: none;
