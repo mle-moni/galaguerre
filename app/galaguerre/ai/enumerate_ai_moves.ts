@@ -21,6 +21,7 @@ import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 import {
     boardHasAttackableTaunt,
     canMinionAttack,
+    canMinionAttackHero,
     canWeaponAttack,
     getMinionHasTaunt,
 } from "#controllers/games/game_utils";
@@ -174,10 +175,16 @@ const enumerateMinionAttacks = (game: Game, player: GamePlayer, opponent: GamePl
     const moves: AiMove[] = [];
     const currentRound = game.data.currentRound;
     const hasAttackableTaunt = boardHasAttackableTaunt(opponent.board);
-    const targets = enumerateAttackTargets(opponent.board, hasAttackableTaunt);
 
     for (const minion of player.board) {
         if (!canMinionAttack(minion, currentRound)) continue;
+
+        const includeHeroTarget = canMinionAttackHero(minion, currentRound);
+        const targets = enumerateAttackTargets(
+            opponent.board,
+            hasAttackableTaunt,
+            includeHeroTarget,
+        );
 
         for (const target of targets) {
             moves.push({

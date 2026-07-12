@@ -395,6 +395,265 @@ test.group("minion combat", () => {
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
     });
 
+    test("rush allows attacking a minion on the turn the minion was placed", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 2,
+            minionPowers: { hasRush: true },
+            effects: ["Ruée"],
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 4,
+        });
+
+        const { game } = await runMinionCombat(
+            createGameData({
+                currentRound: 3,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(attackerCard, { placedAtRound: 3 }),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        0,
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+        );
+
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
+        assertBoardIndex(assert, game, "playerOne", 0, {
+            health: 1,
+            attacksThisRound: 1,
+        });
+    });
+
+    test("rush rejects hero attack on the turn the minion was placed", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 2,
+            health: 2,
+            minionPowers: { hasRush: true },
+            effects: ["Ruée"],
+        });
+
+        const { game } = await runMinionActionInMemory(
+            createGameData({
+                currentRound: 3,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(attackerCard, { placedAtRound: 3 }),
+                    ),
+                },
+            }),
+            "playerOne",
+            { minionId: MINION_IDS.attacker, minionUuid: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Ce monstre avec Ruée ne peut pas attaquer le héros ce tour");
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH);
+    });
+
+    test("rush allows hero attack on a later turn", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 2,
+            health: 2,
+            minionPowers: { hasRush: true },
+            effects: ["Ruée"],
+        });
+
+        const { game } = await runMinionCombat(
+            createGameData({
+                currentRound: 4,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(attackerCard, { placedAtRound: 3 }),
+                    ),
+                },
+            }),
+            { heroAttack: true },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+    });
+
+    test("rush and windfury allow two minion attacks but not hero on placement turn", async ({
+        assert,
+    }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 2,
+            health: 3,
+            minionPowers: { hasRush: true, hasWindfury: true },
+            effects: ["Ruée", "Furie des vents"],
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 5,
+        });
+
+        const setupGame = createInMemoryGame(
+            createGameData({
+                currentRound: 2,
+                isTraining: true,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(attackerCard, { placedAtRound: 2 }),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        createGameData().playerTwo.board,
+                        0,
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+        );
+
+        const { game: afterFirstAttack } = await runMinionCombatOnGame(setupGame);
+        assertBoardIndex(assert, afterFirstAttack, "playerTwo", 0, { health: 3 });
+        assertBoardIndex(assert, afterFirstAttack, "playerOne", 0, { attacksThisRound: 1 });
+
+        const { game: afterHeroAttempt } = await runMinionActionOnGameInMemory(
+            afterFirstAttack,
+            "playerOne",
+            { minionId: MINION_IDS.attacker, minionUuid: null, owner: "OPPONENT" },
+        );
+
+        assertError(assert, "Ce monstre avec Ruée ne peut pas attaquer le héros ce tour");
+        assertPlayerHealth(assert, afterHeroAttempt, "playerTwo", DEFAULT_HERO_HEALTH);
+
+        const { game: afterSecondAttack } = await runMinionCombatOnGame(afterHeroAttempt);
+        assertBoardIndex(assert, afterSecondAttack, "playerTwo", 0, { health: 1 });
+        assertBoardIndex(assert, afterSecondAttack, "playerOne", 0, { attacksThisRound: 2 });
+    });
+
+    test("charge overrides rush and allows hero attack on placement turn", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 2,
+            health: 2,
+            minionPowers: { hasCharge: true, hasRush: true },
+            effects: ["Charge", "Ruée"],
+        });
+
+        const { game } = await runMinionCombat(
+            createGameData({
+                currentRound: 3,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(attackerCard, { placedAtRound: 3 }),
+                    ),
+                },
+            }),
+            { heroAttack: true },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+    });
+
+    test("rush minion must attack taunt on placement turn", async ({ assert }) => {
+        const attackerCard = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 3,
+            minionPowers: { hasRush: true },
+            effects: ["Ruée"],
+        });
+        const tauntCard = createMinionCard({
+            uuid: MINION_IDS.taunt,
+            attack: 1,
+            health: 4,
+            minionPowers: { hasTaunt: true },
+            effects: ["Provocation"],
+        });
+        const targetCard = createMinionCard({
+            uuid: MINION_IDS.target,
+            attack: 1,
+            health: 2,
+        });
+
+        const { game: rejectedGame } = await runMinionActionInMemory(
+            createGameData({
+                currentRound: 2,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(attackerCard, { placedAtRound: 2 }),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        placeMinion(
+                            createGameData().playerTwo.board,
+                            0,
+                            createMinionState(tauntCard),
+                        ),
+                        1,
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+            "playerOne",
+            {
+                minionId: MINION_IDS.attacker,
+                minionUuid: MINION_IDS.target,
+                owner: "OPPONENT",
+            },
+        );
+
+        assertError(assert, "Vous devez d'abord attaquer un monstre avec Provocation");
+        assertBoardIndex(assert, rejectedGame, "playerTwo", 1, { health: 2 });
+
+        const { game } = await runMinionCombat(
+            createGameData({
+                currentRound: 2,
+                playerOne: {
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(attackerCard, { placedAtRound: 2 }),
+                    ),
+                },
+                playerTwo: {
+                    board: placeMinion(
+                        placeMinion(
+                            createGameData().playerTwo.board,
+                            0,
+                            createMinionState(tauntCard),
+                        ),
+                        1,
+                        createMinionState(targetCard),
+                    ),
+                },
+            }),
+            { targetIndex: 0 },
+        );
+
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
+        assertBoardIndex(assert, game, "playerTwo", 1, { health: 2 });
+    });
+
     test("windfury allows two attacks in the same turn", async ({ assert }) => {
         const attackerCard = createMinionCard({
             uuid: MINION_IDS.attacker,

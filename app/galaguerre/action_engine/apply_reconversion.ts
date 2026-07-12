@@ -27,6 +27,7 @@ import { resolveReconvertTemplate } from "./resolve_reconvert_template.js";
 const emptyPermanentKeywords = (): NonNullable<MinionState["permanentKeywords"]> => ({
     hasTaunt: false,
     hasCharge: false,
+    hasRush: false,
     hasWindfury: false,
     isPoisonous: false,
     hasStealth: false,

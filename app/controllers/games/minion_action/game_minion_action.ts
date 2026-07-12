@@ -9,6 +9,7 @@ import {
     getGameActionInfos,
     getMinionAttacksThisRound,
     getMinionHasCharge,
+    getMinionHasRush,
     getMinionMaxAttacks,
     whichPlayerAmI,
 } from "../game_utils.js";
@@ -80,7 +81,11 @@ function getMinionAttackError(minion: MinionState, currentRound: number): string
     if (minion.attack <= 0) {
         return "Ce monstre ne peut pas attaquer sans points d'attaque";
     }
-    if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) {
+    if (
+        minion.placedAtRound === currentRound &&
+        !getMinionHasCharge(minion) &&
+        !getMinionHasRush(minion)
+    ) {
         return "Ce monstre n'est pas encore prêt à attaquer";
     }
     if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion)) {

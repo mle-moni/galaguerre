@@ -161,6 +161,7 @@ const formatBoostStatSuffix = (boost: BoostSnapshot): string => {
     if (boost.minionPowers) {
         if (boost.minionPowers?.hasTaunt) parts.push("Provocation");
         if (boost.minionPowers?.hasCharge) parts.push("Charge");
+        if (boost.minionPowers?.hasRush) parts.push("Ruée");
         if (boost.minionPowers?.hasWindfury) parts.push("Furie des vents");
         if (boost.minionPowers?.isPoisonous) parts.push("Toxique");
         if (boost.minionPowers?.hasStealth) parts.push("Discrétion");

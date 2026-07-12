@@ -23,6 +23,7 @@ const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
     minion.permanentKeywords = {
         hasTaunt: false,
         hasCharge: false,
+        hasRush: false,
         hasWindfury: false,
         isPoisonous: false,
         hasStealth: false,
@@ -32,6 +33,7 @@ const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
     minion.initialKeywords = {
         hasTaunt: false,
         hasCharge: false,
+        hasRush: false,
         hasWindfury: false,
         isPoisonous: false,
         hasStealth: false,
@@ -40,6 +42,7 @@ const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
 
     card.minionPowers.hasTaunt = false;
     card.minionPowers.hasCharge = false;
+    card.minionPowers.hasRush = false;
     card.minionPowers.hasWindfury = false;
     card.minionPowers.isPoisonous = false;
     card.minionPowers.hasStealth = false;

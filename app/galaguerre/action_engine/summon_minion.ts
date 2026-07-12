@@ -40,6 +40,7 @@ const createDefaultSourceMinion = (): MinionState => ({
     initialKeywords: {
         hasTaunt: false,
         hasCharge: false,
+        hasRush: false,
         hasWindfury: false,
         isPoisonous: false,
         hasStealth: false,
@@ -48,6 +49,7 @@ const createDefaultSourceMinion = (): MinionState => ({
     permanentKeywords: {
         hasTaunt: false,
         hasCharge: false,
+        hasRush: false,
         hasWindfury: false,
         isPoisonous: false,
         hasStealth: false,
@@ -70,6 +72,7 @@ const createDefaultSourceMinion = (): MinionState => ({
         minionPowers: {
             hasTaunt: false,
             hasCharge: false,
+            hasRush: false,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,

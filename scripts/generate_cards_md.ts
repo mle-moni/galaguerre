@@ -28,6 +28,7 @@ export const generateCardsMd = () => {
         "",
         "- Provocation: doit être attaqué en priorité",
         "- Charge: peut attaquer dès le tour de mise en jeu",
+        "- Ruée: peut attaquer les monstres dès le tour de mise en jeu",
         "- Furie des vents: peut attaquer 2 fois par tour",
         "- Toxique: détruit les monstres blessés par ce monstre",
         "- Discrétion: non ciblable directement (perdu après attaque)",

@@ -18,6 +18,7 @@ export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): v
         minion.permanentKeywords ??= {
             hasTaunt: false,
             hasCharge: false,
+            hasRush: false,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,
@@ -31,6 +32,10 @@ export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): v
         if (boost.minionPowers.hasCharge) {
             card.minionPowers.hasCharge = true;
             minion.permanentKeywords.hasCharge = true;
+        }
+        if (boost.minionPowers.hasRush) {
+            card.minionPowers.hasRush = true;
+            minion.permanentKeywords.hasRush = true;
         }
         if (boost.minionPowers.hasWindfury) {
             card.minionPowers.hasWindfury = true;

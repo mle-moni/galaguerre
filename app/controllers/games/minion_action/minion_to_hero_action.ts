@@ -11,7 +11,7 @@ import {
 } from "../../../galaguerre/game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
 import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
-import { ensureValidAttackTarget, recordMinionAttack } from "../game_utils.js";
+import { ensureValidAttackTarget, recordMinionAttack, canMinionAttackHero } from "../game_utils.js";
 import { terminateGame } from "../terminate_game.js";
 import type { MinionActionOptions } from "./minion_to_minion_action.js";
 
@@ -34,10 +34,19 @@ export const minionToHeroAction = async ({
         return;
     }
 
+    const attacker = minionInfos.minion;
+
+    if (!canMinionAttackHero(attacker, game.data.currentRound)) {
+        emitSocketEvent(
+            "notify_error",
+            { error: "Ce monstre avec Ruée ne peut pas attaquer le héros ce tour" },
+            socketId,
+        );
+        return;
+    }
+
     const isValidTarget = ensureValidAttackTarget(opponent.board, owner, null, socketId);
     if (!isValidTarget) return;
-
-    const attacker = minionInfos.minion;
 
     await runGameActionWithNarrative(game, async () => {
         recordAttack(game, player, attacker.originalCard, {

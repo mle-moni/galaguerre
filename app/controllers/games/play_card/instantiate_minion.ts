@@ -21,6 +21,7 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
         initialKeywords: {
             hasTaunt: minionPowers.hasTaunt,
             hasCharge: minionPowers.hasCharge,
+            hasRush: minionPowers.hasRush,
             hasWindfury: minionPowers.hasWindfury,
             isPoisonous: minionPowers.isPoisonous,
             hasStealth: minionPowers.hasStealth,
@@ -29,6 +30,7 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
         permanentKeywords: {
             hasTaunt: false,
             hasCharge: false,
+            hasRush: false,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,

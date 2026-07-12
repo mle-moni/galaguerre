@@ -421,6 +421,7 @@ export const createMinionState = (
         initialKeywords: {
             hasTaunt: minionPowers.hasTaunt,
             hasCharge: minionPowers.hasCharge,
+            hasRush: minionPowers.hasRush,
             hasWindfury: minionPowers.hasWindfury,
             isPoisonous: minionPowers.isPoisonous,
             hasStealth: minionPowers.hasStealth,
@@ -429,6 +430,7 @@ export const createMinionState = (
         permanentKeywords: {
             hasTaunt: false,
             hasCharge: false,
+            hasRush: false,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,

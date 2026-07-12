@@ -4,6 +4,7 @@ import type { MinionCard } from "./game.types.js";
 const MINION_EFFECT_LINE_NAMES = [
     "Provocation",
     "Charge",
+    "Ruée",
     "Furie des vents",
     "Toxique",
     "Discrétion",

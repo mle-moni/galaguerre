@@ -15,6 +15,7 @@ import type { CardSeedEntry } from "#database/seed_data/cards/define_card";
 const normalizeMinionPowers = (power: MinionCard["minionPowers"] | null | undefined) => ({
     hasTaunt: power?.hasTaunt ?? false,
     hasCharge: power?.hasCharge ?? false,
+    hasRush: power?.hasRush ?? false,
     hasWindfury: power?.hasWindfury ?? false,
     isPoisonous: power?.isPoisonous ?? false,
     hasStealth: power?.hasStealth ?? false,

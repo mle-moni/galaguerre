@@ -27,6 +27,7 @@ export const catalogCardToPlayerCard = (card: ApiCatalogCard): PlayerCard => {
             minionPowers: minionPowers ?? {
                 hasTaunt: false,
                 hasCharge: false,
+                hasRush: false,
                 hasWindfury: false,
                 isPoisonous: false,
                 hasStealth: false,

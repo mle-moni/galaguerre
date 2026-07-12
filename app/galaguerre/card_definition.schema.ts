@@ -54,6 +54,7 @@ export const targetSchema = z.object({
 export const zMinionPowerSchema = z.object({
     hasTaunt: z.boolean().optional(),
     hasCharge: z.boolean().optional(),
+    hasRush: z.boolean().optional(),
     hasWindfury: z.boolean().optional(),
     isPoisonous: z.boolean().optional(),
     hasStealth: z.boolean().optional(),

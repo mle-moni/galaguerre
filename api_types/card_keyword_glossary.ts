@@ -23,6 +23,11 @@ export const KEYWORD_GLOSSARY_ENTRIES: KeywordGlossaryEntry[] = [
         description: "Peut attaquer dès le tour où il est joué.",
     },
     {
+        name: "Ruée",
+        symbol: "🏃",
+        description: "Peut attaquer les monstres dès le tour où il est joué.",
+    },
+    {
         name: "Furie des vents",
         symbol: "🌪️",
         description: "Peut attaquer deux fois par tour.",

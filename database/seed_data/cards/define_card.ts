@@ -659,6 +659,7 @@ export const boostTaunt = (): BoostDefinition =>
         minionPowers: {
             hasTaunt: true,
             hasCharge: false,
+            hasRush: false,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,
@@ -671,6 +672,20 @@ export const boostCharge = (): BoostDefinition =>
         minionPowers: {
             hasTaunt: false,
             hasCharge: true,
+            hasRush: false,
+            hasWindfury: false,
+            isPoisonous: false,
+            hasStealth: false,
+            hasDivineShield: false,
+        },
+    });
+
+export const boostRush = (): BoostDefinition =>
+    boostStats({
+        minionPowers: {
+            hasTaunt: false,
+            hasCharge: false,
+            hasRush: true,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,
@@ -685,6 +700,7 @@ export const boostBothWithTaunt = (attack: number, health: number): BoostDefinit
         minionPowers: {
             hasTaunt: true,
             hasCharge: false,
+            hasRush: false,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,
@@ -698,6 +714,7 @@ export const boostAttackWithCharge = (attack: number): BoostDefinition =>
         minionPowers: {
             hasTaunt: false,
             hasCharge: true,
+            hasRush: false,
             hasWindfury: false,
             isPoisonous: false,
             hasStealth: false,

@@ -172,6 +172,11 @@ export const getMinionHasCharge = (minion: MinionState): boolean => {
     return minion.originalCard.minionPowers?.hasCharge ?? false;
 };
 
+export const getMinionHasRush = (minion: MinionState): boolean => {
+    if (minion.originalCard.type !== "MINION") return false;
+    return minion.originalCard.minionPowers?.hasRush ?? false;
+};
+
 export const getMinionHasWindfury = (minion: MinionState): boolean => {
     if (minion.originalCard.type !== "MINION") return false;
     return minion.originalCard.minionPowers?.hasWindfury ?? false;
@@ -205,7 +210,23 @@ export const canMinionAttack = (minion: MinionState, currentRound: number): bool
     if (minion.attack <= 0) return false;
     if (getMinionAttacksThisRound(minion, currentRound) >= getMinionMaxAttacks(minion))
         return false;
-    if (minion.placedAtRound === currentRound && !getMinionHasCharge(minion)) return false;
+    if (
+        minion.placedAtRound === currentRound &&
+        !getMinionHasCharge(minion) &&
+        !getMinionHasRush(minion)
+    )
+        return false;
+    return true;
+};
+
+export const canMinionAttackHero = (minion: MinionState, currentRound: number): boolean => {
+    if (!canMinionAttack(minion, currentRound)) return false;
+    if (
+        minion.placedAtRound === currentRound &&
+        getMinionHasRush(minion) &&
+        !getMinionHasCharge(minion)
+    )
+        return false;
     return true;
 };
 

@@ -18,6 +18,7 @@ export const normalizeMinionPowers = (
 ): MinionPowerSnapshot => ({
     hasTaunt: power?.hasTaunt ?? false,
     hasCharge: power?.hasCharge ?? false,
+    hasRush: power?.hasRush ?? false,
     hasWindfury: power?.hasWindfury ?? false,
     isPoisonous: power?.isPoisonous ?? false,
     hasStealth: power?.hasStealth ?? false,

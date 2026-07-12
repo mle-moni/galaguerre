@@ -176,6 +176,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
     const initial = minion.initialKeywords ?? {
         hasTaunt: card.minionPowers.hasTaunt,
         hasCharge: card.minionPowers.hasCharge,
+        hasRush: card.minionPowers.hasRush,
         hasWindfury: card.minionPowers.hasWindfury,
         isPoisonous: card.minionPowers.isPoisonous,
         hasStealth: card.minionPowers.hasStealth,
@@ -184,6 +185,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
     const permanent = minion.permanentKeywords ?? {
         hasTaunt: false,
         hasCharge: false,
+        hasRush: false,
         hasWindfury: false,
         isPoisonous: false,
     };
@@ -192,6 +194,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
         ? {
               hasTaunt: initial.hasTaunt,
               hasCharge: initial.hasCharge,
+              hasRush: initial.hasRush,
               hasWindfury: initial.hasWindfury,
               isPoisonous: initial.isPoisonous,
               hasStealth: initial.hasStealth,
@@ -200,6 +203,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
         : {
               hasTaunt: initial.hasTaunt || permanent.hasTaunt,
               hasCharge: initial.hasCharge || permanent.hasCharge,
+              hasRush: initial.hasRush || permanent.hasRush,
               hasWindfury: initial.hasWindfury || permanent.hasWindfury,
               isPoisonous: initial.isPoisonous || permanent.isPoisonous,
               hasStealth: initial.hasStealth || permanent.hasStealth,
@@ -233,6 +237,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
 
                 if (boost.minionPowers.hasTaunt) keywords.hasTaunt = true;
                 if (boost.minionPowers.hasCharge) keywords.hasCharge = true;
+                if (boost.minionPowers.hasRush) keywords.hasRush = true;
                 if (boost.minionPowers.hasWindfury) keywords.hasWindfury = true;
                 if (boost.minionPowers.isPoisonous) keywords.isPoisonous = true;
                 if (boost.minionPowers.hasStealth) keywords.hasStealth = true;
@@ -243,6 +248,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
 
     card.minionPowers.hasTaunt = keywords.hasTaunt;
     card.minionPowers.hasCharge = keywords.hasCharge;
+    card.minionPowers.hasRush = keywords.hasRush;
     card.minionPowers.hasWindfury = keywords.hasWindfury;
     card.minionPowers.isPoisonous = keywords.isPoisonous;
     card.minionPowers.hasStealth = keywords.hasStealth;

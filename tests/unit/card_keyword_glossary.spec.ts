@@ -11,6 +11,7 @@ import { getMinionPowerEffects } from "../../api_types/get_minion_power_effects.
 const MINION_POWER_EFFECTS = getMinionPowerEffects({
     hasTaunt: true,
     hasCharge: true,
+    hasRush: true,
     hasWindfury: true,
     isPoisonous: true,
     hasStealth: true,
