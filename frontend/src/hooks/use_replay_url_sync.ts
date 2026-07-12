@@ -23,7 +23,7 @@ export const useReplayUrlSync = (
     const perspectiveUserId = replay
         ? resolveReplayPerspectiveUserId(pathUserId, replay)
         : pathUserId;
-    const maxStepIndex = replay?.replay.steps.length ?? 0;
+    const maxStepIndex = replay?.replay?.steps?.length ?? 0;
     const initialStep = replay ? clampReplayStep(parseReplayStep(searchParams), maxStepIndex) : 0;
     const sessionKey = replay ? `${replay.gameId}-${perspectiveUserId}` : null;
 

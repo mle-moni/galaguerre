@@ -5,6 +5,7 @@ import {
     hideGameDataForUser,
     filterPresentationForUser,
 } from "#shared/narrative/filter_presentation_for_user";
+import { normalizeGameDataForReplay } from "#shared/narrative/normalize_replay_game_data";
 import { makeAutoObservable, runInAction } from "mobx";
 import { CardDragStore } from "./CardDragStore.js";
 import { CombatActionQueueStore } from "./CombatActionQueueStore.js";
@@ -143,7 +144,8 @@ export class ReplayStore {
     }
 
     init(replay: ApiGameReplay, perspectiveUserId: number, stepIndex = 0) {
-        const clampedStep = Math.max(0, Math.min(stepIndex, replay.replay.steps.length));
+        const steps = replay.replay?.steps ?? [];
+        const clampedStep = Math.max(0, Math.min(stepIndex, steps.length));
 
         if (
             this.replay?.gameId === replay.gameId &&
@@ -195,7 +197,7 @@ export class ReplayStore {
 
         const raw = index === 0 ? steps[0]!.stateBefore : steps[index - 1]!.stateAfter;
 
-        return hideGameDataForUser(raw, this.perspectiveUserId!);
+        return hideGameDataForUser(normalizeGameDataForReplay(raw), this.perspectiveUserId!);
     }
 
     private buildApiGame(data: GameData): ApiGame {

@@ -1,5 +1,6 @@
 import type { GameData, GamePlayer } from "#api_types/game.types";
 import type { GamePresentationUpdate, NarrativeBeat } from "#api_types/game_narrative.types";
+import { normalizePresentationForReplay } from "#shared/narrative/normalize_replay_game_data";
 
 export interface CompactGamePresentationUpdate {
     updateId: string;
@@ -36,10 +37,10 @@ const compactGameDataForStep = (data: GameData): GameData => stripEphemeralGameF
 
 const mergePlayerDeckCards = (
     player: GamePlayer,
-    deckCards: GamePlayer["deckCards"],
+    deckCards: GamePlayer["deckCards"] | undefined,
 ): GamePlayer => ({
     ...player,
-    deckCards,
+    deckCards: deckCards ?? [],
 });
 
 const expandBeatStateAfter = (beatStateAfter: GameData, stepStateAfter: GameData): GameData => ({
@@ -68,7 +69,7 @@ export const expandReplayStep = (
 ): GamePresentationUpdate => {
     const stateAfter = compact.stateAfter;
 
-    return {
+    return normalizePresentationForReplay({
         updateId: compact.updateId,
         stateBefore:
             compact.stateBefore ??
@@ -77,12 +78,12 @@ export const expandReplayStep = (
                 : (() => {
                       throw new Error("First replay step must include stateBefore");
                   })()),
-        beats: compact.beats.map((beat) => ({
+        beats: (compact.beats ?? []).map((beat) => ({
             ...beat,
             stateAfter: expandBeatStateAfter(beat.stateAfter, stateAfter),
         })),
         stateAfter,
-    };
+    });
 };
 
 export const expandReplaySteps = (

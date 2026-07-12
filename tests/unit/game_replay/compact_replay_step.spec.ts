@@ -134,4 +134,16 @@ test.group("compact replay step", () => {
         assert.equal(compact.beats[0]!.stateAfter.actionLog.length, 0);
         assert.equal(compact.beats[0]!.stateAfter.playerOne.deckCards.length, 0);
     });
+
+    test("expand restores deckCards on beat state from step stateAfter", ({ assert }) => {
+        const original = buildSamplePresentation();
+        delete (original.stateBefore.playerOne as { deckCards?: unknown }).deckCards;
+        delete (original.stateAfter.playerOne as { deckCards?: unknown }).deckCards;
+
+        const [expanded] = expandReplaySteps([compactReplayStep(original, 0)]);
+
+        assert.isArray(expanded.stateBefore.playerOne.deckCards);
+        assert.isArray(expanded.stateAfter.playerOne.deckCards);
+        assert.isArray(expanded.beats[0]!.stateAfter.playerOne.deckCards);
+    });
 });
