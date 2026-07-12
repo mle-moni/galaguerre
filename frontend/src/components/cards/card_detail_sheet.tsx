@@ -26,10 +26,13 @@ export const CardDetailSheet = ({
             opened={opened}
             onClose={onClose}
             position="bottom"
-            size="auto"
+            size="92dvh"
             title={card.label}
             withinPortal
-            classNames={{ content: "card-preview-sheet-content" }}
+            classNames={{
+                content: "card-preview-sheet-content",
+                body: "card-preview-sheet-body",
+            }}
         >
             <div className="card-preview-sheet__face">
                 <PlayerCardFace

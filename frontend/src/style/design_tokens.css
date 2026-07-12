@@ -54,6 +54,7 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding: 1rem;
     border-radius: var(--gg-radius-sm);
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.3) 100%);
@@ -69,6 +70,8 @@
 
 .gg-catalog-card-slot {
     position: relative;
+    width: 100%;
+    min-width: 0;
     border-radius: 10px;
     padding: 6px 6px 12px;
     background: rgba(42, 79, 122, 0.35);
