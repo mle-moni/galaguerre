@@ -310,12 +310,15 @@ export class ReplayStore {
         const steps = this.steps;
         if (steps.length === 0) return "Début";
 
-        if (index === 0) {
+        if (index <= 0) {
             const round = steps[0]!.stateBefore.currentRound;
             return round > 0 ? `Tour ${round} — Début` : "Début de partie";
         }
 
-        const step = steps[index - 1]!;
+        const stepRefIndex = Math.min(index, steps.length) - 1;
+        const step = steps[stepRefIndex];
+        if (!step?.stateAfter) return "Fin de partie";
+
         const round = step.stateAfter.currentRound;
         const kind = step.beats[0]?.kind ?? "ACTION";
         const kindLabels: Record<string, string> = {
@@ -329,6 +332,11 @@ export class ReplayStore {
             MINION_DEATH: "Mort de monstre",
             TRIGGER: "Effet",
         };
+
+        if (index >= steps.length) {
+            return `Tour ${round} — Fin de partie`;
+        }
+
         return `Tour ${round} — ${kindLabels[kind] ?? kind}`;
     }
 
