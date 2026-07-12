@@ -340,4 +340,14 @@ export const CARD_RECAPS: CardRecapData[] = [
         nerfs: [],
         imageUrl: "/card-covers/galadrim/git-revert.webp",
     },
+    {
+        date: "2026-07-12",
+        slug: "recap-2026-07-12",
+        publishedAt: "2026-07-12T18:00:00+02:00",
+        untilCommitHash: "967aa26a946058e26ac89d77513553e1a5d8c418",
+        newCardIds: [174, 176, 177, 173, 175, 172],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/dev-en-passation.webp",
+    },
 ];
