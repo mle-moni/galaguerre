@@ -17,7 +17,7 @@ import {
     getMobileHandCardRatio,
     hasBrowsedMobileHand,
     hasLiftedMobileCard,
-    hasReturnedMobileCardToHand,
+    isPointInsideMobileBounds,
     resolveMobileHandIndex,
 } from "#shared/mobile_hand_gesture";
 import { PlayingCard } from "../playing_card/playing_card.jsx";
@@ -46,7 +46,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [dragPoint, setDragPoint] = useState<Point | null>(null);
     const [isLifted, setIsLifted] = useState(false);
-    const [isReturningToHand, setIsReturningToHand] = useState(false);
+    const [isInCancelZone, setIsInCancelZone] = useState(false);
 
     const selectedCard = selectedIndex === null ? null : player.hand[selectedIndex] ?? null;
 
@@ -98,12 +98,20 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
     const getCardAtGestureIndex = (gesture: ActiveGesture): PlayerCard | null =>
         player.hand[gesture.selectedIndex] ?? null;
 
+    const isInsideCardCancelZone = (point: Point): boolean => {
+        const cancelZone = handRef.current?.closest<HTMLElement>(".mobile-game-layout__bottom");
+        const bounds =
+            cancelZone?.getBoundingClientRect() ?? handRef.current?.getBoundingClientRect();
+
+        return bounds ? isPointInsideMobileBounds(point, bounds) : false;
+    };
+
     const updateMinionDropPreview = (point: Point) => {
         const dropZone = document.querySelector<HTMLElement>(
             '[data-minion-drop-zone][data-spot-owner="PLAYER"]',
         );
 
-        if (!dropZone || !hasReturnedMobileCardToHand(point, dropZone.getBoundingClientRect())) {
+        if (!dropZone || !isPointInsideMobileBounds(point, dropZone.getBoundingClientRect())) {
             store.cardDragStore.leaveMinionDropZone();
             return;
         }
@@ -119,7 +127,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         suppressClickRef.current = true;
         setIsLifted(true);
         setDragPoint(point);
-        setIsReturningToHand(false);
+        setIsInCancelZone(false);
 
         if (!canPlayCard(card)) {
             gesture.mode = "REJECTED";
@@ -167,7 +175,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         setSelectedIndex(index);
         setDragPoint(null);
         setIsLifted(false);
-        setIsReturningToHand(false);
+        setIsInCancelZone(false);
     };
 
     const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -198,28 +206,13 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
             }
         }
 
+        if (gesture.mode !== "NONE") {
+            setDragPoint(point);
+            setIsInCancelZone(isInsideCardCancelZone(point));
+        }
+
         if (gesture.mode === "MINION") {
-            setDragPoint(point);
-            setIsReturningToHand(
-                handRef.current
-                    ? hasReturnedMobileCardToHand(point, handRef.current.getBoundingClientRect())
-                    : false,
-            );
             updateMinionDropPreview(point);
-        } else if (gesture.mode === "TARGETED_SPELL") {
-            setDragPoint(point);
-            setIsReturningToHand(
-                handRef.current
-                    ? hasReturnedMobileCardToHand(point, handRef.current.getBoundingClientRect())
-                    : false,
-            );
-        } else if (gesture.mode === "IMMEDIATE" || gesture.mode === "REJECTED") {
-            setDragPoint(point);
-            setIsReturningToHand(
-                handRef.current
-                    ? hasReturnedMobileCardToHand(point, handRef.current.getBoundingClientRect())
-                    : false,
-            );
         }
     };
 
@@ -227,7 +220,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         const battlefield = document.querySelector<HTMLElement>(".mobile-game-layout__board");
         if (
             !battlefield ||
-            !hasReturnedMobileCardToHand(point, battlefield.getBoundingClientRect())
+            !isPointInsideMobileBounds(point, battlefield.getBoundingClientRect())
         ) {
             return;
         }
@@ -267,11 +260,9 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
 
         const card = getCardAtGestureIndex(gesture);
         const point = { x: event.clientX, y: event.clientY };
-        const returnedToHand = handRef.current
-            ? hasReturnedMobileCardToHand(point, handRef.current.getBoundingClientRect())
-            : false;
+        const releasedInCancelZone = isInsideCardCancelZone(point);
 
-        if (gesture.mode !== "NONE" && returnedToHand) {
+        if (gesture.mode !== "NONE" && releasedInCancelZone) {
             if (gesture.mode === "MINION") {
                 store.cardDragStore.setCardDragged(null);
                 store.cardDragStore.leaveMinionDropZone();
@@ -316,7 +307,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                     className={clsx(
                         "mobile-hand__preview",
                         isLifted && "mobile-hand__preview--dragging",
-                        isReturningToHand && "mobile-hand__preview--canceling",
+                        isInCancelZone && "mobile-hand__preview--canceling",
                     )}
                     style={
                         (isLifted && dragPoint
@@ -338,7 +329,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                         className="mobile-hand__preview-card"
                     />
                     <span className="mobile-hand__preview-hint">
-                        {isReturningToHand
+                        {isInCancelZone
                             ? "Relâchez pour annuler"
                             : isLifted
                               ? "Relâchez pour jouer"

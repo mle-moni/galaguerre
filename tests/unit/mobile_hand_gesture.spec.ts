@@ -4,7 +4,7 @@ import {
     getMobileHandCardRatio,
     hasBrowsedMobileHand,
     hasLiftedMobileCard,
-    hasReturnedMobileCardToHand,
+    isPointInsideMobileBounds,
     resolveMobileHandIndex,
 } from "#shared/mobile_hand_gesture";
 
@@ -49,11 +49,12 @@ test.group("mobile hand gesture", () => {
         );
     });
 
-    test("returning a lifted card to the hand cancels its release", ({ assert }) => {
-        const hand = { left: 0, right: 390, top: 690, bottom: 844 };
+    test("the whole player HUD and hand cancel a lifted card", ({ assert }) => {
+        const playerControls = { left: 0, right: 390, top: 598, bottom: 844 };
 
-        assert.isFalse(hasReturnedMobileCardToHand({ x: 195, y: 520 }, hand));
-        assert.isTrue(hasReturnedMobileCardToHand({ x: 195, y: 760 }, hand));
-        assert.isFalse(hasReturnedMobileCardToHand({ x: 410, y: 760 }, hand));
+        assert.isFalse(isPointInsideMobileBounds({ x: 195, y: 597 }, playerControls));
+        assert.isTrue(isPointInsideMobileBounds({ x: 195, y: 598 }, playerControls));
+        assert.isTrue(isPointInsideMobileBounds({ x: 195, y: 760 }, playerControls));
+        assert.isFalse(isPointInsideMobileBounds({ x: 410, y: 760 }, playerControls));
     });
 });

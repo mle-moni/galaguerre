@@ -49,7 +49,7 @@ export const hasBrowsedMobileHand = (origin: MobileHandPoint, current: MobileHan
 export const hasLiftedMobileCard = (origin: MobileHandPoint, current: MobileHandPoint): boolean =>
     origin.y - current.y >= MOBILE_HAND_LIFT_THRESHOLD_PX;
 
-export const hasReturnedMobileCardToHand = (
+export const isPointInsideMobileBounds = (
     point: MobileHandPoint,
     bounds: MobileHandBounds,
 ): boolean =>

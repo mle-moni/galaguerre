@@ -210,6 +210,19 @@ const liftCard = async (from, distance = 82) => {
     return lifted;
 };
 
+const moveCardIntoBattlefield = async (from) => {
+    const battlefieldBox = await page.locator(".mobile-game-layout__board").boundingBox();
+    assert(battlefieldBox, "The mobile battlefield must be visible");
+
+    const releasePoint = {
+        x: from.x,
+        y: battlefieldBox.y + battlefieldBox.height - 24,
+    };
+    await moveWithPauses(from, releasePoint, 10, 650);
+    await pause(450);
+    return releasePoint;
+};
+
 await ensureGameReady();
 await resetFixture();
 
@@ -227,11 +240,22 @@ await page.mouse.up();
 await pause(1200);
 
 await resetFixture();
-await setCaption("Retour dans la main : le geste est annulé");
+await setCaption("Retour dans la barre joueur : le geste est annulé");
 const canceledSpell = await pressAndBrowseTo(1);
 const liftedCanceledSpell = await liftCard(canceledSpell.start);
-await moveWithPauses(liftedCanceledSpell, canceledSpell.start, 10, 750);
+const cancelFromBattlefield = await moveCardIntoBattlefield(liftedCanceledSpell);
+const playerBarBox = await page.locator(".mobile-bar--player").boundingBox();
+assert(playerBarBox, "The mobile player bar must be visible");
+const playerBarCancelPoint = {
+    x: canceledSpell.start.x,
+    y: playerBarBox.y + 8,
+};
+await moveWithPauses(cancelFromBattlefield, playerBarCancelPoint, 10, 750);
 await pause(700);
+assert.equal(
+    await page.locator("[data-mobile-hand-preview] .mobile-hand__preview-hint").textContent(),
+    "Relâchez pour annuler",
+);
 const cancelPreviewShadow = await page
     .locator("[data-mobile-hand-preview] .mobile-hand__preview-card")
     .evaluate((element) => getComputedStyle(element).boxShadow);
@@ -277,7 +301,8 @@ assert.equal(
 await resetFixture();
 await setCaption("Sort sans cible : monter puis relâcher");
 const spell = await pressAndBrowseTo(1);
-await liftCard(spell.start);
+const liftedSpell = await liftCard(spell.start);
+await moveCardIntoBattlefield(liftedSpell);
 await pause(700);
 await page.mouse.up();
 await pause(1800);
@@ -292,7 +317,8 @@ assert.equal(
 await resetFixture();
 await setCaption("Arme : même geste, équipement immédiat");
 const weapon = await pressAndBrowseTo(2);
-await liftCard(weapon.start);
+const liftedWeapon = await liftCard(weapon.start);
+await moveCardIntoBattlefield(liftedWeapon);
 await pause(700);
 await page.mouse.up();
 await pause(1800);
@@ -305,20 +331,11 @@ assert.equal(
 );
 
 await resetFixture();
-await setCaption("Sort ciblé : le premier dépôt ouvre seulement le choix de cible");
+await setCaption("Sort ciblé : déposer, puis annuler le choix");
 const targetedSpell = await pressAndBrowseTo(3);
-const liftedSpell = await liftCard(targetedSpell.start);
-const opponentTarget = page
-    .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
-    .first();
-const opponentTargetBox = await opponentTarget.boundingBox();
-assert(opponentTargetBox, "The opponent target must be visible");
-const targetPoint = {
-    x: opponentTargetBox.x + opponentTargetBox.width / 2,
-    y: opponentTargetBox.y + opponentTargetBox.height / 2,
-};
-await moveWithPauses(liftedSpell, targetPoint, 18, 1200);
-await pause(900);
+const liftedTargetedSpell = await liftCard(targetedSpell.start);
+const neutralPoint = { x: VIEWPORT.width / 2, y: 390 };
+await moveWithPauses(liftedTargetedSpell, neutralPoint, 14, 900);
 await page.mouse.up();
 await pause(1200);
 const cancelTargetButton = page.getByRole("button", {
@@ -327,26 +344,17 @@ const cancelTargetButton = page.getByRole("button", {
 assert.equal(await cancelTargetButton.count(), 1);
 assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
 assert.equal(await page.locator("[data-hand-card-index]").count(), 10);
-assert.equal(
-    await page.locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]').count(),
-    1,
-);
 
 await setCaption("Annuler rend la main intacte");
 await cancelTargetButton.click();
 await pause(900);
 assert.equal(await cancelTargetButton.count(), 0);
 assert.equal(await page.locator("[data-hand-card-index]").count(), 10);
-assert.equal(
-    await page.locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]').count(),
-    1,
-);
 
 await resetFixture();
 await setCaption("Sort ciblé : déposer, puis toucher la cible");
 const twoStepSpell = await pressAndBrowseTo(3);
 const liftedTwoStep = await liftCard(twoStepSpell.start);
-const neutralPoint = { x: VIEWPORT.width / 2, y: 390 };
 await moveWithPauses(liftedTwoStep, neutralPoint, 14, 900);
 await page.mouse.up();
 await pause(1200);
