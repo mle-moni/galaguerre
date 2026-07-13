@@ -735,6 +735,22 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats DISCOVER with OR filters", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DISCOVER",
+            discoverCardFilter: null,
+            discoverCardFilterAlternatives: [
+                createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["SALES"] }),
+            ],
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Chaque fois que ce monstre attaque"),
+            "Chaque fois que ce monstre attaque : Découvrez un monstre Développeur ou un monstre Sales.",
+        );
+    });
+
     test("formats DEFEAT opponent", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "DEFEAT",

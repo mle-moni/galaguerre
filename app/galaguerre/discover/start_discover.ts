@@ -12,7 +12,11 @@ export const startDiscover = (
     action: Extract<CardActionFieldsSnapshot, { type: "DISCOVER" }>,
     discoverContext: ExecuteActionDiscoverContext,
 ): ExecuteActionResult => {
-    const options = generateDiscoverOptions(action.discoverCardFilter, action.optionCount);
+    const options = generateDiscoverOptions(
+        action.discoverCardFilter,
+        action.optionCount,
+        action.discoverCardFilterAlternatives,
+    );
 
     if (options.length === 0) {
         return "ok";

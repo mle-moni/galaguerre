@@ -308,6 +308,40 @@ const formatDiscoverExtraFilterSuffix = (filter: CardFilterSnapshot): string => 
     return parts.length > 0 ? ` ${parts.join(" ")}` : "";
 };
 
+const hasDiscoverFilter = (
+    filter: CardFilterSnapshot | null,
+    alternatives: CardFilterSnapshot[] | null | undefined,
+): boolean => (alternatives ?? []).length > 0 || hasCardFilterConstraints(filter);
+
+const formatDiscoverTargetPhrase = (filter: CardFilterSnapshot): string => {
+    const { article, label } = formatDiscoverCardLabel(filter);
+    return `${article} ${label}${formatDiscoverExtraFilterSuffix(filter)}`;
+};
+
+const formatDiscoverDescription = (
+    filter: CardFilterSnapshot | null,
+    alternatives: CardFilterSnapshot[],
+    capitalizeFirst = true,
+): string => {
+    const verb = capitalizeFirst ? "Découvrez" : "découvrez";
+
+    if (!hasDiscoverFilter(filter, alternatives)) {
+        return `${verb} une carte`;
+    }
+
+    if (alternatives.length > 0) {
+        const phrases = alternatives.map((alternative) => formatDiscoverTargetPhrase(alternative));
+        return `${verb} ${phrases.join(" ou ")}`;
+    }
+
+    if (!filter) {
+        return `${verb} une carte`;
+    }
+
+    const { article, label } = formatDiscoverCardLabel(filter);
+    return `${verb} ${article} ${label}${formatDiscoverExtraFilterSuffix(filter)}`;
+};
+
 const hasCardFilterConstraints = (filter: CardFilterSnapshot | null): boolean => {
     if (!filter) return false;
 
@@ -726,8 +760,11 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
-            const { article, label } = formatDiscoverCardLabel(action.discoverCardFilter);
-            return `découvrez ${article} ${label}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}`;
+            return formatDiscoverDescription(
+                action.discoverCardFilter,
+                action.discoverCardFilterAlternatives,
+                false,
+            );
         }
         case "MANA": {
             const text = formatManaActionText(action);
@@ -796,7 +833,9 @@ const isSameHandCardGroup = (left: HandCardAction, right: HandCardAction): boole
 
 const isSameDiscoverGroup = (left: DiscoverAction, right: DiscoverAction): boolean =>
     left.optionCount === right.optionCount &&
-    JSON.stringify(left.discoverCardFilter) === JSON.stringify(right.discoverCardFilter);
+    JSON.stringify(left.discoverCardFilter) === JSON.stringify(right.discoverCardFilter) &&
+    JSON.stringify(left.discoverCardFilterAlternatives) ===
+        JSON.stringify(right.discoverCardFilterAlternatives);
 
 const formatMergedHandCardAddDescription = (actions: HandCardAction[], prefix: string): string => {
     const copies = actions.map((action) =>
@@ -807,14 +846,36 @@ const formatMergedHandCardAddDescription = (actions: HandCardAction[], prefix: s
 };
 
 const formatMergedDiscoverDescription = (actions: DiscoverAction[], prefix: string): string => {
-    const { article, label } = formatDiscoverCardLabel(actions[0].discoverCardFilter);
-    const filterSuffix = formatDiscoverExtraFilterSuffix(actions[0].discoverCardFilter);
-    const firstClause = `Découvrez ${article} ${label}${filterSuffix}`;
+    const first = actions[0]!;
+    const firstDescription = formatDiscoverDescription(
+        first.discoverCardFilter,
+        first.discoverCardFilterAlternatives,
+    );
+
+    if (first.discoverCardFilterAlternatives.length > 0) {
+        const additionalClauses = actions.slice(1).map(() => {
+            const repeat = formatDiscoverDescription(
+                first.discoverCardFilter,
+                first.discoverCardFilterAlternatives,
+                false,
+            );
+            return `Puis, ${repeat}`;
+        });
+
+        return `${prefix} : ${[firstDescription, ...additionalClauses].join(". ")}.`;
+    }
+
+    if (!first.discoverCardFilter) {
+        return `${prefix} : ${firstDescription}.`;
+    }
+
+    const { label } = formatDiscoverCardLabel(first.discoverCardFilter);
+    const filterSuffix = formatDiscoverExtraFilterSuffix(first.discoverCardFilter);
     const additionalClauses = actions
         .slice(1)
         .map(() => `Puis, découvrez un autre ${label}${filterSuffix}`);
 
-    return `${prefix} : ${[firstClause, ...additionalClauses].join(". ")}.`;
+    return `${prefix} : ${[firstDescription, ...additionalClauses].join(". ")}.`;
 };
 
 type ActionDescriptionGroup =
@@ -1020,8 +1081,10 @@ export const formatActionDescription = (
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
-            const { article, label } = formatDiscoverCardLabel(action.discoverCardFilter);
-            return `${prefix} : Découvrez ${article} ${label}${formatDiscoverExtraFilterSuffix(action.discoverCardFilter)}.`;
+            return `${prefix} : ${formatDiscoverDescription(
+                action.discoverCardFilter,
+                action.discoverCardFilterAlternatives,
+            )}.`;
         }
         case "BOOST": {
             if (!action.boost) return null;

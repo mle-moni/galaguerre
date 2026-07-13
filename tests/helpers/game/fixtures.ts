@@ -139,7 +139,8 @@ type CardActionSnapshotOverrides = {
     enemyDrawCount?: number;
     drawCardFilter?: CardFilterSnapshot | null;
     drawCardFilterAlternatives?: CardFilterSnapshot[];
-    discoverCardFilter?: CardFilterSnapshot;
+    discoverCardFilter?: CardFilterSnapshot | null;
+    discoverCardFilterAlternatives?: CardFilterSnapshot[];
     optionCount?: number;
     enemyDrawCardFilter?: CardFilterSnapshot | null;
     boost?: BoostSnapshot;
@@ -197,13 +198,17 @@ export const createCardActionSnapshot = (
             return {
                 type: "DISCOVER",
                 isTargeted: false,
-                discoverCardFilter: overrides.discoverCardFilter ?? {
-                    type: "MINION",
-                    comparison: null,
-                    tags: [],
-                    labelTags: [],
-                    rarity: null,
-                },
+                discoverCardFilter:
+                    overrides.discoverCardFilter !== undefined
+                        ? overrides.discoverCardFilter
+                        : {
+                              type: "MINION",
+                              comparison: null,
+                              tags: [],
+                              labelTags: [],
+                              rarity: null,
+                          },
+                discoverCardFilterAlternatives: overrides.discoverCardFilterAlternatives ?? [],
                 optionCount: overrides.optionCount ?? 3,
                 actionCondition,
                 onTargetResult,

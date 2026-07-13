@@ -206,7 +206,8 @@ const generateHandActionFieldsSchema = z.object({
 const discoverActionFieldsSchema = z.object({
     type: z.literal("DISCOVER"),
     isTargeted: z.literal(false).default(false),
-    discoverCardFilter: cardFilterSchema,
+    discoverCardFilter: cardFilterSchema.nullable(),
+    discoverCardFilterAlternatives: z.array(cardFilterSchema).default([]),
     optionCount: z.number().int().positive().default(3),
     actionCondition: actionConditionSchema,
 });

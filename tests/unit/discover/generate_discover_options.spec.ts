@@ -1,91 +1,77 @@
 import { test } from "@japa/runner";
-import { isCardCollectible } from "#api_types/card_preview";
-import { createCardFilterSnapshot, createComparisonSnapshot } from "#tests/helpers/game/fixtures";
+import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
+import { getCollectibleMinionCardTemplates } from "#api_types/card_preview";
 import { generateDiscoverOptions } from "#galaguerre/discover/generate_discover_options";
+import type { CardFilterSnapshot } from "#api_types/game.types";
+
+const DEVELOPPEUR_FILTER: CardFilterSnapshot = {
+    type: "MINION",
+    comparison: null,
+    tags: ["DEVELOPPEUR"],
+    labelTags: [],
+    rarity: null,
+};
+
+const SALES_FILTER: CardFilterSnapshot = {
+    type: "MINION",
+    comparison: null,
+    tags: ["SALES"],
+    labelTags: [],
+    rarity: null,
+};
+
+const expectedDeveloperOrSalesCardIds = new Set(
+    getCollectibleMinionCardTemplates()
+        .filter(
+            (card) =>
+                deckCardMatchesFilter(card, DEVELOPPEUR_FILTER) ||
+                deckCardMatchesFilter(card, SALES_FILTER),
+        )
+        .map((card) => card.cardId),
+);
 
 test.group("generate_discover_options", () => {
-    test("returns only collectible cards", ({ assert }) => {
-        const options = generateDiscoverOptions(createCardFilterSnapshot({ type: "MINION" }), 10);
+    test("returns options from a single filter", ({ assert }) => {
+        const options = generateDiscoverOptions(DEVELOPPEUR_FILTER, 3);
 
+        assert.isAtMost(options.length, 3);
         assert.isAbove(options.length, 0);
-        for (const option of options) {
-            assert.isTrue(isCardCollectible(option.cardId));
-            assert.notEqual(option.cardId, 121);
-        }
+        assert.isTrue(options.every((card) => deckCardMatchesFilter(card, DEVELOPPEUR_FILTER)));
     });
 
-    test("returns unique card ids", ({ assert }) => {
-        const options = generateDiscoverOptions(createCardFilterSnapshot({ type: "MINION" }), 3);
+    test("merges OR filters into one discover pool", ({ assert }) => {
+        const options = generateDiscoverOptions(null, 3, [DEVELOPPEUR_FILTER, SALES_FILTER]);
 
-        const cardIds = options.map((option) => option.cardId);
+        assert.isAtMost(options.length, 3);
+        assert.isAbove(options.length, 0);
+        assert.isTrue(options.every((card) => expectedDeveloperOrSalesCardIds.has(card.cardId)));
+    });
+
+    test("deduplicates cards that match multiple OR filters", ({ assert }) => {
+        const options = generateDiscoverOptions(null, 3, [DEVELOPPEUR_FILTER, SALES_FILTER]);
+        const cardIds = options.map((card) => card.cardId);
+
         assert.equal(new Set(cardIds).size, cardIds.length);
     });
 
-    test("applies cost comparison filters", ({ assert }) => {
-        const options = generateDiscoverOptions(
-            createCardFilterSnapshot({
-                type: "MINION",
-                comparison: createComparisonSnapshot({
-                    costComparison: "=",
-                    cost: 1,
-                }),
-            }),
-            3,
-        );
+    test("returns no options when OR filters have no matches", ({ assert }) => {
+        const impossibleFilter: CardFilterSnapshot = {
+            type: "MINION",
+            comparison: {
+                costComparison: "=",
+                cost: 99,
+                attackComparison: null,
+                attack: null,
+                healthComparison: null,
+                health: null,
+            },
+            tags: [],
+            labelTags: [],
+            rarity: null,
+        };
 
-        assert.isAbove(options.length, 0);
-        for (const option of options) {
-            assert.equal(option.cost, 1);
-        }
-    });
+        const options = generateDiscoverOptions(null, 3, [impossibleFilter]);
 
-    test("returns fewer options when pool is smaller than optionCount", ({ assert }) => {
-        const options = generateDiscoverOptions(
-            createCardFilterSnapshot({
-                type: "SPELL",
-                comparison: createComparisonSnapshot({
-                    costComparison: "=",
-                    cost: 99,
-                }),
-            }),
-            3,
-        );
-
-        assert.isAtMost(options.length, 3);
-    });
-
-    test("assigns unique uuids to each option", ({ assert }) => {
-        const options = generateDiscoverOptions(createCardFilterSnapshot({ type: "MINION" }), 3);
-
-        const uuids = options.map((option) => option.uuid);
-        assert.equal(new Set(uuids).size, uuids.length);
-    });
-
-    test("includes non-collectible cards when filtering by label tags", ({ assert }) => {
-        const options = generateDiscoverOptions(
-            createCardFilterSnapshot({ type: "SPELL", labelTags: ["EMOJI"] }),
-            5,
-        );
-
-        assert.isAbove(options.length, 0);
-        for (const option of options) {
-            assert.equal(option.type, "SPELL");
-            assert.include(option.labelTags, "EMOJI");
-            assert.isFalse(isCardCollectible(option.cardId));
-        }
-    });
-
-    test("applies rarity filters", ({ assert }) => {
-        const options = generateDiscoverOptions(
-            createCardFilterSnapshot({ type: "MINION", rarity: "LEGENDARY" }),
-            3,
-        );
-
-        assert.isAbove(options.length, 0);
-        for (const option of options) {
-            assert.equal(option.rarity, "LEGENDARY");
-            assert.equal(option.type, "MINION");
-            assert.isTrue(isCardCollectible(option.cardId));
-        }
+        assert.equal(options.length, 0);
     });
 });

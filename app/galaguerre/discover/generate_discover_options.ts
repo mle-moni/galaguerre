@@ -9,18 +9,47 @@ const instantiateDiscoverOption = (template: PlayerCard): PlayerCard => ({
     uuid: randomUUID(),
 });
 
-export const generateDiscoverOptions = (
-    filter: CardFilterSnapshot,
-    optionCount: number,
-): PlayerCard[] => {
-    if (optionCount <= 0) return [];
-
+const getDiscoverPool = (filter: CardFilterSnapshot): PlayerCard[] => {
     const pool =
         cardFilterLabelTags(filter).length > 0
             ? getAllCardTemplates()
             : getCollectibleCardTemplates();
-    const matches = pool.filter((template) => deckCardMatchesFilter(template, filter));
 
+    return pool.filter((template) => deckCardMatchesFilter(template, filter));
+};
+
+const collectDiscoverMatches = (
+    filter: CardFilterSnapshot | null,
+    alternatives: CardFilterSnapshot[],
+): PlayerCard[] => {
+    if (alternatives.length > 0) {
+        const seenCardIds = new Set<number>();
+        const matches: PlayerCard[] = [];
+
+        for (const alternative of alternatives) {
+            for (const card of getDiscoverPool(alternative)) {
+                if (seenCardIds.has(card.cardId)) continue;
+                seenCardIds.add(card.cardId);
+                matches.push(card);
+            }
+        }
+
+        return matches;
+    }
+
+    if (!filter) return [];
+
+    return getDiscoverPool(filter);
+};
+
+export const generateDiscoverOptions = (
+    filter: CardFilterSnapshot | null,
+    optionCount: number,
+    filterAlternatives: CardFilterSnapshot[] = [],
+): PlayerCard[] => {
+    if (optionCount <= 0) return [];
+
+    const matches = collectDiscoverMatches(filter, filterAlternatives);
     if (matches.length === 0) return [];
 
     const shuffled = shuffleArray(matches);

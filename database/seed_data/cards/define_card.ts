@@ -178,6 +178,20 @@ export const discoverAction = (
     type: "DISCOVER",
     isTargeted: false,
     discoverCardFilter,
+    discoverCardFilterAlternatives: [],
+    optionCount: options.optionCount ?? 3,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const discoverOrAction = (
+    filters: CardFilterDefinition[],
+    options: { optionCount?: number } = {},
+): CardActionDefinition => ({
+    type: "DISCOVER",
+    isTargeted: false,
+    discoverCardFilter: null,
+    discoverCardFilterAlternatives: filters,
     optionCount: options.optionCount ?? 3,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,

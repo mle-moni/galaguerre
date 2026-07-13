@@ -997,6 +997,28 @@ const validateNonTargetedAction = (
                     path: [...path, "optionCount"],
                 });
             }
+            if (
+                action.discoverCardFilterAlternatives.length > 0 &&
+                action.discoverCardFilterAlternatives.length < 2
+            ) {
+                ctx.addIssue({
+                    code: "custom",
+                    message:
+                        "DISCOVER action with discoverCardFilterAlternatives requires at least 2 filters",
+                    path: [...path, "discoverCardFilterAlternatives"],
+                });
+            }
+            if (
+                action.discoverCardFilterAlternatives.length === 0 &&
+                action.discoverCardFilter === null
+            ) {
+                ctx.addIssue({
+                    code: "custom",
+                    message:
+                        "DISCOVER action requires discoverCardFilter when discoverCardFilterAlternatives is empty",
+                    path: [...path, "discoverCardFilter"],
+                });
+            }
             break;
         }
         case "MANA": {
