@@ -1,5 +1,9 @@
 export const MOBILE_HAND_LIFT_THRESHOLD_PX = 44;
 export const MOBILE_HAND_BROWSE_THRESHOLD_PX = 8;
+/** Card-edge spacing as a fraction of card width (0 = touching, negative = overlap). */
+export const MOBILE_HAND_TIGHT_SPACING_RATIO = -0.04;
+/** Typical travel width / card width on portrait mobile (hand padding + card sizing). */
+export const MOBILE_HAND_TRAVEL_TO_CARD_RATIO = 4;
 
 interface MobileHandPoint {
     x: number;
@@ -21,10 +25,30 @@ interface ResolveMobileHandIndexOptions {
     cardCount: number;
 }
 
-export const getMobileHandCardRatio = (index: number, cardCount: number): number => {
+export const getMobileHandSpreadSpan = (
+    cardCount: number,
+    travelToCardRatio: number = MOBILE_HAND_TRAVEL_TO_CARD_RATIO,
+): number => {
+    if (cardCount <= 1) return 0;
+
+    return Math.min(
+        1,
+        ((cardCount - 1) * (1 + MOBILE_HAND_TIGHT_SPACING_RATIO)) / travelToCardRatio,
+    );
+};
+
+export const getMobileHandCardRatio = (
+    index: number,
+    cardCount: number,
+    travelToCardRatio: number = MOBILE_HAND_TRAVEL_TO_CARD_RATIO,
+): number => {
     if (cardCount <= 1) return 0.5;
 
-    return Math.min(1, Math.max(0, index / (cardCount - 1)));
+    const span = getMobileHandSpreadSpan(cardCount, travelToCardRatio);
+    const start = (1 - span) / 2;
+    const step = span / (cardCount - 1);
+
+    return start + index * step;
 };
 
 export const resolveMobileHandIndex = ({
@@ -37,10 +61,14 @@ export const resolveMobileHandIndex = ({
     if (cardCount <= 1) return 0;
 
     const travelWidth = Math.max(1, handWidth - cardWidth);
+    const travelToCardRatio = travelWidth / cardWidth;
+    const span = getMobileHandSpreadSpan(cardCount, travelToCardRatio);
+    const start = (1 - span) / 2;
+    const step = span / (cardCount - 1);
     const centeredX = clientX - handLeft - cardWidth / 2;
-    const ratio = Math.min(1, Math.max(0, centeredX / travelWidth));
+    const ratio = centeredX / travelWidth;
 
-    return Math.round(ratio * (cardCount - 1));
+    return Math.min(cardCount - 1, Math.max(0, Math.round((ratio - start) / step)));
 };
 
 export const hasBrowsedMobileHand = (origin: MobileHandPoint, current: MobileHandPoint): boolean =>

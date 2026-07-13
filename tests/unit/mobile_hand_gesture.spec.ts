@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import {
     MOBILE_HAND_LIFT_THRESHOLD_PX,
     getMobileHandCardRatio,
+    getMobileHandSpreadSpan,
     hasBrowsedMobileHand,
     hasLiftedMobileCard,
     isPointInsideMobileBounds,
@@ -10,9 +11,22 @@ import {
 
 test.group("mobile hand gesture", () => {
     test("ten cards span the hand from the first edge to the last edge", ({ assert }) => {
-        assert.equal(getMobileHandCardRatio(0, 10), 0);
-        assert.equal(getMobileHandCardRatio(9, 10), 1);
-        assert.closeTo(getMobileHandCardRatio(4, 10), 4 / 9, 0.0001);
+        const travelToCardRatio = 316 / 74;
+
+        assert.equal(getMobileHandCardRatio(0, 10, travelToCardRatio), 0);
+        assert.equal(getMobileHandCardRatio(9, 10, travelToCardRatio), 1);
+        assert.closeTo(getMobileHandCardRatio(4, 10, travelToCardRatio), 4 / 9, 0.0001);
+    });
+
+    test("few cards stay centered with tight spacing", ({ assert }) => {
+        const travelToCardRatio = 316 / 74;
+        const ratios = [0, 1, 2, 3].map((index) =>
+            getMobileHandCardRatio(index, 4, travelToCardRatio),
+        );
+
+        assert.closeTo(ratios[0], 1 - ratios[3], 0.001);
+        assert.isBelow(ratios[3] - ratios[0], 1);
+        assert.closeTo(getMobileHandSpreadSpan(4, travelToCardRatio), 0.69, 0.02);
     });
 
     test("sliding across the hand selects every card and clamps at both edges", ({ assert }) => {

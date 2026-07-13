@@ -5,6 +5,7 @@ import {
     IconStack2,
     IconSword,
 } from "@tabler/icons-react";
+import { Popover, Text } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
@@ -31,6 +32,7 @@ export const MobileHeroStrip = observer(
     ({ player, isOpponent = false, deckCount, handCount }: MobileHeroStripProps) => {
         const { store, authoritativeGame } = useGameContext();
         const [weaponSheetOpened, setWeaponSheetOpened] = useState(false);
+        const [weaponInfoOpened, setWeaponInfoOpened] = useState(false);
         const maxMana = getMaxMana(authoritativeGame.data.currentRound);
 
         const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
@@ -94,6 +96,15 @@ export const MobileHeroStrip = observer(
             store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
         };
 
+        const weaponDescription = weaponLabel
+            ? `${weaponLabel} : dégâts par attaque, puis durabilité restante.`
+            : "Dégâts par attaque, puis durabilité restante de l'arme équipée.";
+
+        const handleWeaponStatClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            setWeaponInfoOpened((current) => !current);
+        };
+
         const handleWeaponPreviewClick = (event: React.MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             event.preventDefault();
@@ -144,12 +155,7 @@ export const MobileHeroStrip = observer(
                 onDrop={handleClick}
                 onClick={handleClick}
             >
-                <div
-                    className={clsx(
-                        "mobile-bar__identity",
-                        player.weaponState && "mobile-bar__identity--armed",
-                    )}
-                >
+                <div className="mobile-bar__avatar-column">
                     <div className="mobile-bar__avatar-wrap">
                         <img
                             className="mobile-bar__avatar"
@@ -161,58 +167,95 @@ export const MobileHeroStrip = observer(
                             alt={`Profil de ${player.pseudo}`}
                             draggable={false}
                         />
-                        {player.weaponState && (
-                            <div className="mobile-bar__weapon">
-                                <MobileStatBadge
-                                    value={`${player.weaponState.damage}/${player.weaponState.durability}`}
-                                    icon={<IconSword />}
-                                    label="Statistiques de l'arme"
-                                    displayLabel="Arme"
-                                    description={
-                                        weaponLabel
-                                            ? `${weaponLabel} : dégâts par attaque, puis durabilité restante.`
-                                            : "Dégâts par attaque, puis durabilité restante de l'arme équipée."
-                                    }
-                                    className="mobile-bar__badge--weapon"
-                                />
-                                <button
-                                    type="button"
-                                    className="mobile-bar__weapon-preview"
-                                    data-weapon-preview
-                                    aria-label={
-                                        weaponLabel ? `Voir ${weaponLabel}` : "Voir l'arme équipée"
-                                    }
-                                    onPointerDown={handleWeaponPreviewPointerDown}
-                                    onClick={handleWeaponPreviewClick}
-                                >
-                                    i
-                                </button>
-                                {!isOpponent && canAttackWithWeapon && (
-                                    <button
-                                        type="button"
-                                        className={clsx(
-                                            "mobile-bar__weapon-attack",
-                                            store.weaponDragStore.isAttacking &&
-                                                "mobile-bar__weapon-attack--active",
-                                        )}
-                                        data-weapon-attack
-                                        aria-label="Attaquer avec l'arme"
-                                        aria-pressed={store.weaponDragStore.isAttacking}
-                                        onPointerDown={(event) => event.stopPropagation()}
-                                        onClick={handleWeaponAttackClick}
-                                    >
-                                        ⚔️
-                                    </button>
-                                )}
-                                <CardPreviewSheet
-                                    card={player.weaponState.originalCard}
-                                    opened={weaponSheetOpened}
-                                    onClose={() => setWeaponSheetOpened(false)}
-                                />
-                            </div>
-                        )}
                     </div>
                     <span className="mobile-bar__pseudo">{player.pseudo}</span>
+                </div>
+                <div className="mobile-bar__weapon-slot" aria-hidden={!player.weaponState}>
+                    {player.weaponState && (
+                        <div className="mobile-bar__weapon">
+                            <Popover
+                                opened={weaponInfoOpened}
+                                onChange={setWeaponInfoOpened}
+                                width={220}
+                                position="bottom"
+                                withArrow
+                                shadow="md"
+                                withinPortal
+                            >
+                                <Popover.Target>
+                                    <div className="mobile-bar__weapon-panel">
+                                        <button
+                                            type="button"
+                                            className="mobile-bar__weapon-stat"
+                                            data-stat-badge
+                                            aria-label="Statistiques de l'arme"
+                                            onClick={handleWeaponStatClick}
+                                        >
+                                            <span
+                                                className="mobile-bar__weapon-stat-icon"
+                                                aria-hidden="true"
+                                            >
+                                                <IconSword />
+                                            </span>
+                                            <span>
+                                                {player.weaponState.damage}/
+                                                {player.weaponState.durability}
+                                            </span>
+                                        </button>
+                                        <div className="mobile-bar__weapon-meta">
+                                            <span className="mobile-bar__weapon-label">Arme</span>
+                                            <button
+                                                type="button"
+                                                className="mobile-bar__weapon-preview"
+                                                data-weapon-preview
+                                                aria-label={
+                                                    weaponLabel
+                                                        ? `Voir ${weaponLabel}`
+                                                        : "Voir l'arme équipée"
+                                                }
+                                                onPointerDown={handleWeaponPreviewPointerDown}
+                                                onClick={handleWeaponPreviewClick}
+                                            >
+                                                i
+                                            </button>
+                                            {!isOpponent && canAttackWithWeapon && (
+                                                <button
+                                                    type="button"
+                                                    className={clsx(
+                                                        "mobile-bar__weapon-attack",
+                                                        store.weaponDragStore.isAttacking &&
+                                                            "mobile-bar__weapon-attack--active",
+                                                    )}
+                                                    data-weapon-attack
+                                                    aria-label="Attaquer avec l'arme"
+                                                    aria-pressed={store.weaponDragStore.isAttacking}
+                                                    onPointerDown={(event) =>
+                                                        event.stopPropagation()
+                                                    }
+                                                    onClick={handleWeaponAttackClick}
+                                                >
+                                                    ⚔️
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Popover.Target>
+                                <Popover.Dropdown onClick={(event) => event.stopPropagation()}>
+                                    <Text size="sm" fw={700}>
+                                        Statistiques de l&apos;arme
+                                    </Text>
+                                    <Text size="xs" c="dimmed">
+                                        {weaponDescription}
+                                    </Text>
+                                </Popover.Dropdown>
+                            </Popover>
+                            <CardPreviewSheet
+                                card={player.weaponState.originalCard}
+                                opened={weaponSheetOpened}
+                                onClose={() => setWeaponSheetOpened(false)}
+                            />
+                        </div>
+                    )}
                 </div>
                 <div className="mobile-bar__stats">
                     <MobileStatBadge
