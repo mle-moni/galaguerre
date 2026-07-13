@@ -1,9 +1,30 @@
 import type { GameData } from "#api_types/game.types";
 import Game from "#models/game";
+import db from "@adonisjs/lucid/services/db";
+import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
-export const loadPersistedGameData = async (gameId: number): Promise<GameData | null> => {
-    const row = await Game.query().where("id", gameId).select("data").first();
-    return row?.data ?? null;
+export const withGameProgressionLock = async <T>(
+    game: Game,
+    work: (lockedGame: Game, trx: TransactionClientContract) => Promise<T>,
+): Promise<T> => {
+    const { lockedGame, result } = await db.transaction(async (trx) => {
+        const lockedGame = await Game.query({ client: trx })
+            .where("id", game.id)
+            .forUpdate()
+            .firstOrFail();
+
+        return {
+            lockedGame,
+            result: await work(lockedGame, trx),
+        };
+    });
+
+    game.data = lockedGame.data;
+    game.winnerId = lockedGame.winnerId;
+    game.isFinished = lockedGame.isFinished;
+    game.endedAt = lockedGame.endedAt;
+
+    return result;
 };
 
 export const hasRatingBeenApplied = (data: GameData): boolean => data.ratingResult !== undefined;

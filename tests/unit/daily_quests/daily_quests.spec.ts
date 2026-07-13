@@ -1,4 +1,5 @@
 import DailyQuestsController from "#controllers/daily_quests/daily_quests_controller";
+import { syncCards } from "#database/seed_helpers/sync_cards";
 import CardPack from "#models/card_pack";
 import User from "#models/user";
 import UserDailyQuest from "#models/user_daily_quest";
@@ -8,6 +9,7 @@ import {
     DailyQuestNotCompletedError,
 } from "#services/daily_quests/claim_daily_quest";
 import { getOrGenerateDailyQuests } from "#services/daily_quests/get_or_generate_daily_quests";
+import { openCardPack } from "#services/collection/open_card_pack";
 import { listDailyQuests } from "#services/daily_quests/list_daily_quests";
 import { updateDailyQuestProgressForGame } from "#services/daily_quests/update_daily_quest_progress";
 import {
@@ -320,5 +322,72 @@ test.group("daily quests", (group) => {
 
         assert.equal(result.goldCoins, 25);
         assert.isNotNull(result.quest.claimedAt);
+    });
+});
+
+test.group("daily quest lock ordering", (group) => {
+    group.each.teardown(async () => {
+        await User.query().where("email", "daily-quests-claim-pack-concurrent@test.fr").delete();
+    });
+    test("claims a quest and opens a pack concurrently for the same user", async ({ assert }) => {
+        await syncCards();
+
+        const user = await User.create({
+            email: "daily-quests-claim-pack-concurrent@test.fr",
+            pseudo: "daily-quests-claim-pack-concurrent",
+            password: "test",
+            goldCoins: 0,
+        });
+        const questDate = parseParisCalendarDate(getParisCalendarDate());
+        const [claimableQuest] = await UserDailyQuest.createMany([
+            {
+                userId: user.id,
+                questDate,
+                slot: 0,
+                questType: "DEAL_DAMAGE",
+                targetValue: 60,
+                progress: 60,
+                params: null,
+                rewardType: "story_points",
+                rewardAmount: 25,
+                completedAt: DateTime.now(),
+            },
+            {
+                userId: user.id,
+                questDate,
+                slot: 1,
+                questType: "OPEN_PACK",
+                targetValue: 3,
+                progress: 0,
+                params: null,
+                rewardType: "story_points",
+                rewardAmount: 50,
+            },
+            {
+                userId: user.id,
+                questDate,
+                slot: 2,
+                questType: "DRAW_CARDS",
+                targetValue: 15,
+                progress: 0,
+                params: null,
+                rewardType: "story_points",
+                rewardAmount: 45,
+            },
+        ]);
+        await CardPack.create({ userId: user.id });
+
+        const [openedCards, claimResult] = await Promise.all([
+            openCardPack(user.id),
+            claimDailyQuest(user.id, claimableQuest!.id),
+        ]);
+
+        assert.isAbove(openedCards.length, 0);
+        assert.equal(claimResult.goldCoins, 25);
+
+        const claimedQuest = await UserDailyQuest.findOrFail(claimableQuest!.id);
+        assert.isNotNull(claimedQuest.claimedAt);
+        const pack = await CardPack.query().where("userId", user.id).firstOrFail();
+        assert.isNotNull(pack.openedAt);
     });
 });

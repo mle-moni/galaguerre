@@ -6,11 +6,10 @@ import { getWinnerUserId } from "#services/elo";
 import { gameQualifiesForRewards } from "#services/rewards/game_qualifies_for_rewards";
 import {
     hasRewardsBeenApplied,
-    loadPersistedGameData,
-    syncProgressionMarkersFromPersisted,
+    withGameProgressionLock,
 } from "#services/post_game/progression_idempotency";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
-import db from "@adonisjs/lucid/services/db";
+import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
 const EMPTY_REWARD: GameRewardPlayerResult = { goldCoins: 0, packs: 0 };
 
@@ -25,15 +24,12 @@ const computePlayerReward = (
     packs: 0,
 });
 
-export const applyGameRewards = async (game: Game): Promise<void> => {
-    if (!(game instanceof Game)) return;
-
-    const persistedData = await loadPersistedGameData(game.id);
-    if (persistedData) {
-        syncProgressionMarkersFromPersisted(game, persistedData);
-        if (hasRewardsBeenApplied(persistedData)) {
-            return;
-        }
+const applyGameRewardsLocked = async (
+    game: Game,
+    trx: TransactionClientContract,
+): Promise<void> => {
+    if (hasRewardsBeenApplied(game.data)) {
+        return;
     }
 
     const winnerUserId = getWinnerUserId(game);
@@ -54,53 +50,66 @@ export const applyGameRewards = async (game: Game): Promise<void> => {
                 playerTwo: EMPTY_REWARD,
             },
         };
+        game.useTransaction(trx);
         await game.save();
         return;
     }
 
-    await db.transaction(async (trx) => {
-        const users = await User.query({ client: trx }).whereIn("id", humanUserIds).forUpdate();
+    const users = await User.query({ client: trx })
+        .whereIn("id", humanUserIds)
+        .orderBy("id", "asc")
+        .forUpdate();
+    const usersById = new Map(users.map((user) => [user.id, user]));
 
-        const usersById = new Map(users.map((user) => [user.id, user]));
+    const playerOneReward = computePlayerReward(
+        !isDraw && winnerUserId === game.data.playerOne.userId,
+        isDraw,
+        isTraining,
+    );
 
-        const playerOneReward = computePlayerReward(
-            !isDraw && winnerUserId === game.data.playerOne.userId,
-            isDraw,
-            isTraining,
-        );
+    const playerTwoReward = computePlayerReward(
+        !isDraw && winnerUserId === game.data.playerTwo.userId,
+        isDraw,
+        isTraining,
+    );
 
-        const playerTwoReward = computePlayerReward(
-            !isDraw && winnerUserId === game.data.playerTwo.userId,
-            isDraw,
-            isTraining,
-        );
+    for (const userId of humanUserIds) {
+        const user = usersById.get(userId);
+        if (!user) continue;
 
-        for (const userId of humanUserIds) {
-            const user = usersById.get(userId);
-            if (!user) continue;
+        const reward = userId === game.data.playerOne.userId ? playerOneReward : playerTwoReward;
 
-            const reward =
-                userId === game.data.playerOne.userId ? playerOneReward : playerTwoReward;
-
-            if (reward.goldCoins > 0) {
-                user.goldCoins += reward.goldCoins;
-            }
-
-            user.useTransaction(trx);
-            await user.save();
+        if (reward.goldCoins > 0) {
+            user.goldCoins += reward.goldCoins;
         }
 
-        const rewardResult: GameRewardResult = {
-            playerOne: isHumanUserId(game.data.playerOne.userId) ? playerOneReward : EMPTY_REWARD,
-            playerTwo: isHumanUserId(game.data.playerTwo.userId) ? playerTwoReward : EMPTY_REWARD,
-        };
+        user.useTransaction(trx);
+        await user.save();
+    }
 
-        game.data = {
-            ...game.data,
-            rewardResult,
-        };
+    const rewardResult: GameRewardResult = {
+        playerOne: isHumanUserId(game.data.playerOne.userId) ? playerOneReward : EMPTY_REWARD,
+        playerTwo: isHumanUserId(game.data.playerTwo.userId) ? playerTwoReward : EMPTY_REWARD,
+    };
 
-        game.useTransaction(trx);
-        await game.save();
-    });
+    game.data = {
+        ...game.data,
+        rewardResult,
+    };
+
+    game.useTransaction(trx);
+    await game.save();
+};
+
+export const applyGameRewards = async (
+    game: Game,
+    trx?: TransactionClientContract,
+): Promise<void> => {
+    if (!(game instanceof Game)) return;
+
+    if (trx) {
+        return applyGameRewardsLocked(game, trx);
+    }
+
+    return withGameProgressionLock(game, applyGameRewardsLocked);
 };

@@ -3,10 +3,9 @@ import type Game from "#models/game";
 import User from "#models/user";
 import {
     hasRatingBeenApplied,
-    loadPersistedGameData,
-    syncProgressionMarkersFromPersisted,
+    withGameProgressionLock,
 } from "#services/post_game/progression_idempotency";
-import db from "@adonisjs/lucid/services/db";
+import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
 export const DEFAULT_ELO = 1200;
 const DEFAULT_K_FACTOR = 32;
@@ -47,19 +46,17 @@ const buildPlayerRatingResult = (eloBefore: number, delta: number): GameRatingPl
     delta,
 });
 
-export const applyGameResult = async (game: Game): Promise<void> => {
-    const winnerUserId = getWinnerUserId(game);
-
-    const persistedData = await loadPersistedGameData(game.id);
-    if (persistedData) {
-        syncProgressionMarkersFromPersisted(game, persistedData);
-        if (hasRatingBeenApplied(persistedData)) {
-            return;
-        }
+const applyGameResultLocked = async (game: Game, trx: TransactionClientContract): Promise<void> => {
+    if (hasRatingBeenApplied(game.data)) {
+        return;
     }
+
+    const winnerUserId = getWinnerUserId(game);
 
     if (winnerUserId === null) {
         game.winnerId = null;
+        game.useTransaction(trx);
+        await game.save();
         return;
     }
 
@@ -69,47 +66,60 @@ export const applyGameResult = async (game: Game): Promise<void> => {
         return;
     }
 
-    await db.transaction(async (trx) => {
-        const playerOne = await User.query({ client: trx })
-            .where("id", playerOneId)
-            .forUpdate()
-            .firstOrFail();
-        const playerTwo = await User.query({ client: trx })
-            .where("id", playerTwoId)
-            .forUpdate()
-            .firstOrFail();
+    const users = await User.query({ client: trx })
+        .whereIn("id", [playerOneId, playerTwoId])
+        .orderBy("id", "asc")
+        .forUpdate();
+    const usersById = new Map(users.map((user) => [user.id, user]));
+    const playerOne = usersById.get(playerOneId);
+    const playerTwo = usersById.get(playerTwoId);
+    if (!playerOne || !playerTwo) {
+        throw new Error("Game players must exist before applying a game result");
+    }
 
-        const winner = winnerUserId === playerOne.id ? playerOne : playerTwo;
-        const loser = winnerUserId === playerOne.id ? playerTwo : playerOne;
-        const winnerEloBefore = winner.elo;
-        const loserEloBefore = loser.elo;
-        const { winnerDelta, loserDelta } = computeEloDeltas(winnerEloBefore, loserEloBefore);
+    const winner = winnerUserId === playerOne.id ? playerOne : playerTwo;
+    const loser = winnerUserId === playerOne.id ? playerTwo : playerOne;
+    const winnerEloBefore = winner.elo;
+    const loserEloBefore = loser.elo;
+    const { winnerDelta, loserDelta } = computeEloDeltas(winnerEloBefore, loserEloBefore);
 
-        winner.elo = winnerEloBefore + winnerDelta;
-        winner.wins += 1;
-        loser.elo = loserEloBefore + loserDelta;
-        loser.losses += 1;
+    winner.elo = winnerEloBefore + winnerDelta;
+    winner.wins += 1;
+    loser.elo = loserEloBefore + loserDelta;
+    loser.losses += 1;
 
-        await winner.useTransaction(trx).save();
-        await loser.useTransaction(trx).save();
+    await winner.useTransaction(trx).save();
+    await loser.useTransaction(trx).save();
 
-        game.winnerId = winnerUserId;
+    game.winnerId = winnerUserId;
 
-        const playerOneIsWinner = playerOne.id === winner.id;
-        const ratingResult: GameRatingResult = {
-            playerOne: buildPlayerRatingResult(
-                playerOneIsWinner ? winnerEloBefore : loserEloBefore,
-                playerOneIsWinner ? winnerDelta : loserDelta,
-            ),
-            playerTwo: buildPlayerRatingResult(
-                playerOneIsWinner ? loserEloBefore : winnerEloBefore,
-                playerOneIsWinner ? loserDelta : winnerDelta,
-            ),
-        };
+    const playerOneIsWinner = playerOne.id === winner.id;
+    const ratingResult: GameRatingResult = {
+        playerOne: buildPlayerRatingResult(
+            playerOneIsWinner ? winnerEloBefore : loserEloBefore,
+            playerOneIsWinner ? winnerDelta : loserDelta,
+        ),
+        playerTwo: buildPlayerRatingResult(
+            playerOneIsWinner ? loserEloBefore : winnerEloBefore,
+            playerOneIsWinner ? loserDelta : winnerDelta,
+        ),
+    };
 
-        game.data = {
-            ...game.data,
-            ratingResult,
-        };
-    });
+    game.data = {
+        ...game.data,
+        ratingResult,
+    };
+    game.useTransaction(trx);
+    await game.save();
+};
+
+export const applyGameResult = async (
+    game: Game,
+    trx?: TransactionClientContract,
+): Promise<void> => {
+    if (trx) {
+        return applyGameResultLocked(game, trx);
+    }
+
+    return withGameProgressionLock(game, applyGameResultLocked);
 };
