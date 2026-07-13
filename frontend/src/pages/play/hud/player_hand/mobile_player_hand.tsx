@@ -249,6 +249,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         gestureRef.current = null;
         setDragPoint(null);
         setIsLifted(false);
+        setIsInCancelZone(false);
     };
 
     const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
