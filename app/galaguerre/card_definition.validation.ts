@@ -968,6 +968,27 @@ const validateNonTargetedAction = (
             validateHandCardPayload(action, ctx, path);
             break;
         }
+        case "GENERATE_HAND": {
+            if (action.generateCount <= 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "GENERATE_HAND action requires generateCount > 0",
+                    path: [...path, "generateCount"],
+                });
+            }
+            if (
+                action.generateCardFilterAlternatives.length > 0 &&
+                action.generateCardFilterAlternatives.length < 2
+            ) {
+                ctx.addIssue({
+                    code: "custom",
+                    message:
+                        "GENERATE_HAND action with generateCardFilterAlternatives requires at least 2 filters",
+                    path: [...path, "generateCardFilterAlternatives"],
+                });
+            }
+            break;
+        }
         case "DISCOVER": {
             if (action.optionCount <= 0) {
                 ctx.addIssue({

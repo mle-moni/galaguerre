@@ -11,7 +11,8 @@ import {
 } from "../../../galaguerre/game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
 import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
-import { ensureValidAttackTarget, recordMinionAttack, canMinionAttackHero } from "../game_utils.js";
+import { ensureValidAttackTarget, canMinionAttackHero } from "../game_utils.js";
+import { completeMinionAttack } from "./complete_minion_attack.js";
 import { terminateGame } from "../terminate_game.js";
 import type { MinionActionOptions } from "./minion_to_minion_action.js";
 
@@ -80,9 +81,18 @@ export const minionToHeroAction = async ({
             { skipNarrative: true },
         );
         endCurrentBeat(game);
-        recordMinionAttack(attacker, game.data.currentRound);
+        const { gameEnded: attackEffectGameEnded } = await completeMinionAttack(
+            game,
+            player,
+            attacker,
+        );
 
-        if (damageGameEnded || player.health <= 0 || opponent.health <= 0) {
+        if (
+            damageGameEnded ||
+            attackEffectGameEnded ||
+            player.health <= 0 ||
+            opponent.health <= 0
+        ) {
             await terminateGame(game, { skipSendUpdate: true });
         }
     });

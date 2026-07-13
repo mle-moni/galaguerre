@@ -82,6 +82,7 @@ export type MinionCard = PlayerCardBase & {
     description: string;
     battlecryActions: CardActionSnapshot[];
     deathrattleActions: CardActionSnapshot[];
+    attackActions: CardActionSnapshot[];
     passives: PassiveSnapshot[];
 };
 
@@ -111,6 +112,7 @@ export type GameLogEntryType =
     | "ATTACK"
     | "BATTLECRY"
     | "DEATHRATTLE"
+    | "ATTACK_EFFECT"
     | "MINION_DEATH"
     | "WEAPON_BREAK"
     | "ABANDON";
@@ -235,7 +237,7 @@ export interface GameMulliganState {
     playerTwoDone: boolean;
 }
 
-export type DiscoverEffectKind = "BATTLECRY" | "SPELL" | "DEATHRATTLE" | "PASSIVE";
+export type DiscoverEffectKind = "BATTLECRY" | "SPELL" | "DEATHRATTLE" | "PASSIVE" | "ATTACK";
 
 export interface DiscoverContinuation {
     remainingActions: CardActionSnapshot[];

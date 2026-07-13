@@ -193,6 +193,16 @@ const handCardActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const generateHandActionFieldsSchema = z.object({
+    type: z.literal("GENERATE_HAND"),
+    isTargeted: z.literal(false).default(false),
+    generateCount: z.number().int().positive(),
+    generateCardFilter: cardFilterSchema.nullable(),
+    generateCardFilterAlternatives: z.array(cardFilterSchema).default([]),
+    handTargetTeam: z.enum(GALAGUERRE_TARGET_TEAMS).default("PLAYER"),
+    actionCondition: actionConditionSchema,
+});
+
 const discoverActionFieldsSchema = z.object({
     type: z.literal("DISCOVER"),
     isTargeted: z.literal(false).default(false),
@@ -244,6 +254,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     summonActionFieldsSchema,
     deckCardActionFieldsSchema,
     handCardActionFieldsSchema,
+    generateHandActionFieldsSchema,
     discoverActionFieldsSchema,
     manaActionFieldsSchema,
     nextSpellCostReductionActionFieldsSchema,
@@ -292,6 +303,7 @@ export const cardActionSchema = z
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),
         deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         handCardActionFieldsSchema.extend(cardActionOnTargetResultField),
+        generateHandActionFieldsSchema.extend(cardActionOnTargetResultField),
         discoverActionFieldsSchema.extend(cardActionOnTargetResultField),
         manaActionFieldsSchema.extend(cardActionOnTargetResultField),
         nextSpellCostReductionActionFieldsSchema.extend(cardActionOnTargetResultField),
@@ -351,6 +363,7 @@ export const minionDataSchema = cardDataBaseSchema.extend({
     minionPowers: zMinionPowerSchema.nullable(),
     battlecryActions: z.array(cardActionSchema),
     deathrattleActions: z.array(deathrattleActionSchema),
+    attackActions: z.array(cardActionSchema).default([]),
     passives: z.array(passiveSchema),
 });
 

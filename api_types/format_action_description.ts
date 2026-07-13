@@ -392,6 +392,52 @@ const formatDrawDescription = (
     return `${verb} ${formatDrawTargetPhrase(filter, drawCount)}`;
 };
 
+const formatGenerateHandTargetPhrase = (
+    filter: CardFilterSnapshot,
+    generateCount: number,
+): string => {
+    const typeInfo = CARD_TYPE_DRAW_LABELS[filter.type];
+    const qualifiers = formatCardFilterQualifiers(filter);
+
+    if (generateCount === 1) {
+        const base = `${typeInfo.article} ${typeInfo.singular}`;
+        return qualifiers.length > 0 ? `${base} ${qualifiers}` : base;
+    }
+
+    const base = `${generateCount} ${typeInfo.plural}`;
+    return qualifiers.length > 0 ? `${base} ${qualifiers}` : base;
+};
+
+const formatGenerateHandDescription = (
+    generateCount: number,
+    filter: CardFilterSnapshot | null,
+    alternatives: CardFilterSnapshot[],
+    handTargetTeam: "PLAYER" | "OPPONENT" | "ALL",
+    capitalizeFirst = true,
+): string => {
+    const verb = capitalizeFirst ? "Ajoute" : "ajoute";
+    const location = formatHandCardAddLocation(handTargetTeam);
+
+    if (!hasDrawFilter(filter, alternatives)) {
+        const suffix = generateCount === 1 ? "carte aléatoire" : "cartes aléatoires";
+        return `${verb} ${generateCount} ${suffix} ${location}`;
+    }
+
+    if (alternatives && alternatives.length > 0) {
+        const phrases = alternatives.map((alternative) =>
+            formatGenerateHandTargetPhrase(alternative, generateCount),
+        );
+        return `${verb} ${phrases.join(" ou ")} aléatoire ${location}`;
+    }
+
+    if (!filter) {
+        const suffix = generateCount === 1 ? "carte aléatoire" : "cartes aléatoires";
+        return `${verb} ${generateCount} ${suffix} ${location}`;
+    }
+
+    return `${verb} ${formatGenerateHandTargetPhrase(filter, generateCount)} aléatoire ${location}`;
+};
+
 const formatEnemyDrawDescription = (
     enemyDrawCount: number,
     filter: CardFilterSnapshot | null,
@@ -657,6 +703,16 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
                 action.drawCount,
                 action.drawCardFilter,
                 action.drawCardFilterAlternatives,
+                false,
+            );
+        }
+        case "GENERATE_HAND": {
+            if (action.generateCount === null || action.generateCount <= 0) return null;
+            return formatGenerateHandDescription(
+                action.generateCount,
+                action.generateCardFilter,
+                action.generateCardFilterAlternatives,
+                action.handTargetTeam,
                 false,
             );
         }
@@ -948,6 +1004,15 @@ export const formatActionDescription = (
         case "DRAW": {
             if (action.drawCount === null || action.drawCount <= 0) return null;
             return `${prefix} : ${formatDrawDescription(action.drawCount, action.drawCardFilter, action.drawCardFilterAlternatives)}.`;
+        }
+        case "GENERATE_HAND": {
+            if (action.generateCount === null || action.generateCount <= 0) return null;
+            return `${prefix} : ${formatGenerateHandDescription(
+                action.generateCount,
+                action.generateCardFilter,
+                action.generateCardFilterAlternatives,
+                action.handTargetTeam,
+            )}.`;
         }
         case "ENEMY_DRAW": {
             if (action.enemyDrawCount === null || action.enemyDrawCount <= 0) return null;

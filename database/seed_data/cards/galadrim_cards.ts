@@ -18,7 +18,6 @@ import {
     boostHealth,
     boostPassive,
     boostSpellPower,
-    boostExtraBattlecryTriggers,
     boostStealth,
     costLessThan,
     costEquals,
@@ -34,6 +33,7 @@ import {
     cardDrawFilter,
     drawAction,
     drawOrAction,
+    generateHandOrAction,
     enemyDrawAction,
     enemyHero,
     enemyMinions,
@@ -300,14 +300,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineMinion(
         177,
         {
-            ...gal("Jean", 3),
+            ...gal("Jean", 4),
             imageUrl: "/card-covers/galadrim/jean.webp",
             attack: 2,
             health: 4,
         },
         {
             tags: ["DEVELOPPEUR", "SALES"],
-            passives: [boostPassive(boostExtraBattlecryTriggers(1), allyHero())],
+            attackActions: [
+                generateHandOrAction(1, [
+                    minionDrawFilter(["DEVELOPPEUR"]),
+                    minionDrawFilter(["SALES"]),
+                ]),
+            ],
+            deathrattleActions: [handCardAddAction(112)],
         },
         { rarity: "LEGENDARY" },
     ),
@@ -1158,8 +1164,8 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineSpell(
         112,
         {
-            ...gal("Navigation Privée", 1),
-            imageUrl: "/card-covers/galadrim/navigation-privee.webp",
+            ...gal("Masque du CEO", 1),
+            imageUrl: "/card-covers/galadrim/masque-du-ceo.webp",
         },
         [boostAction(boostAttackWithStealth(2), targetedAnyMinion(), true)],
         [],

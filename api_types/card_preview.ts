@@ -1,6 +1,7 @@
 import type { MinionCard, PlayerCard, SpellCard, WeaponCard } from "./game.types.js";
 import { getMinionPowerEffects } from "./get_minion_power_effects.js";
 import {
+    getAttackDescription,
     getBattlecryDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
@@ -43,6 +44,7 @@ const buildMinionPreview = (entry: CardSeedEntry): MinionCard => {
     const effects = getMinionPowerEffects(minionPowers);
     const battlecryLines = getBattlecryDescription(data.battlecryActions);
     const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
+    const attackLines = getAttackDescription(data.attackActions ?? []);
     const passiveLines = getPassiveDescription(data.passives);
 
     return {
@@ -69,9 +71,11 @@ const buildMinionPreview = (entry: CardSeedEntry): MinionCard => {
             deathrattleLines,
             passiveLines,
             data.dynamicCost,
+            attackLines,
         ),
         battlecryActions: data.battlecryActions,
         deathrattleActions: data.deathrattleActions,
+        attackActions: data.attackActions ?? [],
         passives: data.passives,
     };
 };

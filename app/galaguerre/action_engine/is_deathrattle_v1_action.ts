@@ -33,6 +33,8 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
             return action.copyCount === null || action.copyCount > 0;
         case "HAND_CARD":
             return action.copyCount > 0;
+        case "GENERATE_HAND":
+            return action.generateCount > 0;
         case "DISCOVER":
             return action.optionCount > 0;
         case "MANA":

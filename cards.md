@@ -234,7 +234,7 @@ Format compact pour construction de deck par LLM.
 - Coût: 3 | Type: MINION | Stats: 3/1 [Immunité] | Rareté: Commune | Famille: PM
 - Immunité : Bloque la première source de dégâts reçue.
 
-### #112 Navigation Privée
+### #112 Masque du CEO
 - Coût: 1 | Type: SPELL | Stats: — | Rareté: Rare | Famille: —
 - Effet : Donne +2 attaque, Discrétion à un monstre.
 
@@ -492,5 +492,5 @@ Format compact pour construction de deck par LLM.
 - Passif : Donne +1 dégâts de sort au héros allié. Cri de guerre : Ajoute 1 copie de Jet de Ducros à votre main. Dernier souffle : Pioche un monstre Développeur OU un monstre Pets.
 
 ### #177 Jean
-- Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur, Sales
-- Passif : Vos Cris de guerre se déclenchent 1 fois de plus.
+- Coût: 4 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur, Sales
+- Chaque fois que ce monstre attaque : Ajoute un monstre Développeur ou un monstre Sales aléatoire à votre main. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.

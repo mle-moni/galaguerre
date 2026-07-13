@@ -13,6 +13,7 @@ import { breakWeapon } from "#controllers/games/play_card/break_weapon";
 import { drawCards } from "../draw_cards.js";
 import { addCardsToDeck, executeDeckCardAction } from "../deck_card_operations.js";
 import { executeHandCardAction } from "../hand_card_operations.js";
+import { executeGenerateHandAction } from "../generate_hand_cards.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
 import { applyDamageToMinion } from "./apply_damage_to_minion.js";
 import { applyDamageToHero } from "./apply_damage_to_hero.js";
@@ -424,6 +425,9 @@ const executeNonTargetedV1Action = (
             break;
         case "HAND_CARD":
             executeHandCardAction(action, game, player, opponent);
+            break;
+        case "GENERATE_HAND":
+            executeGenerateHandAction(action, game, player, opponent);
             break;
         case "DISCOVER": {
             if (!evaluateActionCondition(action.actionCondition, player, opponent)) return "ok";

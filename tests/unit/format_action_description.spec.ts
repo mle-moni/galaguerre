@@ -553,6 +553,36 @@ test.group("format_action_description", () => {
         );
     });
 
+    test("formats GENERATE_HAND with OR filters to player hand", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "GENERATE_HAND",
+            generateCount: 1,
+            generateCardFilter: null,
+            generateCardFilterAlternatives: [
+                {
+                    type: "MINION",
+                    comparison: null,
+                    tags: ["DEVELOPPEUR"],
+                    labelTags: [],
+                    rarity: null,
+                },
+                {
+                    type: "MINION",
+                    comparison: null,
+                    tags: ["SALES"],
+                    labelTags: [],
+                    rarity: null,
+                },
+            ],
+            handTargetTeam: "PLAYER",
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Chaque fois que ce monstre attaque"),
+            "Chaque fois que ce monstre attaque : Ajoute un monstre Développeur ou un monstre Sales aléatoire à votre main.",
+        );
+    });
+
     test("formats RETURN_TO_HAND targeted ally minion", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "RETURN_TO_HAND",

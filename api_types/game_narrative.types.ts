@@ -22,6 +22,7 @@ export const NARRATIVE_TRIGGER_KINDS = [
     "DEATHRATTLE",
     "PASSIVE",
     "POISONOUS",
+    "ATTACK",
 ] as const;
 
 export type NarrativeTriggerKind = (typeof NARRATIVE_TRIGGER_KINDS)[number];

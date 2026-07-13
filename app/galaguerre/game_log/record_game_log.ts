@@ -101,6 +101,15 @@ export const recordDeathrattle = (game: Game, player: GamePlayer, card: PlayerCa
     });
 };
 
+export const recordAttackEffect = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "ATTACK_EFFECT",
+        card: structuredClone(card),
+    });
+};
+
 export const recordMinionDeath = (game: Game, player: GamePlayer, card: PlayerCard): void => {
     appendLogEntry(game, {
         roundNumber: game.data.currentRound,

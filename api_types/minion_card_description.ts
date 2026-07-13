@@ -39,6 +39,10 @@ export const getDeathrattleDescription = (actions: CardActionSnapshot[]): string
     return formatGroupedActionDescriptions(actions, "Dernier souffle");
 };
 
+export const getAttackDescription = (actions: CardActionSnapshot[]): string[] => {
+    return formatGroupedActionDescriptions(actions, "Chaque fois que ce monstre attaque");
+};
+
 export const getSpellEffectDescription = (actions: CardActionSnapshot[]): string[] => {
     return formatGroupedActionDescriptions(actions, "Effet");
 };
@@ -184,11 +188,13 @@ export const buildMinionCardDescriptionParts = (
     deathrattleLines: string[] = [],
     passiveLines: string[] = [],
     dynamicCost: DynamicCostSnapshot | null = null,
+    attackLines: string[] = [],
 ): string[] => {
     return [
         ...getDynamicCostDescription(dynamicCost),
         ...effects.map(formatEffectLine),
         ...passiveLines,
+        ...attackLines,
         ...battlecryLines,
         ...deathrattleLines,
     ];
@@ -202,6 +208,7 @@ export const getMinionCardDescription = (
     deathrattleLines: string[] = [],
     passiveLines: string[] = [],
     dynamicCost: DynamicCostSnapshot | null = null,
+    attackLines: string[] = [],
 ): string => {
     return joinCardDescriptionParts(
         buildMinionCardDescriptionParts(
@@ -210,6 +217,7 @@ export const getMinionCardDescription = (
             deathrattleLines,
             passiveLines,
             dynamicCost,
+            attackLines,
         ),
     );
 };
@@ -221,5 +229,6 @@ export const getMinionDescriptionPartsFromCard = (card: MinionCard): string[] =>
         getDeathrattleDescription(card.deathrattleActions),
         getPassiveDescription(card.passives),
         card.dynamicCost,
+        getAttackDescription(card.attackActions ?? []),
     );
 };

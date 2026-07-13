@@ -14,11 +14,8 @@ import {
 import { minionEntityRef } from "../../../galaguerre/game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
 import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
-import {
-    ensureValidAttackTarget,
-    getMinionIsPoisonous,
-    recordMinionAttack,
-} from "../game_utils.js";
+import { ensureValidAttackTarget, getMinionIsPoisonous } from "../game_utils.js";
+import { completeMinionAttack } from "./complete_minion_attack.js";
 import { terminateGame } from "../terminate_game.js";
 
 export interface MinionActionOptions {
@@ -143,7 +140,7 @@ export const minionToMinionAction = async ({
         const currentTargetBoardIndex = requireMinionIndex(targetOwner, targetMinion);
         if (currentTargetBoardIndex === -1) {
             endCurrentBeat(game);
-            recordMinionAttack(minionInfos.minion, game.data.currentRound);
+            await completeMinionAttack(game, player, minionInfos.minion);
             return;
         }
 
@@ -196,6 +193,6 @@ export const minionToMinionAction = async ({
             endCurrentBeat(game);
         }
 
-        recordMinionAttack(minionInfos.minion, game.data.currentRound);
+        await completeMinionAttack(game, player, minionInfos.minion);
     });
 };

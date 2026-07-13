@@ -8,6 +8,7 @@ import { type GamePlayer } from "#api_types/game.types";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
 import {
+    getAttackDescription,
     getBattlecryDescription,
     getDeathrattleDescription,
     getMinionPowerEffects,
@@ -39,6 +40,7 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
     const effects = getMinionPowerEffects(minionPowers);
     const battlecryLines = getBattlecryDescription(template.battlecryActions);
     const deathrattleLines = getDeathrattleDescription(template.deathrattleActions);
+    const attackLines = getAttackDescription(template.attackActions ?? []);
     const passiveLines = getPassiveDescription(template.passives);
 
     return {
@@ -48,6 +50,7 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
         effects,
         battlecryActions: template.battlecryActions,
         deathrattleActions: template.deathrattleActions,
+        attackActions: template.attackActions ?? [],
         passives: template.passives,
         description: getMinionCardDescription(
             template.attack,
@@ -56,6 +59,8 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
             battlecryLines,
             deathrattleLines,
             passiveLines,
+            template.dynamicCost,
+            attackLines,
         ),
     };
 };

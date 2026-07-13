@@ -78,6 +78,8 @@ export const controllers = {
         Games: () => import("#controllers/games/games_controller"),
         GeneratePlayerCards: () => import("#controllers/games/generate_player_cards"),
         minionAction: {
+            CompleteMinionAttack: () =>
+                import("#controllers/games/minion_action/complete_minion_attack"),
             GameMinionAction: () => import("#controllers/games/minion_action/game_minion_action"),
             MinionToHeroAction: () =>
                 import("#controllers/games/minion_action/minion_to_hero_action"),

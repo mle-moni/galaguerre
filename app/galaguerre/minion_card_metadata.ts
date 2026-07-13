@@ -2,6 +2,7 @@ import type { MinionPowerSnapshot } from "#api_types/game.types";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 
 export {
+    getAttackDescription,
     getBattlecryDescription,
     getDeathrattleDescription,
     getMinionCardDescription,

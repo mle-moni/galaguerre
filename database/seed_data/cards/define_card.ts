@@ -131,6 +131,34 @@ export const drawOrAction = (
     onTargetResult: null,
 });
 
+export const generateHandAction = (
+    generateCount: number,
+    generateCardFilter: CardFilterDefinition | null = null,
+): CardActionDefinition => ({
+    type: "GENERATE_HAND",
+    isTargeted: false,
+    generateCount,
+    generateCardFilter,
+    generateCardFilterAlternatives: [],
+    handTargetTeam: "PLAYER",
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const generateHandOrAction = (
+    generateCount: number,
+    filters: CardFilterDefinition[],
+): CardActionDefinition => ({
+    type: "GENERATE_HAND",
+    isTargeted: false,
+    generateCount,
+    generateCardFilter: null,
+    generateCardFilterAlternatives: filters,
+    handTargetTeam: "PLAYER",
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 export const enemyDrawAction = (
     enemyDrawCount: number,
     enemyDrawCardFilter: CardFilterDefinition | null = null,
@@ -410,6 +438,7 @@ export const defaultMinionData = (): MinionCardData => ({
     minionPowers: null,
     battlecryActions: [],
     deathrattleActions: [],
+    attackActions: [],
     passives: [],
 });
 

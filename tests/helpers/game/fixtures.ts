@@ -151,6 +151,9 @@ type CardActionSnapshotOverrides = {
     deckPlacement?: "TOP" | "BOTTOM" | "RANDOM" | null;
     deckTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
     handTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
+    generateCount?: number;
+    generateCardFilter?: CardFilterSnapshot | null;
+    generateCardFilterAlternatives?: CardFilterSnapshot[];
     targetTeam?: "PLAYER" | "OPPONENT" | "ALL";
     cardId?: number | null;
     copyCount?: number | null;
@@ -318,6 +321,17 @@ export const createCardActionSnapshot = (
                 actionCondition,
                 onTargetResult,
             };
+        case "GENERATE_HAND":
+            return {
+                type: "GENERATE_HAND",
+                isTargeted: false,
+                generateCount: overrides.generateCount ?? 1,
+                generateCardFilter: overrides.generateCardFilter ?? null,
+                generateCardFilterAlternatives: overrides.generateCardFilterAlternatives ?? [],
+                handTargetTeam: overrides.handTargetTeam ?? "PLAYER",
+                actionCondition,
+                onTargetResult,
+            };
         case "MANA":
             return {
                 type: "MANA",
@@ -381,6 +395,7 @@ export const createMinionCard = (
         description: "",
         battlecryActions: [],
         deathrattleActions: [],
+        attackActions: [],
         passives: [],
         ...overrides,
     };

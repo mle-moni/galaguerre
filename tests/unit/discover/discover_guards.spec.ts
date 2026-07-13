@@ -70,6 +70,7 @@ test.group("discover guards", () => {
                     description: "",
                     battlecryActions: [],
                     deathrattleActions: [],
+                    attackActions: [],
                     passives: [],
                 },
             ],

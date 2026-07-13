@@ -2,16 +2,17 @@ import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import { applySilenceToMinion } from "#galaguerre/action_engine/apply_silence";
 import { executeBattlecries } from "#galaguerre/action_engine/execute_battlecries";
-import { getMinionCardTemplateById } from "#galaguerre/card_catalog";
 import { refreshAurasAfterMinionPlayed } from "#galaguerre/passive_engine/refresh_passive_auras";
 import { assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
     CARD_IDS,
+    createBoostSnapshot,
     createEmptyBoard,
     createGameData,
     createHeroTargetSnapshot,
     createMinionCard,
     createMinionState,
+    createPassiveSnapshot,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
@@ -33,16 +34,24 @@ const createBattlecryDamageMinion = (overrides: { uuid?: string; cost?: number }
         ],
     });
 
-const createJeanOnBoard = (overrides: { uuid?: string } = {}) => {
-    const jeanTemplate = getMinionCardTemplateById(177)!;
-    return createMinionCard({
-        ...jeanTemplate,
-        uuid: overrides.uuid ?? "jean-on-board",
+const createExtraBattlecryAuraMinion = (overrides: { uuid?: string } = {}) =>
+    createMinionCard({
+        uuid: overrides.uuid ?? "extra-battlecry-aura",
+        passives: [
+            createPassiveSnapshot({
+                type: "BOOST",
+                triggersOn: null,
+                action: null,
+                passiveBoost: {
+                    boost: createBoostSnapshot({ extraBattlecryTriggers: 1 }),
+                    target: createHeroTargetSnapshot("PLAYER"),
+                },
+            }),
+        ],
     });
-};
 
 test.group("double battlecry", () => {
-    test("battlecry triggers once without Jean on board", ({ assert }) => {
+    test("battlecry triggers once without extra battlecry aura on board", ({ assert }) => {
         const handCard = createBattlecryDamageMinion();
 
         const { game } = runBattlecry(
@@ -56,8 +65,8 @@ test.group("double battlecry", () => {
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
     });
 
-    test("battlecry triggers twice with Jean on board", ({ assert }) => {
-        const jeanOnBoard = createJeanOnBoard();
+    test("battlecry triggers twice with extra battlecry aura on board", ({ assert }) => {
+        const auraMinion = createExtraBattlecryAuraMinion();
         const handCard = createBattlecryDamageMinion({ uuid: CARD_IDS.handMinion });
 
         const { game } = runBattlecry(
@@ -65,7 +74,7 @@ test.group("double battlecry", () => {
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createEmptyBoard(), 0, createMinionState(jeanOnBoard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(auraMinion)),
                 },
                 playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
@@ -76,15 +85,15 @@ test.group("double battlecry", () => {
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 4);
     });
 
-    test("battlecry triggers three times with two Jeans on board", ({ assert }) => {
-        const jeanOne = createJeanOnBoard({ uuid: "jean-one" });
-        const jeanTwo = createJeanOnBoard({ uuid: "jean-two" });
+    test("battlecry triggers three times with two extra battlecry auras on board", ({ assert }) => {
+        const auraOne = createExtraBattlecryAuraMinion({ uuid: "aura-one" });
+        const auraTwo = createExtraBattlecryAuraMinion({ uuid: "aura-two" });
         const handCard = createBattlecryDamageMinion({ uuid: CARD_IDS.handMinion });
 
         const board = placeMinion(
-            placeMinion(createEmptyBoard(), 0, createMinionState(jeanOne)),
+            placeMinion(createEmptyBoard(), 0, createMinionState(auraOne)),
             1,
-            createMinionState(jeanTwo),
+            createMinionState(auraTwo),
         );
 
         const { game } = runBattlecry(
@@ -103,15 +112,15 @@ test.group("double battlecry", () => {
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 6);
     });
 
-    test("silencing Jean restores single battlecry trigger", ({ assert }) => {
-        const jeanOnBoard = createJeanOnBoard();
+    test("silencing extra battlecry aura restores single battlecry trigger", ({ assert }) => {
+        const auraMinion = createExtraBattlecryAuraMinion();
         const handCard = createBattlecryDamageMinion({ uuid: CARD_IDS.handMinion });
         const game = createInMemoryGame(
             createGameData({
                 playerOne: {
                     mana: 10,
                     hand: [handCard],
-                    board: placeMinion(createEmptyBoard(), 0, createMinionState(jeanOnBoard)),
+                    board: placeMinion(createEmptyBoard(), 0, createMinionState(auraMinion)),
                 },
                 playerTwo: { health: DEFAULT_HERO_HEALTH },
             }),
@@ -135,13 +144,5 @@ test.group("double battlecry", () => {
         assert.isFalse(gameEnded);
         assert.isFalse(discoverPending);
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
-    });
-
-    test("Jean card description mentions double battlecries", ({ assert }) => {
-        const jeanTemplate = getMinionCardTemplateById(177)!;
-        assert.include(
-            jeanTemplate.description,
-            "Vos Cris de guerre se déclenchent 1 fois de plus.",
-        );
     });
 });
