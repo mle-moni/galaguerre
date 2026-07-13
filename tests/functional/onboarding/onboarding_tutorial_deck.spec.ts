@@ -4,11 +4,11 @@ import { getDefaultGameData } from "#controllers/games/create_game";
 import { performMulliganOnPlayer } from "#controllers/games/mulligan/perform_mulligan";
 import { syncCards } from "#database/seed_helpers/sync_cards";
 import { GALADRIM_AGGRO_DECK_RECIPE } from "#database/seed_data/balanced_decks";
-import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
 import { createStarterDeckForUser } from "#services/decks/create_starter_deck_for_user";
 import { ONBOARDING_HUMAN_OPENING_HAND_CARD_IDS } from "#services/onboarding/arrange_onboarding_tutorial_deck";
 import User from "#models/user";
+import { buildAiPlayer, buildHumanPlayer } from "#tests/helpers/game/game_factory";
 
 test.group("onboarding tutorial game setup", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
@@ -26,16 +26,8 @@ test.group("onboarding tutorial game setup", (group) => {
         const botCards = await loadTrainingBotCards();
 
         const data = getDefaultGameData({
-            playerOne: {
-                userId: user.id,
-                pseudo: user.pseudo!,
-                deck,
-            },
-            playerTwo: {
-                userId: TRAINING_AI_USER_ID,
-                pseudo: TRAINING_AI_PSEUDO,
-                cards: botCards,
-            },
+            playerOne: buildHumanPlayer(user, deck),
+            playerTwo: buildAiPlayer(botCards),
             isTraining: true,
             isOnboardingTutorial: true,
         });

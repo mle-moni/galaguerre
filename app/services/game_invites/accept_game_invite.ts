@@ -86,11 +86,13 @@ export const acceptGameInvite = async (inviteId: number, userId: number) => {
     const humanOne = {
         userId: inviterId,
         pseudo: generatePseudo(invite.fromUser),
+        avatarCardId: invite.fromUser.avatarCardId,
         deck: inviterDeck,
     };
     const humanTwo = {
         userId,
         pseudo: generatePseudo(inviteeDeck.user),
+        avatarCardId: inviteeDeck.user.avatarCardId,
         deck: inviteeDeck,
     };
 

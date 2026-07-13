@@ -6,6 +6,7 @@ const AI_SPEEDRUN_LEADERBOARD_LIMIT = 100;
 interface AiSpeedrunRow {
     user_id: number;
     pseudo: string | null;
+    avatar_card_id: number;
     duration_seconds: number;
     round_count: number;
 }
@@ -25,7 +26,7 @@ export const getAiSpeedrunLeaderboard = async (): Promise<ApiAiSpeedrunLeaderboa
                 AND ended_at IS NOT NULL
             ORDER BY COALESCE(player_one_id, player_two_id), (ended_at - created_at) ASC, id ASC
         )
-        SELECT br.user_id, u.pseudo, br.duration_seconds, br.round_count
+        SELECT br.user_id, u.pseudo, u.avatar_card_id, br.duration_seconds, br.round_count
         FROM best_runs br
         JOIN users u ON u.id = br.user_id
         ORDER BY br.duration_seconds ASC, br.round_count ASC, br.user_id ASC
@@ -38,6 +39,7 @@ export const getAiSpeedrunLeaderboard = async (): Promise<ApiAiSpeedrunLeaderboa
         rank: index + 1,
         userId: row.user_id,
         pseudo: row.pseudo,
+        avatarCardId: row.avatar_card_id,
         durationSeconds: row.duration_seconds,
         roundCount: row.round_count,
     }));

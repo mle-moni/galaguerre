@@ -3,6 +3,7 @@ import { adominLogout } from "./adomin_logout.js";
 import { createLoginToken, loginMessagesProvider, loginSchema } from "./adomin_login.js";
 import { me } from "./me.js";
 import { registerMessagesProvider, registerSchema, registerUser } from "./register.js";
+import { updateAvatar } from "./update_avatar.js";
 
 export default class AuthController {
     async login({ request }: HttpContext): Promise<{ token: string }> {
@@ -19,14 +20,21 @@ export default class AuthController {
     }
 
     async register(ctx: HttpContext) {
-        const { email, password, pseudo } = await ctx.request.validateUsing(registerSchema, {
-            messagesProvider: registerMessagesProvider,
-        });
+        const { email, password, pseudo, avatarCardId } = await ctx.request.validateUsing(
+            registerSchema,
+            {
+                messagesProvider: registerMessagesProvider,
+            },
+        );
 
-        return registerUser(ctx, { email, password, pseudo });
+        return registerUser(ctx, { email, password, pseudo, avatarCardId });
     }
 
     async me(ctx: HttpContext) {
         return me(ctx);
+    }
+
+    async updateAvatar(ctx: HttpContext) {
+        return updateAvatar(ctx);
     }
 }

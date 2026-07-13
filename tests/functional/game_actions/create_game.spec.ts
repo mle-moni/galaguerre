@@ -6,7 +6,7 @@ import Card from "#models/card";
 import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import User from "#models/user";
-import { createOutsiderUser } from "#tests/helpers/game/game_factory";
+import { buildHumanPlayer, createOutsiderUser } from "#tests/helpers/game/game_factory";
 import { getActiveCardSetId } from "#tests/helpers/card_set";
 import Game from "#models/game";
 import { runSetupNextTurnOnGame } from "#tests/helpers/game/run_pass_turn";
@@ -59,16 +59,8 @@ test.group("game:create", (group) => {
         const deckTwo = await createDeckForUser(playerTwo.id, "p2");
 
         const data = await getDefaultGameData({
-            playerOne: {
-                userId: playerOne.id,
-                pseudo: "Player One",
-                deck: deckOne,
-            },
-            playerTwo: {
-                userId: playerTwo.id,
-                pseudo: "Player Two",
-                deck: deckTwo,
-            },
+            playerOne: buildHumanPlayer(playerOne, deckOne, "Player One"),
+            playerTwo: buildHumanPlayer(playerTwo, deckTwo, "Player Two"),
         });
 
         assert.equal(data.state, "MULLIGAN");
@@ -98,16 +90,8 @@ test.group("game:create", (group) => {
         const deckTwo = await createDeckForUser(playerTwo.id, "deck-b");
 
         const data = await getDefaultGameData({
-            playerOne: {
-                userId: playerOne.id,
-                pseudo: "Player One",
-                deck: deckOne,
-            },
-            playerTwo: {
-                userId: playerTwo.id,
-                pseudo: "Player Two",
-                deck: deckTwo,
-            },
+            playerOne: buildHumanPlayer(playerOne, deckOne, "Player One"),
+            playerTwo: buildHumanPlayer(playerTwo, deckTwo, "Player Two"),
         });
 
         const p1Labels = new Set(data.playerOne.hand.map((card) => card.label));
@@ -138,16 +122,8 @@ test.group("game:create", (group) => {
         const deckTwo = await createDeckForUser(playerTwo.id, "start-b");
 
         const data = getDefaultGameData({
-            playerOne: {
-                userId: playerOne.id,
-                pseudo: "Player One",
-                deck: deckOne,
-            },
-            playerTwo: {
-                userId: playerTwo.id,
-                pseudo: "Player Two",
-                deck: deckTwo,
-            },
+            playerOne: buildHumanPlayer(playerOne, deckOne, "Player One"),
+            playerTwo: buildHumanPlayer(playerTwo, deckTwo, "Player Two"),
         });
 
         data.mulligan = { playerOneDone: true, playerTwoDone: true };
@@ -182,16 +158,8 @@ test.group("game:create", (group) => {
         const deckTwo = await createDeckForUser(playerTwo.id, "hide-b");
 
         const data = await getDefaultGameData({
-            playerOne: {
-                userId: playerOne.id,
-                pseudo: "Player One",
-                deck: deckOne,
-            },
-            playerTwo: {
-                userId: playerTwo.id,
-                pseudo: "Player Two",
-                deck: deckTwo,
-            },
+            playerOne: buildHumanPlayer(playerOne, deckOne, "Player One"),
+            playerTwo: buildHumanPlayer(playerTwo, deckTwo, "Player Two"),
         });
 
         const game = await Game.create({
@@ -227,16 +195,8 @@ test.group("game:create", (group) => {
         const deckTwo = await createDeckForUser(playerTwo.id, "sec-b");
 
         const data = await getDefaultGameData({
-            playerOne: {
-                userId: playerOne.id,
-                pseudo: "Player One",
-                deck: deckOne,
-            },
-            playerTwo: {
-                userId: playerTwo.id,
-                pseudo: "Player Two",
-                deck: deckTwo,
-            },
+            playerOne: buildHumanPlayer(playerOne, deckOne, "Player One"),
+            playerTwo: buildHumanPlayer(playerTwo, deckTwo, "Player Two"),
         });
 
         const game = await Game.create({

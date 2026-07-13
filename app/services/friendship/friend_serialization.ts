@@ -33,6 +33,7 @@ export const serializeFriend = (user: User, currentGameId: number | null = null)
     return {
         userId: user.id,
         pseudo: user.pseudo,
+        avatarCardId: user.avatarCardId,
         elo: user.elo,
         wins: user.wins,
         losses: user.losses,

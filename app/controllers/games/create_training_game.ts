@@ -9,6 +9,7 @@ import {
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { removeMatchmakingImmediately } from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
+import { TRAINING_AI_AVATAR_CARD_ID } from "#services/avatars/avatar_cards";
 import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
 import type { HttpContext } from "@adonisjs/core/http";
@@ -53,12 +54,14 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
     const humanPlayer = {
         userId: user.id,
         pseudo: user.pseudo ?? user.email.split("@")[0],
+        avatarCardId: user.avatarCardId,
         deck,
     };
 
     const aiPlayer = {
         userId: TRAINING_AI_USER_ID,
         pseudo: TRAINING_AI_PSEUDO,
+        avatarCardId: TRAINING_AI_AVATAR_CARD_ID,
         cards: botCards,
     };
 

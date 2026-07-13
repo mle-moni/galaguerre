@@ -23,6 +23,7 @@ import { GameHistoryListPage } from "./pages/game_history/game_history_list_page
 import { ReplayPage } from "./pages/replay/replay_page.jsx";
 import { LeaderboardPage } from "./pages/leaderboard/leaderboard_page.jsx";
 import { OnboardingPage } from "./pages/onboarding/onboarding_page.jsx";
+import { ProfilePage } from "./pages/profile/profile_page.jsx";
 import { RegisterPage } from "./pages/register/register.jsx";
 import { NewsDetailPage } from "./pages/news/news_detail_page.jsx";
 import { NewsListPage } from "./pages/news/news_list_page.jsx";
@@ -102,6 +103,10 @@ const router = createBrowserRouter([
                         path: "/actualites/:slug",
                         element: <NewsDetailPage />,
                         handle: { public: true },
+                    },
+                    {
+                        path: "/profile",
+                        element: <ProfilePage />,
                     },
                     {
                         path: "/onboarding",

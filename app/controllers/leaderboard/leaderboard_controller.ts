@@ -18,6 +18,7 @@ export default class LeaderboardController {
             rank: index + 1,
             userId: user.id,
             pseudo: user.pseudo,
+            avatarCardId: user.avatarCardId,
             elo: user.elo,
             wins: user.wins,
             losses: user.losses,

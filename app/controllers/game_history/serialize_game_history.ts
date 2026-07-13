@@ -16,6 +16,7 @@ import { getGameFinishedAtIso } from "../../galaguerre/game/get_game_finished_at
 export const serializeGameHistoryUser = (user: User): ApiGameHistoryUser => ({
     userId: user.id,
     pseudo: user.pseudo,
+    avatarCardId: user.avatarCardId,
     elo: user.elo,
     wins: user.wins,
     losses: user.losses,
@@ -64,6 +65,7 @@ export const serializeGameHistoryPlayer = (
     return {
         userId: player.userId,
         pseudo: user?.pseudo ?? player.pseudo,
+        avatarCardId: user?.avatarCardId ?? player.avatarCardId ?? 148,
         stats: player.stats ?? DEFAULT_PLAYER_STATS,
     };
 };
@@ -81,6 +83,7 @@ export const serializeGameHistoryEntry = (
         gameId: game.id,
         opponentUserId,
         opponentPseudo: opponentUser?.pseudo ?? opponent.pseudo,
+        opponentAvatarCardId: opponentUser?.avatarCardId ?? opponent.avatarCardId ?? 148,
         result: getGameResult(game, userId),
         eloDelta: getEloDelta(game, userId),
         roundCount: game.data.currentRound,

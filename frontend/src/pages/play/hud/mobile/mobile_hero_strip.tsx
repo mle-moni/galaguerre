@@ -10,6 +10,7 @@ import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { CardPreviewSheet } from "~/components/cards/card_preview_sheet";
+import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { useGameContext } from "~/hooks/use_game_state";
 import { getMaxMana } from "~/pages/play/play_game_constants";
 import type { GamePlayer } from "#api_types/game.types";
@@ -25,12 +26,10 @@ interface MobileHeroStripProps {
     handCount?: number;
 }
 
-const PLAYER_PROFILE_PLACEHOLDER = "/card-covers/galadrim/joseph.webp";
-const OPPONENT_PROFILE_PLACEHOLDER = "/card-covers/galadrim/dev-aigri.webp";
-
 export const MobileHeroStrip = observer(
     ({ player, isOpponent = false, deckCount, handCount }: MobileHeroStripProps) => {
         const { store, authoritativeGame } = useGameContext();
+        const avatarImageUrl = useAvatarImageUrl(player.avatarCardId);
         const [weaponSheetOpened, setWeaponSheetOpened] = useState(false);
         const [weaponInfoOpened, setWeaponInfoOpened] = useState(false);
         const maxMana = getMaxMana(authoritativeGame.data.currentRound);
@@ -159,11 +158,7 @@ export const MobileHeroStrip = observer(
                     <div className="mobile-bar__avatar-wrap">
                         <img
                             className="mobile-bar__avatar"
-                            src={
-                                isOpponent
-                                    ? OPPONENT_PROFILE_PLACEHOLDER
-                                    : PLAYER_PROFILE_PLACEHOLDER
-                            }
+                            src={avatarImageUrl ?? "/card-covers/galadrim/joseph.webp"}
                             alt={`Profil de ${player.pseudo}`}
                             draggable={false}
                         />

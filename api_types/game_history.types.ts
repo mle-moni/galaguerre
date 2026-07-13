@@ -9,6 +9,7 @@ export type GameHistoryResult = "WIN" | "LOSS" | "DRAW";
 export interface ApiGameHistoryUser {
     userId: number;
     pseudo: string | null;
+    avatarCardId: number;
     elo: number;
     wins: number;
     losses: number;
@@ -18,6 +19,7 @@ export interface ApiGameHistoryEntry {
     gameId: number;
     opponentUserId: number;
     opponentPseudo: string | null;
+    opponentAvatarCardId: number;
     result: GameHistoryResult;
     eloDelta: number | null;
     roundCount: number;
@@ -33,6 +35,7 @@ export interface ApiGameHistoryList {
 export interface ApiGameHistoryPlayer {
     userId: number;
     pseudo: string | null;
+    avatarCardId: number;
     stats: GamePlayerStats;
 }
 

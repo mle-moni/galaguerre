@@ -6,6 +6,7 @@ import { observer } from "mobx-react-lite";
 import { useRef, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { CardPreviewLink } from "~/components/cards/card_preview_link";
 import { UserAvatar } from "~/components/user_avatar";
+import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { useGameContext } from "~/hooks/use_game_state";
 import {
     getMaxMana,
@@ -24,6 +25,7 @@ interface PlayerInfosProps {
 
 export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOpponent = false }) => {
     const { store, authoritativeGame } = useGameContext();
+    const avatarImageUrl = useAvatarImageUrl(player.avatarCardId);
     const suppressWeaponButtonClickRef = useRef(false);
     const maxMana = getMaxMana(authoritativeGame.data.currentRound);
 
@@ -185,6 +187,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
                     <UserAvatar
                         pseudo={player.pseudo}
                         userId={player.userId}
+                        imageUrl={avatarImageUrl}
                         className="hero-panel__avatar"
                         alt={player.pseudo}
                     />

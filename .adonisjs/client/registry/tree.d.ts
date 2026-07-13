@@ -7,6 +7,7 @@ export interface ApiDefinition {
         register: (typeof routes)["auth.register"];
         logout: (typeof routes)["auth.logout"];
         me: (typeof routes)["auth.me"];
+        updateAvatar: (typeof routes)["auth.update_avatar"];
     };
     leaderboard: {
         index: (typeof routes)["leaderboard.index"];

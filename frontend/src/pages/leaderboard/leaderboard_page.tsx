@@ -9,6 +9,7 @@ import { FriendActionButton } from "~/components/friends/friend_action_button";
 import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { UserAvatar } from "~/components/user_avatar";
+import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { formatSpeedrunDurationSeconds } from "~/helpers/format_game_duration";
 import { useFriendsQuery } from "~/hooks/use_friends";
 import { useAiSpeedrunLeaderboardQuery, useLeaderboardQuery } from "~/hooks/use_leaderboard";
@@ -42,28 +43,40 @@ const LeaderboardRank = ({ rank }: { rank: number }) => {
 const LeaderboardPlayerCell = ({
     pseudo,
     userId,
+    avatarCardId,
     isFriend,
     isCurrentUser,
 }: {
     pseudo: string | null;
     userId: number;
+    avatarCardId: number;
     isFriend: boolean;
     isCurrentUser: boolean;
-}) => (
-    <span className="leaderboard-player">
-        <UserAvatar pseudo={pseudo} userId={userId} className="leaderboard-player__avatar" alt="" />
-        <PlayerNameLink
-            pseudo={pseudo}
-            userId={userId}
-            className={clsx(
-                "leaderboard-player__name",
-                isCurrentUser && "leaderboard-player__name--current",
-            )}
-        />
-        {isFriend && <span className="leaderboard-friend-badge">Ami</span>}
-        {isCurrentUser && <span className="leaderboard-player__you">(vous)</span>}
-    </span>
-);
+}) => {
+    const avatarImageUrl = useAvatarImageUrl(avatarCardId);
+
+    return (
+        <span className="leaderboard-player">
+            <UserAvatar
+                pseudo={pseudo}
+                userId={userId}
+                imageUrl={avatarImageUrl}
+                className="leaderboard-player__avatar"
+                alt=""
+            />
+            <PlayerNameLink
+                pseudo={pseudo}
+                userId={userId}
+                className={clsx(
+                    "leaderboard-player__name",
+                    isCurrentUser && "leaderboard-player__name--current",
+                )}
+            />
+            {isFriend && <span className="leaderboard-friend-badge">Ami</span>}
+            {isCurrentUser && <span className="leaderboard-player__you">(vous)</span>}
+        </span>
+    );
+};
 
 const LeaderboardFriendCell = ({
     userId,
@@ -121,6 +134,7 @@ const EloLeaderboardTable = ({
                                     <LeaderboardPlayerCell
                                         pseudo={entry.pseudo}
                                         userId={entry.userId}
+                                        avatarCardId={entry.avatarCardId}
                                         isFriend={isFriend}
                                         isCurrentUser={isCurrentUser}
                                     />
@@ -183,6 +197,7 @@ const SpeedrunLeaderboardTable = ({
                                     <LeaderboardPlayerCell
                                         pseudo={entry.pseudo}
                                         userId={entry.userId}
+                                        avatarCardId={entry.avatarCardId}
                                         isFriend={isFriend}
                                         isCurrentUser={isCurrentUser}
                                     />

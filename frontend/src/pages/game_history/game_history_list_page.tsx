@@ -9,6 +9,7 @@ import { CenteredLoader } from "~/components/centered_loader";
 import { GameHistoryResultBadge } from "~/components/game_history_result_badge";
 import { formatPlayerName, PlayerNameLink } from "~/components/player_name_link";
 import { UserAvatar } from "~/components/user_avatar";
+import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { useFriendsQuery } from "~/hooks/use_friends";
 import { useGameHistoryListQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
@@ -38,6 +39,7 @@ const GameHistoryRow = ({
     onSelect: (gameId: number) => void;
 }) => {
     const isFriend = friendIds.has(entry.opponentUserId);
+    const avatarImageUrl = useAvatarImageUrl(entry.opponentAvatarCardId);
     const eloClass =
         entry.eloDelta === null
             ? "game-history-list-elo--neutral"
@@ -60,6 +62,7 @@ const GameHistoryRow = ({
                     <UserAvatar
                         pseudo={entry.opponentPseudo}
                         userId={entry.opponentUserId}
+                        imageUrl={avatarImageUrl}
                         className="game-history-list-opponent__avatar"
                         alt=""
                     />

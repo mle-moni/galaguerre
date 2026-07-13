@@ -1,9 +1,10 @@
 import { PASSWORD_SERIALIZED_FORM } from "#adomin/create_model_view_config";
+import { pickRandomAvatarCardId } from "#services/avatars/avatar_cards";
 import { DbAccessTokensProvider } from "@adonisjs/auth/access_tokens";
 import { withAuthFinder } from "@adonisjs/auth/mixins/lucid";
 import { compose } from "@adonisjs/core/helpers";
 import hash from "@adonisjs/core/services/hash";
-import { BaseModel, column } from "@adonisjs/lucid/orm";
+import { BaseModel, beforeCreate, column } from "@adonisjs/lucid/orm";
 import type { DateTime } from "luxon";
 
 // @dbml-group Users
@@ -56,8 +57,18 @@ export default class User extends compose(BaseModel, AuthFinder) {
     @column.dateTime()
     declare lastSeenAt: DateTime | null;
 
+    @column()
+    declare avatarCardId: number;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
+
+    @beforeCreate()
+    static async assignDefaultAvatarCardId(user: User) {
+        if (user.avatarCardId == null) {
+            user.avatarCardId = await pickRandomAvatarCardId();
+        }
+    }
 
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     declare updatedAt: DateTime | null;

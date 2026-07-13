@@ -1,6 +1,7 @@
 export interface HomeOnlineFriend {
     userId: number;
     pseudo: string | null;
+    avatarCardId: number;
     status: "online" | "in_game";
     currentGameId: number | null;
     level: number;

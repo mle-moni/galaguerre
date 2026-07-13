@@ -122,6 +122,16 @@ const routes = {
         ],
         types: placeholder as Registry["auth.me"]["types"],
     },
+    "auth.update_avatar": {
+        methods: ["PATCH"],
+        pattern: "/api/auth/avatar",
+        tokens: [
+            { old: "/api/auth/avatar", type: 0, val: "api", end: "" },
+            { old: "/api/auth/avatar", type: 0, val: "auth", end: "" },
+            { old: "/api/auth/avatar", type: 0, val: "avatar", end: "" },
+        ],
+        types: placeholder as Registry["auth.update_avatar"]["types"],
+    },
     "card_sets.index": {
         methods: ["GET", "HEAD"],
         pattern: "/api/card-sets",
