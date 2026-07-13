@@ -172,22 +172,24 @@ const resetFixture = async () => {
 const getHandGeometry = async () => {
     const hand = page.locator(".card-hand--mobile");
     const handBox = await hand.boundingBox();
+    const cardCount = await page.locator("[data-hand-card-index]").count();
     const cardBox = await page
         .locator("[data-hand-card-index] [data-playing-card]")
         .first()
         .boundingBox();
     assert(handBox && cardBox, "The mobile hand must be visible");
 
-    return { handBox, cardWidth: cardBox.width };
+    return { handBox, cardCount, cardWidth: cardBox.width };
 };
 
 const cardCenterX = (handBox, cardWidth, index, cardCount = 10) =>
     handBox.x + cardWidth / 2 + ((handBox.width - cardWidth) * index) / (cardCount - 1);
 
 const pressAndBrowseTo = async (index) => {
-    const { handBox, cardWidth } = await getHandGeometry();
+    const { handBox, cardCount, cardWidth } = await getHandGeometry();
+    assert(index < cardCount, `Card index ${index} must exist in a ${cardCount}-card hand`);
     const start = { x: handBox.x + 12, y: handBox.y + 56 };
-    const selected = { x: cardCenterX(handBox, cardWidth, index), y: start.y };
+    const selected = { x: cardCenterX(handBox, cardWidth, index, cardCount), y: start.y };
 
     await page.mouse.move(start.x, start.y);
     await page.mouse.down();
@@ -221,6 +223,45 @@ const moveCardIntoBattlefield = async (from) => {
     await moveWithPauses(from, releasePoint, 10, 650);
     await pause(450);
     return releasePoint;
+};
+
+const getPlayerBoardUuids = () =>
+    page
+        .locator('[data-target-zone][data-spot-owner="PLAYER"][data-minion-uuid]')
+        .evaluateAll((elements) =>
+            elements.map((element) => ({
+                boardIndex: Number(element.getAttribute("data-board-index")),
+                uuid: element.getAttribute("data-minion-uuid"),
+            })),
+        );
+
+const moveMinionToInsertionZone = async (from, boardIndex) => {
+    const dropZoneBox = await page
+        .locator('[data-minion-drop-zone][data-spot-owner="PLAYER"]')
+        .boundingBox();
+    assert(dropZoneBox, "The player drop zone must be visible");
+
+    const dropZoneCenter = {
+        x: dropZoneBox.x + dropZoneBox.width / 2,
+        y: dropZoneBox.y + dropZoneBox.height / 2,
+    };
+    await moveWithPauses(from, dropZoneCenter, 12, 750);
+    await pause(500);
+
+    const insertionZone = page.locator(
+        `[data-board-insertion-zone][data-board-index="${boardIndex}"][data-spot-owner="PLAYER"]`,
+    );
+    await insertionZone.waitFor();
+    const insertionBox = await insertionZone.boundingBox();
+    assert(insertionBox && insertionBox.width > 0, `Insertion zone ${boardIndex} must be active`);
+
+    const insertionPoint = {
+        x: insertionBox.x + insertionBox.width / 2,
+        y: insertionBox.y + insertionBox.height / 2,
+    };
+    await moveWithPauses(dropZoneCenter, insertionPoint, 10, 700);
+    await pause(750);
+    return insertionPoint;
 };
 
 await ensureGameReady();
@@ -272,7 +313,7 @@ assert.equal(
         .locator(".card-hand--mobile .playing-card-face__label")
         .filter({ hasText: "Déploiement Réussi" })
         .count(),
-    3,
+    2,
 );
 assert.equal(await page.locator(".playing-card--armed").count(), 0);
 
@@ -298,6 +339,73 @@ assert.equal(
     1,
 );
 
+const [firstMinion] = await getPlayerBoardUuids();
+assert(firstMinion?.uuid, "The first minion must be present on the board");
+
+await setCaption("Plateau occupé : placer un serviteur à gauche");
+const leftMinion = await pressAndBrowseTo(3);
+const liftedLeftMinion = await liftCard(leftMinion.start);
+await moveMinionToInsertionZone(liftedLeftMinion, 0);
+await page.mouse.up();
+await pause(1800);
+
+const boardAfterLeftDrop = await getPlayerBoardUuids();
+assert.deepEqual(
+    boardAfterLeftDrop.map(({ boardIndex }) => boardIndex),
+    [0, 1],
+);
+assert.equal(boardAfterLeftDrop[1]?.uuid, firstMinion.uuid);
+assert.notEqual(boardAfterLeftDrop[0]?.uuid, firstMinion.uuid);
+
+await setCaption("Deux serviteurs : placer un serviteur à droite");
+const rightMinion = await pressAndBrowseTo(7);
+const liftedRightMinion = await liftCard(rightMinion.start);
+await moveMinionToInsertionZone(liftedRightMinion, 2);
+await page.mouse.up();
+await pause(1800);
+
+const boardAfterRightDrop = await getPlayerBoardUuids();
+assert.deepEqual(
+    boardAfterRightDrop.map(({ boardIndex }) => boardIndex),
+    [0, 1, 2],
+);
+assert.equal(boardAfterRightDrop[1]?.uuid, firstMinion.uuid);
+assert.notEqual(boardAfterRightDrop[2]?.uuid, firstMinion.uuid);
+
+await resetFixture();
+await setCaption("Nouveau cas : préparer deux serviteurs sur le terrain");
+const middleCaseFirstMinion = await pressAndBrowseTo(0);
+const liftedMiddleCaseFirstMinion = await liftCard(middleCaseFirstMinion.start);
+await moveMinionToInsertionZone(liftedMiddleCaseFirstMinion, 0);
+await page.mouse.up();
+await pause(900);
+
+const middleCaseSecondMinion = await pressAndBrowseTo(3);
+const liftedMiddleCaseSecondMinion = await liftCard(middleCaseSecondMinion.start);
+await moveMinionToInsertionZone(liftedMiddleCaseSecondMinion, 1);
+await page.mouse.up();
+await pause(1500);
+
+const boardBeforeMiddleDrop = await getPlayerBoardUuids();
+assert.equal(boardBeforeMiddleDrop.length, 2);
+
+await setCaption("Deux serviteurs : placer le nouveau au milieu");
+const middleMinion = await pressAndBrowseTo(7);
+const liftedMiddleMinion = await liftCard(middleMinion.start);
+await moveMinionToInsertionZone(liftedMiddleMinion, 1);
+await page.mouse.up();
+await pause(1800);
+
+const boardAfterMiddleDrop = await getPlayerBoardUuids();
+assert.deepEqual(
+    boardAfterMiddleDrop.map(({ boardIndex }) => boardIndex),
+    [0, 1, 2],
+);
+assert.equal(boardAfterMiddleDrop[0]?.uuid, boardBeforeMiddleDrop[0]?.uuid);
+assert.equal(boardAfterMiddleDrop[2]?.uuid, boardBeforeMiddleDrop[1]?.uuid);
+assert.notEqual(boardAfterMiddleDrop[1]?.uuid, boardBeforeMiddleDrop[0]?.uuid);
+assert.notEqual(boardAfterMiddleDrop[1]?.uuid, boardBeforeMiddleDrop[1]?.uuid);
+
 await resetFixture();
 await setCaption("Sort sans cible : monter puis relâcher");
 const spell = await pressAndBrowseTo(1);
@@ -311,7 +419,7 @@ assert.equal(
         .locator(".card-hand--mobile .playing-card-face__label")
         .filter({ hasText: "Déploiement Réussi" })
         .count(),
-    2,
+    1,
 );
 
 await resetFixture();

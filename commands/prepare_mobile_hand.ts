@@ -6,7 +6,7 @@ import Card from "#models/card";
 import Game from "#models/game";
 import User from "#models/user";
 
-const HAND_CARD_IDS = [62, 98, 106, 133, 62, 98, 106, 133, 65, 98];
+const HAND_CARD_IDS = [62, 98, 106, 133, 62, 98, 106, 133, 65, 62];
 const TEST_WEAPON_ID = 106;
 const TEST_TARGET_MINION_ID = 62;
 
