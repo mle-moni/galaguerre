@@ -6,6 +6,7 @@ import {
     hasBrowsedMobileHand,
     hasLiftedMobileCard,
     isPointInsideMobileBounds,
+    resolveMobileHandGestureIntent,
     resolveMobileHandIndex,
 } from "#shared/mobile_hand_gesture";
 
@@ -60,6 +61,33 @@ test.group("mobile hand gesture", () => {
                 x: 200,
                 y: origin.y - MOBILE_HAND_LIFT_THRESHOLD_PX,
             }),
+        );
+    });
+
+    test("an upward diagonal locks the initially touched card for play", ({ assert }) => {
+        const origin = { x: 80, y: 760 };
+
+        assert.equal(
+            resolveMobileHandGestureIntent(origin, { x: 98, y: 742 }, "UNDECIDED"),
+            "PLAY",
+        );
+        assert.equal(resolveMobileHandGestureIntent(origin, { x: 150, y: 690 }, "PLAY"), "PLAY");
+    });
+
+    test("a clearly horizontal gesture browses before an upward movement locks it", ({
+        assert,
+    }) => {
+        const origin = { x: 80, y: 760 };
+        const browseIntent = resolveMobileHandGestureIntent(
+            origin,
+            { x: 120, y: 754 },
+            "UNDECIDED",
+        );
+
+        assert.equal(browseIntent, "BROWSE");
+        assert.equal(
+            resolveMobileHandGestureIntent(origin, { x: 145, y: 748 }, browseIntent),
+            "PLAY",
         );
     });
 

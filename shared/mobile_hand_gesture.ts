@@ -1,5 +1,7 @@
 export const MOBILE_HAND_LIFT_THRESHOLD_PX = 44;
 export const MOBILE_HAND_BROWSE_THRESHOLD_PX = 8;
+export const MOBILE_HAND_DIRECTION_LOCK_THRESHOLD_PX = 12;
+const MOBILE_HAND_PLAY_AXIS_RATIO = 0.5;
 /** Card-edge spacing as a fraction of card width (0 = touching, negative = overlap). */
 export const MOBILE_HAND_TIGHT_SPACING_RATIO = -0.04;
 /** Typical travel width / card width on portrait mobile (hand padding + card sizing). */
@@ -16,6 +18,8 @@ interface MobileHandBounds {
     top: number;
     bottom: number;
 }
+
+export type MobileHandGestureIntent = "UNDECIDED" | "BROWSE" | "PLAY";
 
 interface ResolveMobileHandIndexOptions {
     clientX: number;
@@ -76,6 +80,35 @@ export const hasBrowsedMobileHand = (origin: MobileHandPoint, current: MobileHan
 
 export const hasLiftedMobileCard = (origin: MobileHandPoint, current: MobileHandPoint): boolean =>
     origin.y - current.y >= MOBILE_HAND_LIFT_THRESHOLD_PX;
+
+export const resolveMobileHandGestureIntent = (
+    origin: MobileHandPoint,
+    current: MobileHandPoint,
+    currentIntent: MobileHandGestureIntent,
+): MobileHandGestureIntent => {
+    if (currentIntent === "PLAY") return "PLAY";
+
+    const horizontalDistance = Math.abs(current.x - origin.x);
+    const upwardDistance = Math.max(0, origin.y - current.y);
+
+    if (
+        upwardDistance >= MOBILE_HAND_DIRECTION_LOCK_THRESHOLD_PX &&
+        (currentIntent === "BROWSE" ||
+            upwardDistance >= horizontalDistance * MOBILE_HAND_PLAY_AXIS_RATIO)
+    ) {
+        return "PLAY";
+    }
+
+    if (
+        currentIntent === "BROWSE" ||
+        (horizontalDistance >= MOBILE_HAND_BROWSE_THRESHOLD_PX &&
+            upwardDistance < horizontalDistance * MOBILE_HAND_PLAY_AXIS_RATIO)
+    ) {
+        return "BROWSE";
+    }
+
+    return "UNDECIDED";
+};
 
 export const isPointInsideMobileBounds = (
     point: MobileHandPoint,

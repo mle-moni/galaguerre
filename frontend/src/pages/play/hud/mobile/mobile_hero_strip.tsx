@@ -1,3 +1,4 @@
+import { Popover, Text } from "@mantine/core";
 import {
     IconCards,
     IconDiamondFilled,
@@ -5,10 +6,9 @@ import {
     IconStack2,
     IconSword,
 } from "@tabler/icons-react";
-import { Popover, Text } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CardPreviewSheet } from "~/components/cards/card_preview_sheet";
 import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { useGameContext } from "~/hooks/use_game_state";
@@ -32,6 +32,8 @@ export const MobileHeroStrip = observer(
         const avatarImageUrl = useAvatarImageUrl(player.avatarCardId);
         const [weaponSheetOpened, setWeaponSheetOpened] = useState(false);
         const [weaponInfoOpened, setWeaponInfoOpened] = useState(false);
+        const weaponAttackOriginRef = useRef<{ x: number; y: number } | null>(null);
+        const suppressHeroClickRef = useRef(false);
         const maxMana = getMaxMana(authoritativeGame.data.currentRound);
 
         const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
@@ -75,6 +77,13 @@ export const MobileHeroStrip = observer(
         };
 
         const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+            if (suppressHeroClickRef.current) {
+                event.preventDefault();
+                event.stopPropagation();
+                suppressHeroClickRef.current = false;
+                return;
+            }
+
             if (isHeroStripControl(event.target) || weaponSheetOpened) {
                 return;
             }
@@ -93,6 +102,55 @@ export const MobileHeroStrip = observer(
             }
 
             store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
+        };
+
+        const handleWeaponAttackPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+            if (!canAttackWithWeapon || isHeroStripControl(event.target)) return;
+
+            event.preventDefault();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            weaponAttackOriginRef.current = { x: event.clientX, y: event.clientY };
+            suppressHeroClickRef.current = false;
+
+            const rect = event.currentTarget.getBoundingClientRect();
+            const origin = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2,
+            };
+
+            store.targetSelectionStore.disarm();
+            store.cardDragStore.clearMinionPlayHint();
+            store.minionDragStore.cancelAttack();
+            store.weaponDragStore.startAttack();
+            store.targetingArrowStore.beginDrag(origin, {
+                x: event.clientX,
+                y: event.clientY,
+            });
+        };
+
+        const handleWeaponAttackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+            if (!weaponAttackOriginRef.current) return;
+
+            const distance = Math.hypot(
+                event.clientX - weaponAttackOriginRef.current.x,
+                event.clientY - weaponAttackOriginRef.current.y,
+            );
+            if (distance >= 6) {
+                suppressHeroClickRef.current = true;
+            }
+        };
+
+        const handleWeaponAttackPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+            weaponAttackOriginRef.current = null;
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+        };
+
+        const handleWeaponAttackPointerCancel = () => {
+            weaponAttackOriginRef.current = null;
+            suppressHeroClickRef.current = false;
+            store.weaponDragStore.cancelAttack();
         };
 
         const weaponDescription = weaponLabel
@@ -152,6 +210,10 @@ export const MobileHeroStrip = observer(
                 style={{ borderColor: dropZoneBorderColor }}
                 onDragOver={handleDragOver}
                 onDrop={handleClick}
+                onPointerDown={handleWeaponAttackPointerDown}
+                onPointerMove={handleWeaponAttackPointerMove}
+                onPointerUp={handleWeaponAttackPointerUp}
+                onPointerCancel={handleWeaponAttackPointerCancel}
                 onClick={handleClick}
             >
                 <div className="mobile-bar__avatar-column">
@@ -165,7 +227,13 @@ export const MobileHeroStrip = observer(
                     </div>
                     <span className="mobile-bar__pseudo">{player.pseudo}</span>
                 </div>
-                <div className="mobile-bar__weapon-slot" aria-hidden={!player.weaponState}>
+                <div
+                    className={clsx(
+                        "mobile-bar__weapon-slot",
+                        player.weaponState && "mobile-bar__weapon-slot--equipped",
+                    )}
+                    aria-hidden={!player.weaponState}
+                >
                     {player.weaponState && (
                         <div className="mobile-bar__weapon">
                             <Popover

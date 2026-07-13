@@ -1,13 +1,19 @@
-import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
-import type { CSSProperties, MouseEvent, PointerEvent, ReactNode } from "react";
+import {
+    type CSSProperties,
+    type MouseEvent,
+    type PointerEvent,
+    type ReactNode,
+    useRef,
+} from "react";
 import { BoardMinionToken } from "~/components/cards/board_minion_token";
+import { CardHoverPreview } from "~/components/cards/card_hover_preview";
+import { CardMobilePreviewButton } from "~/components/cards/card_mobile_preview_button";
 import { findAuthoritativeMinion } from "~/helpers/combat_target_validation";
 import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
-import { CardHoverPreview } from "~/components/cards/card_hover_preview";
-import { CardMobilePreviewButton } from "~/components/cards/card_mobile_preview_button";
+import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 
 interface MinionToRenderProps {
     state: MinionState;
@@ -23,6 +29,8 @@ const asMinionCard = (state: MinionState): MinionCard | null => {
 export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRenderProps) => {
     const { store } = useGameContext();
     const isMobilePortrait = useIsMobilePortrait();
+    const attackPointerOriginRef = useRef<{ x: number; y: number } | null>(null);
+    const suppressAttackClickRef = useRef(false);
     const card = asMinionCard(state);
     if (!card) return null;
 
@@ -56,6 +64,8 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
 
         event.preventDefault();
         event.currentTarget.setPointerCapture(event.pointerId);
+        attackPointerOriginRef.current = { x: event.clientX, y: event.clientY };
+        suppressAttackClickRef.current = false;
 
         const rect = event.currentTarget.getBoundingClientRect();
         const origin = {
@@ -68,7 +78,35 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
         store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
 
+    const handleAttackPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+        if (!isMobilePortrait || !attackPointerOriginRef.current) return;
+
+        const distance = Math.hypot(
+            event.clientX - attackPointerOriginRef.current.x,
+            event.clientY - attackPointerOriginRef.current.y,
+        );
+        if (distance >= 6) {
+            suppressAttackClickRef.current = true;
+        }
+    };
+
+    const handleAttackPointerUp = () => {
+        attackPointerOriginRef.current = null;
+    };
+
+    const handleAttackPointerCancel = () => {
+        attackPointerOriginRef.current = null;
+        suppressAttackClickRef.current = false;
+        store.minionDragStore.cancelAttack();
+    };
+
     const handleAttackClick = (event: MouseEvent<HTMLDivElement>) => {
+        if (suppressAttackClickRef.current) {
+            event.stopPropagation();
+            suppressAttackClickRef.current = false;
+            return;
+        }
+
         if (!canAttack) return;
 
         event.stopPropagation();
@@ -122,6 +160,9 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
             remainingAttacks={remainingAttacks}
             wrapper={wrapper}
             onPointerDown={canStartAttack ? handleAttackPointerDown : undefined}
+            onPointerMove={canStartAttack ? handleAttackPointerMove : undefined}
+            onPointerUp={canStartAttack ? handleAttackPointerUp : undefined}
+            onPointerCancel={canStartAttack ? handleAttackPointerCancel : undefined}
             onClick={isMobilePortrait && canStartAttack ? handleAttackClick : undefined}
         />
     );

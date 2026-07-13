@@ -23,6 +23,9 @@ export default class PrepareMobileHand extends BaseCommand {
     @flags.number({ description: "Mana available to the human player", default: 10 })
     declare mana: number;
 
+    @flags.boolean({ description: "Add an attack-ready minion for mobile combat tests" })
+    declare combat: boolean;
+
     async run() {
         if (this.app.nodeEnvironment === "production") {
             this.logger.error("This command is disabled in production");
@@ -74,11 +77,15 @@ export default class PrepareMobileHand extends BaseCommand {
         const [humanWeapon, opponentWeapon] = generatePlayerCards([weaponModel, weaponModel], {
             shuffle: false,
         });
-        const [targetMinionCard] = generatePlayerCards([targetMinionModel], { shuffle: false });
+        const [humanMinionCard, targetMinionCard] = generatePlayerCards(
+            [targetMinionModel, targetMinionModel],
+            { shuffle: false },
+        );
 
         if (
             humanWeapon.type !== "WEAPON" ||
             opponentWeapon.type !== "WEAPON" ||
+            humanMinionCard.type !== "MINION" ||
             targetMinionCard.type !== "MINION"
         ) {
             this.logger.error("The mobile hand test fixture has invalid card types");
@@ -94,9 +101,11 @@ export default class PrepareMobileHand extends BaseCommand {
         const preparedHuman = {
             ...human,
             hand,
-            board: [],
+            board: this.combat ? [instantiateMinion(humanMinionCard, currentRound - 1)] : [],
             mana: this.mana,
             health: 30,
+            heroAttacksThisRound: 0,
+            heroLastAttackAtRound: 0,
             weaponState: instantiateWeapon(humanWeapon),
         };
         const preparedOpponent = {
