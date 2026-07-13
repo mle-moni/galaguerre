@@ -155,10 +155,10 @@ const ensureGameReady = async () => {
     }
 };
 
-const resetFixture = async () => {
+const resetFixture = async ({ mana = 10 } = {}) => {
     execFileSync(
         process.execPath,
-        [resolve(ROOT, "ace.js"), "dev:prepare-mobile-hand", TEST_EMAIL],
+        [resolve(ROOT, "ace.js"), "dev:prepare-mobile-hand", TEST_EMAIL, `--mana=${mana}`],
         {
             cwd: ROOT,
             stdio: "ignore",
@@ -254,6 +254,17 @@ const moveMinionToInsertionZone = async (from, boardIndex) => {
     await insertionZone.waitFor();
     const insertionBox = await insertionZone.boundingBox();
     assert(insertionBox && insertionBox.width > 0, `Insertion zone ${boardIndex} must be active`);
+    const insertionStyle = await insertionZone.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+            backgroundColor: style.backgroundColor,
+            borderColor: style.borderTopColor,
+            markerDisplay: getComputedStyle(element, "::before").display,
+        };
+    });
+    assert.equal(insertionStyle.backgroundColor, "rgba(0, 0, 0, 0)");
+    assert.equal(insertionStyle.borderColor, "rgba(0, 0, 0, 0)");
+    assert.equal(insertionStyle.markerDisplay, "none");
 
     const insertionPoint = {
         x: insertionBox.x + insertionBox.width / 2,
@@ -270,6 +281,30 @@ await resetFixture();
 await setCaption("10 cartes visibles, sans défilement");
 await pause(1500);
 
+await resetFixture({ mana: 0 });
+await setCaption("Mana insuffisant : la carte reste dans la main");
+const unaffordableCard = await pressAndBrowseTo(0);
+await liftCard(unaffordableCard.start);
+await pause(600);
+assert.equal(await page.locator(".mobile-hand__preview--dragging").count(), 0);
+assert.equal(await page.locator(".board-player-drop-zone--active").count(), 0);
+assert.equal(
+    await page.locator("[data-mobile-hand-preview] .mobile-hand__preview-hint").textContent(),
+    "Glissez pour parcourir · montez pour jouer",
+);
+await moveCardIntoBattlefield({
+    x: unaffordableCard.start.x,
+    y: unaffordableCard.start.y - 82,
+});
+await page.mouse.up();
+await pause(1200);
+assert.equal(await page.locator("[data-hand-card-index]").count(), 10);
+assert.equal(
+    await page.locator('[data-target-zone][data-spot-owner="PLAYER"][data-minion-uuid]').count(),
+    0,
+);
+
+await resetFixture();
 await setCaption("Appui maintenu puis navigation horizontale");
 const browse = await pressAndBrowseTo(5);
 assert.equal(

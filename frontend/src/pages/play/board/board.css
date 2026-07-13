@@ -223,3 +223,22 @@
 		filter: none;
 	}
 }
+
+@media (max-width: 640px) and (orientation: portrait) {
+	.mobile-game-layout .board-player-drop-zone--active {
+		border-color: transparent;
+		background: transparent;
+	}
+
+	.mobile-game-layout .board-insertion-zone--active.board-insertion-zone--available,
+	.mobile-game-layout .board-insertion-zone--hover-valid {
+		border-color: transparent;
+		background: transparent;
+		box-shadow: none;
+		animation: none;
+	}
+
+	.mobile-game-layout .board-insertion-zone--active::before {
+		display: none;
+	}
+}
