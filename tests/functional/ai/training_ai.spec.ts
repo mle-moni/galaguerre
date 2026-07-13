@@ -14,9 +14,14 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import Game from "#models/game";
 import User from "#models/user";
-import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
+import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { getActiveCardSetId } from "#tests/helpers/card_set";
-import { bindUserIds, createTestGame } from "#tests/helpers/game/game_factory";
+import {
+    bindUserIds,
+    buildAiPlayer,
+    buildHumanPlayer,
+    createTestGame,
+} from "#tests/helpers/game/game_factory";
 import {
     createGameData,
     createEmptyBoard,
@@ -70,12 +75,8 @@ test.group("training:ai", (group) => {
         const deck = await createDeckForUser(human.id, "train-mul");
 
         const data = getDefaultGameData({
-            playerOne: { userId: human.id, pseudo: "Human", deck },
-            playerTwo: {
-                userId: TRAINING_AI_USER_ID,
-                pseudo: TRAINING_AI_PSEUDO,
-                cards: deck.cards,
-            },
+            playerOne: buildHumanPlayer(human, deck, "Human"),
+            playerTwo: buildAiPlayer(deck.cards),
             isTraining: true,
         });
 
@@ -105,12 +106,8 @@ test.group("training:ai", (group) => {
         const deck = await createDeckForUser(human.id, "train-mul-flow");
 
         const data = getDefaultGameData({
-            playerOne: { userId: human.id, pseudo: "Human", deck },
-            playerTwo: {
-                userId: TRAINING_AI_USER_ID,
-                pseudo: TRAINING_AI_PSEUDO,
-                cards: deck.cards,
-            },
+            playerOne: buildHumanPlayer(human, deck, "Human"),
+            playerTwo: buildAiPlayer(deck.cards),
             isTraining: true,
         });
 
@@ -139,12 +136,8 @@ test.group("training:ai", (group) => {
         const deck = await createDeckForUser(human.id, "train");
 
         const data = getDefaultGameData({
-            playerOne: { userId: human.id, pseudo: "Human", deck },
-            playerTwo: {
-                userId: TRAINING_AI_USER_ID,
-                pseudo: TRAINING_AI_PSEUDO,
-                cards: deck.cards,
-            },
+            playerOne: buildHumanPlayer(human, deck, "Human"),
+            playerTwo: buildAiPlayer(deck.cards),
             isTraining: true,
         });
 

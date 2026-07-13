@@ -1,8 +1,30 @@
 import type { GameData } from "#api_types/game.types";
+import type Card from "#models/card";
+import type Deck from "#models/deck";
 import Game from "#models/game";
 import User from "#models/user";
+import { TRAINING_AI_AVATAR_CARD_ID } from "#services/avatars/avatar_cards";
+import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 
 export type PlayerKey = "playerOne" | "playerTwo";
+
+export const buildHumanPlayer = (
+    user: Pick<User, "id" | "avatarCardId" | "pseudo" | "email">,
+    deck: Deck,
+    pseudo?: string,
+) => ({
+    userId: user.id,
+    pseudo: pseudo ?? user.pseudo ?? user.email.split("@")[0],
+    avatarCardId: user.avatarCardId,
+    deck,
+});
+
+export const buildAiPlayer = (cards: Card[], avatarCardId = TRAINING_AI_AVATAR_CARD_ID) => ({
+    userId: TRAINING_AI_USER_ID,
+    pseudo: TRAINING_AI_PSEUDO,
+    avatarCardId,
+    cards,
+});
 
 export const createTestUsers = async () => {
     const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;

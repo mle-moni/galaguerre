@@ -16,6 +16,7 @@ export const controllers = {
             SocketAuth: () => import("#controllers/auth/socket/socket_auth"),
             SocketLogout: () => import("#controllers/auth/socket/socket_logout"),
         },
+        UpdateAvatar: () => import("#controllers/auth/update_avatar"),
     },
     cardSets: {
         CardSets: () => import("#controllers/card_sets/card_sets_controller"),

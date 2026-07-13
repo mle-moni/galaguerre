@@ -41,6 +41,8 @@
 	height: 52px;
 	border-radius: 50%;
 	border: 2px solid var(--gg-gold);
+	object-fit: cover;
+	object-position: center 18%;
 	box-shadow: 0 0 10px var(--play-panel-glow, rgba(100, 180, 255, 0.2));
 }
 

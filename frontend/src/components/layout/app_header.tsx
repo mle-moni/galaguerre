@@ -10,6 +10,7 @@ import { CUELUME_BUTTON, CUELUME_NAV } from "~/cuelume/sound_props";
 import { GoldCoinIcon } from "~/components/rewards/gold_coin_icon";
 import { PackIcon } from "~/components/rewards/pack_icon";
 import { UserAvatar } from "~/components/user_avatar";
+import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { usePacksQuery } from "~/hooks/use_collection";
 import { useLogout } from "~/hooks/use_logout";
 
@@ -95,6 +96,7 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
     }, [isMobileMenu, closeMenu]);
 
     const displayName = user.pseudo ?? user.email.split("@")[0];
+    const avatarImageUrl = useAvatarImageUrl(user.avatarCardId);
 
     return (
         <header className="app-header">
@@ -123,12 +125,14 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                     </Link>
                 </div>
 
-                <div className="app-header__profile">
+                <Link to="/profile" className="app-header__profile">
                     <UserAvatar
                         pseudo={user.pseudo}
                         email={user.email}
                         userId={user.id}
+                        imageUrl={avatarImageUrl}
                         className="app-header__avatar"
+                        alt={displayName}
                     />
                     <div className="app-header__profile-info">
                         <span className="app-header__profile-title">{displayName}</span>
@@ -136,7 +140,7 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                             {user.progression.levelTitle} · Niveau {user.progression.level}
                         </span>
                     </div>
-                </div>
+                </Link>
 
                 <SoundToggle />
 
@@ -188,12 +192,18 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                     </nav>
 
                     <div className="app-header__drawer-footer">
-                        <div className="app-header__profile app-header__profile--drawer">
+                        <Link
+                            to="/profile"
+                            className="app-header__profile app-header__profile--drawer"
+                            onClick={closeMenu}
+                        >
                             <UserAvatar
                                 pseudo={user.pseudo}
                                 email={user.email}
                                 userId={user.id}
+                                imageUrl={avatarImageUrl}
                                 className="app-header__avatar"
+                                alt={displayName}
                             />
                             <div className="app-header__profile-info">
                                 <span className="app-header__profile-title">{displayName}</span>
@@ -201,7 +211,7 @@ export const AppHeader = observer(({ user, playTarget }: AppHeaderProps) => {
                                     {user.progression.levelTitle} · Niveau {user.progression.level}
                                 </span>
                             </div>
-                        </div>
+                        </Link>
 
                         <SoundToggle variant="drawer" />
 

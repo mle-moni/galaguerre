@@ -94,11 +94,13 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         const humanOne = {
             userId: opponent.userId,
             pseudo: generatePseudo(opponentDeck.user),
+            avatarCardId: opponentDeck.user.avatarCardId,
             deck: opponentDeck,
         };
         const humanTwo = {
             userId: user.id,
             pseudo: generatePseudo(user),
+            avatarCardId: user.avatarCardId,
             deck,
         };
 

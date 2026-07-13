@@ -12,6 +12,7 @@ import { CenteredLoader } from "~/components/centered_loader";
 import { PlayerNameLink } from "~/components/player_name_link";
 import { UserAvatar } from "~/components/user_avatar";
 import { formatGameDuration } from "~/helpers/format_game_duration";
+import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { useFriendsQuery } from "~/hooks/use_friends";
 import { useGameHistoryDetailQuery } from "~/hooks/use_game_history";
 import { useUser } from "~/hooks/use_user";
@@ -60,53 +61,58 @@ const GameHistoryPlayerCell = ({
     showFriendButton: boolean;
     side: "left" | "right";
     rating: GameRatingPlayerResult | null;
-}) => (
-    <div
-        className={clsx(
-            "game-history-detail-player",
-            side === "left" && "game-history-detail-player--left",
-            side === "right" && "game-history-detail-player--right",
-            isWinner && "game-history-detail-player--winner",
-        )}
-    >
-        <div className="game-history-detail-player__row">
-            {isWinner && <IconCrown size={16} className="game-history-detail-player__crown" />}
-            <UserAvatar
-                pseudo={player.pseudo}
-                userId={player.userId}
-                className="game-history-detail-player__avatar"
-                alt=""
-            />
-            <span className="inline-flex items-center gap-1 min-w-0">
-                <PlayerNameLink
+}) => {
+    const avatarImageUrl = useAvatarImageUrl(player.avatarCardId);
+
+    return (
+        <div
+            className={clsx(
+                "game-history-detail-player",
+                side === "left" && "game-history-detail-player--left",
+                side === "right" && "game-history-detail-player--right",
+                isWinner && "game-history-detail-player--winner",
+            )}
+        >
+            <div className="game-history-detail-player__row">
+                {isWinner && <IconCrown size={16} className="game-history-detail-player__crown" />}
+                <UserAvatar
                     pseudo={player.pseudo}
                     userId={player.userId}
-                    className={clsx(
-                        "game-history-detail-player__name",
-                        isCurrentUser && "game-history-detail-player__name--current",
-                    )}
+                    imageUrl={avatarImageUrl}
+                    className="game-history-detail-player__avatar"
+                    alt=""
                 />
-                {showFriendButton && (
-                    <FriendActionButton userId={player.userId} isFriend={isFriend} />
-                )}
-            </span>
-        </div>
-        {rating && (
-            <span className="game-history-detail-player__elo">
-                <span
-                    className={clsx(
-                        "game-history-detail-player__elo-delta",
-                        rating.delta > 0 && "game-history-detail-player__elo-delta--positive",
-                        rating.delta < 0 && "game-history-detail-player__elo-delta--negative",
+                <span className="inline-flex items-center gap-1 min-w-0">
+                    <PlayerNameLink
+                        pseudo={player.pseudo}
+                        userId={player.userId}
+                        className={clsx(
+                            "game-history-detail-player__name",
+                            isCurrentUser && "game-history-detail-player__name--current",
+                        )}
+                    />
+                    {showFriendButton && (
+                        <FriendActionButton userId={player.userId} isFriend={isFriend} />
                     )}
-                >
-                    {formatEloDelta(rating.delta)}
-                </span>{" "}
-                Elo ({rating.eloBefore} → {rating.eloAfter})
-            </span>
-        )}
-    </div>
-);
+                </span>
+            </div>
+            {rating && (
+                <span className="game-history-detail-player__elo">
+                    <span
+                        className={clsx(
+                            "game-history-detail-player__elo-delta",
+                            rating.delta > 0 && "game-history-detail-player__elo-delta--positive",
+                            rating.delta < 0 && "game-history-detail-player__elo-delta--negative",
+                        )}
+                    >
+                        {formatEloDelta(rating.delta)}
+                    </span>{" "}
+                    Elo ({rating.eloBefore} → {rating.eloAfter})
+                </span>
+            )}
+        </div>
+    );
+};
 
 const GameHistoryDetailShell = ({
     children,

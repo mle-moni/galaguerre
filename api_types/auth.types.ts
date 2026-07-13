@@ -15,4 +15,5 @@ export interface ApiUser {
     canClaimDailyPack: boolean;
     progression: ApiUserProgression;
     claimedProgressionLevels: number[];
+    avatarCardId: number;
 }

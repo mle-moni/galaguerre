@@ -4,6 +4,7 @@ import type { GamePlayer } from "#api_types/game.types";
 
 import { observer } from "mobx-react-lite";
 import { PlayingCard } from "../playing_card/playing_card.jsx";
+import { MobilePlayerHand } from "./mobile_player_hand.jsx";
 
 interface PlayerHandProps {
     player: GamePlayer;
@@ -12,6 +13,10 @@ interface PlayerHandProps {
 }
 
 export const PlayerHand = observer<PlayerHandProps>(({ player, isOpponent, isMobile }) => {
+    if (isMobile && !isOpponent) {
+        return <MobilePlayerHand player={player} />;
+    }
+
     const className = isMobile
         ? "card-hand card-hand--mobile"
         : isOpponent

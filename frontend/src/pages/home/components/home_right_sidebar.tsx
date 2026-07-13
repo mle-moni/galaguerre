@@ -4,6 +4,7 @@ import { ActionIcon, Tooltip } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAvatar } from "~/components/user_avatar";
+import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { GameInviteButton } from "~/components/friends/game_invite_button";
 import {
     useAcceptFriendRequestMutation,
@@ -19,6 +20,7 @@ import { HomePanel } from "./home_panel.jsx";
 const toOnlineFriend = (friend: ApiFriend): HomeOnlineFriend => ({
     userId: friend.userId,
     pseudo: friend.pseudo,
+    avatarCardId: friend.avatarCardId,
     status: friend.currentGameId !== null ? "in_game" : "online",
     currentGameId: friend.currentGameId,
     level: friend.level,
@@ -33,6 +35,7 @@ const compareOnlineFriends = (left: ApiFriend, right: ApiFriend) => {
 
 const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => {
     const navigate = useNavigate();
+    const avatarImageUrl = useAvatarImageUrl(friend.avatarCardId);
 
     return (
         <div className="home-friend">
@@ -40,6 +43,7 @@ const FriendRow = ({ friend }: { friend: HomeOnlineFriend }) => {
                 <UserAvatar
                     pseudo={friend.pseudo}
                     userId={friend.userId}
+                    imageUrl={avatarImageUrl}
                     className="home-friend__avatar"
                 />
                 <span

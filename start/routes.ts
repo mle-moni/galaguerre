@@ -42,6 +42,7 @@ router
 router
     .group(() => {
         router.get("/auth/me", [controllers.auth.Auth, "me"]);
+        router.patch("/auth/avatar", [controllers.auth.Auth, "updateAvatar"]);
         router.get("/card-sets", [controllers.cardSets.CardSets, "index"]);
         router.get("/collection", [controllers.collection.Collection, "index"]);
         router.get("/collection/duplicates-preview", [

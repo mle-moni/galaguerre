@@ -24,6 +24,35 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
         .filter(Boolean)
         .join(" ");
 
+    if (targetSelectionStore.isSelectingTarget) {
+        const isSpell = targetSelectionStore.pendingPlay?.kind === "SPELL";
+        const hint = isMobile
+            ? isSpell
+                ? "Choisissez la cible du sort"
+                : "Choisissez la cible du cri de guerre"
+            : isSpell
+              ? "Choisissez une cible valide pour lancer le sort · Échap pour annuler"
+              : "Choisissez une cible valide pour résoudre le cri de guerre · Échap pour annuler";
+
+        return (
+            <div className={`${hintClassName} armed-card-hint--targeting`} role="status">
+                <span>{hint}</span>
+                {isMobile && (
+                    <Button
+                        className="armed-card-hint__cancel"
+                        size="compact-xs"
+                        variant="subtle"
+                        color="yellow"
+                        aria-label="Annuler la sélection de cible"
+                        onClick={handleCancel}
+                    >
+                        Annuler
+                    </Button>
+                )}
+            </div>
+        );
+    }
+
     if (cardDragStore.isShowingMinionPlayHint) {
         return (
             <div className={hintClassName} role="status">
@@ -85,7 +114,7 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
         );
     }
 
-    if (!targetSelectionStore.isArmed || targetSelectionStore.isSelectingTarget) return null;
+    if (!targetSelectionStore.isArmed) return null;
 
     const hint = targetSelectionStore.armedCardRequiresTarget
         ? isMobile

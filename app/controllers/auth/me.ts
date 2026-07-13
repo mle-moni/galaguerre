@@ -40,5 +40,6 @@ export const me = async ({ auth, response }: HttpContext) => {
         canClaimDailyPack: canClaimDailyPack(user),
         progression: getProgressionFromTotalXp(user.xp),
         claimedProgressionLevels: await listClaimedProgressionLevels(user.id),
+        avatarCardId: user.avatarCardId,
     };
 };

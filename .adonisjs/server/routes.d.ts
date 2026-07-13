@@ -21,6 +21,7 @@ export type ScannedRoutes = {
         "deck_shares.show": { paramsTuple: [ParamValue]; params: { code: ParamValue } };
         "cards.index": { paramsTuple?: []; params?: {} };
         "auth.me": { paramsTuple?: []; params?: {} };
+        "auth.update_avatar": { paramsTuple?: []; params?: {} };
         "card_sets.index": { paramsTuple?: []; params?: {} };
         "collection.index": { paramsTuple?: []; params?: {} };
         "collection.duplicates_preview": { paramsTuple?: []; params?: {} };
@@ -170,6 +171,7 @@ export type ScannedRoutes = {
         "games.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
     };
     PATCH: {
+        "auth.update_avatar": { paramsTuple?: []; params?: {} };
         "decks.update": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "games.update": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
     };

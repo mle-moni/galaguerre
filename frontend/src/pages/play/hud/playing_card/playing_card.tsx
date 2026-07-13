@@ -158,8 +158,12 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
                 style={style}
                 className={cardClassName}
                 spellPower={store.me.spellPower}
-                onClick={handlePlayableCardClick}
-                onPointerDown={isTargeted && isArmed ? handleTargetedSpellPointerDown : undefined}
+                onClick={isMobilePortrait && isTargeted ? undefined : handlePlayableCardClick}
+                onPointerDown={
+                    !isMobilePortrait && isTargeted && isArmed
+                        ? handleTargetedSpellPointerDown
+                        : undefined
+                }
                 wrapper={wrapper}
             />
         );
@@ -173,7 +177,7 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
             style={style}
             className={cardClassName}
             spellPower={store.me.spellPower}
-            draggable={canPlay && !isCardQueued}
+            draggable={!isMobilePortrait && canPlay && !isCardQueued}
             onClick={handleMinionClick}
             onDragStart={() => store.cardDragStore.setCardDragged(card)}
             onDragEnd={() => store.cardDragStore.setCardDragged(null)}

@@ -19,6 +19,8 @@
         "lint-check": "biome lint",
         "typecheck": "tsc --noEmit",
         "frontend-typecheck": "cd frontend && yarn tsc --noEmit --project tsconfig.json",
+        "screenshot:ingame-mobile": "dev-browser --headless --browser galaguerre < scripts/dev-browser/prepare_ingame_mobile.js && node ace dev:equip-test-weapons test@test.fr && dev-browser --headless --browser galaguerre < scripts/dev-browser/screenshot_ingame_mobile.js",
+        "video:mobile-hand": "node scripts/dev-browser/record_mobile_hand_ux.mjs",
         "generate:card-images": "node --experimental-strip-types scripts/generate_hs_card_ids.ts",
         "generate:news-recaps": "node --experimental-strip-types scripts/generate_news_recaps.ts",
         "generate:cards-md": "node ace test --reporters=dot --files=generate_cards_md"
@@ -72,6 +74,7 @@
         "mobx": "^6.16.0",
         "mobx-react-lite": "^4.1.1",
         "pino-pretty": "^13.1.3",
+        "playwright": "1.58.2",
         "postcss": "^8.5.15",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",

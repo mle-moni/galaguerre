@@ -1,8 +1,9 @@
-import { Button, PasswordInput, TextInput } from "@mantine/core";
+import { Button, PasswordInput, Text, TextInput } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { AvatarPicker } from "~/components/avatar_picker/avatar_picker";
 import { AuthLayout } from "~/components/layout/auth_layout";
 import { useApiMutation } from "~/hooks/use_api_mutation";
 import { USER_QUERY_KEY, useUser } from "~/hooks/use_user";
@@ -15,9 +16,15 @@ export const RegisterPage = observer(() => {
     const queryClient = useQueryClient();
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [redirectTo, setRedirectTo] = useState<string | null>(null);
+    const [avatarCardId, setAvatarCardId] = useState<number | null>(null);
 
     const registerMutation = useApiMutation({
-        mutationFn: async (data: { email: string; password: string; pseudo: string }) => {
+        mutationFn: async (data: {
+            email: string;
+            password: string;
+            pseudo: string;
+            avatarCardId?: number;
+        }) => {
             return client.api.auth.register({ body: data });
         },
         onSuccess: async (data) => {
@@ -41,6 +48,7 @@ export const RegisterPage = observer(() => {
             email: formData.get("email") as string,
             password,
             pseudo: formData.get("pseudo") as string,
+            ...(avatarCardId != null ? { avatarCardId } : {}),
         });
     };
 
@@ -65,6 +73,10 @@ export const RegisterPage = observer(() => {
             }
         >
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div>
+                    <Text className="text-white font-semibold mb-2">Choisir un avatar</Text>
+                    <AvatarPicker value={avatarCardId} onChange={setAvatarCardId} usePublicClient />
+                </div>
                 <TextInput
                     label="Pseudo"
                     name="pseudo"

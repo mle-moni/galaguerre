@@ -203,6 +203,7 @@ export const DEFAULT_PLAYER_STATS: GamePlayerStats = {
 export interface GamePlayer {
     userId: number;
     pseudo: string;
+    avatarCardId?: number;
     deckCards: PlayerCard[];
     hand: PlayerCard[];
     board: BoardState;

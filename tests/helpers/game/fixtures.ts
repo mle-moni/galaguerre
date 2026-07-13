@@ -472,6 +472,7 @@ export const createGamePlayer = (
 ): GamePlayer => ({
     userId,
     pseudo: `player-${userId}`,
+    avatarCardId: 148,
     deckCards: [],
     hand: [],
     board: createEmptyBoard(),

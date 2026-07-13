@@ -1,6 +1,7 @@
 export interface ApiFriend {
     userId: number;
     pseudo: string | null;
+    avatarCardId: number;
     elo: number;
     wins: number;
     losses: number;

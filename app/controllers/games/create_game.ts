@@ -21,12 +21,14 @@ import { sendGameUpdate } from "./send_game_update.js";
 interface HumanPlayer {
     userId: number;
     pseudo: string;
+    avatarCardId: number;
     deck: Deck;
 }
 
 interface AiPlayer {
     userId: number;
     pseudo: string;
+    avatarCardId: number;
     cards: Card[];
 }
 
@@ -98,6 +100,7 @@ const PLAYER_TWO_HAND_SIZE = 4;
 const createGamePlayer = (
     userId: number,
     pseudo: string,
+    avatarCardId: number,
     handSize: number,
     deck: ReturnType<typeof generatePlayerCards>,
 ) => {
@@ -107,6 +110,7 @@ const createGamePlayer = (
     return {
         userId,
         pseudo,
+        avatarCardId,
         deckCards,
         hand,
         board: createEmptyBoard(),
@@ -150,12 +154,14 @@ export const getDefaultGameData = ({
         playerOne: createGamePlayer(
             playerOne.userId,
             playerOne.pseudo,
+            playerOne.avatarCardId,
             PLAYER_ONE_HAND_SIZE,
             p1Deck,
         ),
         playerTwo: createGamePlayer(
             playerTwo.userId,
             playerTwo.pseudo,
+            playerTwo.avatarCardId,
             PLAYER_TWO_HAND_SIZE,
             p2Deck,
         ),

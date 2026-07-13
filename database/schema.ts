@@ -383,6 +383,7 @@ export class UserDailyQuestSchema extends BaseModel {
 
 export class UserSchema extends BaseModel {
     static $columns = [
+        "avatarCardId",
         "createdAt",
         "elo",
         "email",
@@ -401,6 +402,8 @@ export class UserSchema extends BaseModel {
         "xp",
     ] as const;
     $columns = UserSchema.$columns;
+    @column()
+    declare avatarCardId: number;
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
     @column()

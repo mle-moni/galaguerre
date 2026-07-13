@@ -1,12 +1,19 @@
 .mobile-bar {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	padding: 0.375rem 0.5rem;
-	padding-top: max(0.375rem, env(safe-area-inset-top));
+	padding: 0.4rem 0.5rem 0.45rem;
+	padding-top: max(0.4rem, env(safe-area-inset-top));
 	flex-shrink: 0;
-	background: rgba(15, 23, 42, 0.92);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+	background:
+		linear-gradient(180deg, rgba(24, 34, 55, 0.98), rgba(8, 17, 32, 0.98));
+	border: 1px solid rgba(210, 164, 75, 0.82);
+	border-top: none;
+	border-radius: 0 0 14px 14px;
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 235, 182, 0.12),
+		0 3px 12px rgba(0, 0, 0, 0.28);
 }
 
 .mobile-bar__actions {
@@ -31,16 +38,14 @@
 }
 
 .mobile-bar--player {
-	border-bottom: none;
-	border-top: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid rgba(210, 164, 75, 0.82);
+	border-radius: 14px;
 	padding-top: 0.375rem;
 	padding-bottom: 0.375rem;
 }
 
 .mobile-game-layout__bottom .mobile-bar--player {
-	background: transparent;
-	border-top: none;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	background: linear-gradient(180deg, rgba(14, 27, 47, 0.98), rgba(7, 16, 30, 0.98));
 	padding-top: 0.25rem;
 	padding-bottom: 0.25rem;
 }
@@ -60,39 +65,138 @@
 	touch-action: manipulation;
 }
 
-.mobile-bar__identity {
+.mobile-bar__avatar-column {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: 0.375rem;
-	flex: 1;
+	gap: 0.15rem;
+	flex: 0 0 48px;
+	width: 48px;
+}
+
+.mobile-bar__weapon-slot {
+	display: flex;
+	flex: 1 1 auto;
+	align-items: center;
+	justify-content: center;
 	min-width: 0;
+	min-height: 2.85rem;
+	padding: 0 0.2rem;
 }
 
 .mobile-bar__pseudo {
+	width: 100%;
 	min-width: 0;
-	font-size: 0.875rem;
+	font-size: 0.625rem;
 	font-weight: 700;
 	color: #fff;
+	text-align: center;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
+.mobile-bar__avatar-wrap {
+	position: relative;
+	width: 48px;
+	height: 48px;
+	flex: 0 0 48px;
+}
+
+.mobile-bar__avatar {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	border: 2px solid #d2a44b;
+	object-fit: cover;
+	object-position: center 18%;
+	background: #14233b;
+	box-shadow:
+		0 0 0 2px rgba(9, 17, 31, 0.92),
+		0 0 10px rgba(210, 164, 75, 0.24);
+}
+
 .mobile-bar__weapon {
 	display: flex;
 	align-items: center;
-	gap: 0.25rem;
-	flex-shrink: 0;
+	justify-content: center;
+}
+
+.mobile-bar__weapon-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 0.12rem;
+	min-width: 4.75rem;
+	padding: 0.14rem 0.28rem 0.16rem;
+	border: 1px solid rgba(210, 164, 75, 0.68);
+	border-radius: 7px;
+	background: linear-gradient(180deg, rgba(84, 57, 27, 0.72), rgba(38, 27, 18, 0.82));
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.mobile-bar__weapon-stat {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.2rem;
+	width: 100%;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: #f8fafc;
+	font-size: 0.75rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.mobile-bar__weapon-stat:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+.mobile-bar__weapon-stat-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 14px;
+	height: 14px;
+	color: #f1c75b;
+}
+
+.mobile-bar__weapon-stat-icon svg {
+	width: 100%;
+	height: 100%;
+	stroke-width: 1.8;
+}
+
+.mobile-bar__weapon-meta {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.18rem;
+}
+
+.mobile-bar__weapon-label {
+	font-size: 0.5rem;
+	font-weight: 500;
+	line-height: 1;
+	color: rgba(226, 232, 240, 0.72);
+	white-space: nowrap;
 }
 
 .mobile-bar__weapon-preview {
-	width: 22px;
-	height: 22px;
+	width: 18px;
+	height: 18px;
 	border-radius: 50%;
 	border: 1px solid rgba(255, 255, 255, 0.5);
 	background: rgba(0, 0, 0, 0.55);
 	color: #fff;
-	font-size: 11px;
+	font-size: 10px;
 	font-weight: 700;
 	line-height: 1;
 	display: flex;
@@ -110,12 +214,12 @@
 }
 
 .mobile-bar__weapon-attack {
-	width: 32px;
-	height: 32px;
-	border-radius: 8px;
+	width: 22px;
+	height: 22px;
+	border-radius: 6px;
 	border: 1px solid rgba(255, 255, 255, 0.35);
 	background: rgba(0, 0, 0, 0.45);
-	font-size: 1rem;
+	font-size: 0.85rem;
 	line-height: 1;
 	display: flex;
 	align-items: center;
@@ -140,58 +244,78 @@
 
 .mobile-bar__stats {
 	display: flex;
-	align-items: center;
-	gap: 0.375rem;
+	align-items: flex-start;
+	gap: clamp(0.15rem, 1.2vw, 0.375rem);
 	flex-shrink: 0;
+	margin-left: auto;
 }
 
 .mobile-bar__badge {
-	width: var(--board-stat-badge, var(--stat-badge));
-	height: var(--board-stat-badge, var(--stat-badge));
-	border-radius: 50%;
+	display: grid;
+	grid-template-columns: 14px auto;
+	grid-template-rows: 1.1rem 0.75rem;
+	align-items: center;
+	justify-content: center;
+	column-gap: 0.15rem;
+	min-width: 2.25rem;
+	padding: 0.1rem 0.2rem;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	flex-shrink: 0;
+	color: #f8fafc;
+}
+
+.mobile-bar__badge-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: calc(var(--board-stat-badge, var(--stat-badge)) * 0.5);
-	font-weight: bold;
-	border: 1px solid #000;
-	flex-shrink: 0;
-	color: #000;
+	width: 14px;
+	height: 14px;
 }
 
-.mobile-bar__badge--health {
-	background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-	color: #fff;
+.mobile-bar__badge-icon svg {
+	width: 100%;
+	height: 100%;
+	stroke-width: 1.8;
 }
 
-.mobile-bar__badge--mana {
-	background-color: #e3b42a;
+.mobile-bar__badge-value {
+	font-size: 0.75rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+	white-space: nowrap;
 }
 
-.mobile-bar__badge--weapon-damage {
-	background: linear-gradient(180deg, #f0d44b 0%, #c9a318 100%);
-	color: #111;
+.mobile-bar__badge-label {
+	grid-column: 1 / -1;
+	font-size: 0.5rem;
+	font-weight: 500;
+	line-height: 1;
+	text-align: center;
+	color: rgba(226, 232, 240, 0.72);
 }
 
-.mobile-bar__badge--weapon-durability {
-	background-color: #c0c0c0;
-	color: #000;
+.mobile-bar__badge--health .mobile-bar__badge-icon {
+	color: #ef5350;
 }
 
-.mobile-bar__badge--deck {
-	background-color: #1e3a5f;
-	color: #fff;
-	font-size: calc(var(--board-stat-badge, var(--stat-badge)) * 0.45);
-	min-width: var(--board-stat-badge, var(--stat-badge));
-	width: auto;
-	height: var(--board-stat-badge, var(--stat-badge));
-	padding: 0 calc(var(--board-stat-badge, var(--stat-badge)) * 0.2);
-	border-radius: 999px;
+.mobile-bar__badge--mana .mobile-bar__badge-icon {
+	color: #56b8ff;
+}
+
+.mobile-bar__badge--hand .mobile-bar__badge-icon,
+.mobile-bar__badge--deck .mobile-bar__badge-icon {
+	color: #dec99d;
 }
 
 .mobile-bar__badge--interactive {
 	cursor: pointer;
 	touch-action: manipulation;
+}
+
+.mobile-bar__badge--interactive:hover {
+	background-color: rgba(255, 255, 255, 0.08);
 }
 
 .mobile-bar__badge--interactive:focus-visible {
@@ -207,7 +331,7 @@
 	min-width: 0;
 	border: 2px dashed transparent;
 	border-radius: 8px;
-	padding: 0.25rem;
+	padding: 0.35rem 0.25rem 0.45rem;
 	touch-action: manipulation;
 }
 
@@ -321,46 +445,123 @@
 	transform: translate(-50%, -50%);
 }
 
+.armed-card-hint--targeting.armed-card-hint--mobile {
+	top: auto;
+	bottom: 0.75rem;
+	width: max-content;
+	max-width: calc(100% - 1rem);
+	transform: translateX(-50%);
+	background: linear-gradient(180deg, rgba(27, 39, 61, 0.96), rgba(8, 17, 32, 0.98));
+	border-color: rgba(210, 164, 75, 0.78);
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+}
+
+.armed-card-hint--targeting .armed-card-hint__cancel {
+	border: 1px solid rgba(250, 204, 21, 0.55);
+	background: rgba(250, 204, 21, 0.12);
+	color: #fef3c7;
+	font-weight: 800;
+}
+
 .card-hand.card-hand--mobile {
-	position: relative;
-	left: auto;
-	bottom: auto;
+	position: absolute;
+	inset: 0;
 	width: 100%;
-	min-height: var(--hand-height);
-	height: auto;
+	min-height: 0;
+	height: 100%;
 	gap: 0;
-	padding: 0.25rem 0.5rem;
+	padding: 0.25rem 0.5rem 0;
 	padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 12px);
-	overflow-x: auto;
-	overflow-y: hidden;
-	scroll-snap-type: x mandatory;
-	-webkit-overflow-scrolling: touch;
-	align-items: flex-end;
-	justify-content: flex-start;
-	justify-content: safe center;
+	overflow: hidden;
+	touch-action: none;
 	z-index: 10;
 }
 
-.card-hand--mobile .playing-card-face {
-	scroll-snap-align: center;
-	flex-shrink: 0;
+.mobile-hand {
+	position: relative;
+	width: 100%;
+	height: var(--hand-height);
+}
+
+.mobile-hand__preview {
+	position: absolute;
+	left: 50%;
+	bottom: calc(100% + 0.75rem);
+	z-index: 45;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.4rem;
+	transform: translateX(-50%);
+	pointer-events: none;
+	animation: mobile-hand-preview-in 120ms ease-out;
+}
+
+.mobile-hand__preview--dragging {
+	position: fixed;
+	left: var(--mobile-hand-pointer-x);
+	top: var(--mobile-hand-pointer-y);
+	bottom: auto;
+	z-index: 70;
+	transform: translate(-50%, -86%) scale(0.72);
+	transform-origin: bottom center;
+	opacity: 0.86;
+}
+
+.mobile-hand__preview--canceling {
+	opacity: 0.62;
+}
+
+.mobile-hand__preview-card {
+	box-shadow:
+		0 0 0 3px rgba(210, 164, 75, 0.92),
+		0 0 24px rgba(210, 164, 75, 0.35);
+}
+
+.mobile-hand__preview-hint {
+	max-width: 15rem;
+	padding: 0.3rem 0.65rem;
+	border: 1px solid rgba(210, 164, 75, 0.65);
+	border-radius: 999px;
+	background: rgba(8, 17, 32, 0.94);
+	color: rgba(248, 250, 252, 0.9);
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-align: center;
+	white-space: nowrap;
 }
 
 .card-hand--mobile .card-hand__card {
-	display: flex;
-	flex-shrink: 0;
+	position: absolute;
+	top: 0.25rem;
+	width: var(--card-w-hand);
+	transition:
+		transform 100ms ease-out,
+		filter 100ms ease-out;
 }
 
-.card-hand--mobile .card-hand__card:not(:first-child) {
-	margin-left: var(--hand-gap);
+.card-hand--mobile .card-hand__card--selected {
+	filter: brightness(1.08);
 }
 
 .mobile-game-layout__hand-area {
 	flex-shrink: 0;
 	position: relative;
 	min-height: var(--hand-height);
-	overflow: hidden;
+	overflow: visible;
 	z-index: 10;
+}
+
+@keyframes mobile-hand-preview-in {
+	from {
+		opacity: 0;
+		transform: translate(-50%, 8px) scale(0.96);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(-50%);
+	}
 }
 
 @keyframes mobile-hero-target-pulse {

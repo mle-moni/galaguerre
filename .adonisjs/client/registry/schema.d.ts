@@ -261,6 +261,26 @@ export interface Registry {
             >;
         };
     };
+    "auth.update_avatar": {
+        methods: ["PATCH"];
+        pattern: "/api/auth/avatar";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<import("#controllers/auth/auth_controller").default["updateAvatar"]>
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<import("#controllers/auth/auth_controller").default["updateAvatar"]>
+                >
+            >;
+        };
+    };
     "card_sets.index": {
         methods: ["GET", "HEAD"];
         pattern: "/api/card-sets";
