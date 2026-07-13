@@ -1,15 +1,24 @@
 import { Popover, Text } from "@mantine/core";
 import clsx from "clsx";
-import { useState, type MouseEvent, type ReactNode } from "react";
+import { type MouseEvent, type ReactNode, useState } from "react";
 
 interface MobileStatBadgeProps {
     value: ReactNode;
+    icon: ReactNode;
     label: string;
+    displayLabel?: string;
     description: string;
     className: string;
 }
 
-export const MobileStatBadge = ({ value, label, description, className }: MobileStatBadgeProps) => {
+export const MobileStatBadge = ({
+    value,
+    icon,
+    label,
+    displayLabel,
+    description,
+    className,
+}: MobileStatBadgeProps) => {
     const [opened, setOpened] = useState(false);
 
     const handleClick = (event: MouseEvent<HTMLSpanElement>) => {
@@ -38,7 +47,11 @@ export const MobileStatBadge = ({ value, label, description, className }: Mobile
                     onClick={handleClick}
                     aria-label={label}
                 >
-                    {value}
+                    <span className="mobile-bar__badge-icon" aria-hidden="true">
+                        {icon}
+                    </span>
+                    <span className="mobile-bar__badge-value">{value}</span>
+                    <span className="mobile-bar__badge-label">{displayLabel ?? label}</span>
                 </span>
             </Popover.Target>
             <Popover.Dropdown onClick={(event) => event.stopPropagation()}>
