@@ -125,15 +125,16 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
 
     const beginLift = (gesture: ActiveGesture, card: PlayerCard, point: Point) => {
         suppressClickRef.current = true;
-        setIsLifted(true);
-        setDragPoint(point);
-        setIsInCancelZone(false);
 
         if (!canPlayCard(card)) {
             gesture.mode = "REJECTED";
             notifyCannotPlay(card);
             return;
         }
+
+        setIsLifted(true);
+        setDragPoint(point);
+        setIsInCancelZone(false);
 
         if (card.type === "MINION") {
             gesture.mode = "MINION";
@@ -206,7 +207,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
             }
         }
 
-        if (gesture.mode !== "NONE") {
+        if (gesture.mode !== "NONE" && gesture.mode !== "REJECTED") {
             setDragPoint(point);
             setIsInCancelZone(isInsideCardCancelZone(point));
         }

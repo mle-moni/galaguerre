@@ -1,4 +1,4 @@
-import { BaseCommand, args } from "@adonisjs/core/ace";
+import { BaseCommand, args, flags } from "@adonisjs/core/ace";
 import { generatePlayerCards } from "#controllers/games/generate_player_cards";
 import { instantiateMinion } from "#controllers/games/play_card/instantiate_minion";
 import { instantiateWeapon } from "#controllers/games/play_card/instantiate_weapon";
@@ -19,6 +19,9 @@ export default class PrepareMobileHand extends BaseCommand {
 
     @args.string({ description: "Email of the player in the active training game" })
     declare email: string;
+
+    @flags.number({ description: "Mana available to the human player", default: 10 })
+    declare mana: number;
 
     async run() {
         if (this.app.nodeEnvironment === "production") {
@@ -41,6 +44,12 @@ export default class PrepareMobileHand extends BaseCommand {
 
         if (!game?.data.isTraining) {
             this.logger.error("No active training game found for this user");
+            this.exitCode = 1;
+            return;
+        }
+
+        if (!Number.isInteger(this.mana) || this.mana < 0 || this.mana > 10) {
+            this.logger.error("Mana must be an integer between 0 and 10");
             this.exitCode = 1;
             return;
         }
@@ -86,7 +95,7 @@ export default class PrepareMobileHand extends BaseCommand {
             ...human,
             hand,
             board: [],
-            mana: 10,
+            mana: this.mana,
             health: 30,
             weaponState: instantiateWeapon(humanWeapon),
         };
