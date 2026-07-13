@@ -44,6 +44,7 @@ export type ApiCatalogMinionCard = ApiCatalogCardBase & {
     effects: string[];
     battlecryActions: CardActionSnapshot[];
     deathrattleActions: CardActionSnapshot[];
+    attackActions: CardActionSnapshot[];
     passives: PassiveSnapshot[];
 };
 

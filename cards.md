@@ -493,4 +493,4 @@ Format compact pour construction de deck par LLM.
 
 ### #177 Jean
 - Coût: 4 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur, Sales
-- Chaque fois que ce monstre attaque : Ajoute un monstre Développeur ou un monstre Sales aléatoire à votre main. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.
+- Chaque fois que ce monstre attaque, ajoute un monstre Développeur ou un monstre Sales aléatoire à votre main. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.

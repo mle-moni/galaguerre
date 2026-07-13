@@ -24,6 +24,7 @@ export const catalogCardToPlayerCard = (card: ApiCatalogCard): PlayerCard => {
             ...base,
             ...minionFields,
             type: "MINION" as const,
+            attackActions: card.attackActions ?? [],
             minionPowers: minionPowers ?? {
                 hasTaunt: false,
                 hasCharge: false,

@@ -1,6 +1,8 @@
 import { test } from "@japa/runner";
 import {
+    ATTACK_TRIGGER_PREFIX,
     formatActionDescription,
+    formatAttackTriggerLine,
     formatGroupedActionDescriptions,
     formatPlayCardPassiveTriggerLabel,
 } from "#api_types/format_action_description";
@@ -580,6 +582,24 @@ test.group("format_action_description", () => {
         assert.equal(
             formatActionDescription(action, "Chaque fois que ce monstre attaque"),
             "Chaque fois que ce monstre attaque : Ajoute un monstre Développeur ou un monstre Sales aléatoire à votre main.",
+        );
+    });
+
+    test("formats attack trigger lines with a comma instead of a colon", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "GENERATE_HAND",
+            generateCount: 1,
+            generateCardFilter: null,
+            generateCardFilterAlternatives: [
+                createCardFilterSnapshot({ type: "MINION", tags: ["DEVELOPPEUR"] }),
+                createCardFilterSnapshot({ type: "MINION", tags: ["SALES"] }),
+            ],
+            handTargetTeam: "PLAYER",
+        });
+
+        assert.equal(
+            formatAttackTriggerLine(formatActionDescription(action, ATTACK_TRIGGER_PREFIX) ?? ""),
+            "Chaque fois que ce monstre attaque, ajoute un monstre Développeur ou un monstre Sales aléatoire à votre main.",
         );
     });
 

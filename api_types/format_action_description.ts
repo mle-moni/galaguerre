@@ -943,6 +943,16 @@ export const formatGroupedActionDescriptions = (
         .filter((description): description is string => description !== null);
 };
 
+export const ATTACK_TRIGGER_PREFIX = "Chaque fois que ce monstre attaque";
+
+export const formatAttackTriggerLine = (line: string): string => {
+    const colonPrefix = `${ATTACK_TRIGGER_PREFIX} : `;
+    if (!line.startsWith(colonPrefix)) return line;
+
+    const action = line.slice(colonPrefix.length);
+    return `${ATTACK_TRIGGER_PREFIX}, ${action.charAt(0).toLowerCase()}${action.slice(1)}`;
+};
+
 export const formatActionDescription = (
     action: CardActionSnapshot,
     prefix = "Cri de guerre",

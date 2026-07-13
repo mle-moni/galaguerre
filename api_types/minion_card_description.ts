@@ -11,7 +11,9 @@ import type { GalaguerreDynamicCostSource } from "../app/galaguerre/galaguerre.t
 import { EFFECT_DESCRIPTIONS } from "./card_keyword_glossary.js";
 import { CARD_LABEL_TAG_LABELS, formatTagChip } from "./card.types.js";
 import {
+    ATTACK_TRIGGER_PREFIX,
     formatActionDescription,
+    formatAttackTriggerLine,
     formatExtraBattlecryTriggersDescription,
     formatGroupedActionDescriptions,
     formatHealDamagePassiveTriggerLabel,
@@ -40,7 +42,9 @@ export const getDeathrattleDescription = (actions: CardActionSnapshot[]): string
 };
 
 export const getAttackDescription = (actions: CardActionSnapshot[]): string[] => {
-    return formatGroupedActionDescriptions(actions, "Chaque fois que ce monstre attaque");
+    return formatGroupedActionDescriptions(actions, ATTACK_TRIGGER_PREFIX).map(
+        formatAttackTriggerLine,
+    );
 };
 
 export const getSpellEffectDescription = (actions: CardActionSnapshot[]): string[] => {
