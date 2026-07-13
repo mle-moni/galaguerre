@@ -33,7 +33,6 @@ import {
     cardDrawFilter,
     drawAction,
     drawOrAction,
-    generateHandOrAction,
     enemyDrawAction,
     enemyHero,
     enemyMinions,
@@ -307,12 +306,10 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         {
             tags: ["DEVELOPPEUR", "SALES"],
-            attackActions: [
-                generateHandOrAction(1, [
-                    minionDrawFilter(["DEVELOPPEUR"]),
-                    minionDrawFilter(["SALES"]),
-                ]),
-            ],
+            minionPowers: {
+                hasStealth: true,
+            },
+            attackActions: [discoverAction(minionDrawFilter())],
             deathrattleActions: [handCardAddAction(112)],
         },
         { rarity: "LEGENDARY" },

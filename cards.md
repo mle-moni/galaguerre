@@ -492,5 +492,5 @@ Format compact pour construction de deck par LLM.
 - Passif : Donne +1 dégâts de sort au héros allié. Cri de guerre : Ajoute 1 copie de Jet de Ducros à votre main. Dernier souffle : Pioche un monstre Développeur OU un monstre Pets.
 
 ### #177 Jean
-- Coût: 4 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur, Sales
-- Chaque fois que ce monstre attaque, ajoute un monstre Développeur ou un monstre Sales aléatoire à votre main. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.
+- Coût: 4 | Type: MINION | Stats: 2/4 [Discrétion] | Rareté: Légendaire | Famille: Développeur, Sales
+- Discrétion. Chaque fois que ce monstre attaque, découvrez un monstre Développeur ou un monstre Sales. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.
