@@ -37,6 +37,7 @@ const createDefaultSourceMinion = (): MinionState => ({
     lastActionAtRound: 0,
     attacksThisRound: 0,
     divineShieldConsumed: false,
+    stealthConsumed: false,
     initialKeywords: {
         hasTaunt: false,
         hasCharge: false,

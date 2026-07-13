@@ -2,13 +2,13 @@ import { GALADRIM_CARD_SET_NAME } from "../card_set_names.js";
 import { getGaladrimCardImage } from "../galadrim_card_images.js";
 import {
     actionPassive,
-    adjacentAllyAuraPassive,
     allyHero,
     allyMinions,
     allMinions,
     attackAtMost,
     attackGreaterThan,
     boostAction,
+    boostAdjacentAlliesAction,
     boostAttack,
     boostAttackWithCharge,
     boostAttackWithStealth,
@@ -900,7 +900,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             minionPowers: {
                 hasTaunt: true,
             },
-            passives: [adjacentAllyAuraPassive(boostStealth())],
+            battlecryActions: [boostAdjacentAlliesAction(boostStealth())],
         },
         { rarity: "RARE" },
     ),

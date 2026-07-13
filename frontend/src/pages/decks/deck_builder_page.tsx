@@ -23,7 +23,8 @@ import { useDeckQuery, useUpdateDeckMutation } from "~/hooks/use_decks";
 import { useIsNarrowScreen } from "~/hooks/use_is_narrow_screen";
 import { notifyError, notifySuccess } from "~/services/toasts";
 import { ShareDeckModal } from "~/components/decks/share_deck_modal";
-import { CUELUME_BUTTON } from "~/cuelume/sound_props";
+import { play } from "~/cuelume/index";
+import { CUELUME_BUTTON, CUELUME_TOGGLE } from "~/cuelume/sound_props";
 import "~/components/catalogue/catalogue_light.css";
 import "./deck_builder_page.css";
 
@@ -98,6 +99,7 @@ export const DeckBuilderPage = observer(() => {
 
     const addCard = (cardId: number) => {
         if (!canAddCard(cardId)) return;
+        play("chime");
         const next = new Map(currentComposition);
         next.set(cardId, (next.get(cardId) ?? 0) + 1);
         setComposition(next);
@@ -105,8 +107,10 @@ export const DeckBuilderPage = observer(() => {
     };
 
     const removeCard = (cardId: number) => {
+        const count = currentComposition.get(cardId) ?? 0;
+        if (count === 0) return;
+        play("droplet");
         const next = new Map(currentComposition);
-        const count = next.get(cardId) ?? 0;
         if (count <= 1) {
             next.delete(cardId);
         } else {
@@ -141,6 +145,7 @@ export const DeckBuilderPage = observer(() => {
     });
 
     const handleCostClick = (cost: number | null) => {
+        play("toggle");
         setCostFilter(cost === null || costFilter === String(cost) ? null : String(cost));
     };
 
@@ -179,6 +184,7 @@ export const DeckBuilderPage = observer(() => {
                                 className="collection-catalogue__filters-toggle"
                                 onClick={() => setShowManaCurve((visible) => !visible)}
                                 aria-expanded={showManaCurve}
+                                {...CUELUME_TOGGLE}
                             >
                                 <span>Courbe de mana</span>
                                 {showManaCurve ? (
@@ -235,6 +241,7 @@ export const DeckBuilderPage = observer(() => {
                                                 variant="outline"
                                                 color="gold"
                                                 onClick={() => removeCard(cardId)}
+                                                {...CUELUME_BUTTON}
                                             >
                                                 <IconMinus size={12} />
                                             </Button>
@@ -272,6 +279,7 @@ export const DeckBuilderPage = observer(() => {
                                                 variant="outline"
                                                 color="gold"
                                                 onClick={() => removeCard(cardId)}
+                                                {...CUELUME_BUTTON}
                                             >
                                                 <IconMinus size={14} />
                                             </Button>
@@ -281,6 +289,7 @@ export const DeckBuilderPage = observer(() => {
                                                 color="gold"
                                                 onClick={() => addCard(cardId)}
                                                 disabled={!canAddCard(cardId)}
+                                                {...CUELUME_BUTTON}
                                             >
                                                 <IconPlus size={14} />
                                             </Button>
@@ -329,6 +338,7 @@ export const DeckBuilderPage = observer(() => {
                                     type="button"
                                     className="deck-builder-page__action-btn"
                                     onClick={() => navigate("/decks")}
+                                    {...CUELUME_BUTTON}
                                 >
                                     Retour
                                 </button>
@@ -356,8 +366,10 @@ export const DeckBuilderPage = observer(() => {
                                     }}
                                 >
                                     <Tabs.List grow>
-                                        <Tabs.Tab value="catalog">Catalogue</Tabs.Tab>
-                                        <Tabs.Tab value="composition">
+                                        <Tabs.Tab value="catalog" {...CUELUME_TOGGLE}>
+                                            Catalogue
+                                        </Tabs.Tab>
+                                        <Tabs.Tab value="composition" {...CUELUME_TOGGLE}>
                                             Composition ({totalCards}/{DECK_MAX_CARDS})
                                         </Tabs.Tab>
                                     </Tabs.List>

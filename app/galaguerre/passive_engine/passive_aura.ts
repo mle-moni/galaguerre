@@ -197,7 +197,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
               hasRush: initial.hasRush,
               hasWindfury: initial.hasWindfury,
               isPoisonous: initial.isPoisonous,
-              hasStealth: initial.hasStealth,
+              hasStealth: initial.hasStealth && !minion.stealthConsumed,
               hasDivineShield: initial.hasDivineShield,
           }
         : {
@@ -206,7 +206,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
               hasRush: initial.hasRush || permanent.hasRush,
               hasWindfury: initial.hasWindfury || permanent.hasWindfury,
               isPoisonous: initial.isPoisonous || permanent.isPoisonous,
-              hasStealth: initial.hasStealth || permanent.hasStealth,
+              hasStealth: (initial.hasStealth || permanent.hasStealth) && !minion.stealthConsumed,
               hasDivineShield: initial.hasDivineShield || permanent.hasDivineShield,
           };
 
@@ -240,7 +240,6 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
                 if (boost.minionPowers.hasRush) keywords.hasRush = true;
                 if (boost.minionPowers.hasWindfury) keywords.hasWindfury = true;
                 if (boost.minionPowers.isPoisonous) keywords.isPoisonous = true;
-                if (boost.minionPowers.hasStealth) keywords.hasStealth = true;
                 if (boost.minionPowers.hasDivineShield) keywords.hasDivineShield = true;
             }
         }
@@ -251,7 +250,7 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
     card.minionPowers.hasRush = keywords.hasRush;
     card.minionPowers.hasWindfury = keywords.hasWindfury;
     card.minionPowers.isPoisonous = keywords.isPoisonous;
-    card.minionPowers.hasStealth = keywords.hasStealth;
+    card.minionPowers.hasStealth = keywords.hasStealth && !minion.stealthConsumed;
     card.minionPowers.hasDivineShield = keywords.hasDivineShield && !minion.divineShieldConsumed;
 
     card.effects = getMinionPowerEffects(card.minionPowers);

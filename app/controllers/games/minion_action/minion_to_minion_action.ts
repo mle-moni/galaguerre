@@ -5,6 +5,7 @@ import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     applyDamageToMinion,
     applyPoisonousToMinion,
+    popStealth,
 } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
 import { requireMinionIndex } from "../../../galaguerre/action_engine/find_minion_on_board.js";
 import {
@@ -81,6 +82,7 @@ export const minionToMinionAction = async ({
         const targetSpotOwner = owner;
 
         beginLoggedBeat(game, "ATTACK");
+        popStealth(attacker);
         withNarrativeRecorder((recorder) => {
             recorder.recordEffect({
                 type: "ATTACK_LUNGE",

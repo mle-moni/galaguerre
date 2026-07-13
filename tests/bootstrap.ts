@@ -1,3 +1,4 @@
+import { syncCards } from "#database/seed_helpers/sync_cards";
 import { assert } from "@japa/assert";
 import { apiClient } from "@japa/api-client";
 import app from "@adonisjs/core/services/app";
@@ -14,7 +15,10 @@ export const runnerHooks: Required<Pick<Config, "setup" | "teardown">> = {
 
 export const configureSuite: Config["configureSuite"] = (suite) => {
     if (["unit", "functional"].includes(suite.name)) {
-        suite.setup(() => testUtils.db().migrate());
+        suite.setup(async () => {
+            await testUtils.db().migrate();
+            await syncCards();
+        });
     }
 
     if (["browser", "e2e"].includes(suite.name)) {

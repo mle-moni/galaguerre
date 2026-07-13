@@ -158,6 +158,7 @@ export interface MinionState {
     auraSelfScaledBoost?: { attack: number; health: number; spellPower: number } | null;
     isSilenced?: boolean;
     divineShieldConsumed?: boolean;
+    stealthConsumed?: boolean;
 }
 
 export interface MinionPosition {

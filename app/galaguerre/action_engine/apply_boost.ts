@@ -48,6 +48,7 @@ export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): v
         if (boost.minionPowers.hasStealth) {
             card.minionPowers.hasStealth = true;
             minion.permanentKeywords.hasStealth = true;
+            minion.stealthConsumed = false;
         }
         if (boost.minionPowers.hasDivineShield) {
             card.minionPowers.hasDivineShield = true;

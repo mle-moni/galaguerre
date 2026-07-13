@@ -845,7 +845,7 @@ test.group("format_action_description", () => {
         );
     });
 
-    test("formats adjacent ally passive stealth aura", ({ assert }) => {
+    test("formats adjacent ally battlecry stealth", ({ assert }) => {
         const action = createCardActionSnapshot({
             type: "BOOST",
             isTargeted: false,
@@ -859,8 +859,8 @@ test.group("format_action_description", () => {
         });
 
         assert.equal(
-            formatActionDescription(action, "Passif"),
-            "Passif : Donne Discrétion à vos serviteurs adjacents.",
+            formatActionDescription(action, "Cri de guerre"),
+            "Cri de guerre : Donne Discrétion à vos serviteurs adjacents.",
         );
     });
 });

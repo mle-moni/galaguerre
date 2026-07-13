@@ -429,7 +429,7 @@ Format compact pour construction de deck par LLM.
 
 ### #161 La Phonebox
 - Coût: 2 | Type: MINION | Stats: 0/4 [Provocation] | Rareté: Rare | Famille: —
-- Provocation. Passif : Donne Discrétion à vos serviteurs adjacents.
+- Provocation. Cri de guerre : Donne Discrétion à vos serviteurs adjacents.
 
 ### #162 Princesse
 - Coût: 2 | Type: MINION | Stats: 1/1 [Provocation] | Rareté: Légendaire | Famille: Pets
@@ -493,4 +493,4 @@ Format compact pour construction de deck par LLM.
 
 ### #177 Jean
 - Coût: 4 | Type: MINION | Stats: 2/4 [Discrétion] | Rareté: Légendaire | Famille: Développeur, Sales
-- Discrétion. Chaque fois que ce monstre attaque, découvrez un monstre Développeur ou un monstre Sales. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.
+- Discrétion. Chaque fois que ce monstre attaque, découvrez un monstre. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.

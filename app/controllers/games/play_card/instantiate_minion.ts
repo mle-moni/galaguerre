@@ -18,6 +18,7 @@ export const instantiateMinion = (card: MinionCard, roundNumber: number): Minion
         lastActionAtRound: 0,
         attacksThisRound: 0,
         divineShieldConsumed: false,
+        stealthConsumed: false,
         initialKeywords: {
             hasTaunt: minionPowers.hasTaunt,
             hasCharge: minionPowers.hasCharge,

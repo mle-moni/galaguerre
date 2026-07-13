@@ -438,6 +438,7 @@ export const createMinionState = (
         lastActionAtRound: 0,
         attacksThisRound: 0,
         divineShieldConsumed: false,
+        stealthConsumed: false,
         initialKeywords: {
             hasTaunt: minionPowers.hasTaunt,
             hasCharge: minionPowers.hasCharge,

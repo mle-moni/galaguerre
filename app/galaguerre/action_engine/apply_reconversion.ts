@@ -90,6 +90,7 @@ export const applyReconversionWithTemplate = (
         minion.placedAtRound = game.data.currentRound;
     }
     minion.divineShieldConsumed = false;
+    minion.stealthConsumed = false;
     minion.initialKeywords = {
         hasTaunt: minionPowers.hasTaunt,
         hasCharge: minionPowers.hasCharge,

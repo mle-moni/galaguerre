@@ -1,6 +1,7 @@
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { recordAttack } from "../../../galaguerre/game_log/record_game_log.js";
 import { applyDamageToHero } from "../../../galaguerre/action_engine/apply_damage_to_hero.js";
+import { popStealth } from "../../../galaguerre/action_engine/apply_damage_to_minion.js";
 import {
     beginLoggedBeat,
     endCurrentBeat,
@@ -58,6 +59,7 @@ export const minionToHeroAction = async ({
         const targetSpotOwner = resolveSpotOwner(game, opponent);
 
         beginLoggedBeat(game, "ATTACK");
+        popStealth(attacker);
         withNarrativeRecorder((recorder) => {
             recorder.recordEffect({
                 type: "ATTACK_LUNGE",

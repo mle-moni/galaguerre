@@ -38,8 +38,10 @@ export const popDivineShield = (minion: MinionState): void => {
 
 export const popStealth = (minion: MinionState): void => {
     if (minion.originalCard.type !== "MINION") return;
+    if (minion.stealthConsumed) return;
     if (!minion.originalCard.minionPowers.hasStealth) return;
 
+    minion.stealthConsumed = true;
     minion.originalCard.minionPowers.hasStealth = false;
     minion.originalCard.effects = getMinionPowerEffects(minion.originalCard.minionPowers);
 };

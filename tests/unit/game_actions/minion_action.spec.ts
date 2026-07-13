@@ -1501,6 +1501,60 @@ test.group("minion combat", () => {
         assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
     });
 
+    test("stealth minion keeps stealth lost after killing a minion in combat", async ({
+        assert,
+    }) => {
+        const stealthCard = createMinionCard({
+            uuid: "stealth-minion",
+            attack: 5,
+            health: 4,
+            minionPowers: { hasStealth: true, hasCharge: true },
+            effects: ["Discrétion", "Charge"],
+        });
+        const victimCard = createMinionCard({
+            uuid: "victim-minion",
+            attack: 1,
+            health: 3,
+        });
+
+        const { game: gameAfterStealthAttack, errors } = await runMinionActionInMemory(
+            {
+                ...createGameData({
+                    currentRound: 2,
+                    playerTwo: {
+                        board: placeMinion(
+                            createGameData().playerTwo.board,
+                            0,
+                            createMinionState(stealthCard, { placedAtRound: 1 }),
+                        ),
+                    },
+                    playerOne: {
+                        board: placeMinion(
+                            createGameData().playerOne.board,
+                            0,
+                            createMinionState(victimCard),
+                        ),
+                    },
+                }),
+                state: "PLAYER_TWO_TURN",
+            },
+            "playerTwo",
+            {
+                minionId: "stealth-minion",
+                minionUuid: "victim-minion",
+                owner: "OPPONENT",
+            },
+        );
+
+        assert.isEmpty(errors);
+        const stealthMinion = gameAfterStealthAttack.data.playerTwo.board[0]!;
+        const stealthCardState = stealthMinion.originalCard as MinionCard;
+
+        assert.isTrue(stealthMinion.stealthConsumed);
+        assert.isFalse(stealthCardState.minionPowers!.hasStealth);
+        assert.notInclude(stealthCardState.effects, "Discrétion");
+    });
+
     test("requires attacking taunt minion after stealth-taunt loses stealth", async ({
         assert,
     }) => {
