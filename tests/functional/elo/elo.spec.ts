@@ -1,9 +1,13 @@
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
+import { computePlayerXpGain } from "#api_types/progression";
 import { terminateGame } from "#controllers/games/terminate_game";
 import Game from "#models/game";
+import User from "#models/user";
+import UserDailyQuest from "#models/user_daily_quest";
 import { applyGameResult, computeEloDeltas, DEFAULT_ELO, getWinnerUserId } from "#services/elo";
+import { getOrGenerateDailyQuests } from "#services/daily_quests/get_or_generate_daily_quests";
 import { createTestGame } from "#tests/helpers/game/game_factory";
 import { createGameData } from "#tests/helpers/game/fixtures";
 
@@ -221,5 +225,91 @@ test.group("elo", (group) => {
         assert.equal(playerOne.losses, 1);
         assert.exists(game.data.ratingResult);
         assert.exists(game.data.rewardResult);
+    });
+});
+
+test.group("game termination concurrency", (group) => {
+    let gameId: number | undefined;
+    let userIds: number[] = [];
+
+    group.each.teardown(async () => {
+        if (gameId !== undefined) {
+            await Game.query().where("id", gameId).delete();
+        }
+        if (userIds.length > 0) {
+            await User.query().whereIn("id", userIds).delete();
+        }
+    });
+    test("applies one match of progression across concurrent termination attempts", async ({
+        assert,
+    }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                playerOne: { health: 0 },
+                playerTwo: { health: 3 },
+            }),
+        );
+        gameId = game.id;
+        userIds = [playerOne.id, playerTwo.id];
+        await playerOne.refresh();
+        await playerTwo.refresh();
+        const winnerQuest = (await getOrGenerateDailyQuests(playerTwo.id)).find(
+            (quest) => quest.questType === "WIN_GAME",
+        )!;
+        const before = {
+            playerOne: {
+                elo: playerOne.elo,
+                goldCoins: playerOne.goldCoins,
+                xp: playerOne.xp,
+            },
+            playerTwo: {
+                elo: playerTwo.elo,
+                goldCoins: playerTwo.goldCoins,
+                xp: playerTwo.xp,
+            },
+            winnerQuestProgress: winnerQuest.progress,
+        };
+        const { winnerDelta, loserDelta } = computeEloDeltas(
+            before.playerTwo.elo,
+            before.playerOne.elo,
+        );
+
+        const gameInstances = await Promise.all(
+            Array.from({ length: 8 }, () => Game.findOrFail(game.id)),
+        );
+        await Promise.all(
+            gameInstances.map((gameInstance) =>
+                terminateGame(gameInstance, { skipSendUpdate: true }),
+            ),
+        );
+
+        const persistedGame = await Game.findOrFail(game.id);
+        await playerOne.refresh();
+        await playerTwo.refresh();
+        const persistedWinnerQuest = await UserDailyQuest.findOrFail(winnerQuest.id);
+
+        assert.equal(playerTwo.goldCoins, before.playerTwo.goldCoins + GOLD_COINS_PER_VICTORY);
+        assert.equal(playerOne.goldCoins, before.playerOne.goldCoins + GOLD_COINS_PER_DEFEAT);
+        assert.equal(
+            playerTwo.xp,
+            before.playerTwo.xp +
+                computePlayerXpGain({ isWinner: true, isDraw: false, isTraining: false }),
+        );
+        assert.equal(
+            playerOne.xp,
+            before.playerOne.xp +
+                computePlayerXpGain({ isWinner: false, isDraw: false, isTraining: false }),
+        );
+        assert.equal(playerTwo.wins, 1);
+        assert.equal(playerOne.losses, 1);
+        assert.equal(playerTwo.elo, before.playerTwo.elo + winnerDelta);
+        assert.equal(playerOne.elo, before.playerOne.elo + loserDelta);
+        assert.equal(persistedGame.data.ratingResult!.playerTwo.delta, winnerDelta);
+        assert.equal(persistedGame.data.ratingResult!.playerOne.delta, loserDelta);
+        assert.equal(persistedWinnerQuest.progress, before.winnerQuestProgress + 1);
+        assert.isTrue(persistedGame.data.dailyQuestProgressApplied);
+        assert.isTrue(persistedGame.data.postGameProgressionApplied);
     });
 });

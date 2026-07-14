@@ -1,5 +1,6 @@
 import type { DailyQuestParams } from "#api_types/daily_quests.types";
 import Card from "#models/card";
+import User from "#models/user";
 import UserDailyQuest from "#models/user_daily_quest";
 import {
     FIXED_WIN_GAME_QUEST,
@@ -17,10 +18,12 @@ import {
     parseParisCalendarDate,
 } from "#services/rewards/get_paris_calendar_date";
 import db from "@adonisjs/lucid/services/db";
+import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
+import type { DateTime } from "luxon";
 
 interface QuestInsertRow {
     userId: number;
-    questDate: ReturnType<typeof parseParisCalendarDate>;
+    questDate: DateTime;
     slot: number;
     questType: UserDailyQuest["questType"];
     targetValue: number;
@@ -48,6 +51,7 @@ const buildRandomQuestRow = async (
     slot: number,
     random: () => number,
     questType: UserDailyQuest["questType"],
+    client: TransactionClientContract,
     excludedQuestTypes: readonly UserDailyQuest["questType"][] = [],
 ): Promise<QuestInsertRow> => {
     const definition = getQuestDefinition(questType);
@@ -59,7 +63,7 @@ const buildRandomQuestRow = async (
     let params: DailyQuestParams | null = null;
 
     if (questType === "WIN_WITH_CARD") {
-        const collectibleCards = await Card.query().where("isCollectible", true);
+        const collectibleCards = await Card.query({ client }).where("isCollectible", true);
         if (collectibleCards.length > 0) {
             const card = pickRandomItem(collectibleCards, random);
             params = {
@@ -84,6 +88,7 @@ const buildRandomQuestRow = async (
                 slot,
                 random,
                 fallbackType,
+                client,
                 excludedQuestTypes,
             );
         }
@@ -105,6 +110,7 @@ const buildRandomQuestRow = async (
 const generateDailyQuestRows = async (
     userId: number,
     questDate: string,
+    client: TransactionClientContract,
 ): Promise<QuestInsertRow[]> => {
     const random = createSeededRandom(`${userId}:${questDate}:daily-quests`);
     const shuffledTypes = shuffleWithSeed(
@@ -117,6 +123,7 @@ const generateDailyQuestRows = async (
         1,
         random,
         shuffledTypes[0]!,
+        client,
     );
     const secondQuestType =
         shuffledTypes.find(
@@ -128,42 +135,53 @@ const generateDailyQuestRows = async (
         2,
         random,
         secondQuestType,
+        client,
         [firstRandomQuest.questType],
     );
 
     return [buildFixedWinGameQuest(userId, questDate), firstRandomQuest, secondRandomQuest];
 };
 
-export const getOrGenerateDailyQuests = async (userId: number): Promise<UserDailyQuest[]> => {
-    const questDate = getParisCalendarDate();
-    const existingQuests = await UserDailyQuest.query()
+const DAILY_QUEST_SLOT_COUNT = 3;
+
+const getOrGenerateDailyQuestsInTransaction = async (
+    userId: number,
+    questDate: string,
+    client: TransactionClientContract,
+): Promise<UserDailyQuest[]> => {
+    await User.query({ client }).where("id", userId).forUpdate().firstOrFail();
+
+    const existingQuests = await UserDailyQuest.query({ client })
         .where("userId", userId)
         .where("questDate", questDate)
-        .orderBy("slot", "asc");
+        .orderBy("slot", "asc")
+        .forUpdate();
 
-    if (existingQuests.length > 0) {
+    if (existingQuests.length === DAILY_QUEST_SLOT_COUNT) {
         return existingQuests;
     }
 
-    const rows = await generateDailyQuestRows(userId, questDate);
+    const existingSlots = new Set(existingQuests.map((quest) => quest.slot));
+    const generatedRows = await generateDailyQuestRows(userId, questDate, client);
 
-    return db.transaction(async (trx) => {
-        const lockedQuests = await UserDailyQuest.query({ client: trx })
-            .where("userId", userId)
-            .where("questDate", questDate)
-            .forUpdate();
-
-        if (lockedQuests.length > 0) {
-            return lockedQuests.sort((left, right) => left.slot - right.slot);
+    for (const row of generatedRows) {
+        if (!existingSlots.has(row.slot)) {
+            existingQuests.push(await UserDailyQuest.create(row, { client }));
         }
+    }
 
-        const createdQuests: UserDailyQuest[] = [];
+    return existingQuests.sort((left, right) => left.slot - right.slot);
+};
 
-        for (const row of rows) {
-            const quest = await UserDailyQuest.create(row, { client: trx });
-            createdQuests.push(quest);
-        }
+export const getOrGenerateDailyQuests = async (
+    userId: number,
+    client?: TransactionClientContract,
+): Promise<UserDailyQuest[]> => {
+    const questDate = getParisCalendarDate();
 
-        return createdQuests.sort((left, right) => left.slot - right.slot);
-    });
+    if (client) {
+        return getOrGenerateDailyQuestsInTransaction(userId, questDate, client);
+    }
+
+    return db.transaction((trx) => getOrGenerateDailyQuestsInTransaction(userId, questDate, trx));
 };

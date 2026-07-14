@@ -6,25 +6,18 @@ import { getWinnerUserId } from "#services/elo";
 import { gameQualifiesForRewards } from "#services/rewards/game_qualifies_for_rewards";
 import {
     hasXpBeenApplied,
-    loadPersistedGameData,
-    syncProgressionMarkersFromPersisted,
+    withGameProgressionLock,
 } from "#services/post_game/progression_idempotency";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
-import db from "@adonisjs/lucid/services/db";
+import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
 const EMPTY_XP: GameXpPlayerResult = { xp: 0 };
 
 const isHumanUserId = (userId: number): boolean => userId !== TRAINING_AI_USER_ID;
 
-export const applyGameXp = async (game: Game): Promise<void> => {
-    if (!(game instanceof Game)) return;
-
-    const persistedData = await loadPersistedGameData(game.id);
-    if (persistedData) {
-        syncProgressionMarkersFromPersisted(game, persistedData);
-        if (hasXpBeenApplied(persistedData)) {
-            return;
-        }
+const applyGameXpLocked = async (game: Game, trx: TransactionClientContract): Promise<void> => {
+    if (hasXpBeenApplied(game.data)) {
+        return;
     }
 
     const winnerUserId = getWinnerUserId(game);
@@ -45,52 +38,63 @@ export const applyGameXp = async (game: Game): Promise<void> => {
                 playerTwo: EMPTY_XP,
             },
         };
+        game.useTransaction(trx);
         await game.save();
         return;
     }
 
-    await db.transaction(async (trx) => {
-        const users = await User.query({ client: trx }).whereIn("id", humanUserIds).forUpdate();
+    const users = await User.query({ client: trx })
+        .whereIn("id", humanUserIds)
+        .orderBy("id", "asc")
+        .forUpdate();
+    const usersById = new Map(users.map((user) => [user.id, user]));
 
-        const usersById = new Map(users.map((user) => [user.id, user]));
+    const playerOneXp = computePlayerXpGain({
+        isWinner: !isDraw && winnerUserId === game.data.playerOne.userId,
+        isDraw,
+        isTraining,
+    });
 
-        const playerOneXp = computePlayerXpGain({
-            isWinner: !isDraw && winnerUserId === game.data.playerOne.userId,
-            isDraw,
-            isTraining,
-        });
+    const playerTwoXp = computePlayerXpGain({
+        isWinner: !isDraw && winnerUserId === game.data.playerTwo.userId,
+        isDraw,
+        isTraining,
+    });
 
-        const playerTwoXp = computePlayerXpGain({
-            isWinner: !isDraw && winnerUserId === game.data.playerTwo.userId,
-            isDraw,
-            isTraining,
-        });
+    for (const userId of humanUserIds) {
+        const user = usersById.get(userId);
+        if (!user) continue;
 
-        for (const userId of humanUserIds) {
-            const user = usersById.get(userId);
-            if (!user) continue;
+        const xpGain = userId === game.data.playerOne.userId ? playerOneXp : playerTwoXp;
 
-            const xpGain = userId === game.data.playerOne.userId ? playerOneXp : playerTwoXp;
-
-            if (xpGain > 0) {
-                user.xp += xpGain;
-            }
-
-            user.useTransaction(trx);
-            await user.save();
+        if (xpGain > 0) {
+            user.xp += xpGain;
         }
 
-        const xpResult: GameXpResult = {
-            playerOne: isHumanUserId(game.data.playerOne.userId) ? { xp: playerOneXp } : EMPTY_XP,
-            playerTwo: isHumanUserId(game.data.playerTwo.userId) ? { xp: playerTwoXp } : EMPTY_XP,
-        };
+        user.useTransaction(trx);
+        await user.save();
+    }
 
-        game.data = {
-            ...game.data,
-            xpResult,
-        };
+    const xpResult: GameXpResult = {
+        playerOne: isHumanUserId(game.data.playerOne.userId) ? { xp: playerOneXp } : EMPTY_XP,
+        playerTwo: isHumanUserId(game.data.playerTwo.userId) ? { xp: playerTwoXp } : EMPTY_XP,
+    };
 
-        game.useTransaction(trx);
-        await game.save();
-    });
+    game.data = {
+        ...game.data,
+        xpResult,
+    };
+
+    game.useTransaction(trx);
+    await game.save();
+};
+
+export const applyGameXp = async (game: Game, trx?: TransactionClientContract): Promise<void> => {
+    if (!(game instanceof Game)) return;
+
+    if (trx) {
+        return applyGameXpLocked(game, trx);
+    }
+
+    return withGameProgressionLock(game, applyGameXpLocked);
 };

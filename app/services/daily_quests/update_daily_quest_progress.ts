@@ -6,11 +6,12 @@ import { getWinnerUserId } from "#services/elo";
 import { gameQualifiesForRewards } from "#services/rewards/game_qualifies_for_rewards";
 import {
     hasDailyQuestsBeenApplied,
-    loadPersistedGameData,
     syncProgressionMarkersFromPersisted,
 } from "#services/post_game/progression_idempotency";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { DateTime } from "luxon";
+import db from "@adonisjs/lucid/services/db";
+import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
 const isHumanUserId = (userId: number): boolean => userId !== TRAINING_AI_USER_ID;
 
@@ -91,23 +92,35 @@ const updateQuestsForPlayer = (
     }
 };
 
-const saveUpdatedQuests = async (quests: UserDailyQuest[]): Promise<void> => {
+const saveUpdatedQuests = async (
+    quests: UserDailyQuest[],
+    client: TransactionClientContract,
+): Promise<void> => {
     for (const quest of quests) {
         if (quest.$isDirty) {
+            quest.useTransaction(client);
             await quest.save();
         }
     }
 };
 
-export const updateDailyQuestProgressForGame = async (game: Game): Promise<void> => {
+export const updateDailyQuestProgressForGame = async (
+    game: Game,
+    client?: TransactionClientContract,
+): Promise<void> => {
     if (!(game instanceof Game)) return;
 
-    const persistedData = await loadPersistedGameData(game.id);
-    if (persistedData) {
-        syncProgressionMarkersFromPersisted(game, persistedData);
-        if (hasDailyQuestsBeenApplied(persistedData)) {
-            return;
-        }
+    if (!client) {
+        return db.transaction((trx) => updateDailyQuestProgressForGame(game, trx));
+    }
+
+    const persistedGame = await Game.query({ client })
+        .where("id", game.id)
+        .forUpdate()
+        .firstOrFail();
+    syncProgressionMarkersFromPersisted(game, persistedGame.data);
+    if (hasDailyQuestsBeenApplied(persistedGame.data)) {
+        return;
     }
 
     if (!gameQualifiesForRewards(game)) {
@@ -115,38 +128,47 @@ export const updateDailyQuestProgressForGame = async (game: Game): Promise<void>
             ...game.data,
             dailyQuestProgressApplied: true,
         };
+        game.useTransaction(client);
         await game.save();
         return;
     }
 
     const winnerUserId = getWinnerUserId(game);
-    const humanPlayers = [game.data.playerOne, game.data.playerTwo].filter((player) =>
-        isHumanUserId(player.userId),
-    );
+    const humanPlayers = [game.data.playerOne, game.data.playerTwo]
+        .filter((player) => isHumanUserId(player.userId))
+        .sort((left, right) => left.userId - right.userId);
 
     if (humanPlayers.length === 0) return;
 
     for (const player of humanPlayers) {
-        const quests = await getOrGenerateDailyQuests(player.userId);
+        const quests = await getOrGenerateDailyQuests(player.userId, client);
         const activeQuests = quests.filter((quest) => !quest.claimedAt);
         const isWinner = winnerUserId === player.userId;
 
         updateQuestsForPlayer(activeQuests, player, isWinner, game.data.actionLog);
-        await saveUpdatedQuests(activeQuests);
+        await saveUpdatedQuests(activeQuests, client);
     }
 
     game.data = {
         ...game.data,
         dailyQuestProgressApplied: true,
     };
+    game.useTransaction(client);
     await game.save();
 };
 
 export const updateDailyQuestProgressForPackOpen = async (
     userId: number,
     openedCount = 1,
+    client?: TransactionClientContract,
 ): Promise<void> => {
-    const quests = await getOrGenerateDailyQuests(userId);
+    if (!client) {
+        return db.transaction((trx) =>
+            updateDailyQuestProgressForPackOpen(userId, openedCount, trx),
+        );
+    }
+
+    const quests = await getOrGenerateDailyQuests(userId, client);
     const activeQuests = quests.filter(
         (quest) => !quest.claimedAt && quest.questType === "OPEN_PACK",
     );
@@ -155,5 +177,5 @@ export const updateDailyQuestProgressForPackOpen = async (
         applyQuestProgress(quest, openedCount);
     }
 
-    await saveUpdatedQuests(activeQuests);
+    await saveUpdatedQuests(activeQuests, client);
 };

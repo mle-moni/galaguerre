@@ -1,10 +1,19 @@
-import { GOLD_COINS_PER_DUPLICATE_COMMON_SELL } from "#api_types/collection.types";
+import {
+    COLLECTION_MIN_CARDS,
+    GOLD_COINS_PER_DUPLICATE_COMMON_SELL,
+} from "#api_types/collection.types";
+import { getGoldCoinsPerDuplicateSell } from "#api_types/card_rarity.types";
 import { syncCards } from "#database/seed_helpers/sync_cards";
 import Card from "#models/card";
 import User from "#models/user";
 import UserCard from "#models/user_card";
 import { grantStarterCollectionForUser } from "#services/collection/grant_starter_collection_for_user";
-import { sellCardWithGoldCoins } from "#services/collection/sell_card_with_gold_coins";
+import { getTotalCollectionCardCount } from "#services/collection/get_user_collection_counts";
+import {
+    CollectionTooSmallError,
+    sellCardWithGoldCoins,
+} from "#services/collection/sell_card_with_gold_coins";
+import db from "@adonisjs/lucid/services/db";
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 
@@ -124,5 +133,112 @@ test.group("sell card with gold coins", (group) => {
             () => sellCardWithGoldCoins(user.id, unownedCard.id),
             /ne possédez pas cette carte/,
         );
+    });
+});
+
+test.group("sell card with gold coins concurrency", () => {
+    test("keeps the minimum collection size under concurrent distinct-card sales", async ({
+        assert,
+    }) => {
+        await syncCards();
+
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        let userId: number | undefined;
+        const userLockReleased = Promise.withResolvers<void>();
+        const userLockAcquired = Promise.withResolvers<void>();
+        let userLockTransaction: Promise<void> | undefined;
+
+        try {
+            const user = await User.create({
+                email: `sell-concurrent-${unique}@test.fr`,
+                pseudo: "sell-concurrent",
+                password: "test",
+                goldCoins: 0,
+            });
+            userId = user.id;
+
+            await grantStarterCollectionForUser(user.id);
+
+            const starterEntries = await UserCard.query().where("userId", user.id);
+            assert.isAtLeast(starterEntries.length, 4);
+
+            const extraCards = await Card.query()
+                .where("isCollectible", true)
+                .whereNotIn(
+                    "id",
+                    starterEntries.map((entry) => entry.cardId),
+                )
+                .limit(4);
+            assert.lengthOf(extraCards, 4);
+
+            await Promise.all(
+                extraCards.map((card) =>
+                    UserCard.create({ userId: user.id, cardId: card.id, count: 1 }),
+                ),
+            );
+
+            const candidateCardIds = [
+                ...starterEntries.slice(0, 4).map((entry) => entry.cardId),
+                ...extraCards.map((card) => card.id),
+            ];
+            assert.equal(new Set(candidateCardIds).size, candidateCardIds.length);
+
+            const candidateCards = await Card.query().whereIn("id", candidateCardIds);
+            assert.lengthOf(candidateCards, candidateCardIds.length);
+            const cardsById = new Map(candidateCards.map((card) => [card.id, card]));
+
+            assert.equal(await getTotalCollectionCardCount(user.id), COLLECTION_MIN_CARDS + 4);
+
+            userLockTransaction = db.transaction(async (trx) => {
+                await User.query({ client: trx }).where("id", user.id).forUpdate().firstOrFail();
+
+                userLockAcquired.resolve();
+                await userLockReleased.promise;
+            });
+            await userLockAcquired.promise;
+
+            const sales = Promise.allSettled(
+                candidateCardIds.map((cardId) => sellCardWithGoldCoins(user.id, cardId)),
+            );
+
+            const waitForConcurrentTransactions = Promise.withResolvers<void>();
+            setTimeout(waitForConcurrentTransactions.resolve, 100);
+            await waitForConcurrentTransactions.promise;
+
+            userLockReleased.resolve();
+            await userLockTransaction;
+
+            const results = await sales;
+            const successfulCardIds = results.flatMap((result, index) =>
+                result.status === "fulfilled" ? [candidateCardIds[index]] : [],
+            );
+            const rejectedResults = results.filter(
+                (result): result is PromiseRejectedResult => result.status === "rejected",
+            );
+
+            assert.lengthOf(successfulCardIds, 4);
+            assert.lengthOf(rejectedResults, 4);
+            for (const result of rejectedResults) {
+                assert.instanceOf(result.reason, CollectionTooSmallError);
+            }
+
+            const expectedGoldCoins = successfulCardIds.reduce((total, cardId) => {
+                const card = cardsById.get(cardId);
+                if (!card) throw new Error(`Missing candidate card ${cardId}`);
+
+                return total + getGoldCoinsPerDuplicateSell(card.rarity);
+            }, 0);
+
+            assert.equal(await getTotalCollectionCardCount(user.id), COLLECTION_MIN_CARDS);
+            assert.equal((await User.findOrFail(user.id)).goldCoins, expectedGoldCoins);
+        } finally {
+            userLockReleased.resolve();
+            if (userLockTransaction) await userLockTransaction;
+
+            if (userId) {
+                await UserCard.query().where("userId", userId).delete();
+                await User.query().where("id", userId).delete();
+            }
+        }
     });
 });

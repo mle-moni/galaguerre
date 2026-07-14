@@ -29,6 +29,11 @@ export const sellCardWithGoldCoins = async (
     cardId: number,
 ): Promise<{ goldCoins: number; entry: ApiCollectionEntry | null }> => {
     return db.transaction(async (trx) => {
+        const user = await User.query({ client: trx })
+            .where("id", userId)
+            .forUpdate()
+            .firstOrFail();
+
         const userCard = await UserCard.query({ client: trx })
             .where({ userId, cardId })
             .forUpdate()
@@ -45,11 +50,6 @@ export const sellCardWithGoldCoins = async (
 
         const card = await Card.query({ client: trx }).where("id", cardId).firstOrFail();
         const goldEarned = getGoldCoinsPerDuplicateSell(card.rarity);
-
-        const user = await User.query({ client: trx })
-            .where("id", userId)
-            .forUpdate()
-            .firstOrFail();
 
         user.goldCoins += goldEarned;
         user.useTransaction(trx);

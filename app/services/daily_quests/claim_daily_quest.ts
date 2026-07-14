@@ -34,6 +34,11 @@ export const claimDailyQuest = async (
     questId: number,
 ): Promise<ApiClaimDailyQuestResponse> => {
     return db.transaction(async (trx) => {
+        const user = await User.query({ client: trx })
+            .where("id", userId)
+            .forUpdate()
+            .firstOrFail();
+
         const quest = await UserDailyQuest.query({ client: trx })
             .where("id", questId)
             .where("userId", userId)
@@ -52,11 +57,6 @@ export const claimDailyQuest = async (
         if (quest.claimedAt) {
             throw new DailyQuestAlreadyClaimedError();
         }
-
-        const user = await User.query({ client: trx })
-            .where("id", userId)
-            .forUpdate()
-            .firstOrFail();
 
         if (quest.rewardType === "story_points") {
             user.goldCoins += quest.rewardAmount;

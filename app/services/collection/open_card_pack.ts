@@ -52,11 +52,11 @@ export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> =>
         pack.useTransaction(trx);
         await pack.save();
 
+        await updateDailyQuestProgressForPackOpen(userId, 1, trx);
+
         const cardsById = new Map(collectibleCards.map((card) => [card.id, card]));
         return drawnCardIds.map((cardId) => serializeCatalogCard(cardsById.get(cardId)!));
     });
-
-    await updateDailyQuestProgressForPackOpen(userId, 1);
 
     return openedCards;
 };
