@@ -1,4 +1,3 @@
-import type { ActionTarget, SpotOwner } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
 import {
     canWeaponAttackBoardIndex,
@@ -6,9 +5,10 @@ import {
     opponentBoardHasAttackableTaunt,
     weaponHasAnyAttackTarget,
 } from "~/helpers/combat_target_validation";
-import { canWeaponAttack } from "~/helpers/weapon_combat";
-import { getWeaponCannotAttackHero } from "#api_types/weapon_combat";
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
+import { canWeaponAttack } from "~/helpers/weapon_combat";
+import type { ActionTarget, SpotOwner } from "#api_types/game.types";
+import { getWeaponCannotAttackHero } from "#api_types/weapon_combat";
 import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
 import type { TargetValidity } from "./TargetSelectionStore.js";
@@ -22,6 +22,10 @@ export class WeaponDragStore {
 
     startAttack() {
         if (!this.gameStore.canPlanCombatAction) return;
+
+        this.gameStore.targetSelectionStore.disarm();
+        this.gameStore.cardDragStore.clearMinionPlayHint();
+        this.gameStore.minionDragStore.cancelAttack();
         this.isAttacking = true;
     }
 

@@ -1,6 +1,6 @@
-import type { PlayerCard } from "#api_types/game.types";
 import { type MouseEvent, type ReactNode, useState } from "react";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
+import type { MinionState, PlayerCard } from "#api_types/game.types";
 import { CardPreviewSheet } from "./card_preview_sheet.jsx";
 import "~/style/card_sizing.css";
 
@@ -12,6 +12,7 @@ interface CardMobilePreviewButtonProps {
     showDetailButton?: boolean;
     attack?: number;
     health?: number;
+    minionState?: MinionState;
 }
 
 export const CardMobilePreviewButton = ({
@@ -22,6 +23,7 @@ export const CardMobilePreviewButton = ({
     showDetailButton = false,
     attack,
     health,
+    minionState,
 }: CardMobilePreviewButtonProps) => {
     const isMobilePortrait = useIsMobilePortrait();
     const [sheetOpened, setSheetOpened] = useState(false);
@@ -56,6 +58,7 @@ export const CardMobilePreviewButton = ({
                 isSilenced={isSilenced}
                 attack={attack}
                 health={health}
+                minionState={minionState}
             />
         </>
     );

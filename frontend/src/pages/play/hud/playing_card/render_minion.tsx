@@ -1,13 +1,14 @@
-import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 import { observer } from "mobx-react-lite";
 import type { CSSProperties, MouseEvent, PointerEvent, ReactNode } from "react";
 import { BoardMinionToken } from "~/components/cards/board_minion_token";
-import { findAuthoritativeMinion } from "~/helpers/combat_target_validation";
-import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
-import { useGameContext } from "~/hooks/use_game_state";
-import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { CardHoverPreview } from "~/components/cards/card_hover_preview";
 import { CardMobilePreviewButton } from "~/components/cards/card_mobile_preview_button";
+import { findAuthoritativeMinion } from "~/helpers/combat_target_validation";
+import { getMinionAttackStatus, getMinionRemainingAttacks } from "~/helpers/minion_combat";
+import { useDragClickSuppression } from "~/hooks/use_drag_click_suppression";
+import { useGameContext } from "~/hooks/use_game_state";
+import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
+import type { MinionCard, MinionState, SpotOwner } from "#api_types/game.types";
 
 interface MinionToRenderProps {
     state: MinionState;
@@ -23,6 +24,7 @@ const asMinionCard = (state: MinionState): MinionCard | null => {
 export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRenderProps) => {
     const { store } = useGameContext();
     const isMobilePortrait = useIsMobilePortrait();
+    const dragClickSuppression = useDragClickSuppression();
     const card = asMinionCard(state);
     if (!card) return null;
 
@@ -45,17 +47,12 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
         ? getMinionRemainingAttacks(combatState, currentRound)
         : undefined;
 
-    const disarmOtherModes = () => {
-        store.targetSelectionStore.disarm();
-        store.cardDragStore.clearMinionPlayHint();
-        store.weaponDragStore.cancelAttack();
-    };
-
     const handleAttackPointerDown = (event: PointerEvent<HTMLDivElement>) => {
         if (!canAttack) return;
 
         event.preventDefault();
         event.currentTarget.setPointerCapture(event.pointerId);
+        dragClickSuppression.begin(event);
 
         const rect = event.currentTarget.getBoundingClientRect();
         const origin = {
@@ -63,12 +60,30 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
             y: rect.top + rect.height / 2,
         };
 
-        disarmOtherModes();
         store.minionDragStore.startAttack(state);
         store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
 
+    const handleAttackPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+        if (!isMobilePortrait) return;
+        dragClickSuppression.track(event);
+    };
+
+    const handleAttackPointerUp = () => {
+        dragClickSuppression.finish();
+    };
+
+    const handleAttackPointerCancel = () => {
+        dragClickSuppression.reset();
+        store.minionDragStore.cancelAttack();
+    };
+
     const handleAttackClick = (event: MouseEvent<HTMLDivElement>) => {
+        if (dragClickSuppression.consumeClickSuppression()) {
+            event.stopPropagation();
+            return;
+        }
+
         if (!canAttack) return;
 
         event.stopPropagation();
@@ -78,7 +93,6 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
             return;
         }
 
-        disarmOtherModes();
         store.minionDragStore.startAttack(state);
     };
 
@@ -88,10 +102,8 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
                 <CardMobilePreviewButton
                     card={card}
                     spellPower={store.me.spellPower}
-                    isSilenced={state.isSilenced === true}
                     showDetailButton
-                    attack={state.attack}
-                    health={state.health}
+                    minionState={state}
                 >
                     {content}
                 </CardMobilePreviewButton>
@@ -122,6 +134,9 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
             remainingAttacks={remainingAttacks}
             wrapper={wrapper}
             onPointerDown={canStartAttack ? handleAttackPointerDown : undefined}
+            onPointerMove={canStartAttack ? handleAttackPointerMove : undefined}
+            onPointerUp={canStartAttack ? handleAttackPointerUp : undefined}
+            onPointerCancel={canStartAttack ? handleAttackPointerCancel : undefined}
             onClick={isMobilePortrait && canStartAttack ? handleAttackClick : undefined}
         />
     );

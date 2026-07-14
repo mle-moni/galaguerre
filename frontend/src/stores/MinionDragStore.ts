@@ -1,4 +1,3 @@
-import type { ActionTarget, MinionState, SpotOwner } from "#api_types/game.types";
 import { makeAutoObservable } from "mobx";
 import {
     canMinionAttackBoardIndex,
@@ -8,9 +7,10 @@ import {
 } from "~/helpers/combat_target_validation";
 import { canMinionAttack } from "~/helpers/minion_combat";
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
+import type { ActionTarget, MinionState, SpotOwner } from "#api_types/game.types";
+import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 import type { GameStore } from "./GameStore.js";
 import type { TargetValidity } from "./TargetSelectionStore.js";
-import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
 
 export class MinionDragStore {
     public attackingMinion: MinionState | null = null;
@@ -26,6 +26,10 @@ export class MinionDragStore {
     startAttack(minion: MinionState) {
         if (!this.gameStore.canPlanCombatAction) return;
         if (this.gameStore.combatActionQueue.isMinionReserved(minion.uuid)) return;
+
+        this.gameStore.targetSelectionStore.disarm();
+        this.gameStore.cardDragStore.clearMinionPlayHint();
+        this.gameStore.weaponDragStore.cancelAttack();
         this.attackingMinion = minion;
     }
 

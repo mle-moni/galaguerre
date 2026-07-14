@@ -1,8 +1,8 @@
-import type { MinionCard } from "#api_types/game.types";
 import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
-import { getMinionCardMaxAttacks, type MinionAttackStatus } from "~/helpers/minion_combat";
+import { type MinionAttackStatus, getMinionCardMaxAttacks } from "~/helpers/minion_combat";
+import type { MinionCard } from "#api_types/game.types";
 import { BoardMinionEffectIcons } from "./board_minion_effect_icons.jsx";
 import "./board_minion_token.css";
 
@@ -15,6 +15,9 @@ interface BoardMinionTokenProps {
     attackStatus?: MinionAttackStatus;
     remainingAttacks?: number;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
+    onPointerMove?: (event: React.PointerEvent<HTMLDivElement>) => void;
+    onPointerUp?: (event: React.PointerEvent<HTMLDivElement>) => void;
+    onPointerCancel?: (event: React.PointerEvent<HTMLDivElement>) => void;
     onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
 }
@@ -28,6 +31,9 @@ export const BoardMinionToken = ({
     attackStatus,
     remainingAttacks,
     onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel,
     onClick,
     wrapper = (content) => content,
 }: BoardMinionTokenProps) => {
@@ -51,6 +57,9 @@ export const BoardMinionToken = ({
                 className,
             )}
             onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
             onClick={onClick}
         >
             <BoardMinionEffectIcons card={card} />

@@ -4,22 +4,48 @@ const isSpotOwner = (value: string): value is SpotOwner => {
     return value === "PLAYER" || value === "OPPONENT";
 };
 
-export const resolveTargetFromPoint = (x: number, y: number): ActionTarget | null => {
-    const element = document.elementFromPoint(x, y);
-    if (!element) return null;
+const MOBILE_TARGET_HIT_SLOP_PX = 12;
 
-    const zone = element.closest("[data-target-zone]");
-    if (!zone) return null;
-
+const getActionTargetFromZone = (zone: Element): ActionTarget | null => {
     const ownerAttr = zone.getAttribute("data-spot-owner");
     if (!ownerAttr || !isSpotOwner(ownerAttr)) return null;
 
     const minionUuidAttr = zone.getAttribute("data-minion-uuid");
-    if (minionUuidAttr === "hero" || minionUuidAttr === null) {
-        return { minionUuid: null, owner: ownerAttr };
+    return {
+        minionUuid: minionUuidAttr === "hero" || minionUuidAttr === null ? null : minionUuidAttr,
+        owner: ownerAttr,
+    };
+};
+
+const getDistanceFromRect = (x: number, y: number, rect: DOMRect): number => {
+    const horizontalDistance = Math.max(rect.left - x, 0, x - rect.right);
+    const verticalDistance = Math.max(rect.top - y, 0, y - rect.bottom);
+    return Math.hypot(horizontalDistance, verticalDistance);
+};
+
+export const resolveTargetFromPoint = (x: number, y: number): ActionTarget | null => {
+    const element = document.elementFromPoint(x, y);
+    const exactZone = element?.closest("[data-target-zone]");
+    if (exactZone) return getActionTargetFromZone(exactZone);
+
+    let nearestTarget: ActionTarget | null = null;
+    let nearestDistance = MOBILE_TARGET_HIT_SLOP_PX + 1;
+
+    for (const zone of document.querySelectorAll<HTMLElement>("[data-target-zone]")) {
+        const rect = zone.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) continue;
+
+        const distance = getDistanceFromRect(x, y, rect);
+        if (distance > MOBILE_TARGET_HIT_SLOP_PX || distance >= nearestDistance) continue;
+
+        const target = getActionTargetFromZone(zone);
+        if (!target) continue;
+
+        nearestDistance = distance;
+        nearestTarget = target;
     }
 
-    return { minionUuid: minionUuidAttr, owner: ownerAttr };
+    return nearestTarget;
 };
 
 export const getElementCenter = (element: Element): { x: number; y: number } => {
@@ -57,7 +83,7 @@ export const resolveBoardInsertIndexFromPoint = (
     }
 
     let bestIndex: number | null = null;
-    let bestDistance = Infinity;
+    let bestDistance = Number.POSITIVE_INFINITY;
 
     for (const zone of zones) {
         const rect = zone.getBoundingClientRect();

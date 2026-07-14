@@ -14,10 +14,11 @@ import { notifyError } from "~/services/toasts";
 import { countBoardMinionsOnBoard, playerHasBoardSpace } from "#api_types/board";
 import type { GamePlayer, PlayerCard, SpellCard } from "#api_types/game.types";
 import {
+    type MobileHandGestureIntent,
     getMobileHandCardRatio,
-    hasBrowsedMobileHand,
     hasLiftedMobileCard,
     isPointInsideMobileBounds,
+    resolveMobileHandGestureIntent,
     resolveMobileHandIndex,
 } from "#shared/mobile_hand_gesture";
 import { PlayingCard } from "../playing_card/playing_card.jsx";
@@ -33,8 +34,7 @@ interface ActiveGesture {
     pointerId: number;
     origin: Point;
     selectedIndex: number;
-    initialIndex: number;
-    hasBrowsed: boolean;
+    intent: MobileHandGestureIntent;
     mode: LiftMode;
 }
 
@@ -168,8 +168,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
             pointerId: event.pointerId,
             origin: { x: event.clientX, y: event.clientY },
             selectedIndex: index,
-            initialIndex: index,
-            hasBrowsed: false,
+            intent: "UNDECIDED",
             mode: "NONE",
         };
         suppressClickRef.current = false;
@@ -186,22 +185,26 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         const point = { x: event.clientX, y: event.clientY };
 
         if (gesture.mode === "NONE") {
-            const handRect = event.currentTarget.getBoundingClientRect();
-            const firstCard = event.currentTarget.querySelector<HTMLElement>("[data-playing-card]");
-            const cardWidth = firstCard?.getBoundingClientRect().width ?? 1;
-            const nextIndex = resolveMobileHandIndex({
-                clientX: event.clientX,
-                handLeft: handRect.left,
-                handWidth: handRect.width,
-                cardWidth,
-                cardCount: player.hand.length,
-            });
+            gesture.intent = resolveMobileHandGestureIntent(gesture.origin, point, gesture.intent);
 
-            gesture.selectedIndex = nextIndex;
-            gesture.hasBrowsed ||= hasBrowsedMobileHand(gesture.origin, point);
-            setSelectedIndex(nextIndex);
+            if (gesture.intent === "BROWSE") {
+                const handRect = event.currentTarget.getBoundingClientRect();
+                const firstCard =
+                    event.currentTarget.querySelector<HTMLElement>("[data-playing-card]");
+                const cardWidth = firstCard?.getBoundingClientRect().width ?? 1;
+                const nextIndex = resolveMobileHandIndex({
+                    clientX: event.clientX,
+                    handLeft: handRect.left,
+                    handWidth: handRect.width,
+                    cardWidth,
+                    cardCount: player.hand.length,
+                });
 
-            if (hasLiftedMobileCard(gesture.origin, point)) {
+                gesture.selectedIndex = nextIndex;
+                setSelectedIndex(nextIndex);
+            }
+
+            if (gesture.intent === "PLAY" && hasLiftedMobileCard(gesture.origin, point)) {
                 const card = getCardAtGestureIndex(gesture);
                 if (card) beginLift(gesture, card, point);
             }
@@ -247,8 +250,10 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
 
     const resetGestureVisuals = () => {
         gestureRef.current = null;
+        setSelectedIndex(null);
         setDragPoint(null);
         setIsLifted(false);
+        setIsInCancelZone(false);
     };
 
     const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -258,6 +263,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
         }
+        suppressClickRef.current = true;
 
         const card = getCardAtGestureIndex(gesture);
         const point = { x: event.clientX, y: event.clientY };
@@ -268,23 +274,17 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                 store.cardDragStore.setCardDragged(null);
                 store.cardDragStore.leaveMinionDropZone();
             }
-            suppressClickRef.current = true;
             resetGestureVisuals();
             return;
         }
 
         if (card && gesture.mode === "MINION") {
             finishMinionDrop(card, point);
-            setSelectedIndex(null);
         } else if (card?.type === "SPELL" && gesture.mode === "TARGETED_SPELL") {
             finishTargetedSpell(card, point);
-            setSelectedIndex(null);
         } else if (card && card.type !== "MINION" && gesture.mode === "IMMEDIATE") {
             store.targetSelectionStore.armCard(card);
             store.targetSelectionStore.confirmArmedPlay();
-            setSelectedIndex(null);
-        } else if (gesture.hasBrowsed || gesture.selectedIndex !== gesture.initialIndex) {
-            suppressClickRef.current = true;
         }
 
         resetGestureVisuals();
@@ -349,6 +349,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerCancel}
+                onContextMenu={(event) => event.preventDefault()}
                 onClickCapture={(event) => {
                     if (!suppressClickRef.current) return;
                     event.preventDefault();

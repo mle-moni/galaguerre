@@ -84,6 +84,11 @@
 	padding: 0 0.2rem;
 }
 
+.mobile-bar__weapon-slot--equipped {
+	flex: 0 0 auto;
+	min-width: 5.15rem;
+}
+
 .mobile-bar__pseudo {
 	width: 100%;
 	min-width: 0;
@@ -337,6 +342,7 @@
 
 .mobile-bar__hero-target--weapon-draggable {
 	cursor: grab;
+	touch-action: none;
 }
 
 .mobile-bar__hero-target--interactive {
@@ -475,6 +481,13 @@
 	overflow: hidden;
 	touch-action: none;
 	z-index: 10;
+}
+
+.card-hand--mobile .playing-card-face__image-area img {
+	pointer-events: none;
+	-webkit-touch-callout: none;
+	-webkit-user-drag: none;
+	user-select: none;
 }
 
 .mobile-hand {

@@ -16,6 +16,7 @@ mkdirSync(OUTPUT_DIR, { recursive: true });
 const browser = await chromium.launch({
     headless: true,
     executablePath: "/usr/bin/chromium",
+    args: ["--disable-gpu"],
 });
 const context = await browser.newContext({
     viewport: VIEWPORT,
@@ -155,15 +156,19 @@ const ensureGameReady = async () => {
     }
 };
 
-const resetFixture = async ({ mana = 10 } = {}) => {
-    execFileSync(
-        process.execPath,
-        [resolve(ROOT, "ace.js"), "dev:prepare-mobile-hand", TEST_EMAIL, `--mana=${mana}`],
-        {
-            cwd: ROOT,
-            stdio: "ignore",
-        },
-    );
+const resetFixture = async ({ mana = 10, combat = false } = {}) => {
+    const commandArguments = [
+        resolve(ROOT, "ace.js"),
+        "dev:prepare-mobile-hand",
+        TEST_EMAIL,
+        `--mana=${mana}`,
+    ];
+    if (combat) commandArguments.push("--combat");
+
+    execFileSync(process.execPath, commandArguments, {
+        cwd: ROOT,
+        stdio: "ignore",
+    });
     await page.reload({ waitUntil: "networkidle" });
     await page.locator('[data-mobile-hand-count="10"]').waitFor();
     assert.equal(await page.locator("[data-hand-card-index]").count(), 10);
@@ -184,6 +189,21 @@ const getHandGeometry = async () => {
 
 const cardCenterX = (handBox, cardWidth, index, cardCount = 10) =>
     handBox.x + cardWidth / 2 + ((handBox.width - cardWidth) * index) / (cardCount - 1);
+
+const pressCardAtIndex = async (index) => {
+    const card = page.locator(`[data-hand-card-index="${index}"]`);
+    const cardBox = await card.boundingBox();
+    assert(cardBox, `Card index ${index} must be visible`);
+
+    const start = {
+        x: cardBox.x + Math.min(12, cardBox.width / 2),
+        y: cardBox.y + Math.min(52, cardBox.height / 2),
+    };
+    await page.mouse.move(start.x, start.y);
+    await page.mouse.down();
+    await pause(450);
+    return start;
+};
 
 const pressAndBrowseTo = async (index) => {
     const { handBox, cardCount, cardWidth } = await getHandGeometry();
@@ -275,11 +295,78 @@ const moveMinionToInsertionZone = async (from, boardIndex) => {
     return insertionPoint;
 };
 
+const dragAttack = async ({ attacker, target, getStartPoint, getTargetPoint, expectedHint }) => {
+    const attackerBox = await attacker.boundingBox();
+    const targetBox = await target.boundingBox();
+    assert(attackerBox && targetBox, "The attacker and target must be visible");
+
+    const start = getStartPoint(attackerBox);
+    const end = getTargetPoint(targetBox);
+    await page.mouse.move(start.x, start.y);
+    await page.mouse.down();
+    await pause(450);
+    await moveWithPauses(start, end, 16, 1000);
+    assert.equal(await page.locator("#targeting-arrow-head").count(), 1);
+    assert.equal(await page.locator(".armed-card-hint").textContent(), expectedHint);
+    await pause(650);
+    await page.mouse.up();
+    await target.waitFor({ state: "detached", timeout: 10_000 });
+    assert.equal(
+        await page
+            .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
+            .count(),
+        0,
+    );
+    assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
+};
+
 await ensureGameReady();
+
 await resetFixture();
+const playerWeaponBox = await page
+    .locator(".mobile-bar--player .mobile-bar__weapon-panel")
+    .boundingBox();
+const playerHealthBox = await page
+    .locator(".mobile-bar--player .mobile-bar__badge--health")
+    .boundingBox();
+assert(playerWeaponBox && playerHealthBox, "The player weapon and health stat must be visible");
+assert(
+    playerWeaponBox.x + playerWeaponBox.width <= playerHealthBox.x,
+    "The player health stat must not overlap the equipped weapon",
+);
+const handImageAllowsContextMenu = await page
+    .locator(".card-hand--mobile .playing-card-face__image-area img")
+    .first()
+    .evaluate((image) =>
+        image.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true })),
+    );
+assert.equal(handImageAllowsContextMenu, false);
 
 await setCaption("10 cartes visibles, sans défilement");
 await pause(1500);
+
+await resetFixture();
+await setCaption("Un geste diagonal conserve la carte touchée");
+const diagonalStart = await pressCardAtIndex(0);
+const diagonalDropZone = await page
+    .locator('[data-minion-drop-zone][data-spot-owner="PLAYER"]')
+    .boundingBox();
+assert(diagonalDropZone, "The player drop zone must be visible");
+const diagonalTarget = {
+    x: diagonalStart.x + 90,
+    y: diagonalDropZone.y + diagonalDropZone.height / 2,
+};
+await moveWithPauses(diagonalStart, diagonalTarget, 16, 1000);
+assert.equal(
+    await page.locator(".card-hand__card--selected").getAttribute("data-hand-card-index"),
+    "0",
+);
+await pause(600);
+await page.mouse.up();
+const diagonallyPlayedMinion = page.locator(
+    '[data-target-zone][data-spot-owner="PLAYER"][data-minion-uuid] img[alt="Stagiaire Dev"]',
+);
+await diagonallyPlayedMinion.waitFor({ timeout: 10_000 });
 
 await resetFixture({ mana: 0 });
 await setCaption("Mana insuffisant : la carte reste dans la main");
@@ -313,6 +400,9 @@ assert.equal(
 );
 await pause(900);
 await page.mouse.up();
+assert.equal(await page.locator("[data-mobile-hand-preview]").count(), 0);
+assert.equal(await page.locator(".card-hand__card--selected").count(), 0);
+assert.equal(await page.locator(".playing-card--armed").count(), 0);
 await pause(1200);
 
 await resetFixture();
@@ -545,6 +635,45 @@ assert.equal(
     await page.locator('[data-target-zone][data-spot-owner="PLAYER"][data-minion-uuid]').count(),
     0,
 );
+
+await resetFixture({ combat: true });
+await setCaption("Attaque mobile : glisser un serviteur vers sa cible");
+const playerAttacker = page
+    .locator('[data-target-zone][data-spot-owner="PLAYER"][data-minion-uuid] [data-playing-card]')
+    .first();
+const opponentTarget = page
+    .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
+    .first();
+await dragAttack({
+    attacker: playerAttacker,
+    target: opponentTarget,
+    getStartPoint: (box) => ({
+        x: box.x + box.width / 2,
+        y: box.y + box.height / 2,
+    }),
+    getTargetPoint: (box) => ({
+        x: box.x + box.width + 8,
+        y: box.y + box.height / 2,
+    }),
+    expectedHint: "Relâchez sur une cible ennemie pour attaquerAnnuler",
+});
+
+await resetFixture({ combat: true });
+await setCaption("Attaque mobile : glisser le profil armé vers sa cible");
+const armedHero = page.locator('.mobile-bar--player [data-target-zone][data-spot-owner="PLAYER"]');
+const weaponTarget = page
+    .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
+    .first();
+await dragAttack({
+    attacker: armedHero,
+    target: weaponTarget,
+    getStartPoint: (box) => ({ x: box.x + 24, y: box.y + box.height / 2 }),
+    getTargetPoint: (box) => ({
+        x: box.x + box.width / 2,
+        y: box.y + box.height / 2,
+    }),
+    expectedHint: "Relâchez sur une cible ennemie pour attaquer avec votre armeAnnuler",
+});
 
 await setCaption("Tous les parcours tactiles sont validés");
 await pause(1800);
