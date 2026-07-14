@@ -119,6 +119,7 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     labelTags: [],
     description: "",
     battlecryActions: [],
+    comboActions: [],
     deathrattleActions: [],
     attackActions: [],
     passives: [],

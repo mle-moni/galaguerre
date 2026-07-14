@@ -92,6 +92,15 @@ export const recordBattlecry = (game: Game, player: GamePlayer, card: PlayerCard
     });
 };
 
+export const recordCombo = (game: Game, player: GamePlayer, card: PlayerCard): void => {
+    appendLogEntry(game, {
+        roundNumber: game.data.currentRound,
+        playerId: player.userId,
+        type: "COMBO",
+        card: structuredClone(card),
+    });
+};
+
 export const recordDeathrattle = (game: Game, player: GamePlayer, card: PlayerCard): void => {
     appendLogEntry(game, {
         roundNumber: game.data.currentRound,

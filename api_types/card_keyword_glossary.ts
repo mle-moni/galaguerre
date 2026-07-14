@@ -54,6 +54,11 @@ export const KEYWORD_GLOSSARY_ENTRIES: KeywordGlossaryEntry[] = [
         description: "Effet déclenché à la mise en jeu du monstre.",
     },
     {
+        name: "Combo",
+        symbol: "🗡️",
+        description: "Effet bonus si une autre carte a déjà été jouée ce tour.",
+    },
+    {
         name: "Dernier souffle",
         symbol: "💀",
         description: "Effet déclenché à la mort du monstre.",

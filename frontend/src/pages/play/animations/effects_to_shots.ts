@@ -54,6 +54,7 @@ const getDummyCard = (cardUuid: string): PlayerCard => ({
     effects: [],
     description: "",
     battlecryActions: [],
+    comboActions: [],
     deathrattleActions: [],
     attackActions: [],
     passives: [],

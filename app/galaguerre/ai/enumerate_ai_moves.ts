@@ -11,11 +11,13 @@ import { getActionTarget } from "#api_types/action_fields_utils";
 import {
     actionRequiresTarget,
     cardHasPlayableTarget,
+    getMinionPlayTargetedActions,
     heroMatchesTarget,
     minionMatchesTarget,
     selectedTargetMatchesAction,
 } from "#api_types/target_matching";
 import { playerHasBoardSpace } from "../action_engine/apply_mind_control.js";
+import { isComboActive } from "../combo/combo_state.js";
 import { computeEffectiveCost } from "../dynamic_cost/compute_effective_cost.js";
 import { canOpponentDirectlyTargetMinion } from "#api_types/target_matching";
 import {
@@ -75,12 +77,15 @@ const enumerateHeroAndMinionTargets = (
     return targets;
 };
 
-const getTargetedActionsForCard = (card: MinionCard | SpellCard): CardActionSnapshot[] => {
+const getTargetedActionsForCard = (
+    card: MinionCard | SpellCard,
+    comboActive: boolean,
+): CardActionSnapshot[] => {
     if (card.type === "SPELL") {
         return card.spellActions.filter((action) => action.isTargeted);
     }
 
-    return (card.battlecryActions ?? []).filter((action) => action.isTargeted);
+    return getMinionPlayTargetedActions(card, comboActive);
 };
 
 const enumerateTargetsForCard = (
@@ -88,9 +93,10 @@ const enumerateTargetsForCard = (
     player: GamePlayer,
     opponent: GamePlayer,
 ): ActionTarget[] => {
-    if (!actionRequiresTarget(card)) return [];
+    const comboActive = card.type === "MINION" ? isComboActive(player) : false;
+    if (!actionRequiresTarget(card, { comboActive })) return [];
 
-    const targetedActions = getTargetedActionsForCard(card);
+    const targetedActions = getTargetedActionsForCard(card, comboActive);
     if (targetedActions.length === 0) return [];
 
     return enumerateHeroAndMinionTargets(targetedActions, player, opponent);
@@ -102,7 +108,8 @@ const targetMatchesAllActions = (
     player: GamePlayer,
     opponent: GamePlayer,
 ): boolean => {
-    const targetedActions = getTargetedActionsForCard(card);
+    const comboActive = card.type === "MINION" ? isComboActive(player) : false;
+    const targetedActions = getTargetedActionsForCard(card, comboActive);
 
     return targetedActions.every((action) =>
         selectedTargetMatchesAction(
@@ -212,14 +219,16 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
             if (!playerHasBoardSpace(player)) continue;
 
             const boardIndex = countBoardMinionsOnBoard(player.board);
+            const comboActive = isComboActive(player);
 
-            if (actionRequiresTarget(card)) {
+            if (actionRequiresTarget(card, { comboActive })) {
                 if (
                     !cardHasPlayableTarget(
                         card,
                         player.board,
                         opponent.board,
                         playerHasBoardSpace(player),
+                        { comboActive },
                     )
                 ) {
                     moves.push({

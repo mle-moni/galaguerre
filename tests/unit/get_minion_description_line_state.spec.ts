@@ -30,6 +30,7 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
     effects: [],
     description: "Immunité : Bloque la première source de dégâts reçue. Discrétion.",
     battlecryActions: [],
+    comboActions: [],
     deathrattleActions: [],
     attackActions: [],
     passives: [],

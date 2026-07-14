@@ -1,5 +1,6 @@
 import type { SpotOwner, WeaponCard } from "#api_types/game.types";
 import { computeEffectiveCost } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
+import { recordCardPlayedThisTurn } from "../../../galaguerre/combo/combo_state.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import {
@@ -62,6 +63,8 @@ export const playWeapon = async ({ card, player, game }: PlayWeaponOptions) => {
 
         const { gameEnded } = triggerPlayCardPassives(game, player, card);
         endCurrentBeat(game);
+
+        recordCardPlayedThisTurn(player);
 
         if (gameEnded) {
             await terminateGame(game, { skipSendUpdate: true });

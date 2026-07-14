@@ -106,6 +106,27 @@ export const runPlaySpell = async (
     return { game };
 };
 
+export const runPlaySpellOnGame = async (
+    game: Game,
+    card: Extract<PlayerCard, { type: "SPELL" }>,
+    actionTarget?: ActionTarget,
+    actor: PlayerKey = "playerOne",
+): Promise<{ game: Game }> => {
+    const player = game.data[actor];
+
+    await playSpell({
+        card,
+        player,
+        game,
+        socketId: TEST_SOCKET_ID,
+        owner: "PLAYER",
+        boardIndex: null,
+        actionTarget,
+    });
+
+    return { game };
+};
+
 export const runPlayWeapon = async (
     data: GameData,
     card: Extract<PlayerCard, { type: "WEAPON" }>,

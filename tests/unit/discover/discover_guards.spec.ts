@@ -69,6 +69,7 @@ test.group("discover guards", () => {
                     effects: [],
                     description: "",
                     battlecryActions: [],
+                    comboActions: [],
                     deathrattleActions: [],
                     attackActions: [],
                     passives: [],

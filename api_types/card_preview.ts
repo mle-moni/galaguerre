@@ -3,6 +3,7 @@ import { getMinionPowerEffects } from "./get_minion_power_effects.js";
 import {
     getAttackDescription,
     getBattlecryDescription,
+    getComboDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
     getPassiveDescription,
@@ -43,6 +44,7 @@ const buildMinionPreview = (entry: CardSeedEntry): MinionCard => {
     const minionPowers = normalizeMinionPowers(data.minionPowers);
     const effects = getMinionPowerEffects(minionPowers);
     const battlecryLines = getBattlecryDescription(data.battlecryActions);
+    const comboLines = getComboDescription(data.comboActions ?? []);
     const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
     const attackLines = getAttackDescription(data.attackActions ?? []);
     const passiveLines = getPassiveDescription(data.passives);
@@ -72,8 +74,10 @@ const buildMinionPreview = (entry: CardSeedEntry): MinionCard => {
             passiveLines,
             data.dynamicCost,
             attackLines,
+            comboLines,
         ),
         battlecryActions: data.battlecryActions,
+        comboActions: data.comboActions ?? [],
         deathrattleActions: data.deathrattleActions,
         attackActions: data.attackActions ?? [],
         passives: data.passives,

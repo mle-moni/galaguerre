@@ -13,6 +13,7 @@ import {
     actionRequiresTarget,
     canOpponentDirectlyTargetMinion,
     cardHasPlayableTarget,
+    getMinionPlayTargetedActions,
     heroMatchesTarget,
     minionMatchesTarget,
     minionNeedsTargetSelection,
@@ -74,25 +75,33 @@ export class TargetSelectionStore {
     }
 
     requiresTarget(card: MinionCard | SpellCard): boolean {
-        return actionRequiresTarget(card);
+        return actionRequiresTarget(card, { comboActive: this.isComboActiveForMe() });
     }
 
     hasPlayableTarget(card: MinionCard | SpellCard): boolean {
+        const comboActive = card.type === "MINION" ? this.isComboActiveForMe() : false;
         return cardHasPlayableTarget(
             card,
             this.gameStore.me.board,
             this.gameStore.opponent.board,
             playerHasBoardSpace(this.gameStore.me),
+            { comboActive },
         );
     }
 
     minionNeedsTargetSelection(card: MinionCard): boolean {
+        const comboActive = this.isComboActiveForMe();
         return minionNeedsTargetSelection(
             card,
             this.gameStore.me.board,
             this.gameStore.opponent.board,
             playerHasBoardSpace(this.gameStore.me),
+            { comboActive },
         );
+    }
+
+    private isComboActiveForMe(): boolean {
+        return (this.gameStore.me.cardsPlayedThisTurn ?? 0) >= 1;
     }
 
     private targetedActionRequiresMindControlSpace(): boolean {
@@ -213,7 +222,7 @@ export class TargetSelectionStore {
                 return this.pendingPlay.card.spellActions.filter((action) => action.isTargeted);
             }
 
-            return this.pendingPlay.card.battlecryActions.filter((action) => action.isTargeted);
+            return getMinionPlayTargetedActions(this.pendingPlay.card, this.isComboActiveForMe());
         }
 
         if (this.armedCard?.type === "SPELL" && this.requiresTarget(this.armedCard)) {

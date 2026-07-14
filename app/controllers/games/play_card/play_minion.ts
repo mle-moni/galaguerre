@@ -1,8 +1,10 @@
 import type { ActionTarget, MinionCard, SpotOwner } from "#api_types/game.types";
 import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
+import { executeCombo } from "../../../galaguerre/action_engine/execute_combo.js";
 import { insertMinionOnBoard } from "../../../galaguerre/action_engine/summon_minion.js";
 import { triggerSummonPassives } from "../../../galaguerre/passive_engine/trigger_summon_passives.js";
+import { isComboActive, recordCardPlayedThisTurn } from "../../../galaguerre/combo/combo_state.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
@@ -10,7 +12,7 @@ import {
 } from "../../../galaguerre/game_stats/record_player_stats.js";
 import { cardRequiresActionTarget } from "../../../galaguerre/action_engine/requires_action_target.js";
 import { validateSelectedTargetForAction } from "../../../galaguerre/action_engine/validate_selected_target.js";
-import { cardHasPlayableTarget } from "#api_types/target_matching";
+import { cardHasPlayableTarget, getMinionPlayTargetedActions } from "#api_types/target_matching";
 import { computeEffectiveCost } from "../../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { playerHasBoardSpace } from "../../../galaguerre/action_engine/apply_mind_control.js";
 import { emitSocketEvent } from "#services/sockets/emit_socket_event";
@@ -38,8 +40,9 @@ const validateActionTargetForCard = (
     actionTarget: ActionTarget,
     player: PlayCardOptions["player"],
     opponent: PlayCardOptions["player"],
+    comboActive: boolean,
 ): boolean => {
-    const targetedActions = (card.battlecryActions ?? []).filter((action) => action.isTargeted);
+    const targetedActions = getMinionPlayTargetedActions(card, comboActive);
 
     return targetedActions.every((action) =>
         validateSelectedTargetForAction(actionTarget, action, player, opponent),
@@ -79,13 +82,15 @@ export const playMinion = async ({
         return;
     }
 
-    const requiresTarget = cardRequiresActionTarget(card);
+    const comboActive = isComboActive(player);
+    const requiresTarget = cardRequiresActionTarget(card, { comboActive });
     const opponent = getOpponent(game, player);
     const hasPlayableTarget = cardHasPlayableTarget(
         card,
         player.board,
         opponent.board,
         playerHasBoardSpace(player),
+        { comboActive },
     );
 
     if (requiresTarget && hasPlayableTarget && !actionTarget) {
@@ -106,7 +111,10 @@ export const playMinion = async ({
         return;
     }
 
-    if (actionTarget && !validateActionTargetForCard(card, actionTarget, player, opponent)) {
+    if (
+        actionTarget &&
+        !validateActionTargetForCard(card, actionTarget, player, opponent, comboActive)
+    ) {
         emitSocketEvent("notify_error", { error: "Cible invalide pour cette carte" }, socketId);
         return;
     }
@@ -158,6 +166,20 @@ export const playMinion = async ({
         }
 
         if (discoverPending) return;
+
+        if (comboActive) {
+            const { gameEnded: comboGameEnded, discoverPending: comboDiscoverPending } =
+                executeCombo(game, player, card, actionTarget ?? undefined);
+
+            if (comboGameEnded) {
+                await terminateGame(game, { skipSendUpdate: true });
+                return;
+            }
+
+            if (comboDiscoverPending) return;
+        }
+
+        recordCardPlayedThisTurn(player);
 
         const { gameEnded: summonPassiveGameEnded } = triggerSummonPassives(game, player, card);
 

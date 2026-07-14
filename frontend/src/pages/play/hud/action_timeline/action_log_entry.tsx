@@ -126,6 +126,15 @@ export const ActionLogEntry = ({ entry, game, currentUserId, className }: Action
         );
     }
 
+    if (entry.type === "COMBO" && entry.card) {
+        return (
+            <Text className={entryClass} component="div">
+                {pseudo} : <CardLink card={entry.card} spellPower={spellPower} /> déclenche son
+                combo
+            </Text>
+        );
+    }
+
     if (entry.type === "DEATHRATTLE" && entry.card) {
         return (
             <Text className={entryClass} component="div">

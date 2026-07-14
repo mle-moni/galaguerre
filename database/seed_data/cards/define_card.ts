@@ -451,6 +451,7 @@ export const defaultMinionData = (): MinionCardData => ({
     health: 1,
     minionPowers: null,
     battlecryActions: [],
+    comboActions: [],
     deathrattleActions: [],
     attackActions: [],
     passives: [],

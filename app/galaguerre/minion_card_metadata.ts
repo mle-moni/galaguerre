@@ -4,6 +4,7 @@ import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
 export {
     getAttackDescription,
     getBattlecryDescription,
+    getComboDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
     getPassiveDescription,

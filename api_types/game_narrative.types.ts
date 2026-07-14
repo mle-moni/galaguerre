@@ -19,6 +19,7 @@ export type NarrativeBeatKind = (typeof NARRATIVE_BEAT_KINDS)[number];
 
 export const NARRATIVE_TRIGGER_KINDS = [
     "BATTLECRY",
+    "COMBO",
     "DEATHRATTLE",
     "PASSIVE",
     "POISONOUS",

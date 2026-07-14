@@ -2,6 +2,7 @@ import type { PlayerCard, PlayerCardBase } from "#api_types/game.types";
 import {
     getAttackDescription,
     getBattlecryDescription,
+    getComboDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
@@ -73,6 +74,7 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
             case "MINION": {
                 const effects = getMinionPowerEffects(card.data.minionPowers);
                 const battlecryLines = getBattlecryDescription(card.data.battlecryActions);
+                const comboLines = getComboDescription(card.data.comboActions ?? []);
                 const deathrattleLines = getDeathrattleDescription(card.data.deathrattleActions);
                 const attackLines = getAttackDescription(card.data.attackActions ?? []);
                 const passiveLines = getPassiveDescription(card.data.passives);
@@ -93,8 +95,10 @@ export const generatePlayerCards = (source: CardSource, options?: { shuffle?: bo
                         passiveLines,
                         card.data.dynamicCost,
                         attackLines,
+                        comboLines,
                     ),
                     battlecryActions: card.data.battlecryActions,
+                    comboActions: card.data.comboActions ?? [],
                     deathrattleActions: card.data.deathrattleActions,
                     attackActions: card.data.attackActions ?? [],
                     passives: card.data.passives,

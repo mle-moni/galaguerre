@@ -1,6 +1,7 @@
 import type { CardActionSnapshot, DiscoverContinuation, GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
 import { runAdditionalBattlecrySequences } from "../action_engine/execute_battlecries.js";
+import { runAdditionalComboSequences } from "../action_engine/execute_combo.js";
 import { executeAction } from "../action_engine/execute_action.js";
 import { findMinionOnPlayerBoard } from "../action_engine/find_minion_on_board.js";
 import { isTargetedV1Action } from "../action_engine/is_targeted_v1_action.js";
@@ -75,6 +76,20 @@ export const resumeDiscoverContinuation = (
         const { actions, remainingIterations } = context.battlecryContinuation;
         if (remainingIterations > 0) {
             return runAdditionalBattlecrySequences(
+                game,
+                player,
+                source,
+                actions,
+                context.selectedTarget,
+                remainingIterations,
+            );
+        }
+    }
+
+    if (context.battlecryContinuation && context.effectKind === "COMBO") {
+        const { actions, remainingIterations } = context.battlecryContinuation;
+        if (remainingIterations > 0) {
+            return runAdditionalComboSequences(
                 game,
                 player,
                 source,

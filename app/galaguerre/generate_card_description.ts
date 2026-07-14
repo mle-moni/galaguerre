@@ -2,6 +2,7 @@ import type { CardData } from "#galaguerre/card_definition.schema";
 import {
     getAttackDescription,
     getBattlecryDescription,
+    getComboDescription,
     getDeathrattleDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
@@ -33,6 +34,7 @@ export const generateCardDescriptionFromData = (data: CardData): string => {
         case "MINION": {
             const effects = getMinionPowerEffects(data.minionPowers);
             const battlecryLines = getBattlecryDescription(data.battlecryActions);
+            const comboLines = getComboDescription(data.comboActions ?? []);
             const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
             const attackLines = getAttackDescription(data.attackActions ?? []);
             const passiveLines = getPassiveDescription(data.passives);
@@ -46,6 +48,7 @@ export const generateCardDescriptionFromData = (data: CardData): string => {
                 passiveLines,
                 data.dynamicCost,
                 attackLines,
+                comboLines,
             );
         }
     }

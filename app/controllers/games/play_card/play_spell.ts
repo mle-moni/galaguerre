@@ -1,5 +1,6 @@
 import type { ActionTarget, SpellCard, SpotOwner } from "#api_types/game.types";
 import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
+import { recordCardPlayedThisTurn } from "../../../galaguerre/combo/combo_state.js";
 import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
@@ -140,6 +141,8 @@ export const playSpell = async ({
         }
 
         if (discoverPending) return;
+
+        recordCardPlayedThisTurn(player);
 
         const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
 

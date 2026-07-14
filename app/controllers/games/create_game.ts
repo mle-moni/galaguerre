@@ -117,6 +117,7 @@ const createGamePlayer = (
         health: DEFAULT_HERO_HEALTH,
         spellPower: 0,
         extraBattlecryTriggers: 0,
+        cardsPlayedThisTurn: 0,
         mana: 0,
         maxFatigueDamageTaken: 0,
         weaponState: null,

@@ -14,6 +14,7 @@ import {
 import { withNarrativeRecorder } from "../../galaguerre/game_narrative/narrative_context.js";
 import { runGameActionWithNarrative } from "../../galaguerre/game_narrative/run_game_action_with_narrative.js";
 import { terminateGame } from "./terminate_game.js";
+import { resetCardsPlayedThisTurn } from "../../galaguerre/combo/combo_state.js";
 
 const MAX_MANA = 10;
 
@@ -35,6 +36,8 @@ export const setupNextGameTurn = async (game: Game) => {
 
         player.mana = game.data.currentRound;
         if (player.mana > MAX_MANA) player.mana = MAX_MANA;
+
+        resetCardsPlayedThisTurn(player);
 
         const owner = resolveSpotOwner(game, player);
         const manaGained = player.mana - previousMana;

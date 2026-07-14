@@ -115,18 +115,40 @@ export const passiveTriggerEventMatchesFilter = (
     return minionMatchesTarget(event.minion, filter, isOpponentMinion);
 };
 
-export const actionRequiresTarget = (card: MinionCard | SpellCard): boolean => {
+export const getMinionPlayTargetedActions = (
+    card: MinionCard,
+    comboActive: boolean,
+): CardActionSnapshot[] => [
+    ...(card.battlecryActions ?? []).filter((action) => action.isTargeted),
+    ...(comboActive ? (card.comboActions ?? []).filter((action) => action.isTargeted) : []),
+];
+
+export type ActionRequiresTargetOptions = {
+    comboActive?: boolean;
+};
+
+export const actionRequiresTarget = (
+    card: MinionCard | SpellCard,
+    options: ActionRequiresTargetOptions = {},
+): boolean => {
     if (card.type === "SPELL") return card.spellActions.some((action) => action.isTargeted);
-    return card.battlecryActions?.some((action) => action.isTargeted) ?? false;
+    return getMinionPlayTargetedActions(card, options.comboActive ?? false).length > 0;
 };
 
 const actionRequiresMindControlBoardSpace = (action: CardActionSnapshot): boolean => {
     return action.type === "MIND_CONTROL" && action.isTargeted;
 };
 
-const getCardActions = (card: MinionCard | SpellCard): CardActionSnapshot[] => {
+const getCardActions = (
+    card: MinionCard | SpellCard,
+    comboActive = false,
+): CardActionSnapshot[] => {
     if (card.type === "SPELL") return card.spellActions;
-    return card.battlecryActions ?? [];
+    return [...(card.battlecryActions ?? []), ...(comboActive ? card.comboActions ?? [] : [])];
+};
+
+export type MinionTargetSelectionOptions = {
+    comboActive?: boolean;
 };
 
 export const minionNeedsTargetSelection = (
@@ -134,10 +156,12 @@ export const minionNeedsTargetSelection = (
     playerBoard: BoardState,
     opponentBoard: BoardState,
     playerHasSpace = true,
+    options: MinionTargetSelectionOptions = {},
 ): boolean => {
+    const comboActive = options.comboActive ?? false;
     return (
-        actionRequiresTarget(card) &&
-        cardHasPlayableTarget(card, playerBoard, opponentBoard, playerHasSpace)
+        actionRequiresTarget(card, { comboActive }) &&
+        cardHasPlayableTarget(card, playerBoard, opponentBoard, playerHasSpace, { comboActive })
     );
 };
 
@@ -146,8 +170,10 @@ export const cardHasPlayableTarget = (
     playerBoard: BoardState,
     opponentBoard: BoardState,
     playerHasSpace = true,
+    options: MinionTargetSelectionOptions = {},
 ): boolean => {
-    const targetedActions = getCardActions(card).filter((action) => action.isTargeted);
+    const comboActive = options.comboActive ?? false;
+    const targetedActions = getCardActions(card, comboActive).filter((action) => action.isTargeted);
     if (targetedActions.length === 0) return true;
 
     const requiresMindControlSpace = targetedActions.some(actionRequiresMindControlBoardSpace);

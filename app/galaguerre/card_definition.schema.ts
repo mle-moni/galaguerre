@@ -363,6 +363,7 @@ export const minionDataSchema = cardDataBaseSchema.extend({
     health: z.number().int().min(1),
     minionPowers: zMinionPowerSchema.nullable(),
     battlecryActions: z.array(cardActionSchema),
+    comboActions: z.array(cardActionSchema).default([]),
     deathrattleActions: z.array(deathrattleActionSchema),
     attackActions: z.array(cardActionSchema).default([]),
     passives: z.array(passiveSchema),

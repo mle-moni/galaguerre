@@ -10,6 +10,7 @@ import type Game from "#models/game";
 import {
     getAttackDescription,
     getBattlecryDescription,
+    getComboDescription,
     getDeathrattleDescription,
     getMinionPowerEffects,
     getPassiveDescription,
@@ -39,6 +40,7 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
     const minionPowers = normalizeMinionPowers(template.minionPowers);
     const effects = getMinionPowerEffects(minionPowers);
     const battlecryLines = getBattlecryDescription(template.battlecryActions);
+    const comboLines = getComboDescription(template.comboActions ?? []);
     const deathrattleLines = getDeathrattleDescription(template.deathrattleActions);
     const attackLines = getAttackDescription(template.attackActions ?? []);
     const passiveLines = getPassiveDescription(template.passives);
@@ -49,6 +51,7 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
         minionPowers,
         effects,
         battlecryActions: template.battlecryActions,
+        comboActions: template.comboActions ?? [],
         deathrattleActions: template.deathrattleActions,
         attackActions: template.attackActions ?? [],
         passives: template.passives,
@@ -61,6 +64,7 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
             passiveLines,
             template.dynamicCost,
             attackLines,
+            comboLines,
         ),
     };
 };

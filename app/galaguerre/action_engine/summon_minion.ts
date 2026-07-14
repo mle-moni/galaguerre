@@ -82,6 +82,7 @@ const createDefaultSourceMinion = (): MinionState => ({
         effects: [],
         description: "",
         battlecryActions: [],
+        comboActions: [],
         deathrattleActions: [],
         attackActions: [],
         passives: [],

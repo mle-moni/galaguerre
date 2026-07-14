@@ -46,6 +46,7 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
                 minionPowers: card.data.minionPowers,
                 effects,
                 battlecryActions: card.data.battlecryActions,
+                comboActions: card.data.comboActions ?? [],
                 deathrattleActions: card.data.deathrattleActions,
                 attackActions: card.data.attackActions ?? [],
                 passives: card.data.passives,
