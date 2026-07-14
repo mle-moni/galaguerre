@@ -394,8 +394,34 @@ export class GameStore {
         return this.me.userId === this.p1.userId;
     }
 
-    get winner() {
-        if (this.p1.health <= 0) return this.p2;
+    get winnerUserId(): number | null {
+        const { playerOne, playerTwo } = this.game.data;
+
+        if (playerOne.health <= 0 && playerTwo.health <= 0) {
+            return null;
+        }
+
+        if (playerOne.health <= 0) {
+            return playerTwo.userId;
+        }
+
+        if (playerTwo.health <= 0) {
+            return playerOne.userId;
+        }
+
+        return null;
+    }
+
+    get winner(): GamePlayer {
+        const winnerUserId = this.winnerUserId;
+
+        if (winnerUserId === this.p1.userId) {
+            return this.p1;
+        }
+
+        if (winnerUserId === this.p2.userId) {
+            return this.p2;
+        }
 
         return this.p1;
     }
@@ -403,7 +429,10 @@ export class GameStore {
     get isUserWinner() {
         if (this.isSpectating) return false;
 
-        return this.winner.userId === this.user.id;
+        const winnerUserId = this.winnerUserId;
+        if (winnerUserId === null) return false;
+
+        return winnerUserId === this.user.id;
     }
 
     get isMyTurn() {

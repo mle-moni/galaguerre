@@ -312,4 +312,26 @@ test.group("game termination concurrency", (group) => {
         assert.isTrue(persistedGame.data.dailyQuestProgressApplied);
         assert.isTrue(persistedGame.data.postGameProgressionApplied);
     });
+
+    test("terminateGame applies progression from in-memory terminal board state", async ({
+        assert,
+    }) => {
+        const { game, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_TWO_TURN",
+                currentRound: 2,
+                playerOne: { health: 30 },
+                playerTwo: { health: 5 },
+            }),
+        );
+
+        game.data.playerOne.health = 0;
+
+        await terminateGame(game, { skipSendUpdate: true });
+        await game.refresh();
+
+        assert.equal(getWinnerUserId(game), playerTwo.id);
+        assert.equal(game.winnerId, playerTwo.id);
+        assert.equal(game.data.playerOne.health, 0);
+    });
 });

@@ -180,7 +180,7 @@ export const GameFinalScreen = observer(() => {
                 <GameFinalStatsTable
                     me={store.me}
                     opponent={store.opponent}
-                    winnerUserId={store.winner.userId}
+                    winnerUserId={store.winnerUserId}
                 />
 
                 {!store.isSpectating && userReward ? (

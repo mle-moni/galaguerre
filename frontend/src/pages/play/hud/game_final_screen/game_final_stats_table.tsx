@@ -5,7 +5,7 @@ import { getPlayerStats } from "~/helpers/player_stats";
 interface GameFinalStatsTableProps {
     me: GamePlayer;
     opponent: GamePlayer;
-    winnerUserId: number;
+    winnerUserId: number | null;
     highlightUserId?: number;
 }
 
