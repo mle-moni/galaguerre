@@ -13,6 +13,7 @@ import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import db from "@adonisjs/lucid/services/db";
 import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 import { DateTime } from "luxon";
+import { cloneGameData } from "../../galaguerre/game_narrative/clone_game_data.js";
 import { finalizeGameReplay } from "../../galaguerre/game_replay/game_replay_buffer.js";
 import { clearAllGameTimers } from "../../galaguerre/timers/game_timers.js";
 import { sendGameUpdate } from "./send_game_update.js";
@@ -69,6 +70,8 @@ const applyPostGameProgression = async (
 export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boolean }) => {
     if (game.isFinished && hasPostGameProgressionBeenApplied(game.data)) return;
 
+    const terminalGameData = cloneGameData(game.data);
+
     const claimed = await claimGameFinish(game);
     if (!claimed) {
         await game.refresh();
@@ -85,6 +88,15 @@ export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boo
         if (hasPostGameProgressionBeenApplied(lockedGame.data)) {
             return;
         }
+
+        lockedGame.data = {
+            ...terminalGameData,
+            ratingResult: lockedGame.data.ratingResult,
+            rewardResult: lockedGame.data.rewardResult,
+            xpResult: lockedGame.data.xpResult,
+            dailyQuestProgressApplied: lockedGame.data.dailyQuestProgressApplied,
+            postGameProgressionApplied: lockedGame.data.postGameProgressionApplied,
+        };
 
         delete lockedGame.data.turnEndsAt;
         delete lockedGame.data.mulliganEndsAt;

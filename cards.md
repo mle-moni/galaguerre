@@ -290,7 +290,7 @@ Format compact pour construction de deck par LLM.
 
 ### #126 Congrès Tech
 - Coût: 5 | Type: SPELL | Stats: — | Rareté: Rare | Famille: —
-- Effet : Reconvertit tous les monstres en un monstre aléatoire Monstre coût < 4 Développeur.
+- Effet : Reconvertit tous les monstres en un monstre aléatoire Monstre coût > 4 Développeur.
 
 ### #127 Contrat Freelance
 - Coût: 3 | Type: SPELL | Stats: — | Rareté: Commune | Famille: —
@@ -472,7 +472,7 @@ Format compact pour construction de deck par LLM.
 - Arme 3/2. Ne peut pas attaquer le héros adverse.
 
 ### #172 Setup Technique
-- Coût: 0 | Type: SPELL | Stats: — | Rareté: Rare | Famille: —
+- Coût: 0 | Type: SPELL | Stats: — | Rareté: Épique | Famille: —
 - Effet : Le prochain sort que vous lancez pendant ce tour coûte (2) cristaux de moins.
 
 ### #173 Responsable du staffing
