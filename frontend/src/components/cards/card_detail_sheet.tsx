@@ -118,6 +118,9 @@ export const CardDetailSheet = ({
     minionState,
 }: CardDetailSheetProps) => {
     const showActiveEffects = card.type === "MINION" && minionState !== undefined;
+    const displayedAttack = minionState?.attack ?? attack;
+    const displayedHealth = minionState?.health ?? health;
+    const displayedSilenced = minionState?.isSilenced ?? isSilenced;
 
     return (
         <Modal
@@ -144,9 +147,9 @@ export const CardDetailSheet = ({
                         card={card}
                         size="full"
                         spellPower={spellPower}
-                        isSilenced={isSilenced}
-                        attack={attack}
-                        health={health}
+                        isSilenced={displayedSilenced}
+                        attack={displayedAttack}
+                        health={displayedHealth}
                     />
                 </div>
                 {showActiveEffects && <ActiveEffects card={card} state={minionState} />}

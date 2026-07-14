@@ -295,6 +295,31 @@ const moveMinionToInsertionZone = async (from, boardIndex) => {
     return insertionPoint;
 };
 
+const dragAttack = async ({ attacker, target, getStartPoint, getTargetPoint, expectedHint }) => {
+    const attackerBox = await attacker.boundingBox();
+    const targetBox = await target.boundingBox();
+    assert(attackerBox && targetBox, "The attacker and target must be visible");
+
+    const start = getStartPoint(attackerBox);
+    const end = getTargetPoint(targetBox);
+    await page.mouse.move(start.x, start.y);
+    await page.mouse.down();
+    await pause(450);
+    await moveWithPauses(start, end, 16, 1000);
+    assert.equal(await page.locator("#targeting-arrow-head").count(), 1);
+    assert.equal(await page.locator(".armed-card-hint").textContent(), expectedHint);
+    await pause(650);
+    await page.mouse.up();
+    await target.waitFor({ state: "detached", timeout: 10_000 });
+    assert.equal(
+        await page
+            .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
+            .count(),
+        0,
+    );
+    assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
+};
+
 await ensureGameReady();
 
 await resetFixture();
@@ -619,34 +644,19 @@ const playerAttacker = page
 const opponentTarget = page
     .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
     .first();
-const playerAttackerBox = await playerAttacker.boundingBox();
-const opponentTargetBox = await opponentTarget.boundingBox();
-assert(playerAttackerBox && opponentTargetBox, "Both combat minions must be visible");
-const minionAttackStart = {
-    x: playerAttackerBox.x + playerAttackerBox.width / 2,
-    y: playerAttackerBox.y + playerAttackerBox.height / 2,
-};
-const minionAttackTarget = {
-    x: opponentTargetBox.x + opponentTargetBox.width + 8,
-    y: opponentTargetBox.y + opponentTargetBox.height / 2,
-};
-await page.mouse.move(minionAttackStart.x, minionAttackStart.y);
-await page.mouse.down();
-await pause(450);
-await moveWithPauses(minionAttackStart, minionAttackTarget, 16, 1000);
-assert.equal(await page.locator("#targeting-arrow-head").count(), 1);
-assert.equal(
-    await page.locator(".armed-card-hint").textContent(),
-    "Relâchez sur une cible ennemie pour attaquerAnnuler",
-);
-await pause(650);
-await page.mouse.up();
-await opponentTarget.waitFor({ state: "detached", timeout: 10_000 });
-assert.equal(
-    await page.locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]').count(),
-    0,
-);
-assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
+await dragAttack({
+    attacker: playerAttacker,
+    target: opponentTarget,
+    getStartPoint: (box) => ({
+        x: box.x + box.width / 2,
+        y: box.y + box.height / 2,
+    }),
+    getTargetPoint: (box) => ({
+        x: box.x + box.width + 8,
+        y: box.y + box.height / 2,
+    }),
+    expectedHint: "Relâchez sur une cible ennemie pour attaquerAnnuler",
+});
 
 await resetFixture({ combat: true });
 await setCaption("Attaque mobile : glisser le profil armé vers sa cible");
@@ -654,34 +664,16 @@ const armedHero = page.locator('.mobile-bar--player [data-target-zone][data-spot
 const weaponTarget = page
     .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
     .first();
-const armedHeroBox = await armedHero.boundingBox();
-const weaponTargetBox = await weaponTarget.boundingBox();
-assert(armedHeroBox && weaponTargetBox, "The armed hero and target must be visible");
-const weaponAttackStart = {
-    x: armedHeroBox.x + 24,
-    y: armedHeroBox.y + armedHeroBox.height / 2,
-};
-const weaponAttackTarget = {
-    x: weaponTargetBox.x + weaponTargetBox.width / 2,
-    y: weaponTargetBox.y + weaponTargetBox.height / 2,
-};
-await page.mouse.move(weaponAttackStart.x, weaponAttackStart.y);
-await page.mouse.down();
-await pause(450);
-await moveWithPauses(weaponAttackStart, weaponAttackTarget, 16, 1000);
-assert.equal(await page.locator("#targeting-arrow-head").count(), 1);
-assert.equal(
-    await page.locator(".armed-card-hint").textContent(),
-    "Relâchez sur une cible ennemie pour attaquer avec votre armeAnnuler",
-);
-await pause(650);
-await page.mouse.up();
-await weaponTarget.waitFor({ state: "detached", timeout: 10_000 });
-assert.equal(
-    await page.locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]').count(),
-    0,
-);
-assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
+await dragAttack({
+    attacker: armedHero,
+    target: weaponTarget,
+    getStartPoint: (box) => ({ x: box.x + 24, y: box.y + box.height / 2 }),
+    getTargetPoint: (box) => ({
+        x: box.x + box.width / 2,
+        y: box.y + box.height / 2,
+    }),
+    expectedHint: "Relâchez sur une cible ennemie pour attaquer avec votre armeAnnuler",
+});
 
 await setCaption("Tous les parcours tactiles sont validés");
 await pause(1800);

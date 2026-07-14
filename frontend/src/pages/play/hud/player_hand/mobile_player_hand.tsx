@@ -16,7 +16,6 @@ import type { GamePlayer, PlayerCard, SpellCard } from "#api_types/game.types";
 import {
     type MobileHandGestureIntent,
     getMobileHandCardRatio,
-    hasBrowsedMobileHand,
     hasLiftedMobileCard,
     isPointInsideMobileBounds,
     resolveMobileHandGestureIntent,
@@ -35,8 +34,6 @@ interface ActiveGesture {
     pointerId: number;
     origin: Point;
     selectedIndex: number;
-    initialIndex: number;
-    hasBrowsed: boolean;
     intent: MobileHandGestureIntent;
     mode: LiftMode;
 }
@@ -171,8 +168,6 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
             pointerId: event.pointerId,
             origin: { x: event.clientX, y: event.clientY },
             selectedIndex: index,
-            initialIndex: index,
-            hasBrowsed: false,
             intent: "UNDECIDED",
             mode: "NONE",
         };
@@ -206,7 +201,6 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                 });
 
                 gesture.selectedIndex = nextIndex;
-                gesture.hasBrowsed ||= hasBrowsedMobileHand(gesture.origin, point);
                 setSelectedIndex(nextIndex);
             }
 
@@ -280,23 +274,17 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                 store.cardDragStore.setCardDragged(null);
                 store.cardDragStore.leaveMinionDropZone();
             }
-            suppressClickRef.current = true;
             resetGestureVisuals();
             return;
         }
 
         if (card && gesture.mode === "MINION") {
             finishMinionDrop(card, point);
-            setSelectedIndex(null);
         } else if (card?.type === "SPELL" && gesture.mode === "TARGETED_SPELL") {
             finishTargetedSpell(card, point);
-            setSelectedIndex(null);
         } else if (card && card.type !== "MINION" && gesture.mode === "IMMEDIATE") {
             store.targetSelectionStore.armCard(card);
             store.targetSelectionStore.confirmArmedPlay();
-            setSelectedIndex(null);
-        } else if (gesture.hasBrowsed || gesture.selectedIndex !== gesture.initialIndex) {
-            suppressClickRef.current = true;
         }
 
         resetGestureVisuals();

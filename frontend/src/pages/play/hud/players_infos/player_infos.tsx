@@ -1,17 +1,17 @@
 import type { GamePlayer } from "#api_types/game.types";
 
-import clsx from "clsx";
 import { IconHeart } from "@tabler/icons-react";
+import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import { useRef, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { type MouseEvent, type PointerEvent as ReactPointerEvent, useRef } from "react";
 import { CardPreviewLink } from "~/components/cards/card_preview_link";
 import { UserAvatar } from "~/components/user_avatar";
 import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { useGameContext } from "~/hooks/use_game_state";
 import {
-    getMaxMana,
     PLAY_DECK_ICON_URL,
     PLAY_MANA_MEDALLION_URL,
+    getMaxMana,
 } from "~/pages/play/play_game_constants";
 import "~/components/targeting/targeting.css";
 import "~/pages/play/animations/hero_death_animations.css";
@@ -81,9 +81,6 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
             y: rect.top + rect.height / 2,
         };
 
-        store.targetSelectionStore.disarm();
-        store.cardDragStore.clearMinionPlayHint();
-        store.minionDragStore.cancelAttack();
         store.weaponDragStore.startAttack();
         store.targetingArrowStore.beginDrag(origin, { x: event.clientX, y: event.clientY });
     };
@@ -142,9 +139,6 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
             return;
         }
 
-        store.targetSelectionStore.disarm();
-        store.cardDragStore.clearMinionPlayHint();
-        store.minionDragStore.cancelAttack();
         store.weaponDragStore.startAttack();
     };
 

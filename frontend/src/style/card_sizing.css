@@ -83,7 +83,6 @@
     border-radius: 18px;
     background: rgba(5, 12, 24, 0.76);
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
 }
 
 .card-preview-sheet-header {

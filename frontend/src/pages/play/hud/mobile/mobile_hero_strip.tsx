@@ -8,9 +8,10 @@ import {
 } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { CardPreviewSheet } from "~/components/cards/card_preview_sheet";
 import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
+import { useDragClickSuppression } from "~/hooks/use_drag_click_suppression";
 import { useGameContext } from "~/hooks/use_game_state";
 import { getMaxMana } from "~/pages/play/play_game_constants";
 import type { GamePlayer } from "#api_types/game.types";
@@ -32,8 +33,7 @@ export const MobileHeroStrip = observer(
         const avatarImageUrl = useAvatarImageUrl(player.avatarCardId);
         const [weaponSheetOpened, setWeaponSheetOpened] = useState(false);
         const [weaponInfoOpened, setWeaponInfoOpened] = useState(false);
-        const weaponAttackOriginRef = useRef<{ x: number; y: number } | null>(null);
-        const suppressHeroClickRef = useRef(false);
+        const dragClickSuppression = useDragClickSuppression();
         const maxMana = getMaxMana(authoritativeGame.data.currentRound);
 
         const minionAttackBorderColor = store.minionDragStore.getPlayerBorderColor(isOpponent);
@@ -77,10 +77,9 @@ export const MobileHeroStrip = observer(
         };
 
         const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-            if (suppressHeroClickRef.current) {
+            if (dragClickSuppression.consumeClickSuppression()) {
                 event.preventDefault();
                 event.stopPropagation();
-                suppressHeroClickRef.current = false;
                 return;
             }
 
@@ -94,9 +93,6 @@ export const MobileHeroStrip = observer(
                     return;
                 }
 
-                store.targetSelectionStore.disarm();
-                store.cardDragStore.clearMinionPlayHint();
-                store.minionDragStore.cancelAttack();
                 store.weaponDragStore.startAttack();
                 return;
             }
@@ -109,8 +105,7 @@ export const MobileHeroStrip = observer(
 
             event.preventDefault();
             event.currentTarget.setPointerCapture(event.pointerId);
-            weaponAttackOriginRef.current = { x: event.clientX, y: event.clientY };
-            suppressHeroClickRef.current = false;
+            dragClickSuppression.begin(event);
 
             const rect = event.currentTarget.getBoundingClientRect();
             const origin = {
@@ -118,9 +113,6 @@ export const MobileHeroStrip = observer(
                 y: rect.top + rect.height / 2,
             };
 
-            store.targetSelectionStore.disarm();
-            store.cardDragStore.clearMinionPlayHint();
-            store.minionDragStore.cancelAttack();
             store.weaponDragStore.startAttack();
             store.targetingArrowStore.beginDrag(origin, {
                 x: event.clientX,
@@ -129,27 +121,18 @@ export const MobileHeroStrip = observer(
         };
 
         const handleWeaponAttackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-            if (!weaponAttackOriginRef.current) return;
-
-            const distance = Math.hypot(
-                event.clientX - weaponAttackOriginRef.current.x,
-                event.clientY - weaponAttackOriginRef.current.y,
-            );
-            if (distance >= 6) {
-                suppressHeroClickRef.current = true;
-            }
+            dragClickSuppression.track(event);
         };
 
         const handleWeaponAttackPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-            weaponAttackOriginRef.current = null;
+            dragClickSuppression.finish();
             if (event.currentTarget.hasPointerCapture(event.pointerId)) {
                 event.currentTarget.releasePointerCapture(event.pointerId);
             }
         };
 
         const handleWeaponAttackPointerCancel = () => {
-            weaponAttackOriginRef.current = null;
-            suppressHeroClickRef.current = false;
+            dragClickSuppression.reset();
             store.weaponDragStore.cancelAttack();
         };
 
@@ -181,9 +164,6 @@ export const MobileHeroStrip = observer(
                 return;
             }
 
-            store.targetSelectionStore.disarm();
-            store.cardDragStore.clearMinionPlayHint();
-            store.minionDragStore.cancelAttack();
             store.weaponDragStore.startAttack();
         };
 
