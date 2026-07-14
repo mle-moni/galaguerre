@@ -519,6 +519,9 @@ export const costEquals = (cost: number): ComparisonDefinition =>
 export const costLessThan = (cost: number): ComparisonDefinition =>
     comparison({ costComparison: "<", cost });
 
+export const costMoreThan = (cost: number): ComparisonDefinition =>
+    comparison({ costComparison: ">", cost });
+
 export const randomCostReconversion = (
     cost: number,
     target: TargetDefinition,

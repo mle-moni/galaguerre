@@ -21,6 +21,7 @@ import {
     boostStealth,
     costLessThan,
     costEquals,
+    costMoreThan,
     damageAction,
     deckCardAddAction,
     deckCardAddFromTargetAction,
@@ -1206,7 +1207,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             reconversionAction(
                 reconvertParameters({
                     tags: ["DEVELOPPEUR"],
-                    comparison: costLessThan(4),
+                    comparison: costMoreThan(4),
                 }),
                 allMinions(),
             ),
@@ -1254,7 +1255,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         [nextSpellCostReductionAction(2)],
         [],
-        { rarity: "RARE" },
+        { rarity: "EPIC" },
     ),
     defineMinion(
         129,
