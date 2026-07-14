@@ -627,7 +627,7 @@ const minionAttackStart = {
     y: playerAttackerBox.y + playerAttackerBox.height / 2,
 };
 const minionAttackTarget = {
-    x: opponentTargetBox.x + opponentTargetBox.width / 2,
+    x: opponentTargetBox.x + opponentTargetBox.width + 8,
     y: opponentTargetBox.y + opponentTargetBox.height / 2,
 };
 await page.mouse.move(minionAttackStart.x, minionAttackStart.y);
@@ -635,6 +635,10 @@ await page.mouse.down();
 await pause(450);
 await moveWithPauses(minionAttackStart, minionAttackTarget, 16, 1000);
 assert.equal(await page.locator("#targeting-arrow-head").count(), 1);
+assert.equal(
+    await page.locator(".armed-card-hint").textContent(),
+    "Relâchez sur une cible ennemie pour attaquerAnnuler",
+);
 await pause(650);
 await page.mouse.up();
 await opponentTarget.waitFor({ state: "detached", timeout: 10_000 });
@@ -666,6 +670,10 @@ await page.mouse.down();
 await pause(450);
 await moveWithPauses(weaponAttackStart, weaponAttackTarget, 16, 1000);
 assert.equal(await page.locator("#targeting-arrow-head").count(), 1);
+assert.equal(
+    await page.locator(".armed-card-hint").textContent(),
+    "Relâchez sur une cible ennemie pour attaquer avec votre armeAnnuler",
+);
 await pause(650);
 await page.mouse.up();
 await weaponTarget.waitFor({ state: "detached", timeout: 10_000 });

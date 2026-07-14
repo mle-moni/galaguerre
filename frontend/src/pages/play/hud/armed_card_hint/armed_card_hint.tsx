@@ -77,9 +77,13 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
     }
 
     if (minionDragStore.isAttacking) {
+        const hint = store.targetingArrowStore.isDragging
+            ? "Relâchez sur une cible ennemie pour attaquer"
+            : "Touchez une cible ennemie pour attaquer";
+
         return (
             <div className={hintClassName} role="status">
-                <span>Touchez une cible ennemie pour attaquer</span>
+                <span>{hint}</span>
                 {isMobile && (
                     <Button
                         className="armed-card-hint__cancel"
@@ -96,9 +100,13 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
     }
 
     if (weaponDragStore.isAttacking) {
+        const hint = store.targetingArrowStore.isDragging
+            ? "Relâchez sur une cible ennemie pour attaquer avec votre arme"
+            : "Touchez une cible ennemie pour attaquer avec votre arme";
+
         return (
             <div className={hintClassName} role="status">
-                <span>Touchez une cible ennemie pour attaquer avec votre arme</span>
+                <span>{hint}</span>
                 {isMobile && (
                     <Button
                         className="armed-card-hint__cancel"
