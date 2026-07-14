@@ -358,6 +358,39 @@ test.group("SILENCE action", () => {
         });
     });
 
+    test("re-silencing removes buffs applied after first silence", ({ assert }) => {
+        const target = createMinionState(
+            createMinionCard({ uuid: "target", attack: 1, health: 1 }),
+        );
+        applyBoostToMinion(target, createBoostSnapshot({ attack: 1, health: 1 }));
+
+        const game = createGame(
+            createGameData({
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, target),
+                },
+            }),
+        );
+
+        applySilenceToMinion(game, game.data.playerTwo, 0);
+        assertBoardIndex(assert, game, "playerTwo", 0, { attack: 1, health: 1, maxHealth: 1 });
+
+        applyBoostToMinion(
+            game.data.playerTwo.board[0]!,
+            createBoostSnapshot({ attack: 3, health: 3 }),
+        );
+        assertBoardIndex(assert, game, "playerTwo", 0, { attack: 4, health: 4, maxHealth: 4 });
+
+        applySilenceToMinion(game, game.data.playerTwo, 0);
+
+        assertBoardIndex(assert, game, "playerTwo", 0, {
+            attack: 1,
+            health: 1,
+            maxHealth: 1,
+        });
+        assert.isTrue(game.data.playerTwo.board[0]!.isSilenced);
+    });
+
     test("targeted silence via battlecry", ({ assert }) => {
         const enemyCard = createMinionCard({ uuid: "enemy", attack: 1, health: 1 });
         const enemyMinion = createMinionState(enemyCard);

@@ -52,11 +52,14 @@ const resetMinionKeywordsOnSilence = (minion: MinionState): void => {
 
 export const applySilenceToMinion = (game: Game, owner: GamePlayer, boardIndex: number): void => {
     const minion = owner.board[boardIndex];
-    if (!minion || minion.originalCard.type !== "MINION" || minion.isSilenced) return;
+    if (!minion || minion.originalCard.type !== "MINION") return;
 
     const card = minion.originalCard;
+    const wasAlreadySilenced = minion.isSilenced;
 
-    revertPassiveAurasForSource(game, owner, minion);
+    if (!wasAlreadySilenced) {
+        revertPassiveAurasForSource(game, owner, minion);
+    }
 
     minion.attack = card.attack;
     minion.maxHealth = card.health;
