@@ -17,7 +17,11 @@ export const MobilePlayerBar = observer(({ me }: MobilePlayerBarProps) => {
 
     return (
         <div className="mobile-bar mobile-bar--player">
-            <MobileHeroStrip player={me} deckCount={me.deckCards.length} />
+            <MobileHeroStrip
+                player={me}
+                handCount={me.hand.length}
+                deckCount={me.deckCards.length}
+            />
             <div
                 className={clsx(
                     "mobile-bar__actions",

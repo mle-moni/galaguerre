@@ -322,7 +322,11 @@ export const MobileHeroStrip = observer(
                             icon={<IconCards />}
                             label="Cartes en main"
                             displayLabel="Main"
-                            description="Nombre de cartes actuellement en main chez l'adversaire."
+                            description={
+                                isOpponent
+                                    ? "Nombre de cartes actuellement en main chez l'adversaire."
+                                    : "Nombre de cartes actuellement dans votre main."
+                            }
                             className="mobile-bar__badge--hand"
                         />
                     )}

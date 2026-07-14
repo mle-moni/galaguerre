@@ -1,6 +1,6 @@
 import type { GamePlayer } from "#api_types/game.types";
 
-import { IconHeart } from "@tabler/icons-react";
+import { IconCards, IconHeart } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { type MouseEvent, type PointerEvent as ReactPointerEvent, useRef } from "react";
@@ -144,6 +144,7 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
 
     const heroSpotOwner = isOpponent ? "OPPONENT" : "PLAYER";
     const isDying = store.narrativeDirector.dyingHeroOwners.includes(heroSpotOwner);
+    const handCount = player.hand.length;
     const deckCount = player.deckCards.length;
 
     return (
@@ -209,6 +210,15 @@ export const PlayerInfos = observer<PlayerInfosProps>(({ player, label, isOppone
                         <span className="hero-panel__stat-value">
                             {player.mana} / {maxMana}
                         </span>
+                    </div>
+                    <div className="hero-panel__stat">
+                        <IconCards
+                            className="hero-panel__stat-icon hero-panel__stat-icon--hand"
+                            size={18}
+                            stroke={2}
+                            aria-hidden
+                        />
+                        <span className="hero-panel__stat-label">{handCount} en main</span>
                     </div>
                     <div className="hero-panel__stat">
                         <img

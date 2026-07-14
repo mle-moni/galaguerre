@@ -79,6 +79,10 @@
 	color: #ef4444;
 }
 
+.hero-panel__stat-icon--hand {
+	color: #dec99d;
+}
+
 .hero-panel__stat-value {
 	font-size: 0.8rem;
 	font-weight: 700;
@@ -92,6 +96,7 @@
 	color: var(--gg-text-muted);
 	flex: 1;
 	min-width: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .hero-panel__stat-badge {
