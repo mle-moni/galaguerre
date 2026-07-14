@@ -130,6 +130,7 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
                     showDetailButton
                     attack={state.attack}
                     health={state.health}
+                    minionState={state}
                 >
                     {content}
                 </CardMobilePreviewButton>
