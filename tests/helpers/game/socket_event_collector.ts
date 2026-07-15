@@ -13,16 +13,21 @@ export interface EmittedEvent {
 let emittedEvents: EmittedEvent[] = [];
 let originalIo: Server | undefined;
 
+const createBroadcastOperator = (rooms: string | string[]) => ({
+    emit(event: string, data: unknown) {
+        emittedEvents.push({ event, data, rooms });
+    },
+    except(_exceptRooms: string | string[]) {
+        return createBroadcastOperator(rooms);
+    },
+});
+
 export const installSocketCollector = (): void => {
     emittedEvents = [];
     originalIo = WS.io;
     WS.io = {
         to(rooms: string | string[]) {
-            return {
-                emit(event: string, data: unknown) {
-                    emittedEvents.push({ event, data, rooms });
-                },
-            };
+            return createBroadcastOperator(rooms);
         },
     } as Server;
 };
