@@ -2,15 +2,19 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import type { ApiUser } from "#api_types/auth.types";
 import type {
+    ActiveGamesCountResponse,
     CancelGameSearchResponse,
     GameSearchHeartbeatResponse,
     GameSearchResponse,
 } from "#api_types/matchmaking.types";
 import { me } from "#controllers/auth/me";
 import { cancelGameSearch } from "#controllers/games/cancel_game_search";
+import { countActiveGames } from "#controllers/games/count_active_games";
 import { createTrainingGame } from "#controllers/games/create_training_game";
 import { gameSearch } from "#controllers/games/game_search";
 import { gameSearchHeartbeat } from "#controllers/games/game_search_heartbeat";
+import { terminateGame } from "#controllers/games/terminate_game";
+import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { parseMinionData } from "#galaguerre/card_definition.schema";
 import Card from "#models/card";
 import Deck from "#models/deck";
@@ -24,6 +28,7 @@ import {
     addMatchmakingQueueItem,
     findQueueItemByUserId,
 } from "#services/sockets/matchmaking";
+import { canNotifyOpponentWaiting } from "#services/sockets/matchmaking_notifications";
 import { defaultMinionData } from "#database/seed_data/cards/define_card";
 import { getActiveCardSetId } from "#tests/helpers/card_set";
 import { bindUserIds, createTestUsers } from "#tests/helpers/game/game_factory";
@@ -129,6 +134,22 @@ test.group("matchmaking api", (group) => {
         assert.isString(result.searchSessionId);
         assert.equal(MATCHMAKING_QUEUE.length, 1);
         assert.equal(MATCHMAKING_QUEUE[0]!.userId, user.id);
+        assert.isTrue(canNotifyOpponentWaiting(user.id));
+    });
+
+    test("duplicate gameSearch does not create a new lone waiting notification", async ({
+        assert,
+    }) => {
+        const user = await createUser("dedup-notify");
+        await createValidDeckForUser(user.id, "dedup-notify");
+
+        const { ctx } = createMockContext(user);
+        await gameSearch(ctx);
+        assert.isTrue(canNotifyOpponentWaiting(user.id));
+
+        await gameSearch(ctx);
+        assert.isTrue(canNotifyOpponentWaiting(user.id));
+        assert.equal(MATCHMAKING_QUEUE.length, 1);
     });
 
     test("duplicate gameSearch returns the same session", async ({ assert }) => {
@@ -145,7 +166,7 @@ test.group("matchmaking api", (group) => {
 
     test("me exposes the active matchmaking session", async ({ assert }) => {
         const user = await createUser("me");
-        const sessionId = addMatchmakingQueueItem(user.id);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(user.id);
 
         const { ctx } = createMockContext(user);
         const result = expectResult<ApiUser>(await me(ctx));
@@ -155,7 +176,7 @@ test.group("matchmaking api", (group) => {
 
     test("cancelGameSearch removes the session", async ({ assert }) => {
         const user = await createUser("cancel");
-        const sessionId = addMatchmakingQueueItem(user.id);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(user.id);
 
         const { ctx } = createMockContext(user, { searchSessionId: sessionId });
         const result = expectResult<CancelGameSearchResponse>(
@@ -174,7 +195,7 @@ test.group("matchmaking api", (group) => {
 
     test("heartbeat returns searching while session is active", async ({ assert }) => {
         const user = await createUser("heartbeat");
-        const sessionId = addMatchmakingQueueItem(user.id);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(user.id);
 
         const { ctx } = createMockContext(user, { searchSessionId: sessionId });
         const result = expectResult<GameSearchHeartbeatResponse>(
@@ -186,7 +207,7 @@ test.group("matchmaking api", (group) => {
 
     test("heartbeat returns idle for expired sessions", async ({ assert }) => {
         const user = await createUser("expired");
-        const sessionId = addMatchmakingQueueItem(user.id);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(user.id);
         MATCHMAKING_QUEUE[0]!.lastHeartbeatAt = Date.now() - MATCHMAKING_TTL_MS - 1;
 
         const { ctx } = createMockContext(user, { searchSessionId: sessionId });
@@ -199,7 +220,7 @@ test.group("matchmaking api", (group) => {
 
     test("heartbeat returns matched when user has an active game", async ({ assert }) => {
         const { playerOne, playerTwo } = await createTestUsers();
-        const sessionId = addMatchmakingQueueItem(playerOne.id);
+        const sessionId = addMatchmakingQueueItem(playerOne.id).searchSessionId;
 
         const game = await Game.create({
             playerOneId: playerOne.id,
@@ -253,7 +274,7 @@ test.group("matchmaking api", (group) => {
         const joiner = await createUser("joiner");
         await createValidDeckForUser(joiner.id, "joiner");
 
-        const ghostSessionId = addMatchmakingQueueItem(waitingPlayer.id);
+        const ghostSessionId = addMatchmakingQueueItem(waitingPlayer.id).searchSessionId;
         MATCHMAKING_QUEUE[0]!.lastHeartbeatAt = Date.now() - MATCHMAKING_TTL_MS - 1;
 
         const result = expectResult<GameSearchResponse>(
@@ -335,5 +356,45 @@ test.group("matchmaking api", (group) => {
         const meResult = expectResult<ApiUser>(await me(meCtx));
         assert.isNull(meResult.matchmakingSearchSessionId);
         assert.equal(meResult.currentGameId, result.gameId);
+    });
+
+    test("countActiveGames returns zero when no games are active", async ({ assert }) => {
+        const result = expectResult<ActiveGamesCountResponse>(await countActiveGames());
+        assert.equal(result.count, 0);
+    });
+
+    test("countActiveGames counts all unfinished pvp and training games", async ({ assert }) => {
+        const { playerOne, playerTwo } = await createTestUsers();
+
+        const pvpGame = await Game.create({
+            playerOneId: playerOne.id,
+            playerTwoId: playerTwo.id,
+            data: bindUserIds(createGameData({ state: "MULLIGAN" }), playerOne.id, playerTwo.id),
+            isFinished: false,
+        });
+
+        const trainingGame = await Game.create({
+            playerOneId: playerOne.id,
+            playerTwoId: null,
+            data: bindUserIds(
+                createGameData({ state: "MULLIGAN", isTraining: true }),
+                playerOne.id,
+                TRAINING_AI_USER_ID,
+            ),
+            isFinished: false,
+        });
+
+        const result = expectResult<ActiveGamesCountResponse>(await countActiveGames());
+        assert.equal(result.count, 2);
+
+        await terminateGame(pvpGame);
+
+        const afterTerminate = expectResult<ActiveGamesCountResponse>(await countActiveGames());
+        assert.equal(afterTerminate.count, 1);
+
+        await terminateGame(trainingGame);
+
+        const afterAllFinished = expectResult<ActiveGamesCountResponse>(await countActiveGames());
+        assert.equal(afterAllFinished.count, 0);
     });
 });

@@ -6,8 +6,15 @@ import { getGameStateQueryKey } from "~/hooks/use_game_state";
 import { GAME_INVITES_QUERY_KEY, SENT_GAME_INVITES_QUERY_KEY } from "~/hooks/use_game_invites";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
 import { fetchCurrentUser } from "./fetch_current_user.js";
+import { startGameSearch } from "./matchmaking.js";
 import { queryClient } from "./query_client.js";
-import { notifyApiError, notifyError, notifySuccess } from "./toasts.js";
+import {
+    dismissOpponentWaitingToast,
+    notifyApiError,
+    notifyError,
+    notifyOpponentWaiting,
+    notifySuccess,
+} from "./toasts.js";
 import { GAME_STORE } from "~/stores/store_singletons";
 import {
     markSocketDisconnected,
@@ -18,6 +25,34 @@ import {
 } from "./ws_client.js";
 
 let isReauthenticating = false;
+
+const OPPONENT_WAITING_HIDDEN_ROUTES = new Set(["/play", "/login", "/register"]);
+
+const shouldShowOpponentWaitingToast = () => {
+    if (OPPONENT_WAITING_HIDDEN_ROUTES.has(window.location.pathname)) return false;
+
+    const user = queryClient.getQueryData<ApiUser | null>(USER_QUERY_KEY);
+    if (!user) return false;
+    if (user.currentGameId) return false;
+    if (user.matchmakingSearchSessionId) return false;
+
+    return true;
+};
+
+const joinMatchmakingQueue = async () => {
+    try {
+        const data = await startGameSearch();
+
+        if (!data.searchSessionId) return;
+
+        queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
+            if (!oldUser) return oldUser;
+            return { ...oldUser, matchmakingSearchSessionId: data.searchSessionId ?? null };
+        });
+    } catch (error) {
+        notifyApiError(error);
+    }
+};
 
 const WS_EVENTS_SETUP_KEY = "__galaguerre_ws_events_setup__";
 
@@ -104,6 +139,16 @@ export const setupEvents = (socket: Socket) => {
 
     subscribeToSocketEvent("notify_success", ({ message }) => {
         notifySuccess(message);
+    });
+
+    subscribeToSocketEvent("matchmaking:opponent_waiting", () => {
+        if (!shouldShowOpponentWaitingToast()) return;
+
+        notifyOpponentWaiting({ onJoin: () => void joinMatchmakingQueue() });
+    });
+
+    subscribeToSocketEvent("matchmaking:opponent_waiting_cancelled", () => {
+        dismissOpponentWaitingToast();
     });
 
     subscribeToSocketEvent("game:created", ({ gameId }) => {

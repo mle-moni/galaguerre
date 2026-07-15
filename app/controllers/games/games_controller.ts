@@ -1,5 +1,6 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import { cancelGameSearch, cancelSchema } from "./cancel_game_search.js";
+import { countActiveGames } from "./count_active_games.js";
 import { createTrainingGame } from "./create_training_game.js";
 import { gameSearch } from "./game_search.js";
 import { gameSearchHeartbeat, heartbeatSchema } from "./game_search_heartbeat.js";
@@ -26,6 +27,10 @@ export default class GamesController {
     async searchHeartbeat(ctx: HttpContext) {
         const { searchSessionId } = await ctx.request.validateUsing(heartbeatSchema);
         return gameSearchHeartbeat(ctx, searchSessionId);
+    }
+
+    async activeCount() {
+        return countActiveGames();
     }
 
     async show(ctx: HttpContext) {

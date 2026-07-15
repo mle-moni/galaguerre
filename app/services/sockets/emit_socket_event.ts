@@ -17,6 +17,15 @@ export const emitSocketEvent = <T extends SocketEventKey>(
     WS.io?.to(toRooms).emit(key, data);
 };
 
+export const emitSocketEventExcept = <T extends SocketEventKey>(
+    key: T,
+    data: SocketEventByKey[T],
+    toRooms: string[] | string,
+    exceptRooms: string[] | string,
+) => {
+    WS.io?.to(toRooms).except(exceptRooms).emit(key, data);
+};
+
 export const subscribeToClientSocketEvent = <T extends ClientSocketEventKey>(
     socket: Socket,
     key: T,

@@ -86,6 +86,7 @@ router
         router.post("/decks/import", [controllers.deckShares.DeckShares, "import"]);
         router.resource("decks", controllers.decks.Decks).apiOnly();
         router.post("/games/training", [controllers.games.Games, "training"]);
+        router.get("/games/active-count", [controllers.games.Games, "activeCount"]);
         router.delete("/games/search", [controllers.games.Games, "cancelSearch"]);
         router.post("/games/search/heartbeat", [controllers.games.Games, "searchHeartbeat"]);
         router.resource("games", controllers.games.Games).apiOnly();

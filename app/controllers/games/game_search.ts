@@ -13,6 +13,7 @@ import {
     findQueueItemByUserId,
     removeMatchmakingQueueItem,
 } from "#services/sockets/matchmaking";
+import { notifyOpponentWaiting } from "#services/sockets/matchmaking_notifications";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import type { HttpContext } from "@adonisjs/core/http";
 import { preloadDeckCardSet } from "#controllers/decks/deck_utils";
@@ -67,8 +68,7 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
     }
 
     if (!opponent) {
-        const searchSessionId = addMatchmakingQueueItem(user.id);
-        return { message: "Waiting for an opponent to join...", searchSessionId };
+        return queueAndNotify(user.id);
     }
 
     const opponentDeck = await Deck.query()
@@ -79,14 +79,12 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         .first();
 
     if (!opponentDeck) {
-        const searchSessionId = addMatchmakingQueueItem(user.id);
-        return { message: "Waiting for an opponent to join...", searchSessionId };
+        return queueAndNotify(user.id);
     }
 
     const opponentSerializedDeck = serializeDeck(opponentDeck);
     if (!opponentSerializedDeck.valid) {
-        const searchSessionId = addMatchmakingQueueItem(user.id);
-        return { message: "Waiting for an opponent to join...", searchSessionId };
+        return queueAndNotify(user.id);
     }
 
     let game;
@@ -111,8 +109,7 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
         game = await createGame({ playerOne, playerTwo });
     } catch (error) {
         if (error instanceof DeckValidationError) {
-            const searchSessionId = addMatchmakingQueueItem(user.id);
-            return { message: "Waiting for an opponent to join...", searchSessionId };
+            return queueAndNotify(user.id);
         }
 
         throw error;
@@ -136,4 +133,14 @@ export const gameSearch = async ({ auth, response }: HttpContext) => {
 
 const generatePseudo = (user: User) => {
     return user.pseudo ?? user.email.split("@")[0];
+};
+
+const queueAndNotify = (userId: number) => {
+    const { searchSessionId, isNewEntry } = addMatchmakingQueueItem(userId);
+
+    if (isNewEntry) {
+        notifyOpponentWaiting(userId);
+    }
+
+    return { message: "Waiting for an opponent to join...", searchSessionId };
 };

@@ -17,15 +17,16 @@ test.group("matchmaking queue", (group) => {
     });
 
     test("addMatchmakingQueueItem returns the same session for duplicate joins", ({ assert }) => {
-        const firstSessionId = addMatchmakingQueueItem(42);
-        const secondSessionId = addMatchmakingQueueItem(42);
+        const first = addMatchmakingQueueItem(42);
+        const second = addMatchmakingQueueItem(42);
 
-        assert.equal(firstSessionId, secondSessionId);
+        assert.equal(first.searchSessionId, second.searchSessionId);
+        assert.isFalse(second.isNewEntry);
         assert.equal(MATCHMAKING_QUEUE.length, 1);
     });
 
     test("touchHeartbeat keeps an active session alive", ({ assert }) => {
-        const sessionId = addMatchmakingQueueItem(7);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(7);
         const item = MATCHMAKING_QUEUE[0]!;
         item.lastHeartbeatAt = Date.now() - MATCHMAKING_TTL_MS + 1_000;
 
@@ -37,7 +38,7 @@ test.group("matchmaking queue", (group) => {
     });
 
     test("purgeStaleEntries removes expired sessions", ({ assert }) => {
-        const sessionId = addMatchmakingQueueItem(9);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(9);
         MATCHMAKING_QUEUE[0]!.lastHeartbeatAt = Date.now() - MATCHMAKING_TTL_MS - 1;
 
         purgeStaleEntries();
@@ -47,7 +48,7 @@ test.group("matchmaking queue", (group) => {
     });
 
     test("cancelSearch removes only the matching user session", ({ assert }) => {
-        const sessionId = addMatchmakingQueueItem(3);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(3);
         addMatchmakingQueueItem(4);
 
         const cancelled = cancelSearch(sessionId, 3);
@@ -58,10 +59,10 @@ test.group("matchmaking queue", (group) => {
     });
 
     test("claimOpponent skips stale entries and self", ({ assert }) => {
-        const staleSessionId = addMatchmakingQueueItem(1);
+        const { searchSessionId: staleSessionId } = addMatchmakingQueueItem(1);
         MATCHMAKING_QUEUE[0]!.lastHeartbeatAt = Date.now() - MATCHMAKING_TTL_MS - 1;
 
-        const waitingSessionId = addMatchmakingQueueItem(2);
+        const { searchSessionId: waitingSessionId } = addMatchmakingQueueItem(2);
         addMatchmakingQueueItem(3);
 
         const opponent = claimOpponent(3);
@@ -75,7 +76,7 @@ test.group("matchmaking queue", (group) => {
     });
 
     test("findQueueItemByUserId returns null after cancel", ({ assert }) => {
-        const sessionId = addMatchmakingQueueItem(11);
+        const { searchSessionId: sessionId } = addMatchmakingQueueItem(11);
 
         cancelSearch(sessionId, 11);
 

@@ -66,6 +66,7 @@ export const controllers = {
     games: {
         AbandonGame: () => import("#controllers/games/abandon_game"),
         CancelGameSearch: () => import("#controllers/games/cancel_game_search"),
+        CountActiveGames: () => import("#controllers/games/count_active_games"),
         CreateGame: () => import("#controllers/games/create_game"),
         CreateTrainingGame: () => import("#controllers/games/create_training_game"),
         discover: {

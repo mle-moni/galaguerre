@@ -60,6 +60,7 @@ export type ScannedRoutes = {
         "decks.update": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "decks.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "games.training": { paramsTuple?: []; params?: {} };
+        "games.active_count": { paramsTuple?: []; params?: {} };
         "games.cancel_search": { paramsTuple?: []; params?: {} };
         "games.search_heartbeat": { paramsTuple?: []; params?: {} };
         "games.index": { paramsTuple?: []; params?: {} };
@@ -97,6 +98,7 @@ export type ScannedRoutes = {
         "events.index": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "games.active_count": { paramsTuple?: []; params?: {} };
         "games.index": { paramsTuple?: []; params?: {} };
         "games.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
     };
@@ -129,6 +131,7 @@ export type ScannedRoutes = {
         "events.index": { paramsTuple?: []; params?: {} };
         "decks.index": { paramsTuple?: []; params?: {} };
         "decks.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "games.active_count": { paramsTuple?: []; params?: {} };
         "games.index": { paramsTuple?: []; params?: {} };
         "games.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
     };

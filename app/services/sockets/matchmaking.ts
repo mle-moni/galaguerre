@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { notifyOpponentWaitingCancelledIfQueueEmpty } from "#services/sockets/matchmaking_notifications";
 
 export interface MatchmakingQueueItem {
     userId: number;
@@ -19,10 +20,16 @@ const now = () => Date.now();
 const isStale = (item: MatchmakingQueueItem) => now() - item.lastHeartbeatAt > MATCHMAKING_TTL_MS;
 
 export const purgeStaleEntries = () => {
+    const hadEntries = MATCHMAKING_QUEUE.length > 0;
+
     for (let index = MATCHMAKING_QUEUE.length - 1; index >= 0; index--) {
         if (isStale(MATCHMAKING_QUEUE[index]!)) {
             MATCHMAKING_QUEUE.splice(index, 1);
         }
+    }
+
+    if (hadEntries && MATCHMAKING_QUEUE.length === 0) {
+        notifyOpponentWaitingCancelledIfQueueEmpty();
     }
 };
 
@@ -36,14 +43,16 @@ export const findQueueItemBySessionId = (searchSessionId: string) => {
     return MATCHMAKING_QUEUE.find((item) => item.searchSessionId === searchSessionId) ?? null;
 };
 
-export const addMatchmakingQueueItem = (userId: number): string => {
+export const addMatchmakingQueueItem = (
+    userId: number,
+): { searchSessionId: string; isNewEntry: boolean } => {
     cancelMatchmakingRemoval(userId);
     purgeStaleEntries();
 
     const existing = findQueueItemByUserId(userId);
     if (existing) {
         existing.lastHeartbeatAt = now();
-        return existing.searchSessionId;
+        return { searchSessionId: existing.searchSessionId, isNewEntry: false };
     }
 
     const searchSessionId = randomUUID();
@@ -53,7 +62,7 @@ export const addMatchmakingQueueItem = (userId: number): string => {
         lastHeartbeatAt: now(),
     });
 
-    return searchSessionId;
+    return { searchSessionId, isNewEntry: true };
 };
 
 export const removeMatchmakingQueueItem = (userId: number) => {
@@ -61,7 +70,13 @@ export const removeMatchmakingQueueItem = (userId: number) => {
 
     if (index === -1) return;
 
+    const wasLoneSearcher = MATCHMAKING_QUEUE.length === 1;
+
     MATCHMAKING_QUEUE.splice(index, 1);
+
+    if (wasLoneSearcher) {
+        notifyOpponentWaitingCancelledIfQueueEmpty();
+    }
 };
 
 export const touchHeartbeat = (searchSessionId: string) => {
@@ -83,8 +98,15 @@ export const cancelSearch = (searchSessionId: string, userId: number) => {
 
     if (index === -1) return false;
 
+    const wasLoneSearcher = MATCHMAKING_QUEUE.length === 1;
+
     MATCHMAKING_QUEUE.splice(index, 1);
     cancelMatchmakingRemoval(userId);
+
+    if (wasLoneSearcher) {
+        notifyOpponentWaitingCancelledIfQueueEmpty();
+    }
+
     return true;
 };
 
@@ -96,6 +118,10 @@ export const claimOpponent = (excludeUserId: number) => {
 
         if (opponent.userId === excludeUserId || isStale(opponent)) {
             continue;
+        }
+
+        if (MATCHMAKING_QUEUE.length === 0) {
+            notifyOpponentWaitingCancelledIfQueueEmpty();
         }
 
         return opponent;

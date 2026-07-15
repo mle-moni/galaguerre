@@ -19,3 +19,7 @@ export type GameSearchHeartbeatResponse =
     | { status: "searching" }
     | { status: "idle" }
     | { status: "matched"; gameId: number };
+
+export interface ActiveGamesCountResponse {
+    count: number;
+}

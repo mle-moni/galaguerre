@@ -85,6 +85,7 @@ export interface ApiDefinition {
     };
     games: {
         training: (typeof routes)["games.training"];
+        activeCount: (typeof routes)["games.active_count"];
         cancelSearch: (typeof routes)["games.cancel_search"];
         searchHeartbeat: (typeof routes)["games.search_heartbeat"];
         index: (typeof routes)["games.index"];

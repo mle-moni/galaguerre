@@ -1191,6 +1191,26 @@ export interface Registry {
             >;
         };
     };
+    "games.active_count": {
+        methods: ["GET", "HEAD"];
+        pattern: "/api/games/active-count";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<import("#controllers/games/games_controller").default["activeCount"]>
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<import("#controllers/games/games_controller").default["activeCount"]>
+                >
+            >;
+        };
+    };
     "games.cancel_search": {
         methods: ["DELETE"];
         pattern: "/api/games/search";

@@ -11,6 +11,8 @@ export interface SocketEventByKey {
     "game:update": { game: ApiGame; presentation?: GamePresentationUpdate };
     "game:invite_received": { invite: ApiGameInvite };
     "game:invite_cancelled": { inviteId: number };
+    "matchmaking:opponent_waiting": Record<string, never>;
+    "matchmaking:opponent_waiting_cancelled": Record<string, never>;
 }
 
 export type SocketEventKey = keyof SocketEventByKey;

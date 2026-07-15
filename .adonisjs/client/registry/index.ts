@@ -513,6 +513,16 @@ const routes = {
         ],
         types: placeholder as Registry["games.training"]["types"],
     },
+    "games.active_count": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/games/active-count",
+        tokens: [
+            { old: "/api/games/active-count", type: 0, val: "api", end: "" },
+            { old: "/api/games/active-count", type: 0, val: "games", end: "" },
+            { old: "/api/games/active-count", type: 0, val: "active-count", end: "" },
+        ],
+        types: placeholder as Registry["games.active_count"]["types"],
+    },
     "games.cancel_search": {
         methods: ["DELETE"],
         pattern: "/api/games/search",

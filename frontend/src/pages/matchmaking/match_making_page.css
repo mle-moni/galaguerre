@@ -54,6 +54,15 @@
     border-bottom: 1px solid rgba(201, 162, 39, 0.45);
 }
 
+.matchmaking-panel__active-games {
+    margin: 0;
+    padding: 0 1.5rem 0.75rem;
+    font-size: 0.8rem;
+    text-align: center;
+    color: rgba(44, 36, 22, 0.65);
+    border-bottom: 1px solid rgba(201, 162, 39, 0.45);
+}
+
 .matchmaking-panel__body {
     padding: 1.25rem 1.5rem 1.5rem;
     display: flex;

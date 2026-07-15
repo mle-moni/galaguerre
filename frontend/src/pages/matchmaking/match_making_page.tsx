@@ -5,11 +5,13 @@ import { observer } from "mobx-react-lite";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { CenteredLoader } from "~/components/centered_loader";
+import { useActiveGamesCountQuery } from "~/hooks/use_active_games_count";
 import { useApiMutation } from "~/hooks/use_api_mutation";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
 import { useMatchmaking } from "~/hooks/use_matchmaking";
 import { useUser } from "~/hooks/use_user";
+import { formatActiveGamesCount } from "~/helpers/format_active_games_count";
 import { applyTrainingGameStarted } from "~/services/apply_training_game_started";
 import { client } from "~/services/client";
 import { getDeckFeaturedCard } from "~/utils/get_deck_featured_card";
@@ -26,6 +28,7 @@ export const MatchmakingPage = observer(() => {
     const { isSearching, startSearch, isStarting } = useMatchmaking();
     const decksQuery = useDecksQuery();
     const cardsQuery = useCardsQuery();
+    const activeGamesCountQuery = useActiveGamesCountQuery();
 
     const startTrainingMutation = useApiMutation({
         mutationFn: async () => {
@@ -50,6 +53,7 @@ export const MatchmakingPage = observer(() => {
 
     const featuredCard = getDeckFeaturedCard(deckComposition, catalogById);
     const canSearch = selectedDeck?.valid ?? false;
+    const activeGamesCount = activeGamesCountQuery.data?.count ?? 0;
 
     return (
         <div className="matchmaking-page">
@@ -59,6 +63,12 @@ export const MatchmakingPage = observer(() => {
             <div className="matchmaking-page__content">
                 <div className="matchmaking-panel">
                     <div className="matchmaking-panel__header">Rechercher une partie</div>
+
+                    {activeGamesCount > 0 && (
+                        <p className="matchmaking-panel__active-games">
+                            {formatActiveGamesCount(activeGamesCount)}
+                        </p>
+                    )}
 
                     <div className="matchmaking-panel__body">
                         <div className="matchmaking-panel__section">
