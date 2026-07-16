@@ -5,7 +5,7 @@ import {
     findAuthoritativeMinion,
     opponentBoardHasAttackableTaunt,
 } from "~/helpers/combat_target_validation";
-import { canMinionAttack } from "~/helpers/minion_combat";
+import { canMinionAttack, canMinionAttackHero } from "~/helpers/minion_combat";
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import type { ActionTarget, MinionState, SpotOwner } from "#api_types/game.types";
 import { type SlotsBorderColor, buildSlotsBorderColor, spotsToSameColor } from "./CardDragStore.js";
@@ -124,16 +124,14 @@ export class MinionDragStore {
 
         if (!this.gameStore.isMyTurn || this.attackingMinion === null) return transparent;
         if (!isOpponent) return transparent;
-        if (
-            !canMinionAttack(
-                this.attackingMinion,
-                this.gameStore.authoritativeGame.data.currentRound,
-            )
-        ) {
+
+        const currentRound = this.gameStore.authoritativeGame.data.currentRound;
+        if (!canMinionAttack(this.attackingMinion, currentRound)) {
             return transparent;
         }
 
         if (opponentBoardHasAttackableTaunt(this.gameStore)) return "red";
+        if (!canMinionAttackHero(this.attackingMinion, currentRound)) return "red";
 
         return "green";
     }
