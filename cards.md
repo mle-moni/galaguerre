@@ -498,3 +498,7 @@ Format compact pour construction de deck par LLM.
 ### #178 Valentin
 - Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Légendaire | Famille: Développeur
 - Passif : Vos Cris de guerre se déclenchent 1 fois de plus.
+
+### #179 Mise en prod du vendredi
+- Coût: 7 | Type: SPELL | Stats: — | Rareté: Épique | Famille: —
+- Effet : Détruit un monstre. Effet : Invoque un monstre (Dev Back-End) sur votre plateau. Effet : Invoque un monstre (Dev Front-End) sur votre plateau.

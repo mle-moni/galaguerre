@@ -1113,6 +1113,16 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [destroyAction(targetedAllyMinion(), true), drawAction(2)],
     ),
     defineSpell(
+        179,
+        {
+            ...gal("Mise en prod du vendredi", 7),
+            imageUrl: "/card-covers/galadrim/mise-en-prod-du-vendredi.webp",
+        },
+        [destroyAction(targetedAnyMinion(), true), summonCardId(64), summonCardId(63)],
+        [],
+        { rarity: "EPIC" },
+    ),
+    defineSpell(
         103,
         {
             ...gal("Team Building", 3),
