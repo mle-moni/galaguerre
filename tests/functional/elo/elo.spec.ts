@@ -194,8 +194,20 @@ test.group("elo", (group) => {
             (quest) => quest.questType === "WIN_GAME",
         )!;
         const before = {
-            playerOne: { elo: playerOne.elo, wins: playerOne.wins, losses: playerOne.losses, goldCoins: playerOne.goldCoins, xp: playerOne.xp },
-            playerTwo: { elo: playerTwo.elo, wins: playerTwo.wins, losses: playerTwo.losses, goldCoins: playerTwo.goldCoins, xp: playerTwo.xp },
+            playerOne: {
+                elo: playerOne.elo,
+                wins: playerOne.wins,
+                losses: playerOne.losses,
+                goldCoins: playerOne.goldCoins,
+                xp: playerOne.xp,
+            },
+            playerTwo: {
+                elo: playerTwo.elo,
+                wins: playerTwo.wins,
+                losses: playerTwo.losses,
+                goldCoins: playerTwo.goldCoins,
+                xp: playerTwo.xp,
+            },
             playerOneQuest: playerOneQuest.progress,
             playerTwoQuest: playerTwoQuest.progress,
         };

@@ -12,7 +12,13 @@ const TRIGGERED_PASSIVE_LABELS: Record<string, string> = {
     SUMMON: "Invocation",
 };
 
-export const BoardMinionEffectIcons = ({ card }: { card: MinionCard }) => {
+export const BoardMinionEffectIcons = ({
+    card,
+    isSilenced = false,
+}: {
+    card: MinionCard;
+    isSilenced?: boolean;
+}) => {
     const icons: { key: string; symbol: string; title: string }[] = [];
 
     for (const effect of getMinionPowerEffects(card.minionPowers)) {
@@ -23,19 +29,21 @@ export const BoardMinionEffectIcons = ({ card }: { card: MinionCard }) => {
         });
     }
 
-    if (card.deathrattleActions?.length) {
+    if (!isSilenced && card.deathrattleActions?.length) {
         icons.push({ key: "deathrattle", symbol: "💀", title: "Dernier souffle" });
     }
 
-    const triggeredPassives = (card.passives ?? []).filter((passive) => passive.triggersOn);
-    if (triggeredPassives.length > 0) {
-        const titles = triggeredPassives
-            .map(
-                (passive) =>
-                    TRIGGERED_PASSIVE_LABELS[passive.triggersOn ?? ""] ?? "Effet déclenché",
-            )
-            .join(", ");
-        icons.push({ key: "triggered", symbol: "⚡", title: titles });
+    if (!isSilenced) {
+        const triggeredPassives = (card.passives ?? []).filter((passive) => passive.triggersOn);
+        if (triggeredPassives.length > 0) {
+            const titles = triggeredPassives
+                .map(
+                    (passive) =>
+                        TRIGGERED_PASSIVE_LABELS[passive.triggersOn ?? ""] ?? "Effet déclenché",
+                )
+                .join(", ");
+            icons.push({ key: "triggered", symbol: "⚡", title: titles });
+        }
     }
 
     if (icons.length === 0) return null;

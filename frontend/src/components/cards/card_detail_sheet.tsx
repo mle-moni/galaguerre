@@ -64,14 +64,14 @@ const getActiveEffects = (card: MinionCard, state: MinionState): ActiveEffect[] 
             label: "Réduit au silence",
             tone: "negative",
         });
-    } else {
-        for (const effect of getMinionPowerEffects(card.minionPowers)) {
-            effects.push({
-                key: `keyword-${effect}`,
-                symbol: EFFECT_SYMBOLS[effect] ?? "✦",
-                label: effect,
-            });
-        }
+    }
+
+    for (const effect of getMinionPowerEffects(card.minionPowers)) {
+        effects.push({
+            key: `keyword-${effect}`,
+            symbol: EFFECT_SYMBOLS[effect] ?? "✦",
+            label: effect,
+        });
     }
 
     return effects;

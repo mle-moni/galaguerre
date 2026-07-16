@@ -66,6 +66,8 @@ export const applySilenceToMinion = (game: Game, owner: GamePlayer, boardIndex: 
     minion.health = Math.min(minion.health, minion.maxHealth);
 
     resetMinionKeywordsOnSilence(minion);
+    minion.divineShieldConsumed = false;
+    minion.stealthConsumed = false;
     minion.isSilenced = true;
 
     withNarrativeRecorder((recorder) => {

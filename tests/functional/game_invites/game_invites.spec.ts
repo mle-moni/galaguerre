@@ -152,7 +152,6 @@ test.group("game invites", (group) => {
         assert.equal(invite!.toUserId, invitee.id);
     });
 
-
     test("rejects inviting a player already in a game", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const inviter = await createUser(`inviter-busy-${unique}`, `InviterBusy-${unique}`);

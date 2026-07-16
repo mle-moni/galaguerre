@@ -132,6 +132,7 @@ export const RenderMinion = observer(({ state, spotOwner, style }: MinionToRende
             style={style}
             attackStatus={isOwnMinion ? attackStatus : undefined}
             remainingAttacks={remainingAttacks}
+            isSilenced={state.isSilenced === true}
             wrapper={wrapper}
             onPointerDown={canStartAttack ? handleAttackPointerDown : undefined}
             onPointerMove={canStartAttack ? handleAttackPointerMove : undefined}

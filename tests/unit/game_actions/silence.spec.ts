@@ -3,23 +3,35 @@ import { executeAction } from "#galaguerre/action_engine/execute_action";
 import { killMinion } from "#galaguerre/action_engine/kill_minion";
 import { applySilenceToMinion } from "#galaguerre/action_engine/apply_silence";
 import { applyBoostToMinion } from "#galaguerre/action_engine/apply_boost";
+import {
+    applyDamageToMinion,
+    getMinionHasDivineShield,
+} from "#galaguerre/action_engine/apply_damage_to_minion";
 import { refreshAurasAfterMinionPlayed } from "#galaguerre/passive_engine/refresh_passive_auras";
 import { recalculateMinionKeywords } from "#galaguerre/passive_engine/passive_aura";
 import { triggerPassives } from "#galaguerre/passive_engine/trigger_passives";
+import {
+    canMinionAttack,
+    getMinionIsPoisonous,
+    getMinionMaxAttacks,
+} from "#controllers/games/game_utils";
 import {
     createBoostSnapshot,
     createCardActionSnapshot,
     createEmptyBoard,
     createGameData,
     createMinionCard,
+    createMinionPowersSnapshot,
     createMinionState,
     createMinionTargetSnapshot,
     createPassiveSnapshot,
+    MINION_IDS,
     placeMinion,
 } from "#tests/helpers/game/fixtures";
 import { assertBoardIndex } from "#tests/helpers/game/assertions";
 import { createInMemoryGame } from "#tests/helpers/game/in_memory_game";
 import { runBattlecry } from "#tests/helpers/game/run_battlecry";
+import { runMinionCombat } from "#tests/helpers/game/run_minion_combat";
 
 const createGame = (data: ReturnType<typeof createGameData>) => createInMemoryGame(data);
 
@@ -359,15 +371,88 @@ test.group("SILENCE action", () => {
         });
     });
 
-    test("taunt granted after silence survives keyword recalculation", ({ assert }) => {
+    for (const keyword of [
+        "hasTaunt",
+        "hasCharge",
+        "hasRush",
+        "hasWindfury",
+        "isPoisonous",
+        "hasStealth",
+        "hasDivineShield",
+    ] as const) {
+        test(`${keyword} granted after silence survives keyword recalculation`, ({ assert }) => {
+            const target = createMinionState(
+                createMinionCard({
+                    uuid: "target",
+                    attack: 1,
+                    health: 1,
+                    minionPowers: { [keyword]: true },
+                }),
+            );
+
+            const game = createGame(
+                createGameData({
+                    playerTwo: {
+                        board: placeMinion(createEmptyBoard(), 0, target),
+                    },
+                }),
+            );
+
+            applySilenceToMinion(game, game.data.playerTwo, 0);
+
+            const silenced = game.data.playerTwo.board[0]!;
+            assert.isTrue(silenced.isSilenced);
+            assert.isFalse(
+                silenced.originalCard.type === "MINION" &&
+                    silenced.originalCard.minionPowers[keyword],
+            );
+
+            applyBoostToMinion(
+                silenced,
+                createBoostSnapshot({
+                    minionPowers: createMinionPowersSnapshot({ [keyword]: true }),
+                }),
+            );
+
+            recalculateMinionKeywords(game, silenced);
+
+            const card = game.data.playerTwo.board[0]!.originalCard;
+            assert.isTrue(card.type === "MINION" && card.minionPowers[keyword]);
+            assert.isTrue(game.data.playerTwo.board[0]!.permanentKeywords?.[keyword]);
+        });
+    }
+
+    test("charge granted after silence allows attack on placement turn", ({ assert }) => {
+        const currentRound = 3;
         const target = createMinionState(
-            createMinionCard({
-                uuid: "target",
-                attack: 1,
-                health: 1,
-                minionPowers: { hasTaunt: true },
-                effects: ["Provocation"],
+            createMinionCard({ uuid: "target", attack: 2, health: 2 }),
+            { placedAtRound: currentRound },
+        );
+
+        const game = createGame(
+            createGameData({
+                currentRound,
+                playerOne: {
+                    board: placeMinion(createEmptyBoard(), 0, target),
+                },
             }),
+        );
+
+        applySilenceToMinion(game, game.data.playerOne, 0);
+        applyBoostToMinion(
+            game.data.playerOne.board[0]!,
+            createBoostSnapshot({
+                minionPowers: createMinionPowersSnapshot({ hasCharge: true }),
+            }),
+        );
+        recalculateMinionKeywords(game, game.data.playerOne.board[0]!);
+
+        assert.isTrue(canMinionAttack(game.data.playerOne.board[0]!, currentRound));
+    });
+
+    test("divine shield granted after silence blocks damage after recalculation", ({ assert }) => {
+        const target = createMinionState(
+            createMinionCard({ uuid: "target", attack: 1, health: 3 }),
         );
 
         const game = createGame(
@@ -379,39 +464,103 @@ test.group("SILENCE action", () => {
         );
 
         applySilenceToMinion(game, game.data.playerTwo, 0);
+        applyBoostToMinion(
+            game.data.playerTwo.board[0]!,
+            createBoostSnapshot({
+                minionPowers: createMinionPowersSnapshot({ hasDivineShield: true }),
+            }),
+        );
+        recalculateMinionKeywords(game, game.data.playerTwo.board[0]!);
 
-        const silenced = game.data.playerTwo.board[0]!;
-        assert.isTrue(silenced.isSilenced);
-        assert.isFalse(
-            silenced.originalCard.type === "MINION" && silenced.originalCard.minionPowers.hasTaunt,
+        const minion = game.data.playerTwo.board[0]!;
+        assert.isTrue(getMinionHasDivineShield(minion));
+
+        const result = applyDamageToMinion(
+            game,
+            game.data.playerTwo,
+            0,
+            minion,
+            2,
+            game.data.playerOne,
         );
 
-        applyBoostToMinion(
-            silenced,
-            createBoostSnapshot({
-                attack: 3,
-                health: 3,
-                minionPowers: {
-                    hasTaunt: true,
-                    hasCharge: false,
-                    hasRush: false,
-                    hasWindfury: false,
-                    isPoisonous: false,
-                    hasStealth: false,
-                    hasDivineShield: false,
+        assert.equal(result.damageDealt, 0);
+        assert.equal(game.data.playerTwo.board[0]!.health, 3);
+        assert.isFalse(getMinionHasDivineShield(game.data.playerTwo.board[0]!));
+    });
+
+    test("poisonous granted after silence kills on combat damage", async ({ assert }) => {
+        const attacker = createMinionState(
+            createMinionCard({ uuid: MINION_IDS.attacker, attack: 1, health: 5 }),
+            { placedAtRound: 0 },
+        );
+        const defender = createMinionState(
+            createMinionCard({ uuid: MINION_IDS.target, attack: 1, health: 10 }),
+        );
+
+        const game = createGame(
+            createGameData({
+                currentRound: 2,
+                playerOne: {
+                    board: placeMinion(createEmptyBoard(), 0, attacker),
+                },
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, defender),
                 },
             }),
         );
 
-        recalculateMinionKeywords(game, silenced);
+        applySilenceToMinion(game, game.data.playerOne, 0);
+        applyBoostToMinion(
+            game.data.playerOne.board[0]!,
+            createBoostSnapshot({
+                minionPowers: createMinionPowersSnapshot({ isPoisonous: true }),
+            }),
+        );
+        recalculateMinionKeywords(game, game.data.playerOne.board[0]!);
 
-        const card = game.data.playerTwo.board[0]!.originalCard;
-        assert.isTrue(card.type === "MINION" && card.minionPowers.hasTaunt);
-        assertBoardIndex(assert, game, "playerTwo", 0, {
-            attack: 4,
-            health: 4,
-            maxHealth: 4,
+        assert.isTrue(getMinionIsPoisonous(game.data.playerOne.board[0]!));
+
+        const { game: afterCombat } = await runMinionCombat(game.data, {
+            attackerIndex: 0,
+            targetIndex: 0,
         });
+
+        assert.lengthOf(afterCombat.data.playerTwo.board, 0);
+    });
+
+    test("windfury granted after silence allows a second attack", ({ assert }) => {
+        const currentRound = 4;
+        const minion = createMinionState(
+            createMinionCard({ uuid: "windfury-target", attack: 2, health: 2 }),
+            {
+                placedAtRound: 0,
+                lastActionAtRound: currentRound,
+                attacksThisRound: 1,
+            },
+        );
+
+        const game = createGame(
+            createGameData({
+                currentRound,
+                playerOne: {
+                    board: placeMinion(createEmptyBoard(), 0, minion),
+                },
+            }),
+        );
+
+        applySilenceToMinion(game, game.data.playerOne, 0);
+        applyBoostToMinion(
+            game.data.playerOne.board[0]!,
+            createBoostSnapshot({
+                minionPowers: createMinionPowersSnapshot({ hasWindfury: true }),
+            }),
+        );
+        recalculateMinionKeywords(game, game.data.playerOne.board[0]!);
+
+        const boosted = game.data.playerOne.board[0]!;
+        assert.equal(getMinionMaxAttacks(boosted), 2);
+        assert.isTrue(canMinionAttack(boosted, currentRound));
     });
 
     test("re-silencing removes buffs applied after first silence", ({ assert }) => {

@@ -188,6 +188,8 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
         hasRush: false,
         hasWindfury: false,
         isPoisonous: false,
+        hasStealth: false,
+        hasDivineShield: false,
     };
 
     // Silence clears both initial and permanent keywords. Permanent then holds

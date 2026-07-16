@@ -14,6 +14,7 @@ interface BoardMinionTokenProps {
     style?: CSSProperties;
     attackStatus?: MinionAttackStatus;
     remainingAttacks?: number;
+    isSilenced?: boolean;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerMove?: (event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerUp?: (event: React.PointerEvent<HTMLDivElement>) => void;
@@ -30,6 +31,7 @@ export const BoardMinionToken = ({
     style,
     attackStatus,
     remainingAttacks,
+    isSilenced = false,
     onPointerDown,
     onPointerMove,
     onPointerUp,
@@ -62,7 +64,7 @@ export const BoardMinionToken = ({
             onPointerCancel={onPointerCancel}
             onClick={onClick}
         >
-            <BoardMinionEffectIcons card={card} />
+            <BoardMinionEffectIcons card={card} isSilenced={isSilenced} />
             {attackStatus === "sleeping" && (
                 <span className="board-minion-token__sleep-icon" aria-hidden>
                     💤

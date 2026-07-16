@@ -98,6 +98,7 @@ export const applyReconversionWithTemplate = (
     minion.initialKeywords = {
         hasTaunt: minionPowers.hasTaunt,
         hasCharge: minionPowers.hasCharge,
+        hasRush: minionPowers.hasRush,
         hasWindfury: minionPowers.hasWindfury,
         isPoisonous: minionPowers.isPoisonous,
         hasStealth: minionPowers.hasStealth,
