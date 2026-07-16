@@ -350,4 +350,26 @@ export const CARD_RECAPS: CardRecapData[] = [
         nerfs: [],
         imageUrl: "/card-covers/galadrim/dev-en-passation.webp",
     },
+    {
+        date: "2026-07-16",
+        slug: "recap-2026-07-16",
+        publishedAt: "2026-07-16T18:00:00+02:00",
+        untilCommitHash: "761035d1a5261aba6d1e4688e7f911b087fbc96d",
+        newCardIds: [178, 180, 182, 179, 181],
+        buffs: [],
+        nerfs: [
+            {
+                id: 177,
+                label: "Jean",
+                changes: [
+                    {
+                        field: "cost",
+                        from: 3,
+                        to: 4,
+                    },
+                ],
+            },
+        ],
+        imageUrl: "/card-covers/galadrim/valentin.webp",
+    },
 ];
