@@ -187,6 +187,9 @@ test.group("elo", (group) => {
             }),
         );
 
+        await playerOne.refresh();
+        await playerTwo.refresh();
+
         const playerOneQuest = (await getOrGenerateDailyQuests(playerOne.id)).find(
             (quest) => quest.questType === "WIN_GAME",
         )!;

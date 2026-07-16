@@ -221,6 +221,7 @@ test.group("game invites", (group) => {
         assert.isTrue(game.data.isFriendly);
         assert.isUndefined(game.data.isTraining);
 
+        const remainingInvite = await GameInvite.find(invite.id);
         assert.isNull(remainingInvite);
     });
 
