@@ -102,7 +102,7 @@ export const acceptGameInvite = async (inviteId: number, userId: number) => {
         const playerOne = swapSeats ? humanTwo : humanOne;
         const playerTwo = swapSeats ? humanOne : humanTwo;
 
-        game = await createGame({ playerOne, playerTwo });
+        game = await createGame({ playerOne, playerTwo, isFriendly: true });
     } catch (error) {
         if (error instanceof DeckValidationError) {
             await cancelInviteById(invite.id);

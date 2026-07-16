@@ -139,7 +139,7 @@ const GameInviteRow = ({ invite }: { invite: ApiGameInvite }) => {
         <div className="home-invite">
             <p className="home-invite__text">
                 <strong>{invite.fromPseudo ?? `Joueur #${invite.fromUserId}`}</strong> vous invite —
-                Partie classée
+                Partie amicale
             </p>
             <div className="home-invite__actions">
                 <button

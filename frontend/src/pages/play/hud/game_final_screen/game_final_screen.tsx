@@ -31,12 +31,14 @@ export const GameFinalScreen = observer(() => {
     const isMobilePortrait = useIsMobilePortrait();
     const isOnboardingGame = useOnboardingGame();
     const isTraining = store.game.data.isTraining ?? false;
+    const isFriendly = store.game.data.isFriendly ?? false;
     const ButtonsLayout = isMobilePortrait ? Stack : Group;
 
     const invalidatePostGameQueries = (options?: { includeUser?: boolean }) => {
         if (options?.includeUser !== false) {
             queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
         }
+        if (isFriendly) return;
         queryClient.invalidateQueries({ queryKey: PACKS_QUERY_KEY });
         queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY });
         if (isTraining && store.isUserWinner) {
@@ -87,7 +89,7 @@ export const GameFinalScreen = observer(() => {
         }
 
         leaveFinishedGame();
-        navigate(isTraining ? "/" : "/matchmaking");
+        navigate(isFriendly ? "/friends" : isTraining ? "/" : "/matchmaking");
     };
 
     const handleReadRules = () => {
@@ -141,7 +143,7 @@ export const GameFinalScreen = observer(() => {
             size="lg"
         >
             <Stack gap="sm">
-                {isOnboardingGame && !store.isSpectating ? (
+                {isOnboardingGame && !store.isSpectating && !isFriendly ? (
                     <Text size="sm">
                         Vous connaissez les bases ! En classé, vous gagnez ou perdez de l&apos;Elo.
                         Votre deck de départ est déjà actif.
@@ -155,6 +157,10 @@ export const GameFinalScreen = observer(() => {
                 ) : isTraining ? (
                     <Text size="sm" c="dimmed">
                         Partie d'entraînement — Elo et XP inchangés
+                    </Text>
+                ) : isFriendly ? (
+                    <Text size="sm" c="dimmed">
+                        Match amical — aucune progression
                     </Text>
                 ) : isDraw ? (
                     <Text size="sm" c="dimmed">
@@ -183,11 +189,11 @@ export const GameFinalScreen = observer(() => {
                     winnerUserId={store.winnerUserId}
                 />
 
-                {!store.isSpectating && userReward ? (
+                {!store.isSpectating && !isFriendly && userReward ? (
                     <GameLootSection reward={userReward} xp={userXp} />
                 ) : null}
 
-                {store.isSpectating ? (
+                {store.isSpectating || isFriendly ? (
                     <Button onClick={handleClose} mt="sm">
                         Retour aux amis
                     </Button>

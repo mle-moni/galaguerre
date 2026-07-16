@@ -76,7 +76,7 @@ const GameHistoryRow = ({
                 </span>
             </td>
             <td>
-                <GameHistoryResultBadge result={entry.result} />
+                <GameHistoryResultBadge result={entry.result} isFriendly={entry.isFriendly} />
             </td>
             <td>
                 <span className={clsx("game-history-list-elo", eloClass)}>

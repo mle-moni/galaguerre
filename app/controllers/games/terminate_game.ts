@@ -50,13 +50,17 @@ const applyPostGameProgression = async (
         if (humanUserId !== null && game instanceof Game) {
             await completeOnboardingIfNeeded(humanUserId);
         }
+    } else if (game.data.isFriendly) {
+        game.winnerId = getWinnerUserId(game);
     } else {
         await applyGameResult(game, trx);
     }
 
-    await applyGameRewards(game, trx);
-    await applyGameXp(game, trx);
-    await updateDailyQuestProgressForGame(game, trx);
+    if (!game.data.isFriendly) {
+        await applyGameRewards(game, trx);
+        await applyGameXp(game, trx);
+        await updateDailyQuestProgressForGame(game, trx);
+    }
 
     game.data = {
         ...game.data,

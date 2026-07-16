@@ -193,7 +193,7 @@ export const GameHistoryDetailPage = observer(() => {
                         <IconSwords size={16} className="game-history-detail-summary__date-icon" />
                         {formatDate(detail.finishedAt)}
                     </span>
-                    <GameHistoryResultBadge result={detail.result} />
+                    <GameHistoryResultBadge result={detail.result} isFriendly={detail.isFriendly} />
                     {detail.playerRating && (
                         <span className="game-history-detail-summary__elo">
                             <span
@@ -219,7 +219,11 @@ export const GameHistoryDetailPage = observer(() => {
                     </span>
                     {showEloUnchanged && (
                         <span className="game-history-detail-summary__elo-note">
-                            {isDraw ? "Match nul — Elo inchangé" : "Elo inchangé"}
+                            {detail.isFriendly
+                                ? "Match amical — aucune progression"
+                                : isDraw
+                                  ? "Match nul — Elo inchangé"
+                                  : "Elo inchangé"}
                         </span>
                     )}
                 </div>

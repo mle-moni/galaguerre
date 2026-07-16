@@ -267,6 +267,7 @@ test.group("matchmaking api", (group) => {
             .first();
 
         assert.isNotNull(activeGame);
+        assert.isFalse(activeGame!.data.isFriendly ?? false);
     });
 
     test("expired opponent is skipped and joiner stays queued", async ({ assert }) => {

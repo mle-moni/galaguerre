@@ -25,6 +25,7 @@ export interface ApiGameHistoryEntry {
     roundCount: number;
     finishedAt: string;
     isTraining: boolean;
+    isFriendly: boolean;
 }
 
 export interface ApiGameHistoryList {
@@ -46,6 +47,7 @@ export interface ApiGameHistoryDetail {
     player: ApiGameHistoryPlayer;
     winnerId: number | null;
     result: GameHistoryResult;
+    isFriendly: boolean;
     ratingResult: GameRatingResult | null;
     playerRating: GameRatingPlayerResult | null;
     roundCount: number;
