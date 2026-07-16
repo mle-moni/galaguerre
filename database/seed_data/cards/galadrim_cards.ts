@@ -575,6 +575,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             health: 3,
         },
         {
+            tags: ["SUPPORT"],
             battlecryActions: [summonCardId(181, 3)],
         },
     ),
