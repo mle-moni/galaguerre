@@ -506,3 +506,11 @@ Format compact pour construction de deck par LLM.
 ### #180 Alexis
 - Coût: 3 | Type: MINION | Stats: 3/2 | Rareté: Rare | Famille: Développeur
 - Passif (attaque du héros) : Donne +1/+2 à lui-même.
+
+### #181 Nouvelle Recrue
+- Coût: 1 | Type: MINION | Stats: 1/1 [Ruée] | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Ruée : Peut attaquer les monstres dès le tour où il est joué.
+
+### #182 Buddy Charismatique
+- Coût: 4 | Type: MINION | Stats: 2/3 | Rareté: Commune | Famille: —
+- Cri de guerre : Invoque 3 monstres (Nouvelle Recrue) sur votre plateau.

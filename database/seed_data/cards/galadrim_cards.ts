@@ -567,6 +567,18 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
     ),
     defineMinion(
+        182,
+        {
+            ...gal("Buddy Charismatique", 4),
+            imageUrl: "/card-covers/galadrim/buddy-charismatique.webp",
+            attack: 2,
+            health: 3,
+        },
+        {
+            battlecryActions: [summonCardId(181, 3)],
+        },
+    ),
+    defineMinion(
         151,
         {
             ...gal("Léa", 4),
@@ -1409,6 +1421,21 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
 
     // --- cartes non collectionnables ---
+    defineMinion(
+        181,
+        {
+            ...gal("Nouvelle Recrue", 1),
+            imageUrl: "/card-covers/galadrim/nouvelle-recrue.webp",
+            attack: 1,
+            health: 1,
+        },
+        {
+            minionPowers: {
+                hasRush: true,
+            },
+        },
+        { isCollectible: false },
+    ),
     defineMinion(
         155,
         {
