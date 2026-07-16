@@ -25,6 +25,18 @@ const createGame = (data: ReturnType<typeof createGameData>) => ({ data }) as Ga
 const spellPlayCardFilter = createCardFilterSnapshot({ type: "SPELL" });
 const minionSummonFilter = createCardFilterSnapshot({ type: "MINION" });
 
+const createPyromancerPassive = () =>
+    createPassiveSnapshot({
+        type: "ACTION",
+        triggersOn: "PLAY_CARD",
+        playCardFilter: spellPlayCardFilter,
+        action: createCardActionSnapshot({
+            type: "DAMAGE",
+            damage: 1,
+            target: createMinionTargetSnapshot("ALL"),
+        }),
+    });
+
 test.group("passive PLAY_CARD triggers", () => {
     test("SPELL filter deals damage to all minions after a spell is played (Pyromancer)", ({
         assert,
@@ -408,5 +420,72 @@ test.group("passive PLAY_CARD triggers", () => {
 
         assertPlayerHealth(assert, game, "playerTwo", 18);
         assertBoardIndex(assert, game, "playerTwo", 0, { health: 2 });
+    });
+
+    test("two pyromancers both trigger and die after a spell (Wild Pyromancer)", ({ assert }) => {
+        const pyromancerA = createMinionCard({
+            uuid: "pyromancer-a",
+            health: 1,
+            passives: [createPyromancerPassive()],
+        });
+        const pyromancerB = createMinionCard({
+            uuid: "pyromancer-b",
+            health: 2,
+            passives: [createPyromancerPassive()],
+        });
+        const enemyMinion = createMinionCard({ uuid: "enemy-minion", health: 3 });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(
+                    placeMinion(createEmptyBoard(), 0, createMinionState(pyromancerA)),
+                    1,
+                    createMinionState(pyromancerB),
+                ),
+            },
+            playerTwo: {
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(enemyMinion)),
+            },
+        });
+
+        const game = createGame(data);
+        const spell = createSpellCard({ uuid: "fireball", cost: 0 });
+
+        triggerPlayCardPassives(game, game.data.playerOne, spell);
+
+        assert.equal(game.data.playerOne.board.length, 0);
+        assertBoardIndex(assert, game, "playerTwo", 0, { health: 1 });
+    });
+
+    test("second pyromancer still triggers after first dies and shifts board indices", ({
+        assert,
+    }) => {
+        const pyromancerA = createMinionCard({
+            uuid: "pyromancer-a",
+            health: 1,
+            passives: [createPyromancerPassive()],
+        });
+        const pyromancerB = createMinionCard({
+            uuid: "pyromancer-b",
+            health: 2,
+            passives: [createPyromancerPassive()],
+        });
+
+        const data = createGameData({
+            playerOne: {
+                board: placeMinion(
+                    placeMinion(createEmptyBoard(), 0, createMinionState(pyromancerA)),
+                    1,
+                    createMinionState(pyromancerB),
+                ),
+            },
+        });
+
+        const game = createGame(data);
+        const spell = createSpellCard({ uuid: "fireball", cost: 0 });
+
+        triggerPlayCardPassives(game, game.data.playerOne, spell);
+
+        assert.equal(game.data.playerOne.board.length, 0);
     });
 });

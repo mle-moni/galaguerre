@@ -17,7 +17,8 @@ export interface PassiveTriggerEntry {
     passive: PassiveSnapshot;
     owner: GamePlayer;
     sourceOwner: SpotOwner;
-    sourceBoardIndex: number;
+    sourceMinionUuid: string;
+    sourceCard: { cardId: number; label: string; uuid: string };
 }
 
 const collectFromBoard = (
@@ -85,7 +86,12 @@ const collectFromBoard = (
                 passive,
                 owner,
                 sourceOwner,
-                sourceBoardIndex: boardIndex,
+                sourceMinionUuid: minion.uuid,
+                sourceCard: {
+                    cardId: card.cardId,
+                    label: card.label,
+                    uuid: card.uuid,
+                },
             });
         }
     }

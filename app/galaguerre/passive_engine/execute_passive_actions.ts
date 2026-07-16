@@ -1,5 +1,6 @@
 import type { PassiveTriggerEntry } from "./collect_passive_triggers.js";
 import type Game from "#models/game";
+import { findMinionOnPlayerBoard } from "../action_engine/find_minion_on_board.js";
 import { executeActionSequence } from "../action_engine/execute_action_sequence.js";
 import { beginLoggedBeatIfNone, endCurrentBeat } from "../game_narrative/narrative_beats.js";
 import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
@@ -20,7 +21,7 @@ export const executePassiveActions = (
 
         const opponent =
             entry.owner === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
-        const sourceMinion = entry.owner.board[entry.sourceBoardIndex] ?? undefined;
+        const sourceMinion = findMinionOnPlayerBoard(entry.owner, entry.sourceMinionUuid);
 
         withNarrativeRecorder((recorder) => {
             if (!recorder.hasCurrentBeat()) {
@@ -28,25 +29,16 @@ export const executePassiveActions = (
                 openedStandaloneBeat = true;
             }
 
-            if (sourceMinion) {
-                recorder.recordEffect({
-                    type: "TRIGGER",
-                    cardUuid: sourceMinion.uuid,
-                    owner: entry.sourceOwner,
-                    trigger: "PASSIVE",
-                });
-            }
+            recorder.recordEffect({
+                type: "TRIGGER",
+                cardUuid: entry.sourceMinionUuid,
+                owner: entry.sourceOwner,
+                trigger: "PASSIVE",
+            });
         });
 
-        const sourceCard = sourceMinion?.originalCard;
-        if (!sourceCard) continue;
-
         const result = executeActionSequence(game, entry.owner, opponent, [action], {
-            sourceCard: {
-                cardId: sourceCard.cardId,
-                label: sourceCard.label,
-                uuid: sourceCard.uuid,
-            },
+            sourceCard: entry.sourceCard,
             effectKind: "PASSIVE",
             sourceMinion,
         });
