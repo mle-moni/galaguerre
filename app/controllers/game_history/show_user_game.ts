@@ -46,6 +46,7 @@ export const showUserGame = async ({
         opponent: serializeGameHistoryPlayer(game, opponentUserId, opponentUser),
         winnerId: game.winnerId,
         result: getGameResult(game, userId),
+        isFriendly: game.data.isFriendly ?? false,
         ratingResult: getRatingResult(game),
         playerRating: (() => {
             const ratingResult = getRatingResult(game);

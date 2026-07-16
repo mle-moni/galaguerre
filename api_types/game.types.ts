@@ -289,6 +289,7 @@ export interface GameData {
     dailyQuestProgressApplied?: boolean;
     postGameProgressionApplied?: boolean;
     isTraining?: boolean;
+    isFriendly?: boolean;
     isOnboardingTutorial?: boolean;
 }
 

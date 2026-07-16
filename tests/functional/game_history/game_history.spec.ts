@@ -67,6 +67,7 @@ test.group("game history", (group) => {
         assert.equal(result.games[0]!.result, "LOSS");
         assert.equal(result.games[0]!.roundCount, 7);
         assert.equal(result.user.userId, playerOne.id);
+        assert.isFalse(result.games[0]!.isFriendly);
     });
 
     test("list returns 404 for unknown user", async ({ assert }) => {
@@ -96,6 +97,36 @@ test.group("game history", (group) => {
         assert.equal(getGameResult(game, playerOne.id), "DRAW");
         assert.isNull(getEloDelta(game, playerOne.id));
         assert.isNull(entry.eloDelta);
+    });
+
+    test("friendly games appear without rating in list and detail", async ({ assert }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "FINISHED",
+                isFriendly: true,
+                playerOne: { health: 0 },
+                playerTwo: { health: 5 },
+            }),
+            { isFinished: true },
+        );
+
+        game.winnerId = playerTwo.id;
+        await game.save();
+
+        const { ctx: listCtx } = createMockContext({ userId: playerOne.id });
+        const list = await listUserGames(listCtx);
+        assert.equal(list.games.length, 1);
+        assert.isTrue(list.games[0]!.isFriendly);
+        assert.isNull(list.games[0]!.eloDelta);
+
+        const { ctx: detailCtx } = createMockContext({
+            userId: playerOne.id,
+            gameId: game.id,
+        });
+        const detail = await showUserGame(detailCtx);
+        assert.isTrue(detail.isFriendly);
+        assert.isNull(detail.ratingResult);
+        assert.isNull(detail.playerRating);
     });
 
     test("show returns stats and rating result", async ({ assert }) => {

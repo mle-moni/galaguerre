@@ -36,6 +36,7 @@ interface CreateGameOptions {
     playerOne: HumanPlayer | AiPlayer;
     playerTwo: HumanPlayer | AiPlayer;
     isTraining?: boolean;
+    isFriendly?: boolean;
     isOnboardingTutorial?: boolean;
 }
 
@@ -59,6 +60,7 @@ export const createGame = async ({
     playerOne,
     playerTwo,
     isTraining,
+    isFriendly,
     isOnboardingTutorial,
 }: CreateGameOptions) => {
     if (!isAiPlayer(playerOne)) {
@@ -72,6 +74,7 @@ export const createGame = async ({
         playerOne,
         playerTwo,
         isTraining,
+        isFriendly,
         isOnboardingTutorial,
     });
 
@@ -131,6 +134,7 @@ export const getDefaultGameData = ({
     playerOne,
     playerTwo,
     isTraining,
+    isFriendly,
     isOnboardingTutorial,
 }: CreateGameOptions): GameData => {
     const p1Source = isAiPlayer(playerOne) ? playerOne.cards : playerOne.deck;
@@ -168,6 +172,7 @@ export const getDefaultGameData = ({
         ),
         actionLog: [],
         ...(isTraining ? { isTraining: true } : {}),
+        ...(isFriendly ? { isFriendly: true } : {}),
         ...(isOnboardingTutorial ? { isOnboardingTutorial: true } : {}),
     };
 };

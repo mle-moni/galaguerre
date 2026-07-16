@@ -176,6 +176,67 @@ test.group("elo", (group) => {
         assert.equal(game.data.rewardResult!.playerOne.goldCoins, GOLD_COINS_PER_DEFEAT);
     });
 
+    test("friendly games finish without any progression", async ({ assert }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                isFriendly: true,
+                playerOne: { health: 0 },
+                playerTwo: { health: 3 },
+            }),
+        );
+
+        const playerOneQuest = (await getOrGenerateDailyQuests(playerOne.id)).find(
+            (quest) => quest.questType === "WIN_GAME",
+        )!;
+        const playerTwoQuest = (await getOrGenerateDailyQuests(playerTwo.id)).find(
+            (quest) => quest.questType === "WIN_GAME",
+        )!;
+        const before = {
+            playerOne: { elo: playerOne.elo, wins: playerOne.wins, losses: playerOne.losses, goldCoins: playerOne.goldCoins, xp: playerOne.xp },
+            playerTwo: { elo: playerTwo.elo, wins: playerTwo.wins, losses: playerTwo.losses, goldCoins: playerTwo.goldCoins, xp: playerTwo.xp },
+            playerOneQuest: playerOneQuest.progress,
+            playerTwoQuest: playerTwoQuest.progress,
+        };
+
+        await terminateGame(game, { skipSendUpdate: true });
+        await game.refresh();
+        await playerOne.refresh();
+        await playerTwo.refresh();
+        await playerOneQuest.refresh();
+        await playerTwoQuest.refresh();
+
+        assert.equal(game.winnerId, playerTwo.id);
+        assert.isTrue(game.data.postGameProgressionApplied);
+        assert.isUndefined(game.data.ratingResult);
+        assert.isUndefined(game.data.rewardResult);
+        assert.isUndefined(game.data.xpResult);
+        assert.isUndefined(game.data.dailyQuestProgressApplied);
+        assert.deepEqual(
+            {
+                elo: playerOne.elo,
+                wins: playerOne.wins,
+                losses: playerOne.losses,
+                goldCoins: playerOne.goldCoins,
+                xp: playerOne.xp,
+            },
+            before.playerOne,
+        );
+        assert.deepEqual(
+            {
+                elo: playerTwo.elo,
+                wins: playerTwo.wins,
+                losses: playerTwo.losses,
+                goldCoins: playerTwo.goldCoins,
+                xp: playerTwo.xp,
+            },
+            before.playerTwo,
+        );
+        assert.equal(playerOneQuest.progress, before.playerOneQuest);
+        assert.equal(playerTwoQuest.progress, before.playerTwoQuest);
+    });
+
     test("applyGameResult is idempotent", async ({ assert }) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({

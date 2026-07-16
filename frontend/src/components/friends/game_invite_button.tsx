@@ -75,12 +75,14 @@ export const GameInviteButton = ({ friend, size = "sm" }: GameInviteButtonProps)
 
     const tooltipLabel =
         disabledReason ??
-        (pendingInviteToOther ? "Vous avez déjà une invitation en attente" : "Inviter à jouer");
+        (pendingInviteToOther
+            ? "Vous avez déjà une invitation en attente"
+            : "Inviter à jouer — Match amical");
 
     return (
         <Tooltip label={tooltipLabel} withArrow>
             <ActionIcon
-                aria-label="Inviter à jouer"
+                aria-label="Inviter à jouer un match amical"
                 color="gold"
                 disabled={Boolean(disabledReason) || Boolean(pendingInviteToOther)}
                 loading={isLoading}

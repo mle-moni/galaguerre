@@ -89,6 +89,7 @@ export const serializeGameHistoryEntry = (
         roundCount: game.data.currentRound,
         finishedAt: getGameFinishedAtIso(game),
         isTraining: game.data.isTraining ?? false,
+        isFriendly: game.data.isFriendly ?? false,
     };
 };
 

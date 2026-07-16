@@ -1,3 +1,5 @@
+import { bindUserIds } from "#tests/helpers/game/game_factory";
+import { createGameData } from "#tests/helpers/game/fixtures";
 import GameInvitesController from "#controllers/game_invites/game_invites_controller";
 import { createTrainingGame } from "#controllers/games/create_training_game";
 import { gameSearch } from "#controllers/games/game_search";
@@ -150,6 +152,31 @@ test.group("game invites", (group) => {
         assert.equal(invite!.toUserId, invitee.id);
     });
 
+
+    test("rejects inviting a player already in a game", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const inviter = await createUser(`inviter-busy-${unique}`, `InviterBusy-${unique}`);
+        const invitee = await createUser(`invitee-busy-${unique}`, `InviteeBusy-${unique}`);
+        const opponent = await createUser(`opponent-busy-${unique}`, `OpponentBusy-${unique}`);
+
+        await createMutualFriendship(inviter.id, invitee.id);
+        await createValidDeckForUser(inviter.id, `inviter-busy-${unique}`);
+        await touchPresence(invitee.id);
+        await Game.create({
+            playerOneId: invitee.id,
+            playerTwoId: opponent.id,
+            data: bindUserIds(createGameData({ state: "MULLIGAN" }), invitee.id, opponent.id),
+            isFinished: false,
+        });
+
+        const controller = new GameInvitesController();
+        const { ctx, getBadRequestBody } = createContext(inviter, {
+            body: { toUserId: invitee.id },
+        });
+        await controller.store(ctx);
+
+        assert.deepEqual(getBadRequestBody(), { error: "Ce joueur a déjà une partie en cours" });
+    });
     test("decline removes the invite", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const inviter = await createUser(`inviter-decline-${unique}`, `InviterDecline-${unique}`);
@@ -171,7 +198,7 @@ test.group("game invites", (group) => {
         assert.isNull(remaining);
     });
 
-    test("accept creates a ranked game", async ({ assert }) => {
+    test("accept creates a friendly game", async ({ assert }) => {
         const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const inviter = await createUser(`inviter-accept-${unique}`, `InviterAccept-${unique}`);
         const invitee = await createUser(`invitee-accept-${unique}`, `InviteeAccept-${unique}`);
@@ -192,10 +219,55 @@ test.group("game invites", (group) => {
 
         const game = await Game.findOrFail(acceptResponse.gameId);
         assert.isFalse(game.isFinished);
-        assert.notProperty(game.data, "isTraining");
+        assert.isTrue(game.data.isFriendly);
+        assert.isUndefined(game.data.isTraining);
 
-        const remainingInvite = await GameInvite.find(invite.id);
         assert.isNull(remainingInvite);
+    });
+
+    test("accept cancels an invite when a player starts another game", async ({ assert }) => {
+        const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const inviter = await createUser(`inviter-race-${unique}`, `InviterRace-${unique}`);
+        const invitee = await createUser(`invitee-race-${unique}`, `InviteeRace-${unique}`);
+        const opponent = await createUser(`opponent-race-${unique}`, `OpponentRace-${unique}`);
+
+        await createMutualFriendship(inviter.id, invitee.id);
+        await createValidDeckForUser(inviter.id, `inviter-race-${unique}`);
+        await createValidDeckForUser(invitee.id, `invitee-race-${unique}`);
+        await touchPresence(inviter.id);
+        await touchPresence(invitee.id);
+
+        const controller = new GameInvitesController();
+        const { ctx: storeCtx } = createContext(inviter, { body: { toUserId: invitee.id } });
+        await controller.store(storeCtx);
+        const invite = await GameInvite.query().where("fromUserId", inviter.id).firstOrFail();
+
+        await Game.create({
+            playerOneId: inviter.id,
+            playerTwoId: opponent.id,
+            data: bindUserIds(createGameData({ state: "MULLIGAN" }), inviter.id, opponent.id),
+            isFinished: false,
+        });
+
+        const { ctx: acceptCtx, getBadRequestBody } = createContext(invitee, {
+            params: { id: invite.id },
+        });
+        await controller.accept(acceptCtx);
+
+        assert.deepEqual(getBadRequestBody(), {
+            error: "Un des joueurs a déjà une partie en cours",
+        });
+        assert.isNull(await GameInvite.find(invite.id));
+        assert.equal(
+            await Game.query()
+                .where((query) =>
+                    query.where("playerOneId", inviter.id).orWhere("playerTwoId", inviter.id),
+                )
+                .andWhere("isFinished", false)
+                .count("* as total")
+                .then((rows) => Number(rows[0]!.$extras.total)),
+            1,
+        );
     });
 
     test("rejects invite when invitee is offline", async ({ assert }) => {
