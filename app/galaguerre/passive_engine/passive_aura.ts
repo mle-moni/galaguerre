@@ -190,25 +190,17 @@ export const recalculateMinionKeywords = (game: Game, minion: MinionState): void
         isPoisonous: false,
     };
 
-    const keywords = minion.isSilenced
-        ? {
-              hasTaunt: initial.hasTaunt,
-              hasCharge: initial.hasCharge,
-              hasRush: initial.hasRush,
-              hasWindfury: initial.hasWindfury,
-              isPoisonous: initial.isPoisonous,
-              hasStealth: initial.hasStealth && !minion.stealthConsumed,
-              hasDivineShield: initial.hasDivineShield,
-          }
-        : {
-              hasTaunt: initial.hasTaunt || permanent.hasTaunt,
-              hasCharge: initial.hasCharge || permanent.hasCharge,
-              hasRush: initial.hasRush || permanent.hasRush,
-              hasWindfury: initial.hasWindfury || permanent.hasWindfury,
-              isPoisonous: initial.isPoisonous || permanent.isPoisonous,
-              hasStealth: (initial.hasStealth || permanent.hasStealth) && !minion.stealthConsumed,
-              hasDivineShield: initial.hasDivineShield || permanent.hasDivineShield,
-          };
+    // Silence clears both initial and permanent keywords. Permanent then holds
+    // only post-silence grants (e.g. Sprint Review giving Provocation again).
+    const keywords = {
+        hasTaunt: initial.hasTaunt || permanent.hasTaunt,
+        hasCharge: initial.hasCharge || permanent.hasCharge,
+        hasRush: initial.hasRush || permanent.hasRush,
+        hasWindfury: initial.hasWindfury || permanent.hasWindfury,
+        isPoisonous: initial.isPoisonous || permanent.isPoisonous,
+        hasStealth: (initial.hasStealth || permanent.hasStealth) && !minion.stealthConsumed,
+        hasDivineShield: initial.hasDivineShield || permanent.hasDivineShield,
+    };
 
     const targetBoardOwner = getBoardOwnerForMinion(game, minion);
     if (!targetBoardOwner) return;

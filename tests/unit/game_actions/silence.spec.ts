@@ -4,6 +4,7 @@ import { killMinion } from "#galaguerre/action_engine/kill_minion";
 import { applySilenceToMinion } from "#galaguerre/action_engine/apply_silence";
 import { applyBoostToMinion } from "#galaguerre/action_engine/apply_boost";
 import { refreshAurasAfterMinionPlayed } from "#galaguerre/passive_engine/refresh_passive_auras";
+import { recalculateMinionKeywords } from "#galaguerre/passive_engine/passive_aura";
 import { triggerPassives } from "#galaguerre/passive_engine/trigger_passives";
 import {
     createBoostSnapshot,
@@ -355,6 +356,61 @@ test.group("SILENCE action", () => {
             attack: 2,
             health: 2,
             maxHealth: 2,
+        });
+    });
+
+    test("taunt granted after silence survives keyword recalculation", ({ assert }) => {
+        const target = createMinionState(
+            createMinionCard({
+                uuid: "target",
+                attack: 1,
+                health: 1,
+                minionPowers: { hasTaunt: true },
+                effects: ["Provocation"],
+            }),
+        );
+
+        const game = createGame(
+            createGameData({
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, target),
+                },
+            }),
+        );
+
+        applySilenceToMinion(game, game.data.playerTwo, 0);
+
+        const silenced = game.data.playerTwo.board[0]!;
+        assert.isTrue(silenced.isSilenced);
+        assert.isFalse(
+            silenced.originalCard.type === "MINION" && silenced.originalCard.minionPowers.hasTaunt,
+        );
+
+        applyBoostToMinion(
+            silenced,
+            createBoostSnapshot({
+                attack: 3,
+                health: 3,
+                minionPowers: {
+                    hasTaunt: true,
+                    hasCharge: false,
+                    hasRush: false,
+                    hasWindfury: false,
+                    isPoisonous: false,
+                    hasStealth: false,
+                    hasDivineShield: false,
+                },
+            }),
+        );
+
+        recalculateMinionKeywords(game, silenced);
+
+        const card = game.data.playerTwo.board[0]!.originalCard;
+        assert.isTrue(card.type === "MINION" && card.minionPowers.hasTaunt);
+        assertBoardIndex(assert, game, "playerTwo", 0, {
+            attack: 4,
+            health: 4,
+            maxHealth: 4,
         });
     });
 
