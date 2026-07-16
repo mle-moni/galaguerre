@@ -2,9 +2,12 @@ import { DEFAULT_HERO_HEALTH } from "#api_types/game.types";
 import { test } from "@japa/runner";
 import { assertBoardIndex, assertPlayerHealth } from "#tests/helpers/game/assertions";
 import {
+    createCardActionSnapshot,
     createGameData,
     createMinionCard,
     createMinionState,
+    createMinionTargetSnapshot,
+    createPassiveSnapshot,
     createWeaponCard,
     createWeaponState,
     MINION_IDS,
@@ -315,5 +318,48 @@ test.group("weapon combat", () => {
         );
 
         assertError(assert, "Cette arme ne peut pas attaquer le héros adverse");
+    });
+
+    test("HERO_ATTACK passive triggers when weapon attacks hero", async ({ assert }) => {
+        const weaponCard = createWeaponCard({ damage: 2, durability: 2 });
+        const passiveMinion = createMinionCard({
+            uuid: MINION_IDS.attacker,
+            attack: 3,
+            health: 2,
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "HERO_ATTACK",
+                    action: createCardActionSnapshot({
+                        type: "BOOST",
+                        boost: {
+                            attack: 1,
+                            health: 2,
+                            spellPower: null,
+                            extraBattlecryTriggers: null,
+                            minionPowers: null,
+                        },
+                        target: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
+                    }),
+                }),
+            ],
+        });
+
+        const { game } = await runWeaponCombat(
+            createGameData({
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                    board: placeMinion(
+                        createGameData().playerOne.board,
+                        0,
+                        createMinionState(passiveMinion),
+                    ),
+                },
+            }),
+            { heroAttack: true },
+        );
+
+        assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 4, health: 4 });
     });
 });

@@ -501,4 +501,69 @@ test.group("passive ACTION triggers", () => {
         assertBoardIndex(assert, game, "playerOne", 1, { health: 4 });
         assertPlayerHealth(assert, game, "playerTwo", 15);
     });
+
+    test("HERO_ATTACK passive boosts the source minion", ({ assert }) => {
+        const passiveMinion = createMinionCard({
+            uuid: "passive-minion",
+            attack: 3,
+            health: 2,
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "HERO_ATTACK",
+                    action: createCardActionSnapshot({
+                        type: "BOOST",
+                        boost: {
+                            attack: 1,
+                            health: 2,
+                            spellPower: null,
+                            extraBattlecryTriggers: null,
+                            minionPowers: null,
+                        },
+                        target: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
+                    }),
+                }),
+            ],
+        });
+
+        const opponentPassive = createMinionCard({
+            uuid: "opponent-passive",
+            attack: 1,
+            health: 1,
+            passives: [
+                createPassiveSnapshot({
+                    type: "ACTION",
+                    triggersOn: "HERO_ATTACK",
+                    action: createCardActionSnapshot({
+                        type: "BOOST",
+                        boost: {
+                            attack: 5,
+                            health: 5,
+                            spellPower: null,
+                            extraBattlecryTriggers: null,
+                            minionPowers: null,
+                        },
+                        target: createMinionTargetSnapshot("PLAYER", { onlySelf: true }),
+                    }),
+                }),
+            ],
+        });
+
+        const data = createGameData({
+            state: "PLAYER_ONE_TURN",
+            playerOne: {
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(passiveMinion)),
+            },
+            playerTwo: {
+                board: placeMinion(createEmptyBoard(), 0, createMinionState(opponentPassive)),
+            },
+        });
+
+        const game = createGame(data);
+        const { gameEnded } = triggerPassives(game, "HERO_ATTACK", game.data.playerOne);
+
+        assert.isFalse(gameEnded);
+        assertBoardIndex(assert, game, "playerOne", 0, { attack: 4, health: 4 });
+        assertBoardIndex(assert, game, "playerTwo", 0, { attack: 1, health: 1 });
+    });
 });

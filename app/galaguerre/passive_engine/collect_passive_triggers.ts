@@ -63,7 +63,8 @@ const collectFromBoard = (
             } else if (
                 (triggersOn === "TURN_END" ||
                     triggersOn === "TURN_BEGIN" ||
-                    triggersOn === "DRAW") &&
+                    triggersOn === "DRAW" ||
+                    triggersOn === "HERO_ATTACK") &&
                 activePlayer &&
                 owner !== activePlayer
             ) {

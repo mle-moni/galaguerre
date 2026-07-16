@@ -71,6 +71,7 @@ export type PassiveDefinition = {
         | "DAMAGE"
         | "PLAY_CARD"
         | "SUMMON"
+        | "HERO_ATTACK"
         | null;
     action: CardActionDefinition | null;
     passiveBoost: {

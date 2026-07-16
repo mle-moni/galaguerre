@@ -135,6 +135,7 @@ export const GALAGUERRE_PASSIVES_TRIGGERS_ON = [
     "DAMAGE",
     "PLAY_CARD",
     "SUMMON",
+    "HERO_ATTACK",
 ] as const;
 export type GalaguerrePassiveTriggersOn = GenerateTypeFromEnum<
     typeof GALAGUERRE_PASSIVES_TRIGGERS_ON
@@ -147,6 +148,7 @@ export const GALAGUERRE_PASSIVES_TRIGGERS_ON_LABEL_OBJ: LabelObjectType<Galaguer
         DAMAGE: "Damage",
         DRAW: "Draw",
         HEAL: "Heal",
+        HERO_ATTACK: "Hero Attack",
         PLAY_CARD: "Play Card",
         SUMMON: "Summon",
         TURN_BEGIN: "Turn Begin",

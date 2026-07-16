@@ -12,6 +12,7 @@ import {
 } from "../../../galaguerre/game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../../../galaguerre/game_narrative/narrative_context.js";
 import { runGameActionWithNarrative } from "../../../galaguerre/game_narrative/run_game_action_with_narrative.js";
+import { triggerPassives } from "../../../galaguerre/passive_engine/trigger_passives.js";
 import { ensureValidAttackTarget, recordHeroAttack } from "../game_utils.js";
 import { terminateGame } from "../terminate_game.js";
 import type { WeaponActionOptions } from "./weapon_to_minion_action.js";
@@ -84,8 +85,20 @@ export const weaponToHeroAction = async ({
         endCurrentBeat(game);
         recordHeroAttack(player, game.data.currentRound);
 
+        const { gameEnded: heroAttackPassiveGameEnded } = triggerPassives(
+            game,
+            "HERO_ATTACK",
+            player,
+        );
+
         const { gameEnded: durabilityGameEnded } = reduceWeaponDurability(game, player);
-        if (durabilityGameEnded || damageGameEnded || player.health <= 0 || opponent.health <= 0) {
+        if (
+            durabilityGameEnded ||
+            damageGameEnded ||
+            heroAttackPassiveGameEnded ||
+            player.health <= 0 ||
+            opponent.health <= 0
+        ) {
             await terminateGame(game, { skipSendUpdate: true });
         }
     });

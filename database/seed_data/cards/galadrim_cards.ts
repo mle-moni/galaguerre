@@ -239,6 +239,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         { rarity: "LEGENDARY" },
     ),
     defineMinion(
+        180,
+        {
+            ...gal("Alexis", 3),
+            imageUrl: "/card-covers/galadrim/alexis-t.webp",
+            attack: 3,
+            health: 2,
+        },
+        {
+            tags: ["DEVELOPPEUR"],
+            passives: [actionPassive("HERO_ATTACK", boostAction(boostBoth(1, 2), selfMinion()))],
+        },
+        { rarity: "RARE" },
+    ),
+    defineMinion(
         67,
         {
             ...gal("Dev Aguerri", 4),

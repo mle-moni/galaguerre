@@ -10,6 +10,7 @@ const TRIGGERED_PASSIVE_LABELS: Record<string, string> = {
     DAMAGE: "Dégâts",
     PLAY_CARD: "Carte jouée",
     SUMMON: "Invocation",
+    HERO_ATTACK: "Attaque du héros",
 };
 
 export const BoardMinionEffectIcons = ({

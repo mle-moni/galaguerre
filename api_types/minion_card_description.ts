@@ -29,6 +29,7 @@ const PASSIVE_TRIGGER_LABELS: Record<
     TURN_END: "fin de tour",
     TURN_BEGIN: "début de tour",
     DRAW: "pioche",
+    HERO_ATTACK: "attaque du héros",
 };
 
 const LABEL_ONLY_EFFECTS = new Set(["Provocation", "Discrétion"]);

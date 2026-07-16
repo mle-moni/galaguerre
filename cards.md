@@ -502,3 +502,7 @@ Format compact pour construction de deck par LLM.
 ### #179 Mise en prod du vendredi
 - Coût: 7 | Type: SPELL | Stats: — | Rareté: Épique | Famille: —
 - Effet : Détruit un monstre. Effet : Invoque un monstre (Dev Back-End) sur votre plateau. Effet : Invoque un monstre (Dev Front-End) sur votre plateau.
+
+### #180 Alexis
+- Coût: 3 | Type: MINION | Stats: 3/2 | Rareté: Rare | Famille: Développeur
+- Passif (attaque du héros) : Donne +1/+2 à lui-même.
