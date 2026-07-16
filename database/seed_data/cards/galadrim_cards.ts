@@ -236,6 +236,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["DEVELOPPEUR"],
             passives: [boostPassive(boostExtraBattlecryTriggers(1), allyHero())],
         },
+        { rarity: "LEGENDARY" },
     ),
     defineMinion(
         67,
