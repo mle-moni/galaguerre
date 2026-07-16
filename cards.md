@@ -494,3 +494,7 @@ Format compact pour construction de deck par LLM.
 ### #177 Jean
 - Coût: 4 | Type: MINION | Stats: 2/4 [Discrétion] | Rareté: Légendaire | Famille: Développeur, Sales
 - Discrétion. Chaque fois que ce monstre attaque, découvrez un monstre. Dernier souffle : Ajoute 1 copie de Masque du CEO à votre main.
+
+### #178 Valentin
+- Coût: 3 | Type: MINION | Stats: 2/4 | Rareté: Commune | Famille: Développeur
+- Passif : Vos Cris de guerre se déclenchent 1 fois de plus.

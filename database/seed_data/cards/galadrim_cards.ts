@@ -72,6 +72,7 @@ import {
     type CardSeedEntry,
     boostAttackWithDivineShield,
     boostDivineShield,
+    boostExtraBattlecryTriggers,
 } from "./define_card.js";
 
 const gal = (label: string, cost: number) => ({
@@ -221,6 +222,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             tags: ["DEVELOPPEUR"],
             deathrattleActions: [enemyDrawAction(1)],
+        },
+    ),
+    defineMinion(
+        178,
+        {
+            ...gal("Valentin", 3),
+            imageUrl: "/card-covers/galadrim/valentin.webp",
+            attack: 2,
+            health: 4,
+        },
+        {
+            tags: ["DEVELOPPEUR"],
+            passives: [boostPassive(boostExtraBattlecryTriggers(1), allyHero())],
         },
     ),
     defineMinion(
