@@ -1,0 +1,3 @@
+Je suis en train de faire un jeu comme Hearthstone mais pour l'agence web dans laquelle je travaille, le jeu s'appelle "Galaguerre". Peux-tu faire un visuel pour l'événement "Onboarding Galaguerre" qui permettra à mes collègues d'apprendre les bases du jeu, accessible à tous les niveaux ?
+
+ratio 21:9, le thème global du jeu est "heroic fantasy lumineuse", garde une composition simple et claire, ne montre pas les effets ni le texte, ni les bordures de la carte, uniquement l'artwork.
