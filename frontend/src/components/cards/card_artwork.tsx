@@ -12,7 +12,7 @@ interface CardArtworkProps {
 }
 
 /** Crossfade window before the end of the clip (seconds). */
-const LOOP_FADE_SECONDS = 0.25;
+const LOOP_FADE_SECONDS = 0.45;
 
 interface SmoothLoopVideoProps {
     src: string;
