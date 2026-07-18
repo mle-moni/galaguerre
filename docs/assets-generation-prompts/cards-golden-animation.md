@@ -35,5 +35,7 @@ Constraints:
 - no dramatic action, no attack animation, no morphing, no warping face/hands
 
 - keep motion looping-friendly: start and end should feel almost identical
+- prefer a breathing / shimmer cycle that returns to the exact same pose and lighting as frame 1
+- avoid a progressive camera push that ends elsewhere than it started (causes a visible jump on loop)
 
 Duration: about 4 seconds. Calm premium golden-card idle animation, clearly more golden/foil than a normal still.

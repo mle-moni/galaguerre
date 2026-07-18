@@ -5,6 +5,22 @@
 	object-fit: cover;
 }
 
-.card-artwork--video {
+.card-artwork-loop {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.card-artwork-loop .card-artwork--video {
+	position: absolute;
+	inset: 0;
 	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.45s ease-in-out;
+}
+
+.card-artwork-loop .card-artwork--video.card-artwork--active {
+	opacity: 1;
 }
