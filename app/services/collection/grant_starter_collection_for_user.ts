@@ -48,6 +48,50 @@ export const grantCardCopiesForUser = async (
     await UserCard.create({ userId, cardId, count: newCount, goldenCount: 0 }, { client });
 };
 
+/** Grants a new golden copy (increments both count and goldenCount). */
+export const grantGoldenCardCopyForUser = async (
+    userId: number,
+    cardId: number,
+    client?: TransactionClientContract,
+): Promise<void> => {
+    const card = await Card.query({ client }).where("id", cardId).firstOrFail();
+    const maxCopies = getMaxCopiesForRarity(card.rarity);
+    const existing = await UserCard.query({ client }).where({ userId, cardId }).first();
+    const currentCount = existing?.count ?? 0;
+
+    if (currentCount >= maxCopies) {
+        return;
+    }
+
+    if (existing) {
+        existing.count = currentCount + 1;
+        existing.goldenCount = (existing.goldenCount ?? 0) + 1;
+        if (client) existing.useTransaction(client);
+        await existing.save();
+        return;
+    }
+
+    await UserCard.create({ userId, cardId, count: 1, goldenCount: 1 }, { client });
+};
+
+/** Converts one owned normal copy into a golden copy (goldenCount++ only). */
+export const upgradeCardCopyToGoldenForUser = async (
+    userId: number,
+    cardId: number,
+    client?: TransactionClientContract,
+): Promise<void> => {
+    const existing = await UserCard.query({ client }).where({ userId, cardId }).firstOrFail();
+    const currentGoldenCount = existing.goldenCount ?? 0;
+
+    if (currentGoldenCount >= existing.count) {
+        return;
+    }
+
+    existing.goldenCount = currentGoldenCount + 1;
+    if (client) existing.useTransaction(client);
+    await existing.save();
+};
+
 export type GrantPackCardCopyOptions = {
     forceGolden?: boolean;
     random?: () => number;

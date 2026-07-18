@@ -83,6 +83,25 @@ export const CollectionPage = observer(() => {
         [user, catalogById, ownedCounts],
     );
 
+    const canBuyGoldenCard = useCallback(
+        (cardId: number) => {
+            if (!user) return false;
+
+            const card = catalogById.get(cardId);
+            if (!card || !card.isCollectible || !card.goldenVideoUrl) return false;
+
+            const owned = ownedCounts.get(cardId) ?? 0;
+            const ownedGolden = ownedGoldenCounts.get(cardId) ?? 0;
+            const maxCopies = getMaxCopiesForRarity(card.rarity);
+
+            if (ownedGolden >= maxCopies) return false;
+
+            // Upgrade a normal copy, or buy a new golden copy if a slot remains.
+            return owned > ownedGolden || owned < maxCopies;
+        },
+        [user, catalogById, ownedCounts, ownedGoldenCounts],
+    );
+
     const canSellCard = useCallback(
         (cardId: number) => {
             if (!user) return false;
@@ -96,13 +115,17 @@ export const CollectionPage = observer(() => {
         [user, ownedCounts, totalCollection],
     );
 
-    const handleBuyCard = async (cardId: number) => {
+    const handleBuyCard = async (cardId: number, options?: { golden?: boolean }) => {
         setBuyingCardId(cardId);
         try {
-            await buyCardMutation.mutateAsync(cardId);
-            notifySuccess("Carte achetée !");
+            await buyCardMutation.mutateAsync({ cardId, golden: options?.golden });
+            notifySuccess(options?.golden ? "Version golden acquise !" : "Carte achetée !");
         } catch {
-            notifyError("Impossible d'acheter cette carte");
+            notifyError(
+                options?.golden
+                    ? "Impossible d'acheter la version golden"
+                    : "Impossible d'acheter cette carte",
+            );
         } finally {
             setBuyingCardId(null);
         }
@@ -190,6 +213,7 @@ export const CollectionPage = observer(() => {
                             showOwnedOnly={showOwnedOnly}
                             onShowOwnedOnlyChange={setShowOwnedOnly}
                             canBuyCard={canBuyCard}
+                            canBuyGoldenCard={canBuyGoldenCard}
                             onBuyCard={handleBuyCard}
                             buyingCardId={buyingCardId}
                             canSellCard={canSellCard}

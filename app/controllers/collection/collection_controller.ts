@@ -72,10 +72,10 @@ export default class CollectionController {
     }
 
     async buyCard({ auth, request, response }: HttpContext) {
-        const { cardId } = await request.validateUsing(buyCardSchema);
+        const { cardId, golden } = await request.validateUsing(buyCardSchema);
 
         try {
-            return await buyCardWithGoldCoins(auth.user!.id, cardId);
+            return await buyCardWithGoldCoins(auth.user!.id, cardId, { golden });
         } catch (error) {
             if (error instanceof BuyCardNotEnoughGoldCoinsError) {
                 return response.badRequest({ error: error.message });

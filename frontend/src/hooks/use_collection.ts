@@ -60,8 +60,8 @@ export const useBuyCardMutation = () => {
 
     return useApiMutation({
         showErrorToast: false,
-        mutationFn: async (cardId: number) => {
-            return client.api.collection.buyCard({ body: { cardId } });
+        mutationFn: async ({ cardId, golden }: { cardId: number; golden?: boolean }) => {
+            return client.api.collection.buyCard({ body: { cardId, golden } });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: COLLECTION_QUERY_KEY });

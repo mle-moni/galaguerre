@@ -6,6 +6,7 @@ import {
     type ApiSellCardResponse,
     type ApiSellDuplicatesResponse,
 } from "#api_types/collection.types";
+import { getGoldCoinsPerGoldenUpgrade } from "#api_types/card_rarity.types";
 import CollectionController from "#controllers/collection/collection_controller";
 import { syncCards } from "#database/seed_helpers/sync_cards";
 import Card from "#models/card";
@@ -179,6 +180,35 @@ test.group("collection api", (group) => {
 
         assert.equal(result.goldCoins, 0);
         assert.deepEqual(result.entry, { cardId: commonCard.id, count: 1, goldenCount: 0 });
+    });
+
+    test("CollectionController.buyCard upgrades a copy to golden", async ({ assert }) => {
+        await syncCards();
+
+        const card = await Card.query().where("id", 181).firstOrFail();
+        const upgradePrice = getGoldCoinsPerGoldenUpgrade(card.rarity);
+
+        const user = await User.create({
+            email: "buy-golden-api@test.fr",
+            pseudo: "buy-golden-api",
+            password: "test",
+            goldCoins: upgradePrice,
+        });
+
+        await UserCard.create({
+            userId: user.id,
+            cardId: card.id,
+            count: 1,
+            goldenCount: 0,
+        });
+
+        const controller = new CollectionController();
+        const result = (await controller.buyCard(
+            createAuthContext(user, { cardId: card.id, golden: true }) as never,
+        )) as ApiBuyCardResponse;
+
+        assert.equal(result.goldCoins, 0);
+        assert.deepEqual(result.entry, { cardId: card.id, count: 1, goldenCount: 1 });
     });
 
     test("CollectionController.sellCard sells one owned copy", async ({ assert }) => {

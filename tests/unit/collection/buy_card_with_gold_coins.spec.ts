@@ -1,4 +1,9 @@
 import {
+    getGoldCoinsPerCardBuy,
+    getGoldCoinsPerGoldenCardBuy,
+    getGoldCoinsPerGoldenUpgrade,
+} from "#api_types/card_rarity.types";
+import {
     GOLD_COINS_PER_COMMON_CARD_BUY,
     GOLD_COINS_PER_LEGENDARY_CARD_BUY,
 } from "#api_types/collection.types";
@@ -93,5 +98,99 @@ test.group("buy card with gold coins", (group) => {
             .firstOrFail();
 
         await assert.rejects(() => buyCardWithGoldCoins(user.id, commonCard.id), /story points/);
+    });
+
+    test("buys a new golden copy at full golden price", async ({ assert }) => {
+        await syncCards();
+
+        const card = await Card.query().where("id", 181).firstOrFail();
+        assert.isNotNull(card.data.goldenVideoUrl);
+
+        const price = getGoldCoinsPerGoldenCardBuy(card.rarity);
+        const user = await User.create({
+            email: "buy-golden-new@test.fr",
+            pseudo: "buy-golden-new",
+            password: "test",
+            goldCoins: price,
+        });
+
+        const result = await buyCardWithGoldCoins(user.id, card.id, { golden: true });
+
+        assert.equal(result.goldCoins, 0);
+        assert.deepEqual(result.entry, { cardId: card.id, count: 1, goldenCount: 1 });
+    });
+
+    test("upgrades a normal copy to golden for the price difference", async ({ assert }) => {
+        await syncCards();
+
+        const card = await Card.query().where("id", 181).firstOrFail();
+        const upgradePrice = getGoldCoinsPerGoldenUpgrade(card.rarity);
+        const user = await User.create({
+            email: "buy-golden-upgrade@test.fr",
+            pseudo: "buy-golden-upgrade",
+            password: "test",
+            goldCoins: upgradePrice,
+        });
+
+        await UserCard.create({
+            userId: user.id,
+            cardId: card.id,
+            count: 1,
+            goldenCount: 0,
+        });
+
+        const result = await buyCardWithGoldCoins(user.id, card.id, { golden: true });
+
+        assert.equal(result.goldCoins, 0);
+        assert.deepEqual(result.entry, { cardId: card.id, count: 1, goldenCount: 1 });
+        assert.equal(
+            upgradePrice,
+            getGoldCoinsPerGoldenCardBuy(card.rarity) - getGoldCoinsPerCardBuy(card.rarity),
+        );
+    });
+
+    test("rejects golden buy when card has no golden video", async ({ assert }) => {
+        await syncCards();
+
+        const cards = await Card.query().where("isCollectible", true).limit(100).exec();
+        const card = cards.find((candidate) => candidate.data.goldenVideoUrl === null);
+        assert.isDefined(card);
+
+        const user = await User.create({
+            email: "buy-no-golden@test.fr",
+            pseudo: "buy-no-golden",
+            password: "test",
+            goldCoins: getGoldCoinsPerGoldenCardBuy(card!.rarity),
+        });
+
+        await assert.rejects(
+            () => buyCardWithGoldCoins(user.id, card!.id, { golden: true }),
+            /pas de version golden/,
+        );
+    });
+
+    test("rejects golden buy when already at max golden copies", async ({ assert }) => {
+        await syncCards();
+
+        const card = await Card.query().where("id", 181).firstOrFail();
+        const maxCopies = card.rarity === "LEGENDARY" ? 1 : 2;
+        const user = await User.create({
+            email: "buy-golden-max@test.fr",
+            pseudo: "buy-golden-max",
+            password: "test",
+            goldCoins: getGoldCoinsPerGoldenCardBuy(card.rarity),
+        });
+
+        await UserCard.create({
+            userId: user.id,
+            cardId: card.id,
+            count: maxCopies,
+            goldenCount: maxCopies,
+        });
+
+        await assert.rejects(
+            () => buyCardWithGoldCoins(user.id, card.id, { golden: true }),
+            /maximum d'exemplaires golden/,
+        );
     });
 });

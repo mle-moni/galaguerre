@@ -4,6 +4,8 @@ import {
     type CardRarity,
     getGoldCoinsPerCardBuy,
     getGoldCoinsPerDuplicateSell,
+    getGoldCoinsPerGoldenCardBuy,
+    getGoldCoinsPerGoldenUpgrade,
 } from "#api_types/card_rarity.types";
 import { CARD_TAG_LABELS, type CardTag } from "#api_types/card.types";
 import { Button, Collapse, SegmentedControl, Select, TextInput, Tooltip } from "@mantine/core";
@@ -23,7 +25,7 @@ import { CardRarityBadge } from "~/components/cards/card_legendary_badge";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
 import { CenteredLoader } from "~/components/centered_loader";
-import { BuyCardModal } from "~/components/catalogue/buy_card_modal";
+import { BuyCardModal, type BuyCardVariant } from "~/components/catalogue/buy_card_modal";
 import { SellCardModal } from "~/components/catalogue/sell_card_modal";
 import { CollectionFiltersSidebar } from "~/pages/collection/components/collection_filters_sidebar";
 import { useCardSetsQuery } from "~/hooks/use_card_sets";
@@ -80,7 +82,8 @@ export interface CatalogueProps {
     showOwnedOnly?: boolean;
     onShowOwnedOnlyChange?: (value: boolean) => void;
     canBuyCard?: (cardId: number) => boolean;
-    onBuyCard?: (cardId: number) => void | Promise<void>;
+    canBuyGoldenCard?: (cardId: number) => boolean;
+    onBuyCard?: (cardId: number, options?: { golden?: boolean }) => void | Promise<void>;
     buyingCardId?: number | null;
     canSellCard?: (cardId: number) => boolean;
     onSellCard?: (cardId: number) => void | Promise<void>;
@@ -439,6 +442,7 @@ export const Catalogue = observer(
         showOwnedOnly = false,
         onShowOwnedOnlyChange,
         canBuyCard,
+        canBuyGoldenCard,
         onBuyCard,
         buyingCardId = null,
         canSellCard,
@@ -619,7 +623,32 @@ export const Catalogue = observer(
 
         const showTradeActions =
             (canBuyCard !== undefined && onBuyCard !== undefined) ||
+            (canBuyGoldenCard !== undefined && onBuyCard !== undefined) ||
             (canSellCard !== undefined && onSellCard !== undefined);
+
+        const buyModalCanBuyNormal =
+            buyModalCard !== null && (canBuyCard?.(buyModalCard.id) ?? false);
+        const buyModalCanBuyGolden =
+            buyModalCard !== null && (canBuyGoldenCard?.(buyModalCard.id) ?? false);
+        const buyModalOwnedCount =
+            buyModalCard !== null ? ownedCounts?.get(buyModalCard.id) ?? 0 : 0;
+        const buyModalOwnedGoldenCount =
+            buyModalCard !== null ? ownedGoldenCounts?.get(buyModalCard.id) ?? 0 : 0;
+        const buyModalIsGoldenUpgrade = buyModalOwnedCount > buyModalOwnedGoldenCount;
+        const buyModalNormalPrice = buyModalCard
+            ? getGoldCoinsPerCardBuy(buyModalCard.rarity)
+            : null;
+        const buyModalGoldenPrice = buyModalCard
+            ? buyModalIsGoldenUpgrade
+                ? getGoldCoinsPerGoldenUpgrade(buyModalCard.rarity)
+                : getGoldCoinsPerGoldenCardBuy(buyModalCard.rarity)
+            : null;
+
+        const handleBuyConfirm = async (variant: BuyCardVariant) => {
+            if (!buyModalCard || !onBuyCard) return;
+            await onBuyCard(buyModalCard.id, { golden: variant === "golden" });
+            setBuyModalCard(null);
+        };
 
         const gridContent =
             filteredCatalog.length === 0 ? (
@@ -634,7 +663,10 @@ export const Catalogue = observer(
                 </p>
             ) : (
                 filteredCatalog.map((card) => {
-                    const canBuy = showTradeActions && (canBuyCard?.(card.id) ?? false);
+                    const canBuy =
+                        showTradeActions &&
+                        ((canBuyCard?.(card.id) ?? false) ||
+                            (canBuyGoldenCard?.(card.id) ?? false));
                     const canSell = showTradeActions && (canSellCard?.(card.id) ?? false);
 
                     return (
@@ -744,19 +776,15 @@ export const Catalogue = observer(
                         <>
                             <BuyCardModal
                                 card={buyModalCard}
-                                price={
-                                    buyModalCard
-                                        ? getGoldCoinsPerCardBuy(buyModalCard.rarity)
-                                        : null
-                                }
+                                canBuyNormal={buyModalCanBuyNormal}
+                                canBuyGolden={buyModalCanBuyGolden}
+                                isGoldenUpgrade={buyModalIsGoldenUpgrade}
+                                normalPrice={buyModalNormalPrice}
+                                goldenPrice={buyModalGoldenPrice}
                                 userGoldCoins={userGoldCoins}
                                 opened={buyModalCard !== null}
                                 onClose={() => setBuyModalCard(null)}
-                                onConfirm={async () => {
-                                    if (!buyModalCard || !onBuyCard) return;
-                                    await onBuyCard(buyModalCard.id);
-                                    setBuyModalCard(null);
-                                }}
+                                onConfirm={handleBuyConfirm}
                                 isBuying={buyingCardId === buyModalCard?.id}
                             />
 
@@ -820,15 +848,15 @@ export const Catalogue = observer(
 
                 <BuyCardModal
                     card={buyModalCard}
-                    price={buyModalCard ? getGoldCoinsPerCardBuy(buyModalCard.rarity) : null}
+                    canBuyNormal={buyModalCanBuyNormal}
+                    canBuyGolden={buyModalCanBuyGolden}
+                    isGoldenUpgrade={buyModalIsGoldenUpgrade}
+                    normalPrice={buyModalNormalPrice}
+                    goldenPrice={buyModalGoldenPrice}
                     userGoldCoins={userGoldCoins}
                     opened={buyModalCard !== null}
                     onClose={() => setBuyModalCard(null)}
-                    onConfirm={async () => {
-                        if (!buyModalCard || !onBuyCard) return;
-                        await onBuyCard(buyModalCard.id);
-                        setBuyModalCard(null);
-                    }}
+                    onConfirm={handleBuyConfirm}
                     isBuying={buyingCardId === buyModalCard?.id}
                 />
 

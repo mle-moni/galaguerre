@@ -1362,6 +1362,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Arnaud", 5),
             imageUrl: "/card-covers/galadrim/arnaud.webp",
+            goldenVideoUrl: "/card-videos/arnaud.mp4",
             attack: 5,
             health: 4,
         },
