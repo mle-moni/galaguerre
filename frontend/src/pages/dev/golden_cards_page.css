@@ -11,6 +11,38 @@
 	line-height: 1.5;
 }
 
+.golden-cards-page__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	min-width: min(100%, 320px);
+	flex: 1;
+}
+
+.golden-cards-page__field-label {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.6);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.golden-cards-page__select {
+	padding: 0.5rem 0.75rem;
+	border-radius: var(--gg-radius-sm);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	background: rgba(0, 0, 0, 0.35);
+	color: var(--gg-text-on-dark);
+	font-size: 0.95rem;
+}
+
+.golden-cards-page__hint {
+	margin: 1rem 0 0;
+	font-size: 0.85rem;
+	color: rgba(255, 255, 255, 0.55);
+	font-style: italic;
+}
+
 .golden-cards-page__section {
 	padding: 1.25rem;
 	border-radius: var(--gg-radius);
@@ -23,6 +55,19 @@
 	font-size: 1.125rem;
 	font-weight: 700;
 	color: var(--gg-text-on-dark);
+}
+
+.golden-cards-page__variant + .golden-cards-page__variant {
+	margin-top: 1.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.golden-cards-page__subtitle {
+	margin: 0 0 0.75rem;
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.85);
 }
 
 .golden-cards-page__row {

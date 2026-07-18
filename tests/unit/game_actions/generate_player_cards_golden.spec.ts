@@ -11,7 +11,7 @@ test.group("generatePlayerCards golden", () => {
             data: {
                 ...defaultMinionData(),
                 name: "Nouvelle Recrue",
-                goldenVideoUrl: "/card-videos/nouvelle-recrue-640.mp4",
+                goldenVideoUrl: "/card-videos/nouvelle-recrue.mp4",
             },
         });
 
@@ -23,8 +23,8 @@ test.group("generatePlayerCards golden", () => {
         assert.lengthOf(playerCards, 2);
         assert.isTrue(playerCards[0]!.isGolden);
         assert.isFalse(playerCards[1]!.isGolden);
-        assert.equal(playerCards[0]!.goldenVideoUrl, "/card-videos/nouvelle-recrue-640.mp4");
-        assert.equal(playerCards[1]!.goldenVideoUrl, "/card-videos/nouvelle-recrue-640.mp4");
+        assert.equal(playerCards[0]!.goldenVideoUrl, "/card-videos/nouvelle-recrue.mp4");
+        assert.equal(playerCards[1]!.goldenVideoUrl, "/card-videos/nouvelle-recrue.mp4");
     });
 
     test("marks all copies normal when no goldenCounts provided", ({ assert }) => {

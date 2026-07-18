@@ -7,18 +7,19 @@ When you create a card, if an image is provided, optimise the image as a webp im
 
 When a **golden video** is provided for a card:
 
-1. Place the source video under `public/card-videos/<slug>.mp4` and **keep the source** (do not delete it).
+1. Place the source video under `public/card-videos/<slug>_original.mp4`.
 2. Encode a game-ready version beside it (4s, muted, 640px wide, H.264):
 
 ```bash
-ffmpeg -y -i public/card-videos/<slug>.mp4 -t 4 -an \
+ffmpeg -y -i public/card-videos/<slug>_original.mp4 -t 4 -an \
   -vf "scale=640:-2" -c:v libx264 -pix_fmt yuv420p -crf 28 -preset slow -movflags +faststart \
-  public/card-videos/<slug>-640.mp4
+  public/card-videos/<slug>.mp4
 ```
 
 3. On the card seed, set both:
    - `imageUrl: "/card-covers/.../<slug>.webp"` (poster / normal art)
-   - `goldenVideoUrl: "/card-videos/<slug>-640.mp4"` (golden animated art)
+   - `goldenVideoUrl: "/card-videos/<slug>.mp4"` (golden animated art)
 4. Presence of `goldenVideoUrl` makes the card eligible for golden pack drops.
+5. Delete the original video.
 
 After creating cards, always update "cards.md", with `yarn generate:cards-md`
