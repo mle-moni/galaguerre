@@ -315,6 +315,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Head of Emojis", 8),
             imageUrl: "/card-covers/galadrim/head-of-emojis.webp",
+            goldenVideoUrl: "/card-videos/head-of-emojis.mp4",
             attack: 6,
             health: 6,
         },
