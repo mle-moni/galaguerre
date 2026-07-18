@@ -1,9 +1,9 @@
-import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
 import { type MinionAttackStatus, getMinionCardMaxAttacks } from "~/helpers/minion_combat";
 import type { MinionCard } from "#api_types/game.types";
 import { BoardMinionEffectIcons } from "./board_minion_effect_icons.jsx";
+import { CardArtwork } from "./card_artwork.jsx";
 import "./board_minion_token.css";
 
 interface BoardMinionTokenProps {
@@ -71,11 +71,12 @@ export const BoardMinionToken = ({
                 </span>
             )}
             <div className="board-minion-token__art">
-                <Image
+                <CardArtwork
                     className="board-minion-token__image"
-                    src={card.imageUrl}
+                    imageUrl={card.imageUrl}
+                    goldenVideoUrl={card.goldenVideoUrl}
+                    isGolden={card.isGolden}
                     alt={card.label}
-                    draggable={false}
                 />
             </div>
             <span className="board-minion-token__stat board-minion-token__stat--attack">

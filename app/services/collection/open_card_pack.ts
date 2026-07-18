@@ -1,4 +1,4 @@
-import type { ApiCatalogCard } from "#api_types/deck.types";
+import type { ApiOpenedPackCard } from "#api_types/collection.types";
 import { PACK_SIZE } from "#api_types/collection.types";
 import { serializeCatalogCard } from "#galaguerre/serialization/serialize_catalog_card";
 import Card from "#models/card";
@@ -23,7 +23,7 @@ export class NotEnoughCollectibleCardsError extends Error {
     }
 }
 
-export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> => {
+export const openCardPack = async (userId: number): Promise<ApiOpenedPackCard[]> => {
     const openedCards = await db.transaction(async (trx) => {
         const pack = await CardPack.query({ client: trx })
             .where("userId", userId)
@@ -43,9 +43,15 @@ export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> =>
         }
 
         const drawnCardIds = drawPackCardsWithoutReplacement(collectibleCards, PACK_SIZE);
+        const opened: ApiOpenedPackCard[] = [];
 
         for (const cardId of drawnCardIds) {
-            await grantPackCardCopyForUser(userId, cardId, trx);
+            const { isGolden } = await grantPackCardCopyForUser(userId, cardId, trx);
+            const card = collectibleCards.find((entry) => entry.id === cardId)!;
+            opened.push({
+                ...serializeCatalogCard(card),
+                isGolden,
+            });
         }
 
         pack.openedAt = DateTime.now();
@@ -54,8 +60,7 @@ export const openCardPack = async (userId: number): Promise<ApiCatalogCard[]> =>
 
         await updateDailyQuestProgressForPackOpen(userId, 1, trx);
 
-        const cardsById = new Map(collectibleCards.map((card) => [card.id, card]));
-        return drawnCardIds.map((cardId) => serializeCatalogCard(cardsById.get(cardId)!));
+        return opened;
     });
 
     return openedCards;

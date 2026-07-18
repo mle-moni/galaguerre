@@ -12,6 +12,7 @@ import { DeckSharePage } from "./pages/decks/deck_share_page.jsx";
 import { DeckBuilderPage } from "./pages/decks/deck_builder_page.jsx";
 import { DecksPage } from "./pages/decks/decks_page.jsx";
 import { BoardMinionStylesPage } from "./pages/dev/board_minion_styles_page.jsx";
+import { GoldenCardsPage } from "./pages/dev/golden_cards_page.jsx";
 import { FriendsPage } from "./pages/friends/friends_page.jsx";
 import { HomePage } from "./pages/home/home_page.jsx";
 import { LoginPage } from "./pages/login/login_page.jsx";
@@ -139,6 +140,10 @@ const router = createBrowserRouter([
                     {
                         path: "/dev/board-minion-styles",
                         element: <BoardMinionStylesPage />,
+                    },
+                    {
+                        path: "/dev/golden-cards",
+                        element: <GoldenCardsPage />,
                     },
                     {
                         path: "*",

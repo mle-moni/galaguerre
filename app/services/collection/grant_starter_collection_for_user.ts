@@ -1,4 +1,4 @@
-import { STARTER_COLLECTION_RECIPE } from "#api_types/collection.types";
+import { STARTER_COLLECTION_RECIPE, PACK_GOLDEN_CHANCE } from "#api_types/collection.types";
 import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
 import Card from "#models/card";
 import UserCard from "#models/user_card";
@@ -13,12 +13,13 @@ export const grantStarterCollectionForUser = async (
 
         if (existing) {
             existing.count = copies;
+            existing.goldenCount = Math.min(existing.goldenCount ?? 0, copies);
             if (client) existing.useTransaction(client);
             await existing.save();
             continue;
         }
 
-        await UserCard.create({ userId, cardId, count: copies }, { client });
+        await UserCard.create({ userId, cardId, count: copies, goldenCount: 0 }, { client });
     }
 };
 
@@ -44,22 +45,37 @@ export const grantCardCopiesForUser = async (
         return;
     }
 
-    await UserCard.create({ userId, cardId, count: newCount }, { client });
+    await UserCard.create({ userId, cardId, count: newCount, goldenCount: 0 }, { client });
+};
+
+export type GrantPackCardCopyOptions = {
+    forceGolden?: boolean;
+    random?: () => number;
 };
 
 export const grantPackCardCopyForUser = async (
     userId: number,
     cardId: number,
     client?: TransactionClientContract,
-): Promise<void> => {
+    options: GrantPackCardCopyOptions = {},
+): Promise<{ isGolden: boolean }> => {
+    const card = await Card.query({ client }).where("id", cardId).firstOrFail();
+    const canBeGolden = Boolean(card.data.goldenVideoUrl);
+    const roll = options.random?.() ?? Math.random();
+    const isGolden = canBeGolden && (options.forceGolden === true || roll < PACK_GOLDEN_CHANCE);
+
     const existing = await UserCard.query({ client }).where({ userId, cardId }).first();
 
     if (existing) {
         existing.count += 1;
+        if (isGolden) {
+            existing.goldenCount = (existing.goldenCount ?? 0) + 1;
+        }
         if (client) existing.useTransaction(client);
         await existing.save();
-        return;
+        return { isGolden };
     }
 
-    await UserCard.create({ userId, cardId, count: 1 }, { client });
+    await UserCard.create({ userId, cardId, count: 1, goldenCount: isGolden ? 1 : 0 }, { client });
+    return { isGolden };
 };

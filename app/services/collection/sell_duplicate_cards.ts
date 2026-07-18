@@ -88,6 +88,7 @@ export const sellAllDuplicateCards = async (
 
             const maxCopies = getMaxCopiesForRarity(card.rarity);
             userCard.count = maxCopies;
+            userCard.goldenCount = Math.min(userCard.goldenCount ?? 0, userCard.count);
             userCard.useTransaction(trx);
 
             if (userCard.count === 0) {

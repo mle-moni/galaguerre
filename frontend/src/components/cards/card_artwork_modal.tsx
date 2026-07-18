@@ -1,13 +1,20 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import { Modal } from "@mantine/core";
+import { CardArtwork } from "./card_artwork.jsx";
 
 interface CardArtworkModalProps {
     card: ApiCatalogCard | null;
     opened: boolean;
     onClose: () => void;
+    isGolden?: boolean;
 }
 
-export const CardArtworkModal = ({ card, opened, onClose }: CardArtworkModalProps) => (
+export const CardArtworkModal = ({
+    card,
+    opened,
+    onClose,
+    isGolden = false,
+}: CardArtworkModalProps) => (
     <Modal
         opened={opened}
         onClose={onClose}
@@ -19,11 +26,12 @@ export const CardArtworkModal = ({ card, opened, onClose }: CardArtworkModalProp
         classNames={{ content: "card-artwork-modal" }}
     >
         {card && (
-            <img
-                src={card.imageUrl}
-                alt={card.label}
+            <CardArtwork
                 className="card-artwork-modal__image"
-                draggable={false}
+                imageUrl={card.imageUrl}
+                goldenVideoUrl={card.goldenVideoUrl}
+                isGolden={isGolden}
+                alt={card.label}
             />
         )}
     </Modal>

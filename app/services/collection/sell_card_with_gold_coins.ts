@@ -56,6 +56,9 @@ export const sellCardWithGoldCoins = async (
         await user.save();
 
         userCard.count -= 1;
+        if ((userCard.goldenCount ?? 0) > userCard.count) {
+            userCard.goldenCount = userCard.count;
+        }
         userCard.useTransaction(trx);
 
         if (userCard.count === 0) {

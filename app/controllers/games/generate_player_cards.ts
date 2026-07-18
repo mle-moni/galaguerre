@@ -19,16 +19,32 @@ import { shuffleArray } from "../../utils/array.js";
 
 type CardSource = Deck | Card[];
 
+export type GeneratePlayerCardsOptions = {
+    shuffle?: boolean;
+    /** Remaining golden copies available per cardId; consumed as cards are generated. */
+    goldenCounts?: Map<number, number>;
+};
+
 const getSourceCards = (source: CardSource): Card[] =>
     Array.isArray(source) ? source : source.cards;
 
-export const generatePlayerCards = (source: CardSource, options?: { shuffle?: boolean }) => {
+export const generatePlayerCards = (source: CardSource, options?: GeneratePlayerCardsOptions) => {
+    const remainingGolden = new Map(options?.goldenCounts ?? []);
+
     const cards: PlayerCard[] = getSourceCards(source).map((card) => {
+        const left = remainingGolden.get(card.id) ?? 0;
+        const isGolden = left > 0;
+        if (isGolden) {
+            remainingGolden.set(card.id, left - 1);
+        }
+
         const base: PlayerCardBase = {
             uuid: randomUUID(),
             cardId: card.id,
             label: card.data.name,
             imageUrl: card.data.imageUrl,
+            goldenVideoUrl: card.data.goldenVideoUrl ?? null,
+            isGolden,
             baseCost: card.data.cost,
             cost: card.data.cost,
             dynamicCost: card.data.dynamicCost,

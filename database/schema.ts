@@ -304,7 +304,15 @@ export class GameSchema extends BaseModel {
 }
 
 export class UserCardSchema extends BaseModel {
-    static $columns = ["cardId", "count", "createdAt", "id", "updatedAt", "userId"] as const;
+    static $columns = [
+        "cardId",
+        "count",
+        "createdAt",
+        "goldenCount",
+        "id",
+        "updatedAt",
+        "userId",
+    ] as const;
     $columns = UserCardSchema.$columns;
     @column()
     declare cardId: number;
@@ -312,6 +320,8 @@ export class UserCardSchema extends BaseModel {
     declare count: number;
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime | null;
+    @column()
+    declare goldenCount: number;
     @column({ isPrimary: true })
     declare id: number;
     @column.dateTime({ autoCreate: true, autoUpdate: true })

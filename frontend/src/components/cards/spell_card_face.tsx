@@ -1,9 +1,9 @@
 import "./card_faces.css";
 
 import type { SpellCard } from "#api_types/game.types";
-import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
+import { CardArtwork } from "./card_artwork.jsx";
 import { CardCopyCountBadge } from "./card_copy_count_badge.jsx";
 import { CardFaceLabel } from "./card_face_label.jsx";
 import { CardFaceDescription } from "./card_face_description.jsx";
@@ -46,12 +46,13 @@ export const SpellCardFace = ({
                 <div className={clsx("cost", card.cost < card.baseCost && "cost--reduced")}>
                     {card.cost}
                 </div>
-                <Image
-                    className="rounded-t h-full w-full object-cover"
-                    src={card.imageUrl}
+                <CardArtwork
+                    className="rounded-t"
+                    imageUrl={card.imageUrl}
+                    goldenVideoUrl={card.goldenVideoUrl}
+                    isGolden={card.isGolden}
                     alt="Galaguerre spell"
-                    draggable={false}
-                    loading={imageLoading}
+                    imageLoading={imageLoading}
                 />
             </div>
             <div className="playing-card-face__body playing-card-face__body--no-stats">

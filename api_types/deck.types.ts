@@ -27,6 +27,7 @@ export interface ApiCatalogCardBase {
     id: number;
     label: string;
     imageUrl: string;
+    goldenVideoUrl: string | null;
     cost: number;
     dynamicCost: DynamicCostSnapshot | null;
     cardSetId: number;

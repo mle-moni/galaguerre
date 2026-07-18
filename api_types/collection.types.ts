@@ -7,6 +7,7 @@ import { GALADRIM_AGGRO_DECK_RECIPE } from "../database/seed_data/balanced_decks
 export const COLLECTION_MIN_CARDS = DECK_MIN_CARDS;
 export const COLLECTION_MAX_COPIES_PER_CARD = 2;
 export const PACK_SIZE = 5;
+export const PACK_GOLDEN_CHANCE = 0.05;
 
 export const GOLD_COINS_PER_COMMON_CARD_BUY = 50;
 export const GOLD_COINS_PER_RARE_CARD_BUY = 175;
@@ -22,6 +23,7 @@ export const STARTER_COLLECTION_RECIPE = GALADRIM_AGGRO_DECK_RECIPE;
 export interface ApiCollectionEntry {
     cardId: number;
     count: number;
+    goldenCount: number;
 }
 
 export interface ApiCollectionResponse {
@@ -32,8 +34,12 @@ export interface ApiPacksResponse {
     unopenedCount: number;
 }
 
+export type ApiOpenedPackCard = ApiCatalogCard & {
+    isGolden: boolean;
+};
+
 export interface ApiOpenPackResponse {
-    cards: ApiCatalogCard[];
+    cards: ApiOpenedPackCard[];
 }
 
 export interface ApiDuplicateSellLine {

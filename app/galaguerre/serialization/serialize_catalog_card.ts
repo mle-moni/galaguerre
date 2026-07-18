@@ -10,6 +10,7 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
         id: card.id,
         label: card.data.name,
         imageUrl: card.data.imageUrl,
+        goldenVideoUrl: card.data.goldenVideoUrl ?? null,
         cost: card.data.cost,
         dynamicCost: card.data.dynamicCost,
         cardSetId: card.cardSetId,

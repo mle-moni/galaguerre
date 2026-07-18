@@ -28,6 +28,8 @@ const hideCardData = (card: PlayerCard): PlayerCard => ({
     dynamicCost: null,
     label: "dummy card",
     imageUrl: "https://picsum.photos/seed/dummy_card/200/300",
+    goldenVideoUrl: null,
+    isGolden: false,
     uuid: card.uuid,
     cardId: 0,
     rarity: "COMMON",

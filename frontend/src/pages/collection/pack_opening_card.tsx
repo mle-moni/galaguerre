@@ -1,4 +1,4 @@
-import type { ApiCatalogCard } from "#api_types/deck.types";
+import type { ApiOpenedPackCard } from "#api_types/collection.types";
 import clsx from "clsx";
 import { useState, type MouseEvent } from "react";
 import { CardBackFace } from "~/components/cards/card_back_face";
@@ -12,7 +12,7 @@ import { play } from "~/cuelume/index";
 import "./pack_opening_card.css";
 
 interface PackOpeningCardProps {
-    card: ApiCatalogCard;
+    card: ApiOpenedPackCard;
     isFlipped: boolean;
     canFlip: boolean;
     onFlip: () => void;
@@ -73,6 +73,7 @@ export const PackOpeningCard = ({
                         canFlip && "pack-opening-card--can-flip",
                         canPreview && "pack-opening-card--previewable",
                         showRarityHint && "pack-opening-card--rarity-hint",
+                        card.isGolden && "pack-opening-card--golden",
                         !isInteractive && "pack-opening-card--inactive",
                     )}
                     onClick={handleClick}
@@ -104,6 +105,7 @@ export const PackOpeningCard = ({
                         <div className="pack-opening-card__face pack-opening-card__front">
                             <CatalogCardDisplay
                                 card={card}
+                                isGolden={card.isGolden}
                                 size={useFullSize ? "full" : undefined}
                             />
                         </div>
@@ -112,7 +114,7 @@ export const PackOpeningCard = ({
             </div>
             {canPreview ? (
                 <CardPreviewSheet
-                    card={catalogCardToPlayerCard(card)}
+                    card={catalogCardToPlayerCard(card, { isGolden: card.isGolden })}
                     attack={card.type === "MINION" ? card.attack : undefined}
                     health={card.type === "MINION" ? card.health : undefined}
                     opened={previewOpened}

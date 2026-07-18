@@ -1,4 +1,4 @@
-import type { ApiCatalogCard } from "#api_types/deck.types";
+import type { ApiOpenedPackCard } from "#api_types/collection.types";
 import { Button } from "@mantine/core";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
@@ -21,12 +21,12 @@ export const PackOpeningPage = observer(() => {
     const openPackMutation = useOpenPackMutation();
     const useFullSize = usePackOpeningFullSize();
     const [phase, setPhase] = useState<PackOpeningPhase>("idle");
-    const [revealedCards, setRevealedCards] = useState<ApiCatalogCard[] | null>(null);
+    const [revealedCards, setRevealedCards] = useState<ApiOpenedPackCard[] | null>(null);
     const [flippedIndices, setFlippedIndices] = useState<Set<number>>(() => new Set());
     const openingProgressRef = useRef({
         apiDone: false,
         animationDone: false,
-        cards: null as ApiCatalogCard[] | null,
+        cards: null as ApiOpenedPackCard[] | null,
     });
 
     const flippedCount = flippedIndices.size;

@@ -75,6 +75,7 @@ export interface CatalogueProps {
     costFilter?: string | null;
     onCostFilterChange?: (cost: string | null) => void;
     ownedCounts?: Map<number, number>;
+    ownedGoldenCounts?: Map<number, number>;
     ownedOnly?: boolean;
     showOwnedOnly?: boolean;
     onShowOwnedOnlyChange?: (value: boolean) => void;
@@ -91,6 +92,7 @@ interface CatalogCardItemProps {
     card: ApiCatalogCard;
     count: number;
     ownedCount: number | null;
+    isGolden: boolean;
     interactive: boolean;
     canAdd: boolean;
     onAdd?: () => void;
@@ -257,6 +259,7 @@ const CatalogCardItem = ({
     card,
     count,
     ownedCount,
+    isGolden,
     interactive,
     canAdd,
     onAdd,
@@ -297,6 +300,7 @@ const CatalogCardItem = ({
                             <CatalogCardDisplay
                                 card={card}
                                 variant="artwork"
+                                isGolden={isGolden}
                                 overlay={
                                     <>
                                         {card.rarity !== "COMMON" && (
@@ -370,6 +374,7 @@ const CatalogCardItem = ({
             >
                 <CatalogCardDisplay
                     card={card}
+                    isGolden={isGolden}
                     copyCount={showOwnedBadge ? ownedCount : undefined}
                 />
             </div>
@@ -429,6 +434,7 @@ export const Catalogue = observer(
         costFilter: controlledCostFilter,
         onCostFilterChange,
         ownedCounts,
+        ownedGoldenCounts,
         ownedOnly = false,
         showOwnedOnly = false,
         onShowOwnedOnlyChange,
@@ -450,6 +456,7 @@ export const Catalogue = observer(
         const [internalCostFilter, setInternalCostFilter] = useState<string | null>(null);
         const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
         const [artworkCard, setArtworkCard] = useState<ApiCatalogCard | null>(null);
+        const [artworkIsGolden, setArtworkIsGolden] = useState(false);
         const [buyModalCard, setBuyModalCard] = useState<ApiCatalogCard | null>(null);
         const [sellModalCard, setSellModalCard] = useState<ApiCatalogCard | null>(null);
         const [showFilters, setShowFilters] = useState(false);
@@ -638,11 +645,15 @@ export const Catalogue = observer(
                             ownedCount={
                                 ownedCounts === undefined ? null : ownedCounts.get(card.id) ?? 0
                             }
+                            isGolden={(ownedGoldenCounts?.get(card.id) ?? 0) > 0}
                             interactive={interactive}
                             canAdd={canAddCard?.(card.id) ?? false}
                             onAdd={onAdd ? () => onAdd(card.id) : undefined}
                             onRemove={onRemove ? () => onRemove(card.id) : undefined}
-                            onViewArtwork={() => setArtworkCard(card)}
+                            onViewArtwork={() => {
+                                setArtworkCard(card);
+                                setArtworkIsGolden((ownedGoldenCounts?.get(card.id) ?? 0) > 0);
+                            }}
                             isNarrowScreen={isNarrowScreen}
                             isMobilePortrait={isMobilePortrait}
                             showOwnedCount={ownedOnly || !interactive}
@@ -722,7 +733,11 @@ export const Catalogue = observer(
                     <CardArtworkModal
                         card={artworkCard}
                         opened={artworkCard !== null}
-                        onClose={() => setArtworkCard(null)}
+                        onClose={() => {
+                            setArtworkCard(null);
+                            setArtworkIsGolden(false);
+                        }}
+                        isGolden={artworkIsGolden}
                     />
 
                     {isCollection && (
@@ -796,7 +811,11 @@ export const Catalogue = observer(
                 <CardArtworkModal
                     card={artworkCard}
                     opened={artworkCard !== null}
-                    onClose={() => setArtworkCard(null)}
+                    onClose={() => {
+                        setArtworkCard(null);
+                        setArtworkIsGolden(false);
+                    }}
+                    isGolden={artworkIsGolden}
                 />
 
                 <BuyCardModal

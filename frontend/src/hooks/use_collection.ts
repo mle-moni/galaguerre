@@ -120,3 +120,7 @@ export const useBuyPackMutation = () => {
 export const entriesToOwnedCounts = (
     entries: { cardId: number; count: number }[],
 ): Map<number, number> => new Map(entries.map((entry) => [entry.cardId, entry.count]));
+
+export const entriesToOwnedGoldenCounts = (
+    entries: { cardId: number; goldenCount: number }[],
+): Map<number, number> => new Map(entries.map((entry) => [entry.cardId, entry.goldenCount]));

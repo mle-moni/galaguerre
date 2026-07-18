@@ -61,6 +61,8 @@ const createDefaultSourceMinion = (): MinionState => ({
         cardId: 0,
         label: "Placeholder",
         imageUrl: "",
+        goldenVideoUrl: null,
+        isGolden: false,
         baseCost: 0,
         cost: 0,
         dynamicCost: null,

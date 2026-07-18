@@ -23,6 +23,9 @@ export default class UserCard extends BaseModel {
     @column()
     declare count: number;
 
+    @column()
+    declare goldenCount: number;
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime;
 

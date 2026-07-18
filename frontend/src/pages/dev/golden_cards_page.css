@@ -1,0 +1,46 @@
+.golden-cards-page {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.golden-cards-page__intro {
+	margin: 0;
+	color: rgba(255, 255, 255, 0.75);
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+
+.golden-cards-page__section {
+	padding: 1.25rem;
+	border-radius: var(--gg-radius);
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.golden-cards-page__title {
+	margin: 0 0 1rem;
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--gg-text-on-dark);
+}
+
+.golden-cards-page__row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2rem;
+	align-items: flex-end;
+}
+
+.golden-cards-page__sample {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+.golden-cards-page__label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.7);
+}

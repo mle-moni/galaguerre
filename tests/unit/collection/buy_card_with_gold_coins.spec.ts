@@ -31,7 +31,7 @@ test.group("buy card with gold coins", (group) => {
         const result = await buyCardWithGoldCoins(user.id, commonCard.id);
 
         assert.equal(result.goldCoins, 0);
-        assert.deepEqual(result.entry, { cardId: commonCard.id, count: 1 });
+        assert.deepEqual(result.entry, { cardId: commonCard.id, count: 1, goldenCount: 0 });
     });
 
     test("buys a second common copy", async ({ assert }) => {

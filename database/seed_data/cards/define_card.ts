@@ -44,6 +44,7 @@ type CardSeedBase = {
     label: string;
     cost: number;
     imageUrl: string;
+    goldenVideoUrl?: string | null;
     cardSetName: string;
 };
 
@@ -447,6 +448,7 @@ export const defaultMinionData = (): MinionCardData => ({
     cost: 1,
     dynamicCost: null,
     imageUrl: "https://example.com/card.png",
+    goldenVideoUrl: null,
     attack: 1,
     health: 1,
     minionPowers: null,
@@ -466,6 +468,7 @@ export const defaultSpellData = (): SpellCardData => ({
     cost: 1,
     dynamicCost: null,
     imageUrl: "https://example.com/card.png",
+    goldenVideoUrl: null,
     spellActions: [damageAction(1, enemyHero())],
     castsWhenDrawn: false,
 });
@@ -479,6 +482,7 @@ export const defaultWeaponData = (): WeaponCardData => ({
     cost: 1,
     dynamicCost: null,
     imageUrl: "https://example.com/card.png",
+    goldenVideoUrl: null,
     damage: 1,
     durability: 1,
     deathrattleActions: [],
@@ -904,6 +908,7 @@ export const defineMinion = (
         name: base.label,
         cost: base.cost,
         imageUrl: base.imageUrl,
+        goldenVideoUrl: base.goldenVideoUrl ?? null,
         attack: base.attack,
         health: base.health,
         ...dataPartial,
@@ -932,6 +937,7 @@ export const defineSpell = (
         name: base.label,
         cost: base.cost,
         imageUrl: base.imageUrl,
+        goldenVideoUrl: base.goldenVideoUrl ?? null,
         spellActions,
         ...dataPartial,
     });
@@ -956,6 +962,7 @@ export const defineWeapon = (
         name: base.label,
         cost: base.cost,
         imageUrl: base.imageUrl,
+        goldenVideoUrl: base.goldenVideoUrl ?? null,
         damage: base.damage,
         durability: base.durability,
         ...dataPartial,

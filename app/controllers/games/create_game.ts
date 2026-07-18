@@ -15,6 +15,7 @@ import {
     ONBOARDING_HUMAN_MULLIGAN_TOP_CARD_IDS,
     ONBOARDING_HUMAN_OPENING_HAND_CARD_IDS,
 } from "#services/onboarding/arrange_onboarding_tutorial_deck";
+import { getUserCollectionGoldenCounts } from "#services/collection/get_user_collection_counts";
 import { generatePlayerCards } from "./generate_player_cards.js";
 import { sendGameUpdate } from "./send_game_update.js";
 
@@ -70,12 +71,23 @@ export const createGame = async ({
         assertDeckPlayable(playerTwo.deck);
     }
 
+    const [playerOneGoldenCounts, playerTwoGoldenCounts] = await Promise.all([
+        isAiPlayer(playerOne)
+            ? Promise.resolve(new Map<number, number>())
+            : getUserCollectionGoldenCounts(playerOne.userId),
+        isAiPlayer(playerTwo)
+            ? Promise.resolve(new Map<number, number>())
+            : getUserCollectionGoldenCounts(playerTwo.userId),
+    ]);
+
     const gameData: GameData = getDefaultGameData({
         playerOne,
         playerTwo,
         isTraining,
         isFriendly,
         isOnboardingTutorial,
+        playerOneGoldenCounts,
+        playerTwoGoldenCounts,
     });
 
     const game = await Game.create({
@@ -130,23 +142,32 @@ const createGamePlayer = (
     };
 };
 
+type GetDefaultGameDataOptions = CreateGameOptions & {
+    playerOneGoldenCounts?: Map<number, number>;
+    playerTwoGoldenCounts?: Map<number, number>;
+};
+
 export const getDefaultGameData = ({
     playerOne,
     playerTwo,
     isTraining,
     isFriendly,
     isOnboardingTutorial,
-}: CreateGameOptions): GameData => {
+    playerOneGoldenCounts,
+    playerTwoGoldenCounts,
+}: GetDefaultGameDataOptions): GameData => {
     const p1Source = isAiPlayer(playerOne) ? playerOne.cards : playerOne.deck;
     const p2Source = isAiPlayer(playerTwo) ? playerTwo.cards : playerTwo.deck;
 
     const p1Deck = buildPlayerDeckOrder(p1Source, {
         isOnboardingTutorial,
         isHuman: !isAiPlayer(playerOne),
+        goldenCounts: playerOneGoldenCounts,
     });
     const p2Deck = buildPlayerDeckOrder(p2Source, {
         isOnboardingTutorial,
         isHuman: !isAiPlayer(playerTwo),
+        goldenCounts: playerTwoGoldenCounts,
     });
 
     return {
@@ -182,13 +203,17 @@ const buildPlayerDeckOrder = (
     options: {
         isOnboardingTutorial?: boolean;
         isHuman: boolean;
+        goldenCounts?: Map<number, number>;
     },
 ): ReturnType<typeof generatePlayerCards> => {
     if (!options.isOnboardingTutorial) {
-        return generatePlayerCards(source);
+        return generatePlayerCards(source, { goldenCounts: options.goldenCounts });
     }
 
-    const cards = generatePlayerCards(source, { shuffle: false });
+    const cards = generatePlayerCards(source, {
+        shuffle: false,
+        goldenCounts: options.goldenCounts,
+    });
 
     if (options.isHuman) {
         return arrangeOnboardingTutorialDeck(

@@ -43,6 +43,8 @@ export interface PlayerCardBase {
     cardId: number;
     label: string;
     imageUrl: string;
+    goldenVideoUrl: string | null;
+    isGolden: boolean;
     baseCost: number;
     cost: number;
     handCostReduction?: number;

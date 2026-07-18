@@ -353,6 +353,7 @@ const cardDataBaseSchema = z.object({
     labelTags: z.array(cardLabelTagSchema).default([]),
     name: z.string(),
     imageUrl: z.string(),
+    goldenVideoUrl: z.string().nullable().default(null),
     cost: z.number().int().min(0),
     dynamicCost: dynamicCostSchema.nullable(),
 });

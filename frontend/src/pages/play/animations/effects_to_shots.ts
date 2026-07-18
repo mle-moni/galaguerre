@@ -42,6 +42,8 @@ const getDummyCard = (cardUuid: string): PlayerCard => ({
     cardId: 0,
     label: "Carte",
     imageUrl: "https://picsum.photos/seed/dummy_card/200/300",
+    goldenVideoUrl: null,
+    isGolden: false,
     baseCost: 0,
     cost: 0,
     dynamicCost: null,

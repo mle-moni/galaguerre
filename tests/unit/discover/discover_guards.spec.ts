@@ -49,6 +49,8 @@ test.group("discover guards", () => {
                     cardId: 2,
                     label: "Visible To P1",
                     imageUrl: "https://example.com/card.png",
+                    goldenVideoUrl: null,
+                    isGolden: false,
                     baseCost: 1,
                     cost: 1,
                     dynamicCost: null,

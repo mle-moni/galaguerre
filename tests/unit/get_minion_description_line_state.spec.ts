@@ -13,6 +13,8 @@ const createMinionCard = (overrides: Partial<MinionCard> = {}): MinionCard => ({
     cost: 1,
     dynamicCost: null,
     imageUrl: "",
+    goldenVideoUrl: null,
+    isGolden: false,
     tags: [],
     labelTags: [],
     rarity: "COMMON",

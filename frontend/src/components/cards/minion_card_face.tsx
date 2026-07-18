@@ -1,5 +1,4 @@
 import type { MinionCard } from "#api_types/game.types";
-import { Image } from "@mantine/core";
 import clsx from "clsx";
 import type { CSSProperties, ReactNode } from "react";
 import {
@@ -9,6 +8,7 @@ import {
 } from "~/helpers/minion_combat";
 import "./card_faces.css";
 
+import { CardArtwork } from "./card_artwork.jsx";
 import { CardCopyCountBadge } from "./card_copy_count_badge.jsx";
 import { CardEffectSymbols } from "./card_effect_symbols.jsx";
 import { CardFaceLabel } from "./card_face_label.jsx";
@@ -92,12 +92,13 @@ export const MinionCardFace = ({
                 <div className={clsx("cost", card.cost < card.baseCost && "cost--reduced")}>
                     {card.cost}
                 </div>
-                <Image
-                    className="rounded-t h-full w-full object-cover"
-                    src={card.imageUrl}
+                <CardArtwork
+                    className="rounded-t"
+                    imageUrl={card.imageUrl}
+                    goldenVideoUrl={card.goldenVideoUrl}
+                    isGolden={card.isGolden}
                     alt="Galaguerre card"
-                    draggable={false}
-                    loading={imageLoading}
+                    imageLoading={imageLoading}
                 />
             </div>
             <div className="playing-card-face__body">

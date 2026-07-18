@@ -508,7 +508,7 @@ Format compact pour construction de deck par LLM.
 - Passif (attaque du héros) : Donne +1/+2 à lui-même.
 
 ### #181 Nouvelle Recrue
-- Coût: 1 | Type: MINION | Stats: 1/1 [Ruée] | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Coût: 1 | Type: MINION | Stats: 1/1 [Ruée] | Rareté: Commune | Famille: —
 - Ruée : Peut attaquer les monstres dès le tour où il est joué.
 
 ### #182 Buddy Charismatique

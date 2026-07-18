@@ -10,7 +10,8 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
-.catalog-card-artwork img {
+.catalog-card-artwork img,
+.catalog-card-artwork video {
     display: block;
     width: 100%;
     height: 100%;

@@ -178,7 +178,7 @@ test.group("collection api", (group) => {
         )) as ApiBuyCardResponse;
 
         assert.equal(result.goldCoins, 0);
-        assert.deepEqual(result.entry, { cardId: commonCard.id, count: 1 });
+        assert.deepEqual(result.entry, { cardId: commonCard.id, count: 1, goldenCount: 0 });
     });
 
     test("CollectionController.sellCard sells one owned copy", async ({ assert }) => {

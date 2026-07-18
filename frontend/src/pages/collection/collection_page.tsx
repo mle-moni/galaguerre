@@ -16,6 +16,7 @@ import { PackIcon } from "~/components/rewards/pack_icon";
 import { CenteredLoader } from "~/components/centered_loader";
 import {
     entriesToOwnedCounts,
+    entriesToOwnedGoldenCounts,
     useBuyCardMutation,
     useCollectionQuery,
     useDuplicatesPreviewQuery,
@@ -48,6 +49,11 @@ export const CollectionPage = observer(() => {
 
     const ownedCounts = useMemo(
         () => entriesToOwnedCounts(collectionQuery.data ?? []),
+        [collectionQuery.data],
+    );
+
+    const ownedGoldenCounts = useMemo(
+        () => entriesToOwnedGoldenCounts(collectionQuery.data ?? []),
         [collectionQuery.data],
     );
 
@@ -180,6 +186,7 @@ export const CollectionPage = observer(() => {
                             headerTitle={false}
                             includeNonCollectible
                             ownedCounts={ownedCounts}
+                            ownedGoldenCounts={ownedGoldenCounts}
                             showOwnedOnly={showOwnedOnly}
                             onShowOwnedOnlyChange={setShowOwnedOnly}
                             canBuyCard={canBuyCard}
