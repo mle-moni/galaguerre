@@ -1,3 +1,4 @@
+import { getPackGoldenChanceForRarity } from "#api_types/card_rarity.types";
 import { syncCards } from "#database/seed_helpers/sync_cards";
 import Card from "#models/card";
 import User from "#models/user";
@@ -35,6 +36,38 @@ test.group("golden collection grants", (group) => {
             .firstOrFail();
         assert.equal(owned.count, 1);
         assert.equal(owned.goldenCount, 1);
+    });
+
+    test("grantPackCardCopyForUser rolls golden using per-rarity pack chance", async ({
+        assert,
+    }) => {
+        await syncCards();
+
+        const user = await User.create({
+            email: "golden-rarity-roll@test.fr",
+            pseudo: "golden-rarity-roll",
+            password: "test",
+        });
+
+        const card = await Card.query().where("id", 181).firstOrFail();
+        assert.equal(card.rarity, "LEGENDARY");
+        const legendaryChance = getPackGoldenChanceForRarity("LEGENDARY");
+
+        const golden = await grantPackCardCopyForUser(user.id, card.id, undefined, {
+            random: () => legendaryChance - 0.001,
+        });
+        assert.isTrue(golden.isGolden);
+
+        const user2 = await User.create({
+            email: "golden-rarity-miss@test.fr",
+            pseudo: "golden-rarity-miss",
+            password: "test",
+        });
+
+        const miss = await grantPackCardCopyForUser(user2.id, card.id, undefined, {
+            random: () => legendaryChance + 0.001,
+        });
+        assert.isFalse(miss.isGolden);
     });
 
     test("grantPackCardCopyForUser does not golden when card has no video", async ({ assert }) => {

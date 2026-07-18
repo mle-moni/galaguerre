@@ -7,8 +7,6 @@ import { GALADRIM_AGGRO_DECK_RECIPE } from "../database/seed_data/balanced_decks
 export const COLLECTION_MIN_CARDS = DECK_MIN_CARDS;
 export const COLLECTION_MAX_COPIES_PER_CARD = 2;
 export const PACK_SIZE = 5;
-/** ~1 golden legendary every 50 packs (8/14 legendaries eligible, 3% leg drop rate). */
-export const PACK_GOLDEN_CHANCE = 0.24;
 
 export const GOLD_COINS_PER_COMMON_CARD_BUY = 50;
 export const GOLD_COINS_PER_RARE_CARD_BUY = 175;

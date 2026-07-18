@@ -1,5 +1,5 @@
-import { STARTER_COLLECTION_RECIPE, PACK_GOLDEN_CHANCE } from "#api_types/collection.types";
-import { getMaxCopiesForRarity } from "#api_types/card_rarity.types";
+import { STARTER_COLLECTION_RECIPE } from "#api_types/collection.types";
+import { getMaxCopiesForRarity, getPackGoldenChanceForRarity } from "#api_types/card_rarity.types";
 import Card from "#models/card";
 import UserCard from "#models/user_card";
 import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
@@ -106,7 +106,8 @@ export const grantPackCardCopyForUser = async (
     const card = await Card.query({ client }).where("id", cardId).firstOrFail();
     const canBeGolden = Boolean(card.data.goldenVideoUrl);
     const roll = options.random?.() ?? Math.random();
-    const isGolden = canBeGolden && (options.forceGolden === true || roll < PACK_GOLDEN_CHANCE);
+    const goldenChance = getPackGoldenChanceForRarity(card.rarity);
+    const isGolden = canBeGolden && (options.forceGolden === true || roll < goldenChance);
 
     const existing = await UserCard.query({ client }).where({ userId, cardId }).first();
 

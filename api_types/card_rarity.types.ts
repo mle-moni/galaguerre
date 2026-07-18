@@ -31,6 +31,17 @@ export const PACK_RARITY_FALLBACK_ORDER: readonly CardRarity[] = [
     "COMMON",
 ];
 
+/** Per-rarity golden roll when opening packs (card must also have goldenVideoUrl). */
+export const PACK_GOLDEN_CHANCE_BY_RARITY = {
+    COMMON: 0.03,
+    RARE: 0.06,
+    EPIC: 0.08,
+    LEGENDARY: 0.135,
+} as const satisfies Record<CardRarity, number>;
+
+export const getPackGoldenChanceForRarity = (rarity: CardRarity): number =>
+    PACK_GOLDEN_CHANCE_BY_RARITY[rarity];
+
 const PACK_RARITY_ROLL_SCALE = 10_000;
 
 export const rollPackRarity = (random: () => number): CardRarity => {
