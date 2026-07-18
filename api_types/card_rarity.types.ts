@@ -58,12 +58,7 @@ const GOLD_COINS_PER_CARD_BUY_BY_RARITY = {
 } as const satisfies Record<CardRarity, number>;
 
 /** Golden craft price = normal buy price × this multiplier (same for all rarities). */
-export const GOLDEN_BUY_MULTIPLIER_BY_RARITY = {
-    COMMON: 4,
-    RARE: 4,
-    EPIC: 4,
-    LEGENDARY: 4,
-} as const satisfies Record<CardRarity, number>;
+export const GOLDEN_BUY_MULTIPLIER = 2.5;
 
 export const DUPLICATE_SELL_RATIO = 0.2;
 
@@ -78,7 +73,7 @@ export const getGoldCoinsPerCardBuy = (rarity: CardRarity): number =>
     GOLD_COINS_PER_CARD_BUY_BY_RARITY[rarity];
 
 export const getGoldCoinsPerGoldenCardBuy = (rarity: CardRarity): number =>
-    getGoldCoinsPerCardBuy(rarity) * GOLDEN_BUY_MULTIPLIER_BY_RARITY[rarity];
+    Math.round(getGoldCoinsPerCardBuy(rarity) * GOLDEN_BUY_MULTIPLIER);
 
 export const getGoldCoinsPerGoldenUpgrade = (rarity: CardRarity): number =>
     getGoldCoinsPerGoldenCardBuy(rarity) - getGoldCoinsPerCardBuy(rarity);
