@@ -49,16 +49,16 @@ test.group("golden collection grants", (group) => {
         const cards = await Card.query().where("isCollectible", true).limit(100).exec();
         const card = cards.find((candidate) => candidate.data.goldenVideoUrl === null);
         assert.isDefined(card);
-        assert.isNull(card.data.goldenVideoUrl);
+        assert.isNull(card!.data.goldenVideoUrl);
 
-        const { isGolden } = await grantPackCardCopyForUser(user.id, card.id, undefined, {
+        const { isGolden } = await grantPackCardCopyForUser(user.id, card!.id, undefined, {
             forceGolden: true,
         });
 
         assert.isFalse(isGolden);
 
         const owned = await UserCard.query()
-            .where({ userId: user.id, cardId: card.id })
+            .where({ userId: user.id, cardId: card!.id })
             .firstOrFail();
         assert.equal(owned.goldenCount, 0);
     });
