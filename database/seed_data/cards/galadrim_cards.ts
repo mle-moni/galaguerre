@@ -1382,6 +1382,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         { rarity: "LEGENDARY" },
     ),
+    defineMinion(
+        181,
+        {
+            ...gal("Nouvelle Recrue", 1),
+            imageUrl: "/card-covers/galadrim/nouvelle-recrue.webp",
+            attack: 1,
+            health: 1,
+        },
+        {
+            minionPowers: {
+                hasRush: true,
+            },
+        },
+    ),
 
     // --- weapons ---
     defineWeapon(106, {
@@ -1422,21 +1436,6 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
 
     // --- cartes non collectionnables ---
-    defineMinion(
-        181,
-        {
-            ...gal("Nouvelle Recrue", 1),
-            imageUrl: "/card-covers/galadrim/nouvelle-recrue.webp",
-            attack: 1,
-            health: 1,
-        },
-        {
-            minionPowers: {
-                hasRush: true,
-            },
-        },
-        { isCollectible: false },
-    ),
     defineMinion(
         155,
         {
