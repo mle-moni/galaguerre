@@ -73,7 +73,7 @@ export const getGoldCoinsPerCardBuy = (rarity: CardRarity): number =>
     GOLD_COINS_PER_CARD_BUY_BY_RARITY[rarity];
 
 export const getGoldCoinsPerGoldenCardBuy = (rarity: CardRarity): number =>
-    Math.round(getGoldCoinsPerCardBuy(rarity) * GOLDEN_BUY_MULTIPLIER);
+    Math.round((getGoldCoinsPerCardBuy(rarity) * GOLDEN_BUY_MULTIPLIER) / 25) * 25;
 
 export const getGoldCoinsPerGoldenUpgrade = (rarity: CardRarity): number =>
     getGoldCoinsPerGoldenCardBuy(rarity) - getGoldCoinsPerCardBuy(rarity);
