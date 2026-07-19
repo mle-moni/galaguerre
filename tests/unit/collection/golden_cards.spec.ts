@@ -57,7 +57,7 @@ test.group("golden collection grants", (group) => {
         assert.isDefined(card);
         const legendaryChance = getPackGoldenChanceForRarity("LEGENDARY");
 
-        const golden = await grantPackCardCopyForUser(user.id, card.id, undefined, {
+        const golden = await grantPackCardCopyForUser(user.id, card!.id, undefined, {
             random: () => legendaryChance - 0.001,
         });
         assert.isTrue(golden.isGolden);
@@ -68,7 +68,7 @@ test.group("golden collection grants", (group) => {
             password: "test",
         });
 
-        const miss = await grantPackCardCopyForUser(user2.id, card.id, undefined, {
+        const miss = await grantPackCardCopyForUser(user2.id, card!.id, undefined, {
             random: () => legendaryChance + 0.001,
         });
         assert.isFalse(miss.isGolden);
