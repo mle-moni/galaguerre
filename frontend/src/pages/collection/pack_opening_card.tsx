@@ -2,11 +2,8 @@ import type { ApiOpenedPackCard } from "#api_types/collection.types";
 import clsx from "clsx";
 import { useState, type MouseEvent } from "react";
 import { CardBackFace } from "~/components/cards/card_back_face";
-import { CardPreviewSheet } from "~/components/cards/card_preview_sheet";
-import {
-    CatalogCardDisplay,
-    catalogCardToPlayerCard,
-} from "~/components/cards/catalog_card_display";
+import { CardInspectModal } from "~/components/cards/card_inspect_modal";
+import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { usePackOpeningFullSize } from "~/hooks/use_pack_opening_full_size";
 import { play } from "~/cuelume/index";
 import "./pack_opening_card.css";
@@ -29,7 +26,7 @@ export const PackOpeningCard = ({
     const useFullSize = usePackOpeningFullSize();
     const [previewOpened, setPreviewOpened] = useState(false);
     const [showRarityHint, setShowRarityHint] = useState(false);
-    const canPreview = !useFullSize && isFlipped;
+    const canPreview = isFlipped;
     const canPeekRarity = canFlip && !isFlipped;
     const isInteractive = canFlip || canPreview;
 
@@ -112,15 +109,12 @@ export const PackOpeningCard = ({
                     </div>
                 </button>
             </div>
-            {canPreview ? (
-                <CardPreviewSheet
-                    card={catalogCardToPlayerCard(card, { isGolden: card.isGolden })}
-                    attack={card.type === "MINION" ? card.attack : undefined}
-                    health={card.type === "MINION" ? card.health : undefined}
-                    opened={previewOpened}
-                    onClose={() => setPreviewOpened(false)}
-                />
-            ) : null}
+            <CardInspectModal
+                card={card}
+                opened={previewOpened}
+                onClose={() => setPreviewOpened(false)}
+                isGolden={card.isGolden}
+            />
         </>
     );
 };

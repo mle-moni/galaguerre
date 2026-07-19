@@ -144,7 +144,6 @@ export const CardDetailSheet = ({
         >
             <CardInspectStage
                 key={`${card.uuid}-${card.isGolden ? "g" : "n"}`}
-                label={card.label}
                 rarity={card.rarity}
                 isGolden={card.isGolden}
                 onClose={onClose}

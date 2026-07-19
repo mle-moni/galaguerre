@@ -11,7 +11,6 @@ const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const INTRO_ANIMATION_NAME = "card-inspect-pop";
 
 interface CardInspectStageProps {
-    label: string;
     rarity: CardRarity;
     isGolden?: boolean;
     onClose: () => void;
@@ -21,7 +20,6 @@ interface CardInspectStageProps {
 }
 
 export const CardInspectStage = ({
-    label,
     rarity,
     isGolden = false,
     onClose,
@@ -95,7 +93,6 @@ export const CardInspectStage = ({
                             </div>
                         </div>
                     </div>
-                    <p className="card-inspect-stage__label">{label}</p>
                 </div>
                 {sideContent}
             </div>

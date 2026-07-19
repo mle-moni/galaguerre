@@ -36,7 +36,6 @@ export const CardInspectModal = ({
         {card && (
             <CardInspectStage
                 key={`${card.id}-${isGolden ? "g" : "n"}`}
-                label={card.label}
                 rarity={card.rarity}
                 isGolden={isGolden}
                 onClose={onClose}
