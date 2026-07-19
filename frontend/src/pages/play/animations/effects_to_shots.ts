@@ -1,8 +1,13 @@
 import type { ApiGame, GameData, PlayerCard } from "#api_types/game.types";
-import type { NarrativeEffect } from "#api_types/game_narrative.types";
+import type {
+    AbilityImpactKind,
+    AbilityImpactZone,
+    NarrativeEffect,
+} from "#api_types/game_narrative.types";
 import type { GameAnimationSnapshot } from "./game_animation_snapshot.js";
 import {
     resolveBoardCenter,
+    resolveBoardSideRect,
     resolveBoardSlotRect,
     resolveCardRect,
     resolveDeckRect,
@@ -11,6 +16,7 @@ import {
     resolveHeroRect,
 } from "./resolve_rects.js";
 import type {
+    AbilityImpactTone,
     AnimationRect,
     FloatingTone,
     VisualAnimationEventInput,
@@ -77,6 +83,67 @@ const resolveDestinationRect = (
     return resolveBoardCenter(snapshot);
 };
 
+const resolveAbilitySourceRect = (
+    source: Extract<NarrativeEffect, { type: "ABILITY_IMPACT" }>["source"],
+    snapshot: GameAnimationSnapshot,
+): AnimationRect => {
+    if (source.type === "HERO") {
+        return resolveHeroRect(source.owner, snapshot);
+    }
+
+    return resolveCardRect(source.cardUuid, snapshot, source.owner);
+};
+
+const resolveAbilityZoneRect = (
+    zone: AbilityImpactZone,
+    snapshot: GameAnimationSnapshot,
+): AnimationRect => {
+    if (zone.type === "BOARD") {
+        return resolveBoardSideRect(zone.owner, snapshot);
+    }
+
+    return resolveHeroRect(zone.owner, snapshot);
+};
+
+const toAbilityTone = (kind: AbilityImpactKind): AbilityImpactTone => kind;
+
+const pushAbilityImpactShots = (
+    effect: Extract<NarrativeEffect, { type: "ABILITY_IMPACT" }>,
+    snapshot: GameAnimationSnapshot,
+    shots: VisualAnimationEventInput[],
+) => {
+    const kind = toAbilityTone(effect.kind);
+    const from = resolveAbilitySourceRect(effect.source, snapshot);
+    const targetRects = effect.targets.map((target) => resolveEntityRect(target, snapshot));
+
+    if (effect.delivery === "CLOUD") {
+        const ats = targetRects.length > 0 ? targetRects : [from];
+        shots.push({ type: "CLOUD", ats });
+        return;
+    }
+
+    if (effect.delivery === "AOE") {
+        const zoneRects =
+            effect.zones && effect.zones.length > 0
+                ? effect.zones.map((zone) => resolveAbilityZoneRect(zone, snapshot))
+                : targetRects.length > 0
+                  ? targetRects
+                  : [from];
+        shots.push({ type: "EXPLOSION", kind, ats: zoneRects });
+        return;
+    }
+
+    if (effect.delivery === "MULTI_PROJECTILE") {
+        if (targetRects.length === 0) return;
+        shots.push({ type: "MULTI_PROJECTILE", kind, from, tos: targetRects });
+        return;
+    }
+
+    for (const to of targetRects) {
+        shots.push({ type: "PROJECTILE", kind, from, to });
+    }
+};
+
 export const effectsToShots = (
     effects: NarrativeEffect[],
     snapshot: GameAnimationSnapshot,
@@ -128,6 +195,10 @@ export const effectsToShots = (
                 );
                 const to = resolveEntityRect(effect.target, snapshot);
                 shots.push({ type: "ATTACK", card, from, to });
+                break;
+            }
+            case "ABILITY_IMPACT": {
+                pushAbilityImpactShots(effect, snapshot, shots);
                 break;
             }
             case "COMBAT_DAMAGE":

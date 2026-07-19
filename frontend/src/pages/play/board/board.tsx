@@ -60,7 +60,10 @@ const BoardSide = observer(({ spotOwner }: BoardSideProps) => {
 
     if (spotOwner === "OPPONENT") {
         return (
-            <div className="board-side flex-1 min-h-0 w-full flex justify-center items-center">
+            <div
+                className="board-side flex-1 min-h-0 w-full flex justify-center items-center"
+                data-animation-board-side={spotOwner}
+            >
                 <div
                     className={clsx(
                         "board-row board-row--centered",
@@ -142,7 +145,10 @@ const BoardSide = observer(({ spotOwner }: BoardSideProps) => {
     };
 
     return (
-        <div className="board-side flex-1 min-h-0 w-full flex justify-center items-center">
+        <div
+            className="board-side flex-1 min-h-0 w-full flex justify-center items-center"
+            data-animation-board-side={spotOwner}
+        >
             <div
                 data-minion-drop-zone
                 data-spot-owner={spotOwner}

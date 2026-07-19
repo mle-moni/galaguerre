@@ -6,6 +6,7 @@ export interface GameAnimationSnapshot {
     cards: Map<string, AnimationRect>;
     spots: Map<string, AnimationRect>;
     heroes: Map<SpotOwner, AnimationRect>;
+    boardSides: Map<SpotOwner, AnimationRect>;
     decks: Map<SpotOwner, AnimationRect>;
     hands: Map<SpotOwner, AnimationRect>;
 }
@@ -53,6 +54,7 @@ export const readGameAnimationSnapshot = (): GameAnimationSnapshot => {
     const cards = new Map<string, AnimationRect>();
     const spots = new Map<string, AnimationRect>();
     const heroes = new Map<SpotOwner, AnimationRect>();
+    const boardSides = new Map<SpotOwner, AnimationRect>();
     const decks = new Map<SpotOwner, AnimationRect>();
     const hands = new Map<SpotOwner, AnimationRect>();
 
@@ -79,6 +81,13 @@ export const readGameAnimationSnapshot = (): GameAnimationSnapshot => {
         }
     }
 
+    for (const element of Array.from(document.querySelectorAll("[data-animation-board-side]"))) {
+        const owner = element.getAttribute("data-animation-board-side");
+        if (owner === "PLAYER" || owner === "OPPONENT") {
+            boardSides.set(owner, readRect(element));
+        }
+    }
+
     for (const element of Array.from(document.querySelectorAll("[data-animation-deck]"))) {
         const owner = readOwner(element);
         if (owner) decks.set(owner, readRect(element));
@@ -89,5 +98,5 @@ export const readGameAnimationSnapshot = (): GameAnimationSnapshot => {
         if (owner) hands.set(owner, readRect(element));
     }
 
-    return { board, cards, spots, heroes, decks, hands };
+    return { board, cards, spots, heroes, boardSides, decks, hands };
 };

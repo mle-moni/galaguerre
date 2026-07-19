@@ -10,6 +10,10 @@ export const ANIMATION_TIMING = {
     HERO_EXPLOSION: { normal: 2, reduced: 1 },
     TURN_BANNER: { normal: 0.8, reduced: 0.5 },
     SOURCE_PULSE: { normal: 0.3, reduced: 0.14 },
+    PROJECTILE: { normal: 0.28, reduced: 0.12 },
+    MULTI_PROJECTILE: { normal: 0.36, reduced: 0.14 },
+    EXPLOSION: { normal: 0.4, reduced: 0.16 },
+    CLOUD: { normal: 0.42, reduced: 0.16 },
 } as const;
 
 export const getShotDurationSec = (
@@ -21,6 +25,8 @@ export const getShotDurationSec = (
 };
 
 export const FLOATING_TEXT_STACK_DELAY_MS = 120;
+export const MULTI_PROJECTILE_STAGGER_MS = 50;
+export const CLOUD_STAGGER_MS = 40;
 
 export const getShotDurationMs = (
     event: VisualAnimationEventInput,
@@ -28,10 +34,27 @@ export const getShotDurationMs = (
 ): number => {
     const baseMs = Math.round(getShotDurationSec(event.type, reducedMotion) * 1000);
     const drawDelayMs = event.type === "DRAW" && !reducedMotion ? event.delayMs ?? 0 : 0;
+    const projectileDelayMs =
+        event.type === "PROJECTILE" && !reducedMotion ? event.delayMs ?? 0 : 0;
     const floatingTextDelayMs =
         event.type === "FLOATING_TEXT" && !reducedMotion
             ? (event.stackIndex ?? 0) * FLOATING_TEXT_STACK_DELAY_MS
             : 0;
+    const multiProjectileExtraMs =
+        event.type === "MULTI_PROJECTILE" && !reducedMotion && event.tos.length > 1
+            ? (event.tos.length - 1) * MULTI_PROJECTILE_STAGGER_MS
+            : 0;
+    const cloudExtraMs =
+        event.type === "CLOUD" && !reducedMotion && event.ats.length > 1
+            ? (event.ats.length - 1) * CLOUD_STAGGER_MS
+            : 0;
 
-    return baseMs + drawDelayMs + floatingTextDelayMs;
+    return (
+        baseMs +
+        drawDelayMs +
+        projectileDelayMs +
+        floatingTextDelayMs +
+        multiProjectileExtraMs +
+        cloudExtraMs
+    );
 };

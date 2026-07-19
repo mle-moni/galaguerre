@@ -1,9 +1,24 @@
 import type { BoostSnapshot, GamePlayer, MinionState, TargetSnapshot } from "#api_types/game.types";
 import type { AdjacencyContext } from "#api_types/adjacent_targeting";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
+import type Game from "#models/game";
 import { collectMatchingMinionTargets } from "./apply_mass_minion_effects.js";
+import {
+    minionEntityRef,
+    recordStatChange,
+    resolveSpotOwner,
+} from "../game_narrative/narrative_effects.js";
 
-export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): void => {
+export type ApplyBoostNarrativeContext = {
+    game: Game;
+    owner: GamePlayer;
+};
+
+export const applyBoostToMinion = (
+    minion: MinionState,
+    boost: BoostSnapshot,
+    narrative?: ApplyBoostNarrativeContext,
+): void => {
     if (boost.attack !== null) {
         minion.attack += boost.attack;
     }
@@ -58,6 +73,17 @@ export const applyBoostToMinion = (minion: MinionState, boost: BoostSnapshot): v
 
         card.effects = getMinionPowerEffects(card.minionPowers);
     }
+
+    if (!narrative) return;
+
+    const attackDelta = boost.attack !== null && boost.attack !== 0 ? boost.attack : undefined;
+    const healthDelta = boost.health !== null && boost.health !== 0 ? boost.health : undefined;
+    if (attackDelta === undefined && healthDelta === undefined) return;
+
+    recordStatChange(minionEntityRef(minion, resolveSpotOwner(narrative.game, narrative.owner)), {
+        attackDelta,
+        healthDelta,
+    });
 };
 
 export const applyBoostToHero = (player: GamePlayer, boost: BoostSnapshot): void => {
@@ -70,6 +96,7 @@ export const applyBoostToHero = (player: GamePlayer, boost: BoostSnapshot): void
 };
 
 export const applyBoostToAllMinions = (
+    game: Game,
     player: GamePlayer,
     opponent: GamePlayer,
     target: TargetSnapshot,
@@ -85,7 +112,7 @@ export const applyBoostToAllMinions = (
         adjacencyContext,
     );
 
-    for (const { minion } of targets) {
-        applyBoostToMinion(minion, boost);
+    for (const { owner, minion } of targets) {
+        applyBoostToMinion(minion, boost, { game, owner });
     }
 };

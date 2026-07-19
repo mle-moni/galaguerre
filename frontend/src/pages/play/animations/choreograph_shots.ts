@@ -8,6 +8,10 @@ const isLeadShot = (shot: VisualAnimationEventInput) =>
     shot.type === "DRAW" ||
     shot.type === "ATTACK" ||
     shot.type === "TURN_BANNER" ||
+    shot.type === "PROJECTILE" ||
+    shot.type === "MULTI_PROJECTILE" ||
+    shot.type === "EXPLOSION" ||
+    shot.type === "CLOUD" ||
     isPoisonousPulseShot(shot);
 
 /**

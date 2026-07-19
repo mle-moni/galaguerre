@@ -46,6 +46,14 @@ import { triggerSummonPassivesForCards } from "../passive_engine/trigger_summon_
 import { requireMinionIndex } from "./find_minion_on_board.js";
 import { resolveManaAmount } from "./resolve_mana_amount.js";
 import { recordGainMana, resolveSpotOwner } from "../game_narrative/narrative_effects.js";
+import {
+    getAbilityImpactKind,
+    recordAbilityImpact,
+    recordAoeAbilityImpactIfNeeded,
+    resolveAbilityImpactDelivery,
+    resolveAbilityImpactSource,
+    resolvedTargetToEntityRef,
+} from "../game_narrative/record_ability_impact.js";
 import { startDiscover } from "../discover/start_discover.js";
 import type { ExecuteActionOptions, ExecuteActionResult } from "../discover/discover_types.js";
 
@@ -120,7 +128,10 @@ const applyEffectToResolvedTarget = (
             if (resolved.type === "HERO") {
                 applyBoostToHero(resolved.player, action.boost);
             } else {
-                applyBoostToMinion(resolved.minion, action.boost);
+                applyBoostToMinion(resolved.minion, action.boost, {
+                    game,
+                    owner: resolved.owner,
+                });
             }
             return { gameEnded: false };
         }
@@ -224,6 +235,8 @@ const executeNonTargetedV1Action = (
     if (!isV1Action(action)) return "ok";
 
     const adjacencyContext = buildAdjacencyContext(player, opponent, sourceMinion, selectedTarget);
+
+    recordAoeAbilityImpactIfNeeded(action, game, player, opponent, sourceMinion, adjacencyContext);
 
     switch (action.type) {
         case "DAMAGE": {
@@ -333,6 +346,7 @@ const executeNonTargetedV1Action = (
                     applyBoostToHero(target, action.boost);
                 }
                 applyBoostToAllMinions(
+                    game,
                     player,
                     opponent,
                     action.target,
@@ -342,6 +356,7 @@ const executeNonTargetedV1Action = (
                 );
             } else if (action.target.type === "MINION") {
                 applyBoostToAllMinions(
+                    game,
                     player,
                     opponent,
                     action.target,
@@ -534,6 +549,16 @@ export const executeAction = (
         const resolved = resolveSelectedTarget(selectedTarget, player, opponent);
         if (!resolved) return "ok";
 
+        const kind = getAbilityImpactKind(action);
+        if (kind) {
+            recordAbilityImpact({
+                kind,
+                delivery: resolveAbilityImpactDelivery(kind, "targeted"),
+                source: resolveAbilityImpactSource(game, player, sourceMinion),
+                targets: [resolvedTargetToEntityRef(resolved, game)],
+            });
+        }
+
         const shouldStop = applyTargetedEffectWithFollowUp(
             resolved,
             action,
@@ -552,10 +577,23 @@ export const executeAction = (
     const randomTarget = getActionTarget(action);
     if (randomTarget && hasRandomLimitedTarget(randomTarget)) {
         const picks = pickRandomLimitedTargets(randomTarget, player, opponent, sourceMinion);
+        const resolvedPicks: ResolvedTarget[] = [];
         for (const pick of picks) {
             const resolved = resolveSelectedTarget(pick, player, opponent);
-            if (!resolved) continue;
+            if (resolved) resolvedPicks.push(resolved);
+        }
 
+        const kind = getAbilityImpactKind(action);
+        if (kind && resolvedPicks.length > 0) {
+            recordAbilityImpact({
+                kind,
+                delivery: resolveAbilityImpactDelivery(kind, "random_multi"),
+                source: resolveAbilityImpactSource(game, player, sourceMinion),
+                targets: resolvedPicks.map((resolved) => resolvedTargetToEntityRef(resolved, game)),
+            });
+        }
+
+        for (const resolved of resolvedPicks) {
             const shouldStop = applyTargetedEffectWithFollowUp(
                 resolved,
                 action,

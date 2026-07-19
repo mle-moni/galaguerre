@@ -42,6 +42,11 @@ export const resolveDeckRect = (owner: SpotOwner, snapshot: GameAnimationSnapsho
 export const resolveHeroRect = (owner: SpotOwner, snapshot: GameAnimationSnapshot): AnimationRect =>
     getFallbackRect([snapshot.heroes.get(owner)]);
 
+export const resolveBoardSideRect = (
+    owner: SpotOwner,
+    snapshot: GameAnimationSnapshot,
+): AnimationRect => getFallbackRect([snapshot.boardSides.get(owner), snapshot.board]);
+
 export const resolveBoardCenter = (snapshot: GameAnimationSnapshot): AnimationRect =>
     getFallbackRect([snapshot.board]);
 

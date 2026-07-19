@@ -69,6 +69,40 @@ export interface SourcePulseEventInput {
     trigger: NarrativeTriggerKind;
 }
 
+export type AbilityImpactTone =
+    | "DAMAGE"
+    | "DESTROY"
+    | "HEAL"
+    | "BOOST"
+    | "SILENCE"
+    | "RECONVERSION";
+
+export interface ProjectileEventInput {
+    type: "PROJECTILE";
+    kind: AbilityImpactTone;
+    from: AnimationRect;
+    to: AnimationRect;
+    delayMs?: number;
+}
+
+export interface MultiProjectileEventInput {
+    type: "MULTI_PROJECTILE";
+    kind: AbilityImpactTone;
+    from: AnimationRect;
+    tos: AnimationRect[];
+}
+
+export interface ExplosionEventInput {
+    type: "EXPLOSION";
+    kind: AbilityImpactTone;
+    ats: AnimationRect[];
+}
+
+export interface CloudEventInput {
+    type: "CLOUD";
+    ats: AnimationRect[];
+}
+
 export type VisualAnimationEventInput =
     | CardFlightEventInput
     | AttackEventInput
@@ -77,7 +111,11 @@ export type VisualAnimationEventInput =
     | HeroExplosionEventInput
     | DrawEventInput
     | TurnBannerEventInput
-    | SourcePulseEventInput;
+    | SourcePulseEventInput
+    | ProjectileEventInput
+    | MultiProjectileEventInput
+    | ExplosionEventInput
+    | CloudEventInput;
 
 export type VisualAnimationEvent = VisualAnimationEventInput & BaseVisualEvent;
 export type CardFlightEvent = CardFlightEventInput & BaseVisualEvent;
@@ -88,6 +126,10 @@ export type HeroExplosionEvent = HeroExplosionEventInput & BaseVisualEvent;
 export type DrawEvent = DrawEventInput & BaseVisualEvent;
 export type TurnBannerEvent = TurnBannerEventInput & BaseVisualEvent;
 export type SourcePulseEvent = SourcePulseEventInput & BaseVisualEvent;
+export type ProjectileEvent = ProjectileEventInput & BaseVisualEvent;
+export type MultiProjectileEvent = MultiProjectileEventInput & BaseVisualEvent;
+export type ExplosionEvent = ExplosionEventInput & BaseVisualEvent;
+export type CloudEvent = CloudEventInput & BaseVisualEvent;
 
 import { getShotDurationMs } from "~/pages/play/animations/shot_durations";
 

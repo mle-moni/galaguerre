@@ -37,6 +37,30 @@ export type NarrativeCardDestination =
     | { type: "HERO_WEAPON"; owner: SpotOwner }
     | { type: "DISCARD" };
 
+export const ABILITY_IMPACT_KINDS = [
+    "DAMAGE",
+    "DESTROY",
+    "HEAL",
+    "BOOST",
+    "SILENCE",
+    "RECONVERSION",
+] as const;
+
+export type AbilityImpactKind = (typeof ABILITY_IMPACT_KINDS)[number];
+
+export const ABILITY_IMPACT_DELIVERIES = [
+    "PROJECTILE",
+    "MULTI_PROJECTILE",
+    "AOE",
+    "CLOUD",
+] as const;
+
+export type AbilityImpactDelivery = (typeof ABILITY_IMPACT_DELIVERIES)[number];
+
+export type AbilityImpactZone =
+    | { type: "BOARD"; owner: SpotOwner }
+    | { type: "HERO"; owner: SpotOwner };
+
 export type NarrativeEffect =
     | {
           type: "MOVE_CARD";
@@ -64,6 +88,14 @@ export type NarrativeEffect =
           target: NarrativeEntityRef;
           attackDelta?: number;
           healthDelta?: number;
+      }
+    | {
+          type: "ABILITY_IMPACT";
+          kind: AbilityImpactKind;
+          delivery: AbilityImpactDelivery;
+          source: NarrativeEntityRef;
+          targets: NarrativeEntityRef[];
+          zones?: AbilityImpactZone[];
       }
     | {
           type: "TRIGGER";

@@ -5,13 +5,22 @@ import type {
     AnimationRect,
     AttackEvent,
     CardFlightEvent,
+    CloudEvent,
     DrawEvent,
+    ExplosionEvent,
     FloatingTextEvent,
+    MultiProjectileEvent,
+    ProjectileEvent,
     VisualAnimationEvent,
 } from "~/stores/AnimationStore";
 import { ANIMATION_STORE } from "~/stores/store_singletons";
 import { getRectCenter } from "./game_animation_snapshot.js";
-import { FLOATING_TEXT_STACK_DELAY_MS, getShotDurationSec } from "./shot_durations.js";
+import {
+    CLOUD_STAGGER_MS,
+    FLOATING_TEXT_STACK_DELAY_MS,
+    MULTI_PROJECTILE_STAGGER_MS,
+    getShotDurationSec,
+} from "./shot_durations.js";
 import "./game_animation_overlay.css";
 
 const clampVisualSize = (rect: AnimationRect) => ({
@@ -334,6 +343,154 @@ const SourcePulse = ({
     );
 };
 
+const ProjectileBolt = ({
+    kind,
+    from,
+    to,
+    delayMs = 0,
+    durationType,
+}: {
+    kind: ProjectileEvent["kind"];
+    from: AnimationRect;
+    to: AnimationRect;
+    delayMs?: number;
+    durationType: "PROJECTILE" | "MULTI_PROJECTILE";
+}) => {
+    const reduceMotion = useReducedMotion();
+    const fromCenter = getRectCenter(from);
+    const toCenter = getRectCenter(to);
+    const dx = toCenter.x - fromCenter.x;
+    const dy = toCenter.y - fromCenter.y;
+    const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
+    const delay = reduceMotion ? 0 : delayMs / 1000;
+
+    return (
+        <motion.div
+            className={`game-animation-projectile game-animation-projectile--${kind}`}
+            style={{ rotate: `${angleDeg}deg` }}
+            initial={{
+                x: fromCenter.x - 10,
+                y: fromCenter.y - 4,
+                opacity: 0,
+                scale: reduceMotion ? 1 : 0.7,
+            }}
+            animate={{
+                x: toCenter.x - 10,
+                y: toCenter.y - 4,
+                opacity: [0, 1, 1, 0],
+                scale: reduceMotion ? 1 : [0.7, 1, 1, 0.85],
+            }}
+            transition={{
+                duration: getShotDurationSec(durationType, reduceMotion ?? false),
+                ease: "easeOut",
+                delay,
+            }}
+        />
+    );
+};
+
+const ProjectileShot = ({ event }: { event: ProjectileEvent }) => (
+    <ProjectileBolt
+        kind={event.kind}
+        from={event.from}
+        to={event.to}
+        delayMs={event.delayMs}
+        durationType="PROJECTILE"
+    />
+);
+
+const MultiProjectileShot = ({ event }: { event: MultiProjectileEvent }) => {
+    const reduceMotion = useReducedMotion();
+
+    return (
+        <>
+            {event.tos.map((to, index) => (
+                <ProjectileBolt
+                    key={`${to.x}-${to.y}-${index}`}
+                    kind={event.kind}
+                    from={event.from}
+                    to={to}
+                    delayMs={reduceMotion ? 0 : index * MULTI_PROJECTILE_STAGGER_MS}
+                    durationType="MULTI_PROJECTILE"
+                />
+            ))}
+        </>
+    );
+};
+
+const ExplosionShot = ({ event }: { event: ExplosionEvent }) => {
+    const reduceMotion = useReducedMotion();
+
+    return (
+        <>
+            {event.ats.map((at, index) => {
+                const center = getRectCenter(at);
+                const size = Math.max(Math.min(at.width, at.height) * 0.9, 72);
+
+                return (
+                    <motion.div
+                        key={`${at.x}-${at.y}-${index}`}
+                        className={`game-animation-explosion game-animation-explosion--${event.kind}`}
+                        style={{
+                            width: size,
+                            height: size,
+                            left: center.x - size / 2,
+                            top: center.y - size / 2,
+                        }}
+                        initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.45 }}
+                        animate={{
+                            opacity: [0, 1, 0],
+                            scale: reduceMotion ? 1 : [0.45, 1.15, 1.35],
+                        }}
+                        transition={{
+                            duration: getShotDurationSec("EXPLOSION", reduceMotion ?? false),
+                            ease: "easeOut",
+                        }}
+                    />
+                );
+            })}
+        </>
+    );
+};
+
+const CloudShot = ({ event }: { event: CloudEvent }) => {
+    const reduceMotion = useReducedMotion();
+
+    return (
+        <>
+            {event.ats.map((at, index) => {
+                const center = getRectCenter(at);
+                const width = Math.max(at.width * 1.15, 64);
+                const height = Math.max(at.height * 0.85, 48);
+                const delay = reduceMotion ? 0 : (index * CLOUD_STAGGER_MS) / 1000;
+
+                return (
+                    <motion.div
+                        key={`${at.x}-${at.y}-${index}`}
+                        className="game-animation-cloud"
+                        style={{
+                            width,
+                            height,
+                            left: center.x - width / 2,
+                            top: center.y - height / 2,
+                        }}
+                        initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.6 }}
+                        animate={{
+                            opacity: [0, 0.9, 0.9, 0],
+                            scale: reduceMotion ? 1 : [0.6, 1.05, 1.1, 1.2],
+                        }}
+                        transition={{
+                            duration: getShotDurationSec("CLOUD", reduceMotion ?? false),
+                            ease: "easeOut",
+                            delay,
+                        }}
+                    />
+                );
+            })}
+        </>
+    );
+};
+
 const AnimationEvent = ({ event }: { event: VisualAnimationEvent }) => {
     if (event.type === "CARD_FLIGHT") return <CardFlight event={event} />;
     if (event.type === "ATTACK") return <AttackFlight event={event} />;
@@ -343,6 +500,10 @@ const AnimationEvent = ({ event }: { event: VisualAnimationEvent }) => {
     if (event.type === "DRAW") return <DrawFlight event={event} />;
     if (event.type === "TURN_BANNER") return <TurnBanner event={event} />;
     if (event.type === "SOURCE_PULSE") return <SourcePulse event={event} />;
+    if (event.type === "PROJECTILE") return <ProjectileShot event={event} />;
+    if (event.type === "MULTI_PROJECTILE") return <MultiProjectileShot event={event} />;
+    if (event.type === "EXPLOSION") return <ExplosionShot event={event} />;
+    if (event.type === "CLOUD") return <CloudShot event={event} />;
 
     return null;
 };

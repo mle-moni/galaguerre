@@ -67,6 +67,18 @@ export const remapEffectForUser = (
                 ...effect,
                 target: remapEntityRef(effect.target, forUserId, playerOneUserId),
             };
+        case "ABILITY_IMPACT":
+            return {
+                ...effect,
+                source: remapEntityRef(effect.source, forUserId, playerOneUserId),
+                targets: effect.targets.map((target) =>
+                    remapEntityRef(target, forUserId, playerOneUserId),
+                ),
+                zones: effect.zones?.map((zone) => ({
+                    ...zone,
+                    owner: remapSpotOwnerForUser(zone.owner, forUserId, playerOneUserId),
+                })),
+            };
         case "TRIGGER":
         case "KILL":
         case "SILENCE":
