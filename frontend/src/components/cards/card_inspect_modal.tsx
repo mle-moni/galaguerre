@@ -1,8 +1,8 @@
 import type { ApiCatalogCard } from "#api_types/deck.types";
 import { Modal } from "@mantine/core";
 import { CatalogCardDisplay } from "./catalog_card_display.jsx";
-import { HoloCardShell } from "./holo_card_shell.jsx";
-import "./card_inspect_modal.css";
+import { CardInspectStage } from "./card_inspect_stage.jsx";
+import "./card_inspect_stage.css";
 
 interface CardInspectModalProps {
     card: ApiCatalogCard | null;
@@ -20,26 +20,29 @@ export const CardInspectModal = ({
     <Modal
         opened={opened}
         onClose={onClose}
-        title={card?.label}
-        size="auto"
+        withCloseButton={false}
+        fullScreen
+        padding={0}
         centered
-        padding="md"
         withinPortal
+        transitionProps={{ transition: "fade", duration: 220 }}
+        overlayProps={{ backgroundOpacity: 0.72, blur: 10 }}
         classNames={{
-            content: "card-inspect-modal",
-            body: "card-inspect-modal__body",
-            header: "card-inspect-modal__header",
-            title: "card-inspect-modal__title",
+            content: "card-inspect-overlay",
+            body: "card-inspect-overlay__body",
+            inner: "card-inspect-overlay__inner",
         }}
     >
         {card && (
-            <HoloCardShell
+            <CardInspectStage
+                key={`${card.id}-${isGolden ? "g" : "n"}`}
+                label={card.label}
                 rarity={card.rarity}
                 isGolden={isGolden}
-                className="card-inspect-modal__shell"
+                onClose={onClose}
             >
                 <CatalogCardDisplay card={card} size="full" isGolden={isGolden} />
-            </HoloCardShell>
+            </CardInspectStage>
         )}
     </Modal>
 );

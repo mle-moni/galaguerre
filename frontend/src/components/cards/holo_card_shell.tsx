@@ -26,6 +26,7 @@ interface HoloCardShellProps {
     children: ReactNode;
     className?: string;
     style?: CSSProperties;
+    tiltEnabled?: boolean;
 }
 
 export const HoloCardShell = ({
@@ -34,10 +35,11 @@ export const HoloCardShell = ({
     children,
     className,
     style,
+    tiltEnabled = true,
 }: HoloCardShellProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const tier = resolveHoloTier(rarity, isGolden);
-    const tilt = usePointerCardTilt(containerRef);
+    const tilt = usePointerCardTilt(containerRef, tiltEnabled);
 
     return (
         <div

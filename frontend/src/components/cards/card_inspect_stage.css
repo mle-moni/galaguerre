@@ -1,0 +1,214 @@
+.card-inspect-stage {
+	position: relative;
+	width: 100%;
+	min-height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.25rem;
+	box-sizing: border-box;
+	cursor: zoom-out;
+}
+
+.card-inspect-stage__close {
+	position: absolute;
+	top: 0.85rem;
+	right: 0.85rem;
+	z-index: 5;
+	width: 2.5rem;
+	height: 2.5rem;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 999px;
+	background: rgba(8, 10, 14, 0.55);
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 1.6rem;
+	line-height: 1;
+	cursor: pointer;
+	backdrop-filter: blur(8px);
+	transition:
+		background 140ms ease,
+		border-color 140ms ease;
+}
+
+.card-inspect-stage__close:hover {
+	background: rgba(20, 24, 32, 0.75);
+	border-color: rgba(255, 220, 140, 0.45);
+}
+
+.card-inspect-stage__layout {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: clamp(0.75rem, 3vw, 1.25rem);
+	cursor: default;
+}
+
+.card-inspect-stage__card-col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.85rem;
+	--card-w-full: min(400px, calc(100vw - 4rem), calc((100dvh - 7rem) / 1.4));
+	--card-h-full: calc(var(--card-w-full) * 1.4);
+	--stat-badge-full: calc(var(--card-w-full) * 0.164);
+}
+
+.card-inspect-stage__layout--with-side .card-inspect-stage__card-col {
+	--card-w-full: min(55vw, calc((100dvh - 6.5rem) / 1.4), 240px);
+	--card-h-full: calc(var(--card-w-full) * 1.4);
+	--stat-badge-full: calc(var(--card-w-full) * 0.164);
+}
+
+.card-inspect-stage__label {
+	margin: 0;
+	max-width: min(400px, 80vw);
+	text-align: center;
+	color: rgba(255, 248, 230, 0.92);
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+}
+
+.card-inspect-stage__shell {
+	padding: 0;
+}
+
+.card-inspect-flip {
+	perspective: 1400px;
+	width: var(--card-w-full);
+	height: var(--card-h-full);
+}
+
+.card-inspect-flip__inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	animation: card-inspect-pop 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+	will-change: transform;
+}
+
+.card-inspect-flip__face {
+	position: absolute;
+	inset: 0;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+}
+
+.card-inspect-flip__face--front {
+	transform: rotateY(0deg) translateZ(1px);
+}
+
+.card-inspect-flip__face--back {
+	transform: rotateY(180deg) translateZ(1px);
+}
+
+.card-inspect-flip__back-face {
+	width: 100%;
+	height: 100%;
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.3),
+		0 22px 48px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes card-inspect-pop {
+	0% {
+		transform: rotateY(0deg) scale(0.82);
+	}
+	100% {
+		transform: rotateY(360deg) scale(1);
+	}
+}
+
+/* Flatten after spin so tilt / tall text work cleanly */
+.card-inspect-flip--ready {
+	height: auto;
+	min-height: var(--card-h-full);
+}
+
+.card-inspect-flip--ready .card-inspect-flip__inner {
+	animation: none;
+	transform: none;
+	filter: none;
+	height: auto;
+	min-height: var(--card-h-full);
+}
+
+.card-inspect-flip--ready .card-inspect-flip__face--front {
+	position: relative;
+	inset: auto;
+	transform: none;
+	backface-visibility: visible;
+	-webkit-backface-visibility: visible;
+}
+
+.card-inspect-flip--ready .card-inspect-flip__face--back {
+	display: none;
+}
+
+.card-inspect-stage__shell .playing-card-face {
+	height: auto;
+	min-height: var(--card-h);
+}
+
+.card-inspect-stage__shell .playing-card-face__body {
+	flex: 1;
+	overflow: visible;
+}
+
+.card-inspect-stage__shell .playing-card-face__text {
+	flex: none;
+	justify-content: flex-start;
+	overflow: visible;
+}
+
+.card-inspect-stage__shell .card-face-description {
+	display: block;
+	overflow: visible;
+	-webkit-line-clamp: unset;
+	line-clamp: unset;
+	flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.card-inspect-flip__inner {
+		animation: none;
+		transform: none;
+		filter: none;
+	}
+
+	.card-inspect-flip__face--front {
+		position: relative;
+		inset: auto;
+		transform: none;
+		backface-visibility: visible;
+		-webkit-backface-visibility: visible;
+	}
+
+	.card-inspect-flip__face--back {
+		display: none;
+	}
+}
+
+/* Immersive overlay chrome (Mantine Modal host) */
+.card-inspect-overlay {
+	background: transparent !important;
+	box-shadow: none !important;
+	border: none !important;
+	overflow: visible !important;
+}
+
+.card-inspect-overlay__body {
+	height: 100%;
+	padding: 0 !important;
+	overflow: visible;
+}
+
+.card-inspect-overlay__inner {
+	padding: 0;
+}

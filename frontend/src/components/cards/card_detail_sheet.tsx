@@ -2,8 +2,9 @@ import { Modal } from "@mantine/core";
 import { EFFECT_SYMBOLS } from "#api_types/card_keyword_glossary";
 import type { MinionCard, MinionState, PlayerCard } from "#api_types/game.types";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
-import { HoloCardShell } from "./holo_card_shell.jsx";
+import { CardInspectStage } from "./card_inspect_stage.jsx";
 import { PlayerCardFace } from "./player_card_face.jsx";
+import "./card_inspect_stage.css";
 
 interface CardDetailSheetProps {
     card: PlayerCard;
@@ -127,36 +128,41 @@ export const CardDetailSheet = ({
         <Modal
             opened={opened}
             onClose={onClose}
+            withCloseButton={false}
+            fullScreen
+            padding={0}
             centered
-            title={card.label}
             withinPortal
             closeOnClickOutside
-            closeButtonProps={{ "aria-label": "Fermer le détail de la carte" }}
-            overlayProps={{ backgroundOpacity: 0.82, blur: 3 }}
+            transitionProps={{ transition: "fade", duration: 220 }}
+            overlayProps={{ backgroundOpacity: 0.72, blur: 10 }}
             classNames={{
-                content: "card-preview-sheet-content",
-                header: "card-preview-sheet-header",
-                body: "card-preview-sheet-body",
-                overlay: "card-preview-sheet-overlay",
+                content: "card-inspect-overlay",
+                body: "card-inspect-overlay__body",
+                inner: "card-inspect-overlay__inner",
             }}
         >
-            <div
-                className={`card-preview-sheet__layout${showActiveEffects ? " card-preview-sheet__layout--with-effects" : ""}`}
+            <CardInspectStage
+                key={`${card.uuid}-${card.isGolden ? "g" : "n"}`}
+                label={card.label}
+                rarity={card.rarity}
+                isGolden={card.isGolden}
+                onClose={onClose}
+                sideContent={
+                    showActiveEffects ? (
+                        <ActiveEffects card={card} state={minionState} />
+                    ) : undefined
+                }
             >
-                <div className="card-preview-sheet__face">
-                    <HoloCardShell rarity={card.rarity} isGolden={card.isGolden}>
-                        <PlayerCardFace
-                            card={card}
-                            size="full"
-                            spellPower={spellPower}
-                            isSilenced={displayedSilenced}
-                            attack={displayedAttack}
-                            health={displayedHealth}
-                        />
-                    </HoloCardShell>
-                </div>
-                {showActiveEffects && <ActiveEffects card={card} state={minionState} />}
-            </div>
+                <PlayerCardFace
+                    card={card}
+                    size="full"
+                    spellPower={spellPower}
+                    isSilenced={displayedSilenced}
+                    attack={displayedAttack}
+                    health={displayedHealth}
+                />
+            </CardInspectStage>
         </Modal>
     );
 };
