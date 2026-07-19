@@ -16,7 +16,7 @@ Motion (subtle only):
 
 - very gentle camera push-in / breathing parallax
 
-- soft wind in hair/clothes, tiny idle body micro-movement
+- soft wind in hair/clothes if applicable, don't add extra hair, tiny idle body micro-movement
 
 - warm golden dust motes / light sparkles drifting slowly in the air
 

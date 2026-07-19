@@ -369,12 +369,12 @@ export const CARD_RECAPS: CardRecapData[] = [
         goldenVideoUrl: null,
     },
     {
-        date: "2026-07-16",
-        slug: "recap-2026-07-16",
-        publishedAt: "2026-07-16T18:00:00+02:00",
-        untilCommitHash: "761035d1a5261aba6d1e4688e7f911b087fbc96d",
-        newCardIds: [178, 182, 179, 181],
-        newGoldenCardIds: [],
+        date: "2026-07-19",
+        slug: "recap-2026-07-19",
+        publishedAt: "2026-07-19T18:00:00+02:00",
+        untilCommitHash: "6c04f7f674eaf56be9dff0e24b070dffabc883ed",
+        newCardIds: [178, 180, 182, 179, 181],
+        newGoldenCardIds: [176, 169, 177, 151, 138, 139, 142, 181],
         buffs: [],
         nerfs: [
             {
@@ -391,17 +391,5 @@ export const CARD_RECAPS: CardRecapData[] = [
         ],
         imageUrl: "/card-covers/galadrim/valentin.webp",
         goldenVideoUrl: null,
-    },
-    {
-        date: "2026-07-18",
-        slug: "recap-2026-07-18",
-        publishedAt: "2026-07-18T18:00:00+02:00",
-        untilCommitHash: "01ea9942d59bc85f4f72b6b5cb73ce9d0ccb2d0e",
-        newCardIds: [],
-        newGoldenCardIds: [176, 169, 177, 151, 138, 139, 142, 181],
-        buffs: [],
-        nerfs: [],
-        imageUrl: "/card-covers/galadrim/molly.webp",
-        goldenVideoUrl: "/card-videos/molly.mp4",
     },
 ];
