@@ -49,8 +49,12 @@ test.group("golden collection grants", (group) => {
             password: "test",
         });
 
-        const card = await Card.query().where("id", 181).firstOrFail();
-        assert.equal(card.rarity, "LEGENDARY");
+        const legendaryCards = await Card.query()
+            .where("isCollectible", true)
+            .where("rarity", "LEGENDARY")
+            .exec();
+        const card = legendaryCards.find((candidate) => candidate.data.goldenVideoUrl !== null);
+        assert.isDefined(card);
         const legendaryChance = getPackGoldenChanceForRarity("LEGENDARY");
 
         const golden = await grantPackCardCopyForUser(user.id, card.id, undefined, {

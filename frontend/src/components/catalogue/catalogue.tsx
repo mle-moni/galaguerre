@@ -21,6 +21,7 @@ import clsx from "clsx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { CardArtworkModal } from "~/components/cards/card_artwork_modal";
+import { CardInspectModal } from "~/components/cards/card_inspect_modal";
 import { CardRarityBadge } from "~/components/cards/card_legendary_badge";
 import { CatalogCardDisplay } from "~/components/cards/catalog_card_display";
 import { CatalogCardHoverPreview } from "~/components/cards/catalog_card_hover_preview";
@@ -762,15 +763,27 @@ export const Catalogue = observer(
                         </div>
                     </div>
 
-                    <CardArtworkModal
-                        card={artworkCard}
-                        opened={artworkCard !== null}
-                        onClose={() => {
-                            setArtworkCard(null);
-                            setArtworkIsGolden(false);
-                        }}
-                        isGolden={artworkIsGolden}
-                    />
+                    {isCollection ? (
+                        <CardInspectModal
+                            card={artworkCard}
+                            opened={artworkCard !== null}
+                            onClose={() => {
+                                setArtworkCard(null);
+                                setArtworkIsGolden(false);
+                            }}
+                            isGolden={artworkIsGolden}
+                        />
+                    ) : (
+                        <CardArtworkModal
+                            card={artworkCard}
+                            opened={artworkCard !== null}
+                            onClose={() => {
+                                setArtworkCard(null);
+                                setArtworkIsGolden(false);
+                            }}
+                            isGolden={artworkIsGolden}
+                        />
+                    )}
 
                     {isCollection && (
                         <>

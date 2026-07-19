@@ -1,0 +1,325 @@
+.holo-card-shell {
+	--holo-radius: 10px;
+	perspective: 800px;
+	transform-style: preserve-3d;
+	cursor: grab;
+	width: fit-content;
+	margin-inline: auto;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.holo-card-shell__card {
+	position: relative;
+	border-radius: var(--holo-radius);
+	overflow: hidden;
+	transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale3d(1.02, 1.02, 1.02);
+	transform-style: preserve-3d;
+	will-change: transform;
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.25),
+		0 18px 40px rgba(0, 0, 0, 0.35),
+		0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.holo-card-shell:active {
+	cursor: grabbing;
+}
+
+.holo-card-shell__foil,
+.holo-card-shell__glare {
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	z-index: 3;
+}
+
+/*
+ * Foil sits on light parchment cards — avoid color-dodge (washes to magenta).
+ * Prefer soft-light / overlay; fade foil over the text body so art keeps shine.
+ */
+.holo-card-shell__foil {
+	mask-image: linear-gradient(
+		to bottom,
+		rgba(0, 0, 0, 1) 0%,
+		rgba(0, 0, 0, 0.95) 42%,
+		rgba(0, 0, 0, 0.35) 58%,
+		rgba(0, 0, 0, 0.12) 100%
+	);
+	-webkit-mask-image: linear-gradient(
+		to bottom,
+		rgba(0, 0, 0, 1) 0%,
+		rgba(0, 0, 0, 0.95) 42%,
+		rgba(0, 0, 0, 0.35) 58%,
+		rgba(0, 0, 0, 0.12) 100%
+	);
+}
+
+/* —— Glare (all tiers) —— */
+.holo-card-shell__glare {
+	background: radial-gradient(
+		circle at var(--mx, 50%) var(--my, 50%),
+		rgba(255, 255, 255, 0.5) 0%,
+		rgba(255, 255, 255, 0.14) 26%,
+		rgba(255, 255, 255, 0) 55%
+	);
+	mix-blend-mode: soft-light;
+	opacity: 0.75;
+}
+
+/* —— Common: glare only —— */
+.holo-card-shell--common .holo-card-shell__foil {
+	display: none;
+}
+
+.holo-card-shell--common .holo-card-shell__glare {
+	opacity: 0.9;
+	mix-blend-mode: overlay;
+}
+
+/* —— Rare: reverse holo (light foil) —— */
+.holo-card-shell--rare .holo-card-shell__foil {
+	background-image:
+		repeating-linear-gradient(
+			115deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0.35) 2%,
+			transparent 4%,
+			transparent 9%
+		),
+		linear-gradient(
+			125deg,
+			rgba(200, 230, 255, 0.35) 0%,
+			rgba(255, 220, 255, 0.25) 40%,
+			rgba(200, 255, 235, 0.3) 75%,
+			rgba(255, 240, 210, 0.25) 100%
+		);
+	background-size:
+		220% 220%,
+		200% 200%;
+	background-position:
+		calc(var(--pos-x, 50%) * 1.2) calc(var(--pos-y, 50%) * 1.2),
+		var(--pos-x, 50%) var(--pos-y, 50%);
+	mix-blend-mode: soft-light;
+	opacity: 0.55;
+}
+
+.holo-card-shell--rare .holo-card-shell__glare {
+	opacity: 0.6;
+}
+
+/* —— Epic: galaxy / cosmos —— */
+.holo-card-shell--epic .holo-card-shell__foil {
+	background-image:
+		radial-gradient(
+			ellipse at calc(var(--mx, 50%) - 10%) calc(var(--my, 50%) - 5%),
+			rgba(150, 130, 255, 0.7) 0%,
+			transparent 48%
+		),
+		radial-gradient(
+			ellipse at calc(100% - var(--mx, 50%)) calc(100% - var(--my, 50%)),
+			rgba(70, 200, 255, 0.65) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			ellipse at var(--mx, 50%) var(--my, 50%),
+			rgba(255, 140, 210, 0.5) 0%,
+			transparent 42%
+		),
+		radial-gradient(
+			circle at calc(var(--pos-x, 50%) * 0.8) calc(var(--pos-y, 50%) * 1.2),
+			rgba(255, 230, 140, 0.35) 0%,
+			transparent 28%
+		),
+		repeating-linear-gradient(
+			0deg,
+			transparent 0px,
+			transparent 2px,
+			rgba(255, 255, 255, 0.12) 2px,
+			rgba(255, 255, 255, 0.12) 3px
+		),
+		repeating-linear-gradient(
+			125deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0.2) 3%,
+			transparent 6%,
+			transparent 14%
+		),
+		linear-gradient(
+			115deg,
+			rgba(255, 100, 190, 0.4),
+			rgba(80, 200, 255, 0.4),
+			rgba(170, 100, 255, 0.4),
+			rgba(255, 210, 100, 0.35),
+			rgba(100, 255, 210, 0.4),
+			rgba(255, 100, 190, 0.4)
+		);
+	background-size:
+		170% 170%,
+		190% 190%,
+		150% 150%,
+		120% 120%,
+		100% 100%,
+		260% 260%,
+		280% 280%;
+	background-position:
+		var(--pos-x, 50%) var(--pos-y, 50%),
+		calc(100% - var(--pos-x, 50%)) calc(100% - var(--pos-y, 50%)),
+		var(--mx, 50%) var(--my, 50%),
+		var(--pos-x, 50%) var(--pos-y, 50%),
+		center,
+		calc(var(--pos-x, 50%) * 1.5) calc(var(--pos-y, 50%) * 1.3),
+		calc(var(--pos-x, 50%) * 1.6) calc(var(--pos-y, 50%) * 1.5);
+	background-blend-mode: soft-light, soft-light, soft-light, soft-light, overlay, soft-light, soft-light;
+	mix-blend-mode: soft-light;
+	opacity: 0.92;
+	mask-image: linear-gradient(
+		to bottom,
+		rgba(0, 0, 0, 1) 0%,
+		rgba(0, 0, 0, 1) 40%,
+		rgba(0, 0, 0, 0.45) 55%,
+		rgba(0, 0, 0, 0.15) 100%
+	);
+	-webkit-mask-image: linear-gradient(
+		to bottom,
+		rgba(0, 0, 0, 1) 0%,
+		rgba(0, 0, 0, 1) 40%,
+		rgba(0, 0, 0, 0.45) 55%,
+		rgba(0, 0, 0, 0.15) 100%
+	);
+}
+
+.holo-card-shell--epic .holo-card-shell__glare {
+	opacity: 0.7;
+	mix-blend-mode: overlay;
+	background: radial-gradient(
+		circle at var(--mx, 50%) var(--my, 50%),
+		rgba(255, 255, 255, 0.7) 0%,
+		rgba(220, 200, 255, 0.28) 24%,
+		rgba(255, 255, 255, 0) 58%
+	);
+}
+
+/* —— Legendary: diagonal vibrant (V alt-art style) —— */
+.holo-card-shell--legendary .holo-card-shell__foil {
+	background-image:
+		url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"),
+		repeating-linear-gradient(
+			-45deg,
+			rgba(255, 80, 160, 0.2) 0%,
+			rgba(80, 200, 255, 0.2) 10%,
+			rgba(255, 220, 100, 0.16) 20%,
+			rgba(160, 100, 255, 0.2) 30%,
+			rgba(80, 255, 200, 0.16) 40%,
+			rgba(255, 80, 160, 0.2) 50%
+		),
+		repeating-linear-gradient(
+			45deg,
+			rgba(100, 240, 255, 0.14) 0%,
+			rgba(255, 100, 200, 0.14) 12%,
+			rgba(255, 240, 120, 0.12) 24%,
+			rgba(100, 150, 255, 0.14) 36%,
+			rgba(100, 240, 255, 0.14) 48%
+		),
+		linear-gradient(
+			125deg,
+			rgba(255, 255, 255, 0.35) 0%,
+			transparent 38%,
+			rgba(255, 255, 255, 0.2) 68%,
+			transparent 100%
+		);
+	background-size:
+		cover,
+		280% 280%,
+		260% 260%,
+		200% 200%;
+	background-position:
+		center,
+		calc(var(--pos-x, 50%) * -1.2) calc(var(--pos-y, 50%) * 1.1),
+		calc(var(--pos-x, 50%) * 1.2) calc(var(--pos-y, 50%) * -1.1),
+		var(--pos-x, 50%) var(--pos-y, 50%);
+	background-blend-mode: overlay, soft-light, soft-light, soft-light;
+	mix-blend-mode: soft-light;
+	opacity: 0.8;
+}
+
+.holo-card-shell--legendary .holo-card-shell__glare {
+	opacity: 0.5;
+	background: radial-gradient(
+		circle at var(--mx, 50%) var(--my, 50%),
+		rgba(255, 255, 255, 0.65) 0%,
+		rgba(255, 235, 210, 0.2) 28%,
+		rgba(255, 255, 255, 0) 58%
+	);
+}
+
+/* —— Golden: secret rare gold —— */
+.holo-card-shell--golden .holo-card-shell__foil {
+	background-image:
+		url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.9 0 0 0 0 0.45 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.92 0 0 0 0 0.5 0 0 0 0.28 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g2)'/%3E%3C/svg%3E"),
+		linear-gradient(
+			115deg,
+			rgba(255, 230, 140, 0.45) 0%,
+			rgba(255, 200, 80, 0.15) 28%,
+			rgba(255, 245, 200, 0.5) 48%,
+			rgba(220, 170, 60, 0.18) 68%,
+			rgba(255, 230, 150, 0.4) 100%
+		),
+		radial-gradient(
+			circle at var(--mx, 50%) var(--my, 50%),
+			rgba(255, 255, 235, 0.55) 0%,
+			rgba(255, 220, 140, 0.2) 32%,
+			transparent 62%
+		);
+	background-size:
+		180% 180%,
+		220% 220%,
+		200% 200%,
+		140% 140%;
+	background-position:
+		calc(var(--pos-x, 50%) * 1.5) calc(var(--pos-y, 50%) * -1.1),
+		calc(var(--pos-x, 50%) * -1.3) calc(var(--pos-y, 50%) * 1.4),
+		var(--pos-x, 50%) var(--pos-y, 50%),
+		var(--mx, 50%) var(--my, 50%);
+	background-blend-mode: overlay, soft-light, soft-light, soft-light;
+	mix-blend-mode: soft-light;
+	opacity: 0.75;
+}
+
+.holo-card-shell--golden .holo-card-shell__glare {
+	opacity: 0.6;
+	background: radial-gradient(
+		circle at var(--mx, 50%) var(--my, 50%),
+		rgba(255, 252, 230, 0.75) 0%,
+		rgba(255, 220, 140, 0.28) 26%,
+		rgba(255, 255, 255, 0) 55%
+	);
+	mix-blend-mode: soft-light;
+}
+
+.holo-card-shell--golden .holo-card-shell__card {
+	box-shadow:
+		0 2px 8px rgba(0, 0, 0, 0.3),
+		0 18px 44px rgba(180, 120, 20, 0.35),
+		0 0 24px rgba(255, 200, 60, 0.25),
+		0 0 0 1px rgba(255, 220, 120, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.holo-card-shell__card {
+		transform: none;
+		transition: none;
+	}
+
+	.holo-card-shell__foil,
+	.holo-card-shell__glare {
+		opacity: 0.2;
+		background-position: 50% 50% !important;
+	}
+
+	.holo-card-shell--common .holo-card-shell__glare {
+		opacity: 0.12;
+	}
+}
