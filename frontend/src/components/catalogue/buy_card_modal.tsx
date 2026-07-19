@@ -78,7 +78,7 @@ export const BuyCardModal = ({
                                 },
                                 {
                                     value: "golden",
-                                    label: isGoldenUpgrade ? "Golden (upgrade)" : "Golden",
+                                    label: isGoldenUpgrade ? "Dorée (upgrade)" : "Dorée",
                                     disabled: !canBuyGolden,
                                 },
                             ]}

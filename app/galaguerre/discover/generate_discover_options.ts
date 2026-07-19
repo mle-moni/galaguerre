@@ -2,15 +2,16 @@ import type { CardFilterSnapshot, PlayerCard } from "#api_types/game.types";
 import { deckCardMatchesFilter, cardFilterLabelTags } from "#api_types/card_filter_matching";
 import { getAllCardTemplates, getCollectibleCardTemplates } from "#api_types/card_preview";
 import { randomUUID } from "node:crypto";
+import { playerOwnsGoldenCard } from "../golden/resolve_is_golden_for_player.js";
 import { shuffleArray } from "../../utils/array.js";
 
 const instantiateDiscoverOption = (
     template: PlayerCard,
-    ownedGoldenCardIds: ReadonlySet<number>,
+    ownedGoldenCardIds: readonly number[],
 ): PlayerCard => ({
     ...structuredClone(template),
     uuid: randomUUID(),
-    isGolden: ownedGoldenCardIds.has(template.cardId) && Boolean(template.goldenVideoUrl),
+    isGolden: playerOwnsGoldenCard(template.cardId, template.goldenVideoUrl, ownedGoldenCardIds),
 });
 
 const getDiscoverPool = (filter: CardFilterSnapshot): PlayerCard[] => {
@@ -57,9 +58,8 @@ export const generateDiscoverOptions = (
     const matches = collectDiscoverMatches(filter, filterAlternatives);
     if (matches.length === 0) return [];
 
-    const ownedGolden = new Set(ownedGoldenCardIds);
     const shuffled = shuffleArray(matches);
     return shuffled
         .slice(0, Math.min(optionCount, shuffled.length))
-        .map((template) => instantiateDiscoverOption(template, ownedGolden));
+        .map((template) => instantiateDiscoverOption(template, ownedGoldenCardIds));
 };

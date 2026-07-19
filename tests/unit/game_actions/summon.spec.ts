@@ -47,6 +47,54 @@ test.group("SUMMON action", () => {
         });
     });
 
+    test("uses golden art when owner has the card in golden collection", ({ assert }) => {
+        const template = getMinionCardTemplateById(181)!;
+        const game = createGame(
+            createGameData({
+                playerOne: {
+                    board: createEmptyBoard(),
+                    ownedGoldenCardIds: [181],
+                },
+            }),
+        );
+
+        const { summonedCards } = summonMinions(
+            game,
+            game.data.playerOne,
+            "PLAYER",
+            createReconvertParametersSnapshot({ cardId: template.cardId }),
+            1,
+        );
+
+        assert.lengthOf(summonedCards, 1);
+        assert.isTrue(summonedCards[0]!.isGolden);
+        assert.isTrue(game.data.playerOne.board[0]!.originalCard.isGolden);
+    });
+
+    test("does not use golden art for opponent summons without golden ownership", ({ assert }) => {
+        const template = getMinionCardTemplateById(181)!;
+        const game = createGame(
+            createGameData({
+                playerOne: {
+                    board: createEmptyBoard(),
+                    ownedGoldenCardIds: [181],
+                },
+                playerTwo: { board: createEmptyBoard() },
+            }),
+        );
+
+        const action = createCardActionSnapshot({
+            type: "SUMMON",
+            summonParameters: createReconvertParametersSnapshot({ cardId: template.cardId }),
+            summonCount: 1,
+            summonTargetTeam: "OPPONENT",
+        });
+
+        executeAction(action, game, game.data.playerOne, game.data.playerTwo);
+
+        assert.isFalse(game.data.playerTwo.board[0]!.originalCard.isGolden);
+    });
+
     test("summoned minion does not trigger battlecry", ({ assert }) => {
         const game = createGame(
             createGameData({

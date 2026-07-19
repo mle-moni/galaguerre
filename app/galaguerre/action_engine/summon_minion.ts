@@ -12,6 +12,7 @@ import type {
 import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
 import { instantiateMinion } from "../../controllers/games/play_card/instantiate_minion.js";
+import { playerOwnsGoldenCard } from "../golden/resolve_is_golden_for_player.js";
 import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
 import { resolveReconvertTemplate } from "./resolve_reconvert_template.js";
 import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
@@ -23,9 +24,14 @@ const getOpponent = (game: Game, player: GamePlayer): GamePlayer => {
     return player === game.data.playerOne ? game.data.playerTwo : game.data.playerOne;
 };
 
-const cloneTemplateForSummon = (template: MinionCard): MinionCard => ({
+const cloneTemplateForSummon = (template: MinionCard, owner: GamePlayer): MinionCard => ({
     ...template,
     uuid: randomUUID(),
+    isGolden: playerOwnsGoldenCard(
+        template.cardId,
+        template.goldenVideoUrl,
+        owner.ownedGoldenCardIds ?? [],
+    ),
 });
 
 const createDefaultSourceMinion = (): MinionState => ({
@@ -123,7 +129,7 @@ export const summonMinionToBoard = (
 
     const boardIndex = countBoardMinionsOnBoard(owner.board);
 
-    const card = cloneTemplateForSummon(template);
+    const card = cloneTemplateForSummon(template, owner);
     const { inserted, boardIndex: insertedIndex } = insertMinionOnBoard(
         game,
         owner,
@@ -162,7 +168,7 @@ export const summonMinions = (
         const template = resolveReconvertTemplate(parameters, sourceForTemplate);
         if (!template) break;
 
-        const card = cloneTemplateForSummon(template);
+        const card = cloneTemplateForSummon(template, owner);
         const boardIndex = countBoardMinionsOnBoard(owner.board);
         const { inserted, boardIndex: insertedIndex } = insertMinionOnBoard(
             game,

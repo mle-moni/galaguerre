@@ -5,6 +5,7 @@ import type {
     TargetSnapshot,
 } from "#api_types/game.types";
 import { type GamePlayer } from "#api_types/game.types";
+import { playerOwnsGoldenCard } from "../golden/resolve_is_golden_for_player.js";
 import { minionMatchesTarget, shouldExcludeSourceMinion } from "#api_types/target_matching";
 import type Game from "#models/game";
 import {
@@ -36,7 +37,11 @@ const emptyPermanentKeywords = (): NonNullable<MinionState["permanentKeywords"]>
     hasDivineShield: false,
 });
 
-const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): MinionCard => {
+const buildReconvertedMinionCard = (
+    template: MinionCard,
+    boardUuid: string,
+    owner: GamePlayer,
+): MinionCard => {
     const minionPowers = normalizeMinionPowers(template.minionPowers);
     const effects = getMinionPowerEffects(minionPowers);
     const battlecryLines = getBattlecryDescription(template.battlecryActions);
@@ -48,6 +53,11 @@ const buildReconvertedMinionCard = (template: MinionCard, boardUuid: string): Mi
     return {
         ...template,
         uuid: boardUuid,
+        isGolden: playerOwnsGoldenCard(
+            template.cardId,
+            template.goldenVideoUrl,
+            owner.ownedGoldenCardIds ?? [],
+        ),
         minionPowers,
         effects,
         battlecryActions: template.battlecryActions,
@@ -82,7 +92,7 @@ export const applyReconversionWithTemplate = (
     revertPassiveAurasForSource(game, owner, minion);
     removeMinionFromAuraTracking(game, minion);
 
-    const newCard = buildReconvertedMinionCard(template, minion.uuid);
+    const newCard = buildReconvertedMinionCard(template, minion.uuid, owner);
     const minionPowers = newCard.minionPowers;
 
     minion.originalCard = newCard;

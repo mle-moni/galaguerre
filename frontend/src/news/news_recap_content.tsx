@@ -88,7 +88,7 @@ export const NewsRecapContent = ({ recap }: { recap: CardRecapData }) => {
 
             {hasNewGoldens && (
                 <section className="news-recap-section">
-                    <h2 className="news-recap-section__title">Versions golden</h2>
+                    <h2 className="news-recap-section__title">Versions dorées</h2>
                     <div className="gg-catalog-grid news-recap-grid">
                         {goldenOnlyIds.map((cardId) => (
                             <NewsRecapCardById

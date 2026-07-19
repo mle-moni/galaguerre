@@ -80,6 +80,32 @@ test.group("RECONVERSION action", () => {
         assert.equal(game.data.playerTwo.board[0]!.uuid, "target");
     });
 
+    test("uses golden art when owner has the card in golden collection", ({ assert }) => {
+        const NOUVELLE_RECRUE_CARD_ID = 181;
+        const targetCard = createMinionCard({ uuid: "target", attack: 5, health: 5, cardId: 10 });
+        const target = createMinionState(targetCard);
+
+        const game = createGame(
+            createGameData({
+                playerTwo: {
+                    board: placeMinion(createEmptyBoard(), 0, target),
+                    ownedGoldenCardIds: [NOUVELLE_RECRUE_CARD_ID],
+                },
+            }),
+        );
+
+        applyReconversionToMinion(
+            game,
+            game.data.playerTwo,
+            0,
+            createReconvertParametersSnapshot({ cardId: NOUVELLE_RECRUE_CARD_ID }),
+            target,
+            game.data.playerOne,
+        );
+
+        assert.isTrue(game.data.playerTwo.board[0]!.originalCard.isGolden);
+    });
+
     test("reconverted minion keeps all effects of the new card form", ({ assert }) => {
         const DIRECTEUR_COMMERCIAL_CARD_ID = 81;
         const targetCard = createMinionCard({ uuid: "target", attack: 3, health: 3 });
