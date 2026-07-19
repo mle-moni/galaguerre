@@ -300,7 +300,7 @@ const CatalogCardItem = ({
                                 : undefined
                         }
                     >
-                        <CatalogCardHoverPreview card={card}>
+                        <CatalogCardHoverPreview card={card} isGolden={isGolden}>
                             <CatalogCardDisplay
                                 card={card}
                                 variant="artwork"

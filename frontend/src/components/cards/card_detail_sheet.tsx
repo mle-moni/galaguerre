@@ -2,6 +2,7 @@ import { Modal } from "@mantine/core";
 import { EFFECT_SYMBOLS } from "#api_types/card_keyword_glossary";
 import type { MinionCard, MinionState, PlayerCard } from "#api_types/game.types";
 import { getMinionPowerEffects } from "#api_types/get_minion_power_effects";
+import { HoloCardShell } from "./holo_card_shell.jsx";
 import { PlayerCardFace } from "./player_card_face.jsx";
 
 interface CardDetailSheetProps {
@@ -143,14 +144,16 @@ export const CardDetailSheet = ({
                 className={`card-preview-sheet__layout${showActiveEffects ? " card-preview-sheet__layout--with-effects" : ""}`}
             >
                 <div className="card-preview-sheet__face">
-                    <PlayerCardFace
-                        card={card}
-                        size="full"
-                        spellPower={spellPower}
-                        isSilenced={displayedSilenced}
-                        attack={displayedAttack}
-                        health={displayedHealth}
-                    />
+                    <HoloCardShell rarity={card.rarity} isGolden={card.isGolden}>
+                        <PlayerCardFace
+                            card={card}
+                            size="full"
+                            spellPower={spellPower}
+                            isSilenced={displayedSilenced}
+                            attack={displayedAttack}
+                            health={displayedHealth}
+                        />
+                    </HoloCardShell>
                 </div>
                 {showActiveEffects && <ActiveEffects card={card} state={minionState} />}
             </div>

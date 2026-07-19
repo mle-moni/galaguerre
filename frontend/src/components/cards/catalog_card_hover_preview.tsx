@@ -22,6 +22,7 @@ interface CatalogCardHoverPreviewProps {
     card: ApiCatalogCard;
     children: ReactNode;
     disabled?: boolean;
+    isGolden?: boolean;
 }
 
 const composeHandler = <E,>(theirs: ((event: E) => void) | undefined, ours: (event: E) => void) => {
@@ -36,6 +37,7 @@ export const CatalogCardHoverPreview = ({
     card,
     children,
     disabled = false,
+    isGolden = false,
 }: CatalogCardHoverPreviewProps) => {
     const isMobilePortrait = useIsMobilePortrait();
     const [sheetOpened, setSheetOpened] = useState(false);
@@ -77,7 +79,7 @@ export const CatalogCardHoverPreview = ({
 
     useEffect(() => () => clearTimeouts(), [clearTimeouts]);
 
-    const playerCard = catalogCardToPlayerCard(card);
+    const playerCard = catalogCardToPlayerCard(card, { isGolden });
 
     if (isMobilePortrait) {
         return (
@@ -145,7 +147,7 @@ export const CatalogCardHoverPreview = ({
                 onMouseEnter={scheduleOpen}
                 onMouseLeave={scheduleClose}
             >
-                <CatalogCardDisplay card={card} size="full" />
+                <CatalogCardDisplay card={card} size="full" isGolden={isGolden} />
             </Popover.Dropdown>
         </Popover>
     );
