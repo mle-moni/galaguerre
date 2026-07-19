@@ -177,6 +177,35 @@ export class AnimationStore {
         this.removeMany(animated.map((event) => event.id));
     }
 
+    /**
+     * Plays an event and invokes `onReveal` partway through (e.g. swap board
+     * under an opaque transform cloud, then finish the fade-out).
+     */
+    async playWithMidpointReveal(
+        event: VisualAnimationEventInput,
+        revealAtRatio: number,
+        onReveal: () => void | Promise<void>,
+        reducedMotion = false,
+    ): Promise<void> {
+        const animated = withAnimationId(event);
+        this.events.push(animated);
+
+        const duration = getShotDurationMs(event, reducedMotion);
+        const revealAt = Math.round(duration * Math.min(Math.max(revealAtRatio, 0), 1));
+
+        if (revealAt > 0) {
+            await wait(revealAt);
+        }
+        await onReveal();
+
+        const remaining = duration - revealAt;
+        if (remaining > 0) {
+            await wait(remaining);
+        }
+
+        this.remove(animated.id);
+    }
+
     private removeMany(ids: string[]) {
         if (ids.length === 0) return;
         const idSet = new Set(ids);

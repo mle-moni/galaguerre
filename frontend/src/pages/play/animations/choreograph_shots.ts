@@ -46,3 +46,21 @@ export const choreographShots = (
 
 export const isCombatLungePhase = (phase: VisualAnimationEventInput[]) =>
     phase.length === 1 && phase[0]?.type === "ATTACK";
+
+export const isCloudPhase = (phase: VisualAnimationEventInput[]) =>
+    phase.length === 1 && phase[0]?.type === "CLOUD";
+
+const ABILITY_VFX_LEAD_TYPES = new Set(["PROJECTILE", "MULTI_PROJECTILE", "EXPLOSION", "CLOUD"]);
+
+export const isAbilityVfxLeadPhase = (phase: VisualAnimationEventInput[]) =>
+    phase.length === 1 && phase[0] !== undefined && ABILITY_VFX_LEAD_TYPES.has(phase[0].type);
+
+export const findLastAbilityVfxLeadIndex = (phases: VisualAnimationEventInput[][]): number => {
+    let lastIndex = -1;
+    for (let index = 0; index < phases.length; index++) {
+        if (isAbilityVfxLeadPhase(phases[index]!)) {
+            lastIndex = index;
+        }
+    }
+    return lastIndex;
+};

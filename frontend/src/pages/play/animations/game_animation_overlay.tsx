@@ -343,6 +343,25 @@ const SourcePulse = ({
     );
 };
 
+const isRockProjectile = (kind: ProjectileEvent["kind"]) => kind === "DAMAGE" || kind === "DESTROY";
+
+const getProjectileSize = (
+    kind: ProjectileEvent["kind"],
+    from: AnimationRect,
+    to: AnimationRect,
+) => {
+    if (!isRockProjectile(kind)) {
+        return { width: 28, height: 12 };
+    }
+
+    // Match board minion footprint so the rock reads as a thrown creature-sized boulder.
+    const side = Math.min(
+        Math.max(Math.max(to.width, to.height, from.width, from.height) * 0.92, 64),
+        110,
+    );
+    return { width: side, height: side * 0.88 };
+};
+
 const ProjectileBolt = ({
     kind,
     from,
@@ -363,26 +382,31 @@ const ProjectileBolt = ({
     const dy = toCenter.y - fromCenter.y;
     const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
     const delay = reduceMotion ? 0 : delayMs / 1000;
+    const size = getProjectileSize(kind, from, to);
+    const isRock = isRockProjectile(kind);
+    const spin = isRock && !reduceMotion ? angleDeg + 320 : angleDeg;
 
     return (
         <motion.div
-            className={`game-animation-projectile game-animation-projectile--${kind}`}
-            style={{ rotate: `${angleDeg}deg` }}
+            className={`game-animation-projectile game-animation-projectile--${kind}${isRock ? " game-animation-projectile--rock" : ""}`}
+            style={{ width: size.width, height: size.height }}
             initial={{
-                x: fromCenter.x - 10,
-                y: fromCenter.y - 4,
+                x: fromCenter.x - size.width / 2,
+                y: fromCenter.y - size.height / 2,
                 opacity: 0,
-                scale: reduceMotion ? 1 : 0.7,
+                scale: reduceMotion ? 1 : isRock ? 0.85 : 0.7,
+                rotate: angleDeg,
             }}
             animate={{
-                x: toCenter.x - 10,
-                y: toCenter.y - 4,
-                opacity: [0, 1, 1, 0],
-                scale: reduceMotion ? 1 : [0.7, 1, 1, 0.85],
+                x: toCenter.x - size.width / 2,
+                y: toCenter.y - size.height / 2,
+                opacity: [0, 1, 1, 0.85],
+                scale: reduceMotion ? 1 : isRock ? [0.85, 1.05, 1, 0.95] : [0.7, 1, 1, 0.85],
+                rotate: spin,
             }}
             transition={{
                 duration: getShotDurationSec(durationType, reduceMotion ?? false),
-                ease: "easeOut",
+                ease: isRock ? "easeIn" : "easeOut",
                 delay,
             }}
         />
@@ -476,13 +500,14 @@ const CloudShot = ({ event }: { event: CloudEvent }) => {
                         }}
                         initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.6 }}
                         animate={{
-                            opacity: [0, 0.9, 0.9, 0],
-                            scale: reduceMotion ? 1 : [0.6, 1.05, 1.1, 1.2],
+                            opacity: [0, 1, 1, 0],
+                            scale: reduceMotion ? 1 : [0.6, 1.08, 1.12, 1.25],
                         }}
                         transition={{
                             duration: getShotDurationSec("CLOUD", reduceMotion ?? false),
-                            ease: "easeOut",
+                            ease: "easeInOut",
                             delay,
+                            times: [0, 0.18, 0.62, 1],
                         }}
                     />
                 );

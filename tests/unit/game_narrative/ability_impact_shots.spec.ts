@@ -90,6 +90,11 @@ test.group("ability impact shot mapping", () => {
         assert.deepEqual(phases, [["PROJECTILE"], ["PROJECTILE"], ["FLOATING_TEXT"]]);
     });
 
+    test("ability VFX leads precede impact reveals in shot order", ({ assert }) => {
+        const phases = choreographShotTypes(["EXPLOSION", "DEATH", "FLOATING_TEXT"]);
+        assert.deepEqual(phases, [["EXPLOSION"], ["DEATH", "FLOATING_TEXT"]]);
+    });
+
     test("remaps ability impact for opponent viewer", ({ assert }) => {
         const effect: NarrativeEffect = {
             type: "ABILITY_IMPACT",

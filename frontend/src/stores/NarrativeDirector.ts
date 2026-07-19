@@ -1,7 +1,12 @@
 import type { ApiGame, SpotOwner } from "#api_types/game.types";
 import type { GamePresentationUpdate, NarrativeBeat } from "#api_types/game_narrative.types";
 import { makeAutoObservable } from "mobx";
-import { choreographShots, isCombatLungePhase } from "~/pages/play/animations/choreograph_shots";
+import {
+    choreographShots,
+    findLastAbilityVfxLeadIndex,
+    isCloudPhase,
+    isCombatLungePhase,
+} from "~/pages/play/animations/choreograph_shots";
 import { effectsToShots } from "~/pages/play/animations/effects_to_shots";
 import { readGameAnimationSnapshot } from "~/pages/play/animations/game_animation_snapshot";
 import { resolveHeroRect } from "~/pages/play/animations/resolve_rects";
@@ -12,14 +17,35 @@ import type { GameStore } from "./GameStore.js";
 const BEAT_GAP_MS = 0;
 const REDUCED_MOTION_GAP_MS = 0;
 
-/** Placement beats: show the resulting board state while the flight animation plays. */
-const appliesStateBeforeAnimations = (beat: NarrativeBeat) => beat.kind === "PLAY_CARD";
+/** Swap board under transform cloud once it is fully opaque. */
+const CLOUD_BOARD_REVEAL_RATIO = 0.55;
 
-const shouldRewindToSceneStart = (presentation: GamePresentationUpdate) =>
-    presentation.beats[0]?.kind !== "PLAY_CARD";
+/** Any ability VFX should play on the pre-impact board, then reveal results. */
+const hasAbilityImpactReveal = (beat: NarrativeBeat) =>
+    beat.effects.some((effect) => effect.type === "ABILITY_IMPACT");
+
+/** Placement beats: show the resulting board state while the flight animation plays. */
+const appliesStateBeforeAnimations = (beat: NarrativeBeat) =>
+    beat.kind === "PLAY_CARD" && !hasAbilityImpactReveal(beat);
+
+const shouldRewindToSceneStart = (presentation: GamePresentationUpdate) => {
+    const firstBeat = presentation.beats[0];
+    if (!firstBeat) return false;
+    // Minion/weapon placement keeps post-play board for CARD_FLIGHT landing.
+    // Ability VFX on PLAY_CARD (spells, etc.) must start from the pre-impact board.
+    if (firstBeat.kind === "PLAY_CARD") {
+        return hasAbilityImpactReveal(firstBeat);
+    }
+    return true;
+};
 
 const usesCombatStateReveal = (beat: NarrativeBeat) =>
     beat.kind === "ATTACK" || beat.effects.some((effect) => effect.type === "ATTACK_LUNGE");
+
+const usesAbilityImpactStateReveal = (beat: NarrativeBeat) => hasAbilityImpactReveal(beat);
+
+const usesDeferredBoardReveal = (beat: NarrativeBeat) =>
+    usesCombatStateReveal(beat) || usesAbilityImpactStateReveal(beat);
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -142,6 +168,11 @@ export class NarrativeDirector {
         };
     }
 
+    private async revealBoardState(stateAfter: ApiGame) {
+        this.gameStore.setDisplayGame(stateAfter);
+        await waitForLayout();
+    }
+
     private async playBeatAnimations(
         beat: NarrativeBeat,
         authoritativeGame: ApiGame,
@@ -159,17 +190,45 @@ export class NarrativeDirector {
 
         const stateAfter = this.mergeGameData(authoritativeGame, beat.stateAfter);
         const revealCombatStateAfterLunge = usesCombatStateReveal(beat) && !revealStateFirst;
+        const revealAfterAbilityVfx = usesAbilityImpactStateReveal(beat) && !revealStateFirst;
+        const phases = choreographShots(shots);
+        const lastAbilityVfxIndex = findLastAbilityVfxLeadIndex(phases);
 
-        for (const phase of choreographShots(shots)) {
+        let boardRevealed = revealStateFirst;
+
+        for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex++) {
+            const phase = phases[phaseIndex]!;
+
+            if (revealAfterAbilityVfx && isCloudPhase(phase) && phase[0] && !boardRevealed) {
+                await ANIMATION_STORE.playWithMidpointReveal(
+                    phase[0],
+                    CLOUD_BOARD_REVEAL_RATIO,
+                    async () => {
+                        await this.revealBoardState(stateAfter);
+                        boardRevealed = true;
+                    },
+                    reducedMotion,
+                );
+                continue;
+            }
+
             if (phase.length === 1) {
                 await ANIMATION_STORE.playSequential(phase, reducedMotion);
             } else {
                 await ANIMATION_STORE.playParallel(phase, reducedMotion);
             }
 
-            if (revealCombatStateAfterLunge && isCombatLungePhase(phase)) {
-                this.gameStore.setDisplayGame(stateAfter);
-                await waitForLayout();
+            if (revealCombatStateAfterLunge && isCombatLungePhase(phase) && !boardRevealed) {
+                await this.revealBoardState(stateAfter);
+                boardRevealed = true;
+            }
+
+            // After the last ability VFX lead (projectile / explosion / …), reveal
+            // deaths & stat changes so impacts play on the post-effect board.
+            // Cloud already revealed mid-animation above.
+            if (revealAfterAbilityVfx && !boardRevealed && phaseIndex === lastAbilityVfxIndex) {
+                await this.revealBoardState(stateAfter);
+                boardRevealed = true;
             }
         }
     }
@@ -213,7 +272,10 @@ export class NarrativeDirector {
                     authoritativeGame,
                     this.gameStore.me.userId,
                 );
-                if (cardReveal && (revealStateFirst || beat.kind === "OVERDRAW")) {
+                if (
+                    cardReveal &&
+                    (revealStateFirst || beat.kind === "PLAY_CARD" || beat.kind === "OVERDRAW")
+                ) {
                     this.gameStore.playedCardRevealStore.reveal(
                         cardReveal.card,
                         cardReveal.playerId,
@@ -230,7 +292,8 @@ export class NarrativeDirector {
                     );
                 }
 
-                if (!revealStateFirst && !usesCombatStateReveal(beat)) {
+                const deferredRevealHandled = usesDeferredBoardReveal(beat) && !reducedMotion;
+                if (!revealStateFirst && !deferredRevealHandled) {
                     this.gameStore.setDisplayGame(
                         this.mergeGameData(authoritativeGame, beat.stateAfter),
                     );

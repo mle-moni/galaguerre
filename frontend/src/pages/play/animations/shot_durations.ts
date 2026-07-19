@@ -10,10 +10,10 @@ export const ANIMATION_TIMING = {
     HERO_EXPLOSION: { normal: 2, reduced: 1 },
     TURN_BANNER: { normal: 0.8, reduced: 0.5 },
     SOURCE_PULSE: { normal: 0.3, reduced: 0.14 },
-    PROJECTILE: { normal: 0.28, reduced: 0.12 },
-    MULTI_PROJECTILE: { normal: 0.36, reduced: 0.14 },
+    PROJECTILE: { normal: 0.42, reduced: 0.16 },
+    MULTI_PROJECTILE: { normal: 0.48, reduced: 0.18 },
     EXPLOSION: { normal: 0.4, reduced: 0.16 },
-    CLOUD: { normal: 0.42, reduced: 0.16 },
+    CLOUD: { normal: 0.9, reduced: 0.28 },
 } as const;
 
 export const getShotDurationSec = (
