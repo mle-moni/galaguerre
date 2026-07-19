@@ -56,6 +56,7 @@ export const hidePlayerDataForUser = (player: GamePlayer, forUserId: number): Ga
         ...player,
         deckCards,
         hand: player.userId === forUserId ? hand : hiddenHand,
+        ownedGoldenCardIds: player.userId === forUserId ? player.ownedGoldenCardIds ?? [] : [],
     };
 };
 

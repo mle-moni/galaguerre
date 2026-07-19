@@ -112,12 +112,18 @@ export const createGame = async ({
 const PLAYER_ONE_HAND_SIZE = 3;
 const PLAYER_TWO_HAND_SIZE = 4;
 
+const ownedGoldenCardIdsFromCounts = (goldenCounts: Map<number, number> | undefined): number[] => {
+    if (!goldenCounts) return [];
+    return [...goldenCounts.entries()].filter(([, count]) => count > 0).map(([cardId]) => cardId);
+};
+
 const createGamePlayer = (
     userId: number,
     pseudo: string,
     avatarCardId: number,
     handSize: number,
     deck: ReturnType<typeof generatePlayerCards>,
+    ownedGoldenCardIds: number[] = [],
 ) => {
     const hand = deck.slice(0, handSize);
     const deckCards = deck.slice(handSize);
@@ -139,6 +145,7 @@ const createGamePlayer = (
         heroAttacksThisRound: 0,
         heroLastAttackAtRound: 0,
         stats: { ...DEFAULT_PLAYER_STATS },
+        ownedGoldenCardIds,
     };
 };
 
@@ -183,6 +190,7 @@ export const getDefaultGameData = ({
             playerOne.avatarCardId,
             PLAYER_ONE_HAND_SIZE,
             p1Deck,
+            ownedGoldenCardIdsFromCounts(playerOneGoldenCounts),
         ),
         playerTwo: createGamePlayer(
             playerTwo.userId,
@@ -190,6 +198,7 @@ export const getDefaultGameData = ({
             playerTwo.avatarCardId,
             PLAYER_TWO_HAND_SIZE,
             p2Deck,
+            ownedGoldenCardIdsFromCounts(playerTwoGoldenCounts),
         ),
         actionLog: [],
         ...(isTraining ? { isTraining: true } : {}),

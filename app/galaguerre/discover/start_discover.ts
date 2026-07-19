@@ -16,6 +16,7 @@ export const startDiscover = (
         action.discoverCardFilter,
         action.optionCount,
         action.discoverCardFilterAlternatives,
+        player.ownedGoldenCardIds ?? [],
     );
 
     if (options.length === 0) {

@@ -490,6 +490,7 @@ export const createGamePlayer = (
     mana: 10,
     maxFatigueDamageTaken: 0,
     stats: { ...DEFAULT_PLAYER_STATS },
+    ownedGoldenCardIds: [],
     ...overrides,
 });
 

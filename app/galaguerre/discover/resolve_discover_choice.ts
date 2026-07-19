@@ -22,6 +22,7 @@ const buildChosenCard = (
     return {
         ...template,
         uuid: option.uuid,
+        isGolden: option.isGolden,
         generatedBy: {
             cardId: pending.sourceCardId,
             label: pending.sourceCardLabel,

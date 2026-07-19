@@ -74,4 +74,30 @@ test.group("generate_discover_options", () => {
 
         assert.equal(options.length, 0);
     });
+
+    test("marks owned golden cards as golden when video exists", ({ assert }) => {
+        const goldenTemplates = getCollectibleMinionCardTemplates().filter(
+            (card) =>
+                deckCardMatchesFilter(card, DEVELOPPEUR_FILTER) && Boolean(card.goldenVideoUrl),
+        );
+        assert.isAbove(goldenTemplates.length, 0);
+
+        const ownedId = goldenTemplates[0]!.cardId;
+        const options = generateDiscoverOptions(DEVELOPPEUR_FILTER, 50, [], [ownedId]);
+        const ownedOption = options.find((card) => card.cardId === ownedId);
+
+        assert.isDefined(ownedOption);
+        assert.isTrue(ownedOption!.isGolden);
+        assert.isTrue(
+            options
+                .filter((card) => card.cardId !== ownedId)
+                .every((card) => card.isGolden === false),
+        );
+    });
+
+    test("does not mark cards golden without ownership", ({ assert }) => {
+        const options = generateDiscoverOptions(DEVELOPPEUR_FILTER, 3);
+
+        assert.isTrue(options.every((card) => card.isGolden === false));
+    });
 });

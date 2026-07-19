@@ -12,6 +12,7 @@ const normalizeGamePlayerForReplay = (player: GamePlayer): GamePlayer => {
         hand: player.hand ?? [],
         board,
         stats: player.stats ?? DEFAULT_PLAYER_STATS,
+        ownedGoldenCardIds: player.ownedGoldenCardIds ?? [],
     };
 };
 

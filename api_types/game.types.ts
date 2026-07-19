@@ -224,6 +224,8 @@ export interface GamePlayer {
     mana: number;
     maxFatigueDamageTaken: number;
     stats: GamePlayerStats;
+    /** Card IDs the player owns as golden in their collection (snapshot at game start). */
+    ownedGoldenCardIds: number[];
 }
 
 export interface GameRatingPlayerResult {

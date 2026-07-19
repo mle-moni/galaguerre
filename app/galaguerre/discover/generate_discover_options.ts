@@ -4,9 +4,13 @@ import { getAllCardTemplates, getCollectibleCardTemplates } from "#api_types/car
 import { randomUUID } from "node:crypto";
 import { shuffleArray } from "../../utils/array.js";
 
-const instantiateDiscoverOption = (template: PlayerCard): PlayerCard => ({
+const instantiateDiscoverOption = (
+    template: PlayerCard,
+    ownedGoldenCardIds: ReadonlySet<number>,
+): PlayerCard => ({
     ...structuredClone(template),
     uuid: randomUUID(),
+    isGolden: ownedGoldenCardIds.has(template.cardId) && Boolean(template.goldenVideoUrl),
 });
 
 const getDiscoverPool = (filter: CardFilterSnapshot): PlayerCard[] => {
@@ -46,12 +50,16 @@ export const generateDiscoverOptions = (
     filter: CardFilterSnapshot | null,
     optionCount: number,
     filterAlternatives: CardFilterSnapshot[] = [],
+    ownedGoldenCardIds: readonly number[] = [],
 ): PlayerCard[] => {
     if (optionCount <= 0) return [];
 
     const matches = collectDiscoverMatches(filter, filterAlternatives);
     if (matches.length === 0) return [];
 
+    const ownedGolden = new Set(ownedGoldenCardIds);
     const shuffled = shuffleArray(matches);
-    return shuffled.slice(0, Math.min(optionCount, shuffled.length)).map(instantiateDiscoverOption);
+    return shuffled
+        .slice(0, Math.min(optionCount, shuffled.length))
+        .map((template) => instantiateDiscoverOption(template, ownedGolden));
 };

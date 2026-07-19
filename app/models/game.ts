@@ -93,6 +93,7 @@ const hidePlayerData = (player: GamePlayer, forUserId: number): GamePlayer => {
         ...player,
         deckCards,
         hand: player.userId === forUserId ? player.hand : hiddenHand,
+        ownedGoldenCardIds: player.userId === forUserId ? player.ownedGoldenCardIds ?? [] : [],
     };
 };
 
