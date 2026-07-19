@@ -16,6 +16,7 @@ import { Board } from "./board/board.jsx";
 import { DecksInfos } from "./hud/decks_infos/decks_infos.jsx";
 import { GameFinalScreen } from "./hud/game_final_screen/game_final_screen.jsx";
 import { GameHudControls } from "./hud/game_hud_controls/game_hud_controls.jsx";
+import { GameMusicController } from "./game_music_controller.jsx";
 import { MulliganOverlay } from "./hud/mulligan/mulligan_overlay.jsx";
 import { DiscoverOverlay } from "./hud/discover/discover_overlay.jsx";
 import { DiscoverOpponentIndicator } from "./hud/discover/discover_opponent_indicator.jsx";
@@ -85,9 +86,14 @@ const DesktopGameLayout = observer<GameRendererProps>(({ spectating = false }) =
 export const GameRenderer = observer<GameRendererProps>(({ game, user, spectating = false }) => {
     const isMobilePortrait = useIsMobilePortrait();
 
-    if (isMobilePortrait) {
-        return <MobileGameLayout user={user} spectating={spectating} />;
-    }
-
-    return <DesktopGameLayout game={game} user={user} spectating={spectating} />;
+    return (
+        <>
+            <GameMusicController />
+            {isMobilePortrait ? (
+                <MobileGameLayout user={user} spectating={spectating} />
+            ) : (
+                <DesktopGameLayout game={game} user={user} spectating={spectating} />
+            )}
+        </>
+    );
 });

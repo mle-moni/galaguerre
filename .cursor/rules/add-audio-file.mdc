@@ -1,0 +1,27 @@
+---
+description: Check this rule when adding battle music / audio tracks
+alwaysApply: false
+---
+
+# Adding a battle music track
+
+Battle BGM lives under `public/audio/` and is listed in `frontend/src/game_music/tracks.ts`.
+Tracks play only during matches (from mulligan until a hero dies).
+
+## Steps
+
+1. Place the source file under `public/audio/<slug>_original.<ext>` (any ffmpeg-readable format).
+2. Encode a web-ready MP3 beside it (96 kbps, 44.1 kHz stereo, no metadata/cover):
+
+```bash
+ffmpeg -y -i public/audio/<slug>_original.<ext> -vn -map_metadata -1 \
+  -c:a libmp3lame -b:a 96k -ar 44100 -ac 2 \
+  public/audio/<slug>.mp3
+```
+
+3. Delete the original (`public/audio/<slug>_original.<ext>`).
+4. Append `"/audio/<slug>.mp3"` to the `GAME_MUSIC_TRACKS` array in
+   [`frontend/src/game_music/tracks.ts`](frontend/src/game_music/tracks.ts).
+
+The playlist is shuffled once per match; when a track ends, the next one crossfades in.
+Playback respects `galaguerre:sound-enabled` (same toggle as Cuelume SFX).

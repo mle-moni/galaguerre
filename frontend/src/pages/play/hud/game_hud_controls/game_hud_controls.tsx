@@ -2,6 +2,7 @@ import { Button, Modal, Text } from "@mantine/core";
 import { IconFlag, IconQuestionMark } from "@tabler/icons-react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { SoundToggle } from "~/components/cuelume/sound_toggle";
 import { useGameContext } from "~/hooks/use_game_state";
 import { abandonGame } from "~/services/ws_client";
 import { GameKeywordsGlossaryModal } from "./game_keywords_glossary_modal.jsx";
@@ -38,6 +39,7 @@ export const GameHudControls = observer(() => {
                 >
                     <IconQuestionMark size={20} />
                 </button>
+                <SoundToggle variant="fab" />
             </div>
 
             <Modal

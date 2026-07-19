@@ -5,7 +5,7 @@ import { CUELUME_TOGGLE } from "~/cuelume/sound_props";
 import { readSoundEnabled, subscribeSoundEnabled, writeSoundEnabled } from "~/cuelume/preferences";
 
 interface SoundToggleProps {
-    variant?: "icon" | "drawer";
+    variant?: "icon" | "drawer" | "fab";
 }
 
 export const SoundToggle = ({ variant = "icon" }: SoundToggleProps) => {
@@ -31,6 +31,22 @@ export const SoundToggle = ({ variant = "icon" }: SoundToggleProps) => {
             >
                 {enabled ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
                 {enabled ? "Son activé" : "Son coupé"}
+            </button>
+        );
+    }
+
+    if (variant === "fab") {
+        return (
+            <button
+                type="button"
+                className="game-hud-fab game-hud-fab--sound"
+                onClick={toggle}
+                aria-pressed={enabled}
+                aria-label={label}
+                title={label}
+                {...CUELUME_TOGGLE}
+            >
+                {enabled ? <IconVolume size={20} /> : <IconVolumeOff size={20} />}
             </button>
         );
     }

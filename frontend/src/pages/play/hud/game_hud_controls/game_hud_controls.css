@@ -38,6 +38,12 @@
 	border-color: #93c5fd;
 }
 
+.game-hud-fab--sound:hover {
+	background: rgba(30, 58, 138, 0.85);
+	color: #fff;
+	border-color: #93c5fd;
+}
+
 @media (max-width: 640px) and (orientation: portrait) {
 	.game-hud-fabs {
 		top: calc(max(0.5rem, env(safe-area-inset-top)) + 2.75rem + 52px);
