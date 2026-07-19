@@ -395,6 +395,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Product Owner", 4),
             imageUrl: "/card-covers/galadrim/product-owner.webp",
+            goldenVideoUrl: "/card-videos/product-owner.mp4",
             attack: 3,
             health: 5,
         },
@@ -1244,7 +1245,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         122,
-        { ...gal("Doom scrolling", 4), imageUrl: "/card-covers/galadrim/doom-scrolling.webp" },
+        {
+            ...gal("Doom scrolling", 4),
+            imageUrl: "/card-covers/galadrim/doom-scrolling.webp",
+            goldenVideoUrl: "/card-videos/doom-scrolling.mp4",
+        },
         [reconversionToCardId(121, targetedAnyMinion(), true)],
     ),
     defineSpell(
