@@ -2,6 +2,7 @@ import type { ApiGameInvite, ApiSentGameInvite } from "#api_types/game_invite.ty
 import type { ApiUser } from "#api_types/auth.types";
 import type { ApiGame } from "#api_types/game.types";
 import type { Socket } from "socket.io-client";
+import { play } from "~/cuelume/index";
 import { getGameStateQueryKey } from "~/hooks/use_game_state";
 import { GAME_INVITES_QUERY_KEY, SENT_GAME_INVITES_QUERY_KEY } from "~/hooks/use_game_invites";
 import { USER_QUERY_KEY } from "~/hooks/use_user";
@@ -152,6 +153,18 @@ export const setupEvents = (socket: Socket) => {
     });
 
     subscribeToSocketEvent("game:created", ({ gameId }) => {
+        const user = queryClient.getQueryData<ApiUser | null>(USER_QUERY_KEY);
+        const sentInvites =
+            queryClient.getQueryData<ApiSentGameInvite[]>(SENT_GAME_INVITES_QUERY_KEY) ?? [];
+
+        if (user && !user.currentGameId) {
+            if (user.matchmakingSearchSessionId) {
+                play("sparkle");
+            } else if (sentInvites.length > 0) {
+                play("success");
+            }
+        }
+
         queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
             if (!oldUser) return oldUser;
             return {
@@ -165,6 +178,8 @@ export const setupEvents = (socket: Socket) => {
     });
 
     subscribeToSocketEvent("game:invite_received", ({ invite }) => {
+        play("chime");
+
         queryClient.setQueryData<ApiGameInvite[]>(GAME_INVITES_QUERY_KEY, (oldInvites) => {
             const invites = oldInvites ?? [];
             if (invites.some((entry) => entry.id === invite.id)) return invites;

@@ -10,6 +10,7 @@ import {
     sendGameSearchHeartbeat,
     startGameSearch,
 } from "~/services/matchmaking";
+import { play } from "~/cuelume/index";
 import { CLIENT_SOCKET } from "~/services/ws_client";
 import { USER_QUERY_KEY, useUser } from "./use_user.js";
 
@@ -107,6 +108,11 @@ export const useMatchmakingOrchestrator = () => {
                 const result = await sendGameSearchHeartbeat(sessionId);
 
                 if (result.status === "matched") {
+                    const currentUser = queryClient.getQueryData<ApiUser | null>(USER_QUERY_KEY);
+                    if (currentUser?.matchmakingSearchSessionId && !currentUser.currentGameId) {
+                        play("sparkle");
+                    }
+
                     handleMatched(result.gameId);
                     return;
                 }
