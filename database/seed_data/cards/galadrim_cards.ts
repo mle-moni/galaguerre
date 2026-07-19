@@ -89,6 +89,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Stagiaire Dev", 1),
             imageUrl: "/card-covers/galadrim/stagiaire-dev.webp",
+            goldenVideoUrl: "/card-videos/stagiaire-dev.mp4",
             attack: 1,
             health: 1,
         },
@@ -575,6 +576,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Buddy Charismatique", 4),
             imageUrl: "/card-covers/galadrim/buddy-charismatique.webp",
+            goldenVideoUrl: "/card-videos/buddy-charismatique.mp4",
             attack: 2,
             health: 3,
         },
