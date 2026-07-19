@@ -18,6 +18,7 @@ type ParsedCard = {
     damage: number | null;
     durability: number | null;
     imageUrl: string | null;
+    goldenVideoUrl: string | null;
 };
 
 type BalanceChange = {
@@ -38,11 +39,15 @@ type CardRecapBase = {
     publishedAt: string;
     untilCommitHash: string;
     newCardIds: number[];
+    newGoldenCardIds: number[];
     buffs: BalanceEntry[];
     nerfs: BalanceEntry[];
 };
 
-type CardRecapWithImage = CardRecapBase & { imageUrl: string };
+type CardRecapWithImage = CardRecapBase & {
+    imageUrl: string;
+    goldenVideoUrl: string | null;
+};
 
 type LegacyRecap = {
     week?: string;
@@ -51,21 +56,37 @@ type LegacyRecap = {
     publishedAt: string;
     untilCommitHash?: string;
     imageUrl?: string;
+    goldenVideoUrl?: string | null;
     newCardIds: number[];
+    newGoldenCardIds?: number[];
     buffs: BalanceEntry[];
     nerfs: BalanceEntry[];
 };
 
-const getRecapImageUrl = (recap: CardRecapBase, cardsById: Map<number, ParsedCard>): string => {
-    const featuredId =
-        recap.newCardIds[0] ?? recap.buffs[0]?.id ?? recap.nerfs[0]?.id ?? recap.newCardIds.at(-1);
+const FALLBACK_RECAP_IMAGE = "/events/pause-event.webp";
 
-    if (featuredId !== undefined) {
-        const imageUrl = cardsById.get(featuredId)?.imageUrl;
-        if (imageUrl) return imageUrl;
+const getRecapMedia = (
+    recap: CardRecapBase,
+    cardsById: Map<number, ParsedCard>,
+): { imageUrl: string; goldenVideoUrl: string | null } => {
+    let featuredId: number | undefined;
+    let fromGolden = false;
+
+    if (recap.newCardIds[0] !== undefined) {
+        featuredId = recap.newCardIds[0];
+    } else if (recap.newGoldenCardIds[0] !== undefined) {
+        featuredId = recap.newGoldenCardIds[0];
+        fromGolden = true;
+    } else {
+        featuredId = recap.buffs[0]?.id ?? recap.nerfs[0]?.id;
     }
 
-    return "/events/pause-event.webp";
+    const card = featuredId !== undefined ? cardsById.get(featuredId) : undefined;
+
+    return {
+        imageUrl: card?.imageUrl ?? FALLBACK_RECAP_IMAGE,
+        goldenVideoUrl: fromGolden ? card?.goldenVideoUrl ?? null : null,
+    };
 };
 
 const parseCards = (content: string): Map<number, ParsedCard> => {
@@ -86,6 +107,7 @@ const parseCards = (content: string): Map<number, ParsedCard> => {
         const damage = block.match(/damage:\s*(\d+)/)?.[1];
         const durability = block.match(/durability:\s*(\d+)/)?.[1];
         const imageUrl = block.match(/imageUrl:\s*"([^"]+)"/)?.[1] ?? null;
+        const goldenVideoUrl = block.match(/goldenVideoUrl:\s*"([^"]+)"/)?.[1] ?? null;
         const type = match[0].startsWith("defineMinion")
             ? "MINION"
             : match[0].startsWith("defineSpell")
@@ -102,6 +124,7 @@ const parseCards = (content: string): Map<number, ParsedCard> => {
             damage: damage ? Number(damage) : null,
             durability: durability ? Number(durability) : null,
             imageUrl,
+            goldenVideoUrl,
         });
     }
 
@@ -181,20 +204,36 @@ const getCommitDate = (hash: string): string => {
     return date.slice(0, 10);
 };
 
+const gainedGolden = (previous: ParsedCard | undefined, current: ParsedCard): boolean =>
+    Boolean(current.goldenVideoUrl) && !previous?.goldenVideoUrl;
+
 const diffCards = (
     previous: Map<number, ParsedCard>,
     current: Map<number, ParsedCard>,
-): { newCards: Map<number, ParsedCard>; balanceRaw: BalanceEntry[] } => {
+): {
+    newCards: Map<number, ParsedCard>;
+    newGoldenCardIds: number[];
+    balanceRaw: BalanceEntry[];
+} => {
     const newCards = new Map<number, ParsedCard>();
+    const newGoldenCardIds: number[] = [];
     const balanceRaw: BalanceEntry[] = [];
 
     for (const [id, card] of current) {
-        if (!previous.has(id)) {
+        const old = previous.get(id);
+
+        if (!old) {
             newCards.set(id, card);
+            if (gainedGolden(undefined, card)) {
+                newGoldenCardIds.push(id);
+            }
             continue;
         }
 
-        const old = previous.get(id)!;
+        if (gainedGolden(old, card)) {
+            newGoldenCardIds.push(id);
+        }
+
         const changes: BalanceChange[] = [];
         for (const field of ["cost", "attack", "health", "damage", "durability"] as const) {
             if (old[field] !== card[field] && (old[field] != null || card[field] != null)) {
@@ -206,7 +245,7 @@ const diffCards = (
         }
     }
 
-    return { newCards, balanceRaw };
+    return { newCards, newGoldenCardIds, balanceRaw };
 };
 
 const buildWeekLastCommitMap = (): Map<string, string> => {
@@ -250,6 +289,7 @@ const migrateRecap = (recap: LegacyRecap, weekLastCommit: Map<string, string>): 
         publishedAt: recap.publishedAt,
         untilCommitHash,
         newCardIds: recap.newCardIds,
+        newGoldenCardIds: recap.newGoldenCardIds ?? [],
         buffs: recap.buffs,
         nerfs: recap.nerfs,
     };
@@ -276,9 +316,9 @@ const computeRecapSince = (
     const current = gitShowCards(toHash);
     if (!current) return null;
 
-    const { newCards, balanceRaw } = diffCards(previous, current);
+    const { newCards, newGoldenCardIds, balanceRaw } = diffCards(previous, current);
     const { buffs, nerfs } = mergeBalance(balanceRaw);
-    const changeCount = newCards.size + buffs.length + nerfs.length;
+    const changeCount = newCards.size + newGoldenCardIds.length + buffs.length + nerfs.length;
     if (changeCount === 0) return null;
 
     const date = getCommitDate(toHash);
@@ -288,6 +328,7 @@ const computeRecapSince = (
         publishedAt: formatPublishedAt(date),
         untilCommitHash: toHash,
         newCardIds: [...newCards.keys()],
+        newGoldenCardIds,
         buffs,
         nerfs,
     };
@@ -312,12 +353,15 @@ if (newRecap) {
 }
 
 const latestCards = gitShowCards("HEAD") ?? new Map<number, ParsedCard>();
-const recapsWithImages: CardRecapWithImage[] = recaps.map((recap) => ({
-    ...recap,
-    imageUrl:
-        existingRaw.find((raw) => raw.slug === recap.slug)?.imageUrl ??
-        getRecapImageUrl(recap, latestCards),
-}));
+const recapsWithImages: CardRecapWithImage[] = recaps.map((recap) => {
+    const existing = existingRaw.find((raw) => raw.slug === recap.slug);
+    const media = getRecapMedia(recap, latestCards);
+    return {
+        ...recap,
+        imageUrl: existing?.imageUrl ?? media.imageUrl,
+        goldenVideoUrl: media.goldenVideoUrl,
+    };
+});
 
 const fileContents = `// Generated by scripts/generate_news_recaps.ts — do not edit manually.
 
@@ -339,7 +383,9 @@ export type CardRecapData = {
     publishedAt: string;
     untilCommitHash: string;
     imageUrl: string;
+    goldenVideoUrl: string | null;
     newCardIds: number[];
+    newGoldenCardIds: number[];
     buffs: NewsBalanceEntry[];
     nerfs: NewsBalanceEntry[];
 };

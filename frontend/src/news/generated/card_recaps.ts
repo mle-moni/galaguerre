@@ -18,7 +18,9 @@ export type CardRecapData = {
     publishedAt: string;
     untilCommitHash: string;
     imageUrl: string;
+    goldenVideoUrl: string | null;
     newCardIds: number[];
+    newGoldenCardIds: number[];
     buffs: NewsBalanceEntry[];
     nerfs: NewsBalanceEntry[];
 };
@@ -34,6 +36,7 @@ export const CARD_RECAPS: CardRecapData[] = [
             84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 106, 107, 108, 111, 113, 114, 115, 116,
             117, 118, 119, 121, 129, 125,
         ],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [
             {
@@ -49,6 +52,7 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/stagiaire-dev.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-06-21",
@@ -59,9 +63,11 @@ export const CARD_RECAPS: CardRecapData[] = [
             130, 131, 136, 138, 137, 1, 132, 133, 134, 135, 120, 122, 123, 124, 126, 127, 128, 96,
             98, 101, 102, 104, 109, 110, 112,
         ],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/avocat-d-affaires.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-06-28",
@@ -69,6 +75,7 @@ export const CARD_RECAPS: CardRecapData[] = [
         publishedAt: "2026-06-28T18:00:00+02:00",
         untilCommitHash: "0eda9cd1877befa0ba514f38aa28a4770468c085",
         newCardIds: [97, 99, 100, 103, 105, 139, 140, 141, 142, 143, 144, 145, 146, 148, 147],
+        newGoldenCardIds: [],
         buffs: [
             {
                 id: 73,
@@ -271,6 +278,7 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/bug-en-prod.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-07-05",
@@ -278,6 +286,7 @@ export const CARD_RECAPS: CardRecapData[] = [
         publishedAt: "2026-07-05T18:00:00+02:00",
         untilCommitHash: "cf735d52f38333680de6672612e9e66da190b379",
         newCardIds: [149, 150, 151, 152, 153, 154, 156, 155, 157, 158, 159],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [
             {
@@ -309,6 +318,7 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/recherche-google.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-07-06",
@@ -316,9 +326,11 @@ export const CARD_RECAPS: CardRecapData[] = [
         publishedAt: "2026-07-06T18:00:00+02:00",
         untilCommitHash: "7e66f1162357d3d0e4ced4289b66ec732b2ef853",
         newCardIds: [160, 162, 161],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/stagiaire-x.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-07-07",
@@ -326,9 +338,11 @@ export const CARD_RECAPS: CardRecapData[] = [
         publishedAt: "2026-07-07T18:00:00+02:00",
         untilCommitHash: "8e8263998ecd32bbaa1abd857abfe7228bab195a",
         newCardIds: [169, 163, 164, 165, 166, 167, 168],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/head-of-emojis.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-07-09",
@@ -336,9 +350,11 @@ export const CARD_RECAPS: CardRecapData[] = [
         publishedAt: "2026-07-09T18:00:00+02:00",
         untilCommitHash: "f734f8903399527729a0dc3578f34e5d313cb819",
         newCardIds: [170, 171],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/git-revert.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-07-12",
@@ -346,17 +362,19 @@ export const CARD_RECAPS: CardRecapData[] = [
         publishedAt: "2026-07-12T18:00:00+02:00",
         untilCommitHash: "967aa26a946058e26ac89d77513553e1a5d8c418",
         newCardIds: [174, 176, 177, 173, 175, 172],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/dev-en-passation.webp",
+        goldenVideoUrl: null,
     },
     {
         date: "2026-07-16",
         slug: "recap-2026-07-16",
         publishedAt: "2026-07-16T18:00:00+02:00",
         untilCommitHash: "761035d1a5261aba6d1e4688e7f911b087fbc96d",
-        // 180,
         newCardIds: [178, 182, 179, 181],
+        newGoldenCardIds: [],
         buffs: [],
         nerfs: [
             {
@@ -372,5 +390,18 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/valentin.webp",
+        goldenVideoUrl: null,
+    },
+    {
+        date: "2026-07-18",
+        slug: "recap-2026-07-18",
+        publishedAt: "2026-07-18T18:00:00+02:00",
+        untilCommitHash: "01ea9942d59bc85f4f72b6b5cb73ce9d0ccb2d0e",
+        newCardIds: [],
+        newGoldenCardIds: [176, 169, 177, 151, 138, 139, 142, 181],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/molly.webp",
+        goldenVideoUrl: "/card-videos/molly.mp4",
     },
 ];

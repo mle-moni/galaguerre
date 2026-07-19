@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { getLatestNews } from "~/news/galaguerre_news";
 import { formatNewsPublishedAt } from "~/news/format_news_published_at";
+import { NewsMedia } from "~/news/news_media";
 import { HomePanel } from "./home_panel.jsx";
 
 export const HomeNewsPanel = () => {
@@ -22,7 +23,12 @@ export const HomeNewsPanel = () => {
                         to={`/actualites/${entry.slug}`}
                         className="home-news-item home-news-item--link"
                     >
-                        <img src={entry.imageUrl} alt="" className="home-news-item__thumb" />
+                        <NewsMedia
+                            imageUrl={entry.imageUrl}
+                            goldenVideoUrl={entry.goldenVideoUrl}
+                            alt=""
+                            className="home-news-item__thumb"
+                        />
                         <div>
                             <h3 className="home-news-item__title">{entry.title}</h3>
                             <p className="home-news-item__excerpt">{entry.shortDescription}</p>

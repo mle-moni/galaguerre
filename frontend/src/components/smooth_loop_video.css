@@ -1,0 +1,30 @@
+.smooth-loop-video {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	min-width: 0;
+}
+
+/*
+ * Poster + videos are paint-only. Layout size comes exclusively from `className`
+ * on the wrapper (e.g. `card-artwork`, `news-list__thumb`) — same as a static <img>.
+ */
+.smooth-loop-video__media {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	pointer-events: none;
+	border: 0;
+}
+
+.smooth-loop-video > video.smooth-loop-video__media {
+	opacity: 0;
+	transition: opacity 0.45s ease-in-out;
+}
+
+.smooth-loop-video > video.smooth-loop-video__media--active {
+	opacity: 1;
+}

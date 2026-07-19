@@ -2,6 +2,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    width: 100%;
+    min-width: 0;
 }
 
 .news-recap-section + .news-recap-section {
@@ -17,6 +19,8 @@
 
 .news-recap-grid {
     flex: none;
+    width: 100%;
+    min-width: 0;
     min-height: auto;
     overflow: visible;
 }
@@ -26,6 +30,7 @@
     flex-direction: column;
     gap: 0.5rem;
     cursor: default;
+    min-width: 0;
 }
 
 .news-recap-card-slot:hover {

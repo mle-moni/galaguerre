@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useUser } from "~/hooks/use_user";
 import { getNewsBySlug } from "~/news/galaguerre_news";
 import { formatNewsPublishedAt, formatNewsPublishedAtLong } from "~/news/format_news_published_at";
+import { NewsMedia } from "~/news/news_media";
 import "./news_page.css";
 
 export const NewsDetailPage = observer(() => {
@@ -24,11 +25,16 @@ export const NewsDetailPage = observer(() => {
     const Content = entry.Content;
 
     return (
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full max-w-4xl mx-auto">
             <div className="gg-panel">
                 <div className="gg-panel-header">{entry.title}</div>
                 <div className="gg-panel-body">
-                    <img src={entry.imageUrl} alt={entry.title} className="news-detail__banner" />
+                    <NewsMedia
+                        imageUrl={entry.imageUrl}
+                        goldenVideoUrl={entry.goldenVideoUrl}
+                        alt={entry.title}
+                        className="news-detail__banner"
+                    />
                     <p className="news-detail__meta">
                         <time dateTime={entry.publishedAt}>
                             {formatNewsPublishedAtLong(entry.publishedAt)}

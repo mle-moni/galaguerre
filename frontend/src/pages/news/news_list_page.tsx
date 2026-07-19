@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "~/hooks/use_user";
 import { GALAGUERRE_NEWS } from "~/news/galaguerre_news";
 import { formatNewsPublishedAt } from "~/news/format_news_published_at";
+import { NewsMedia } from "~/news/news_media";
 import "./news_page.css";
 
 export const NewsListPage = observer(() => {
@@ -23,7 +24,12 @@ export const NewsListPage = observer(() => {
                                     to={`/actualites/${entry.slug}`}
                                     className="news-list__item"
                                 >
-                                    <img src={entry.imageUrl} alt="" className="news-list__thumb" />
+                                    <NewsMedia
+                                        imageUrl={entry.imageUrl}
+                                        goldenVideoUrl={entry.goldenVideoUrl}
+                                        alt=""
+                                        className="news-list__thumb"
+                                    />
                                     <div>
                                         <h2 className="news-list__title">{entry.title}</h2>
                                         <p className="news-list__excerpt">

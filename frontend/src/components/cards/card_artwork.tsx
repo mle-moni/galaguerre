@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { SmoothLoopVideo } from "~/components/smooth_loop_video";
 import "./card_artwork.css";
 
 interface CardArtworkProps {
@@ -11,98 +11,6 @@ interface CardArtworkProps {
     imageLoading?: "eager" | "lazy";
 }
 
-/** Crossfade window before the end of the clip (seconds). */
-const LOOP_FADE_SECONDS = 0.45;
-
-interface SmoothLoopVideoProps {
-    src: string;
-    poster: string;
-    alt: string;
-    className?: string;
-}
-
-const SmoothLoopVideo = ({ src, poster, alt, className }: SmoothLoopVideoProps) => {
-    const primaryRef = useRef<HTMLVideoElement>(null);
-    const secondaryRef = useRef<HTMLVideoElement>(null);
-    const [activeIndex, setActiveIndex] = useState<0 | 1>(0);
-    const fadingRef = useRef(false);
-
-    useEffect(() => {
-        fadingRef.current = false;
-        setActiveIndex(0);
-
-        const primary = primaryRef.current;
-        const secondary = secondaryRef.current;
-        if (!primary || !secondary) return;
-
-        primary.currentTime = 0;
-        secondary.pause();
-        secondary.currentTime = 0;
-        void primary.play().catch(() => undefined);
-    }, [src]);
-
-    useEffect(() => {
-        const active = activeIndex === 0 ? primaryRef.current : secondaryRef.current;
-        const standby = activeIndex === 0 ? secondaryRef.current : primaryRef.current;
-        if (!active || !standby) return;
-
-        const onTimeUpdate = () => {
-            if (fadingRef.current || !Number.isFinite(active.duration) || active.duration <= 0) {
-                return;
-            }
-
-            const remaining = active.duration - active.currentTime;
-            if (remaining > LOOP_FADE_SECONDS) return;
-
-            fadingRef.current = true;
-            standby.currentTime = 0;
-            void standby.play().catch(() => undefined);
-            setActiveIndex((current) => (current === 0 ? 1 : 0));
-
-            window.setTimeout(() => {
-                fadingRef.current = false;
-                active.pause();
-            }, LOOP_FADE_SECONDS * 1000);
-        };
-
-        active.addEventListener("timeupdate", onTimeUpdate);
-        return () => active.removeEventListener("timeupdate", onTimeUpdate);
-    }, [activeIndex, src]);
-
-    return (
-        <div className={clsx("card-artwork-loop", className)} aria-label={alt}>
-            <video
-                ref={primaryRef}
-                className={clsx(
-                    "card-artwork",
-                    "card-artwork--video",
-                    activeIndex === 0 && "card-artwork--active",
-                )}
-                src={src}
-                poster={poster}
-                muted
-                playsInline
-                preload="auto"
-                aria-hidden={activeIndex !== 0}
-            />
-            <video
-                ref={secondaryRef}
-                className={clsx(
-                    "card-artwork",
-                    "card-artwork--video",
-                    activeIndex === 1 && "card-artwork--active",
-                )}
-                src={src}
-                poster={poster}
-                muted
-                playsInline
-                preload="auto"
-                aria-hidden={activeIndex !== 1}
-            />
-        </div>
-    );
-};
-
 export const CardArtwork = ({
     imageUrl,
     goldenVideoUrl,
@@ -112,6 +20,7 @@ export const CardArtwork = ({
     imageLoading,
 }: CardArtworkProps) => {
     const showVideo = isGolden && Boolean(goldenVideoUrl);
+    const mediaClassName = clsx("card-artwork", className);
 
     if (showVideo && goldenVideoUrl) {
         return (
@@ -119,14 +28,14 @@ export const CardArtwork = ({
                 src={goldenVideoUrl}
                 poster={imageUrl}
                 alt={alt}
-                className={className}
+                className={mediaClassName}
             />
         );
     }
 
     return (
         <img
-            className={clsx("card-artwork", className)}
+            className={mediaClassName}
             src={imageUrl}
             alt={alt}
             draggable={false}

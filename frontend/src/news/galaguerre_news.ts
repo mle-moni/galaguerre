@@ -10,6 +10,7 @@ const CARD_RECAP_NEWS: NewsEntry[] = CARD_RECAPS.map((recap) =>
         title: formatRecapTitle(recap.date),
         shortDescription: formatRecapShortDescription(recap),
         imageUrl: recap.imageUrl,
+        goldenVideoUrl: recap.goldenVideoUrl,
         publishedAt: recap.publishedAt,
         Content: createNewsRecapContent(recap),
     }),

@@ -10,14 +10,16 @@ const NewsRecapCard = ({
     card,
     changes,
     tone,
+    isGolden = false,
 }: {
     card: ApiCatalogCard;
     changes?: NewsBalanceEntry["changes"];
     tone?: "buff" | "nerf";
+    isGolden?: boolean;
 }) => (
     <div className="gg-catalog-card-slot news-recap-card-slot">
         <div className="gg-catalog-card-slot__preview">
-            <CatalogCardDisplay card={card} />
+            <CatalogCardDisplay card={card} isGolden={isGolden} />
         </div>
         {changes && changes.length > 0 && (
             <div
@@ -38,15 +40,17 @@ const NewsRecapCardById = ({
     cardsById,
     changes,
     tone,
+    isGolden = false,
 }: {
     cardId: number;
     cardsById: Map<number, ApiCatalogCard>;
     changes?: NewsBalanceEntry["changes"];
     tone?: "buff" | "nerf";
+    isGolden?: boolean;
 }) => {
     const card = cardsById.get(cardId);
     if (!card) return null;
-    return <NewsRecapCard card={card} changes={changes} tone={tone} />;
+    return <NewsRecapCard card={card} changes={changes} tone={tone} isGolden={isGolden} />;
 };
 
 export const NewsRecapContent = ({ recap }: { recap: CardRecapData }) => {
@@ -55,7 +59,10 @@ export const NewsRecapContent = ({ recap }: { recap: CardRecapData }) => {
     if (cardsQuery.isLoading) return <CenteredLoader />;
 
     const cardsById = new Map((cardsQuery.data ?? []).map((card) => [card.id, card]));
+    const newCardIdSet = new Set(recap.newCardIds);
+    const goldenOnlyIds = recap.newGoldenCardIds.filter((id) => !newCardIdSet.has(id));
     const hasNewCards = recap.newCardIds.length > 0;
+    const hasNewGoldens = goldenOnlyIds.length > 0;
     const hasBuffs = recap.buffs.length > 0;
     const hasNerfs = recap.nerfs.length > 0;
 
@@ -68,7 +75,28 @@ export const NewsRecapContent = ({ recap }: { recap: CardRecapData }) => {
                     <h2 className="news-recap-section__title">Nouvelles cartes</h2>
                     <div className="gg-catalog-grid news-recap-grid">
                         {recap.newCardIds.map((cardId) => (
-                            <NewsRecapCardById key={cardId} cardId={cardId} cardsById={cardsById} />
+                            <NewsRecapCardById
+                                key={cardId}
+                                cardId={cardId}
+                                cardsById={cardsById}
+                                isGolden={recap.newGoldenCardIds.includes(cardId)}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {hasNewGoldens && (
+                <section className="news-recap-section">
+                    <h2 className="news-recap-section__title">Versions golden</h2>
+                    <div className="gg-catalog-grid news-recap-grid">
+                        {goldenOnlyIds.map((cardId) => (
+                            <NewsRecapCardById
+                                key={cardId}
+                                cardId={cardId}
+                                cardsById={cardsById}
+                                isGolden
+                            />
                         ))}
                     </div>
                 </section>
@@ -108,7 +136,7 @@ export const NewsRecapContent = ({ recap }: { recap: CardRecapData }) => {
                 </section>
             )}
 
-            {!hasNewCards && !hasBuffs && !hasNerfs && (
+            {!hasNewCards && !hasNewGoldens && !hasBuffs && !hasNerfs && (
                 <p className="news-recap-empty">Aucun changement de carte.</p>
             )}
         </>
