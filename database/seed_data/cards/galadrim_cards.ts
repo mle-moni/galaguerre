@@ -578,7 +578,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     defineMinion(
         182,
         {
-            ...gal("Buddy Charismatique", 4),
+            ...gal("Buddy Charismatique", 5),
             imageUrl: "/card-covers/galadrim/buddy-charismatique.webp",
             goldenVideoUrl: "/card-videos/buddy-charismatique.mp4",
             attack: 2,

@@ -512,5 +512,5 @@ Format compact pour construction de deck par LLM.
 - Ruée : Peut attaquer les monstres dès le tour où il est joué.
 
 ### #182 Buddy Charismatique
-- Coût: 4 | Type: MINION | Stats: 2/3 | Rareté: Commune | Famille: Équipe support
+- Coût: 5 | Type: MINION | Stats: 2/3 | Rareté: Commune | Famille: Équipe support
 - Cri de guerre : Invoque 3 monstres (Nouvelle Recrue) sur votre plateau.
