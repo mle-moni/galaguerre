@@ -46,7 +46,6 @@ type CardRecapBase = {
 
 type CardRecapWithImage = CardRecapBase & {
     imageUrl: string;
-    goldenVideoUrl: string | null;
 };
 
 type LegacyRecap = {
@@ -56,7 +55,6 @@ type LegacyRecap = {
     publishedAt: string;
     untilCommitHash?: string;
     imageUrl?: string;
-    goldenVideoUrl?: string | null;
     newCardIds: number[];
     newGoldenCardIds?: number[];
     buffs: BalanceEntry[];
@@ -65,28 +63,20 @@ type LegacyRecap = {
 
 const FALLBACK_RECAP_IMAGE = "/events/pause-event.webp";
 
-const getRecapMedia = (
-    recap: CardRecapBase,
-    cardsById: Map<number, ParsedCard>,
-): { imageUrl: string; goldenVideoUrl: string | null } => {
+const getRecapImageUrl = (recap: CardRecapBase, cardsById: Map<number, ParsedCard>): string => {
     let featuredId: number | undefined;
-    let fromGolden = false;
 
     if (recap.newCardIds[0] !== undefined) {
         featuredId = recap.newCardIds[0];
     } else if (recap.newGoldenCardIds[0] !== undefined) {
         featuredId = recap.newGoldenCardIds[0];
-        fromGolden = true;
     } else {
         featuredId = recap.buffs[0]?.id ?? recap.nerfs[0]?.id;
     }
 
     const card = featuredId !== undefined ? cardsById.get(featuredId) : undefined;
 
-    return {
-        imageUrl: card?.imageUrl ?? FALLBACK_RECAP_IMAGE,
-        goldenVideoUrl: fromGolden ? card?.goldenVideoUrl ?? null : null,
-    };
+    return card?.imageUrl ?? FALLBACK_RECAP_IMAGE;
 };
 
 const parseCards = (content: string): Map<number, ParsedCard> => {
@@ -355,11 +345,9 @@ if (newRecap) {
 const latestCards = gitShowCards("HEAD") ?? new Map<number, ParsedCard>();
 const recapsWithImages: CardRecapWithImage[] = recaps.map((recap) => {
     const existing = existingRaw.find((raw) => raw.slug === recap.slug);
-    const media = getRecapMedia(recap, latestCards);
     return {
         ...recap,
-        imageUrl: existing?.imageUrl ?? media.imageUrl,
-        goldenVideoUrl: media.goldenVideoUrl,
+        imageUrl: existing?.imageUrl ?? getRecapImageUrl(recap, latestCards),
     };
 });
 
@@ -383,7 +371,6 @@ export type CardRecapData = {
     publishedAt: string;
     untilCommitHash: string;
     imageUrl: string;
-    goldenVideoUrl: string | null;
     newCardIds: number[];
     newGoldenCardIds: number[];
     buffs: NewsBalanceEntry[];

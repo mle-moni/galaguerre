@@ -18,7 +18,6 @@ export type CardRecapData = {
     publishedAt: string;
     untilCommitHash: string;
     imageUrl: string;
-    goldenVideoUrl: string | null;
     newCardIds: number[];
     newGoldenCardIds: number[];
     buffs: NewsBalanceEntry[];
@@ -52,7 +51,6 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/stagiaire-dev.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-06-21",
@@ -67,7 +65,6 @@ export const CARD_RECAPS: CardRecapData[] = [
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/avocat-d-affaires.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-06-28",
@@ -278,7 +275,6 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/bug-en-prod.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-07-05",
@@ -318,7 +314,6 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/recherche-google.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-07-06",
@@ -330,7 +325,6 @@ export const CARD_RECAPS: CardRecapData[] = [
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/stagiaire-x.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-07-07",
@@ -342,7 +336,6 @@ export const CARD_RECAPS: CardRecapData[] = [
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/head-of-emojis.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-07-09",
@@ -354,7 +347,6 @@ export const CARD_RECAPS: CardRecapData[] = [
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/git-revert.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-07-12",
@@ -366,7 +358,6 @@ export const CARD_RECAPS: CardRecapData[] = [
         buffs: [],
         nerfs: [],
         imageUrl: "/card-covers/galadrim/dev-en-passation.webp",
-        goldenVideoUrl: null,
     },
     {
         date: "2026-07-19",
@@ -393,6 +384,28 @@ export const CARD_RECAPS: CardRecapData[] = [
             },
         ],
         imageUrl: "/card-covers/galadrim/valentin.webp",
-        goldenVideoUrl: null,
+    },
+    {
+        date: "2026-07-20",
+        slug: "recap-2026-07-20",
+        publishedAt: "2026-07-20T18:00:00+02:00",
+        untilCommitHash: "b4a5973c952a3731a500423d1338beea8f575354",
+        newCardIds: [],
+        newGoldenCardIds: [150, 180, 82, 173, 92, 158, 97, 149, 105, 109, 170],
+        buffs: [],
+        nerfs: [
+            {
+                id: 182,
+                label: "Buddy Charismatique",
+                changes: [
+                    {
+                        field: "cost",
+                        from: 4,
+                        to: 5,
+                    },
+                ],
+            },
+        ],
+        imageUrl: "/card-covers/galadrim/mentor-technique.webp",
     },
 ];
