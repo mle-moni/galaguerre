@@ -190,7 +190,7 @@ test.group("buy card with gold coins", (group) => {
 
         await assert.rejects(
             () => buyCardWithGoldCoins(user.id, card.id, { golden: true }),
-            /maximum d'exemplaires golden/,
+            /maximum d'exemplaires dorés/,
         );
     });
 });
