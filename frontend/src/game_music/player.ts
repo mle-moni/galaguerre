@@ -3,7 +3,7 @@ import { GAME_MUSIC_TRACKS } from "./tracks.ts";
 const FADE_IN_MS = 1500;
 const FADE_OUT_MS = 2000;
 const CROSSFADE_MS = 2000;
-const TARGET_VOLUME = 0.45;
+const TARGET_VOLUME = 0.14;
 const SESSION_STORAGE_KEY = "galaguerre:game-music-session";
 
 type FadeHandle = { cancel: () => void };
