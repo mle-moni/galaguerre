@@ -2,6 +2,7 @@ import type { ApiUser } from "#api_types/auth.types";
 import { observer } from "mobx-react-lite";
 import { TargetingArrowOverlay } from "~/components/targeting/targeting_arrow_overlay";
 import { useArmedCardInteraction } from "~/hooks/use_armed_card_interaction";
+import { useTargetedSpellHandDrag } from "~/hooks/use_targeted_spell_hand_drag";
 import { useTargetingArrow } from "~/hooks/use_targeting_arrow";
 import { useTargetSelectionCancel } from "~/hooks/use_target_selection_cancel";
 import { useGameContext } from "~/hooks/use_game_state";
@@ -32,6 +33,7 @@ export const MobileGameLayout = observer<MobileGameLayoutProps>(
         useTargetSelectionCancel(store);
         useArmedCardInteraction(store);
         useTargetingArrow(store);
+        useTargetedSpellHandDrag(store);
 
         const me = store.me;
         const opponent = store.opponent;

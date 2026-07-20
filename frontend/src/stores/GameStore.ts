@@ -479,6 +479,7 @@ export class GameStore {
 
         return (
             cardDragStore.cardDragged !== null ||
+            cardDragStore.isDraggingTargetedSpell ||
             cardDragStore.isShowingMinionPlayHint ||
             cardDragStore.isShowingSpellOrWeaponPlayHint ||
             targetSelectionStore.isArmed ||

@@ -8,7 +8,10 @@ import {
     useState,
 } from "react";
 import { PlayerCardFace } from "~/components/cards/player_card_face";
-import { resolveBoardInsertIndexFromPoint } from "~/helpers/resolve_target_from_point";
+import {
+    getElementCenter,
+    resolveBoardInsertIndexFromPoint,
+} from "~/helpers/resolve_target_from_point";
 import { useGameContext } from "~/hooks/use_game_state";
 import { notifyError } from "~/services/toasts";
 import { countBoardMinionsOnBoard, playerHasBoardSpace } from "#api_types/board";
@@ -49,6 +52,14 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
     const [isInCancelZone, setIsInCancelZone] = useState(false);
 
     const selectedCard = selectedIndex === null ? null : player.hand[selectedIndex] ?? null;
+    const isTargetedSpellArrowActive =
+        store.cardDragStore.targetedSpellDrag?.isArrowActive === true;
+    const isTargetedSpellLift =
+        store.cardDragStore.isDraggingTargetedSpell ||
+        (isLifted &&
+            selectedCard?.type === "SPELL" &&
+            store.targetSelectionStore.requiresTarget(selectedCard));
+    const showFloatingCardPreview = Boolean(selectedCard) && !isTargetedSpellArrowActive;
 
     useEffect(() => {
         if (selectedIndex !== null && selectedIndex >= player.hand.length) {
@@ -145,6 +156,11 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
 
         if (card.type === "SPELL" && store.targetSelectionStore.requiresTarget(card)) {
             gesture.mode = "TARGETED_SPELL";
+            const cardElement = handRef.current?.querySelector<HTMLElement>(
+                `[data-hand-card-index="${gesture.selectedIndex}"] [data-playing-card]`,
+            );
+            const origin = cardElement ? getElementCenter(cardElement) : { x: point.x, y: point.y };
+            store.cardDragStore.startTargetedSpellDrag(card as SpellCard, origin);
             return;
         }
 
@@ -218,18 +234,8 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         if (gesture.mode === "MINION") {
             updateMinionDropPreview(point);
         }
-    };
 
-    const finishTargetedSpell = (card: SpellCard, point: Point) => {
-        const battlefield = document.querySelector<HTMLElement>(".mobile-game-layout__board");
-        if (
-            !battlefield ||
-            !isPointInsideMobileBounds(point, battlefield.getBoundingClientRect())
-        ) {
-            return;
-        }
-
-        store.targetSelectionStore.startSpellTargetSelection(card);
+        // Arrow morph / cursor updates are owned by useTargetedSpellHandDrag.
     };
 
     const finishMinionDrop = (card: PlayerCard, point: Point) => {
@@ -269,6 +275,12 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         const point = { x: event.clientX, y: event.clientY };
         const releasedInCancelZone = isInsideCardCancelZone(point);
 
+        if (gesture.mode === "TARGETED_SPELL") {
+            // Finish is owned by useTargetedSpellHandDrag / finishTargetedSpellArrow.
+            resetGestureVisuals();
+            return;
+        }
+
         if (gesture.mode !== "NONE" && releasedInCancelZone) {
             if (gesture.mode === "MINION") {
                 store.cardDragStore.setCardDragged(null);
@@ -280,8 +292,6 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
 
         if (card && gesture.mode === "MINION") {
             finishMinionDrop(card, point);
-        } else if (card?.type === "SPELL" && gesture.mode === "TARGETED_SPELL") {
-            finishTargetedSpell(card, point);
         } else if (card && card.type !== "MINION" && gesture.mode === "IMMEDIATE") {
             store.targetSelectionStore.armCard(card);
             store.targetSelectionStore.confirmArmedPlay();
@@ -298,12 +308,24 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
             store.cardDragStore.setCardDragged(null);
             store.cardDragStore.leaveMinionDropZone();
         }
+        if (gesture.mode === "TARGETED_SPELL") {
+            store.cardDragStore.cancelTargetedSpellDrag();
+        }
         resetGestureVisuals();
     };
 
+    const previewHint = (() => {
+        if (isInCancelZone) return "Relâchez pour annuler";
+        if (isLifted && isTargetedSpellLift) {
+            return "Glissez hors de la main pour cibler";
+        }
+        if (isLifted) return "Relâchez pour jouer";
+        return "Glissez pour parcourir · montez pour jouer";
+    })();
+
     return (
         <div className="mobile-hand" data-mobile-player-hand>
-            {selectedCard && (
+            {selectedCard && showFloatingCardPreview && (
                 <div
                     className={clsx(
                         "mobile-hand__preview",
@@ -329,13 +351,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                         health={selectedCard.type === "MINION" ? selectedCard.health : undefined}
                         className="mobile-hand__preview-card"
                     />
-                    <span className="mobile-hand__preview-hint">
-                        {isInCancelZone
-                            ? "Relâchez pour annuler"
-                            : isLifted
-                              ? "Relâchez pour jouer"
-                              : "Glissez pour parcourir · montez pour jouer"}
-                    </span>
+                    <span className="mobile-hand__preview-hint">{previewHint}</span>
                 </div>
             )}
 

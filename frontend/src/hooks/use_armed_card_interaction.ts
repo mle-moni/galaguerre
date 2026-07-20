@@ -14,6 +14,7 @@ export const useArmedCardInteraction = (store: GameStore) => {
         if (!isMyTurn) {
             store.targetSelectionStore.disarm();
             store.cardDragStore.clearPlayHints();
+            store.cardDragStore.cancelTargetedSpellDrag();
         }
     }, [isMyTurn, store]);
 

@@ -24,14 +24,43 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
         .filter(Boolean)
         .join(" ");
 
+    if (cardDragStore.isDraggingTargetedSpell) {
+        const hint = cardDragStore.targetedSpellDrag?.isArrowActive
+            ? isMobile
+                ? "Relâchez sur une cible · remettez dans la main pour annuler"
+                : "Relâchez sur une cible valide · remettez dans la main pour annuler"
+            : isMobile
+              ? "Glissez hors de la main pour cibler"
+              : "Glissez hors de la main pour cibler · relâchez pour annuler";
+
+        return (
+            <div className={`${hintClassName} armed-card-hint--targeting`} role="status">
+                <span>{hint}</span>
+                {isMobile && (
+                    <Button
+                        className="armed-card-hint__cancel"
+                        size="compact-xs"
+                        variant="subtle"
+                        color="yellow"
+                        aria-label="Annuler le ciblage du sort"
+                        onClick={handleCancel}
+                    >
+                        Annuler
+                    </Button>
+                )}
+            </div>
+        );
+    }
+
     if (targetSelectionStore.isSelectingTarget) {
         const isSpell = targetSelectionStore.pendingPlay?.kind === "SPELL";
+        // Spells use continuous arrow-from-hand; this branch is for battlecry (and legacy).
         const hint = isMobile
             ? isSpell
-                ? "Choisissez la cible du sort"
+                ? "Relâchez sur une cible valide"
                 : "Choisissez la cible du cri de guerre"
             : isSpell
-              ? "Choisissez une cible valide pour lancer le sort · Échap pour annuler"
+              ? "Relâchez sur une cible valide · remettez dans la main pour annuler"
               : "Choisissez une cible valide pour résoudre le cri de guerre · Échap pour annuler";
 
         return (

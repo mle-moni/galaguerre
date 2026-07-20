@@ -1,7 +1,8 @@
-import type { PlayerCard, SpotOwner } from "#api_types/game.types";
+import type { PlayerCard, SpellCard, SpotOwner } from "#api_types/game.types";
 import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
 
 import { makeAutoObservable } from "mobx";
+import type { Point } from "~/helpers/is_point_inside_hand_cancel_zone";
 import {
     getElementCenter,
     getInsertionZoneElement,
@@ -12,6 +13,12 @@ import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
 
 export type SlotsBorderColor = Record<number, string>;
+
+export type TargetedSpellDrag = {
+    card: SpellCard;
+    origin: Point;
+    isArrowActive: boolean;
+};
 
 const BOARD_INDICES = Array.from({ length: MAX_BOARD_MINIONS }, (_, index) => index);
 
@@ -30,6 +37,7 @@ export class CardDragStore {
     public previewInsertIndex: number | null = null;
     public isOverMinionDropZone = false;
     public isOverSpellPlayZone = false;
+    public targetedSpellDrag: TargetedSpellDrag | null = null;
 
     constructor(protected gameStore: GameStore) {
         makeAutoObservable(this);
@@ -59,10 +67,64 @@ export class CardDragStore {
         return card?.type === "SPELL" || card?.type === "WEAPON";
     }
 
+    get isDraggingTargetedSpell(): boolean {
+        return this.targetedSpellDrag !== null;
+    }
+
+    isCardHiddenInHand(cardUuid: string): boolean {
+        return (
+            this.targetedSpellDrag?.card.uuid === cardUuid && this.targetedSpellDrag.isArrowActive
+        );
+    }
+
+    startTargetedSpellDrag(card: SpellCard, origin: Point) {
+        this.gameStore.targetSelectionStore.disarm();
+        this.clearPlayHints();
+        this.cardDragged = null;
+        this.targetedSpellDrag = { card, origin, isArrowActive: false };
+    }
+
+    updateTargetedSpellDrag(point: Point, isOverHand: boolean) {
+        const drag = this.targetedSpellDrag;
+        if (!drag) return;
+
+        if (!isOverHand) {
+            if (!drag.isArrowActive) {
+                this.gameStore.targetSelectionStore.startSpellTargetSelection(drag.card);
+                this.gameStore.targetingArrowStore.beginDrag(drag.origin, point);
+                drag.isArrowActive = true;
+            } else {
+                this.gameStore.targetingArrowStore.updateCursor(point.x, point.y);
+            }
+            return;
+        }
+
+        if (drag.isArrowActive) {
+            drag.isArrowActive = false;
+            this.gameStore.targetSelectionStore.clearPendingPlay();
+            this.gameStore.targetingArrowStore.endDrag();
+        }
+    }
+
+    clearTargetedSpellDrag() {
+        this.targetedSpellDrag = null;
+    }
+
+    cancelTargetedSpellDrag() {
+        if (!this.targetedSpellDrag) {
+            return;
+        }
+
+        this.targetedSpellDrag = null;
+        this.gameStore.targetSelectionStore.clearPendingPlay();
+        this.gameStore.targetingArrowStore.endDrag();
+    }
+
     showMinionPlayHint(cardId: string) {
         this.spellOrWeaponPlayHintCardId = null;
         this.minionPlayHintCardId = cardId;
         this.gameStore.targetSelectionStore.disarm();
+        this.cancelTargetedSpellDrag();
     }
 
     showSpellOrWeaponPlayHint(cardId: string) {
@@ -71,6 +133,7 @@ export class CardDragStore {
         this.isOverMinionDropZone = false;
         this.spellOrWeaponPlayHintCardId = cardId;
         this.gameStore.targetSelectionStore.disarm();
+        this.cancelTargetedSpellDrag();
     }
 
     clearMinionPlayHint() {
@@ -93,6 +156,7 @@ export class CardDragStore {
         if (card !== null) {
             this.gameStore.targetSelectionStore.disarm();
             this.clearPlayHints();
+            this.cancelTargetedSpellDrag();
         } else {
             this.previewInsertIndex = null;
             this.isOverMinionDropZone = false;
@@ -141,8 +205,8 @@ export class CardDragStore {
             return;
         }
 
+        // Targeted spells use pointer → arrow from hand; never the board drop zone.
         if (card.type === "SPELL" && this.gameStore.targetSelectionStore.requiresTarget(card)) {
-            this.gameStore.targetSelectionStore.startSpellTargetSelection(card);
             this.setCardDragged(null);
             return;
         }

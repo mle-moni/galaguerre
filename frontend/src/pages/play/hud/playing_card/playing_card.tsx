@@ -1,13 +1,15 @@
 import { playerHasBoardSpace } from "#api_types/board";
-import type { PlayerCard } from "#api_types/game.types";
+import type { PlayerCard, SpellCard } from "#api_types/game.types";
 
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import type { CSSProperties } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { CardBackFace } from "~/components/cards/card_back_face";
 import { CardHoverPreview } from "~/components/cards/card_hover_preview";
 import { CardMobilePreviewButton } from "~/components/cards/card_mobile_preview_button";
 import { PlayerCardFace } from "~/components/cards/player_card_face";
+import { getElementCenter } from "~/helpers/resolve_target_from_point";
+import { useDragClickSuppression } from "~/hooks/use_drag_click_suppression";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
 import { notifyError } from "~/services/toasts";
@@ -23,11 +25,14 @@ interface CardProps {
 export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton }: CardProps) => {
     const { store } = useGameContext();
     const isMobilePortrait = useIsMobilePortrait();
+    const dragClickSuppression = useDragClickSuppression();
 
     if (isOpponent) {
         return <CardBackFace cardUuid={card.uuid} style={style} className="cursor-pointer" />;
     }
 
+    const requiresSpellTarget =
+        card.type === "SPELL" && store.targetSelectionStore.requiresTarget(card);
     const canPlay =
         store.isMyTurn &&
         card.cost <= store.me.mana &&
@@ -46,10 +51,12 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         store.cardDragStore.spellOrWeaponPlayHintCardId === card.uuid;
     const isCardQueued =
         card.type === "MINION" && store.combatActionQueue.isCardReserved(card.uuid);
+    const isHiddenInHand = store.cardDragStore.isCardHiddenInHand(card.uuid);
     const cardClassName = clsx(
         canPlay && !isCardQueued ? "cursor-pointer" : "cursor-not-allowed opacity-60",
         (isArmed || isMinionHinted || isSpellOrWeaponHinted || isCardQueued) &&
             "playing-card--armed",
+        isHiddenInHand && "playing-card--hidden-in-hand",
     );
 
     const handleUnplayableCardClick = () => {
@@ -64,6 +71,8 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
     };
 
     const handleSpellOrWeaponClick = () => {
+        if (dragClickSuppression.consumeClickSuppression()) return;
+
         if (!canPlay) {
             handleUnplayableCardClick();
             return;
@@ -71,6 +80,8 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
 
         if (card.type !== "SPELL" && card.type !== "WEAPON") return;
         if (isMobilePortrait) return;
+        // Targeted spells are played via pointer → arrow, not click-to-hint.
+        if (card.type === "SPELL" && store.targetSelectionStore.requiresTarget(card)) return;
 
         store.cardDragStore.showSpellOrWeaponPlayHint(card.uuid);
     };
@@ -84,6 +95,18 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         }
 
         store.cardDragStore.showMinionPlayHint(card.uuid);
+    };
+
+    const handleTargetedSpellPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+        if (isMobilePortrait || !canPlay || !requiresSpellTarget) return;
+        if (store.isInputBlocked) return;
+
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragClickSuppression.begin(event);
+
+        const origin = getElementCenter(event.currentTarget);
+        store.cardDragStore.startTargetedSpellDrag(card as SpellCard, origin);
     };
 
     const wrapper = (content: React.ReactNode) => {
@@ -134,6 +157,21 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
     }
 
     if (card.type === "SPELL") {
+        if (requiresSpellTarget) {
+            return (
+                <PlayerCardFace
+                    card={card}
+                    style={style}
+                    className={cardClassName}
+                    spellPower={store.me.spellPower}
+                    draggable={false}
+                    onClick={isMobilePortrait ? undefined : handleSpellOrWeaponClick}
+                    onPointerDown={isMobilePortrait ? undefined : handleTargetedSpellPointerDown}
+                    wrapper={wrapper}
+                />
+            );
+        }
+
         return (
             <PlayerCardFace
                 card={card}

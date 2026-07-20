@@ -112,6 +112,11 @@ export class TargetSelectionStore {
         this.armedCard = null;
         this.pendingPlay = null;
         this.gameStore.targetingArrowStore.endDrag();
+        this.gameStore.cardDragStore.clearTargetedSpellDrag();
+    }
+
+    clearPendingPlay() {
+        this.pendingPlay = null;
     }
 
     playUntargetedFromHand(card: ArmedPlayableCard) {

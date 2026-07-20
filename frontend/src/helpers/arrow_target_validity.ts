@@ -1,4 +1,5 @@
 import type { ActionTarget } from "#api_types/game.types";
+import { isPointInsideHandCancelZone } from "~/helpers/is_point_inside_hand_cancel_zone";
 import { resolveTargetFromPoint } from "~/helpers/resolve_target_from_point";
 import type { GameStore } from "~/stores/GameStore";
 import type { TargetValidity } from "~/stores/TargetSelectionStore";
@@ -36,6 +37,11 @@ export const confirmArrowTarget = (store: GameStore, actionTarget: ActionTarget)
 };
 
 export const cancelArrowTargeting = (store: GameStore) => {
+    if (store.cardDragStore.isDraggingTargetedSpell) {
+        store.cardDragStore.cancelTargetedSpellDrag();
+        return;
+    }
+
     if (store.targetSelectionStore.isSelectingTarget) {
         store.targetSelectionStore.cancelTargetSelection();
         return;
@@ -67,12 +73,43 @@ export const cancelArrowTargeting = (store: GameStore) => {
 };
 
 export const resolveAndConfirmArrowTarget = (store: GameStore, x: number, y: number) => {
+    if (
+        store.targetSelectionStore.pendingPlay?.kind === "SPELL" &&
+        isPointInsideHandCancelZone({ x, y })
+    ) {
+        cancelArrowTargeting(store);
+        store.targetingArrowStore.endDrag();
+        return;
+    }
+
     const actionTarget = resolveTargetFromPoint(x, y);
 
     if (actionTarget && getArrowTargetValidity(store, x, y) === "valid") {
         confirmArrowTarget(store, actionTarget);
     } else {
         cancelArrowTargeting(store);
+    }
+
+    store.targetingArrowStore.endDrag();
+};
+
+/** Completes a targeted-spell hand drag (card ↔ arrow morph). */
+export const finishTargetedSpellArrow = (store: GameStore, x: number, y: number) => {
+    const drag = store.cardDragStore.targetedSpellDrag;
+    if (!drag) return;
+
+    const isOverHand = isPointInsideHandCancelZone({ x, y });
+    if (isOverHand || !drag.isArrowActive) {
+        store.cardDragStore.cancelTargetedSpellDrag();
+        return;
+    }
+
+    // Keep targetedSpellDrag until after confirm/cancel so useTargetingArrow stays skipped.
+    const actionTarget = resolveTargetFromPoint(x, y);
+    if (actionTarget && getArrowTargetValidity(store, x, y) === "valid") {
+        confirmArrowTarget(store, actionTarget);
+    } else {
+        store.cardDragStore.cancelTargetedSpellDrag();
     }
 
     store.targetingArrowStore.endDrag();

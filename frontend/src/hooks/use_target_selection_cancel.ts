@@ -7,6 +7,7 @@ export const useTargetSelectionCancel = (store: GameStore) => {
         store.isNarrativePlaying ||
         store.targetSelectionStore.isArmed ||
         store.targetSelectionStore.isSelectingTarget ||
+        store.cardDragStore.isDraggingTargetedSpell ||
         store.cardDragStore.isShowingMinionPlayHint ||
         store.cardDragStore.isShowingSpellOrWeaponPlayHint ||
         store.minionDragStore.isAttacking ||
@@ -23,6 +24,7 @@ export const useTargetSelectionCancel = (store: GameStore) => {
                 store.weaponDragStore.isAttacking ||
                 store.targetSelectionStore.isArmed ||
                 store.targetSelectionStore.isSelectingTarget ||
+                store.cardDragStore.isDraggingTargetedSpell ||
                 store.cardDragStore.isShowingMinionPlayHint ||
                 store.cardDragStore.isShowingSpellOrWeaponPlayHint
             ) {

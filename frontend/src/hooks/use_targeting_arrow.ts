@@ -7,9 +7,11 @@ import type { GameStore } from "~/stores/GameStore";
 
 export const useTargetingArrow = (store: GameStore) => {
     const isDragging = store.targetingArrowStore.isDragging;
+    const isTargetedSpellDrag = store.cardDragStore.isDraggingTargetedSpell;
 
     useLayoutEffect(() => {
-        if (!isDragging) return;
+        // Targeted spells own their pointer lifecycle via useTargetedSpellHandDrag.
+        if (!isDragging || isTargetedSpellDrag) return;
 
         const handlePointerMove = (event: PointerEvent) => {
             store.targetingArrowStore.updateCursor(event.clientX, event.clientY);
@@ -33,5 +35,5 @@ export const useTargetingArrow = (store: GameStore) => {
             document.removeEventListener("pointerup", handlePointerUp);
             document.removeEventListener("pointercancel", handlePointerCancel);
         };
-    }, [isDragging, store]);
+    }, [isDragging, isTargetedSpellDrag, store]);
 };
