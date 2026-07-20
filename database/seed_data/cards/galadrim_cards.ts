@@ -158,6 +158,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Mentor Technique", 2),
             imageUrl: "/card-covers/galadrim/mentor-technique.webp",
+            goldenVideoUrl: "/card-videos/mentor-technique.mp4",
             attack: 2,
             health: 3,
         },
@@ -244,6 +245,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Alexis", 3),
             imageUrl: "/card-covers/galadrim/alexis-t.webp",
+            goldenVideoUrl: "/card-videos/alexis.mp4",
             attack: 3,
             health: 2,
         },
@@ -550,6 +552,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Responsable du staffing", 2),
             imageUrl: "/card-covers/galadrim/responsable-du-staffing.webp",
+            goldenVideoUrl: "/card-videos/responsable-du-staffing.mp4",
             attack: 3,
             health: 2,
         },
@@ -758,6 +761,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Sully JR", 1),
             imageUrl: "/card-covers/galadrim/sully-jr.webp",
+            goldenVideoUrl: "/card-videos/sully-jr.mp4",
             attack: 1,
             health: 1,
         },
@@ -1073,6 +1077,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Bug en Prod", 4),
             imageUrl: "/card-covers/galadrim/bug-en-prod.webp",
+            goldenVideoUrl: "/card-videos/bug-en-prod.mp4",
         },
         [damageAction(3, allMinions())],
     ),
@@ -1201,6 +1206,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Coupure Internet", 6),
             imageUrl: "/card-covers/galadrim/coupure-internet.webp",
+            goldenVideoUrl: "/card-videos/coupure-internet.mp4",
         },
         [damageAction(4, randomEnemyMinions(3))],
         [],
@@ -1211,6 +1217,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Lendemain de soirée", 1),
             imageUrl: "/card-covers/galadrim/lendemain-de-soiree.webp",
+            goldenVideoUrl: "/card-videos/lendemain-de-soiree.mp4",
         },
         [silenceAction(targetedAnyMinion(), true), damageAction(1, targetedAnyMinion(), true)],
     ),
