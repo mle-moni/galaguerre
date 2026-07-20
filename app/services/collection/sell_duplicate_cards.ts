@@ -1,5 +1,9 @@
 import type { ApiCollectionEntry, ApiDuplicatesPreviewResponse } from "#api_types/collection.types";
-import { getGoldCoinsPerDuplicateSell, getMaxCopiesForRarity } from "#api_types/card_rarity.types";
+import {
+    getGoldCoinsPerDuplicateSell,
+    getGoldCoinsPerGoldenDuplicateSell,
+    getMaxCopiesForRarity,
+} from "#api_types/card_rarity.types";
 import Card from "#models/card";
 import User from "#models/user";
 import UserCard from "#models/user_card";
@@ -27,14 +31,25 @@ const buildDuplicateSellLines = (
         const excessCount = userCard.count - maxCopies;
         if (excessCount <= 0) continue;
 
-        const goldCoinsPerCopy = getGoldCoinsPerDuplicateSell(card.rarity);
+        // Excess above max is sold normal-first; only golden copies beyond max pay the golden rate.
+        const goldenExcessCount = Math.max(0, (userCard.goldenCount ?? 0) - maxCopies);
+        const normalExcessCount = excessCount - goldenExcessCount;
+        const normalSell = getGoldCoinsPerDuplicateSell(card.rarity);
+        const goldenSell = getGoldCoinsPerGoldenDuplicateSell(card.rarity);
+        const goldCoinsTotal = normalExcessCount * normalSell + goldenExcessCount * goldenSell;
+
         lines.push({
             cardId: card.id,
             cardLabel: card.data.name,
             rarity: card.rarity,
             excessCount,
-            goldCoinsPerCopy,
-            goldCoinsTotal: excessCount * goldCoinsPerCopy,
+            goldCoinsPerCopy:
+                goldenExcessCount === excessCount
+                    ? goldenSell
+                    : normalExcessCount === excessCount
+                      ? normalSell
+                      : Math.round(goldCoinsTotal / excessCount),
+            goldCoinsTotal,
         });
     }
 

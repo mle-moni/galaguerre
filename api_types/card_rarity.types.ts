@@ -91,3 +91,7 @@ export const getGoldCoinsPerGoldenUpgrade = (rarity: CardRarity): number =>
 
 export const getGoldCoinsPerDuplicateSell = (rarity: CardRarity): number =>
     GOLD_COINS_PER_DUPLICATE_SELL_BY_RARITY[rarity];
+
+/** Dusting a golden copy refunds enough to craft one normal copy of the same rarity. */
+export const getGoldCoinsPerGoldenDuplicateSell = (rarity: CardRarity): number =>
+    getGoldCoinsPerCardBuy(rarity);

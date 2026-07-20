@@ -1,6 +1,7 @@
 import {
     CARD_RARITY_LABELS,
     type CardRarity,
+    getGoldCoinsPerCardBuy,
     getGoldCoinsPerDuplicateSell,
     getMaxCopiesForRarity,
 } from "#api_types/card_rarity.types";
@@ -245,6 +246,21 @@ export const CollectionPage = observer(() => {
                                 <Text size="sm">{CARD_RARITY_LABELS[rarity]}</Text>
                                 <GoldCoinAmount
                                     amount={getGoldCoinsPerDuplicateSell(rarity)}
+                                    iconSize={16}
+                                />
+                            </Group>
+                        ))}
+                    </Stack>
+                    <Text size="sm" c="dimmed">
+                        Un doublon doré rapporte le prix d&apos;achat d&apos;une carte normale
+                        (assez pour en recrafter une) :
+                    </Text>
+                    <Stack gap={4}>
+                        {SELL_MODAL_RARITIES.map((rarity) => (
+                            <Group key={`golden-${rarity}`} justify="space-between" wrap="nowrap">
+                                <Text size="sm">{CARD_RARITY_LABELS[rarity]} dorée</Text>
+                                <GoldCoinAmount
+                                    amount={getGoldCoinsPerCardBuy(rarity)}
                                     iconSize={16}
                                 />
                             </Group>

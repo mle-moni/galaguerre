@@ -1,6 +1,9 @@
 import type { ApiCollectionEntry } from "#api_types/collection.types";
 import { COLLECTION_MIN_CARDS } from "#api_types/collection.types";
-import { getGoldCoinsPerDuplicateSell } from "#api_types/card_rarity.types";
+import {
+    getGoldCoinsPerDuplicateSell,
+    getGoldCoinsPerGoldenDuplicateSell,
+} from "#api_types/card_rarity.types";
 import Card from "#models/card";
 import User from "#models/user";
 import UserCard from "#models/user_card";
@@ -49,7 +52,11 @@ export const sellCardWithGoldCoins = async (
         }
 
         const card = await Card.query({ client: trx }).where("id", cardId).firstOrFail();
-        const goldEarned = getGoldCoinsPerDuplicateSell(card.rarity);
+        // Prefer selling normal copies; a golden is sold only when every remaining copy is golden.
+        const sellingGolden = (userCard.goldenCount ?? 0) >= userCard.count;
+        const goldEarned = sellingGolden
+            ? getGoldCoinsPerGoldenDuplicateSell(card.rarity)
+            : getGoldCoinsPerDuplicateSell(card.rarity);
 
         user.goldCoins += goldEarned;
         user.useTransaction(trx);

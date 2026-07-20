@@ -5,6 +5,7 @@ import {
     getGoldCoinsPerCardBuy,
     getGoldCoinsPerDuplicateSell,
     getGoldCoinsPerGoldenCardBuy,
+    getGoldCoinsPerGoldenDuplicateSell,
     getGoldCoinsPerGoldenUpgrade,
 } from "#api_types/card_rarity.types";
 import { CARD_TAG_LABELS, type CardTag } from "#api_types/card.types";
@@ -651,6 +652,16 @@ export const Catalogue = observer(
             setBuyModalCard(null);
         };
 
+        const getSellPriceForCard = (card: ApiCatalogCard): number => {
+            const ownedCount = ownedCounts?.get(card.id) ?? 0;
+            const ownedGoldenCount = ownedGoldenCounts?.get(card.id) ?? 0;
+            // Mirror server: a golden is sold only when every remaining copy is golden.
+            if (ownedCount > 0 && ownedGoldenCount >= ownedCount) {
+                return getGoldCoinsPerGoldenDuplicateSell(card.rarity);
+            }
+            return getGoldCoinsPerDuplicateSell(card.rarity);
+        };
+
         const gridContent =
             filteredCatalog.length === 0 ? (
                 <p
@@ -803,11 +814,7 @@ export const Catalogue = observer(
 
                             <SellCardModal
                                 card={sellModalCard}
-                                price={
-                                    sellModalCard
-                                        ? getGoldCoinsPerDuplicateSell(sellModalCard.rarity)
-                                        : null
-                                }
+                                price={sellModalCard ? getSellPriceForCard(sellModalCard) : null}
                                 userGoldCoins={userGoldCoins}
                                 opened={sellModalCard !== null}
                                 onClose={() => setSellModalCard(null)}
@@ -875,9 +882,7 @@ export const Catalogue = observer(
 
                 <SellCardModal
                     card={sellModalCard}
-                    price={
-                        sellModalCard ? getGoldCoinsPerDuplicateSell(sellModalCard.rarity) : null
-                    }
+                    price={sellModalCard ? getSellPriceForCard(sellModalCard) : null}
                     userGoldCoins={userGoldCoins}
                     opened={sellModalCard !== null}
                     onClose={() => setSellModalCard(null)}
