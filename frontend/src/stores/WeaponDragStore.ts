@@ -24,7 +24,7 @@ export class WeaponDragStore {
         if (!this.gameStore.canPlanCombatAction) return;
 
         this.gameStore.targetSelectionStore.disarm();
-        this.gameStore.cardDragStore.clearMinionPlayHint();
+        this.gameStore.cardDragStore.clearPlayHints();
         this.gameStore.minionDragStore.cancelAttack();
         this.isAttacking = true;
     }

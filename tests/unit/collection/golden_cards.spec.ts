@@ -1,4 +1,4 @@
-import { getPackGoldenChanceForRarity } from "#api_types/card_rarity.types";
+import { getGoldCoinsPerCardBuy, getPackGoldenChanceForRarity } from "#api_types/card_rarity.types";
 import { syncCards } from "#database/seed_helpers/sync_cards";
 import Card from "#models/card";
 import User from "#models/user";
@@ -141,5 +141,44 @@ test.group("golden collection grants", (group) => {
             .firstOrFail();
         assert.equal(owned.count, 1);
         assert.equal(owned.goldenCount, 1);
+    });
+
+    test("selling a golden copy refunds the normal craft price", async ({ assert }) => {
+        await syncCards();
+
+        const user = await User.create({
+            email: "sell-golden-price@test.fr",
+            pseudo: "sell-golden-price",
+            password: "test",
+            goldCoins: 0,
+        });
+
+        const card = await Card.query().where("id", 181).firstOrFail();
+
+        const filler = await Card.query()
+            .where("isCollectible", true)
+            .whereNot("id", 181)
+            .limit(40)
+            .exec();
+        for (const fillerCard of filler) {
+            await UserCard.create({
+                userId: user.id,
+                cardId: fillerCard.id,
+                count: 1,
+                goldenCount: 0,
+            });
+        }
+
+        await UserCard.create({
+            userId: user.id,
+            cardId: card.id,
+            count: 1,
+            goldenCount: 1,
+        });
+
+        const result = await sellCardWithGoldCoins(user.id, card.id);
+
+        assert.equal(result.goldCoins, getGoldCoinsPerCardBuy(card.rarity));
+        assert.isNull(result.entry);
     });
 });

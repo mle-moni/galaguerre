@@ -26,8 +26,10 @@ export const buildSlotsBorderColor = (
 export class CardDragStore {
     public cardDragged: PlayerCard | null = null;
     public minionPlayHintCardId: string | null = null;
+    public spellOrWeaponPlayHintCardId: string | null = null;
     public previewInsertIndex: number | null = null;
     public isOverMinionDropZone = false;
+    public isOverSpellPlayZone = false;
 
     constructor(protected gameStore: GameStore) {
         makeAutoObservable(this);
@@ -35,6 +37,10 @@ export class CardDragStore {
 
     get isShowingMinionPlayHint(): boolean {
         return this.minionPlayHintCardId !== null;
+    }
+
+    get isShowingSpellOrWeaponPlayHint(): boolean {
+        return this.spellOrWeaponPlayHintCardId !== null;
     }
 
     get pendingMinionCard(): PlayerCard | null {
@@ -48,8 +54,22 @@ export class CardDragStore {
         return this.cardDragged ?? this.pendingMinionCard;
     }
 
+    get isDraggingSpellOrWeapon(): boolean {
+        const card = this.cardDragged;
+        return card?.type === "SPELL" || card?.type === "WEAPON";
+    }
+
     showMinionPlayHint(cardId: string) {
+        this.spellOrWeaponPlayHintCardId = null;
         this.minionPlayHintCardId = cardId;
+        this.gameStore.targetSelectionStore.disarm();
+    }
+
+    showSpellOrWeaponPlayHint(cardId: string) {
+        this.minionPlayHintCardId = null;
+        this.previewInsertIndex = null;
+        this.isOverMinionDropZone = false;
+        this.spellOrWeaponPlayHintCardId = cardId;
         this.gameStore.targetSelectionStore.disarm();
     }
 
@@ -59,13 +79,24 @@ export class CardDragStore {
         this.isOverMinionDropZone = false;
     }
 
+    clearSpellOrWeaponPlayHint() {
+        this.spellOrWeaponPlayHintCardId = null;
+        this.isOverSpellPlayZone = false;
+    }
+
+    clearPlayHints() {
+        this.clearMinionPlayHint();
+        this.clearSpellOrWeaponPlayHint();
+    }
+
     setCardDragged(card: PlayerCard | null) {
         if (card !== null) {
             this.gameStore.targetSelectionStore.disarm();
-            this.clearMinionPlayHint();
+            this.clearPlayHints();
         } else {
             this.previewInsertIndex = null;
             this.isOverMinionDropZone = false;
+            this.isOverSpellPlayZone = false;
         }
 
         this.cardDragged = card;
@@ -78,6 +109,46 @@ export class CardDragStore {
     leaveMinionDropZone() {
         this.isOverMinionDropZone = false;
         this.previewInsertIndex = null;
+    }
+
+    enterSpellPlayZone() {
+        this.isOverSpellPlayZone = true;
+    }
+
+    leaveSpellPlayZone() {
+        this.isOverSpellPlayZone = false;
+    }
+
+    handleSpellOrWeaponDrop(card: PlayerCard) {
+        this.isOverSpellPlayZone = false;
+        this.clearSpellOrWeaponPlayHint();
+
+        if (card.type !== "SPELL" && card.type !== "WEAPON") return;
+
+        if (!this.gameStore.isMyTurn) {
+            this.setCardDragged(null);
+            return;
+        }
+
+        if (card.cost > this.gameStore.me.mana) {
+            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            this.setCardDragged(null);
+            return;
+        }
+
+        if (this.gameStore.isInputBlocked) {
+            this.setCardDragged(null);
+            return;
+        }
+
+        if (card.type === "SPELL" && this.gameStore.targetSelectionStore.requiresTarget(card)) {
+            this.gameStore.targetSelectionStore.startSpellTargetSelection(card);
+            this.setCardDragged(null);
+            return;
+        }
+
+        this.gameStore.targetSelectionStore.playUntargetedFromHand(card);
+        this.setCardDragged(null);
     }
 
     setPreviewInsertIndex(boardIndex: number | null) {

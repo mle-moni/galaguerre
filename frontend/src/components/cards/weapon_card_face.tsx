@@ -15,6 +15,9 @@ interface WeaponCardFaceProps {
     className?: string;
     style?: CSSProperties;
     spellPower?: number;
+    draggable?: boolean;
+    onDragStart?: () => void;
+    onDragEnd?: () => void;
     onClick?: () => void;
     wrapper?: (content: ReactNode) => ReactNode;
     imageLoading?: "eager" | "lazy";
@@ -26,6 +29,9 @@ export const WeaponCardFace = ({
     className,
     style,
     spellPower = 0,
+    draggable,
+    onDragStart,
+    onDragEnd,
     onClick,
     wrapper = (content) => content,
     imageLoading,
@@ -37,7 +43,10 @@ export const WeaponCardFace = ({
             data-playing-card-id={card.uuid}
             style={style}
             className={clsx("weapon-card-face playing-card-face relative", className)}
+            draggable={draggable}
             onClick={onClick}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
         >
             <div className="relative playing-card-face__image-area">
                 <div className={clsx("cost", card.cost < card.baseCost && "cost--reduced")}>

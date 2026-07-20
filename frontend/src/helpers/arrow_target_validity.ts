@@ -58,6 +58,11 @@ export const cancelArrowTargeting = (store: GameStore) => {
 
     if (store.cardDragStore.isShowingMinionPlayHint) {
         store.cardDragStore.clearMinionPlayHint();
+        return;
+    }
+
+    if (store.cardDragStore.isShowingSpellOrWeaponPlayHint) {
+        store.cardDragStore.clearSpellOrWeaponPlayHint();
     }
 };
 

@@ -57,7 +57,8 @@ const ONBOARDING_COACH_STEPS: Array<{
     },
     {
         id: "play_card",
-        getMessage: () => "Cliquez sur une carte lumineuse dans votre main pour la jouer.",
+        getMessage: () =>
+            "Glissez une carte lumineuse de votre main vers le plateau pour la jouer.",
         isActive: (store) =>
             store.isMyTurn && hasPlayableCard(store) && store.me.board.length === 0,
     },

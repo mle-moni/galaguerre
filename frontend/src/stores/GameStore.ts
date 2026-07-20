@@ -480,8 +480,8 @@ export class GameStore {
         return (
             cardDragStore.cardDragged !== null ||
             cardDragStore.isShowingMinionPlayHint ||
+            cardDragStore.isShowingSpellOrWeaponPlayHint ||
             targetSelectionStore.isArmed ||
-            targetSelectionStore.hasPendingSpellDrag ||
             targetSelectionStore.isSelectingTarget ||
             minionDragStore.isAttacking ||
             weaponDragStore.isAttacking

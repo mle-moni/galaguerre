@@ -8,6 +8,7 @@ export const useTargetSelectionCancel = (store: GameStore) => {
         store.targetSelectionStore.isArmed ||
         store.targetSelectionStore.isSelectingTarget ||
         store.cardDragStore.isShowingMinionPlayHint ||
+        store.cardDragStore.isShowingSpellOrWeaponPlayHint ||
         store.minionDragStore.isAttacking ||
         store.weaponDragStore.isAttacking;
 
@@ -22,7 +23,8 @@ export const useTargetSelectionCancel = (store: GameStore) => {
                 store.weaponDragStore.isAttacking ||
                 store.targetSelectionStore.isArmed ||
                 store.targetSelectionStore.isSelectingTarget ||
-                store.cardDragStore.isShowingMinionPlayHint
+                store.cardDragStore.isShowingMinionPlayHint ||
+                store.cardDragStore.isShowingSpellOrWeaponPlayHint
             ) {
                 cancelArrowTargeting(store);
                 return;

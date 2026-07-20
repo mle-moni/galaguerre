@@ -4,8 +4,8 @@ import type { GameStore } from "~/stores/GameStore";
 
 export const useArmedCardInteraction = (store: GameStore) => {
     const isArmed = store.targetSelectionStore.isArmed;
-    const hasPendingSpellDrag = store.targetSelectionStore.hasPendingSpellDrag;
     const hasMinionPlayHint = store.cardDragStore.isShowingMinionPlayHint;
+    const hasSpellOrWeaponPlayHint = store.cardDragStore.isShowingSpellOrWeaponPlayHint;
     const isMinionAttacking = store.minionDragStore.isAttacking;
     const isWeaponAttacking = store.weaponDragStore.isAttacking;
     const isMyTurn = store.isMyTurn;
@@ -13,32 +13,20 @@ export const useArmedCardInteraction = (store: GameStore) => {
     useEffect(() => {
         if (!isMyTurn) {
             store.targetSelectionStore.disarm();
-            store.cardDragStore.clearMinionPlayHint();
+            store.cardDragStore.clearPlayHints();
         }
     }, [isMyTurn, store]);
 
     useEffect(() => {
-        if (!isArmed && !hasPendingSpellDrag) return;
-
-        const handlePointerMove = (event: PointerEvent) => {
-            store.targetSelectionStore.updatePendingSpellDrag(event.clientX, event.clientY);
-        };
-
-        const handlePointerUp = () => {
-            store.targetSelectionStore.cancelPendingSpellDrag();
-        };
-
-        document.addEventListener("pointermove", handlePointerMove);
-        document.addEventListener("pointerup", handlePointerUp);
-
-        return () => {
-            document.removeEventListener("pointermove", handlePointerMove);
-            document.removeEventListener("pointerup", handlePointerUp);
-        };
-    }, [hasPendingSpellDrag, isArmed, store]);
-
-    useEffect(() => {
-        if (!isArmed && !hasMinionPlayHint && !isMinionAttacking && !isWeaponAttacking) return;
+        if (
+            !isArmed &&
+            !hasMinionPlayHint &&
+            !hasSpellOrWeaponPlayHint &&
+            !isMinionAttacking &&
+            !isWeaponAttacking
+        ) {
+            return;
+        }
 
         const handlePointerDown = (event: PointerEvent) => {
             const target = event.target;
@@ -56,5 +44,12 @@ export const useArmedCardInteraction = (store: GameStore) => {
         return () => {
             document.removeEventListener("pointerdown", handlePointerDown);
         };
-    }, [hasMinionPlayHint, isArmed, isMinionAttacking, isWeaponAttacking, store]);
+    }, [
+        hasMinionPlayHint,
+        hasSpellOrWeaponPlayHint,
+        isArmed,
+        isMinionAttacking,
+        isWeaponAttacking,
+        store,
+    ]);
 };

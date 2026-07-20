@@ -34,6 +34,23 @@
 	min-width: 100%;
 }
 
+.board-spell-play-zone {
+	border-radius: 16px;
+	border: 2px dashed transparent;
+	transition: border-color 140ms ease, background-color 140ms ease;
+	width: 100%;
+}
+
+.board-spell-play-zone--active {
+	border-color: rgba(46, 227, 42, 0.28);
+	background: rgba(46, 227, 42, 0.04);
+}
+
+.board-spell-play-zone--over {
+	border-color: rgba(46, 227, 42, 0.55);
+	background: rgba(46, 227, 42, 0.1);
+}
+
 .board-insertion-zone {
 	width: 0;
 	flex-shrink: 0;

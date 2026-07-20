@@ -2,6 +2,7 @@ import {
     GOLD_COINS_PER_DUPLICATE_COMMON_SELL,
     GOLD_COINS_PER_DUPLICATE_LEGENDARY_SELL,
 } from "#api_types/collection.types";
+import { getGoldCoinsPerCardBuy } from "#api_types/card_rarity.types";
 import { syncCards } from "#database/seed_helpers/sync_cards";
 import Card from "#models/card";
 import User from "#models/user";
@@ -44,6 +45,34 @@ test.group("sell duplicate cards", (group) => {
             GOLD_COINS_PER_DUPLICATE_COMMON_SELL + GOLD_COINS_PER_DUPLICATE_LEGENDARY_SELL,
         );
         assert.lengthOf(preview.lines, 2);
+    });
+
+    test("preview pays craft price for excess golden copies", async ({ assert }) => {
+        await syncCards();
+
+        const user = await User.create({
+            email: "sell-preview-golden@test.fr",
+            pseudo: "sell-preview-golden",
+            password: "test",
+        });
+
+        const commonCard = await Card.query()
+            .where("isCollectible", true)
+            .where("rarity", "COMMON")
+            .firstOrFail();
+
+        // max = 2; count = 4 golden → 2 excess golden copies
+        await UserCard.create({
+            userId: user.id,
+            cardId: commonCard.id,
+            count: 4,
+            goldenCount: 4,
+        });
+
+        const preview = await computeDuplicatesSellPreview(user.id);
+
+        assert.equal(preview.totalGoldCoins, getGoldCoinsPerCardBuy("COMMON") * 2);
+        assert.equal(preview.lines[0]?.goldCoinsPerCopy, getGoldCoinsPerCardBuy("COMMON"));
     });
 
     test("sellAllDuplicateCards credits gold and reduces counts to deck max", async ({

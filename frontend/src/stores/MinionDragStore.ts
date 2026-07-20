@@ -28,7 +28,7 @@ export class MinionDragStore {
         if (this.gameStore.combatActionQueue.isMinionReserved(minion.uuid)) return;
 
         this.gameStore.targetSelectionStore.disarm();
-        this.gameStore.cardDragStore.clearMinionPlayHint();
+        this.gameStore.cardDragStore.clearPlayHints();
         this.gameStore.weaponDragStore.cancelAttack();
         this.attackingMinion = minion;
     }

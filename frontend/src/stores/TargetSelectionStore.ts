@@ -25,8 +25,6 @@ import { makeAutoObservable } from "mobx";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
 
-export const SPELL_DRAG_THRESHOLD_PX = 12;
-
 export type TargetValidity = "valid" | "invalid" | "none";
 
 export type ArmedPlayableCard = SpellCard | WeaponCard;
@@ -35,18 +33,9 @@ export type PendingPlay =
     | { kind: "MINION"; card: MinionCard; boardIndex: number; owner: SpotOwner }
     | { kind: "SPELL"; card: SpellCard };
 
-type Point = { x: number; y: number };
-
-type PendingSpellDrag = {
-    card: SpellCard;
-    pointerOrigin: Point;
-    arrowOrigin: Point;
-};
-
 export class TargetSelectionStore {
     public pendingPlay: PendingPlay | null = null;
     public armedCard: ArmedPlayableCard | null = null;
-    private pendingSpellDrag: PendingSpellDrag | null = null;
 
     constructor(protected gameStore: GameStore) {
         makeAutoObservable(this);
@@ -58,10 +47,6 @@ export class TargetSelectionStore {
 
     get isArmed(): boolean {
         return this.armedCard !== null;
-    }
-
-    get hasPendingSpellDrag(): boolean {
-        return this.pendingSpellDrag !== null;
     }
 
     get isHighlightingTargets(): boolean {
@@ -120,36 +105,16 @@ export class TargetSelectionStore {
 
     armCard(card: ArmedPlayableCard) {
         this.armedCard = card;
-        this.gameStore.cardDragStore.clearMinionPlayHint();
+        this.gameStore.cardDragStore.clearPlayHints();
     }
 
     disarm() {
         this.armedCard = null;
         this.pendingPlay = null;
-        this.pendingSpellDrag = null;
         this.gameStore.targetingArrowStore.endDrag();
     }
 
-    handlePlayableCardClick(card: ArmedPlayableCard) {
-        if (this.gameStore.isInputBlocked) return;
-
-        if (this.isCardArmed(card)) {
-            if (card.type === "SPELL" && this.requiresTarget(card)) {
-                return;
-            }
-
-            this.confirmArmedPlay();
-            return;
-        }
-
-        this.armCard(card);
-    }
-
-    confirmArmedPlay() {
-        if (!this.armedCard) return;
-
-        const card = this.armedCard;
-
+    playUntargetedFromHand(card: ArmedPlayableCard) {
         emitSocketEventToServer("game:play_card", {
             cardId: card.uuid,
             boardIndex: null,
@@ -157,6 +122,12 @@ export class TargetSelectionStore {
         });
 
         this.disarm();
+    }
+
+    confirmArmedPlay() {
+        if (!this.armedCard) return;
+
+        this.playUntargetedFromHand(this.armedCard);
     }
 
     tryConfirmArmedTarget(actionTarget: ActionTarget): boolean {
@@ -190,30 +161,6 @@ export class TargetSelectionStore {
 
     cancelTargetSelection() {
         this.disarm();
-    }
-
-    beginPendingSpellDrag(card: SpellCard, pointerOrigin: Point, arrowOrigin: Point) {
-        if (!this.isCardArmed(card)) return;
-
-        this.pendingSpellDrag = { card, pointerOrigin, arrowOrigin };
-    }
-
-    updatePendingSpellDrag(x: number, y: number) {
-        if (!this.pendingSpellDrag) return;
-
-        const { card, pointerOrigin, arrowOrigin } = this.pendingSpellDrag;
-        const dx = x - pointerOrigin.x;
-        const dy = y - pointerOrigin.y;
-
-        if (Math.hypot(dx, dy) < SPELL_DRAG_THRESHOLD_PX) return;
-
-        this.startSpellTargetSelection(card);
-        this.gameStore.targetingArrowStore.beginDrag(arrowOrigin, { x, y });
-        this.pendingSpellDrag = null;
-    }
-
-    cancelPendingSpellDrag() {
-        this.pendingSpellDrag = null;
     }
 
     private getTargetedActions(): CardActionSnapshot[] {

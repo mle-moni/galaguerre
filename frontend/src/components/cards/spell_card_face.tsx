@@ -15,6 +15,9 @@ interface SpellCardFaceProps {
     className?: string;
     style?: CSSProperties;
     spellPower?: number;
+    draggable?: boolean;
+    onDragStart?: () => void;
+    onDragEnd?: () => void;
     onClick?: () => void;
     onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
     wrapper?: (content: ReactNode) => ReactNode;
@@ -27,6 +30,9 @@ export const SpellCardFace = ({
     className,
     style,
     spellPower = 0,
+    draggable,
+    onDragStart,
+    onDragEnd,
     onClick,
     onPointerDown,
     wrapper = (content) => content,
@@ -39,7 +45,10 @@ export const SpellCardFace = ({
             data-playing-card-id={card.uuid}
             style={style}
             className={clsx("spell-card-face playing-card-face relative", className)}
+            draggable={draggable}
             onClick={onClick}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
             onPointerDown={onPointerDown}
         >
             <div className="relative playing-card-face__image-area">

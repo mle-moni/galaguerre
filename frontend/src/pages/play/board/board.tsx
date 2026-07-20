@@ -18,10 +18,56 @@ import { useTurnRopeProgress } from "./use_turn_rope_progress.js";
 const BOARD_SHIFT_PX = "calc(var(--board-minion-w) * 0.55)";
 
 export const Board = observer(() => {
+    const { store } = useGameContext();
+    const { cardDragStore } = store;
+    const isDraggingSpellOrWeapon = cardDragStore.isDraggingSpellOrWeapon;
+    const showSpellPlayZone =
+        isDraggingSpellOrWeapon || cardDragStore.isShowingSpellOrWeaponPlayHint;
+
+    const handleSpellPlayZoneDragEnter = (event: DragEvent<HTMLDivElement>) => {
+        if (!isDraggingSpellOrWeapon) return;
+        event.preventDefault();
+        cardDragStore.enterSpellPlayZone();
+    };
+
+    const handleSpellPlayZoneDragLeave = (event: DragEvent<HTMLDivElement>) => {
+        if (!isDraggingSpellOrWeapon) return;
+        if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+        cardDragStore.leaveSpellPlayZone();
+    };
+
+    const handleSpellPlayZoneDragOver = (event: DragEvent<HTMLDivElement>) => {
+        if (!isDraggingSpellOrWeapon) return;
+        event.preventDefault();
+        if (!cardDragStore.isOverSpellPlayZone) {
+            cardDragStore.enterSpellPlayZone();
+        }
+    };
+
+    const handleSpellPlayZoneDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        if (store.targetSelectionStore.isSelectingTarget) return;
+
+        const card = cardDragStore.cardDragged;
+        if (!card || (card.type !== "SPELL" && card.type !== "WEAPON")) return;
+        if (!cardDragStore.isOverSpellPlayZone) return;
+
+        cardDragStore.handleSpellOrWeaponDrop(card);
+    };
+
     return (
         <div
-            className="flex flex-col h-full justify-center items-center min-h-0"
+            className={clsx(
+                "flex flex-col h-full justify-center items-center min-h-0 board-spell-play-zone",
+                showSpellPlayZone && "board-spell-play-zone--active",
+                cardDragStore.isOverSpellPlayZone && "board-spell-play-zone--over",
+            )}
             data-animation-board
+            data-spell-play-zone
+            onDragEnter={handleSpellPlayZoneDragEnter}
+            onDragLeave={handleSpellPlayZoneDragLeave}
+            onDragOver={handleSpellPlayZoneDragOver}
+            onDrop={handleSpellPlayZoneDrop}
         >
             <BoardSide spotOwner="OPPONENT" />
             <BoardDivider />

@@ -53,7 +53,7 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
         );
     }
 
-    if (cardDragStore.isShowingMinionPlayHint) {
+    if (cardDragStore.isShowingMinionPlayHint || cardDragStore.isShowingSpellOrWeaponPlayHint) {
         return (
             <div className={hintClassName} role="status">
                 <span>
@@ -124,28 +124,25 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
 
     if (!targetSelectionStore.isArmed) return null;
 
+    // Armed confirm is mobile-only (desktop plays via drag-to-board).
+    if (!isMobile) return null;
+
     const hint = targetSelectionStore.armedCardRequiresTarget
-        ? isMobile
-            ? "Touchez une cible valide ou recliquez sur la carte"
-            : "Glissez vers une cible, cliquez sur une cible valide, ou recliquez sur la carte · Échap pour annuler"
-        : isMobile
-          ? "Recliquez sur la carte pour confirmer"
-          : "Cliquez à nouveau sur la carte pour confirmer · Échap pour annuler";
+        ? "Touchez une cible valide ou recliquez sur la carte"
+        : "Recliquez sur la carte pour confirmer";
 
     return (
         <div className={hintClassName} role="status">
             <span>{hint}</span>
-            {isMobile && (
-                <Button
-                    className="armed-card-hint__cancel"
-                    size="compact-xs"
-                    variant="subtle"
-                    color="yellow"
-                    onClick={handleCancel}
-                >
-                    Annuler
-                </Button>
-            )}
+            <Button
+                className="armed-card-hint__cancel"
+                size="compact-xs"
+                variant="subtle"
+                color="yellow"
+                onClick={handleCancel}
+            >
+                Annuler
+            </Button>
         </div>
     );
 });

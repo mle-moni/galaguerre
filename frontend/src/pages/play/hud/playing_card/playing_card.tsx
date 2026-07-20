@@ -41,11 +41,15 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         store.targetSelectionStore.isCardArmed(card);
     const isMinionHinted =
         card.type === "MINION" && store.cardDragStore.minionPlayHintCardId === card.uuid;
+    const isSpellOrWeaponHinted =
+        (card.type === "SPELL" || card.type === "WEAPON") &&
+        store.cardDragStore.spellOrWeaponPlayHintCardId === card.uuid;
     const isCardQueued =
         card.type === "MINION" && store.combatActionQueue.isCardReserved(card.uuid);
     const cardClassName = clsx(
         canPlay && !isCardQueued ? "cursor-pointer" : "cursor-not-allowed opacity-60",
-        (isArmed || isMinionHinted || isCardQueued) && "playing-card--armed",
+        (isArmed || isMinionHinted || isSpellOrWeaponHinted || isCardQueued) &&
+            "playing-card--armed",
     );
 
     const handleUnplayableCardClick = () => {
@@ -59,15 +63,16 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         }
     };
 
-    const handlePlayableCardClick = () => {
+    const handleSpellOrWeaponClick = () => {
         if (!canPlay) {
             handleUnplayableCardClick();
             return;
         }
 
         if (card.type !== "SPELL" && card.type !== "WEAPON") return;
+        if (isMobilePortrait) return;
 
-        store.targetSelectionStore.handlePlayableCardClick(card);
+        store.cardDragStore.showSpellOrWeaponPlayHint(card.uuid);
     };
 
     const handleMinionClick = () => {
@@ -79,30 +84,6 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
         }
 
         store.cardDragStore.showMinionPlayHint(card.uuid);
-    };
-
-    const handleTargetedSpellPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (!canPlay) {
-            handleUnplayableCardClick();
-            return;
-        }
-
-        if (card.type !== "SPELL" || !store.targetSelectionStore.requiresTarget(card)) return;
-        if (!store.targetSelectionStore.isCardArmed(card)) return;
-
-        event.preventDefault();
-
-        const rect = event.currentTarget.getBoundingClientRect();
-        const arrowOrigin = {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2,
-        };
-
-        store.targetSelectionStore.beginPendingSpellDrag(
-            card,
-            { x: event.clientX, y: event.clientY },
-            arrowOrigin,
-        );
     };
 
     const wrapper = (content: React.ReactNode) => {
@@ -143,27 +124,26 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
                 style={style}
                 className={cardClassName}
                 spellPower={store.me.spellPower}
-                onClick={handlePlayableCardClick}
+                draggable={!isMobilePortrait && canPlay}
+                onClick={handleSpellOrWeaponClick}
+                onDragStart={() => store.cardDragStore.setCardDragged(card)}
+                onDragEnd={() => store.cardDragStore.setCardDragged(null)}
                 wrapper={wrapper}
             />
         );
     }
 
     if (card.type === "SPELL") {
-        const isTargeted = store.targetSelectionStore.requiresTarget(card);
-
         return (
             <PlayerCardFace
                 card={card}
                 style={style}
                 className={cardClassName}
                 spellPower={store.me.spellPower}
-                onClick={isMobilePortrait && isTargeted ? undefined : handlePlayableCardClick}
-                onPointerDown={
-                    !isMobilePortrait && isTargeted && isArmed
-                        ? handleTargetedSpellPointerDown
-                        : undefined
-                }
+                draggable={!isMobilePortrait && canPlay}
+                onClick={isMobilePortrait ? undefined : handleSpellOrWeaponClick}
+                onDragStart={() => store.cardDragStore.setCardDragged(card)}
+                onDragEnd={() => store.cardDragStore.setCardDragged(null)}
                 wrapper={wrapper}
             />
         );
