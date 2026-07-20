@@ -119,11 +119,11 @@ export const CollectionPage = observer(() => {
         setBuyingCardId(cardId);
         try {
             await buyCardMutation.mutateAsync({ cardId, golden: options?.golden });
-            notifySuccess(options?.golden ? "Version golden acquise !" : "Carte achetée !");
+            notifySuccess(options?.golden ? "Version dorée acquise !" : "Carte achetée !");
         } catch {
             notifyError(
                 options?.golden
-                    ? "Impossible d'acheter la version golden"
+                    ? "Impossible d'acheter la version dorée"
                     : "Impossible d'acheter cette carte",
             );
         } finally {

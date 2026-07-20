@@ -165,7 +165,7 @@ test.group("buy card with gold coins", (group) => {
 
         await assert.rejects(
             () => buyCardWithGoldCoins(user.id, card!.id, { golden: true }),
-            /pas de version golden/,
+            /pas de version dorée/,
         );
     });
 

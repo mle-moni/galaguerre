@@ -61,7 +61,7 @@ export const buyCardWithGoldCoins = async (
 
         if (buyGolden) {
             if (!card.data.goldenVideoUrl) {
-                throw new CardNotBuyableError("Cette carte n'a pas de version golden");
+                throw new CardNotBuyableError("Cette carte n'a pas de version dorée");
             }
 
             const canUpgrade = currentCount > currentGoldenCount;
@@ -69,7 +69,7 @@ export const buyCardWithGoldCoins = async (
 
             if (!canUpgrade && !canBuyNew) {
                 throw new CardNotBuyableError(
-                    "Vous possédez déjà le maximum d'exemplaires golden de cette carte",
+                    "Vous possédez déjà le maximum d'exemplaires dorés de cette carte",
                 );
             }
 

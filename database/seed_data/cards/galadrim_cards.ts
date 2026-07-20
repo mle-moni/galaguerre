@@ -524,6 +524,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Agent Support", 1),
             imageUrl: "/card-covers/galadrim/agent-support.webp",
+            goldenVideoUrl: "/card-videos/agent-support.mp4",
             attack: 1,
             health: 3,
         },
@@ -856,6 +857,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Aloy", 3),
             imageUrl: "/card-covers/galadrim/aloy.webp",
+            goldenVideoUrl: "/card-videos/aloy.mp4",
             attack: 3,
             health: 3,
         },
@@ -1188,6 +1190,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Recherche Google", 1),
             imageUrl: "/card-covers/galadrim/recherche-google.webp",
+            goldenVideoUrl: "/card-videos/recherche-google.mp4",
         },
         [discoverAction(spellDrawFilter())],
     ),
@@ -1311,6 +1314,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Git Revert", 0),
             imageUrl: "/card-covers/galadrim/git-revert.webp",
+            goldenVideoUrl: "/card-videos/git-revert.mp4",
         },
         [returnToHandAction(2, targetedAllyMinion(), true)],
     ),

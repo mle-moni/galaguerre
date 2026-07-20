@@ -69,7 +69,7 @@ export const GoldenCardsPage = () => {
     if (GOLDEN_CARD_OPTIONS.length === 0) {
         return (
             <div className="golden-cards-page">
-                <p className="golden-cards-page__intro">Aucune carte golden disponible.</p>
+                <p className="golden-cards-page__intro">Aucune carte dorée disponible.</p>
             </div>
         );
     }
