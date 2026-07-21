@@ -357,6 +357,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("PM Junior", 1),
             imageUrl: "/card-covers/galadrim/pm-junior.webp",
+            goldenVideoUrl: "/card-videos/pm-junior.mp4",
             attack: 1,
             health: 2,
         },
@@ -911,6 +912,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Plante Verte", 1),
             imageUrl: "/card-covers/galadrim/plante-verte.webp",
+            goldenVideoUrl: "/card-videos/plante-verte.mp4",
             attack: 0,
             health: 4,
         },
@@ -1158,6 +1160,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Optimisation Salariale", 1),
             imageUrl: "/card-covers/galadrim/optimisation-salariale.webp",
+            goldenVideoUrl: "/card-videos/optimisation-salariale.mp4",
         },
         [destroyAction(targetedAllyMinion(), true), drawAction(2)],
     ),
@@ -1339,6 +1342,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Setup Technique", 0),
             imageUrl: "/card-covers/galadrim/setup-technique.webp",
+            goldenVideoUrl: "/card-videos/setup-technique.mp4",
         },
         [nextSpellCostReductionAction(2)],
         [],
