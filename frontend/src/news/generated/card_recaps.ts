@@ -408,4 +408,15 @@ export const CARD_RECAPS: CardRecapData[] = [
         ],
         imageUrl: "/card-covers/galadrim/mentor-technique.webp",
     },
+    {
+        date: "2026-07-21",
+        slug: "recap-2026-07-21",
+        publishedAt: "2026-07-21T18:00:00+02:00",
+        untilCommitHash: "572c35669603fd2f5dc22a6bd476a0e7d9505f29",
+        newCardIds: [],
+        newGoldenCardIds: [70, 76, 95, 117, 135, 110, 123, 172],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/pm-junior.webp",
+    },
 ];
