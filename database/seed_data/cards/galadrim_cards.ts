@@ -440,6 +440,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("BizDev Débutant", 1),
             imageUrl: "/card-covers/galadrim/bizdev-debutant.webp",
+            goldenVideoUrl: "/card-videos/bizdev-debutant.mp4",
             attack: 1,
             health: 2,
         },
@@ -1008,6 +1009,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Alternant Surmotivé", 1),
             imageUrl: "/card-covers/galadrim/alternant-surmotive.webp",
+            goldenVideoUrl: "/card-videos/alternant-surmotive.mp4",
             attack: 1,
             health: 2,
         },
@@ -1229,6 +1231,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Casque à Réduction de Bruit", 1),
             imageUrl: "/card-covers/galadrim/casque-reduction-bruit.webp",
+            goldenVideoUrl: "/card-videos/casque-reduction-bruit.mp4",
         },
         [boostAction(boostDivineShield(), targetedAllyMinion(), true)],
         [],
@@ -1266,7 +1269,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         123,
-        { ...gal("Levée de Fonds", 1), imageUrl: "/card-covers/galadrim/levee-de-fonds.webp" },
+        {
+            ...gal("Levée de Fonds", 1),
+            imageUrl: "/card-covers/galadrim/levee-de-fonds.webp",
+            goldenVideoUrl: "/card-videos/levee-de-fonds.mp4",
+        },
         [relativeCostReconversion(2, targetedAllyMinion(), true)],
     ),
     defineSpell(
