@@ -419,4 +419,15 @@ export const CARD_RECAPS: CardRecapData[] = [
         nerfs: [],
         imageUrl: "/card-covers/galadrim/pm-junior.webp",
     },
+    {
+        date: "2026-07-22",
+        slug: "recap-2026-07-22",
+        publishedAt: "2026-07-22T18:00:00+02:00",
+        untilCommitHash: "114bf481f8ad4c58a2c6fe9984962976a4f0b036",
+        newCardIds: [],
+        newGoldenCardIds: [113, 160, 63, 64, 152, 75, 93, 115, 104, 112, 124, 163],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/stagiaire-planque.webp",
+    },
 ];
