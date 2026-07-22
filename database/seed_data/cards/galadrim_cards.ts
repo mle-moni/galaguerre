@@ -134,6 +134,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Dev Front-End", 2),
             imageUrl: "/card-covers/galadrim/dev-front-end.webp",
+            goldenVideoUrl: "/card-videos/dev-front-end.mp4",
             attack: 2,
             health: 2,
         },
@@ -147,6 +148,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Dev Back-End", 2),
             imageUrl: "/card-covers/galadrim/dev-back-end.webp",
+            goldenVideoUrl: "/card-videos/dev-back-end.mp4",
             attack: 2,
             health: 3,
         },
@@ -1292,6 +1294,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Coupe Budgétaire", 2),
             imageUrl: "/card-covers/galadrim/coupe-budgetaire.webp",
+            goldenVideoUrl: "/card-videos/coupe-budgetaire.mp4",
         },
         [relativeCostReconversion(-1, enemyMinions())],
         [],
@@ -1595,7 +1598,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         163,
-        { ...gal("Copier-Coller", 2), imageUrl: "/card-covers/galadrim/copier-coller.webp" },
+        {
+            ...gal("Copier-Coller", 2),
+            imageUrl: "/card-covers/galadrim/copier-coller.webp",
+            goldenVideoUrl: "/card-videos/copier-coller.mp4",
+        },
         [deckCardAddFromTargetAction(3, targetedAnyMinion())],
     ),
     defineSpell(
