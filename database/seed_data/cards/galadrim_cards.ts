@@ -103,6 +103,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Stagiaire Planqué", 1),
             imageUrl: "/card-covers/galadrim/stagiaire-planque.webp",
+            goldenVideoUrl: "/card-videos/stagiaire-planque.mp4",
             attack: 2,
             health: 1,
         },
@@ -117,6 +118,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Stagiaire de l'X", 1),
             imageUrl: "/card-covers/galadrim/stagiaire-x.webp",
+            goldenVideoUrl: "/card-videos/stagiaire-x.mp4",
             attack: 2,
             health: 1,
         },
@@ -173,6 +175,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("A/B testeur", 2),
             imageUrl: "/card-covers/galadrim/ab-testeur.webp",
+            goldenVideoUrl: "/card-videos/ab-testeur.mp4",
             attack: 1,
             health: 1,
         },
@@ -426,6 +429,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Agiliste Convaincu", 2),
             imageUrl: "/card-covers/galadrim/agiliste-convaincu.webp",
+            goldenVideoUrl: "/card-videos/agiliste-convaincu.mp4",
             attack: 1,
             health: 4,
         },
@@ -778,6 +782,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Chat sur le Clavier", 2),
             imageUrl: "/card-covers/galadrim/chat-sur-le-clavier.webp",
+            goldenVideoUrl: "/card-videos/chat-sur-le-clavier.mp4",
             attack: 1,
             health: 2,
         },
@@ -975,6 +980,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Commère de l'Open Space", 2),
             imageUrl: "/card-covers/galadrim/commere-de-l-open-space.webp",
+            goldenVideoUrl: "/card-videos/commere-de-l-open-space.mp4",
             attack: 3,
             health: 2,
         },
@@ -1187,6 +1193,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Goodies Galadrim", 1),
             imageUrl: "/card-covers/galadrim/goodies-galadrim.webp",
+            goldenVideoUrl: "/card-videos/goodies-galadrim.mp4",
         },
         [healAction(5, targetedAllyMinion(), true)],
     ),
@@ -1245,6 +1252,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Masque du CEO", 1),
             imageUrl: "/card-covers/galadrim/masque-du-ceo.webp",
+            goldenVideoUrl: "/card-videos/masque-du-ceo.mp4",
         },
         [boostAction(boostAttackWithStealth(2), targetedAnyMinion(), true)],
         [],
