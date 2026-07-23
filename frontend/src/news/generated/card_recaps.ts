@@ -434,11 +434,11 @@ export const CARD_RECAPS: CardRecapData[] = [
         date: "2026-07-23",
         slug: "recap-2026-07-23",
         publishedAt: "2026-07-23T18:00:00+02:00",
-        untilCommitHash: "611de62acc37a557ed3d05be1853b512d1d919a7",
+        untilCommitHash: "87c4be445ca294d4b411305c5bac0026aaae860d",
         newCardIds: [],
         newGoldenCardIds: [
             65, 66, 174, 72, 78, 83, 131, 87, 88, 89, 94, 154, 156, 111, 161, 116, 118, 119, 96, 98,
-            101, 102, 132, 120, 127, 175, 107, 171,
+            101, 102, 132, 120, 127, 175, 107, 171, 129,
         ],
         buffs: [],
         nerfs: [],
