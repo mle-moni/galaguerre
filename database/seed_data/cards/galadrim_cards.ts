@@ -1393,6 +1393,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Chasseur de Têtes", 3),
             imageUrl: "/card-covers/galadrim/chasseur-de-tetes.webp",
+            goldenVideoUrl: "/card-videos/chasseur-de-tete.mp4",
             attack: 3,
             health: 3,
         },
