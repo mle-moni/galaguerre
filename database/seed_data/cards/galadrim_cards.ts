@@ -548,6 +548,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Happiness Manager", 2),
             imageUrl: "/card-covers/galadrim/happiness-manager.webp",
+            goldenVideoUrl: "/card-videos/happiness-manager.mp4",
             attack: 2,
             health: 3,
         },
@@ -1052,6 +1053,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("DevOps en Sueur", 2),
             imageUrl: "/card-covers/galadrim/devops-en-sueur.webp",
+            goldenVideoUrl: "/card-videos/devops-en-sueur.mp4",
             attack: 3,
             health: 2,
         },
@@ -1142,6 +1144,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Fin de Période d'Essai", 2),
             imageUrl: "/card-covers/galadrim/fin-de-periode-d-essai.webp",
+            goldenVideoUrl: "/card-videos/fin-de-periode-d-essai.mp4",
         },
         [destroyAction(targetedAnyMinionWithComparison(costLessThan(4)), true)],
     ),
@@ -1484,6 +1487,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Gros Cahier des Charges", 2),
             imageUrl: "/card-covers/galadrim/gros-cahier-des-charges.webp",
+            goldenVideoUrl: "/card-videos/gros-cahier-des-charges.mp4",
             damage: 3,
             durability: 2,
         },
