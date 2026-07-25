@@ -277,7 +277,9 @@ export class CardDragStore {
             if (spotElement) {
                 const origin = getElementCenter(spotElement);
                 requestAnimationFrame(() => {
-                    this.gameStore.targetingArrowStore.beginDrag(origin, cursor);
+                    this.gameStore.targetingArrowStore.beginDrag(origin, cursor, {
+                        ignoreNextPointerUp: true,
+                    });
                 });
             }
 

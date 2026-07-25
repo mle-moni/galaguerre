@@ -144,6 +144,47 @@ test.group("target_matching", () => {
         assert.isFalse(minionMatchesTarget(otherMinion, target, true));
     });
 
+    test("minionMatchesTarget with attack at most comparison", ({ assert }) => {
+        const target = createMinionTargetSnapshot("PLAYER", {
+            comparison: createComparisonSnapshot({ attackComparison: "<", attack: 4 }),
+        });
+        const eligibleMinion = createMinionState(createMinionCard({ attack: 3 }));
+        const ineligibleMinion = createMinionState(createMinionCard({ attack: 4 }));
+
+        assert.isTrue(minionMatchesTarget(eligibleMinion, target, false));
+        assert.isFalse(minionMatchesTarget(ineligibleMinion, target, false));
+    });
+
+    test("selectedTargetMatchesAction with attack at most comparison", ({ assert }) => {
+        const eligibleCard = createMinionCard({ uuid: "ally-3", attack: 3 });
+        const eligibleMinion = createMinionState(eligibleCard);
+        const playerBoard = placeMinion(createEmptyBoard(), 0, eligibleMinion);
+        const opponentBoard = createEmptyBoard();
+        const action = createCardActionSnapshot({
+            type: "BOOST",
+            isTargeted: true,
+            boost: {
+                attack: null,
+                health: null,
+                spellPower: null,
+                minionPowers: { hasCharge: true },
+                extraBattlecryTriggers: null,
+            },
+            target: createMinionTargetSnapshot("PLAYER", {
+                comparison: createComparisonSnapshot({ attackComparison: "<", attack: 4 }),
+            }),
+        });
+
+        assert.isTrue(
+            selectedTargetMatchesAction(
+                { minionUuid: "ally-3", owner: "PLAYER" },
+                action,
+                playerBoard,
+                opponentBoard,
+            ),
+        );
+    });
+
     test("shouldExcludeSourceMinion skips only the source minion", ({ assert }) => {
         const source = createMinionState(createMinionCard({ uuid: "aura-source" }));
         const ally = createMinionState(createMinionCard({ uuid: "ally" }));

@@ -86,7 +86,7 @@ export const resolveAndConfirmArrowTarget = (store: GameStore, x: number, y: num
 
     if (actionTarget && getArrowTargetValidity(store, x, y) === "valid") {
         confirmArrowTarget(store, actionTarget);
-    } else {
+    } else if (store.targetSelectionStore.pendingPlay?.kind !== "MINION") {
         cancelArrowTargeting(store);
     }
 

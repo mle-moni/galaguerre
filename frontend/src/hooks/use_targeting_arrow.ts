@@ -18,6 +18,7 @@ export const useTargetingArrow = (store: GameStore) => {
         };
 
         const handlePointerUp = (event: PointerEvent) => {
+            if (store.targetingArrowStore.consumeIgnoredPointerUp()) return;
             resolveAndConfirmArrowTarget(store, event.clientX, event.clientY);
         };
 

@@ -125,6 +125,40 @@ test.group("RETURN_TO_HAND action", () => {
         }
     });
 
+    test("returns printed keywords and ignores board-granted powers", ({ assert }) => {
+        const allyMinion = createMinionCard({
+            uuid: "boosted-ally",
+            attack: 2,
+            health: 3,
+        });
+        const boostedState = createMinionState(allyMinion);
+        if (boostedState.originalCard.type === "MINION") {
+            boostedState.originalCard.minionPowers.hasTaunt = true;
+            boostedState.originalCard.minionPowers.isPoisonous = true;
+            boostedState.originalCard.effects = ["Provocation", "Toxicité"];
+        }
+        const spell = createReturnToHandSpell();
+
+        const { game } = runSpellEffect(
+            createGameData({
+                playerOne: {
+                    hand: [spell],
+                    board: placeMinion(createEmptyBoard(), 0, boostedState),
+                },
+            }),
+            spell,
+            { actionTarget: { minionUuid: "boosted-ally", owner: "PLAYER" } },
+        );
+
+        const returnedCard = game.data.playerOne.hand.find((card) => card.uuid !== spell.uuid);
+        assert.exists(returnedCard);
+        if (returnedCard!.type === "MINION") {
+            assert.isFalse(returnedCard!.minionPowers.hasTaunt);
+            assert.isFalse(returnedCard!.minionPowers.isPoisonous);
+            assert.deepEqual(returnedCard!.effects, []);
+        }
+    });
+
     test("does not trigger deathrattle", ({ assert }) => {
         const allyMinion = createMinionCard({
             uuid: "deathrattle-ally",
