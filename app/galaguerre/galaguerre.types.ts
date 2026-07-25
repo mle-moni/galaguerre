@@ -238,3 +238,18 @@ export const GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES_LABEL_OBJ: LabelObjectType<Gal
 export const GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES_LABEL_OBJ,
 );
+
+export const GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES = ["OPPONENT_DECK_CARD_COUNT"] as const;
+export type GalaguerreSummonCountScaleSource = GenerateTypeFromEnum<
+    typeof GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES
+>;
+export const GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES_OBJ = generateTypeObjectFromEnum(
+    GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES,
+);
+export const GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES_LABEL_OBJ: LabelObjectType<GalaguerreSummonCountScaleSource> =
+    {
+        OPPONENT_DECK_CARD_COUNT: "Opponent Deck Card Count",
+    };
+export const GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES_OPTIONS = generateOptionsFromLabelObj(
+    GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES_LABEL_OBJ,
+);

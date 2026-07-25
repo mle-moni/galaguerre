@@ -10,6 +10,7 @@ import { getActionTarget } from "#api_types/action_fields_utils";
 import { getEffectiveDamage } from "#api_types/get_effective_damage";
 import type Game from "#models/game";
 import { breakWeapon } from "#controllers/games/play_card/break_weapon";
+import { resolveSummonCount } from "./resolve_summon_count.js";
 import { drawCards } from "../draw_cards.js";
 import { addCardsToDeck, executeDeckCardAction } from "../deck_card_operations.js";
 import { executeHandCardAction } from "../hand_card_operations.js";
@@ -423,12 +424,15 @@ const executeNonTargetedV1Action = (
         case "SUMMON": {
             if (!action.summonParameters || action.summonCount === null) break;
 
+            const summonCount = resolveSummonCount(action, player, opponent);
+            if (summonCount <= 0) break;
+
             const { summonedCards } = summonMinions(
                 game,
                 player,
                 action.summonTargetTeam,
                 action.summonParameters,
-                action.summonCount,
+                summonCount,
                 sourceMinion,
             );
             const { gameEnded } = triggerSummonPassivesForCards(game, player, summonedCards);

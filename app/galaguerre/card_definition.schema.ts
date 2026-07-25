@@ -13,6 +13,7 @@ import {
     GALAGUERRE_DECK_PLACEMENTS,
     GALAGUERRE_MANA_SUBTYPES,
     GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES,
+    GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES,
     GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
     GALAGUERRE_PASSIVES_TYPES,
@@ -164,11 +165,18 @@ const returnToHandActionFieldsSchema = z.object({
     costReduction: z.number().int().nonnegative(),
 });
 
+const summonCountScaleSchema = z.object({
+    source: z.enum(GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES),
+    cardId: z.number().int().positive(),
+    countPer: z.number().positive().default(1),
+});
+
 const summonActionFieldsSchema = z.object({
     type: z.literal("SUMMON"),
     isTargeted: z.literal(false).default(false),
     summonParameters: reconvertParametersSchema,
     summonCount: z.number().int().positive(),
+    summonCountScale: summonCountScaleSchema.nullable().default(null),
     summonTargetTeam: z.enum(["PLAYER", "OPPONENT"]).default("PLAYER"),
     actionCondition: actionConditionSchema,
 });

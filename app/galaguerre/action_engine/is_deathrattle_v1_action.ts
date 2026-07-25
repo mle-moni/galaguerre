@@ -25,7 +25,7 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
         case "BREAK_WEAPON":
             return action.target !== null && action.target.type === "HERO";
         case "SUMMON":
-            return action.summonCount > 0;
+            return action.summonCount > 0 || action.summonCountScale !== null;
         case "SUMMON_FROM_HAND":
             return action.summonCount > 0;
         case "DECK_CARD":

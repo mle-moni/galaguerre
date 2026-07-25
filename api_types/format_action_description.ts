@@ -701,6 +701,13 @@ const formatDefeatDescription = (targetTeam: "PLAYER" | "OPPONENT" | "ALL"): str
     }
 };
 
+const formatScaledSummonDescription = (
+    summonName: string,
+    deckCardName: string,
+    boardLabel: string,
+): string =>
+    `Invoquez un monstre ${summonName} ${boardLabel} pour chaque ${deckCardName} dans le deck adverse.`;
+
 const formatManaTemporaryChange = (amount: number): string => {
     const crystalLabel = amount === 1 ? "cristal de mana" : "cristaux de mana";
     return `Ce tour-ci, gagnez ${amount} ${crystalLabel}.`;
@@ -1279,12 +1286,18 @@ export const formatActionDescription = (
             return `${prefix} : Renvoie un monstre allié dans votre main.${costReductionSuffix}`;
         }
         case "SUMMON": {
-            const count = action.summonCount ?? 1;
             const targetLabel = formatReconvertTargetLabel(action.summonParameters);
             const boardLabel =
                 action.summonTargetTeam === "OPPONENT"
                     ? "sur le plateau adverse"
                     : "sur votre plateau";
+
+            if (action.summonCountScale) {
+                const deckCardName = formatDeckCardName(action.summonCountScale.cardId);
+                return `${prefix} : ${formatScaledSummonDescription(targetLabel, deckCardName, boardLabel)}`;
+            }
+
+            const count = action.summonCount ?? 1;
             const countLabel = count > 1 ? `${count} monstres` : "un monstre";
 
             return `${prefix} : Invoque ${countLabel} (${targetLabel}) ${boardLabel}.`;

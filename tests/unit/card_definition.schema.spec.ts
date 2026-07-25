@@ -19,6 +19,7 @@ import {
     silenceAction,
     manaTemporaryChangeAction,
     manaTemporaryChangePerOpponentMinionAction,
+    summonCardIdPerOpponentDeckCard,
     reconversionAction,
     reconversionToCardId,
     reconvertParameters,
@@ -521,6 +522,46 @@ test.group("card_definition.schema", () => {
                     subtype: "TEMPORARY_CHANGE",
                     amount: 1,
                     amountScale: { source: "OPPONENT_MINION_COUNT", amountPer: 0 },
+                    actionCondition: null,
+                    onTargetResult: null,
+                },
+            ],
+        });
+
+        assert.isFalse(result.success);
+    });
+
+    test("accepts minion with scaled SUMMON battlecry action", ({ assert }) => {
+        const data = parseMinionData({
+            ...defaultMinionData(),
+            battlecryActions: [summonCardIdPerOpponentDeckCard(186, 185)],
+        });
+
+        assert.equal(data.battlecryActions[0]!.type, "SUMMON");
+        if (data.battlecryActions[0]!.type === "SUMMON") {
+            assert.deepEqual(data.battlecryActions[0]!.summonCountScale, {
+                source: "OPPONENT_DECK_CARD_COUNT",
+                cardId: 185,
+                countPer: 1,
+            });
+        }
+    });
+
+    test("rejects SUMMON action with summonCountScale countPer <= 0", ({ assert }) => {
+        const result = safeParseCardData({
+            ...defaultMinionData(),
+            battlecryActions: [
+                {
+                    type: "SUMMON",
+                    isTargeted: false,
+                    summonParameters: reconvertParameters({ cardId: 186 }),
+                    summonCount: 1,
+                    summonCountScale: {
+                        source: "OPPONENT_DECK_CARD_COUNT",
+                        cardId: 185,
+                        countPer: 0,
+                    },
+                    summonTargetTeam: "PLAYER",
                     actionCondition: null,
                     onTargetResult: null,
                 },

@@ -62,6 +62,7 @@ import {
     selfMinion,
     silenceAction,
     summonCardId,
+    summonCardIdPerOpponentDeckCard,
     summonRandomMinionFromHandAction,
     spellDrawFilter,
     spellDiscoverFilter,
@@ -1554,6 +1555,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         },
         { cannotAttackHero: true },
     ),
+    defineMinion(
+        187,
+        {
+            ...gal("Head of dynamite", 7),
+            imageUrl: "/card-covers/galadrim/head-of-dynamite.webp",
+            attack: 7,
+            health: 7,
+        },
+        {
+            battlecryActions: [summonCardIdPerOpponentDeckCard(186, 185)],
+        },
+        { rarity: "LEGENDARY" },
+    ),
 
     // --- cartes non collectionnables ---
     defineMinion(
@@ -1727,5 +1741,27 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         [],
         { isCollectible: false },
         { labelTags: ["EMOJI"] },
+    ),
+    defineSpell(
+        185,
+        {
+            ...gal("Bug à retardement", 0),
+            imageUrl: "/card-covers/galadrim/bug-a-retardement.webp",
+        },
+        [damageAction(5, allyHero())],
+        [],
+        { isCollectible: false },
+        { castsWhenDrawn: true },
+    ),
+    defineMinion(
+        186,
+        {
+            ...gal("Bug explosif", 1),
+            imageUrl: "/card-covers/galadrim/bug-explosif.webp",
+            attack: 1,
+            health: 1,
+        },
+        { deathrattleActions: [damageAction(2, randomEnemyCharacter())] },
+        { isCollectible: false },
     ),
 ];

@@ -422,6 +422,32 @@ const validateSummonPayload = (
     path: (string | number)[],
 ) => {
     validateSummonParameters(action.summonParameters, ctx, [...path, "summonParameters"]);
+
+    if (action.summonCountScale !== null) {
+        if (action.summonCountScale.countPer <= 0) {
+            ctx.addIssue({
+                code: "custom",
+                message: "SUMMON summonCountScale requires countPer > 0",
+                path: [...path, "summonCountScale", "countPer"],
+            });
+        }
+        if (action.summonCountScale.cardId <= 0) {
+            ctx.addIssue({
+                code: "custom",
+                message: "SUMMON summonCountScale requires cardId > 0",
+                path: [...path, "summonCountScale", "cardId"],
+            });
+        }
+        return;
+    }
+
+    if (action.summonCount <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON action requires summonCount > 0",
+            path: [...path, "summonCount"],
+        });
+    }
 };
 
 const validateHandCardFilter = (

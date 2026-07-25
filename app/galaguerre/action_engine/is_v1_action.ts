@@ -52,7 +52,7 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
                 (action.target.type === "MINION" || action.target.type === "ALL")
             );
         case "SUMMON":
-            return action.summonCount > 0;
+            return action.summonCount > 0 || action.summonCountScale !== null;
         case "SUMMON_FROM_HAND":
             return action.summonCount > 0;
         case "DECK_CARD":

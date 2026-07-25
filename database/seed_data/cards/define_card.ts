@@ -349,6 +349,7 @@ export const summonAction = (
     isTargeted: false,
     summonParameters: parameters,
     summonCount: options.count ?? 1,
+    summonCountScale: null,
     summonTargetTeam: options.targetTeam ?? "PLAYER",
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
@@ -359,6 +360,22 @@ export const summonCardId = (
     count = 1,
     targetTeam: "PLAYER" | "OPPONENT" = "PLAYER",
 ): CardActionDefinition => summonAction(reconvertParameters({ cardId }), { count, targetTeam });
+
+export const summonCardIdPerOpponentDeckCard = (
+    summonCardId: number,
+    deckCardId: number,
+    countPer = 1,
+    targetTeam: "PLAYER" | "OPPONENT" = "PLAYER",
+): CardActionDefinition => ({
+    type: "SUMMON",
+    isTargeted: false,
+    summonParameters: reconvertParameters({ cardId: summonCardId }),
+    summonCount: countPer,
+    summonCountScale: { source: "OPPONENT_DECK_CARD_COUNT", cardId: deckCardId, countPer },
+    summonTargetTeam: targetTeam,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
 
 export const summonRandomMinionFromHandAction = (
     targetTeam: "PLAYER" | "OPPONENT" = "OPPONENT",

@@ -147,6 +147,11 @@ type CardActionSnapshotOverrides = {
     reconvertParameters?: ReconvertParametersSnapshot;
     summonParameters?: ReconvertParametersSnapshot;
     summonCount?: number;
+    summonCountScale?: {
+        source: "OPPONENT_DECK_CARD_COUNT";
+        cardId: number;
+        countPer: number;
+    } | null;
     summonTargetTeam?: "PLAYER" | "OPPONENT";
     handCardFilter?: CardFilterSnapshot | null;
     deckCardOperation?: "ADD" | "DELETE" | "DELETE_ADDED";
@@ -295,6 +300,8 @@ export const createCardActionSnapshot = (
                 isTargeted: false,
                 summonParameters: overrides.summonParameters ?? createReconvertParametersSnapshot(),
                 summonCount: overrides.summonCount ?? 1,
+                summonCountScale:
+                    overrides.summonCountScale !== undefined ? overrides.summonCountScale : null,
                 summonTargetTeam: overrides.summonTargetTeam ?? "PLAYER",
                 actionCondition,
                 onTargetResult,

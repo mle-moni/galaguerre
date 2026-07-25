@@ -522,3 +522,15 @@ Format compact pour construction de deck par LLM.
 ### #184 Recadreur de scope
 - Coût: 5 | Type: MINION | Stats: 5/5 | Rareté: Rare | Famille: PM
 - Cri de guerre : Détruit toutes les cartes de deux decks qui n'y étaient pas au début de la partie.
+
+### #185 Bug à retardement
+- Coût: 0 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Lancé quand pioché. Effet : Inflige 5 dégâts au héros allié.
+
+### #186 Bug explosif
+- Coût: 1 | Type: MINION | Stats: 1/1 | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
+- Dernier souffle : Inflige 2 dégâts à un personnage adverse aléatoire.
+
+### #187 Head of dynamite
+- Coût: 7 | Type: MINION | Stats: 7/7 | Rareté: Légendaire | Famille: —
+- Cri de guerre : Invoquez un monstre Bug explosif sur votre plateau pour chaque Bug à retardement dans le deck adverse.
