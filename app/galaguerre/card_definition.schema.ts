@@ -14,6 +14,7 @@ import {
     GALAGUERRE_MANA_SUBTYPES,
     GALAGUERRE_MANA_AMOUNT_SCALE_SOURCES,
     GALAGUERRE_SUMMON_COUNT_SCALE_SOURCES,
+    GALAGUERRE_DISCOVER_SOURCES,
     GALAGUERRE_DYNAMIC_COST_SOURCES,
     GALAGUERRE_PASSIVES_TRIGGERS_ON,
     GALAGUERRE_PASSIVES_TYPES,
@@ -224,6 +225,8 @@ const generateHandActionFieldsSchema = z.object({
 const discoverActionFieldsSchema = z.object({
     type: z.literal("DISCOVER"),
     isTargeted: z.literal(false).default(false),
+    discoverSource: z.enum(GALAGUERRE_DISCOVER_SOURCES).default("CATALOG"),
+    enemyDrawsChosenCard: z.boolean().default(false),
     discoverCardFilter: cardFilterSchema.nullable(),
     discoverCardFilterAlternatives: z.array(cardFilterSchema).default([]),
     optionCount: z.number().int().positive().default(3),

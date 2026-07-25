@@ -178,6 +178,8 @@ export const discoverAction = (
 ): CardActionDefinition => ({
     type: "DISCOVER",
     isTargeted: false,
+    discoverSource: "CATALOG",
+    enemyDrawsChosenCard: false,
     discoverCardFilter,
     discoverCardFilterAlternatives: [],
     optionCount: options.optionCount ?? 3,
@@ -191,8 +193,24 @@ export const discoverOrAction = (
 ): CardActionDefinition => ({
     type: "DISCOVER",
     isTargeted: false,
+    discoverSource: "CATALOG",
+    enemyDrawsChosenCard: false,
     discoverCardFilter: null,
     discoverCardFilterAlternatives: filters,
+    optionCount: options.optionCount ?? 3,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const discoverOpponentDeckAction = (
+    options: { optionCount?: number; enemyDrawsChosenCard?: boolean } = {},
+): CardActionDefinition => ({
+    type: "DISCOVER",
+    isTargeted: false,
+    discoverSource: "OPPONENT_DECK",
+    enemyDrawsChosenCard: options.enemyDrawsChosenCard ?? true,
+    discoverCardFilter: null,
+    discoverCardFilterAlternatives: [],
     optionCount: options.optionCount ?? 3,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,

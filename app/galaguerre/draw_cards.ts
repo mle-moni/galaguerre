@@ -102,6 +102,19 @@ const handleDrawnCard = (
     addDrawnCardToHand(player, card, game);
 };
 
+export const drawSpecificDeckCard = (
+    player: GamePlayer,
+    cardUuid: string,
+    game?: Game,
+): boolean => {
+    const matchIndex = player.deckCards.findIndex((card) => card.uuid === cardUuid);
+    if (matchIndex === -1) return false;
+
+    const [card] = player.deckCards.splice(matchIndex, 1);
+    handleDrawnCard(player, card!, game);
+    return true;
+};
+
 export const drawOneCard = (
     player: GamePlayer,
     filter?: CardFilterSnapshot | null,

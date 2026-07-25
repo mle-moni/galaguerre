@@ -342,6 +342,32 @@ const formatDiscoverDescription = (
     return `${verb} ${article} ${label}${formatDiscoverExtraFilterSuffix(filter)}`;
 };
 
+const formatOpponentDeckDiscoverDescription = (capitalizeFirst = true): string => {
+    const verb = capitalizeFirst ? "Découvrez" : "découvrez";
+    return `${verb} une carte du deck de votre adversaire, votre adversaire la pioche également`;
+};
+
+const formatDiscoverActionDescription = (
+    action: Pick<
+        Extract<CardActionSnapshot, { type: "DISCOVER" }>,
+        | "discoverSource"
+        | "enemyDrawsChosenCard"
+        | "discoverCardFilter"
+        | "discoverCardFilterAlternatives"
+    >,
+    capitalizeFirst = true,
+): string => {
+    if (action.discoverSource === "OPPONENT_DECK" && action.enemyDrawsChosenCard) {
+        return formatOpponentDeckDiscoverDescription(capitalizeFirst);
+    }
+
+    return formatDiscoverDescription(
+        action.discoverCardFilter,
+        action.discoverCardFilterAlternatives,
+        capitalizeFirst,
+    );
+};
+
 const hasCardFilterConstraints = (filter: CardFilterSnapshot | null): boolean => {
     if (!filter) return false;
 
@@ -767,11 +793,7 @@ const formatFollowUpActionClause = (action: CardActionFieldsSnapshot): string | 
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
-            return formatDiscoverDescription(
-                action.discoverCardFilter,
-                action.discoverCardFilterAlternatives,
-                false,
-            );
+            return formatDiscoverActionDescription(action, false);
         }
         case "MANA": {
             const text = formatManaActionText(action);
@@ -840,6 +862,8 @@ const isSameHandCardGroup = (left: HandCardAction, right: HandCardAction): boole
 
 const isSameDiscoverGroup = (left: DiscoverAction, right: DiscoverAction): boolean =>
     left.optionCount === right.optionCount &&
+    left.discoverSource === right.discoverSource &&
+    left.enemyDrawsChosenCard === right.enemyDrawsChosenCard &&
     JSON.stringify(left.discoverCardFilter) === JSON.stringify(right.discoverCardFilter) &&
     JSON.stringify(left.discoverCardFilterAlternatives) ===
         JSON.stringify(right.discoverCardFilterAlternatives);
@@ -854,6 +878,11 @@ const formatMergedHandCardAddDescription = (actions: HandCardAction[], prefix: s
 
 const formatMergedDiscoverDescription = (actions: DiscoverAction[], prefix: string): string => {
     const first = actions[0]!;
+
+    if (first.discoverSource === "OPPONENT_DECK" && first.enemyDrawsChosenCard) {
+        return `${prefix} : ${formatOpponentDeckDiscoverDescription()}.`;
+    }
+
     const firstDescription = formatDiscoverDescription(
         first.discoverCardFilter,
         first.discoverCardFilterAlternatives,
@@ -1108,10 +1137,7 @@ export const formatActionDescription = (
         }
         case "DISCOVER": {
             if (action.optionCount === null || action.optionCount <= 0) return null;
-            return `${prefix} : ${formatDiscoverDescription(
-                action.discoverCardFilter,
-                action.discoverCardFilterAlternatives,
-            )}.`;
+            return `${prefix} : ${formatDiscoverActionDescription(action)}.`;
         }
         case "BOOST": {
             if (!action.boost) return null;

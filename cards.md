@@ -550,3 +550,7 @@ Format compact pour construction de deck par LLM.
 ### #191 Développeur Fatigué
 - Coût: 3 | Type: MINION | Stats: 3/3 | Rareté: Commune | Famille: Développeur
 - Cri de guerre : Mélange 1 copie de Bug à retardement dans le deck adverse.
+
+### #192 Spécialiste OSINT
+- Coût: 4 | Type: MINION | Stats: 4/5 | Rareté: Épique | Famille: Développeur
+- Cri de guerre : Découvrez une carte du deck de votre adversaire, votre adversaire la pioche également.

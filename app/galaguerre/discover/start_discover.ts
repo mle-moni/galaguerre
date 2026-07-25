@@ -4,7 +4,9 @@ import { beginLoggedBeat, endCurrentBeat } from "../game_narrative/narrative_bea
 import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import { generateDiscoverOptions } from "./generate_discover_options.js";
+import { generateOpponentDeckDiscoverOptions } from "./generate_opponent_deck_discover_options.js";
 import type { ExecuteActionDiscoverContext, ExecuteActionResult } from "./discover_types.js";
+import { getOpponentPlayer } from "./discover_types.js";
 
 export const startDiscover = (
     game: Game,
@@ -12,16 +14,26 @@ export const startDiscover = (
     action: Extract<CardActionFieldsSnapshot, { type: "DISCOVER" }>,
     discoverContext: ExecuteActionDiscoverContext,
 ): ExecuteActionResult => {
-    const options = generateDiscoverOptions(
-        action.discoverCardFilter,
-        action.optionCount,
-        action.discoverCardFilterAlternatives,
-        player.ownedGoldenCardIds ?? [],
-    );
+    const discoverSource = action.discoverSource ?? "CATALOG";
+    const options =
+        discoverSource === "OPPONENT_DECK"
+            ? generateOpponentDeckDiscoverOptions(
+                  getOpponentPlayer(game, player),
+                  action.optionCount,
+              )
+            : generateDiscoverOptions(
+                  action.discoverCardFilter,
+                  action.optionCount,
+                  action.discoverCardFilterAlternatives,
+                  player.ownedGoldenCardIds ?? [],
+              );
 
     if (options.length === 0) {
         return "ok";
     }
+
+    const opponent =
+        discoverSource === "OPPONENT_DECK" ? getOpponentPlayer(game, player) : undefined;
 
     game.data.pendingDiscover = {
         playerUserId: player.userId,
@@ -29,6 +41,9 @@ export const startDiscover = (
         sourceCardLabel: discoverContext.sourceCard.label,
         sourceCardUuid: discoverContext.sourceCard.uuid,
         options,
+        discoverSource,
+        enemyDrawsChosenCard: action.enemyDrawsChosenCard ?? false,
+        opponentUserId: opponent?.userId,
         continuation: {
             remainingActions: discoverContext.remainingActions,
             context: {

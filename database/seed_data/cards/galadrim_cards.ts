@@ -33,6 +33,7 @@ import {
     defineSpell,
     defineWeapon,
     discoverAction,
+    discoverOpponentDeckAction,
     cardDrawFilter,
     drawAction,
     drawOrAction,
@@ -223,6 +224,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             },
         },
         { rarity: "RARE" },
+    ),
+    defineMinion(
+        192,
+        {
+            ...gal("Spécialiste OSINT", 4),
+            imageUrl: "/card-covers/galadrim/specialiste-osint.webp",
+            attack: 4,
+            health: 5,
+        },
+        {
+            tags: ["DEVELOPPEUR"],
+            battlecryActions: [discoverOpponentDeckAction()],
+        },
+        { rarity: "EPIC" },
     ),
     defineMinion(
         174,

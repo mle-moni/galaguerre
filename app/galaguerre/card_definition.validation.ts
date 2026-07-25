@@ -1146,6 +1146,7 @@ const validateNonTargetedAction = (
                 });
             }
             if (
+                action.discoverSource === "CATALOG" &&
                 action.discoverCardFilterAlternatives.length === 0 &&
                 action.discoverCardFilter === null
             ) {

@@ -141,6 +141,8 @@ type CardActionSnapshotOverrides = {
     drawCardFilterAlternatives?: CardFilterSnapshot[];
     discoverCardFilter?: CardFilterSnapshot | null;
     discoverCardFilterAlternatives?: CardFilterSnapshot[];
+    discoverSource?: "CATALOG" | "OPPONENT_DECK";
+    enemyDrawsChosenCard?: boolean;
     optionCount?: number;
     enemyDrawCardFilter?: CardFilterSnapshot | null;
     boost?: BoostSnapshot;
@@ -205,6 +207,8 @@ export const createCardActionSnapshot = (
             return {
                 type: "DISCOVER",
                 isTargeted: false,
+                discoverSource: overrides.discoverSource ?? "CATALOG",
+                enemyDrawsChosenCard: overrides.enemyDrawsChosenCard ?? false,
                 discoverCardFilter:
                     overrides.discoverCardFilter !== undefined
                         ? overrides.discoverCardFilter

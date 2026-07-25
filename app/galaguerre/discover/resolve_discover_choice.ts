@@ -1,6 +1,8 @@
 import type { GamePlayer, PlayerCard } from "#api_types/game.types";
 import type Game from "#models/game";
+import { randomUUID } from "node:crypto";
 import { instantiateDeckCard } from "../deck_card_operations.js";
+import { drawSpecificDeckCard } from "../draw_cards.js";
 import { giveCardToHand } from "../give_card_to_hand.js";
 import { beginLoggedBeat, endCurrentBeat } from "../game_narrative/narrative_beats.js";
 import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
@@ -19,15 +21,30 @@ const buildChosenCard = (
     const template = instantiateDeckCard(option.cardId);
     if (!template) return undefined;
 
+    const isOpponentDeckDiscover = pending.discoverSource === "OPPONENT_DECK";
+
     return {
         ...template,
-        uuid: option.uuid,
+        uuid: isOpponentDeckDiscover ? randomUUID() : option.uuid,
         isGolden: option.isGolden,
         generatedBy: {
             cardId: pending.sourceCardId,
             label: pending.sourceCardLabel,
         },
     };
+};
+
+const drawChosenCardForOpponent = (
+    game: Game,
+    pending: NonNullable<Game["data"]["pendingDiscover"]>,
+    option: PlayerCard,
+): void => {
+    if (!pending.enemyDrawsChosenCard || !pending.opponentUserId) return;
+
+    const opponent = findPlayerByUserId(game, pending.opponentUserId);
+    if (!opponent) return;
+
+    drawSpecificDeckCard(opponent, option.uuid, game);
 };
 
 export const resolveDiscoverChoice = (
@@ -60,6 +77,7 @@ export const resolveDiscoverChoice = (
 
     const owner = resolveSpotOwner(game, player);
     giveCardToHand(player, chosenCard, game, { source: "GENERATED" });
+    drawChosenCardForOpponent(game, pending, option);
 
     withNarrativeRecorder((recorder) => {
         beginLoggedBeat(game, "TRIGGER");

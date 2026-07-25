@@ -281,6 +281,9 @@ export interface GamePendingDiscover {
     sourceCardUuid: string;
     options: PlayerCard[];
     continuation: DiscoverContinuation;
+    discoverSource?: "CATALOG" | "OPPONENT_DECK";
+    enemyDrawsChosenCard?: boolean;
+    opponentUserId?: number;
 }
 
 export interface GameData {
