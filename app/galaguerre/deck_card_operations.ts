@@ -1,9 +1,11 @@
 import type { CardActionFieldsSnapshot, GamePlayer, PlayerCard } from "#api_types/game.types";
+import type { PassiveTriggerEvent } from "#api_types/target_matching";
 import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
 import type { GalaguerreDeckPlacement } from "./galaguerre.types.js";
 import { getCardPreviewById } from "./card_catalog.js";
 import { randomIntInRange } from "../utils/random.js";
+import { triggerPassives } from "./passive_engine/trigger_passives.js";
 
 export const instantiateDeckCard = (cardId: number): PlayerCard | undefined => {
     const template = getCardPreviewById(cardId);
@@ -53,6 +55,50 @@ export const addCardsToDeck = (
     }
 
     return added;
+};
+
+type AddCardsToDeckWithPassivesOptions = {
+    suppressPassives?: boolean;
+};
+
+export const addCardsToDeckWithPassives = (
+    game: Game,
+    targetPlayer: GamePlayer,
+    cardId: number,
+    copyCount: number,
+    placement: GalaguerreDeckPlacement,
+    options: AddCardsToDeckWithPassivesOptions = {},
+): { added: number; gameEnded: boolean } => {
+    let added = 0;
+
+    for (let i = 0; i < copyCount; i++) {
+        const card = instantiateDeckCard(cardId);
+        if (!card) break;
+
+        insertCardAtPlacement(targetPlayer.deckCards, card, placement);
+        added++;
+
+        if (!options.suppressPassives) {
+            const event: PassiveTriggerEvent = {
+                type: "DECK_CARD",
+                cardId,
+                targetPlayer,
+                placement,
+            };
+            const { gameEnded } = triggerPassives(
+                game,
+                "DECK_CARD_ADD",
+                undefined,
+                undefined,
+                event,
+            );
+            if (gameEnded) {
+                return { added, gameEnded: true };
+            }
+        }
+    }
+
+    return { added, gameEnded: false };
 };
 
 const findMatchingIndices = (deck: PlayerCard[], cardId: number): number[] => {
@@ -114,40 +160,47 @@ export const removeAddedCardsFromDeck = (player: GamePlayer): number => {
 };
 
 const applyDeckCardOperationToPlayer = (
+    game: Game,
     targetPlayer: GamePlayer,
     action: Extract<CardActionFieldsSnapshot, { type: "DECK_CARD" }>,
-): void => {
+): { gameEnded: boolean } => {
     if (action.deckCardOperation === "ADD") {
-        if (action.cardId === null) return;
-        addCardsToDeck(targetPlayer, action.cardId, action.copyCount!, action.deckPlacement!);
-        return;
+        if (action.cardId === null) return { gameEnded: false };
+        const { gameEnded } = addCardsToDeckWithPassives(
+            game,
+            targetPlayer,
+            action.cardId,
+            action.copyCount!,
+            action.deckPlacement!,
+        );
+        return { gameEnded };
     }
 
     if (action.deckCardOperation === "DELETE_ADDED") {
         removeAddedCardsFromDeck(targetPlayer);
-        return;
+        return { gameEnded: false };
     }
 
-    if (action.cardId === null) return;
+    if (action.cardId === null) return { gameEnded: false };
     removeCardsFromDeck(targetPlayer, action.cardId, action.copyCount, action.deckPlacement);
+    return { gameEnded: false };
 };
 
 export const executeDeckCardAction = (
     action: Extract<CardActionFieldsSnapshot, { type: "DECK_CARD" }>,
-    _game: Game,
+    game: Game,
     player: GamePlayer,
     opponent: GamePlayer,
-): void => {
+): { gameEnded: boolean } => {
     switch (action.deckTargetTeam) {
         case "PLAYER":
-            applyDeckCardOperationToPlayer(player, action);
-            break;
+            return applyDeckCardOperationToPlayer(game, player, action);
         case "OPPONENT":
-            applyDeckCardOperationToPlayer(opponent, action);
-            break;
-        case "ALL":
-            applyDeckCardOperationToPlayer(player, action);
-            applyDeckCardOperationToPlayer(opponent, action);
-            break;
+            return applyDeckCardOperationToPlayer(game, opponent, action);
+        case "ALL": {
+            const playerResult = applyDeckCardOperationToPlayer(game, player, action);
+            if (playerResult.gameEnded) return playerResult;
+            return applyDeckCardOperationToPlayer(game, opponent, action);
+        }
     }
 };

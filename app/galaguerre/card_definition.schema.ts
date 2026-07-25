@@ -198,6 +198,7 @@ const deckCardActionFieldsSchema = z.object({
     deckTargetTeam: z.enum(GALAGUERRE_TARGET_TEAMS).default("PLAYER"),
     cardId: z.number().int().positive().nullable(),
     copyCount: z.number().int().positive().nullable(),
+    useTriggerContext: z.boolean().default(false),
     actionCondition: actionConditionSchema,
 });
 
@@ -400,6 +401,7 @@ export const weaponDataSchema = cardDataBaseSchema.extend({
     damage: z.number().int().min(0),
     durability: z.number().int().min(1),
     deathrattleActions: z.array(deathrattleActionSchema),
+    heroAttackActions: z.array(cardActionSchema).default([]),
     cannotAttackHero: z.boolean().default(false),
 });
 

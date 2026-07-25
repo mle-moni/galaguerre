@@ -534,3 +534,19 @@ Format compact pour construction de deck par LLM.
 ### #187 Head of dynamite
 - Coût: 7 | Type: MINION | Stats: 7/7 | Rareté: Légendaire | Famille: —
 - Cri de guerre : Invoquez un monstre Bug explosif sur votre plateau pour chaque Bug à retardement dans le deck adverse.
+
+### #188 Testeur nonchalant
+- Coût: 3 | Type: MINION | Stats: 2/2 | Rareté: Rare | Famille: PM
+- Passif (fin de tour) : Mélange 1 copie de Bug à retardement dans le deck adverse.
+
+### #189 Cahier des charges imprécis
+- Coût: 4 | Type: WEAPON | Stats: 3/2 | Rareté: Épique | Famille: —
+- Arme 3/2. Une fois que votre héros a attaqué, mélange 1 copie de Bug à retardement dans le deck adverse.
+
+### #190 Perroquet de l'open space
+- Coût: 4 | Type: MINION | Stats: 4/4 | Rareté: Épique | Famille: Pets
+- Passif (carte placée dans un deck) : Place une copie supplémentaire de la carte ajoutée au même endroit.
+
+### #191 Développeur Fatigué
+- Coût: 3 | Type: MINION | Stats: 3/3 | Rareté: Commune | Famille: Développeur
+- Cri de guerre : Mélange 1 copie de Bug à retardement dans le deck adverse.

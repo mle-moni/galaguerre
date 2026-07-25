@@ -61,6 +61,7 @@ export type ApiCatalogWeaponCard = ApiCatalogCardBase & {
     damage: number;
     durability: number;
     deathrattleActions: CardActionSnapshot[];
+    heroAttackActions: CardActionSnapshot[];
 };
 
 export type ApiCatalogCard = ApiCatalogMinionCard | ApiCatalogSpellCard | ApiCatalogWeaponCard;

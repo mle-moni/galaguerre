@@ -12,5 +12,5 @@ export const triggerPassives = (
     event?: PassiveTriggerEvent,
 ): { gameEnded: boolean } => {
     const entries = collectPassiveTriggers(game, triggersOn, activePlayer, playedCard, event);
-    return executePassiveActions(game, entries);
+    return executePassiveActions(game, entries, event);
 };

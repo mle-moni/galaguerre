@@ -4,6 +4,7 @@ import {
     getBattlecryDescription,
     getComboDescription,
     getDeathrattleDescription,
+    getHeroAttackDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
     normalizeMinionPowers,
@@ -57,6 +58,7 @@ export const generatePlayerCards = (source: CardSource, options?: GeneratePlayer
         switch (card.data.type) {
             case "WEAPON": {
                 const deathrattleLines = getDeathrattleDescription(card.data.deathrattleActions);
+                const heroAttackLines = getHeroAttackDescription(card.data.heroAttackActions ?? []);
 
                 return {
                     ...base,
@@ -64,6 +66,7 @@ export const generatePlayerCards = (source: CardSource, options?: GeneratePlayer
                     damage: card.data.damage,
                     durability: card.data.durability,
                     deathrattleActions: card.data.deathrattleActions,
+                    heroAttackActions: card.data.heroAttackActions ?? [],
                     cannotAttackHero: card.data.cannotAttackHero,
                     description: getWeaponCardDescription(
                         card.data.damage,
@@ -71,6 +74,7 @@ export const generatePlayerCards = (source: CardSource, options?: GeneratePlayer
                         deathrattleLines,
                         card.data.labelTags,
                         card.data.cannotAttackHero,
+                        heroAttackLines,
                     ),
                 };
             }

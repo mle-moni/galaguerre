@@ -10,6 +10,7 @@ const TRIGGERED_PASSIVE_LABELS: Record<string, string> = {
     DAMAGE: "Dégâts",
     PLAY_CARD: "Carte jouée",
     SUMMON: "Invocation",
+    DECK_CARD_ADD: "Carte placée dans un deck",
     HERO_ATTACK: "Attaque du héros",
 };
 

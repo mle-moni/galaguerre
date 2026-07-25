@@ -25,6 +25,7 @@ import {
     damageAction,
     deckCardAddAction,
     deckCardAddFromTargetAction,
+    deckCardDuplicateFromEventAction,
     deckCardDeleteAddedAction,
     defeatAction,
     destroyAction,
@@ -235,6 +236,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             tags: ["DEVELOPPEUR"],
             deathrattleActions: [enemyDrawAction(1)],
+        },
+    ),
+    defineMinion(
+        191,
+        {
+            ...gal("Développeur Fatigué", 3),
+            imageUrl: "/card-covers/galadrim/developpeur-fatigue.webp",
+            attack: 3,
+            health: 3,
+        },
+        {
+            tags: ["DEVELOPPEUR"],
+            battlecryActions: [deckCardAddAction(185, 1, { targetTeam: "OPPONENT" })],
         },
     ),
     defineMinion(
@@ -458,6 +472,22 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             tags: ["PM"],
             battlecryActions: [deckCardDeleteAddedAction()],
+        },
+        { rarity: "RARE" },
+    ),
+    defineMinion(
+        188,
+        {
+            ...gal("Testeur nonchalant", 3),
+            imageUrl: "/card-covers/galadrim/testeur-nonchalant.webp",
+            attack: 2,
+            health: 2,
+        },
+        {
+            tags: ["PM"],
+            passives: [
+                actionPassive("TURN_END", deckCardAddAction(185, 1, { targetTeam: "OPPONENT" })),
+            ],
         },
         { rarity: "RARE" },
     ),
@@ -920,6 +950,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             tags: ["PETS"],
             passives: [boostPassive(boostBoth(2, 1), otherAllyMinionsWithTag("PETS"))],
+        },
+        { rarity: "EPIC" },
+    ),
+    defineMinion(
+        190,
+        {
+            ...gal("Perroquet de l'open space", 4),
+            imageUrl: "/card-covers/galadrim/perroquet-de-l-open-space.webp",
+            attack: 4,
+            health: 4,
+        },
+        {
+            tags: ["PETS"],
+            passives: [actionPassive("DECK_CARD_ADD", deckCardDuplicateFromEventAction())],
         },
         { rarity: "EPIC" },
     ),
@@ -1554,6 +1598,19 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             durability: 2,
         },
         { cannotAttackHero: true },
+    ),
+    defineWeapon(
+        189,
+        {
+            ...gal("Cahier des charges imprécis", 4),
+            imageUrl: "/card-covers/galadrim/cahier-des-charges-imprecis.webp",
+            damage: 3,
+            durability: 2,
+        },
+        {
+            heroAttackActions: [deckCardAddAction(185, 1, { targetTeam: "OPPONENT" })],
+        },
+        { rarity: "EPIC" },
     ),
     defineMinion(
         187,

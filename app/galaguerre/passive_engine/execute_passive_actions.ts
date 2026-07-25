@@ -1,4 +1,5 @@
 import type { PassiveTriggerEntry } from "./collect_passive_triggers.js";
+import type { PassiveTriggerEvent } from "#api_types/target_matching";
 import type Game from "#models/game";
 import { findMinionOnPlayerBoard } from "../action_engine/find_minion_on_board.js";
 import { executeActionSequence } from "../action_engine/execute_action_sequence.js";
@@ -12,6 +13,7 @@ const isGameOver = (game: Game): boolean => {
 export const executePassiveActions = (
     game: Game,
     entries: PassiveTriggerEntry[],
+    event?: PassiveTriggerEvent,
 ): { gameEnded: boolean; discoverPending: boolean } => {
     let openedStandaloneBeat = false;
 
@@ -41,6 +43,7 @@ export const executePassiveActions = (
             sourceCard: entry.sourceCard,
             effectKind: "PASSIVE",
             sourceMinion,
+            deckCardAddEvent: event,
         });
 
         if (result.discoverPending) {

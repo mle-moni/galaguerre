@@ -69,6 +69,8 @@ const collectFromBoard = (
                 owner !== activePlayer
             ) {
                 continue;
+            } else if (triggersOn === "DECK_CARD_ADD") {
+                if (!event || event.type !== "DECK_CARD") continue;
             } else if ((triggersOn === "HEAL" || triggersOn === "DAMAGE") && event) {
                 if (
                     !passiveTriggerEventMatchesFilter(

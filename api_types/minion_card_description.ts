@@ -17,8 +17,10 @@ import {
     formatExtraBattlecryTriggersDescription,
     formatGroupedActionDescriptions,
     formatHealDamagePassiveTriggerLabel,
+    formatHeroAttackTriggerLine,
     formatPlayCardPassiveTriggerLabel,
     formatSummonPassiveTriggerLabel,
+    HERO_ATTACK_TRIGGER_PREFIX,
     isExtraBattlecryTriggersOnlyAllyHeroBoost,
 } from "./format_action_description.js";
 
@@ -30,6 +32,7 @@ const PASSIVE_TRIGGER_LABELS: Record<
     TURN_BEGIN: "début de tour",
     DRAW: "pioche",
     HERO_ATTACK: "attaque du héros",
+    DECK_CARD_ADD: "carte placée dans un deck",
 };
 
 const LABEL_ONLY_EFFECTS = new Set(["Provocation", "Discrétion"]);
@@ -49,6 +52,12 @@ export const getDeathrattleDescription = (actions: CardActionSnapshot[]): string
 export const getAttackDescription = (actions: CardActionSnapshot[]): string[] => {
     return formatGroupedActionDescriptions(actions, ATTACK_TRIGGER_PREFIX).map(
         formatAttackTriggerLine,
+    );
+};
+
+export const getHeroAttackDescription = (actions: CardActionSnapshot[]): string[] => {
+    return formatGroupedActionDescriptions(actions, HERO_ATTACK_TRIGGER_PREFIX).map(
+        formatHeroAttackTriggerLine,
     );
 };
 
@@ -90,11 +99,13 @@ export const getWeaponCardDescription = (
     deathrattleLines: string[] = [],
     labelTags: CardLabelTag[] = [],
     cannotAttackHero = false,
+    heroAttackLines: string[] = [],
 ): string => {
     return joinCardDescriptionParts([
         ...formatLabelTagLines(labelTags),
         `Arme ${damage}/${durability}.`,
         ...(cannotAttackHero ? ["Ne peut pas attaquer le héros adverse"] : []),
+        ...heroAttackLines,
         ...deathrattleLines,
     ]);
 };

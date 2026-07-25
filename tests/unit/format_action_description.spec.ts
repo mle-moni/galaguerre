@@ -863,4 +863,20 @@ test.group("format_action_description", () => {
             "Cri de guerre : Donne Discrétion à vos serviteurs adjacents.",
         );
     });
+
+    test("formats DECK_CARD duplicate from trigger context", ({ assert }) => {
+        const action = createCardActionSnapshot({
+            type: "DECK_CARD",
+            deckCardOperation: "ADD",
+            deckPlacement: null,
+            cardId: null,
+            copyCount: 1,
+            useTriggerContext: true,
+        });
+
+        assert.equal(
+            formatActionDescription(action, "Passif (carte placée dans un deck)"),
+            "Passif (carte placée dans un deck) : Place une copie supplémentaire de la carte ajoutée au même endroit.",
+        );
+    });
 });

@@ -952,12 +952,22 @@ export const formatGroupedActionDescriptions = (
 
 export const ATTACK_TRIGGER_PREFIX = "Chaque fois que ce monstre attaque";
 
+export const HERO_ATTACK_TRIGGER_PREFIX = "Une fois que votre héros a attaqué";
+
 export const formatAttackTriggerLine = (line: string): string => {
     const colonPrefix = `${ATTACK_TRIGGER_PREFIX} : `;
     if (!line.startsWith(colonPrefix)) return line;
 
     const action = line.slice(colonPrefix.length);
     return `${ATTACK_TRIGGER_PREFIX}, ${action.charAt(0).toLowerCase()}${action.slice(1)}`;
+};
+
+export const formatHeroAttackTriggerLine = (line: string): string => {
+    const colonPrefix = `${HERO_ATTACK_TRIGGER_PREFIX} : `;
+    if (!line.startsWith(colonPrefix)) return line;
+
+    const action = line.slice(colonPrefix.length);
+    return `${HERO_ATTACK_TRIGGER_PREFIX}, ${action.charAt(0).toLowerCase()}${action.slice(1)}`;
 };
 
 export const formatActionDescription = (
@@ -1314,6 +1324,14 @@ export const formatActionDescription = (
             return `${prefix} : Invoquez ${countLabel} de votre main.`;
         }
         case "DECK_CARD": {
+            if (action.useTriggerContext && action.deckCardOperation === "ADD") {
+                const copies =
+                    action.copyCount === 1
+                        ? "une copie supplémentaire"
+                        : `${action.copyCount} copies supplémentaires`;
+                return `${prefix} : Place ${copies} de la carte ajoutée au même endroit.`;
+            }
+
             if (action.isTargeted && action.deckCardOperation === "ADD") {
                 const copies = action.copyCount === 1 ? "1 copie" : `${action.copyCount} copies`;
                 const targetLabel =

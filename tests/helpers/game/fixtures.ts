@@ -157,6 +157,7 @@ type CardActionSnapshotOverrides = {
     deckCardOperation?: "ADD" | "DELETE" | "DELETE_ADDED";
     deckPlacement?: "TOP" | "BOTTOM" | "RANDOM" | null;
     deckTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
+    useTriggerContext?: boolean;
     handTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
     generateCount?: number;
     generateCardFilter?: CardFilterSnapshot | null;
@@ -346,6 +347,7 @@ export const createCardActionSnapshot = (
                         : overrides.deckCardOperation === "DELETE_ADDED"
                           ? null
                           : 1,
+                useTriggerContext: overrides.useTriggerContext ?? false,
                 actionCondition,
                 onTargetResult,
             };
@@ -622,6 +624,7 @@ export const createWeaponCard = (
         durability: 2,
         description: "Arme 3/2.",
         deathrattleActions: [],
+        heroAttackActions: [],
         ...overrides,
     };
 };

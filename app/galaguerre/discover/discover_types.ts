@@ -4,6 +4,7 @@ import type {
     DiscoverEffectKind,
     GamePlayer,
 } from "#api_types/game.types";
+import type { PassiveTriggerEvent } from "#api_types/target_matching";
 
 export type ExecuteActionResult = "ok" | "discover_pending";
 
@@ -22,6 +23,7 @@ export interface ExecuteActionDiscoverContext {
 
 export interface ExecuteActionOptions {
     discoverContext?: ExecuteActionDiscoverContext;
+    deckCardAddEvent?: PassiveTriggerEvent;
 }
 
 export const findPlayerByUserId = (

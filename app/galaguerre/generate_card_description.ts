@@ -4,6 +4,7 @@ import {
     getBattlecryDescription,
     getComboDescription,
     getDeathrattleDescription,
+    getHeroAttackDescription,
     getMinionCardDescription,
     getMinionPowerEffects,
     getPassiveDescription,
@@ -16,12 +17,14 @@ export const generateCardDescriptionFromData = (data: CardData): string => {
     switch (data.type) {
         case "WEAPON": {
             const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
+            const heroAttackLines = getHeroAttackDescription(data.heroAttackActions ?? []);
             return getWeaponCardDescription(
                 data.damage,
                 data.durability,
                 deathrattleLines,
                 data.labelTags,
                 data.cannotAttackHero,
+                heroAttackLines,
             );
         }
         case "SPELL": {

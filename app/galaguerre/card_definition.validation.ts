@@ -72,6 +72,7 @@ export type PassiveDefinition = {
         | "PLAY_CARD"
         | "SUMMON"
         | "HERO_ATTACK"
+        | "DECK_CARD_ADD"
         | null;
     action: CardActionDefinition | null;
     passiveBoost: {
@@ -552,6 +553,43 @@ const validateDeckCardPayload = (
                 path: [...path, "deckCardOperation"],
             });
         }
+    } else if (action.useTriggerContext) {
+        if (action.isTargeted) {
+            ctx.addIssue({
+                code: "custom",
+                message: "useTriggerContext DECK_CARD action must not be targeted",
+                path: [...path, "isTargeted"],
+            });
+        }
+        if (action.deckCardOperation !== "ADD") {
+            ctx.addIssue({
+                code: "custom",
+                message: "useTriggerContext DECK_CARD action must use ADD operation",
+                path: [...path, "deckCardOperation"],
+            });
+        }
+        if (action.cardId !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "useTriggerContext DECK_CARD action must not set cardId",
+                path: [...path, "cardId"],
+            });
+        }
+        if (action.deckPlacement !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "useTriggerContext DECK_CARD action must not set deckPlacement",
+                path: [...path, "deckPlacement"],
+            });
+        }
+        if (action.copyCount === null || action.copyCount <= 0) {
+            ctx.addIssue({
+                code: "custom",
+                message: "useTriggerContext DECK_CARD ADD action requires copyCount > 0",
+                path: [...path, "copyCount"],
+            });
+        }
+        return;
     } else if (action.cardId === null || action.cardId <= 0) {
         ctx.addIssue({
             code: "custom",

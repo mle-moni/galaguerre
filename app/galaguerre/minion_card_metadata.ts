@@ -6,6 +6,7 @@ export {
     getBattlecryDescription,
     getComboDescription,
     getDeathrattleDescription,
+    getHeroAttackDescription,
     getMinionCardDescription,
     getPassiveDescription,
     getSpellCardDescription,

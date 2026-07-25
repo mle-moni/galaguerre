@@ -28,6 +28,7 @@ export const serializeCatalogCard = (card: Card): ApiCatalogCard => {
                 damage: card.data.damage,
                 durability: card.data.durability,
                 deathrattleActions: card.data.deathrattleActions,
+                heroAttackActions: card.data.heroAttackActions ?? [],
             };
         case "SPELL":
             return {

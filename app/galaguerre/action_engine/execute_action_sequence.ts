@@ -5,6 +5,7 @@ import type {
     GamePlayer,
     MinionState,
 } from "#api_types/game.types";
+import type { PassiveTriggerEvent } from "#api_types/target_matching";
 import type Game from "#models/game";
 import { executeAction } from "./execute_action.js";
 import { isTargetedV1Action } from "./is_targeted_v1_action.js";
@@ -20,6 +21,7 @@ export interface ExecuteActionSequenceOptions {
     selectedTarget?: ActionTarget;
     damageBonus?: number;
     sourceMinion?: MinionState;
+    deckCardAddEvent?: PassiveTriggerEvent;
     battlecryContinuation?: {
         actions: CardActionSnapshot[];
         remainingIterations: number;
@@ -57,6 +59,7 @@ export const executeActionSequence = (
                     sourceMinionUuid: options.sourceMinion?.uuid,
                     battlecryContinuation: options.battlecryContinuation,
                 },
+                deckCardAddEvent: options.deckCardAddEvent,
             },
         );
 

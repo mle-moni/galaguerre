@@ -408,6 +408,21 @@ export const deckCardAddAction = (
     deckTargetTeam: options.targetTeam ?? "PLAYER",
     cardId,
     copyCount,
+    useTriggerContext: false,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
+export const deckCardDuplicateFromEventAction = (copyCount = 1): CardActionDefinition => ({
+    type: "DECK_CARD",
+    isTargeted: false,
+    target: null,
+    deckCardOperation: "ADD",
+    deckPlacement: null,
+    deckTargetTeam: "PLAYER",
+    cardId: null,
+    copyCount,
+    useTriggerContext: true,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
 });
@@ -425,6 +440,7 @@ export const deckCardAddFromTargetAction = (
     deckTargetTeam: options.targetTeam ?? "PLAYER",
     cardId: null,
     copyCount,
+    useTriggerContext: false,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
 });
@@ -442,6 +458,7 @@ export const deckCardDeleteAction = (
     deckTargetTeam: options.targetTeam ?? "PLAYER",
     cardId,
     copyCount,
+    useTriggerContext: false,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
 });
@@ -462,6 +479,7 @@ export const deckCardDeleteAddedAction = (
     deckTargetTeam: options.targetTeam ?? "ALL",
     cardId: null,
     copyCount: null,
+    useTriggerContext: false,
     actionCondition: defaultActionCondition(),
     onTargetResult: null,
 });
@@ -531,6 +549,7 @@ export const defaultWeaponData = (): WeaponCardData => ({
     damage: 1,
     durability: 1,
     deathrattleActions: [],
+    heroAttackActions: [],
     cannotAttackHero: false,
 });
 

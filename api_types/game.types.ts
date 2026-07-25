@@ -71,7 +71,8 @@ export type PassiveTriggersOn =
     | "DAMAGE"
     | "PLAY_CARD"
     | "SUMMON"
-    | "HERO_ATTACK";
+    | "HERO_ATTACK"
+    | "DECK_CARD_ADD";
 
 export interface AuraAppliedTarget {
     owner: SpotOwner;
@@ -105,6 +106,7 @@ export type WeaponCard = PlayerCardBase & {
     durability: number;
     description: string;
     deathrattleActions: CardActionSnapshot[];
+    heroAttackActions: CardActionSnapshot[];
     cannotAttackHero?: boolean;
 };
 
@@ -255,7 +257,8 @@ export type DiscoverEffectKind =
     | "SPELL"
     | "DEATHRATTLE"
     | "PASSIVE"
-    | "ATTACK";
+    | "ATTACK"
+    | "HERO_ATTACK";
 
 export interface DiscoverContinuation {
     remainingActions: CardActionSnapshot[];

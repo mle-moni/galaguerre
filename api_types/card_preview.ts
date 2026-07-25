@@ -5,6 +5,7 @@ import {
     getBattlecryDescription,
     getComboDescription,
     getDeathrattleDescription,
+    getHeroAttackDescription,
     getMinionCardDescription,
     getPassiveDescription,
     getSpellCardDescription,
@@ -123,6 +124,7 @@ const buildWeaponPreview = (entry: CardSeedEntry): WeaponCard => {
     }
 
     const deathrattleLines = getDeathrattleDescription(data.deathrattleActions);
+    const heroAttackLines = getHeroAttackDescription(data.heroAttackActions ?? []);
 
     return {
         uuid: `preview-${id}`,
@@ -146,8 +148,10 @@ const buildWeaponPreview = (entry: CardSeedEntry): WeaponCard => {
             deathrattleLines,
             data.labelTags,
             data.cannotAttackHero,
+            heroAttackLines,
         ),
         deathrattleActions: data.deathrattleActions,
+        heroAttackActions: data.heroAttackActions ?? [],
         cannotAttackHero: data.cannotAttackHero,
     };
 };

@@ -81,7 +81,13 @@ export const minionMatchesTarget = (
 
 export type PassiveTriggerEvent =
     | { type: "HERO"; affectedPlayer: GamePlayer }
-    | { type: "MINION"; owner: GamePlayer; boardIndex: number; minion: MinionState };
+    | { type: "MINION"; owner: GamePlayer; boardIndex: number; minion: MinionState }
+    | {
+          type: "DECK_CARD";
+          cardId: number;
+          targetPlayer: GamePlayer;
+          placement: "TOP" | "BOTTOM" | "RANDOM";
+      };
 
 export type PassiveTriggerGameContext = {
     playerOne: GamePlayer;
@@ -108,7 +114,13 @@ export const passiveTriggerEventMatchesFilter = (
         return heroMatchesTarget(filter, isOpponentHero);
     }
 
+    if (event.type === "DECK_CARD") {
+        return filter === null;
+    }
+
     if (filter.type === "HERO") return false;
+
+    if (event.type !== "MINION") return false;
 
     const isOpponentMinion = event.owner === passiveOpponent;
     if (shouldExcludeSourceMinion(filter, sourceMinion, event.minion)) return false;

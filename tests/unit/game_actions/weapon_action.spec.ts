@@ -362,4 +362,38 @@ test.group("weapon combat", () => {
         assertPlayerHealth(assert, game, "playerTwo", DEFAULT_HERO_HEALTH - 2);
         assertBoardIndex(assert, game, "playerOne", 0, { attack: 4, health: 4 });
     });
+
+    test("heroAttackActions place a card in opponent deck after hero attacks", async ({
+        assert,
+    }) => {
+        const weaponCard = createWeaponCard({
+            damage: 2,
+            durability: 2,
+            heroAttackActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "ADD",
+                    deckPlacement: "TOP",
+                    deckTargetTeam: "OPPONENT",
+                    cardId: 185,
+                    copyCount: 1,
+                }),
+            ],
+        });
+
+        const { game } = await runWeaponCombat(
+            createGameData({
+                playerOne: {
+                    weaponState: createWeaponState(weaponCard),
+                },
+                playerTwo: {
+                    deckCards: [],
+                },
+            }),
+            { heroAttack: true },
+        );
+
+        assert.equal(game.data.playerTwo.deckCards.length, 1);
+        assert.equal(game.data.playerTwo.deckCards[0]!.cardId, 185);
+    });
 });

@@ -12,7 +12,7 @@ import type Game from "#models/game";
 import { breakWeapon } from "#controllers/games/play_card/break_weapon";
 import { resolveSummonCount } from "./resolve_summon_count.js";
 import { drawCards } from "../draw_cards.js";
-import { addCardsToDeck, executeDeckCardAction } from "../deck_card_operations.js";
+import { addCardsToDeckWithPassives, executeDeckCardAction } from "../deck_card_operations.js";
 import { executeHandCardAction } from "../hand_card_operations.js";
 import { executeGenerateHandAction } from "../generate_hand_cards.js";
 import { applyBoostToAllMinions, applyBoostToHero, applyBoostToMinion } from "./apply_boost.js";
@@ -205,16 +205,47 @@ const applyEffectToResolvedTarget = (
 
             const cardId = resolved.minion.originalCard.cardId;
             switch (action.deckTargetTeam) {
-                case "PLAYER":
-                    addCardsToDeck(player, cardId, action.copyCount, action.deckPlacement);
+                case "PLAYER": {
+                    const { gameEnded } = addCardsToDeckWithPassives(
+                        game,
+                        player,
+                        cardId,
+                        action.copyCount,
+                        action.deckPlacement,
+                    );
+                    if (gameEnded) return { gameEnded: true };
                     break;
-                case "OPPONENT":
-                    addCardsToDeck(opponent, cardId, action.copyCount, action.deckPlacement);
+                }
+                case "OPPONENT": {
+                    const { gameEnded } = addCardsToDeckWithPassives(
+                        game,
+                        opponent,
+                        cardId,
+                        action.copyCount,
+                        action.deckPlacement,
+                    );
+                    if (gameEnded) return { gameEnded: true };
                     break;
-                case "ALL":
-                    addCardsToDeck(player, cardId, action.copyCount, action.deckPlacement);
-                    addCardsToDeck(opponent, cardId, action.copyCount, action.deckPlacement);
+                }
+                case "ALL": {
+                    const playerResult = addCardsToDeckWithPassives(
+                        game,
+                        player,
+                        cardId,
+                        action.copyCount,
+                        action.deckPlacement,
+                    );
+                    if (playerResult.gameEnded) return { gameEnded: true };
+                    const opponentResult = addCardsToDeckWithPassives(
+                        game,
+                        opponent,
+                        cardId,
+                        action.copyCount,
+                        action.deckPlacement,
+                    );
+                    if (opponentResult.gameEnded) return { gameEnded: true };
                     break;
+                }
             }
             return { gameEnded: false };
         }
@@ -451,9 +482,25 @@ const executeNonTargetedV1Action = (
             if (gameEnded) return "ok";
             break;
         }
-        case "DECK_CARD":
-            executeDeckCardAction(action, game, player, opponent);
+        case "DECK_CARD": {
+            if (action.useTriggerContext) {
+                const event = options?.deckCardAddEvent;
+                if (!event || event.type !== "DECK_CARD") break;
+                const { gameEnded } = addCardsToDeckWithPassives(
+                    game,
+                    event.targetPlayer,
+                    event.cardId,
+                    action.copyCount ?? 1,
+                    event.placement,
+                    { suppressPassives: true },
+                );
+                if (gameEnded) return "ok";
+                break;
+            }
+            const { gameEnded } = executeDeckCardAction(action, game, player, opponent);
+            if (gameEnded) return "ok";
             break;
+        }
         case "HAND_CARD":
             executeHandCardAction(action, game, player, opponent);
             break;
