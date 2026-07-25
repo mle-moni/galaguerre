@@ -25,6 +25,7 @@ import {
     damageAction,
     deckCardAddAction,
     deckCardAddFromTargetAction,
+    deckCardDeleteAddedAction,
     defeatAction,
     destroyAction,
     defineMinion,
@@ -444,6 +445,20 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["PM"],
             passives: [actionPassive("TURN_END", healAction(2, otherAllyMinions()))],
         },
+    ),
+    defineMinion(
+        184,
+        {
+            ...gal("Recadreur de scope", 5),
+            imageUrl: "/card-covers/galadrim/recadreur-de-scope.webp",
+            attack: 5,
+            health: 5,
+        },
+        {
+            tags: ["PM"],
+            battlecryActions: [deckCardDeleteAddedAction()],
+        },
+        { rarity: "RARE" },
     ),
 
     // --- sales / support minions ---

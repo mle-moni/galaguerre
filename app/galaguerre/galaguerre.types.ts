@@ -88,7 +88,7 @@ export const GALAGUERRE_ACTIONS_TYPES_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_ACTIONS_TYPES_LABEL_OBJ,
 );
 
-export const GALAGUERRE_DECK_CARD_OPERATIONS = ["ADD", "DELETE"] as const;
+export const GALAGUERRE_DECK_CARD_OPERATIONS = ["ADD", "DELETE", "DELETE_ADDED"] as const;
 export type GalaguerreDeckCardOperation = GenerateTypeFromEnum<
     typeof GALAGUERRE_DECK_CARD_OPERATIONS
 >;
@@ -99,6 +99,7 @@ export const GALAGUERRE_DECK_CARD_OPERATIONS_LABEL_OBJ: LabelObjectType<Galaguer
     {
         ADD: "Add",
         DELETE: "Delete",
+        DELETE_ADDED: "Delete Added",
     };
 export const GALAGUERRE_DECK_CARD_OPERATIONS_OPTIONS = generateOptionsFromLabelObj(
     GALAGUERRE_DECK_CARD_OPERATIONS_LABEL_OBJ,

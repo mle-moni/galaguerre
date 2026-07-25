@@ -149,7 +149,7 @@ type CardActionSnapshotOverrides = {
     summonCount?: number;
     summonTargetTeam?: "PLAYER" | "OPPONENT";
     handCardFilter?: CardFilterSnapshot | null;
-    deckCardOperation?: "ADD" | "DELETE";
+    deckCardOperation?: "ADD" | "DELETE" | "DELETE_ADDED";
     deckPlacement?: "TOP" | "BOTTOM" | "RANDOM" | null;
     deckTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
     handTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
@@ -323,10 +323,22 @@ export const createCardActionSnapshot = (
                         ? overrides.deckPlacement
                         : overrides.deckCardOperation === "DELETE" && overrides.copyCount === null
                           ? null
-                          : "RANDOM",
+                          : overrides.deckCardOperation === "DELETE_ADDED"
+                            ? null
+                            : "RANDOM",
                 deckTargetTeam: overrides.deckTargetTeam ?? "PLAYER",
-                cardId: overrides.cardId !== undefined ? overrides.cardId : 121,
-                copyCount: overrides.copyCount !== undefined ? overrides.copyCount : 1,
+                cardId:
+                    overrides.cardId !== undefined
+                        ? overrides.cardId
+                        : overrides.deckCardOperation === "DELETE_ADDED"
+                          ? null
+                          : 121,
+                copyCount:
+                    overrides.copyCount !== undefined
+                        ? overrides.copyCount
+                        : overrides.deckCardOperation === "DELETE_ADDED"
+                          ? null
+                          : 1,
                 actionCondition,
                 onTargetResult,
             };

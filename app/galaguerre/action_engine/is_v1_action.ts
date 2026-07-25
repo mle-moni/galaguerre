@@ -59,6 +59,9 @@ export const isV1Action = (action: CardActionFieldsSnapshot): boolean => {
             if (action.deckCardOperation === "ADD") {
                 return action.copyCount !== null && action.copyCount > 0;
             }
+            if (action.deckCardOperation === "DELETE_ADDED") {
+                return true;
+            }
             return action.copyCount === null || action.copyCount > 0;
         case "HAND_CARD":
             return action.copyCount > 0;

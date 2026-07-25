@@ -12,6 +12,7 @@ export const instantiateDeckCard = (cardId: number): PlayerCard | undefined => {
     return {
         ...template,
         uuid: randomUUID(),
+        isStartingDeckCard: false,
     };
 };
 
@@ -106,6 +107,12 @@ export const removeCardsFromDeck = (
     return removed;
 };
 
+export const removeAddedCardsFromDeck = (player: GamePlayer): number => {
+    const before = player.deckCards.length;
+    player.deckCards = player.deckCards.filter((card) => card.isStartingDeckCard !== false);
+    return before - player.deckCards.length;
+};
+
 const applyDeckCardOperationToPlayer = (
     targetPlayer: GamePlayer,
     action: Extract<CardActionFieldsSnapshot, { type: "DECK_CARD" }>,
@@ -113,6 +120,11 @@ const applyDeckCardOperationToPlayer = (
     if (action.deckCardOperation === "ADD") {
         if (action.cardId === null) return;
         addCardsToDeck(targetPlayer, action.cardId, action.copyCount!, action.deckPlacement!);
+        return;
+    }
+
+    if (action.deckCardOperation === "DELETE_ADDED") {
+        removeAddedCardsFromDeck(targetPlayer);
         return;
     }
 

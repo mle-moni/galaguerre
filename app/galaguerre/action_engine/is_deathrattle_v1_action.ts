@@ -32,6 +32,9 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
             if (action.deckCardOperation === "ADD") {
                 return action.copyCount !== null && action.copyCount > 0;
             }
+            if (action.deckCardOperation === "DELETE_ADDED") {
+                return true;
+            }
             return action.copyCount === null || action.copyCount > 0;
         case "HAND_CARD":
             return action.copyCount > 0;

@@ -434,6 +434,21 @@ export const deckCardDeleteAllAction = (
     options: Omit<DeckCardActionOptions, "placement"> = {},
 ): CardActionDefinition => deckCardDeleteAction(cardId, null, options);
 
+export const deckCardDeleteAddedAction = (
+    options: Omit<DeckCardActionOptions, "placement"> = {},
+): CardActionDefinition => ({
+    type: "DECK_CARD",
+    isTargeted: false,
+    target: null,
+    deckCardOperation: "DELETE_ADDED",
+    deckPlacement: null,
+    deckTargetTeam: options.targetTeam ?? "ALL",
+    cardId: null,
+    copyCount: null,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 type HandCardActionOptions = {
     targetTeam?: GalaguerreTargetTeam;
 };

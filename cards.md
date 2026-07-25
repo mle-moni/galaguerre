@@ -518,3 +518,7 @@ Format compact pour construction de deck par LLM.
 ### #183 Auditeur RGPD
 - Coût: 2 | Type: MINION | Stats: 2/6 [Provocation] | Rareté: Épique | Famille: Équipe support
 - Provocation. Cri de guerre : Votre adversaire invoque un serviteur aléatoire de sa main.
+
+### #184 Recadreur de scope
+- Coût: 5 | Type: MINION | Stats: 5/5 | Rareté: Rare | Famille: PM
+- Cri de guerre : Détruit toutes les cartes de deux decks qui n'y étaient pas au début de la partie.

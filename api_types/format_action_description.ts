@@ -1321,6 +1321,17 @@ export const formatActionDescription = (
             const cardName = formatDeckCardName(action.cardId!);
             const deleteLocation = formatDeckCardDeleteLocation(action.deckTargetTeam);
 
+            if (action.deckCardOperation === "DELETE_ADDED") {
+                switch (action.deckTargetTeam) {
+                    case "OPPONENT":
+                        return `${prefix} : Détruit toutes les cartes du deck adverse qui n'y étaient pas au début de la partie.`;
+                    case "ALL":
+                        return `${prefix} : Détruit toutes les cartes de deux decks qui n'y étaient pas au début de la partie.`;
+                    default:
+                        return `${prefix} : Détruit toutes les cartes de votre deck qui n'y étaient pas au début de la partie.`;
+                }
+            }
+
             if (action.deckCardOperation === "DELETE") {
                 if (action.copyCount === null) {
                     return `${prefix} : Supprime toutes les copies de la carte ${cardName} ${deleteLocation}.`;

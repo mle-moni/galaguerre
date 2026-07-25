@@ -479,6 +479,38 @@ const validateDeckCardPayload = (
     ctx: z.RefinementCtx,
     path: (string | number)[],
 ) => {
+    if (action.deckCardOperation === "DELETE_ADDED") {
+        if (action.isTargeted) {
+            ctx.addIssue({
+                code: "custom",
+                message: "DELETE_ADDED DECK_CARD action must not be targeted",
+                path: [...path, "isTargeted"],
+            });
+        }
+        if (action.cardId !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "DELETE_ADDED DECK_CARD action must not set cardId",
+                path: [...path, "cardId"],
+            });
+        }
+        if (action.copyCount !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "DELETE_ADDED DECK_CARD action must not set copyCount",
+                path: [...path, "copyCount"],
+            });
+        }
+        if (action.deckPlacement !== null) {
+            ctx.addIssue({
+                code: "custom",
+                message: "DELETE_ADDED DECK_CARD action must not set deckPlacement",
+                path: [...path, "deckPlacement"],
+            });
+        }
+        return;
+    }
+
     if (action.isTargeted) {
         if (action.cardId !== null) {
             ctx.addIssue({

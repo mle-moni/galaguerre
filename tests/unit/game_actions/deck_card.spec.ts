@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import { targetedAnyMinion } from "../../../database/seed_data/cards/define_card.js";
 import {
     addCardsToDeck,
+    removeAddedCardsFromDeck,
     removeCardsFromDeck,
 } from "../../../app/galaguerre/deck_card_operations.js";
 import {
@@ -101,6 +102,58 @@ test.group("deck_card_operations", () => {
         assert.equal(removed, 2);
         assert.equal(player.deckCards.length, 1);
         assert.equal(player.deckCards[0]!.uuid, "other");
+    });
+
+    test("removeAddedCardsFromDeck keeps only starting deck cards", ({ assert }) => {
+        const startingOne = createMinionCard({
+            uuid: "starting-1",
+            cardId: 1,
+            isStartingDeckCard: true,
+        });
+        const startingTwo = createMinionCard({
+            uuid: "starting-2",
+            cardId: 2,
+            isStartingDeckCard: true,
+        });
+        const addedOne = createMinionCard({
+            uuid: "added-1",
+            cardId: LEGUME_CARD_ID,
+            isStartingDeckCard: false,
+        });
+        const addedTwo = createMinionCard({
+            uuid: "added-2",
+            cardId: LEGUME_CARD_ID,
+            isStartingDeckCard: false,
+        });
+        const player = createGamePlayer(1, {
+            deckCards: [startingOne, addedOne, startingTwo, addedTwo],
+            hand: [],
+        });
+
+        const removed = removeAddedCardsFromDeck(player);
+
+        assert.equal(removed, 2);
+        assert.equal(player.deckCards.length, 2);
+        assert.deepEqual(
+            player.deckCards.map((card) => card.uuid),
+            ["starting-1", "starting-2"],
+        );
+    });
+
+    test("removeAddedCardsFromDeck keeps cards without provenance flag", ({ assert }) => {
+        const legacy = createMinionCard({ uuid: "legacy", cardId: 1 });
+        const added = createMinionCard({
+            uuid: "added",
+            cardId: LEGUME_CARD_ID,
+            isStartingDeckCard: false,
+        });
+        const player = createGamePlayer(1, { deckCards: [legacy, added], hand: [] });
+
+        const removed = removeAddedCardsFromDeck(player);
+
+        assert.equal(removed, 1);
+        assert.equal(player.deckCards.length, 1);
+        assert.equal(player.deckCards[0]!.uuid, "legacy");
     });
 });
 
@@ -264,6 +317,89 @@ test.group("deck_card battlecry", () => {
         );
 
         assert.equal(game.data.playerTwo.deckCards.length, 0);
+    });
+
+    test("DELETE_ADDED battlecry removes added cards from both decks", ({ assert }) => {
+        const playerStarting = createMinionCard({
+            uuid: "p-starting",
+            cardId: 1,
+            isStartingDeckCard: true,
+        });
+        const playerAdded = createMinionCard({
+            uuid: "p-added",
+            cardId: LEGUME_CARD_ID,
+            isStartingDeckCard: false,
+        });
+        const opponentStarting = createMinionCard({
+            uuid: "o-starting",
+            cardId: 2,
+            isStartingDeckCard: true,
+        });
+        const opponentAdded = createMinionCard({
+            uuid: "o-added",
+            cardId: LEGUME_CARD_ID,
+            isStartingDeckCard: false,
+        });
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "DELETE_ADDED",
+                    deckPlacement: null,
+                    deckTargetTeam: "ALL",
+                    cardId: null,
+                    copyCount: null,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [playerStarting, playerAdded] },
+                playerTwo: { deckCards: [opponentStarting, opponentAdded] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 1);
+        assert.equal(game.data.playerOne.deckCards[0]!.uuid, "p-starting");
+        assert.equal(game.data.playerTwo.deckCards.length, 1);
+        assert.equal(game.data.playerTwo.deckCards[0]!.uuid, "o-starting");
+    });
+
+    test("DELETE_ADDED battlecry keeps mulliganed starting deck cards", ({ assert }) => {
+        const mulliganedStarting = createMinionCard({
+            uuid: "mulliganed",
+            cardId: 1,
+            isStartingDeckCard: true,
+        });
+        const added = createMinionCard({
+            uuid: "added",
+            cardId: LEGUME_CARD_ID,
+            isStartingDeckCard: false,
+        });
+        const handCard = createMinionCard({
+            battlecryActions: [
+                createCardActionSnapshot({
+                    type: "DECK_CARD",
+                    deckCardOperation: "DELETE_ADDED",
+                    deckPlacement: null,
+                    deckTargetTeam: "PLAYER",
+                    cardId: null,
+                    copyCount: null,
+                }),
+            ],
+        });
+
+        const { game } = runBattlecry(
+            createGameData({
+                playerOne: { hand: [handCard], deckCards: [mulliganedStarting, added] },
+            }),
+            handCard,
+        );
+
+        assert.equal(game.data.playerOne.deckCards.length, 1);
+        assert.equal(game.data.playerOne.deckCards[0]!.uuid, "mulliganed");
     });
 });
 

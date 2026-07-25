@@ -53,6 +53,8 @@ export interface PlayerCardBase {
     labelTags: CardLabelTag[];
     rarity: CardRarity;
     generatedBy?: { cardId: number; label: string };
+    /** True for cards in the opening deck; false for cards added mid-game. */
+    isStartingDeckCard?: boolean;
 }
 export type PlayerCard = MinionCard | SpellCard | WeaponCard;
 

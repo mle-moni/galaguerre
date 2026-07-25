@@ -51,6 +51,7 @@ export const generatePlayerCards = (source: CardSource, options?: GeneratePlayer
             tags: card.data.tags,
             labelTags: card.data.labelTags,
             rarity: card.rarity,
+            isStartingDeckCard: true,
         };
 
         switch (card.data.type) {
