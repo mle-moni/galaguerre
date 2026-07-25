@@ -1,7 +1,11 @@
 import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import { GOLD_COINS_PER_DEFEAT, GOLD_COINS_PER_VICTORY } from "#api_types/rewards.types";
-import { computePlayerXpGain } from "#api_types/progression";
+import {
+    XP_FRIENDLY_DEFEAT,
+    XP_FRIENDLY_VICTORY,
+    computePlayerXpGain,
+} from "#api_types/progression";
 import { terminateGame } from "#controllers/games/terminate_game";
 import Game from "#models/game";
 import User from "#models/user";
@@ -176,7 +180,7 @@ test.group("elo", (group) => {
         assert.equal(game.data.rewardResult!.playerOne.goldCoins, GOLD_COINS_PER_DEFEAT);
     });
 
-    test("friendly games finish without any progression", async ({ assert }) => {
+    test("friendly games award half ranked xp without other progression", async ({ assert }) => {
         const { game, playerOne, playerTwo } = await createTestGame(
             createGameData({
                 state: "PLAYER_ONE_TURN",
@@ -226,17 +230,24 @@ test.group("elo", (group) => {
         assert.isTrue(game.data.postGameProgressionApplied);
         assert.isUndefined(game.data.ratingResult);
         assert.isUndefined(game.data.rewardResult);
-        assert.isUndefined(game.data.xpResult);
+        assert.equal(game.data.xpResult?.playerTwo.xp, XP_FRIENDLY_VICTORY);
+        assert.equal(game.data.xpResult?.playerOne.xp, XP_FRIENDLY_DEFEAT);
         assert.isUndefined(game.data.dailyQuestProgressApplied);
+        assert.equal(playerTwo.xp, before.playerTwo.xp + XP_FRIENDLY_VICTORY);
+        assert.equal(playerOne.xp, before.playerOne.xp + XP_FRIENDLY_DEFEAT);
         assert.deepEqual(
             {
                 elo: playerOne.elo,
                 wins: playerOne.wins,
                 losses: playerOne.losses,
                 goldCoins: playerOne.goldCoins,
-                xp: playerOne.xp,
             },
-            before.playerOne,
+            {
+                elo: before.playerOne.elo,
+                wins: before.playerOne.wins,
+                losses: before.playerOne.losses,
+                goldCoins: before.playerOne.goldCoins,
+            },
         );
         assert.deepEqual(
             {
@@ -244,9 +255,13 @@ test.group("elo", (group) => {
                 wins: playerTwo.wins,
                 losses: playerTwo.losses,
                 goldCoins: playerTwo.goldCoins,
-                xp: playerTwo.xp,
             },
-            before.playerTwo,
+            {
+                elo: before.playerTwo.elo,
+                wins: before.playerTwo.wins,
+                losses: before.playerTwo.losses,
+                goldCoins: before.playerTwo.goldCoins,
+            },
         );
         assert.equal(playerOneQuest.progress, before.playerOneQuest);
         assert.equal(playerTwoQuest.progress, before.playerTwoQuest);

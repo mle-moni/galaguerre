@@ -160,7 +160,7 @@ export const GameFinalScreen = observer(() => {
                     </Text>
                 ) : isFriendly ? (
                     <Text size="sm" c="dimmed">
-                        Match amical — aucune progression
+                        Match amical — pas d&apos;Elo ni de butin, XP réduit
                     </Text>
                 ) : isDraw ? (
                     <Text size="sm" c="dimmed">
@@ -189,8 +189,11 @@ export const GameFinalScreen = observer(() => {
                     winnerUserId={store.winnerUserId}
                 />
 
-                {!store.isSpectating && !isFriendly && userReward ? (
-                    <GameLootSection reward={userReward} xp={userXp} />
+                {!store.isSpectating && (isFriendly ? userXp > 0 : userReward) ? (
+                    <GameLootSection
+                        reward={userReward ?? { goldCoins: 0, packs: 0 }}
+                        xp={userXp}
+                    />
                 ) : null}
 
                 {store.isSpectating || isFriendly ? (

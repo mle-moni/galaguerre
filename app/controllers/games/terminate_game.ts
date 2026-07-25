@@ -58,9 +58,10 @@ const applyPostGameProgression = async (
 
     if (!game.data.isFriendly) {
         await applyGameRewards(game, trx);
-        await applyGameXp(game, trx);
         await updateDailyQuestProgressForGame(game, trx);
     }
+
+    await applyGameXp(game, trx);
 
     game.data = {
         ...game.data,

@@ -27,7 +27,12 @@ const computeGameXpByUserId = (game: Game): Map<number, number> => {
         if (!isHumanUserId(userId)) continue;
 
         const isWinner = !isDraw && winnerUserId === userId;
-        const xp = computePlayerXpGain({ isWinner, isDraw, isTraining: false });
+        const xp = computePlayerXpGain({
+            isWinner,
+            isDraw,
+            isTraining: false,
+            isFriendly: game.data.isFriendly === true,
+        });
         xpByUserId.set(userId, xp);
     }
 

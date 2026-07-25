@@ -23,6 +23,7 @@ const applyGameXpLocked = async (game: Game, trx: TransactionClientContract): Pr
     const winnerUserId = getWinnerUserId(game);
     const isDraw = winnerUserId === null;
     const isTraining = game.data.isTraining === true;
+    const isFriendly = game.data.isFriendly === true;
 
     const humanUserIds = [game.data.playerOne.userId, game.data.playerTwo.userId].filter(
         isHumanUserId,
@@ -53,12 +54,14 @@ const applyGameXpLocked = async (game: Game, trx: TransactionClientContract): Pr
         isWinner: !isDraw && winnerUserId === game.data.playerOne.userId,
         isDraw,
         isTraining,
+        isFriendly,
     });
 
     const playerTwoXp = computePlayerXpGain({
         isWinner: !isDraw && winnerUserId === game.data.playerTwo.userId,
         isDraw,
         isTraining,
+        isFriendly,
     });
 
     for (const userId of humanUserIds) {

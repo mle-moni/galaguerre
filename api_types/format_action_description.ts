@@ -1383,7 +1383,7 @@ export const formatActionDescription = (
                     case "OPPONENT":
                         return `${prefix} : Détruit toutes les cartes du deck adverse qui n'y étaient pas au début de la partie.`;
                     case "ALL":
-                        return `${prefix} : Détruit toutes les cartes de deux decks qui n'y étaient pas au début de la partie.`;
+                        return `${prefix} : Détruit toutes les cartes des deux decks qui n'y étaient pas au début de la partie.`;
                     default:
                         return `${prefix} : Détruit toutes les cartes de votre deck qui n'y étaient pas au début de la partie.`;
                 }

@@ -220,7 +220,7 @@ export const GameHistoryDetailPage = observer(() => {
                     {showEloUnchanged && (
                         <span className="game-history-detail-summary__elo-note">
                             {detail.isFriendly
-                                ? "Match amical — aucune progression"
+                                ? "Match amical — pas d'Elo ni de butin"
                                 : isDraw
                                   ? "Match nul — Elo inchangé"
                                   : "Elo inchangé"}

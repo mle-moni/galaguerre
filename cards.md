@@ -521,7 +521,7 @@ Format compact pour construction de deck par LLM.
 
 ### #184 Recadreur de scope
 - Coût: 5 | Type: MINION | Stats: 5/5 | Rareté: Rare | Famille: PM
-- Cri de guerre : Détruit toutes les cartes de deux decks qui n'y étaient pas au début de la partie.
+- Cri de guerre : Détruit toutes les cartes des deux decks qui n'y étaient pas au début de la partie.
 
 ### #185 Bug à retardement
 - Coût: 0 | Type: SPELL | Stats: — | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE

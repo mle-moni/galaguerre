@@ -1,4 +1,9 @@
-import { XP_RANKED_DEFEAT, XP_RANKED_VICTORY } from "#api_types/progression";
+import {
+    XP_FRIENDLY_DEFEAT,
+    XP_FRIENDLY_VICTORY,
+    XP_RANKED_DEFEAT,
+    XP_RANKED_VICTORY,
+} from "#api_types/progression";
 import Game from "#models/game";
 import User from "#models/user";
 import { applyGameXp } from "#services/progression/apply_game_xp";
@@ -30,6 +35,27 @@ test.group("apply game xp", (group) => {
         assert.equal(playerOne.xp, XP_RANKED_DEFEAT);
         assert.equal(game.data.xpResult?.playerTwo.xp, XP_RANKED_VICTORY);
         assert.equal(game.data.xpResult?.playerOne.xp, XP_RANKED_DEFEAT);
+    });
+
+    test("friendly winner gets half ranked xp", async ({ assert }) => {
+        const { game, playerOne, playerTwo } = await createTestGame(
+            createGameData({
+                state: "PLAYER_ONE_TURN",
+                currentRound: 2,
+                isFriendly: true,
+                playerOne: { health: 0 },
+                playerTwo: { health: 5 },
+            }),
+        );
+
+        await applyGameXp(game);
+        await playerOne.refresh();
+        await playerTwo.refresh();
+
+        assert.equal(playerTwo.xp, XP_FRIENDLY_VICTORY);
+        assert.equal(playerOne.xp, XP_FRIENDLY_DEFEAT);
+        assert.equal(game.data.xpResult?.playerTwo.xp, XP_FRIENDLY_VICTORY);
+        assert.equal(game.data.xpResult?.playerOne.xp, XP_FRIENDLY_DEFEAT);
     });
 
     test("training game gives no xp", async ({ assert }) => {

@@ -1,5 +1,7 @@
 export const XP_RANKED_VICTORY = 400;
 export const XP_RANKED_DEFEAT = 100;
+export const XP_FRIENDLY_VICTORY = XP_RANKED_VICTORY / 2;
+export const XP_FRIENDLY_DEFEAT = XP_RANKED_DEFEAT / 2;
 
 export const MAX_LEVEL = 100;
 
@@ -158,24 +160,29 @@ export const computePlayerXpGain = ({
     isWinner,
     isDraw,
     isTraining,
+    isFriendly = false,
 }: {
     isWinner: boolean;
     isDraw: boolean;
     isTraining: boolean;
+    isFriendly?: boolean;
 }): number => {
     if (isTraining) {
         return 0;
     }
 
+    const victoryXp = isFriendly ? XP_FRIENDLY_VICTORY : XP_RANKED_VICTORY;
+    const defeatXp = isFriendly ? XP_FRIENDLY_DEFEAT : XP_RANKED_DEFEAT;
+
     if (isDraw) {
-        return XP_RANKED_DEFEAT;
+        return defeatXp;
     }
 
     if (isWinner) {
-        return XP_RANKED_VICTORY;
+        return victoryXp;
     }
 
-    return XP_RANKED_DEFEAT;
+    return defeatXp;
 };
 
 export const getProgressionMilestoneLevels = (currentLevel: number, radius = 2): number[] => {

@@ -1,4 +1,6 @@
 import {
+    XP_FRIENDLY_DEFEAT,
+    XP_FRIENDLY_VICTORY,
     XP_RANKED_DEFEAT,
     XP_RANKED_VICTORY,
     computePlayerXpGain,
@@ -27,6 +29,36 @@ test.group("progression", () => {
             XP_RANKED_DEFEAT,
         );
         assert.equal(computePlayerXpGain({ isWinner: false, isDraw: true, isTraining: true }), 0);
+    });
+
+    test("computePlayerXpGain returns half ranked xp in friendly games", ({ assert }) => {
+        assert.equal(
+            computePlayerXpGain({
+                isWinner: true,
+                isDraw: false,
+                isTraining: false,
+                isFriendly: true,
+            }),
+            XP_FRIENDLY_VICTORY,
+        );
+        assert.equal(
+            computePlayerXpGain({
+                isWinner: false,
+                isDraw: false,
+                isTraining: false,
+                isFriendly: true,
+            }),
+            XP_FRIENDLY_DEFEAT,
+        );
+        assert.equal(
+            computePlayerXpGain({
+                isWinner: false,
+                isDraw: true,
+                isTraining: false,
+                isFriendly: true,
+            }),
+            XP_FRIENDLY_DEFEAT,
+        );
     });
 
     test("getProgressionFromTotalXp uses 500 xp per level from 1 to 10", ({ assert }) => {
