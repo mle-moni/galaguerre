@@ -148,6 +148,7 @@ type CardActionSnapshotOverrides = {
     summonParameters?: ReconvertParametersSnapshot;
     summonCount?: number;
     summonTargetTeam?: "PLAYER" | "OPPONENT";
+    handCardFilter?: CardFilterSnapshot | null;
     deckCardOperation?: "ADD" | "DELETE";
     deckPlacement?: "TOP" | "BOTTOM" | "RANDOM" | null;
     deckTargetTeam?: "PLAYER" | "OPPONENT" | "ALL";
@@ -295,6 +296,19 @@ export const createCardActionSnapshot = (
                 summonParameters: overrides.summonParameters ?? createReconvertParametersSnapshot(),
                 summonCount: overrides.summonCount ?? 1,
                 summonTargetTeam: overrides.summonTargetTeam ?? "PLAYER",
+                actionCondition,
+                onTargetResult,
+            };
+        case "SUMMON_FROM_HAND":
+            return {
+                type: "SUMMON_FROM_HAND",
+                isTargeted: false,
+                summonTargetTeam: overrides.summonTargetTeam ?? "OPPONENT",
+                handCardFilter:
+                    overrides.handCardFilter !== undefined
+                        ? overrides.handCardFilter
+                        : createCardFilterSnapshot({ type: "MINION" }),
+                summonCount: overrides.summonCount ?? 1,
                 actionCondition,
                 onTargetResult,
             };

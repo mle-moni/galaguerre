@@ -61,6 +61,7 @@ import {
     selfMinion,
     silenceAction,
     summonCardId,
+    summonRandomMinionFromHandAction,
     spellDrawFilter,
     spellDiscoverFilter,
     targetedAllyMinion,
@@ -602,6 +603,23 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             tags: ["SUPPORT"],
             battlecryActions: [summonCardId(181, 3)],
         },
+    ),
+    defineMinion(
+        183,
+        {
+            ...gal("Auditeur RGPD", 2),
+            imageUrl: "/card-covers/galadrim/auditeur-rgpd.webp",
+            attack: 2,
+            health: 6,
+        },
+        {
+            tags: ["SUPPORT"],
+            minionPowers: {
+                hasTaunt: true,
+            },
+            battlecryActions: [summonRandomMinionFromHandAction("OPPONENT")],
+        },
+        { rarity: "EPIC" },
     ),
     defineMinion(
         151,

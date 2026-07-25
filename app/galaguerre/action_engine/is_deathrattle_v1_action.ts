@@ -26,6 +26,8 @@ export const isDeathrattleV1Action = (action: CardActionSnapshot): boolean => {
             return action.target !== null && action.target.type === "HERO";
         case "SUMMON":
             return action.summonCount > 0;
+        case "SUMMON_FROM_HAND":
+            return action.summonCount > 0;
         case "DECK_CARD":
             if (action.deckCardOperation === "ADD") {
                 return action.copyCount !== null && action.copyCount > 0;

@@ -41,7 +41,7 @@ import { applyDamageToAllMinions, applyHealToAllMinions } from "./apply_mass_min
 import { hasRandomLimitedTarget, pickRandomLimitedTargets } from "./pick_random_targets.js";
 import { resolveHeroTargets } from "./resolve_hero_target.js";
 import { resolveSelectedTarget, type ResolvedTarget } from "./resolve_selected_target.js";
-import { summonMinions } from "./summon_minion.js";
+import { summonMinions, summonRandomMinionsFromHand } from "./summon_minion.js";
 import { triggerSummonPassivesForCards } from "../passive_engine/trigger_summon_passives.js";
 import { requireMinionIndex } from "./find_minion_on_board.js";
 import { resolveManaAmount } from "./resolve_mana_amount.js";
@@ -430,6 +430,18 @@ const executeNonTargetedV1Action = (
                 action.summonParameters,
                 action.summonCount,
                 sourceMinion,
+            );
+            const { gameEnded } = triggerSummonPassivesForCards(game, player, summonedCards);
+            if (gameEnded) return "ok";
+            break;
+        }
+        case "SUMMON_FROM_HAND": {
+            const { summonedCards } = summonRandomMinionsFromHand(
+                game,
+                player,
+                action.summonTargetTeam,
+                action.handCardFilter,
+                action.summonCount,
             );
             const { gameEnded } = triggerSummonPassivesForCards(game, player, summonedCards);
             if (gameEnded) return "ok";

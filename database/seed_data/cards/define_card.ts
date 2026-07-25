@@ -360,6 +360,19 @@ export const summonCardId = (
     targetTeam: "PLAYER" | "OPPONENT" = "PLAYER",
 ): CardActionDefinition => summonAction(reconvertParameters({ cardId }), { count, targetTeam });
 
+export const summonRandomMinionFromHandAction = (
+    targetTeam: "PLAYER" | "OPPONENT" = "OPPONENT",
+    count = 1,
+): CardActionDefinition => ({
+    type: "SUMMON_FROM_HAND",
+    isTargeted: false,
+    summonTargetTeam: targetTeam,
+    handCardFilter: minionDrawFilter(),
+    summonCount: count,
+    actionCondition: defaultActionCondition(),
+    onTargetResult: null,
+});
+
 type DeckCardActionOptions = {
     placement?: GalaguerreDeckPlacement;
     targetTeam?: GalaguerreTargetTeam;

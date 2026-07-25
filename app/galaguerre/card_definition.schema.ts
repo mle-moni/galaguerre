@@ -173,6 +173,15 @@ const summonActionFieldsSchema = z.object({
     actionCondition: actionConditionSchema,
 });
 
+const summonFromHandActionFieldsSchema = z.object({
+    type: z.literal("SUMMON_FROM_HAND"),
+    isTargeted: z.literal(false).default(false),
+    summonTargetTeam: z.enum(["PLAYER", "OPPONENT"]).default("PLAYER"),
+    handCardFilter: cardFilterSchema.nullable().default(null),
+    summonCount: z.number().int().positive(),
+    actionCondition: actionConditionSchema,
+});
+
 const deckCardActionFieldsSchema = z.object({
     type: z.literal("DECK_CARD"),
     ...targetedActionBaseFields,
@@ -253,6 +262,7 @@ const cardActionFieldsSchema = z.discriminatedUnion("type", [
     mindControlActionFieldsSchema,
     returnToHandActionFieldsSchema,
     summonActionFieldsSchema,
+    summonFromHandActionFieldsSchema,
     deckCardActionFieldsSchema,
     handCardActionFieldsSchema,
     generateHandActionFieldsSchema,
@@ -302,6 +312,7 @@ export const cardActionSchema = z
         mindControlActionFieldsSchema.extend(cardActionOnTargetResultField),
         returnToHandActionFieldsSchema.extend(cardActionOnTargetResultField),
         summonActionFieldsSchema.extend(cardActionOnTargetResultField),
+        summonFromHandActionFieldsSchema.extend(cardActionOnTargetResultField),
         deckCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         handCardActionFieldsSchema.extend(cardActionOnTargetResultField),
         generateHandActionFieldsSchema.extend(cardActionOnTargetResultField),

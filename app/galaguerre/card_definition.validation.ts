@@ -424,6 +424,42 @@ const validateSummonPayload = (
     validateSummonParameters(action.summonParameters, ctx, [...path, "summonParameters"]);
 };
 
+const validateHandCardFilter = (
+    filter: CardFilterDefinition,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (filter.type !== "MINION" && filter.type !== "ANY") {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON_FROM_HAND handCardFilter.type must be MINION or ANY",
+            path: [...path, "type"],
+        });
+    }
+
+    if (filter.comparison !== null) {
+        validateComparisonSnapshot(filter.comparison, ctx, [...path, "comparison"]);
+    }
+};
+
+const validateSummonFromHandPayload = (
+    action: Extract<CardActionDefinition, { type: "SUMMON_FROM_HAND" }>,
+    ctx: z.RefinementCtx,
+    path: (string | number)[],
+) => {
+    if (action.summonCount <= 0) {
+        ctx.addIssue({
+            code: "custom",
+            message: "SUMMON_FROM_HAND action requires summonCount > 0",
+            path: [...path, "summonCount"],
+        });
+    }
+
+    if (action.handCardFilter !== null) {
+        validateHandCardFilter(action.handCardFilter, ctx, [...path, "handCardFilter"]);
+    }
+};
+
 const validateDeckCardTarget = (
     target: TargetDefinition,
     ctx: z.RefinementCtx,
@@ -959,6 +995,10 @@ const validateNonTargetedAction = (
         }
         case "SUMMON": {
             validateSummonPayload(action, ctx, path);
+            break;
+        }
+        case "SUMMON_FROM_HAND": {
+            validateSummonFromHandPayload(action, ctx, path);
             break;
         }
         case "DECK_CARD": {

@@ -3,7 +3,9 @@ import {
     insertMinionAtIndex,
     playerHasBoardSpace,
 } from "#api_types/board";
+import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import type {
+    CardFilterSnapshot,
     GamePlayer,
     MinionCard,
     MinionState,
@@ -11,6 +13,7 @@ import type {
 } from "#api_types/game.types";
 import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
+import { randomIntInRange } from "../../utils/random.js";
 import { instantiateMinion } from "../../controllers/games/play_card/instantiate_minion.js";
 import { playerOwnsGoldenCard } from "../golden/resolve_is_golden_for_player.js";
 import { refreshAurasAfterMinionPlayed } from "../passive_engine/refresh_passive_auras.js";
@@ -188,6 +191,69 @@ export const summonMinions = (
             });
             summonedCards.push(card);
         }
+    }
+
+    return { summonedCards };
+};
+
+const DEFAULT_HAND_CARD_FILTER: CardFilterSnapshot = {
+    type: "MINION",
+    comparison: null,
+    tags: [],
+    labelTags: [],
+    rarity: null,
+};
+
+const pickEligibleHandMinions = (
+    hand: GamePlayer["hand"],
+    filter: CardFilterSnapshot,
+): MinionCard[] =>
+    hand.filter(
+        (card): card is MinionCard => card.type === "MINION" && deckCardMatchesFilter(card, filter),
+    );
+
+export const summonRandomMinionsFromHand = (
+    game: Game,
+    controller: GamePlayer,
+    targetTeam: "PLAYER" | "OPPONENT",
+    handCardFilter: CardFilterSnapshot | null,
+    count: number,
+): { summonedCards: MinionCard[] } => {
+    const filter = handCardFilter ?? DEFAULT_HAND_CARD_FILTER;
+    const owner = targetTeam === "PLAYER" ? controller : getOpponent(game, controller);
+    const summonedCards: MinionCard[] = [];
+
+    for (let i = 0; i < count; i++) {
+        if (!playerHasBoardSpace(owner)) break;
+
+        const eligible = pickEligibleHandMinions(owner.hand, filter);
+        if (eligible.length === 0) break;
+
+        const picked = eligible[randomIntInRange(0, eligible.length - 1)]!;
+        const boardIndex = countBoardMinionsOnBoard(owner.board);
+        const { inserted, boardIndex: insertedIndex } = insertMinionOnBoard(
+            game,
+            owner,
+            boardIndex,
+            picked,
+        );
+
+        if (!inserted || insertedIndex === null) break;
+
+        owner.hand = owner.hand.filter((card) => card.uuid !== picked.uuid);
+
+        const ownerSpot = resolveSpotOwner(game, owner);
+        withNarrativeRecorder((recorder) => {
+            recorder.recordEffect({
+                type: "MOVE_CARD",
+                cardUuid: picked.uuid,
+                owner: ownerSpot,
+                from: "HAND",
+                to: { type: "BOARD", owner: ownerSpot, boardIndex: insertedIndex },
+            });
+        });
+
+        summonedCards.push(picked);
     }
 
     return { summonedCards };

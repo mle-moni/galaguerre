@@ -1289,6 +1289,17 @@ export const formatActionDescription = (
 
             return `${prefix} : Invoque ${countLabel} (${targetLabel}) ${boardLabel}.`;
         }
+        case "SUMMON_FROM_HAND": {
+            const count = action.summonCount ?? 1;
+            const countLabel =
+                count > 1 ? `${count} serviteurs aléatoires` : "un serviteur aléatoire";
+
+            if (action.summonTargetTeam === "OPPONENT") {
+                return `${prefix} : Votre adversaire invoque ${countLabel} de sa main.`;
+            }
+
+            return `${prefix} : Invoquez ${countLabel} de votre main.`;
+        }
         case "DECK_CARD": {
             if (action.isTargeted && action.deckCardOperation === "ADD") {
                 const copies = action.copyCount === 1 ? "1 copie" : `${action.copyCount} copies`;

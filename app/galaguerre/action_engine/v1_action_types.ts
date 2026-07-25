@@ -10,6 +10,7 @@ export const V1_ACTION_TYPES = [
     "RECONVERSION",
     "MIND_CONTROL",
     "SUMMON",
+    "SUMMON_FROM_HAND",
     "DECK_CARD",
     "HAND_CARD",
     "GENERATE_HAND",

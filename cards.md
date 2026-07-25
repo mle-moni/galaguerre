@@ -514,3 +514,7 @@ Format compact pour construction de deck par LLM.
 ### #182 Buddy Charismatique
 - Coût: 5 | Type: MINION | Stats: 2/3 | Rareté: Commune | Famille: Équipe support
 - Cri de guerre : Invoque 3 monstres (Nouvelle Recrue) sur votre plateau.
+
+### #183 Auditeur RGPD
+- Coût: 2 | Type: MINION | Stats: 2/6 [Provocation] | Rareté: Épique | Famille: Équipe support
+- Provocation. Cri de guerre : Votre adversaire invoque un serviteur aléatoire de sa main.
