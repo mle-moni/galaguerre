@@ -1833,7 +1833,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
             attack: 1,
             health: 1,
         },
-        { deathrattleActions: [damageAction(2, randomEnemyCharacter())] },
+        { deathrattleActions: [damageAction(3, randomEnemyCharacter())] },
         { isCollectible: false },
     ),
 ];

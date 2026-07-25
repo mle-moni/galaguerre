@@ -529,7 +529,7 @@ Format compact pour construction de deck par LLM.
 
 ### #186 Bug explosif
 - Coût: 1 | Type: MINION | Stats: 1/1 | Rareté: Commune | Famille: — | NON-COLLECTIONNABLE
-- Dernier souffle : Inflige 2 dégâts à un personnage adverse aléatoire.
+- Dernier souffle : Inflige 3 dégâts à un personnage adverse aléatoire.
 
 ### #187 Head of dynamite
 - Coût: 7 | Type: MINION | Stats: 7/7 | Rareté: Légendaire | Famille: —
