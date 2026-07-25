@@ -444,4 +444,15 @@ export const CARD_RECAPS: CardRecapData[] = [
         nerfs: [],
         imageUrl: "/card-covers/galadrim/dev-aigri.webp",
     },
+    {
+        date: "2026-07-25",
+        slug: "recap-2026-07-25",
+        publishedAt: "2026-07-25T18:00:00+02:00",
+        untilCommitHash: "53919a61c50855afcf95b46e54dff11ce52bc08b",
+        newCardIds: [192, 191, 184, 188, 183, 190, 189, 187, 185, 186],
+        newGoldenCardIds: [],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/specialiste-osint.webp",
+    },
 ];
