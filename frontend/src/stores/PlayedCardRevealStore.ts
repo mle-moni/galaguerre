@@ -3,7 +3,7 @@ import { makeAutoObservable } from "mobx";
 
 const REVEAL_DURATION_MS = 5000;
 
-export type PlayedCardRevealVariant = "played" | "overdraw";
+export type PlayedCardRevealVariant = "played" | "overdraw" | "castWhenDrawn";
 
 export class PlayedCardRevealStore {
     card: PlayerCard | null = null;

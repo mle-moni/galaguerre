@@ -73,6 +73,38 @@ const extractPlayCardFromBeat = (
     };
 };
 
+const extractCastWhenDrawnFromBeat = (
+    beat: NarrativeBeat,
+    authoritativeGame: ApiGame,
+    viewerUserId: number,
+): CardRevealFromBeat | null => {
+    if (beat.logEntryId) {
+        const entry = authoritativeGame.data.actionLog?.find(
+            (logEntry) => logEntry.id === beat.logEntryId,
+        );
+        if (entry?.type === "CAST_WHEN_DRAWN" && entry.card) {
+            return { card: entry.card, playerId: entry.playerId, variant: "castWhenDrawn" };
+        }
+    }
+
+    const moveFromDeck = beat.effects.find(
+        (effect): effect is Extract<NarrativeEffect, { type: "MOVE_CARD" }> =>
+            effect.type === "MOVE_CARD" && effect.from === "DECK",
+    );
+    if (!moveFromDeck) return null;
+
+    const card =
+        findCardInGameData(authoritativeGame.data, moveFromDeck.cardUuid) ??
+        findCardInGameData(beat.stateAfter, moveFromDeck.cardUuid);
+    if (!card || card.label === "dummy card") return null;
+
+    return {
+        card,
+        playerId: getPlayerIdForOwner(authoritativeGame.data, moveFromDeck.owner, viewerUserId),
+        variant: "castWhenDrawn",
+    };
+};
+
 const extractOverdrawFromBeat = (
     beat: NarrativeBeat,
     authoritativeGame: ApiGame,
@@ -111,6 +143,10 @@ export const extractCardRevealFromBeat = (
 
     if (beat.kind === "OVERDRAW") {
         return extractOverdrawFromBeat(beat, authoritativeGame, viewerUserId);
+    }
+
+    if (beat.kind === "CAST_WHEN_DRAWN") {
+        return extractCastWhenDrawnFromBeat(beat, authoritativeGame, viewerUserId);
     }
 
     return null;

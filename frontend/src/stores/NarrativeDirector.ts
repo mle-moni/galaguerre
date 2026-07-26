@@ -33,7 +33,7 @@ const shouldRewindToSceneStart = (presentation: GamePresentationUpdate) => {
     if (!firstBeat) return false;
     // Minion/weapon placement keeps post-play board for CARD_FLIGHT landing.
     // Ability VFX on PLAY_CARD (spells, etc.) must start from the pre-impact board.
-    if (firstBeat.kind === "PLAY_CARD") {
+    if (firstBeat.kind === "PLAY_CARD" || firstBeat.kind === "CAST_WHEN_DRAWN") {
         return hasAbilityImpactReveal(firstBeat);
     }
     return true;
@@ -274,7 +274,10 @@ export class NarrativeDirector {
                 );
                 if (
                     cardReveal &&
-                    (revealStateFirst || beat.kind === "PLAY_CARD" || beat.kind === "OVERDRAW")
+                    (revealStateFirst ||
+                        beat.kind === "PLAY_CARD" ||
+                        beat.kind === "OVERDRAW" ||
+                        beat.kind === "CAST_WHEN_DRAWN")
                 ) {
                     this.gameStore.playedCardRevealStore.reveal(
                         cardReveal.card,
