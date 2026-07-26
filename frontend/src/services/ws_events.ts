@@ -16,6 +16,7 @@ import {
     notifyOpponentWaiting,
     notifySuccess,
 } from "./toasts.js";
+import { notifyGameError } from "./game_feedback.js";
 import { GAME_STORE } from "~/stores/store_singletons";
 import {
     markSocketDisconnected,
@@ -135,7 +136,7 @@ export const setupEvents = (socket: Socket) => {
     });
 
     subscribeToSocketEvent("notify_error", (error) => {
-        notifyApiError(error);
+        notifyGameError(error);
     });
 
     subscribeToSocketEvent("notify_success", ({ message }) => {

@@ -8,7 +8,6 @@ import {
     getInsertionZoneElement,
     getMinionBoardElement,
 } from "~/helpers/resolve_target_from_point";
-import { notifyError } from "~/services/toasts";
 import { emitSocketEventToServer } from "~/services/ws_client";
 import type { GameStore } from "./GameStore.js";
 
@@ -195,7 +194,7 @@ export class CardDragStore {
         }
 
         if (card.cost > this.gameStore.me.mana) {
-            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            this.gameStore.showFeedbackHint("Vous n'avez pas assez de mana pour jouer cette carte");
             this.setCardDragged(null);
             return;
         }
@@ -243,17 +242,17 @@ export class CardDragStore {
         this.isOverMinionDropZone = false;
 
         if (spotOwner !== "PLAYER") {
-            notifyError("Vous ne pouvez pas jouer cette carte ici");
+            this.gameStore.showFeedbackHint("Vous ne pouvez pas jouer cette carte ici");
             return;
         }
 
         if (card.cost > this.gameStore.me.mana) {
-            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            this.gameStore.showFeedbackHint("Vous n'avez pas assez de mana pour jouer cette carte");
             return;
         }
 
         if (!this.canPlayAtIndex(boardIndex)) {
-            notifyError("Vous ne pouvez pas jouer cette carte ici");
+            this.gameStore.showFeedbackHint("Vous ne pouvez pas jouer cette carte ici");
             return;
         }
 

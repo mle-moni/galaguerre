@@ -24,6 +24,14 @@ export const ArmedCardHint = observer(({ isMobile = false }: ArmedCardHintProps)
         .filter(Boolean)
         .join(" ");
 
+    if (store.feedbackHint) {
+        return (
+            <div className={hintClassName} role="status">
+                <span>{store.feedbackHint}</span>
+            </div>
+        );
+    }
+
     if (cardDragStore.isDraggingTargetedSpell) {
         const hint = cardDragStore.targetedSpellDrag?.isArrowActive
             ? isMobile

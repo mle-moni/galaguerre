@@ -18,6 +18,7 @@ import { WeaponDragStore } from "./WeaponDragStore.js";
 export type TargetHighlight = "valid" | "invalid" | "none";
 
 const TRANSPARENT = "RGBa(0, 0, 0, 0)";
+const FEEDBACK_HINT_DURATION_MS = 2500;
 
 const colorToTargetHighlight = (color: string): TargetHighlight => {
     if (color === "green") return "valid";
@@ -45,12 +46,18 @@ export class GameStore {
     mulliganSelectedCardIds: string[] = [];
     mulliganConfirmedLocally = false;
     discoverOverlayMinimized = false;
+    feedbackHint: string | null = null;
     private passTurnSubmittedAt: { state: ApiGame["data"]["state"]; round: number } | null = null;
     private discoverOverlaySessionKey: string | null = null;
     private processedPresentationUpdateIds = new Set<string>();
+    private feedbackHintTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     constructor() {
         makeAutoObservable(this);
+    }
+
+    get hasActiveGame() {
+        return this._authoritativeGame !== null;
     }
 
     get authoritativeGame() {
@@ -100,6 +107,27 @@ export class GameStore {
 
     setNarrativePlaying(isPlaying: boolean) {
         this.isNarrativePlaying = isPlaying;
+    }
+
+    showFeedbackHint(message: string) {
+        this.clearFeedbackHintTimeout();
+        this.feedbackHint = message;
+        this.feedbackHintTimeoutId = setTimeout(
+            () => this.clearFeedbackHint(),
+            FEEDBACK_HINT_DURATION_MS,
+        );
+    }
+
+    clearFeedbackHint() {
+        this.clearFeedbackHintTimeout();
+        this.feedbackHint = null;
+    }
+
+    private clearFeedbackHintTimeout() {
+        if (this.feedbackHintTimeoutId !== null) {
+            clearTimeout(this.feedbackHintTimeoutId);
+            this.feedbackHintTimeoutId = null;
+        }
     }
 
     private resetMulliganLocalState() {
@@ -180,6 +208,7 @@ export class GameStore {
             this.processedPresentationUpdateIds.clear();
             this.narrativeDirector.clear();
             this.combatActionQueue.clear();
+            this.clearFeedbackHint();
         } else if (game.data.state === "MULLIGAN") {
             this.syncMulliganLocalStateFromServer(game);
         }

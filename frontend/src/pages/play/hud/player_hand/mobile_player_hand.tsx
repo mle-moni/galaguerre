@@ -13,7 +13,6 @@ import {
     resolveBoardInsertIndexFromPoint,
 } from "~/helpers/resolve_target_from_point";
 import { useGameContext } from "~/hooks/use_game_state";
-import { notifyError } from "~/services/toasts";
 import { countBoardMinionsOnBoard, playerHasBoardSpace } from "#api_types/board";
 import type { GamePlayer, PlayerCard, SpellCard } from "#api_types/game.types";
 import {
@@ -89,21 +88,21 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
 
     const notifyCannotPlay = (card: PlayerCard) => {
         if (!store.isMyTurn) {
-            notifyError("Ce n'est pas votre tour");
+            store.showFeedbackHint("Ce n'est pas votre tour");
             return;
         }
 
         if (card.cost > store.me.mana) {
-            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            store.showFeedbackHint("Vous n'avez pas assez de mana pour jouer cette carte");
             return;
         }
 
         if (card.type === "MINION" && !playerHasBoardSpace(store.me)) {
-            notifyError("Votre plateau est plein (7 monstres maximum)");
+            store.showFeedbackHint("Votre plateau est plein (7 monstres maximum)");
             return;
         }
 
-        notifyError("Cette carte ne peut pas être jouée maintenant");
+        store.showFeedbackHint("Cette carte ne peut pas être jouée maintenant");
     };
 
     const getCardAtGestureIndex = (gesture: ActiveGesture): PlayerCard | null =>

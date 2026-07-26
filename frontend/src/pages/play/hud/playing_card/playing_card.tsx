@@ -12,7 +12,6 @@ import { getElementCenter } from "~/helpers/resolve_target_from_point";
 import { useDragClickSuppression } from "~/hooks/use_drag_click_suppression";
 import { useGameContext } from "~/hooks/use_game_state";
 import { useIsMobilePortrait } from "~/hooks/use_is_mobile_portrait";
-import { notifyError } from "~/services/toasts";
 import "./playing_card.css";
 
 interface CardProps {
@@ -61,12 +60,12 @@ export const PlayingCard = observer(({ card, isOpponent, style, showDetailButton
 
     const handleUnplayableCardClick = () => {
         if (card.cost > store.me.mana) {
-            notifyError("Vous n'avez pas assez de mana pour jouer cette carte");
+            store.showFeedbackHint("Vous n'avez pas assez de mana pour jouer cette carte");
             return;
         }
 
         if (card.type === "MINION" && !playerHasBoardSpace(store.me)) {
-            notifyError("Votre plateau est plein (7 monstres maximum)");
+            store.showFeedbackHint("Votre plateau est plein (7 monstres maximum)");
         }
     };
 
