@@ -1,7 +1,8 @@
 export const MOBILE_HAND_LIFT_THRESHOLD_PX = 44;
-export const MOBILE_HAND_BROWSE_THRESHOLD_PX = 8;
+export const MOBILE_HAND_BROWSE_THRESHOLD_PX = 16;
+export const MOBILE_HAND_BROWSE_FREEZE_UPWARD_PX = 6;
 export const MOBILE_HAND_DIRECTION_LOCK_THRESHOLD_PX = 12;
-const MOBILE_HAND_PLAY_AXIS_RATIO = 0.5;
+const MOBILE_HAND_PLAY_AXIS_RATIO = 0.35;
 /** Card-edge spacing as a fraction of card width (0 = touching, negative = overlap). */
 export const MOBILE_HAND_TIGHT_SPACING_RATIO = -0.04;
 /** Typical travel width / card width on portrait mobile (hand padding + card sizing). */
@@ -81,6 +82,17 @@ export const hasBrowsedMobileHand = (origin: MobileHandPoint, current: MobileHan
 export const hasLiftedMobileCard = (origin: MobileHandPoint, current: MobileHandPoint): boolean =>
     origin.y - current.y >= MOBILE_HAND_LIFT_THRESHOLD_PX;
 
+/** True while the finger may still scrub the hand (clear horizontal, little upward). */
+export const canBrowseMobileHand = (origin: MobileHandPoint, current: MobileHandPoint): boolean => {
+    const horizontalDistance = Math.abs(current.x - origin.x);
+    const upwardDistance = Math.max(0, origin.y - current.y);
+
+    return (
+        horizontalDistance >= MOBILE_HAND_BROWSE_THRESHOLD_PX &&
+        upwardDistance < MOBILE_HAND_BROWSE_FREEZE_UPWARD_PX
+    );
+};
+
 export const resolveMobileHandGestureIntent = (
     origin: MobileHandPoint,
     current: MobileHandPoint,
@@ -102,6 +114,7 @@ export const resolveMobileHandGestureIntent = (
     if (
         currentIntent === "BROWSE" ||
         (horizontalDistance >= MOBILE_HAND_BROWSE_THRESHOLD_PX &&
+            upwardDistance < MOBILE_HAND_BROWSE_FREEZE_UPWARD_PX &&
             upwardDistance < horizontalDistance * MOBILE_HAND_PLAY_AXIS_RATIO)
     ) {
         return "BROWSE";

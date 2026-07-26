@@ -1,6 +1,9 @@
 import { test } from "@japa/runner";
 import {
+    MOBILE_HAND_BROWSE_FREEZE_UPWARD_PX,
+    MOBILE_HAND_BROWSE_THRESHOLD_PX,
     MOBILE_HAND_LIFT_THRESHOLD_PX,
+    canBrowseMobileHand,
     getMobileHandCardRatio,
     getMobileHandSpreadSpan,
     hasBrowsedMobileHand,
@@ -47,48 +50,82 @@ test.group("mobile hand gesture", () => {
         assert,
     }) => {
         const origin = { x: 160, y: 760 };
+        const browsedPoint = {
+            x: origin.x + MOBILE_HAND_BROWSE_THRESHOLD_PX + 4,
+            y: origin.y - 2,
+        };
 
-        assert.isTrue(hasBrowsedMobileHand(origin, { x: 200, y: 756 }));
-        assert.isFalse(hasLiftedMobileCard(origin, { x: 200, y: 756 }));
+        assert.isTrue(hasBrowsedMobileHand(origin, browsedPoint));
+        assert.isTrue(canBrowseMobileHand(origin, browsedPoint));
+        assert.isFalse(hasLiftedMobileCard(origin, browsedPoint));
         assert.isFalse(
             hasLiftedMobileCard(origin, {
-                x: 200,
+                x: browsedPoint.x,
                 y: origin.y - MOBILE_HAND_LIFT_THRESHOLD_PX + 1,
             }),
         );
         assert.isTrue(
             hasLiftedMobileCard(origin, {
-                x: 200,
+                x: browsedPoint.x,
                 y: origin.y - MOBILE_HAND_LIFT_THRESHOLD_PX,
             }),
         );
     });
 
-    test("an upward diagonal locks the initially touched card for play", ({ assert }) => {
+    test("an upward diagonal locks play without allowing browse scrubbing", ({ assert }) => {
         const origin = { x: 80, y: 760 };
+        // Equal diagonal ↖: dx=18, dy=18 → PLAY, not BROWSE
+        const diagonal = { x: 62, y: 742 };
+
+        assert.equal(resolveMobileHandGestureIntent(origin, diagonal, "UNDECIDED"), "PLAY");
+        assert.isFalse(canBrowseMobileHand(origin, diagonal));
+        assert.equal(resolveMobileHandGestureIntent(origin, { x: 40, y: 690 }, "PLAY"), "PLAY");
+    });
+
+    test("early horizontal samples then upward freeze browsing", ({ assert }) => {
+        const origin = { x: 80, y: 760 };
+        const earlyHorizontal = {
+            x: origin.x + MOBILE_HAND_BROWSE_THRESHOLD_PX,
+            y: origin.y - 2,
+        };
+        const afterUpwardFreeze = {
+            x: earlyHorizontal.x + 20,
+            y: origin.y - MOBILE_HAND_BROWSE_FREEZE_UPWARD_PX,
+        };
 
         assert.equal(
-            resolveMobileHandGestureIntent(origin, { x: 98, y: 742 }, "UNDECIDED"),
-            "PLAY",
+            resolveMobileHandGestureIntent(origin, earlyHorizontal, "UNDECIDED"),
+            "BROWSE",
         );
-        assert.equal(resolveMobileHandGestureIntent(origin, { x: 150, y: 690 }, "PLAY"), "PLAY");
+        assert.isTrue(canBrowseMobileHand(origin, earlyHorizontal));
+        assert.isFalse(canBrowseMobileHand(origin, afterUpwardFreeze));
     });
 
     test("a clearly horizontal gesture browses before an upward movement locks it", ({
         assert,
     }) => {
         const origin = { x: 80, y: 760 };
-        const browseIntent = resolveMobileHandGestureIntent(
-            origin,
-            { x: 120, y: 754 },
-            "UNDECIDED",
-        );
+        const browsePoint = {
+            x: origin.x + MOBILE_HAND_BROWSE_THRESHOLD_PX + 8,
+            y: origin.y - 2,
+        };
+        const browseIntent = resolveMobileHandGestureIntent(origin, browsePoint, "UNDECIDED");
 
         assert.equal(browseIntent, "BROWSE");
+        assert.isTrue(canBrowseMobileHand(origin, browsePoint));
         assert.equal(
-            resolveMobileHandGestureIntent(origin, { x: 145, y: 748 }, browseIntent),
+            resolveMobileHandGestureIntent(origin, { x: browsePoint.x + 25, y: 748 }, browseIntent),
             "PLAY",
         );
+    });
+
+    test("micro horizontal movement stays undecided and does not browse", ({ assert }) => {
+        const origin = { x: 80, y: 760 };
+        const micro = { x: origin.x + 10, y: origin.y - 1 };
+
+        assert.isFalse(hasBrowsedMobileHand(origin, micro));
+        assert.isFalse(canBrowseMobileHand(origin, micro));
+        assert.equal(resolveMobileHandGestureIntent(origin, micro, "UNDECIDED"), "UNDECIDED");
     });
 
     test("the whole player HUD and hand cancel a lifted card", ({ assert }) => {

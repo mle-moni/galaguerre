@@ -17,6 +17,7 @@ import { countBoardMinionsOnBoard, playerHasBoardSpace } from "#api_types/board"
 import type { GamePlayer, PlayerCard, SpellCard } from "#api_types/game.types";
 import {
     type MobileHandGestureIntent,
+    canBrowseMobileHand,
     getMobileHandCardRatio,
     hasLiftedMobileCard,
     isPointInsideMobileBounds,
@@ -35,9 +36,11 @@ type LiftMode = "NONE" | "MINION" | "IMMEDIATE" | "TARGETED_SPELL" | "REJECTED";
 interface ActiveGesture {
     pointerId: number;
     origin: Point;
+    originIndex: number;
     selectedIndex: number;
     intent: MobileHandGestureIntent;
     mode: LiftMode;
+    didBrowse: boolean;
 }
 
 export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => {
@@ -182,9 +185,11 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         gestureRef.current = {
             pointerId: event.pointerId,
             origin: { x: event.clientX, y: event.clientY },
+            originIndex: index,
             selectedIndex: index,
             intent: "UNDECIDED",
             mode: "NONE",
+            didBrowse: false,
         };
         suppressClickRef.current = false;
         setSelectedIndex(index);
@@ -200,9 +205,12 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         const point = { x: event.clientX, y: event.clientY };
 
         if (gesture.mode === "NONE") {
+            const previousIntent = gesture.intent;
             gesture.intent = resolveMobileHandGestureIntent(gesture.origin, point, gesture.intent);
 
-            if (gesture.intent === "BROWSE") {
+            // Scrub only while the gesture stays clearly horizontal; any upward
+            // motion freezes the selected card for the rest of the gesture.
+            if (gesture.intent === "BROWSE" && canBrowseMobileHand(gesture.origin, point)) {
                 const handRect = event.currentTarget.getBoundingClientRect();
                 const firstCard =
                     event.currentTarget.querySelector<HTMLElement>("[data-playing-card]");
@@ -215,8 +223,15 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                     cardCount: player.hand.length,
                 });
 
+                gesture.didBrowse = true;
                 gesture.selectedIndex = nextIndex;
                 setSelectedIndex(nextIndex);
+            }
+
+            // Diagonal play: restore the touched card if we never scrubbed.
+            if (gesture.intent === "PLAY" && previousIntent !== "PLAY" && !gesture.didBrowse) {
+                gesture.selectedIndex = gesture.originIndex;
+                setSelectedIndex(gesture.originIndex);
             }
 
             if (gesture.intent === "PLAY" && hasLiftedMobileCard(gesture.origin, point)) {
