@@ -8,7 +8,7 @@ import {
 } from "@tabler/icons-react";
 import clsx from "clsx";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { type MouseEvent, type PointerEvent as ReactPointerEvent, useRef, useState } from "react";
 import { CardPreviewSheet } from "~/components/cards/card_preview_sheet";
 import { useAvatarImageUrl } from "~/hooks/use_avatar_image_url";
 import { useDragClickSuppression } from "~/hooks/use_drag_click_suppression";
@@ -33,6 +33,7 @@ export const MobileHeroStrip = observer(
         const avatarImageUrl = useAvatarImageUrl(player.avatarCardId);
         const [weaponSheetOpened, setWeaponSheetOpened] = useState(false);
         const [weaponInfoOpened, setWeaponInfoOpened] = useState(false);
+        const suppressWeaponButtonClickRef = useRef(false);
         const dragClickSuppression = useDragClickSuppression();
         const maxMana = getMaxMana(authoritativeGame.data.currentRound);
 
@@ -100,14 +101,17 @@ export const MobileHeroStrip = observer(
             store.handleDrop(null, isOpponent ? "OPPONENT" : "PLAYER");
         };
 
-        const handleWeaponAttackPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-            if (!canAttackWithWeapon || isHeroStripControl(event.target)) return;
+        const beginWeaponAttackDrag = (
+            event: PointerEvent | ReactPointerEvent<HTMLElement>,
+            originElement: HTMLElement,
+        ) => {
+            if (!canAttackWithWeapon) return;
 
             event.preventDefault();
-            event.currentTarget.setPointerCapture(event.pointerId);
+            originElement.setPointerCapture(event.pointerId);
             dragClickSuppression.begin(event);
 
-            const rect = event.currentTarget.getBoundingClientRect();
+            const rect = originElement.getBoundingClientRect();
             const origin = {
                 x: rect.left + rect.width / 2,
                 y: rect.top + rect.height / 2,
@@ -120,11 +124,17 @@ export const MobileHeroStrip = observer(
             });
         };
 
-        const handleWeaponAttackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+        const handleWeaponAttackPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+            if (!canAttackWithWeapon || isHeroStripControl(event.target)) return;
+
+            beginWeaponAttackDrag(event, event.currentTarget);
+        };
+
+        const handleWeaponAttackPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
             dragClickSuppression.track(event);
         };
 
-        const handleWeaponAttackPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+        const handleWeaponAttackPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
             dragClickSuppression.finish();
             if (event.currentTarget.hasPointerCapture(event.pointerId)) {
                 event.currentTarget.releasePointerCapture(event.pointerId);
@@ -136,28 +146,65 @@ export const MobileHeroStrip = observer(
             store.weaponDragStore.cancelAttack();
         };
 
+        const handleWeaponAttackButtonPointerDown = (
+            event: ReactPointerEvent<HTMLButtonElement>,
+        ) => {
+            if (!canAttackWithWeapon) return;
+
+            event.stopPropagation();
+
+            const heroStrip = event.currentTarget.closest(".mobile-bar__hero-target");
+            if (!(heroStrip instanceof HTMLElement)) return;
+
+            const startX = event.clientX;
+            const startY = event.clientY;
+            let dragStarted = false;
+
+            const onPointerMove = (moveEvent: PointerEvent) => {
+                if (dragStarted) return;
+                if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 5) return;
+
+                dragStarted = true;
+                suppressWeaponButtonClickRef.current = true;
+                beginWeaponAttackDrag(moveEvent, heroStrip);
+                document.removeEventListener("pointermove", onPointerMove);
+            };
+
+            const onPointerUp = () => {
+                document.removeEventListener("pointermove", onPointerMove);
+            };
+
+            document.addEventListener("pointermove", onPointerMove);
+            document.addEventListener("pointerup", onPointerUp, { once: true });
+        };
+
         const weaponDescription = weaponLabel
             ? `${weaponLabel} : dégâts par attaque, puis durabilité restante.`
             : "Dégâts par attaque, puis durabilité restante de l'arme équipée.";
 
-        const handleWeaponStatClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const handleWeaponStatClick = (event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             setWeaponInfoOpened((current) => !current);
         };
 
-        const handleWeaponPreviewClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const handleWeaponPreviewClick = (event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             event.preventDefault();
             setWeaponSheetOpened(true);
         };
 
-        const handleWeaponPreviewPointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+        const handleWeaponPreviewPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
             event.stopPropagation();
         };
 
-        const handleWeaponAttackClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const handleWeaponAttackClick = (event: MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             event.preventDefault();
+
+            if (suppressWeaponButtonClickRef.current) {
+                suppressWeaponButtonClickRef.current = false;
+                return;
+            }
 
             if (store.weaponDragStore.isAttacking) {
                 store.weaponDragStore.cancelAttack();
@@ -272,8 +319,8 @@ export const MobileHeroStrip = observer(
                                                     data-weapon-attack
                                                     aria-label="Attaquer avec l'arme"
                                                     aria-pressed={store.weaponDragStore.isAttacking}
-                                                    onPointerDown={(event) =>
-                                                        event.stopPropagation()
+                                                    onPointerDown={
+                                                        handleWeaponAttackButtonPointerDown
                                                     }
                                                     onClick={handleWeaponAttackClick}
                                                 >
