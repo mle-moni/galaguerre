@@ -49,7 +49,7 @@ test.group("getDefaultGameData golden expansion", () => {
 });
 
 test.group("discover golden via expanded ownership", () => {
-    test("emoji discover options stay non-golden without goldenVideoUrl even when parent grants entitlement", ({
+    test("emoji discover options are golden when parent grants entitlement and goldenVideoUrl exists", ({
         assert,
     }) => {
         const ownedGoldenCardIds = expandOwnedGoldenCardIds([HEAD_OF_EMOJIS_CARD_ID]);
@@ -64,7 +64,7 @@ test.group("discover golden via expanded ownership", () => {
 
         assert.equal(options.length, 5);
         assert.isTrue(options.every((card) => EMOJI_SPELL_CARD_IDS.includes(card.cardId)));
-        assert.isTrue(options.every((card) => card.isGolden === false));
-        assert.isTrue(options.every((card) => !card.goldenVideoUrl));
+        assert.isTrue(options.every((card) => card.isGolden === true));
+        assert.isTrue(options.every((card) => Boolean(card.goldenVideoUrl)));
     });
 });
