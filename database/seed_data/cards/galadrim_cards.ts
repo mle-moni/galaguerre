@@ -272,6 +272,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Valentin", 3),
             imageUrl: "/card-covers/galadrim/valentin.webp",
+            goldenVideoUrl: "/card-videos/valentin.mp4",
             attack: 2,
             health: 4,
         },
@@ -301,6 +302,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Dev Aguerri", 4),
             imageUrl: "/card-covers/galadrim/dev-aguerri.webp",
+            goldenVideoUrl: "/card-videos/dev-aguerri.mp4",
             attack: 4,
             health: 4,
         },
@@ -414,6 +416,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Scrum Master", 3),
             imageUrl: "/card-covers/galadrim/scrum-master.webp",
+            goldenVideoUrl: "/card-videos/scrum-master.mp4",
             attack: 2,
             health: 4,
         },
@@ -500,6 +503,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Testeur nonchalant", 3),
             imageUrl: "/card-covers/galadrim/testeur-nonchalant.webp",
+            goldenVideoUrl: "/card-videos/testeur-nonchalant.mp4",
             attack: 2,
             health: 2,
         },
@@ -740,6 +744,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Manager Bienveillant", 4),
             imageUrl: "/card-covers/galadrim/manager-bienveillant.webp",
+            goldenVideoUrl: "/card-videos/manager-bienveillant.mp4",
             attack: 2,
             health: 5,
         },
@@ -845,6 +850,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Nantais Créatif", 4),
             imageUrl: "/card-covers/galadrim/nantais-creatif.webp",
+            goldenVideoUrl: "/card-videos/nantais-creatif.mp4",
             attack: 3,
             health: 3,
         },
@@ -858,6 +864,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Lyonnais Gourmand", 4),
             imageUrl: "/card-covers/galadrim/lyonnais-gourmand.webp",
+            goldenVideoUrl: "/card-videos/lyonnais-gourmand.mp4",
             attack: 3,
             health: 5,
         },
@@ -1069,6 +1076,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Télétravailleur Injoignable", 3),
             imageUrl: "/card-covers/galadrim/teletravailleur-injoignable.webp",
+            goldenVideoUrl: "/card-videos/teletravailleur-injoignable.mp4",
             attack: 1,
             health: 1,
         },
@@ -1321,6 +1329,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Team Building", 3),
             imageUrl: "/card-covers/galadrim/team-building.webp",
+            goldenVideoUrl: "/card-videos/team-building.mp4",
         },
         [drawAction(2, minionDrawFilter())],
     ),
@@ -1347,6 +1356,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Zoothérapie", 3),
             imageUrl: "/card-covers/galadrim/zootherapie.webp",
+            goldenVideoUrl: "/card-videos/zootherapie.mp4",
         },
         [discoverAction(minionDrawFilter(["PETS"])), discoverAction(minionDrawFilter(["PETS"]))],
         [],
@@ -1646,6 +1656,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Cahier des charges imprécis", 4),
             imageUrl: "/card-covers/galadrim/cahier-des-charges-imprecis.webp",
+            goldenVideoUrl: "/card-videos/cahier-des-charges-imprecis.mp4",
             damage: 3,
             durability: 2,
         },
@@ -1697,6 +1708,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Légume", 1),
             imageUrl: "/card-covers/galadrim/legume.webp",
+            goldenVideoUrl: "/card-videos/legume.mp4",
             attack: 1,
             health: 1,
         },
@@ -1788,6 +1800,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal(":rage-fist:", 1),
             imageUrl: "/card-covers/galadrim/rage-fist.webp",
+            goldenVideoUrl: "/card-videos/rage-fist.mp4",
         },
         [
             damageAction(1, targetedAnyMinion(), true),
@@ -1802,6 +1815,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal(":sadge:", 2),
             imageUrl: "/card-covers/galadrim/sadge.webp",
+            goldenVideoUrl: "/card-videos/sadge.mp4",
         },
         [silenceAction(allMinions())],
         [],
@@ -1813,6 +1827,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal(":madge:", 3),
             imageUrl: "/card-covers/galadrim/madge.webp",
+            goldenVideoUrl: "/card-videos/madge.mp4",
         },
         [damageAction(4, targetedAnyCharacter(), true)],
         [],
@@ -1824,6 +1839,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal(":pepe-dead:", 4),
             imageUrl: "/card-covers/galadrim/pepe-dead.webp",
+            goldenVideoUrl: "/card-videos/pepe-dead.mp4",
         },
         [destroyAction(targetedAnyMinion(), true)],
         [],
@@ -1835,6 +1851,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal(":pogslide:", 5),
             imageUrl: "/card-covers/galadrim/pogslide.webp",
+            goldenVideoUrl: "/card-videos/pogslide.mp4",
         },
         [drawAction(3)],
         [],
@@ -1857,6 +1874,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Bug explosif", 1),
             imageUrl: "/card-covers/galadrim/bug-explosif.webp",
+            goldenVideoUrl: "/card-videos/bug-explosif.mp4",
             attack: 1,
             health: 1,
         },
