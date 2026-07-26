@@ -8,6 +8,8 @@ import {
     useState,
 } from "react";
 import { PlayerCardFace } from "~/components/cards/player_card_face";
+import { finishTargetedSpellArrow } from "~/helpers/arrow_target_validity";
+import { isPointInsideHandCancelZone } from "~/helpers/is_point_inside_hand_cancel_zone";
 import {
     getElementCenter,
     resolveBoardInsertIndexFromPoint,
@@ -111,13 +113,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
     const getCardAtGestureIndex = (gesture: ActiveGesture): PlayerCard | null =>
         player.hand[gesture.selectedIndex] ?? null;
 
-    const isInsideCardCancelZone = (point: Point): boolean => {
-        const cancelZone = handRef.current?.closest<HTMLElement>(".mobile-game-layout__bottom");
-        const bounds =
-            cancelZone?.getBoundingClientRect() ?? handRef.current?.getBoundingClientRect();
-
-        return bounds ? isPointInsideMobileBounds(point, bounds) : false;
-    };
+    const isInsideCardCancelZone = (point: Point): boolean => isPointInsideHandCancelZone(point);
 
     const updateMinionDropPreview = (point: Point) => {
         const dropZone = document.querySelector<HTMLElement>(
@@ -234,9 +230,19 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
                 setSelectedIndex(gesture.originIndex);
             }
 
-            if (gesture.intent === "PLAY" && hasLiftedMobileCard(gesture.origin, point)) {
+            if (gesture.intent === "PLAY") {
                 const card = getCardAtGestureIndex(gesture);
-                if (card) beginLift(gesture, card, point);
+                if (card) {
+                    const isTargetedSpell =
+                        card.type === "SPELL" && store.targetSelectionStore.requiresTarget(card);
+                    // Targeted spells: start as soon as PLAY locks (desktop-like).
+                    // Other cards: require the usual lift threshold.
+                    const readyToLift = isTargetedSpell
+                        ? previousIntent !== "PLAY" || hasLiftedMobileCard(gesture.origin, point)
+                        : hasLiftedMobileCard(gesture.origin, point);
+
+                    if (readyToLift) beginLift(gesture, card, point);
+                }
             }
         }
 
@@ -290,7 +296,8 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
         const releasedInCancelZone = isInsideCardCancelZone(point);
 
         if (gesture.mode === "TARGETED_SPELL") {
-            // Finish is owned by useTargetedSpellHandDrag / finishTargetedSpellArrow.
+            // Also finish here so a fast release is not lost before document listeners attach.
+            finishTargetedSpellArrow(store, point.x, point.y);
             resetGestureVisuals();
             return;
         }
@@ -372,6 +379,7 @@ export const MobilePlayerHand = observer(({ player }: MobilePlayerHandProps) => 
             <div
                 ref={handRef}
                 className="card-hand card-hand--mobile"
+                data-player-hand
                 data-animation-hand
                 data-animation-owner="PLAYER"
                 data-mobile-hand-count={player.hand.length}

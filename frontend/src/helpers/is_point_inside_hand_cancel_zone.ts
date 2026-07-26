@@ -5,15 +5,9 @@ const isPointInsideRect = (point: Point, rect: DOMRect): boolean =>
 
 /**
  * Hand cancel zone for targeted-spell arrow targeting.
- * Mobile: the whole bottom chrome (hand + player bar).
- * Desktop: the player's hand element.
+ * Uses the player's hand element on both mobile and desktop.
  */
 export const isPointInsideHandCancelZone = (point: Point): boolean => {
-    const mobileBottom = document.querySelector<HTMLElement>(".mobile-game-layout__bottom");
-    if (mobileBottom) {
-        return isPointInsideRect(point, mobileBottom.getBoundingClientRect());
-    }
-
     const hand = document.querySelector<HTMLElement>("[data-player-hand]");
     if (!hand) return false;
 
