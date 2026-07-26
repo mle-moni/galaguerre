@@ -592,6 +592,28 @@ const routes = {
         ],
         types: placeholder as Registry["games.destroy"]["types"],
     },
+    "dev_stats.cards": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/dev/stats/cards",
+        tokens: [
+            { old: "/api/dev/stats/cards", type: 0, val: "api", end: "" },
+            { old: "/api/dev/stats/cards", type: 0, val: "dev", end: "" },
+            { old: "/api/dev/stats/cards", type: 0, val: "stats", end: "" },
+            { old: "/api/dev/stats/cards", type: 0, val: "cards", end: "" },
+        ],
+        types: placeholder as Registry["dev_stats.cards"]["types"],
+    },
+    "dev_stats.games": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/dev/stats/games",
+        tokens: [
+            { old: "/api/dev/stats/games", type: 0, val: "api", end: "" },
+            { old: "/api/dev/stats/games", type: 0, val: "dev", end: "" },
+            { old: "/api/dev/stats/games", type: 0, val: "stats", end: "" },
+            { old: "/api/dev/stats/games", type: 0, val: "games", end: "" },
+        ],
+        types: placeholder as Registry["dev_stats.games"]["types"],
+    },
     "dev_stats.v1": {
         methods: ["GET", "HEAD"],
         pattern: "/api/dev/stats/v1",

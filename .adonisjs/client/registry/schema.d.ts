@@ -1371,6 +1371,54 @@ export interface Registry {
             >;
         };
     };
+    "dev_stats.cards": {
+        methods: ["GET", "HEAD"];
+        pattern: "/api/dev/stats/cards";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/dev/stats/dev_stats_controller").default["cards"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/dev/stats/dev_stats_controller").default["cards"]
+                    >
+                >
+            >;
+        };
+    };
+    "dev_stats.games": {
+        methods: ["GET", "HEAD"];
+        pattern: "/api/dev/stats/games";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/dev/stats/dev_stats_controller").default["games"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/dev/stats/dev_stats_controller").default["games"]
+                    >
+                >
+            >;
+        };
+    };
     "dev_stats.v1": {
         methods: ["GET", "HEAD"];
         pattern: "/api/dev/stats/v1";

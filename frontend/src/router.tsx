@@ -1,4 +1,4 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
 import { AppLayout } from "./components/layout/app_layout.jsx";
 import { AppShell } from "./components/layout/app_shell.jsx";
 import { CenteredLoader } from "./components/centered_loader.jsx";
@@ -13,7 +13,9 @@ import { DeckBuilderPage } from "./pages/decks/deck_builder_page.jsx";
 import { DecksPage } from "./pages/decks/decks_page.jsx";
 import { BoardMinionStylesPage } from "./pages/dev/board_minion_styles_page.jsx";
 import { GoldenCardsPage } from "./pages/dev/golden_cards_page.jsx";
-import { StatsV1Page } from "./pages/dev/stats_v1_page.jsx";
+import { StatsCardsPage } from "./pages/dev/stats_cards_page.jsx";
+import { StatsGamesPage } from "./pages/dev/stats_games_page.jsx";
+import { StatsHubPage } from "./pages/dev/stats_hub_page.jsx";
 import { FriendsPage } from "./pages/friends/friends_page.jsx";
 import { HomePage } from "./pages/home/home_page.jsx";
 import { LoginPage } from "./pages/login/login_page.jsx";
@@ -147,8 +149,20 @@ const router = createBrowserRouter([
                         element: <GoldenCardsPage />,
                     },
                     {
+                        path: "/dev/stats",
+                        element: <StatsHubPage />,
+                    },
+                    {
+                        path: "/dev/stats/cards",
+                        element: <StatsCardsPage />,
+                    },
+                    {
+                        path: "/dev/stats/games",
+                        element: <StatsGamesPage />,
+                    },
+                    {
                         path: "/dev/stats/v1",
-                        element: <StatsV1Page />,
+                        element: <Navigate to="/dev/stats/cards" replace />,
                     },
                     {
                         path: "*",

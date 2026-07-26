@@ -1,11 +1,11 @@
-.stats-v1-page {
+.stats-dev-page {
 	display: flex;
 	flex-direction: column;
 	gap: 1.25rem;
 	padding-bottom: 2rem;
 }
 
-.stats-v1-page__header {
+.stats-dev-page__header {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem 1.5rem;
@@ -13,13 +13,13 @@
 	align-items: flex-start;
 }
 
-.stats-v1-page__title {
+.stats-dev-page__title {
 	margin: 0 0 0.35rem;
 	font-size: 1.35rem;
 	color: var(--gg-text-on-dark, #fff);
 }
 
-.stats-v1-page__intro {
+.stats-dev-page__intro {
 	margin: 0;
 	color: rgba(255, 255, 255, 0.75);
 	font-size: 0.9rem;
@@ -27,14 +27,26 @@
 	max-width: 52rem;
 }
 
-.stats-v1-page__intro code {
+.stats-dev-page__intro code {
 	font-size: 0.85em;
 	padding: 0.1em 0.35em;
 	border-radius: 4px;
 	background: rgba(0, 0, 0, 0.35);
 }
 
-.stats-v1-page__meta {
+.stats-dev-page__back {
+	display: inline-block;
+	margin-bottom: 0.5rem;
+	font-size: 0.85rem;
+	color: rgba(255, 255, 255, 0.55);
+	text-decoration: none;
+}
+
+.stats-dev-page__back:hover {
+	color: var(--gg-gold, #d4a853);
+}
+
+.stats-dev-page__meta {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem 0.85rem;
@@ -42,28 +54,28 @@
 	color: rgba(255, 255, 255, 0.65);
 }
 
-.stats-v1-page__meta span {
+.stats-dev-page__meta span {
 	padding: 0.25rem 0.55rem;
 	border-radius: var(--gg-radius-sm, 6px);
 	border: 1px solid rgba(255, 255, 255, 0.12);
 	background: rgba(0, 0, 0, 0.25);
 }
 
-.stats-v1-page__controls {
+.stats-dev-page__controls {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.85rem 1rem;
 	align-items: flex-end;
 }
 
-.stats-v1-page__tabs {
+.stats-dev-page__tabs {
 	display: inline-flex;
 	border: 1px solid rgba(255, 255, 255, 0.18);
 	border-radius: var(--gg-radius-sm, 6px);
 	overflow: hidden;
 }
 
-.stats-v1-page__tab {
+.stats-dev-page__tab {
 	appearance: none;
 	border: 0;
 	background: rgba(0, 0, 0, 0.25);
@@ -73,13 +85,13 @@
 	cursor: pointer;
 }
 
-.stats-v1-page__tab.is-active {
+.stats-dev-page__tab.is-active {
 	background: rgba(212, 168, 83, 0.25);
 	color: var(--gg-gold, #d4a853);
 	font-weight: 600;
 }
 
-.stats-v1-page__field {
+.stats-dev-page__field {
 	display: flex;
 	flex-direction: column;
 	gap: 0.3rem;
@@ -87,13 +99,13 @@
 	flex: 1;
 }
 
-.stats-v1-page__field--narrow {
+.stats-dev-page__field--narrow {
 	min-width: 6rem;
 	flex: 0;
 }
 
-.stats-v1-page__field span,
-.stats-v1-page__checkbox {
+.stats-dev-page__field span,
+.stats-dev-page__checkbox {
 	font-size: 0.75rem;
 	font-weight: 600;
 	color: rgba(255, 255, 255, 0.6);
@@ -101,7 +113,7 @@
 	letter-spacing: 0.04em;
 }
 
-.stats-v1-page__field input {
+.stats-dev-page__field input {
 	padding: 0.45rem 0.65rem;
 	border-radius: var(--gg-radius-sm, 6px);
 	border: 1px solid rgba(255, 255, 255, 0.2);
@@ -110,7 +122,7 @@
 	font-size: 0.95rem;
 }
 
-.stats-v1-page__checkbox {
+.stats-dev-page__checkbox {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.45rem;
@@ -122,29 +134,29 @@
 	padding-bottom: 0.35rem;
 }
 
-.stats-v1-page__table-wrap {
+.stats-dev-page__table-wrap {
 	overflow: auto;
 	border-radius: var(--gg-radius, 10px);
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	background: rgba(0, 0, 0, 0.28);
 }
 
-.stats-v1-page__table {
+.stats-dev-page__table {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 0.9rem;
 	color: rgba(255, 255, 255, 0.9);
 }
 
-.stats-v1-page__table th,
-.stats-v1-page__table td {
+.stats-dev-page__table th,
+.stats-dev-page__table td {
 	padding: 0.55rem 0.7rem;
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 	white-space: nowrap;
 }
 
-.stats-v1-page__table th {
+.stats-dev-page__table th {
 	position: sticky;
 	top: 0;
 	background: rgba(20, 16, 12, 0.95);
@@ -155,7 +167,7 @@
 	color: rgba(255, 255, 255, 0.65);
 }
 
-.stats-v1-page__table th button {
+.stats-dev-page__table th button {
 	appearance: none;
 	border: 0;
 	background: transparent;
@@ -167,40 +179,104 @@
 	padding: 0;
 }
 
-.stats-v1-page__table th button:hover {
+.stats-dev-page__table th button:hover {
 	color: var(--gg-gold, #d4a853);
 }
 
-.stats-v1-page__table tbody tr:hover {
+.stats-dev-page__table tbody tr:hover {
 	background: rgba(255, 255, 255, 0.04);
 }
 
-.stats-v1-page__table tbody tr.is-dimmed {
+.stats-dev-page__table tbody tr.is-dimmed {
 	opacity: 0.45;
 }
 
-.stats-v1-page__card-id {
+.stats-dev-page__table td.num,
+.stats-dev-page__table th.num {
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+.stats-dev-page__card-id {
 	color: rgba(255, 255, 255, 0.45);
 	font-variant-numeric: tabular-nums;
 	margin-right: 0.35rem;
 }
 
-.stats-v1-page__winrate {
+.stats-dev-page__winrate {
 	font-variant-numeric: tabular-nums;
 	font-weight: 600;
 }
 
-.stats-v1-page__winrate.is-high {
+.stats-dev-page__winrate.is-high {
 	color: #7ddea0;
 }
 
-.stats-v1-page__winrate.is-low {
+.stats-dev-page__winrate.is-low {
 	color: #f0a0a0;
 }
 
-.stats-v1-page__empty {
+.stats-dev-page__delta.is-up {
+	color: #7ddea0;
+	font-weight: 600;
+}
+
+.stats-dev-page__delta.is-down {
+	color: #f0a0a0;
+	font-weight: 600;
+}
+
+.stats-dev-page__table-foot td {
+	border-top: 1px solid rgba(255, 255, 255, 0.18);
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.stats-dev-page__empty {
 	margin: 0;
 	padding: 1.25rem;
 	color: rgba(255, 255, 255, 0.55);
 	font-size: 0.9rem;
+}
+
+.stats-dev-page__section-title {
+	margin: 0.5rem 0 0;
+	font-size: 1.05rem;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.stats-dev-page__links {
+	display: grid;
+	gap: 0.85rem;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.stats-dev-page__link {
+	display: block;
+	padding: 1.1rem 1.2rem;
+	border-radius: var(--gg-radius, 10px);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: rgba(0, 0, 0, 0.28);
+	text-decoration: none;
+	color: inherit;
+	transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.stats-dev-page__link:hover {
+	border-color: rgba(212, 168, 83, 0.45);
+	background: rgba(212, 168, 83, 0.08);
+}
+
+.stats-dev-page__link-title {
+	display: block;
+	font-size: 1.05rem;
+	font-weight: 600;
+	color: var(--gg-gold, #d4a853);
+	margin-bottom: 0.35rem;
+}
+
+.stats-dev-page__link-desc {
+	margin: 0;
+	font-size: 0.88rem;
+	line-height: 1.45;
+	color: rgba(255, 255, 255, 0.7);
 }

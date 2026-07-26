@@ -68,6 +68,8 @@ export type ScannedRoutes = {
         "games.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "games.update": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "games.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "dev_stats.cards": { paramsTuple?: []; params?: {} };
+        "dev_stats.games": { paramsTuple?: []; params?: {} };
         "dev_stats.v1": { paramsTuple?: []; params?: {} };
     };
     GET: {
@@ -102,6 +104,8 @@ export type ScannedRoutes = {
         "games.active_count": { paramsTuple?: []; params?: {} };
         "games.index": { paramsTuple?: []; params?: {} };
         "games.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "dev_stats.cards": { paramsTuple?: []; params?: {} };
+        "dev_stats.games": { paramsTuple?: []; params?: {} };
         "dev_stats.v1": { paramsTuple?: []; params?: {} };
     };
     HEAD: {
@@ -136,6 +140,8 @@ export type ScannedRoutes = {
         "games.active_count": { paramsTuple?: []; params?: {} };
         "games.index": { paramsTuple?: []; params?: {} };
         "games.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
+        "dev_stats.cards": { paramsTuple?: []; params?: {} };
+        "dev_stats.games": { paramsTuple?: []; params?: {} };
         "dev_stats.v1": { paramsTuple?: []; params?: {} };
     };
     POST: {

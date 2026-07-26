@@ -95,6 +95,8 @@ export interface ApiDefinition {
         destroy: (typeof routes)["games.destroy"];
     };
     devStats: {
+        cards: (typeof routes)["dev_stats.cards"];
+        games: (typeof routes)["dev_stats.games"];
         v1: (typeof routes)["dev_stats.v1"];
     };
 }

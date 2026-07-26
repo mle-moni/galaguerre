@@ -2,8 +2,9 @@ import type { ApiDevStatsV1Card } from "#api_types/dev_stats.types";
 import { CARD_RARITY_LABELS } from "#api_types/card_rarity.types";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
-import { useDevStatsV1Query } from "~/hooks/use_dev_stats_v1";
-import "./stats_v1_page.css";
+import { Link } from "react-router-dom";
+import { useDevStatsCardsQuery } from "~/hooks/use_dev_stats_cards";
+import "./stats_dev_page.css";
 
 type Mode = "human" | "ai";
 type SortKey = "label" | "cost" | "liveSelectionRate" | "liveAvgCopies" | "playedGames" | "winrate";
@@ -25,8 +26,8 @@ const compareNullable = (a: number | null, b: number | null) => {
     return a - b;
 };
 
-export const StatsV1Page = () => {
-    const query = useDevStatsV1Query();
+export const StatsCardsPage = () => {
+    const query = useDevStatsCardsQuery();
     const [mode, setMode] = useState<Mode>("human");
     const [search, setSearch] = useState("");
     const [minGames, setMinGames] = useState(5);
@@ -100,16 +101,16 @@ export const StatsV1Page = () => {
 
     if (query.isLoading) {
         return (
-            <div className="stats-v1-page">
-                <p className="stats-v1-page__intro">Chargement des stats…</p>
+            <div className="stats-dev-page">
+                <p className="stats-dev-page__intro">Chargement des stats…</p>
             </div>
         );
     }
 
     if (query.isError || !query.data) {
         return (
-            <div className="stats-v1-page">
-                <p className="stats-v1-page__intro">Échec du chargement des stats.</p>
+            <div className="stats-dev-page">
+                <p className="stats-dev-page__intro">Échec du chargement des stats.</p>
             </div>
         );
     }
@@ -121,9 +122,12 @@ export const StatsV1Page = () => {
 
     if (status === "pending" || !data) {
         return (
-            <div className="stats-v1-page">
-                <h1 className="stats-v1-page__title">Stats cartes v1</h1>
-                <p className="stats-v1-page__intro">
+            <div className="stats-dev-page">
+                <Link to="/dev/stats" className="stats-dev-page__back">
+                    ← Dev stats
+                </Link>
+                <h1 className="stats-dev-page__title">Cards stats</h1>
+                <p className="stats-dev-page__intro">
                     {isRefreshing
                         ? "Calcul en cours en arrière-plan (cache vide après démarrage)…"
                         : "Pas encore de snapshot en cache."}{" "}
@@ -136,12 +140,14 @@ export const StatsV1Page = () => {
     const { meta } = data;
 
     return (
-        <div className="stats-v1-page">
-            <header className="stats-v1-page__header">
+        <div className="stats-dev-page">
+            <header className="stats-dev-page__header">
                 <div>
-                    <h1 className="stats-v1-page__title">Stats cartes v1</h1>
-                    <p className="stats-v1-page__intro">
-                        Page d&apos;équilibrage — URL secrète : <code>/dev/stats/v1</code>.
+                    <Link to="/dev/stats" className="stats-dev-page__back">
+                        ← Dev stats
+                    </Link>
+                    <h1 className="stats-dev-page__title">Cards stats</h1>
+                    <p className="stats-dev-page__intro">
                         Sélection = decks live. Winrate = when-played. Snapshot mémoire recalculé
                         chaque nuit à 03:00 (Europe/Paris)
                         {isRefreshing ? " — refresh en cours…" : ""}. Généré le{" "}
@@ -151,7 +157,7 @@ export const StatsV1Page = () => {
                         . Prochain : {nextRefreshLabel}.
                     </p>
                 </div>
-                <div className="stats-v1-page__meta">
+                <div className="stats-dev-page__meta">
                     <span>{meta.totalDecks} decks</span>
                     <span>{meta.humanGames} games humaines</span>
                     <span>{meta.aiGames} games IA</span>
@@ -161,13 +167,13 @@ export const StatsV1Page = () => {
                 </div>
             </header>
 
-            <div className="stats-v1-page__controls">
-                <div className="stats-v1-page__tabs" role="tablist">
+            <div className="stats-dev-page__controls">
+                <div className="stats-dev-page__tabs" role="tablist">
                     <button
                         type="button"
                         role="tab"
                         aria-selected={mode === "human"}
-                        className={clsx("stats-v1-page__tab", mode === "human" && "is-active")}
+                        className={clsx("stats-dev-page__tab", mode === "human" && "is-active")}
                         onClick={() => setMode("human")}
                     >
                         Humain
@@ -176,14 +182,14 @@ export const StatsV1Page = () => {
                         type="button"
                         role="tab"
                         aria-selected={mode === "ai"}
-                        className={clsx("stats-v1-page__tab", mode === "ai" && "is-active")}
+                        className={clsx("stats-dev-page__tab", mode === "ai" && "is-active")}
                         onClick={() => setMode("ai")}
                     >
                         vs IA
                     </button>
                 </div>
 
-                <label className="stats-v1-page__field">
+                <label className="stats-dev-page__field">
                     <span>Recherche</span>
                     <input
                         type="search"
@@ -193,7 +199,7 @@ export const StatsV1Page = () => {
                     />
                 </label>
 
-                <label className="stats-v1-page__field stats-v1-page__field--narrow">
+                <label className="stats-dev-page__field stats-dev-page__field--narrow">
                     <span>Min games</span>
                     <input
                         type="number"
@@ -205,7 +211,7 @@ export const StatsV1Page = () => {
                     />
                 </label>
 
-                <label className="stats-v1-page__checkbox">
+                <label className="stats-dev-page__checkbox">
                     <input
                         type="checkbox"
                         checked={hideBelowMin}
@@ -215,8 +221,8 @@ export const StatsV1Page = () => {
                 </label>
             </div>
 
-            <div className="stats-v1-page__table-wrap">
-                <table className="stats-v1-page__table">
+            <div className="stats-dev-page__table-wrap">
+                <table className="stats-dev-page__table">
                     <thead>
                         <tr>
                             <th>
@@ -264,7 +270,7 @@ export const StatsV1Page = () => {
                     </tbody>
                 </table>
                 {rows.length === 0 && (
-                    <p className="stats-v1-page__empty">Aucune carte ne correspond aux filtres.</p>
+                    <p className="stats-dev-page__empty">Aucune carte ne correspond aux filtres.</p>
                 )}
             </div>
         </div>
@@ -285,7 +291,7 @@ const StatsRow = ({ card, mode, minGames }: StatsRowProps) => {
     return (
         <tr className={clsx(belowMin && "is-dimmed")}>
             <td>
-                <span className="stats-v1-page__card-id">#{card.cardId}</span> {card.label}
+                <span className="stats-dev-page__card-id">#{card.cardId}</span> {card.label}
             </td>
             <td>{card.cost}</td>
             <td>{CARD_RARITY_LABELS[card.rarity]}</td>
@@ -294,7 +300,7 @@ const StatsRow = ({ card, mode, minGames }: StatsRowProps) => {
             <td>{modeStats.playedGames}</td>
             <td
                 className={clsx(
-                    "stats-v1-page__winrate",
+                    "stats-dev-page__winrate",
                     winrate !== null && winrate > 0.52 && "is-high",
                     winrate !== null && winrate < 0.48 && "is-low",
                 )}

@@ -1,7 +1,7 @@
 import type {
     ApiDevStatsV1Card,
     ApiDevStatsV1ModeStats,
-    ApiDevStatsV1Payload,
+    ApiDevCardsStatsPayload,
 } from "#api_types/dev_stats.types";
 import type { CardRarity } from "#api_types/card_rarity.types";
 import type { GameData, GameWinnerSide } from "#api_types/game.types";
@@ -158,7 +158,7 @@ const aggregateFinishedGames = async (
     return { humanGames, aiGames, gamesScanned: games.length };
 };
 
-export const computeStatsV1 = async (): Promise<ApiDevStatsV1Payload> => {
+export const computeStatsV1 = async (): Promise<ApiDevCardsStatsPayload> => {
     const [live, collectibleCards] = await Promise.all([
         loadLiveDeckStats(),
         Card.query().where("isCollectible", true).orderBy("id", "asc"),
