@@ -230,6 +230,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Spécialiste OSINT", 4),
             imageUrl: "/card-covers/galadrim/specialiste-osint.webp",
+            goldenVideoUrl: "/card-videos/specialiste-osint.mp4",
             attack: 4,
             health: 5,
         },
@@ -313,6 +314,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Dev Insomniaque", 5),
             imageUrl: "/card-covers/galadrim/dev-insomniaque.webp",
+            goldenVideoUrl: "/card-videos/dev-insomniaque.mp4",
             attack: 4,
             health: 5,
         },
@@ -326,6 +328,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Architecte Système", 7),
             imageUrl: "/card-covers/galadrim/architecte-systeme.webp",
+            goldenVideoUrl: "/card-videos/architecte-systeme.mp4",
             attack: 5,
             health: 5,
         },
@@ -454,6 +457,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Directeur de Projet", 5),
             imageUrl: "/card-covers/galadrim/directeur-de-projet.webp",
+            goldenVideoUrl: "/card-videos/directeur-de-projet.mp4",
             attack: 4,
             health: 4,
         },
@@ -481,6 +485,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Recadreur de scope", 5),
             imageUrl: "/card-covers/galadrim/recadreur-de-scope.webp",
+            goldenVideoUrl: "/card-videos/recadreur-de-scope.mp4",
             attack: 5,
             health: 5,
         },
@@ -527,6 +532,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Sales Charismatique", 3),
             imageUrl: "/card-covers/galadrim/sales-charismatique.webp",
+            goldenVideoUrl: "/card-videos/sales-charismatique.mp4",
             attack: 2,
             health: 2,
         },
@@ -557,6 +563,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Négociateur", 4),
             imageUrl: "/card-covers/galadrim/negociateur.webp",
+            goldenVideoUrl: "/card-videos/negociateur.mp4",
             attack: 4,
             health: 2,
         },
@@ -570,6 +577,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Key Account Manager", 6),
             imageUrl: "/card-covers/galadrim/key-account-manager.webp",
+            goldenVideoUrl: "/card-videos/key-account-manager.mp4",
             attack: 6,
             health: 2,
         },
@@ -585,6 +593,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Directeur Commercial", 6),
             imageUrl: "/card-covers/galadrim/directeur-commercial.webp",
+            goldenVideoUrl: "/card-videos/directeur-commercial.mp4",
             attack: 5,
             health: 5,
         },
@@ -643,6 +652,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Recruteur RH", 3),
             imageUrl: "/card-covers/galadrim/recruteur-rh.webp",
+            goldenVideoUrl: "/card-videos/recruteur-rh.mp4",
             attack: 2,
             health: 4,
         },
@@ -702,6 +712,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Avocat d'Affaires", 5),
             imageUrl: "/card-covers/galadrim/avocat-d-affaires.webp",
+            goldenVideoUrl: "/card-videos/avocat-d-affaires.mp4",
             attack: 4,
             health: 5,
         },
@@ -745,6 +756,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Balin", 5),
             imageUrl: "/card-covers/galadrim/balin.webp",
+            goldenVideoUrl: "/card-videos/balin.mp4",
             attack: 4,
             health: 6,
         },
@@ -973,6 +985,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Perroquet de l'open space", 4),
             imageUrl: "/card-covers/galadrim/perroquet-de-l-open-space.webp",
+            goldenVideoUrl: "/card-videos/perroquet-de-l-open-space.mp4",
             attack: 4,
             health: 4,
         },
@@ -1221,6 +1234,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Réunion Interminable", 5),
             imageUrl: "/card-covers/galadrim/reunion-interminable.webp",
+            goldenVideoUrl: "/card-videos/reunion-interminable.mp4",
         },
         [damageAction(3, enemyMinions())],
     ),
@@ -1229,6 +1243,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Sprint Review", 4),
             imageUrl: "/card-covers/galadrim/sprint-review.webp",
+            goldenVideoUrl: "/card-videos/sprint-review.mp4",
         },
         [boostAction(boostBothWithTaunt(3, 3), targetedAllyMinion(), true)],
     ),
@@ -1266,6 +1281,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Licenciement pour Faute", 5),
             imageUrl: "/card-covers/galadrim/licenciement-pour-faute.webp",
+            goldenVideoUrl: "/card-videos/licenciement-pour-faute.mp4",
         },
         [destroyAction(targetedAnyMinion(), true)],
     ),
@@ -1274,6 +1290,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Licenciement collectif", 8),
             imageUrl: "/card-covers/galadrim/licenciement-collectif.webp",
+            goldenVideoUrl: "/card-videos/licenciement-collectif.mp4",
         },
         [destroyAction(allMinions())],
         [],
@@ -1293,6 +1310,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Mise en prod du vendredi", 7),
             imageUrl: "/card-covers/galadrim/mise-en-prod-du-vendredi.webp",
+            goldenVideoUrl: "/card-videos/mise-en-prod-du-vendredi.mp4",
         },
         [destroyAction(targetedAnyMinion(), true), summonCardId(64), summonCardId(63)],
         [],
@@ -1422,7 +1440,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         126,
-        { ...gal("Congrès Tech", 5), imageUrl: "/card-covers/galadrim/congres-tech.webp" },
+        {
+            ...gal("Congrès Tech", 5),
+            imageUrl: "/card-covers/galadrim/congres-tech.webp",
+            goldenVideoUrl: "/card-videos/congres-tech.mp4",
+        },
         [
             reconversionAction(
                 reconvertParameters({
@@ -1446,7 +1468,11 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         128,
-        { ...gal("Débauchage", 9), imageUrl: "/card-covers/galadrim/debauchage.webp" },
+        {
+            ...gal("Débauchage", 9),
+            imageUrl: "/card-covers/galadrim/debauchage.webp",
+            goldenVideoUrl: "/card-videos/debauchage.mp4",
+        },
         [mindControlAction(targetedEnemyMinion(), true)],
         [],
         { rarity: "EPIC" },
@@ -1598,6 +1624,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Câble Réseau", 6),
             imageUrl: "/card-covers/galadrim/cable-reseau.webp",
+            goldenVideoUrl: "/card-videos/cable-reseau.mp4",
             damage: 4,
             durability: 2,
         },
