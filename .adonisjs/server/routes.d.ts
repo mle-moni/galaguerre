@@ -70,6 +70,7 @@ export type ScannedRoutes = {
         "games.destroy": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "dev_stats.cards": { paramsTuple?: []; params?: {} };
         "dev_stats.games": { paramsTuple?: []; params?: {} };
+        "dev_stats.players": { paramsTuple?: []; params?: {} };
         "dev_stats.v1": { paramsTuple?: []; params?: {} };
     };
     GET: {
@@ -106,6 +107,7 @@ export type ScannedRoutes = {
         "games.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "dev_stats.cards": { paramsTuple?: []; params?: {} };
         "dev_stats.games": { paramsTuple?: []; params?: {} };
+        "dev_stats.players": { paramsTuple?: []; params?: {} };
         "dev_stats.v1": { paramsTuple?: []; params?: {} };
     };
     HEAD: {
@@ -142,6 +144,7 @@ export type ScannedRoutes = {
         "games.show": { paramsTuple: [ParamValue]; params: { id: ParamValue } };
         "dev_stats.cards": { paramsTuple?: []; params?: {} };
         "dev_stats.games": { paramsTuple?: []; params?: {} };
+        "dev_stats.players": { paramsTuple?: []; params?: {} };
         "dev_stats.v1": { paramsTuple?: []; params?: {} };
     };
     POST: {

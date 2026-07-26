@@ -14,6 +14,12 @@ const ENTRIES = [
         description:
             "Volume de parties par jour / semaine / mois, par mode (ranked, amicales, IA, onboarding).",
     },
+    {
+        to: "/dev/stats/players",
+        title: "Player stats",
+        description:
+            "Top joueurs par volume de parties (all-time / 7j / 30j), split modes, winrate, lien historique.",
+    },
 ] as const;
 
 export const StatsHubPage = () => (

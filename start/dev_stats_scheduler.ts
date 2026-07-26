@@ -1,6 +1,7 @@
 import {
     getDevStatsCardsCacheSnapshot,
     getDevStatsGamesCacheSnapshot,
+    getDevStatsPlayersCacheSnapshot,
     refreshDevStatsCacheInBackground,
     scheduleDevStatsNightlyRefresh,
 } from "#services/dev_stats/dev_stats_cache";
@@ -15,7 +16,8 @@ emitter.on("http:server_ready", () => {
     // Warm cache after deploy/restart without waiting until 03:00 — still off the request path.
     const cardsPending = getDevStatsCardsCacheSnapshot().status === "pending";
     const gamesPending = getDevStatsGamesCacheSnapshot().status === "pending";
-    if (cardsPending || gamesPending) {
+    const playersPending = getDevStatsPlayersCacheSnapshot().status === "pending";
+    if (cardsPending || gamesPending || playersPending) {
         refreshDevStatsCacheInBackground();
     }
 });

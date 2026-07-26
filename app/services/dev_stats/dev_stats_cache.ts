@@ -4,8 +4,11 @@ import type {
     ApiDevCardsStatsResponse,
     ApiDevGameStatsPayload,
     ApiDevGameStatsResponse,
+    ApiDevPlayerStatsPayload,
+    ApiDevPlayerStatsResponse,
 } from "#api_types/dev_stats.types";
 import { computeGameStats } from "#services/dev_stats/compute_game_stats";
+import { computePlayerStats } from "#services/dev_stats/compute_player_stats";
 import { computeStatsV1 } from "#services/dev_stats/compute_stats_v1";
 import { DateTime } from "luxon";
 
@@ -19,6 +22,7 @@ export const DEV_STATS_V1_REFRESH_HOUR = DEV_STATS_REFRESH_HOUR;
 
 let cachedCards: ApiDevCardsStatsPayload | null = null;
 let cachedGames: ApiDevGameStatsPayload | null = null;
+let cachedPlayers: ApiDevPlayerStatsPayload | null = null;
 let refreshPromise: Promise<void> | null = null;
 let scheduledTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -58,6 +62,9 @@ export const getDevStatsGamesCacheSnapshot = (): ApiDevGameStatsResponse => {
     return envelope(cachedGames);
 };
 
+export const getDevStatsPlayersCacheSnapshot = (): ApiDevPlayerStatsResponse =>
+    envelope(cachedPlayers);
+
 /** @deprecated Prefer getDevStatsCardsCacheSnapshot */
 export const getDevStatsV1CacheSnapshot = getDevStatsCardsCacheSnapshot;
 
@@ -69,13 +76,18 @@ export const refreshDevStatsCache = async (): Promise<void> => {
 
     refreshPromise = (async () => {
         const startedAt = Date.now();
-        console.info("[dev-stats] refresh starting (cards + games)…");
+        console.info("[dev-stats] refresh starting (cards + games + players)…");
         try {
-            const [cards, games] = await Promise.all([computeStatsV1(), computeGameStats()]);
+            const [cards, games, players] = await Promise.all([
+                computeStatsV1(),
+                computeGameStats(),
+                computePlayerStats(),
+            ]);
             cachedCards = cards;
             cachedGames = games;
+            cachedPlayers = players;
             console.info(
-                `[dev-stats] refresh done in ${Date.now() - startedAt}ms (${cards.cards.length} cards, ${games.totals.total} finished games)`,
+                `[dev-stats] refresh done in ${Date.now() - startedAt}ms (${cards.cards.length} cards, ${games.totals.total} finished games, ${players.players.length} players)`,
             );
         } catch (error) {
             console.error("[dev-stats] refresh failed", error);
@@ -138,9 +150,11 @@ export const scheduleDevStatsV1NightlyRefresh = scheduleDevStatsNightlyRefresh;
 export const __setDevStatsCacheForTests = (options: {
     cards?: ApiDevCardsStatsPayload | null;
     games?: ApiDevGameStatsPayload | null;
+    players?: ApiDevPlayerStatsPayload | null;
 }): void => {
     if ("cards" in options) cachedCards = options.cards ?? null;
     if ("games" in options) cachedGames = options.games ?? null;
+    if ("players" in options) cachedPlayers = options.players ?? null;
 };
 
 /** @deprecated Prefer __setDevStatsCacheForTests */

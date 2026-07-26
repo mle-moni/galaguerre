@@ -1419,6 +1419,30 @@ export interface Registry {
             >;
         };
     };
+    "dev_stats.players": {
+        methods: ["GET", "HEAD"];
+        pattern: "/api/dev/stats/players";
+        types: {
+            body: {};
+            paramsTuple: [];
+            params: {};
+            query: {};
+            response: ExtractResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/dev/stats/dev_stats_controller").default["players"]
+                    >
+                >
+            >;
+            errorResponse: ExtractErrorResponse<
+                Awaited<
+                    ReturnType<
+                        import("#controllers/dev/stats/dev_stats_controller").default["players"]
+                    >
+                >
+            >;
+        };
+    };
     "dev_stats.v1": {
         methods: ["GET", "HEAD"];
         pattern: "/api/dev/stats/v1";

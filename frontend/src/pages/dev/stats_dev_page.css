@@ -231,6 +231,22 @@
 	background: rgba(255, 255, 255, 0.03);
 }
 
+.stats-dev-page__breakdown {
+	font-variant-numeric: tabular-nums;
+	font-size: 0.82rem;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.stats-dev-page__player-link {
+	color: var(--gg-gold, #d4a853);
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.stats-dev-page__player-link:hover {
+	text-decoration: underline;
+}
+
 .stats-dev-page__empty {
 	margin: 0;
 	padding: 1.25rem;

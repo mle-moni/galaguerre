@@ -92,6 +92,39 @@ export interface ApiDevCachedStatsResponse<TPayload> {
 
 export type ApiDevCardsStatsResponse = ApiDevCachedStatsResponse<ApiDevCardsStatsPayload>;
 export type ApiDevGameStatsResponse = ApiDevCachedStatsResponse<ApiDevGameStatsPayload>;
+export type ApiDevPlayerStatsResponse = ApiDevCachedStatsResponse<ApiDevPlayerStatsPayload>;
 
 /** @deprecated Prefer ApiDevCardsStatsResponse */
 export type ApiDevStatsV1Response = ApiDevCardsStatsResponse;
+
+export interface ApiDevPlayerPeriodStats extends ApiDevGameModeCounts {
+    wins: number;
+    losses: number;
+    draws: number;
+    /** wins / (wins + losses); null if no decisive games. */
+    winrate: number | null;
+}
+
+export interface ApiDevPlayerPeriodStatsWithDelta extends ApiDevPlayerPeriodStats {
+    previousWeekTotal: number;
+    totalDeltaPct: number | null;
+}
+
+export interface ApiDevPlayerStatsRow {
+    userId: number;
+    pseudo: string | null;
+    avatarCardId: number;
+    elo: number;
+    allTime: ApiDevPlayerPeriodStats;
+    last7Days: ApiDevPlayerPeriodStatsWithDelta;
+    last30Days: ApiDevPlayerPeriodStats;
+}
+
+export interface ApiDevPlayerStatsPayload {
+    meta: {
+        generatedAt: string;
+        timezone: string;
+        limit: number;
+    };
+    players: ApiDevPlayerStatsRow[];
+}

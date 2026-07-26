@@ -97,6 +97,9 @@ router
         router
             .get("/dev/stats/games", [controllers.dev.stats.DevStats, "games"])
             .as("dev_stats.games");
+        router
+            .get("/dev/stats/players", [controllers.dev.stats.DevStats, "players"])
+            .as("dev_stats.players");
         router.get("/dev/stats/v1", [controllers.dev.stats.DevStats, "v1"]).as("dev_stats.v1");
     })
     .use(middleware.auth())

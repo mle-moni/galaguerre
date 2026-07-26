@@ -97,6 +97,7 @@ export interface ApiDefinition {
     devStats: {
         cards: (typeof routes)["dev_stats.cards"];
         games: (typeof routes)["dev_stats.games"];
+        players: (typeof routes)["dev_stats.players"];
         v1: (typeof routes)["dev_stats.v1"];
     };
 }

@@ -9,6 +9,7 @@ export {
     clearDevStatsV1Schedule,
     getDevStatsCardsCacheSnapshot,
     getDevStatsGamesCacheSnapshot,
+    getDevStatsPlayersCacheSnapshot,
     getDevStatsV1CacheSnapshot,
     getNextDevStatsRefreshAt,
     getNextDevStatsV1RefreshAt,

@@ -16,6 +16,7 @@ import { GoldenCardsPage } from "./pages/dev/golden_cards_page.jsx";
 import { StatsCardsPage } from "./pages/dev/stats_cards_page.jsx";
 import { StatsGamesPage } from "./pages/dev/stats_games_page.jsx";
 import { StatsHubPage } from "./pages/dev/stats_hub_page.jsx";
+import { StatsPlayersPage } from "./pages/dev/stats_players_page.jsx";
 import { FriendsPage } from "./pages/friends/friends_page.jsx";
 import { HomePage } from "./pages/home/home_page.jsx";
 import { LoginPage } from "./pages/login/login_page.jsx";
@@ -159,6 +160,10 @@ const router = createBrowserRouter([
                     {
                         path: "/dev/stats/games",
                         element: <StatsGamesPage />,
+                    },
+                    {
+                        path: "/dev/stats/players",
+                        element: <StatsPlayersPage />,
                     },
                     {
                         path: "/dev/stats/v1",

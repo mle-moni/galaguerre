@@ -614,6 +614,17 @@ const routes = {
         ],
         types: placeholder as Registry["dev_stats.games"]["types"],
     },
+    "dev_stats.players": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/dev/stats/players",
+        tokens: [
+            { old: "/api/dev/stats/players", type: 0, val: "api", end: "" },
+            { old: "/api/dev/stats/players", type: 0, val: "dev", end: "" },
+            { old: "/api/dev/stats/players", type: 0, val: "stats", end: "" },
+            { old: "/api/dev/stats/players", type: 0, val: "players", end: "" },
+        ],
+        types: placeholder as Registry["dev_stats.players"]["types"],
+    },
     "dev_stats.v1": {
         methods: ["GET", "HEAD"],
         pattern: "/api/dev/stats/v1",
