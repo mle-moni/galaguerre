@@ -55,6 +55,7 @@ export default defineConfig({
         () => import("#start/sync_cards"),
         () => import("#start/sync_events"),
         () => import("#start/sync_user_wins_losses"),
+        () => import("#start/dev_stats_scheduler"),
     ],
 
     /*

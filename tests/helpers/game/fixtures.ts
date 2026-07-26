@@ -530,6 +530,7 @@ export const createGamePlayer = (
     maxFatigueDamageTaken: 0,
     stats: { ...DEFAULT_PLAYER_STATS },
     ownedGoldenCardIds: [],
+    startingDeckCardIds: [],
     ...overrides,
 });
 

@@ -1,5 +1,5 @@
 import Game from "#models/game";
-import { applyGameResult, getWinnerUserId } from "#services/elo";
+import { applyGameResult, getWinnerSide, getWinnerUserId } from "#services/elo";
 import { completeOnboardingIfNeeded } from "#services/onboarding/complete_onboarding_if_needed";
 import { getTrainingGameHumanUserId } from "#services/onboarding/get_training_game_human_user_id";
 import { applyGameRewards } from "#services/rewards/apply_game_rewards";
@@ -66,6 +66,7 @@ const applyPostGameProgression = async (
     game.data = {
         ...game.data,
         state: "FINISHED",
+        winnerSide: getWinnerSide(game),
         postGameProgressionApplied: true,
     };
     game.useTransaction(trx);

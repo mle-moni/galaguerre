@@ -376,6 +376,7 @@ test.group("training:ai", (group) => {
 
         assert.isTrue(game.isFinished);
         assert.isNull(game.winnerId);
+        assert.equal(game.data.winnerSide, "PLAYER_TWO");
         assert.isUndefined(game.data.ratingResult);
         assert.equal(human.elo, 1200);
         assert.equal(human.wins, 0);

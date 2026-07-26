@@ -1,4 +1,8 @@
-import type { GameRatingPlayerResult, GameRatingResult } from "#api_types/game.types";
+import type {
+    GameRatingPlayerResult,
+    GameRatingResult,
+    GameWinnerSide,
+} from "#api_types/game.types";
 import type Game from "#models/game";
 import User from "#models/user";
 import {
@@ -23,6 +27,25 @@ export const getWinnerUserId = (game: Game): number | null => {
 
     if (playerTwo.health <= 0) {
         return playerOne.userId;
+    }
+
+    return null;
+};
+
+/** Winning side including AI; null on draw / unfinished health state. */
+export const getWinnerSide = (game: Game): GameWinnerSide | null => {
+    const { playerOne, playerTwo } = game.data;
+
+    if (playerOne.health <= 0 && playerTwo.health <= 0) {
+        return null;
+    }
+
+    if (playerOne.health <= 0) {
+        return "PLAYER_TWO";
+    }
+
+    if (playerTwo.health <= 0) {
+        return "PLAYER_ONE";
     }
 
     return null;

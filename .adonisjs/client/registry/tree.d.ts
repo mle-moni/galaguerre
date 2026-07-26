@@ -94,4 +94,7 @@ export interface ApiDefinition {
         update: (typeof routes)["games.update"];
         destroy: (typeof routes)["games.destroy"];
     };
+    devStats: {
+        v1: (typeof routes)["dev_stats.v1"];
+    };
 }

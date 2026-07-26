@@ -592,6 +592,17 @@ const routes = {
         ],
         types: placeholder as Registry["games.destroy"]["types"],
     },
+    "dev_stats.v1": {
+        methods: ["GET", "HEAD"],
+        pattern: "/api/dev/stats/v1",
+        tokens: [
+            { old: "/api/dev/stats/v1", type: 0, val: "api", end: "" },
+            { old: "/api/dev/stats/v1", type: 0, val: "dev", end: "" },
+            { old: "/api/dev/stats/v1", type: 0, val: "stats", end: "" },
+            { old: "/api/dev/stats/v1", type: 0, val: "v1", end: "" },
+        ],
+        types: placeholder as Registry["dev_stats.v1"]["types"],
+    },
 } as const satisfies Record<string, AdonisEndpoint>;
 
 export { routes };

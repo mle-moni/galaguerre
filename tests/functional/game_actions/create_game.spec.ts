@@ -71,6 +71,14 @@ test.group("game:create", (group) => {
         assert.equal(data.playerTwo.hand.length, 4);
         assert.equal(data.playerOne.deckCards.length, 3);
         assert.equal(data.playerTwo.deckCards.length, 2);
+        assert.equal(data.playerOne.startingDeckCardIds?.length, 6);
+        assert.equal(data.playerTwo.startingDeckCardIds?.length, 6);
+        assert.deepEqual(
+            [...(data.playerOne.startingDeckCardIds ?? [])].sort((a, b) => a - b),
+            [...data.playerOne.hand, ...data.playerOne.deckCards]
+                .map((card) => card.cardId)
+                .sort((a, b) => a - b),
+        );
         assert.isFalse(data.mulligan?.playerOneDone);
         assert.isFalse(data.mulligan?.playerTwoDone);
     });

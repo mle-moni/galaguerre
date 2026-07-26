@@ -210,6 +210,8 @@ export const DEFAULT_PLAYER_STATS: GamePlayerStats = {
     heroAttacks: 0,
 };
 
+export type GameWinnerSide = "PLAYER_ONE" | "PLAYER_TWO";
+
 export interface GamePlayer {
     userId: number;
     pseudo: string;
@@ -230,6 +232,11 @@ export interface GamePlayer {
     stats: GamePlayerStats;
     /** Card IDs the player owns as golden in their collection (snapshot at game start). */
     ownedGoldenCardIds: number[];
+    /**
+     * Immutable starting-deck cardIds (duplicates = copies).
+     * Set at createGame; never mutate. Optional for games created before this field existed.
+     */
+    startingDeckCardIds?: number[];
 }
 
 export interface GameRatingPlayerResult {
@@ -304,6 +311,11 @@ export interface GameData {
     isTraining?: boolean;
     isFriendly?: boolean;
     isOnboardingTutorial?: boolean;
+    /**
+     * Winning side at terminate (including AI). Prefer this over `games.winner_id` for analytics —
+     * training AI wins keep `winner_id` null to avoid an invalid FK.
+     */
+    winnerSide?: GameWinnerSide | null;
 }
 
 export interface ApiGame {

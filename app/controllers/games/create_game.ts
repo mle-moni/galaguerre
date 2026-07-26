@@ -146,6 +146,7 @@ const createGamePlayer = (
         heroLastAttackAtRound: 0,
         stats: { ...DEFAULT_PLAYER_STATS },
         ownedGoldenCardIds,
+        startingDeckCardIds: deck.map((card) => card.cardId),
     };
 };
 

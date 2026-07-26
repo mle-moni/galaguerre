@@ -44,6 +44,11 @@ export const controllers = {
         Decks: () => import("#controllers/decks/decks_controller"),
         SerializeDeck: () => import("#controllers/decks/serialize_deck"),
     },
+    dev: {
+        stats: {
+            DevStats: () => import("#controllers/dev/stats/dev_stats_controller"),
+        },
+    },
     events: {
         Events: () => import("#controllers/events/events_controller"),
     },

@@ -90,6 +90,9 @@ router
         router.delete("/games/search", [controllers.games.Games, "cancelSearch"]);
         router.post("/games/search/heartbeat", [controllers.games.Games, "searchHeartbeat"]);
         router.resource("games", controllers.games.Games).apiOnly();
+        // Explicit name: Adonis would register `dev_stats.v_1` from method `v1`, but Tuyau
+        // resolves `client.api.devStats.v1` → `dev_stats.v1`.
+        router.get("/dev/stats/v1", [controllers.dev.stats.DevStats, "v1"]).as("dev_stats.v1");
     })
     .use(middleware.auth())
     .prefix("/api");
