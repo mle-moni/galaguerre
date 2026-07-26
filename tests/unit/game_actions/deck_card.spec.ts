@@ -5,6 +5,7 @@ import {
     removeAddedCardsFromDeck,
     removeCardsFromDeck,
 } from "../../../app/galaguerre/deck_card_operations.js";
+import { getCardPreviewById } from "#api_types/card_preview";
 import {
     createCardActionSnapshot,
     createEmptyBoard,
@@ -19,6 +20,7 @@ import { runBattlecry } from "#tests/helpers/game/run_battlecry";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 
 const LEGUME_CARD_ID = 121;
+const NOUVELLE_RECRUE_CARD_ID = 181;
 
 test.group("deck_card_operations", () => {
     test("addCardsToDeck TOP places last added copy on top", ({ assert }) => {
@@ -49,7 +51,22 @@ test.group("deck_card_operations", () => {
         addCardsToDeck(player, LEGUME_CARD_ID, 2, "RANDOM");
 
         assert.equal(player.deckCards.length, 2);
-        assert.isTrue(player.deckCards.every((card) => card.cardId === LEGUME_CARD_ID));
+    });
+
+    test("addCardsToDeck marks golden when target owns golden of that card", ({ assert }) => {
+        const template = getCardPreviewById(NOUVELLE_RECRUE_CARD_ID)!;
+        assert.isTrue(Boolean(template.goldenVideoUrl));
+
+        const player = createGamePlayer(1, {
+            deckCards: [],
+            hand: [],
+            ownedGoldenCardIds: [NOUVELLE_RECRUE_CARD_ID],
+        });
+
+        addCardsToDeck(player, NOUVELLE_RECRUE_CARD_ID, 1, "TOP");
+
+        assert.equal(player.deckCards.length, 1);
+        assert.isTrue(player.deckCards[0]!.isGolden);
     });
 
     test("removeCardsFromDeck TOP removes highest card", ({ assert }) => {

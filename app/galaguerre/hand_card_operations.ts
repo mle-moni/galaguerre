@@ -10,9 +10,10 @@ export const addCardsToHand = (
     game?: Game,
 ): number => {
     let added = 0;
+    const ownedGoldenCardIds = player.ownedGoldenCardIds ?? [];
 
     for (let i = 0; i < copyCount; i++) {
-        const card = instantiateDeckCard(cardId);
+        const card = instantiateDeckCard(cardId, ownedGoldenCardIds);
         if (!card) break;
 
         const result = giveCardToHand(player, card, game, { source: "GENERATED" });

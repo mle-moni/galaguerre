@@ -16,6 +16,7 @@ import {
     ONBOARDING_HUMAN_OPENING_HAND_CARD_IDS,
 } from "#services/onboarding/arrange_onboarding_tutorial_deck";
 import { getUserCollectionGoldenCounts } from "#services/collection/get_user_collection_counts";
+import { expandOwnedGoldenCardIds } from "../../galaguerre/golden/expand_owned_golden_card_ids.js";
 import { generatePlayerCards } from "./generate_player_cards.js";
 import { sendGameUpdate } from "./send_game_update.js";
 
@@ -117,6 +118,9 @@ const ownedGoldenCardIdsFromCounts = (goldenCounts: Map<number, number> | undefi
     return [...goldenCounts.entries()].filter(([, count]) => count > 0).map(([cardId]) => cardId);
 };
 
+const resolveOwnedGoldenCardIds = (goldenCounts: Map<number, number> | undefined): number[] =>
+    expandOwnedGoldenCardIds(ownedGoldenCardIdsFromCounts(goldenCounts));
+
 const createGamePlayer = (
     userId: number,
     pseudo: string,
@@ -191,7 +195,7 @@ export const getDefaultGameData = ({
             playerOne.avatarCardId,
             PLAYER_ONE_HAND_SIZE,
             p1Deck,
-            ownedGoldenCardIdsFromCounts(playerOneGoldenCounts),
+            resolveOwnedGoldenCardIds(playerOneGoldenCounts),
         ),
         playerTwo: createGamePlayer(
             playerTwo.userId,
@@ -199,7 +203,7 @@ export const getDefaultGameData = ({
             playerTwo.avatarCardId,
             PLAYER_TWO_HAND_SIZE,
             p2Deck,
-            ownedGoldenCardIdsFromCounts(playerTwoGoldenCounts),
+            resolveOwnedGoldenCardIds(playerTwoGoldenCounts),
         ),
         actionLog: [],
         ...(isTraining ? { isTraining: true } : {}),

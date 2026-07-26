@@ -1,6 +1,7 @@
 import { test } from "@japa/runner";
 import { addCardsToHand } from "../../../app/galaguerre/hand_card_operations.js";
 import { MAX_HAND_SIZE } from "../../../app/galaguerre/game_rules.js";
+import { getCardPreviewById } from "#api_types/card_preview";
 import {
     createCardActionSnapshot,
     createGameData,
@@ -12,6 +13,8 @@ import { runBattlecry } from "#tests/helpers/game/run_battlecry";
 import { runSpellEffect } from "#tests/helpers/game/run_spell_effect";
 
 const LEGUME_CARD_ID = 121;
+const NOUVELLE_RECRUE_CARD_ID = 181;
+const PLUME_CARD_ID = 155;
 
 test.group("hand_card_operations", () => {
     test("addCardsToHand appends copies to hand", ({ assert }) => {
@@ -46,6 +49,38 @@ test.group("hand_card_operations", () => {
 
         assert.equal(added, 0);
         assert.equal(player.hand.length, MAX_HAND_SIZE);
+    });
+
+    test("addCardsToHand marks golden when target owns golden of that card", ({ assert }) => {
+        const template = getCardPreviewById(NOUVELLE_RECRUE_CARD_ID)!;
+        assert.isTrue(Boolean(template.goldenVideoUrl));
+
+        const player = createGamePlayer(1, {
+            deckCards: [],
+            hand: [],
+            ownedGoldenCardIds: [NOUVELLE_RECRUE_CARD_ID],
+        });
+
+        addCardsToHand(player, NOUVELLE_RECRUE_CARD_ID, 1);
+
+        assert.equal(player.hand.length, 1);
+        assert.isTrue(player.hand[0]!.isGolden);
+    });
+
+    test("addCardsToHand stays non-golden for tokens without goldenVideoUrl", ({ assert }) => {
+        const template = getCardPreviewById(PLUME_CARD_ID)!;
+        assert.isNull(template.goldenVideoUrl);
+
+        const player = createGamePlayer(1, {
+            deckCards: [],
+            hand: [],
+            ownedGoldenCardIds: [PLUME_CARD_ID],
+        });
+
+        addCardsToHand(player, PLUME_CARD_ID, 1);
+
+        assert.equal(player.hand.length, 1);
+        assert.isFalse(player.hand[0]!.isGolden);
     });
 });
 

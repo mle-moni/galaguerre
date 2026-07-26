@@ -4,10 +4,14 @@ import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
 import type { GalaguerreDeckPlacement } from "./galaguerre.types.js";
 import { getCardPreviewById } from "./card_catalog.js";
+import { playerOwnsGoldenCard } from "./golden/resolve_is_golden_for_player.js";
 import { randomIntInRange } from "../utils/random.js";
 import { triggerPassives } from "./passive_engine/trigger_passives.js";
 
-export const instantiateDeckCard = (cardId: number): PlayerCard | undefined => {
+export const instantiateDeckCard = (
+    cardId: number,
+    ownedGoldenCardIds: readonly number[] = [],
+): PlayerCard | undefined => {
     const template = getCardPreviewById(cardId);
     if (!template) return undefined;
 
@@ -15,6 +19,11 @@ export const instantiateDeckCard = (cardId: number): PlayerCard | undefined => {
         ...template,
         uuid: randomUUID(),
         isStartingDeckCard: false,
+        isGolden: playerOwnsGoldenCard(
+            template.cardId,
+            template.goldenVideoUrl,
+            ownedGoldenCardIds,
+        ),
     };
 };
 
@@ -45,9 +54,10 @@ export const addCardsToDeck = (
     placement: GalaguerreDeckPlacement,
 ): number => {
     let added = 0;
+    const ownedGoldenCardIds = player.ownedGoldenCardIds ?? [];
 
     for (let i = 0; i < copyCount; i++) {
-        const card = instantiateDeckCard(cardId);
+        const card = instantiateDeckCard(cardId, ownedGoldenCardIds);
         if (!card) break;
 
         insertCardAtPlacement(player.deckCards, card, placement);
@@ -70,9 +80,10 @@ export const addCardsToDeckWithPassives = (
     options: AddCardsToDeckWithPassivesOptions = {},
 ): { added: number; gameEnded: boolean } => {
     let added = 0;
+    const ownedGoldenCardIds = targetPlayer.ownedGoldenCardIds ?? [];
 
     for (let i = 0; i < copyCount; i++) {
-        const card = instantiateDeckCard(cardId);
+        const card = instantiateDeckCard(cardId, ownedGoldenCardIds);
         if (!card) break;
 
         insertCardAtPlacement(targetPlayer.deckCards, card, placement);
