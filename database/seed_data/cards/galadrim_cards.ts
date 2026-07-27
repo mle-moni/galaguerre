@@ -259,6 +259,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Développeur Fatigué", 3),
             imageUrl: "/card-covers/galadrim/developpeur-fatigue.webp",
+            goldenVideoUrl: "/card-videos/developpeur-fatigue.mp4",
             attack: 3,
             health: 3,
         },
@@ -1685,6 +1686,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Plume", 1),
             imageUrl: "/card-covers/galadrim/plume.webp",
+            goldenVideoUrl: "/card-videos/plume.mp4",
             attack: 1,
             health: 1,
         },
@@ -1720,6 +1722,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Freelance", 3),
             imageUrl: "/card-covers/galadrim/freelance.webp",
+            goldenVideoUrl: "/card-videos/freelance.mp4",
             attack: 3,
             health: 3,
         },
@@ -1741,6 +1744,7 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
         {
             ...gal("Boîte de Code Names", 1),
             imageUrl: "/card-covers/galadrim/boite-de-code-names.webp",
+            goldenVideoUrl: "/card-videos/boite-de-code-names.mp4",
             attack: 0,
             health: 2,
         },
@@ -1759,28 +1763,44 @@ export const GALADRIM_CARDS: CardSeedEntry[] = [
     ),
     defineSpell(
         144,
-        { ...gal("mot blanc", 1), imageUrl: "/card-covers/galadrim/mot-blanc.webp" },
+        {
+            ...gal("mot blanc", 1),
+            imageUrl: "/card-covers/galadrim/mot-blanc.webp",
+            goldenVideoUrl: "/card-videos/mot-blanc.mp4",
+        },
         [drawAction(1)],
         [],
         { isCollectible: false },
     ),
     defineSpell(
         145,
-        { ...gal("mot rouge", 2), imageUrl: "/card-covers/galadrim/mot-rouge.webp" },
+        {
+            ...gal("mot rouge", 2),
+            imageUrl: "/card-covers/galadrim/mot-rouge.webp",
+            goldenVideoUrl: "/card-videos/mot-rouge.mp4",
+        },
         [damageAction(2, targetedAnyCharacter(), true)],
         [],
         { isCollectible: false },
     ),
     defineSpell(
         146,
-        { ...gal("mot bleu", 0), imageUrl: "/card-covers/galadrim/mot-bleu.webp" },
+        {
+            ...gal("mot bleu", 0),
+            imageUrl: "/card-covers/galadrim/mot-bleu.webp",
+            goldenVideoUrl: "/card-videos/mot-bleu.mp4",
+        },
         [healAction(2, targetedAnyCharacter(), true)],
         [],
         { isCollectible: false },
     ),
     defineSpell(
         147,
-        { ...gal("mot noir", 0), imageUrl: "/card-covers/galadrim/mot-noir.webp" },
+        {
+            ...gal("mot noir", 0),
+            imageUrl: "/card-covers/galadrim/mot-noir.webp",
+            goldenVideoUrl: "/card-videos/mot-noir.mp4",
+        },
         [defeatAction("PLAYER")],
         [],
         { isCollectible: false },
