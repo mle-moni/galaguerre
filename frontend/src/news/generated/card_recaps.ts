@@ -455,4 +455,19 @@ export const CARD_RECAPS: CardRecapData[] = [
         nerfs: [],
         imageUrl: "/card-covers/galadrim/specialiste-osint.webp",
     },
+    {
+        date: "2026-07-27",
+        slug: "recap-2026-07-27",
+        publishedAt: "2026-07-27T18:00:00+02:00",
+        untilCommitHash: "dd44c96aeca47938381aab338e4c018f11da3b13",
+        newCardIds: [],
+        newGoldenCardIds: [
+            192, 191, 178, 67, 68, 69, 71, 74, 184, 188, 77, 79, 80, 81, 84, 130, 85, 86, 90, 91,
+            190, 114, 99, 100, 133, 134, 179, 103, 153, 126, 128, 108, 189, 155, 121, 125, 143, 144,
+            145, 146, 147, 164, 165, 166, 167, 168, 186,
+        ],
+        buffs: [],
+        nerfs: [],
+        imageUrl: "/card-covers/galadrim/specialiste-osint.webp",
+    },
 ];
