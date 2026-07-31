@@ -293,6 +293,28 @@ export interface GamePendingDiscover {
     opponentUserId?: number;
 }
 
+/**
+ * A passive trigger queued when a card started resolving, kept in a serializable shape so it
+ * survives a discover interruption (the game state is persisted between the two socket events).
+ */
+export interface PendingPassiveTrigger {
+    ownerUserId: number;
+    sourceOwner: SpotOwner;
+    sourceMinionUuid: string;
+    passive: PassiveSnapshot;
+    sourceCard: { cardId: number; label: string; uuid: string };
+}
+
+/**
+ * Leftover work of a card play that was interrupted by a discover: the combo counter and the
+ * passives queued when the card was played still have to be resolved once the discover is done.
+ */
+export interface GamePendingCardPlay {
+    playerUserId: number;
+    recordCardPlayed: boolean;
+    queuedPassives: PendingPassiveTrigger[];
+}
+
 export interface GameData {
     state: "INIT" | "MULLIGAN" | "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" | "FINISHED";
     currentRound: number;
@@ -301,6 +323,7 @@ export interface GameData {
     actionLog: GameLogEntry[];
     mulligan?: GameMulliganState;
     pendingDiscover?: GamePendingDiscover;
+    pendingCardPlay?: GamePendingCardPlay;
     turnEndsAt?: number;
     mulliganEndsAt?: number;
     ratingResult?: GameRatingResult;

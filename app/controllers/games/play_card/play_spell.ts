@@ -1,7 +1,11 @@
 import type { ActionTarget, SpellCard, SpotOwner } from "#api_types/game.types";
 import { executeSpellEffect } from "../../../galaguerre/action_engine/execute_spell_effect.js";
 import { recordCardPlayedThisTurn } from "../../../galaguerre/combo/combo_state.js";
-import { triggerPlayCardPassives } from "../../../galaguerre/passive_engine/trigger_play_card_passives.js";
+import {
+    deferCardPlayPassives,
+    queueCardPlayPassives,
+    runQueuedCardPlayPassives,
+} from "../../../galaguerre/passive_engine/pending_card_play.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
     recordManaSpent,
@@ -126,6 +130,10 @@ export const playSpell = async ({
             recorder.recordEffect({ type: "SPEND_MANA", owner: spotOwner, amount: effectiveCost });
         });
 
+        // Queued before the spell resolves: passives react to the cast even if the spell kills
+        // their minion in the meantime.
+        const queuedPassives = queueCardPlayPassives(game, player, card, "PLAY_CARD");
+
         const { gameEnded: spellGameEnded, discoverPending } = executeSpellEffect(
             game,
             player,
@@ -140,11 +148,18 @@ export const playSpell = async ({
             return;
         }
 
-        if (discoverPending) return;
+        if (discoverPending) {
+            deferCardPlayPassives(game, player, queuedPassives, { recordCardPlayed: true });
+            return;
+        }
 
         recordCardPlayedThisTurn(player);
 
-        const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
+        const { gameEnded: playCardPassiveGameEnded } = runQueuedCardPlayPassives(
+            game,
+            player,
+            queuedPassives,
+        );
 
         if (playCardPassiveGameEnded) {
             await terminateGame(game, { skipSendUpdate: true });

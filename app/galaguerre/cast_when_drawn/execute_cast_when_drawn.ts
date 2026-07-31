@@ -3,7 +3,11 @@ import type Game from "#models/game";
 import { executeSpellEffect } from "../action_engine/execute_spell_effect.js";
 import { cardRequiresActionTarget } from "../action_engine/requires_action_target.js";
 import { pickRandomPlayableTarget } from "../action_engine/pick_random_playable_target.js";
-import { triggerPlayCardPassives } from "../passive_engine/trigger_play_card_passives.js";
+import {
+    deferCardPlayPassives,
+    queueCardPlayPassives,
+    runQueuedCardPlayPassives,
+} from "../passive_engine/pending_card_play.js";
 import { recordCastWhenDrawn } from "../game_log/record_game_log.js";
 import { recordSpellCast } from "../game_stats/record_player_stats.js";
 import { beginLoggedBeat, endCurrentBeat } from "../game_narrative/narrative_beats.js";
@@ -44,7 +48,14 @@ export const executeCastWhenDrawn = (
         });
     });
 
-    const { gameEnded: spellGameEnded } = executeSpellEffect(game, player, card, actionTarget);
+    const queuedPassives = queueCardPlayPassives(game, player, card, "PLAY_CARD");
+
+    const { gameEnded: spellGameEnded, discoverPending } = executeSpellEffect(
+        game,
+        player,
+        card,
+        actionTarget,
+    );
 
     endCurrentBeat(game);
 
@@ -52,7 +63,16 @@ export const executeCastWhenDrawn = (
         return { gameEnded: true };
     }
 
-    const { gameEnded: playCardPassiveGameEnded } = triggerPlayCardPassives(game, player, card);
+    if (discoverPending) {
+        deferCardPlayPassives(game, player, queuedPassives, { recordCardPlayed: false });
+        return { gameEnded: false };
+    }
+
+    const { gameEnded: playCardPassiveGameEnded } = runQueuedCardPlayPassives(
+        game,
+        player,
+        queuedPassives,
+    );
 
     return { gameEnded: playCardPassiveGameEnded };
 };

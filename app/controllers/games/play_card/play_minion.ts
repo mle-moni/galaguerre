@@ -3,7 +3,11 @@ import { countBoardMinionsOnBoard, MAX_BOARD_MINIONS } from "#api_types/board";
 import { executeBattlecries } from "../../../galaguerre/action_engine/execute_battlecries.js";
 import { executeCombo } from "../../../galaguerre/action_engine/execute_combo.js";
 import { insertMinionOnBoard } from "../../../galaguerre/action_engine/summon_minion.js";
-import { triggerSummonPassives } from "../../../galaguerre/passive_engine/trigger_summon_passives.js";
+import {
+    deferCardPlayPassives,
+    queueCardPlayPassives,
+    runQueuedCardPlayPassives,
+} from "../../../galaguerre/passive_engine/pending_card_play.js";
 import { isComboActive, recordCardPlayedThisTurn } from "../../../galaguerre/combo/combo_state.js";
 import { recordPlayCard } from "../../../galaguerre/game_log/record_game_log.js";
 import {
@@ -153,6 +157,10 @@ export const playMinion = async ({
         });
         endCurrentBeat(game);
 
+        // Queued before the battlecry resolves: passives react to the summon even if the
+        // battlecry kills their minion in the meantime.
+        const queuedPassives = queueCardPlayPassives(game, player, card, "SUMMON");
+
         const { gameEnded: battlecryGameEnded, discoverPending } = executeBattlecries(
             game,
             player,
@@ -165,7 +173,10 @@ export const playMinion = async ({
             return;
         }
 
-        if (discoverPending) return;
+        if (discoverPending) {
+            deferCardPlayPassives(game, player, queuedPassives, { recordCardPlayed: true });
+            return;
+        }
 
         if (comboActive) {
             const { gameEnded: comboGameEnded, discoverPending: comboDiscoverPending } =
@@ -176,12 +187,19 @@ export const playMinion = async ({
                 return;
             }
 
-            if (comboDiscoverPending) return;
+            if (comboDiscoverPending) {
+                deferCardPlayPassives(game, player, queuedPassives, { recordCardPlayed: true });
+                return;
+            }
         }
 
         recordCardPlayedThisTurn(player);
 
-        const { gameEnded: summonPassiveGameEnded } = triggerSummonPassives(game, player, card);
+        const { gameEnded: summonPassiveGameEnded } = runQueuedCardPlayPassives(
+            game,
+            player,
+            queuedPassives,
+        );
 
         if (summonPassiveGameEnded) {
             await terminateGame(game, { skipSendUpdate: true });

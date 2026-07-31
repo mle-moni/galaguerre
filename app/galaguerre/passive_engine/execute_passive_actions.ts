@@ -10,14 +10,22 @@ const isGameOver = (game: Game): boolean => {
     return game.data.playerOne.health <= 0 || game.data.playerTwo.health <= 0;
 };
 
+export interface ExecutePassiveActionsResult {
+    gameEnded: boolean;
+    discoverPending: boolean;
+    /** Entries left untouched when a discover interrupted the queue. */
+    remainingEntries?: PassiveTriggerEntry[];
+}
+
 export const executePassiveActions = (
     game: Game,
     entries: PassiveTriggerEntry[],
     event?: PassiveTriggerEvent,
-): { gameEnded: boolean; discoverPending: boolean } => {
+): ExecutePassiveActionsResult => {
     let openedStandaloneBeat = false;
 
-    for (const entry of entries) {
+    for (let index = 0; index < entries.length; index++) {
+        const entry = entries[index]!;
         const action = entry.passive.action;
         if (!action) continue;
 
@@ -47,7 +55,7 @@ export const executePassiveActions = (
         });
 
         if (result.discoverPending) {
-            return result;
+            return { ...result, remainingEntries: entries.slice(index + 1) };
         }
 
         if (result.gameEnded || isGameOver(game)) {

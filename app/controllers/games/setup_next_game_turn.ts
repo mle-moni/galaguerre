@@ -15,6 +15,7 @@ import { withNarrativeRecorder } from "../../galaguerre/game_narrative/narrative
 import { runGameActionWithNarrative } from "../../galaguerre/game_narrative/run_game_action_with_narrative.js";
 import { terminateGame } from "./terminate_game.js";
 import { resetCardsPlayedThisTurn } from "../../galaguerre/combo/combo_state.js";
+import { clearPendingCardPlay } from "../../galaguerre/passive_engine/pending_card_play.js";
 
 const MAX_MANA = 10;
 
@@ -23,6 +24,9 @@ export const setupNextGameTurn = async (game: Game) => {
         const nextState = getWhoIsNext(game);
 
         game.data.state = nextState;
+
+        // A card play never spans two turns: drop any leftover queued trigger.
+        clearPendingCardPlay(game);
 
         const p1 = game.data.playerOne;
         const p2 = game.data.playerTwo;

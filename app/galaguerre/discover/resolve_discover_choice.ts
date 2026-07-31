@@ -1,4 +1,4 @@
-import type { GamePlayer, PlayerCard } from "#api_types/game.types";
+import type { DiscoverContinuation, GamePlayer, PlayerCard } from "#api_types/game.types";
 import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
 import { instantiateDeckCard } from "../deck_card_operations.js";
@@ -9,6 +9,7 @@ import { resolveSpotOwner } from "../game_narrative/narrative_effects.js";
 import { withNarrativeRecorder } from "../game_narrative/narrative_context.js";
 import { randomIntInRange } from "../../utils/random.js";
 import { resumeDiscoverContinuation } from "./resume_discover_continuation.js";
+import { completePendingCardPlay } from "../passive_engine/pending_card_play.js";
 import { findPlayerByUserId } from "./discover_types.js";
 
 const isGameOver = (game: Game): boolean =>
@@ -72,7 +73,7 @@ export const resolveDiscoverChoice = (
 
     if (!chosenCard) {
         game.data.pendingDiscover = undefined;
-        return resumeDiscoverContinuation(game, player, continuation, source);
+        return resumeAndFinishCardPlay(game, player, continuation, source);
     }
 
     const owner = resolveSpotOwner(game, player);
@@ -99,7 +100,23 @@ export const resolveDiscoverChoice = (
         return { gameEnded: true, discoverPending: false };
     }
 
-    return resumeDiscoverContinuation(game, player, continuation, source);
+    return resumeAndFinishCardPlay(game, player, continuation, source);
+};
+
+/**
+ * Resumes the interrupted effect, then finishes the card play it belonged to (combo counter and
+ * passives queued when the card was played) if nothing else is pending.
+ */
+const resumeAndFinishCardPlay = (
+    game: Game,
+    player: GamePlayer,
+    continuation: DiscoverContinuation,
+    source: { cardId: number; label: string; uuid: string },
+): { gameEnded: boolean; discoverPending: boolean } => {
+    const result = resumeDiscoverContinuation(game, player, continuation, source);
+    if (result.gameEnded || result.discoverPending) return result;
+
+    return completePendingCardPlay(game);
 };
 
 export const autoResolvePendingDiscover = (
@@ -108,13 +125,13 @@ export const autoResolvePendingDiscover = (
     const pending = game.data.pendingDiscover;
     if (!pending || pending.options.length === 0) {
         game.data.pendingDiscover = undefined;
-        return { gameEnded: false, discoverPending: false };
+        return completePendingCardPlay(game);
     }
 
     const player = findPlayerByUserId(game, pending.playerUserId);
     if (!player) {
         game.data.pendingDiscover = undefined;
-        return { gameEnded: false, discoverPending: false };
+        return completePendingCardPlay(game);
     }
 
     const randomIndex = randomIntInRange(0, pending.options.length - 1);
