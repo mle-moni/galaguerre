@@ -14,7 +14,7 @@ export const MobileOpponentBar = observer(({ opponent }: MobileOpponentBarProps)
     const { store } = useGameContext();
 
     return (
-        <div className="mobile-bar">
+        <div className="mobile-bar" data-hero-row="OPPONENT">
             <MobileHeroStrip
                 player={opponent}
                 isOpponent

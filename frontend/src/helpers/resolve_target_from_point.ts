@@ -23,6 +23,25 @@ const getDistanceFromRect = (x: number, y: number, rect: DOMRect): number => {
     return Math.hypot(horizontalDistance, verticalDistance);
 };
 
+/**
+ * Mobile hero bars also hold the timer / end turn column, which is not part of the
+ * hero target zone. Releasing anywhere on a hero row still targets that hero.
+ */
+const getHeroTargetFromRow = (x: number, y: number): ActionTarget | null => {
+    for (const row of document.querySelectorAll<HTMLElement>("[data-hero-row]")) {
+        const owner = row.getAttribute("data-hero-row");
+        if (!owner || !isSpotOwner(owner)) continue;
+
+        const rect = row.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) continue;
+        if (getDistanceFromRect(x, y, rect) > 0) continue;
+
+        return { minionUuid: null, owner };
+    }
+
+    return null;
+};
+
 export const resolveTargetFromPoint = (x: number, y: number): ActionTarget | null => {
     const element = document.elementFromPoint(x, y);
     const exactZone = element?.closest("[data-target-zone]");
@@ -45,7 +64,7 @@ export const resolveTargetFromPoint = (x: number, y: number): ActionTarget | nul
         nearestTarget = target;
     }
 
-    return nearestTarget;
+    return nearestTarget ?? getHeroTargetFromRow(x, y);
 };
 
 export const getElementCenter = (element: Element): { x: number; y: number } => {

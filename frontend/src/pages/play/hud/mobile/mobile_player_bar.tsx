@@ -16,7 +16,7 @@ export const MobilePlayerBar = observer(({ me }: MobilePlayerBarProps) => {
     const { store } = useGameContext();
 
     return (
-        <div className="mobile-bar mobile-bar--player">
+        <div className="mobile-bar mobile-bar--player" data-hero-row="PLAYER">
             <MobileHeroStrip
                 player={me}
                 handCount={me.hand.length}
