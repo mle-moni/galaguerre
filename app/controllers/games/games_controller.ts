@@ -2,6 +2,7 @@ import type { HttpContext } from "@adonisjs/core/http";
 import { cancelGameSearch, cancelSchema } from "./cancel_game_search.js";
 import { countActiveGames } from "./count_active_games.js";
 import { createTrainingGame } from "./create_training_game.js";
+import { createTrainingGameSchema } from "./game_validators.js";
 import { gameSearch } from "./game_search.js";
 import { gameSearchHeartbeat, heartbeatSchema } from "./game_search_heartbeat.js";
 import { showGame, showGameQueryValidator } from "./show_game.js";
@@ -16,7 +17,8 @@ export default class GamesController {
     }
 
     async training(ctx: HttpContext) {
-        return createTrainingGame(ctx);
+        const { difficulty } = await ctx.request.validateUsing(createTrainingGameSchema);
+        return createTrainingGame(ctx, difficulty);
     }
 
     async cancelSearch(ctx: HttpContext) {

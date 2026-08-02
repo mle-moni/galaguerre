@@ -1,5 +1,11 @@
 import { createEmptyBoard } from "#api_types/board";
-import { DEFAULT_HERO_HEALTH, DEFAULT_PLAYER_STATS, type GameData } from "#api_types/game.types";
+import {
+    DEFAULT_HERO_HEALTH,
+    DEFAULT_PLAYER_STATS,
+    type AiDeckProfile,
+    type AiDifficulty,
+    type GameData,
+} from "#api_types/game.types";
 import { deckCardsToEntries } from "#controllers/decks/deck_utils";
 import { assertDeckValid } from "../../galaguerre/validation/validate_deck.js";
 import { validateDeckCollectible } from "../../galaguerre/validation/validate_deck_collectible.js";
@@ -40,6 +46,8 @@ interface CreateGameOptions {
     isTraining?: boolean;
     isFriendly?: boolean;
     isOnboardingTutorial?: boolean;
+    aiDifficulty?: AiDifficulty;
+    aiDeckProfile?: AiDeckProfile;
 }
 
 export const isAiPlayer = (player: HumanPlayer | AiPlayer): player is AiPlayer => "cards" in player;
@@ -64,6 +72,8 @@ export const createGame = async ({
     isTraining,
     isFriendly,
     isOnboardingTutorial,
+    aiDifficulty,
+    aiDeckProfile,
 }: CreateGameOptions) => {
     if (!isAiPlayer(playerOne)) {
         assertDeckPlayable(playerOne.deck);
@@ -87,6 +97,8 @@ export const createGame = async ({
         isTraining,
         isFriendly,
         isOnboardingTutorial,
+        aiDifficulty,
+        aiDeckProfile,
         playerOneGoldenCounts,
         playerTwoGoldenCounts,
     });
@@ -165,6 +177,8 @@ export const getDefaultGameData = ({
     isTraining,
     isFriendly,
     isOnboardingTutorial,
+    aiDifficulty,
+    aiDeckProfile,
     playerOneGoldenCounts,
     playerTwoGoldenCounts,
 }: GetDefaultGameDataOptions): GameData => {
@@ -209,6 +223,8 @@ export const getDefaultGameData = ({
         ...(isTraining ? { isTraining: true } : {}),
         ...(isFriendly ? { isFriendly: true } : {}),
         ...(isOnboardingTutorial ? { isOnboardingTutorial: true } : {}),
+        ...(aiDifficulty ? { aiDifficulty } : {}),
+        ...(aiDeckProfile ? { aiDeckProfile } : {}),
     };
 };
 

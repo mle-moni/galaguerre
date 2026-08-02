@@ -1,6 +1,8 @@
 import type { SpotOwner, GamePlayer } from "#api_types/game.types";
 import type Game from "#models/game";
 import { sendGameUpdate } from "#controllers/games/send_game_update";
+import { isSimulating } from "../../utils/simulation_context.js";
+import { refreshGameDynamicCosts } from "../dynamic_cost/compute_effective_cost.js";
 import { buildPresentationUpdate } from "./build_presentation_update.js";
 import { persistReplayStep } from "../game_replay/game_replay_buffer.js";
 import { cloneGameData } from "./clone_game_data.js";
@@ -17,6 +19,15 @@ export const runGameActionWithNarrative = async (
     game: Game,
     action: (recorder: GameNarrativeRecorder) => Promise<void>,
 ): Promise<void> => {
+    // En simulation, la narration n'est jamais affichée : on saute le clone d'état, la
+    // construction de la présentation, le replay et la persistance. Hors du contexte
+    // `runWithNarrativeRecorderAsync`, tous les `withNarrativeRecorder(...)` internes no-op.
+    if (isSimulating()) {
+        await action(createGameNarrativeRecorder());
+        refreshGameDynamicCosts(game.data);
+        return;
+    }
+
     const recorder = createGameNarrativeRecorder();
     const stateBefore = cloneGameData(game.data);
     recorder.reset(stateBefore);

@@ -12,12 +12,17 @@ import { WsRooms } from "#services/sockets/ws_rooms";
 import { TRAINING_AI_AVATAR_CARD_ID } from "#services/avatars/avatar_cards";
 import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
+import { DEFAULT_AI_DIFFICULTY, type AiDifficulty } from "#api_types/game.types";
 import type { HttpContext } from "@adonisjs/core/http";
+import { ADVANCED_AI_DECKS } from "../../../database/seed_data/ai_decks.js";
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
-import { randomBoolean } from "../../utils/random.js";
+import { randomBoolean, randomIntInRange } from "../../utils/random.js";
 import { createGame } from "./create_game.js";
 
-export const createTrainingGame = async ({ auth, response }: HttpContext) => {
+export const createTrainingGame = async (
+    { auth, response }: HttpContext,
+    difficulty?: AiDifficulty,
+) => {
     const user = auth.user!;
 
     const activeGame = await findActiveGameForUser(user.id);
@@ -47,9 +52,19 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
         });
     }
 
-    const botCards = await loadTrainingBotCards();
-
     const isOnboardingTutorial = !user.onboardingCompletedAt;
+
+    // Le tutoriel s'appuie sur la main de départ exacte de l'IA historique : il force le mode
+    // Débutant, quelle que soit la difficulté demandée.
+    const aiDifficulty: AiDifficulty =
+        isOnboardingTutorial || !difficulty ? DEFAULT_AI_DIFFICULTY : difficulty;
+
+    const advancedDeck =
+        aiDifficulty === "ADVANCED"
+            ? ADVANCED_AI_DECKS[randomIntInRange(0, ADVANCED_AI_DECKS.length - 1)]!
+            : null;
+
+    const botCards = await loadTrainingBotCards(advancedDeck?.recipe);
 
     const humanPlayer = {
         userId: user.id,
@@ -76,6 +91,8 @@ export const createTrainingGame = async ({ auth, response }: HttpContext) => {
             playerTwo,
             isTraining: true,
             isOnboardingTutorial,
+            aiDifficulty,
+            ...(advancedDeck ? { aiDeckProfile: advancedDeck.profile } : {}),
         });
     } catch (error) {
         if (error instanceof DeckValidationError) {

@@ -1,11 +1,13 @@
-import { Loader } from "@mantine/core";
+import { Loader, SegmentedControl } from "@mantine/core";
 import { IconArrowsExchange, IconSwords } from "@tabler/icons-react";
+import type { AiDifficulty } from "#api_types/game.types";
 import { useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ManaCurveChart } from "~/components/decks/mana_curve_chart";
 import { CenteredLoader } from "~/components/centered_loader";
 import { useActiveGamesCountQuery } from "~/hooks/use_active_games_count";
+import { useAiDifficulty } from "~/hooks/use_ai_difficulty";
 import { useApiMutation } from "~/hooks/use_api_mutation";
 import { useCardsQuery } from "~/hooks/use_cards";
 import { useDecksQuery } from "~/hooks/use_decks";
@@ -21,6 +23,11 @@ import "./match_making_page.css";
 const DECK_PLACEHOLDER_IMAGE = "/card-covers/galadrim/question_mark.webp";
 const SEARCH_COMPASS_IMAGE = "/game/boussole.webp";
 
+const AI_DIFFICULTY_OPTIONS: { value: AiDifficulty; label: string }[] = [
+    { value: "BEGINNER", label: "Débutant" },
+    { value: "ADVANCED", label: "Avancé" },
+];
+
 export const MatchmakingPage = observer(() => {
     const user = useUser()!;
     const navigate = useNavigate();
@@ -30,9 +37,13 @@ export const MatchmakingPage = observer(() => {
     const cardsQuery = useCardsQuery();
     const activeGamesCountQuery = useActiveGamesCountQuery();
 
+    const { difficulty, setDifficulty } = useAiDifficulty();
+
     const startTrainingMutation = useApiMutation({
         mutationFn: async () => {
-            return (await client.api.games.training({})) as { gameId: number };
+            return (await client.api.games.training({ body: { difficulty } })) as {
+                gameId: number;
+            };
         },
         onSuccess: (data) => {
             applyTrainingGameStarted(queryClient, data.gameId);
@@ -154,20 +165,37 @@ export const MatchmakingPage = observer(() => {
                                         )}
                                         Rechercher une partie
                                     </button>
-                                    <button
-                                        type="button"
-                                        className="matchmaking-actions__btn matchmaking-actions__btn--training"
-                                        disabled={!canSearch || startTrainingMutation.isPending}
-                                        onClick={() => startTrainingMutation.mutate()}
-                                        {...CUELUME_BUTTON}
-                                    >
-                                        {startTrainingMutation.isPending ? (
-                                            <Loader size={18} color="#2c2416" />
-                                        ) : (
-                                            <IconSwords size={20} />
-                                        )}
-                                        Jouer contre l&apos;IA
-                                    </button>
+                                    <div className="matchmaking-actions__training">
+                                        <div className="matchmaking-difficulty">
+                                            <span className="matchmaking-difficulty__label">
+                                                Difficulté de l&apos;IA
+                                            </span>
+                                            <SegmentedControl
+                                                fullWidth
+                                                size="sm"
+                                                value={difficulty}
+                                                onChange={(value) =>
+                                                    setDifficulty(value as AiDifficulty)
+                                                }
+                                                disabled={startTrainingMutation.isPending}
+                                                data={AI_DIFFICULTY_OPTIONS}
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="matchmaking-actions__btn matchmaking-actions__btn--training"
+                                            disabled={!canSearch || startTrainingMutation.isPending}
+                                            onClick={() => startTrainingMutation.mutate()}
+                                            {...CUELUME_BUTTON}
+                                        >
+                                            {startTrainingMutation.isPending ? (
+                                                <Loader size={18} color="#2c2416" />
+                                            ) : (
+                                                <IconSwords size={20} />
+                                            )}
+                                            Jouer contre l&apos;IA
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="matchmaking-searching">

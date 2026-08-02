@@ -82,6 +82,7 @@ export const controllers = {
         GameSearchHeartbeat: () => import("#controllers/games/game_search_heartbeat"),
         GameSearch: () => import("#controllers/games/game_search"),
         GameUtils: () => import("#controllers/games/game_utils"),
+        GameValidators: () => import("#controllers/games/game_validators"),
         Games: () => import("#controllers/games/games_controller"),
         GeneratePlayerCards: () => import("#controllers/games/generate_player_cards"),
         minionAction: {

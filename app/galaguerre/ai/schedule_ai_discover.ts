@@ -1,6 +1,10 @@
+import type { PlayerCard } from "#api_types/game.types";
 import Game from "#models/game";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { randomIntInRange } from "../../utils/random.js";
+import { isSimulating } from "../../utils/simulation_context.js";
+import { createDiscoverPicker } from "./advanced/score_discover_option.js";
+import { isAdvancedAi } from "./get_ai_difficulty.js";
 import { resolveDiscoverChoice } from "../discover/resolve_discover_choice.js";
 import { findPlayerByUserId } from "../discover/discover_types.js";
 import { runGameActionWithNarrative } from "../game_narrative/run_game_action_with_narrative.js";
@@ -8,12 +12,22 @@ import { terminateGame } from "#controllers/games/terminate_game";
 
 const runningAiDiscovers = new Set<number>();
 
+/** L'IA débutante tire au hasard ; l'avancée note chaque option. */
+const pickAiDiscoverOption = (game: Game, options: PlayerCard[]): PlayerCard => {
+    if (!isAdvancedAi(game)) {
+        return options[randomIntInRange(0, options.length - 1)]!;
+    }
+
+    return createDiscoverPicker(TRAINING_AI_USER_ID, game.data.aiDeckProfile)(options, game.data);
+};
+
 export const isAiDiscoverPending = (game: Game): boolean => {
     const pending = game.data.pendingDiscover;
     return pending?.playerUserId === TRAINING_AI_USER_ID;
 };
 
 export const scheduleAiDiscoverIfNeeded = (game: Game): void => {
+    if (isSimulating()) return;
     if (!game.data.isTraining || !isAiDiscoverPending(game)) return;
 
     const gameId = game.id;
@@ -39,8 +53,7 @@ const runAiDiscover = async (gameId: number): Promise<void> => {
     const pending = game.data.pendingDiscover;
     if (!pending || pending.options.length === 0) return;
 
-    const randomIndex = randomIntInRange(0, pending.options.length - 1);
-    const cardUuid = pending.options[randomIndex]!.uuid;
+    const cardUuid = pickAiDiscoverOption(game, pending.options).uuid;
     const player = findPlayerByUserId(game, pending.playerUserId);
     if (!player) return;
 

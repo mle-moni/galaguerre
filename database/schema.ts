@@ -7,6 +7,17 @@
 import { BaseModel, column } from "@adonisjs/lucid/orm";
 import { DateTime } from "luxon";
 
+export class AppSettingSchema extends BaseModel {
+    static $columns = ["key", "updatedAt", "value"] as const;
+    $columns = AppSettingSchema.$columns;
+    @column({ isPrimary: true })
+    declare key: string;
+    @column.dateTime({ autoCreate: true, autoUpdate: true })
+    declare updatedAt: DateTime;
+    @column()
+    declare value: any;
+}
+
 export class AuthAccessTokenSchema extends BaseModel {
     static $columns = [
         "abilities",

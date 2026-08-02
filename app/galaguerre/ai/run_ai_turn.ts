@@ -1,14 +1,12 @@
 import Game from "#models/game";
+import { getAiActionDelayMs } from "./ai_action_delay.js";
 import { enumerateAiMoves } from "./enumerate_ai_moves.js";
 import { isAiTurn } from "./get_ai_player_seat.js";
 import { tryAiAction, withAiSocket } from "./try_ai_action.js";
 
-const MAX_ACTIONS_PER_TURN = 40;
-let actionDelayMs = 800;
+export { setAiActionDelayForTests } from "./ai_action_delay.js";
 
-export const setAiActionDelayForTests = (ms: number): void => {
-    actionDelayMs = ms;
-};
+const MAX_ACTIONS_PER_TURN = 40;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -37,7 +35,7 @@ export const runAiTurn = async (gameId: number, aiUserId: number): Promise<void>
                         return;
                     }
 
-                    await sleep(actionDelayMs);
+                    await sleep(getAiActionDelayMs());
                     break;
                 }
             }

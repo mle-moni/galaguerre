@@ -188,6 +188,20 @@
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
+    /* Le sélecteur de difficulté surélève la colonne « IA » : on aligne les deux boutons en bas. */
+    align-items: flex-end;
+}
+
+.matchmaking-actions__training {
+    flex: 1 1 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Dans la colonne, `flex: 1 1 200px` ferait grandir le bouton en HAUTEUR. */
+.matchmaking-actions__training .matchmaking-actions__btn {
+    flex: 0 0 auto;
 }
 
 .matchmaking-actions__icon {
@@ -249,6 +263,41 @@
 
 .matchmaking-actions__btn--training:hover:not(:disabled) {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.matchmaking-difficulty {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: center;
+}
+
+.matchmaking-difficulty__label {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(44, 36, 22, 0.6);
+}
+
+.matchmaking-difficulty .mantine-SegmentedControl-root {
+    background: rgba(44, 36, 22, 0.08);
+}
+
+.matchmaking-difficulty .mantine-SegmentedControl-label {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(44, 36, 22, 0.75);
+}
+
+.matchmaking-difficulty .mantine-SegmentedControl-label[data-active] {
+    color: #2c2416;
+}
+
+.matchmaking-difficulty .mantine-SegmentedControl-indicator {
+    background: linear-gradient(180deg, #f4e8cc 0%, #dcc99a 100%);
 }
 
 .matchmaking-searching {

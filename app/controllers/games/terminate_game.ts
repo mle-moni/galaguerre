@@ -13,6 +13,7 @@ import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import db from "@adonisjs/lucid/services/db";
 import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
 import { DateTime } from "luxon";
+import { isSimulating } from "../../utils/simulation_context.js";
 import { cloneGameData } from "../../galaguerre/game_narrative/clone_game_data.js";
 import { finalizeGameReplay } from "../../galaguerre/game_replay/game_replay_buffer.js";
 import { clearAllGameTimers } from "../../galaguerre/timers/game_timers.js";
@@ -74,6 +75,15 @@ const applyPostGameProgression = async (
 };
 
 export const terminateGame = async (game: Game, options?: { skipSendUpdate?: boolean }) => {
+    // En simulation, on marque la partie terminée en mémoire uniquement : `claimGameFinish` ferait
+    // un UPDATE sur la table `games` avec l'id factice de l'état simulé.
+    if (isSimulating()) {
+        game.isFinished = true;
+        game.data.winnerSide = getWinnerSide(game);
+        game.data.state = "FINISHED";
+        return;
+    }
+
     if (game.isFinished && hasPostGameProgressionBeenApplied(game.data)) return;
 
     const terminalGameData = cloneGameData(game.data);

@@ -315,6 +315,18 @@ export interface GamePendingCardPlay {
     queuedPassives: PendingPassiveTrigger[];
 }
 
+/** Niveau de l'IA d'entraînement. `BEGINNER` = IA historique, `ADVANCED` = IA avec recherche. */
+export const AI_DIFFICULTIES = ["BEGINNER", "ADVANCED"] as const;
+
+export type AiDifficulty = (typeof AI_DIFFICULTIES)[number];
+
+export const DEFAULT_AI_DIFFICULTY: AiDifficulty = "BEGINNER";
+
+/** Archétype du deck tiré par l'IA avancée : pilote les poids de sa fonction d'évaluation. */
+export const AI_DECK_PROFILES = ["AGGRO", "MIDRANGE"] as const;
+
+export type AiDeckProfile = (typeof AI_DECK_PROFILES)[number];
+
 export interface GameData {
     state: "INIT" | "MULLIGAN" | "PLAYER_ONE_TURN" | "PLAYER_TWO_TURN" | "FINISHED";
     currentRound: number;
@@ -334,6 +346,10 @@ export interface GameData {
     isTraining?: boolean;
     isFriendly?: boolean;
     isOnboardingTutorial?: boolean;
+    /** Difficulté choisie pour l'IA d'entraînement. Absent = `BEGINNER` (parties antérieures). */
+    aiDifficulty?: AiDifficulty;
+    /** Archétype du deck tiré par l'IA avancée. */
+    aiDeckProfile?: AiDeckProfile;
     /**
      * Winning side at terminate (including AI). Prefer this over `games.winner_id` for analytics —
      * training AI wins keep `winner_id` null to avoid an invalid FK.

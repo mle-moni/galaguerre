@@ -1175,20 +1175,32 @@ export interface Registry {
         methods: ["POST"];
         pattern: "/api/games/training";
         types: {
-            body: {};
+            body: ExtractBody<
+                InferInput<
+                    typeof import("#app/controllers/games/game_validators.js").createTrainingGameSchema
+                >
+            >;
             paramsTuple: [];
             params: {};
-            query: {};
+            query: ExtractQuery<
+                InferInput<
+                    typeof import("#app/controllers/games/game_validators.js").createTrainingGameSchema
+                >
+            >;
             response: ExtractResponse<
                 Awaited<
                     ReturnType<import("#controllers/games/games_controller").default["training"]>
                 >
             >;
-            errorResponse: ExtractErrorResponse<
-                Awaited<
-                    ReturnType<import("#controllers/games/games_controller").default["training"]>
-                >
-            >;
+            errorResponse:
+                | ExtractErrorResponse<
+                      Awaited<
+                          ReturnType<
+                              import("#controllers/games/games_controller").default["training"]
+                          >
+                      >
+                  >
+                | { status: 422; response: { errors: SimpleError[] } };
         };
     };
     "games.active_count": {

@@ -4,6 +4,7 @@ import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { getSpectatorsForGame } from "#services/sockets/spectator_watchers";
 import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { WsRooms } from "#services/sockets/ws_rooms";
+import { isSimulating } from "../../utils/simulation_context.js";
 import { refreshGameDynamicCosts } from "../../galaguerre/dynamic_cost/compute_effective_cost.js";
 import { buildPresentationForUser } from "../../galaguerre/game_narrative/build_presentation_update.js";
 import { scheduleAiDiscoverIfNeeded } from "../../galaguerre/ai/schedule_ai_discover.js";
@@ -48,6 +49,10 @@ const emitForSpectators = (game: Game, presentation?: GamePresentationUpdate) =>
 
 export const sendGameUpdate = (game: Game, presentation?: GamePresentationUpdate) => {
     refreshGameDynamicCosts(game.data);
+
+    // En simulation, l'état n'est visible de personne : pas d'émission, et surtout pas de
+    // planification de discover (qui irait chercher une vraie partie en base).
+    if (isSimulating()) return;
 
     if (game.data.isTraining) {
         const humanUserId = getTrainingHumanUserId(game);

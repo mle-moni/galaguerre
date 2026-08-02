@@ -2,6 +2,7 @@ import Game from "#models/game";
 import { performPassTurn } from "#controllers/games/pass_game_turn";
 import { finalizeMulligan } from "#controllers/games/mulligan/finalize_mulligan";
 import { autoConfirmPendingMulligans } from "#controllers/games/mulligan/perform_mulligan";
+import { isSimulating } from "../../utils/simulation_context.js";
 import { scheduleAiMulliganIfNeeded } from "../ai/schedule_ai_mulligan.js";
 import { scheduleAiTurnIfNeeded } from "../ai/schedule_ai_turn.js";
 import { autoResolveAllPendingDiscovers } from "../discover/resolve_discover_choice.js";
@@ -30,6 +31,8 @@ export const resetGameTimerDurationsForTests = (): void => {
 };
 
 export const clearMulliganTimer = (gameId: number): void => {
+    if (isSimulating()) return;
+
     const timer = mulliganTimers.get(gameId);
     if (timer) {
         clearTimeout(timer);
@@ -38,6 +41,8 @@ export const clearMulliganTimer = (gameId: number): void => {
 };
 
 export const clearTurnTimer = (gameId: number): void => {
+    if (isSimulating()) return;
+
     const timer = turnTimers.get(gameId);
     if (timer) {
         clearTimeout(timer);
@@ -87,12 +92,16 @@ const scheduleTurnTimer = async (gameId: number, expectedEndsAt: number): Promis
 };
 
 export const startMulliganTimer = (game: Game): void => {
+    if (isSimulating()) return;
+
     const expectedEndsAt = Date.now() + mulliganTimerMs;
     game.data.mulliganEndsAt = expectedEndsAt;
     void scheduleMulliganTimer(game.id, expectedEndsAt);
 };
 
 export const startTurnTimer = (game: Game): void => {
+    if (isSimulating()) return;
+
     const expectedEndsAt = Date.now() + turnTimerMs;
     game.data.turnEndsAt = expectedEndsAt;
     void scheduleTurnTimer(game.id, expectedEndsAt);
