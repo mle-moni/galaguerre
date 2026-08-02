@@ -10,7 +10,7 @@ import Deck from "#models/deck";
 import DeckCard from "#models/deck_card";
 import Game from "#models/game";
 import User from "#models/user";
-import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
+import { TRAINING_AI_PSEUDOS, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { syncCards } from "#database/seed_helpers/sync_cards";
 import { defaultMinionData } from "#database/seed_data/cards/define_card";
 import { ADVANCED_AI_DECKS } from "#database/seed_data/ai_decks";
@@ -79,6 +79,12 @@ const aiDeckCardIds = (game: Game): number[] => {
 
 const sortedIds = (cardIds: number[]): number[] => [...cardIds].sort((a, b) => a - b);
 
+/** Pseudo affiché pour le bot, quel que soit le siège qu'il occupe. */
+const aiPseudo = (game: Game): string =>
+    game.data.playerOne.userId === TRAINING_AI_USER_ID
+        ? game.data.playerOne.pseudo
+        : game.data.playerTwo.pseudo;
+
 test.group("training:difficulty", (group) => {
     group.each.setup(() => testUtils.db().wrapInGlobalTransaction());
 
@@ -92,6 +98,7 @@ test.group("training:difficulty", (group) => {
 
         assert.equal(game.data.aiDifficulty, "BEGINNER");
         assert.isUndefined(game.data.aiDeckProfile);
+        assert.equal(aiPseudo(game), TRAINING_AI_PSEUDOS.BEGINNER);
         assert.deepEqual(
             aiDeckCardIds(game),
             sortedIds(buildDeckCardIds(TRAINING_BOT_DECK_RECIPE)),
@@ -112,6 +119,7 @@ test.group("training:difficulty", (group) => {
 
         assert.equal(game.data.aiDifficulty, "ADVANCED");
         assert.oneOf(game.data.aiDeckProfile, ["AGGRO", "MIDRANGE"]);
+        assert.equal(aiPseudo(game), TRAINING_AI_PSEUDOS.ADVANCED);
 
         const expectedDeck = ADVANCED_AI_DECKS.find(
             ({ profile }) => profile === game.data.aiDeckProfile,
@@ -139,6 +147,7 @@ test.group("training:difficulty", (group) => {
         assert.isTrue(game.data.isOnboardingTutorial);
         assert.equal(game.data.aiDifficulty, "BEGINNER");
         assert.isUndefined(game.data.aiDeckProfile);
+        assert.equal(aiPseudo(game), TRAINING_AI_PSEUDOS.BEGINNER);
         assert.deepEqual(
             aiDeckCardIds(game),
             sortedIds(buildDeckCardIds(TRAINING_BOT_DECK_RECIPE)),

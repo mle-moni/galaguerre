@@ -10,7 +10,7 @@ import { emitSocketEvent } from "#services/sockets/emit_socket_event";
 import { removeMatchmakingImmediately } from "#services/sockets/matchmaking";
 import { WsRooms } from "#services/sockets/ws_rooms";
 import { TRAINING_AI_AVATAR_CARD_ID } from "#services/avatars/avatar_cards";
-import { TRAINING_AI_PSEUDO, TRAINING_AI_USER_ID } from "#services/training/training_constants";
+import { getTrainingAiPseudo, TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
 import { DEFAULT_AI_DIFFICULTY, type AiDifficulty } from "#api_types/game.types";
 import type { HttpContext } from "@adonisjs/core/http";
@@ -75,7 +75,7 @@ export const createTrainingGame = async (
 
     const aiPlayer = {
         userId: TRAINING_AI_USER_ID,
-        pseudo: TRAINING_AI_PSEUDO,
+        pseudo: getTrainingAiPseudo(aiDifficulty),
         avatarCardId: TRAINING_AI_AVATAR_CARD_ID,
         cards: botCards,
     };

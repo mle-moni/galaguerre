@@ -20,6 +20,7 @@ import {
     getGameFinishedAt,
 } from "~/helpers/format_game_duration";
 import type { ApiUser } from "#api_types/auth.types";
+import { DEFAULT_AI_DIFFICULTY } from "#api_types/game.types";
 import { GameFinalStatsTable } from "./game_final_stats_table.tsx";
 import { GameLootSection } from "./game_loot_section.tsx";
 
@@ -51,9 +52,15 @@ export const GameFinalScreen = observer(() => {
         invalidatePostGameQueries(options);
     };
 
+    // « Rejouer » doit relancer le MÊME adversaire : sans cette difficulté, le serveur retomberait
+    // sur Débutant et on quitterait silencieusement l'IA Avancée.
+    const replayDifficulty = store.game.data.aiDifficulty ?? DEFAULT_AI_DIFFICULTY;
+
     const startTrainingMutation = useApiMutation({
         mutationFn: async () => {
-            return (await client.api.games.training({})) as { gameId: number };
+            return (await client.api.games.training({
+                body: { difficulty: replayDifficulty },
+            })) as { gameId: number };
         },
         onSuccess: (data) => {
             queryClient.setQueryData<ApiUser | null>(USER_QUERY_KEY, (oldUser) => {
