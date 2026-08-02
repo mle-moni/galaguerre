@@ -23,6 +23,7 @@ import {
 } from "#services/onboarding/arrange_onboarding_tutorial_deck";
 import { getUserCollectionGoldenCounts } from "#services/collection/get_user_collection_counts";
 import { expandOwnedGoldenCardIds } from "../../galaguerre/golden/expand_owned_golden_card_ids.js";
+import { getAllGoldenCardIds } from "../../galaguerre/golden/all_golden_card_ids.js";
 import { generatePlayerCards } from "./generate_player_cards.js";
 import { sendGameUpdate } from "./send_game_update.js";
 
@@ -133,6 +134,15 @@ const ownedGoldenCardIdsFromCounts = (goldenCounts: Map<number, number> | undefi
 const resolveOwnedGoldenCardIds = (goldenCounts: Map<number, number> | undefined): number[] =>
     expandOwnedGoldenCardIds(ownedGoldenCardIdsFromCounts(goldenCounts));
 
+/**
+ * L'IA Expert joue toutes ses cartes en doré (main, deck, invocations, découvertes) : le joueur
+ * affronte visuellement un « boss de fin ».
+ */
+const isBossAi = (
+    player: HumanPlayer | AiPlayer,
+    aiDifficulty: AiDifficulty | undefined,
+): boolean => isAiPlayer(player) && aiDifficulty === "EXPERT";
+
 const createGamePlayer = (
     userId: number,
     pseudo: string,
@@ -185,15 +195,20 @@ export const getDefaultGameData = ({
     const p1Source = isAiPlayer(playerOne) ? playerOne.cards : playerOne.deck;
     const p2Source = isAiPlayer(playerTwo) ? playerTwo.cards : playerTwo.deck;
 
+    const p1IsBossAi = isBossAi(playerOne, aiDifficulty);
+    const p2IsBossAi = isBossAi(playerTwo, aiDifficulty);
+
     const p1Deck = buildPlayerDeckOrder(p1Source, {
         isOnboardingTutorial,
         isHuman: !isAiPlayer(playerOne),
         goldenCounts: playerOneGoldenCounts,
+        allGolden: p1IsBossAi,
     });
     const p2Deck = buildPlayerDeckOrder(p2Source, {
         isOnboardingTutorial,
         isHuman: !isAiPlayer(playerTwo),
         goldenCounts: playerTwoGoldenCounts,
+        allGolden: p2IsBossAi,
     });
 
     return {
@@ -209,7 +224,7 @@ export const getDefaultGameData = ({
             playerOne.avatarCardId,
             PLAYER_ONE_HAND_SIZE,
             p1Deck,
-            resolveOwnedGoldenCardIds(playerOneGoldenCounts),
+            p1IsBossAi ? getAllGoldenCardIds() : resolveOwnedGoldenCardIds(playerOneGoldenCounts),
         ),
         playerTwo: createGamePlayer(
             playerTwo.userId,
@@ -217,7 +232,7 @@ export const getDefaultGameData = ({
             playerTwo.avatarCardId,
             PLAYER_TWO_HAND_SIZE,
             p2Deck,
-            resolveOwnedGoldenCardIds(playerTwoGoldenCounts),
+            p2IsBossAi ? getAllGoldenCardIds() : resolveOwnedGoldenCardIds(playerTwoGoldenCounts),
         ),
         actionLog: [],
         ...(isTraining ? { isTraining: true } : {}),
@@ -234,15 +249,20 @@ const buildPlayerDeckOrder = (
         isOnboardingTutorial?: boolean;
         isHuman: boolean;
         goldenCounts?: Map<number, number>;
+        allGolden?: boolean;
     },
 ): ReturnType<typeof generatePlayerCards> => {
     if (!options.isOnboardingTutorial) {
-        return generatePlayerCards(source, { goldenCounts: options.goldenCounts });
+        return generatePlayerCards(source, {
+            goldenCounts: options.goldenCounts,
+            allGolden: options.allGolden,
+        });
     }
 
     const cards = generatePlayerCards(source, {
         shuffle: false,
         goldenCounts: options.goldenCounts,
+        allGolden: options.allGolden,
     });
 
     if (options.isHuman) {

@@ -24,6 +24,8 @@ export type GeneratePlayerCardsOptions = {
     shuffle?: boolean;
     /** Remaining golden copies available per cardId; consumed as cards are generated. */
     goldenCounts?: Map<number, number>;
+    /** Every card that has a golden version is generated golden, ignoring `goldenCounts`. */
+    allGolden?: boolean;
 };
 
 const getSourceCards = (source: CardSource): Card[] =>
@@ -34,8 +36,8 @@ export const generatePlayerCards = (source: CardSource, options?: GeneratePlayer
 
     const cards: PlayerCard[] = getSourceCards(source).map((card) => {
         const left = remainingGolden.get(card.id) ?? 0;
-        const isGolden = left > 0;
-        if (isGolden) {
+        const isGolden = options?.allGolden ? Boolean(card.data.goldenVideoUrl) : left > 0;
+        if (!options?.allGolden && isGolden) {
             remainingGolden.set(card.id, left - 1);
         }
 
