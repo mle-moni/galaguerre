@@ -1,16 +1,19 @@
+import { DEFAULT_AI_DIFFICULTY, type AiDifficulty, type GameData } from "#api_types/game.types";
 import Game from "#models/game";
 import { getAiActionDelayMs } from "../ai_action_delay.js";
 import { isAiTurn } from "../get_ai_player_seat.js";
 import { tryAiAction, withAiSocket } from "../try_ai_action.js";
 import { loadAdvancedAiConfig } from "./advanced_ai_config.js";
-import { decideNextMoves } from "./decide_next_move.js";
+import { decideExpertMoves } from "./decide_expert_move.js";
+import { decideNextMoves, type AiDecision } from "./decide_next_move.js";
+import { loadExpertAiConfig } from "./expert_ai_config.js";
 
 /**
- * Tour de l'IA « Avancé ».
+ * Tour des IA à recherche (« Avancé » et « Expert »).
  *
  * Même ossature que `runAiTurn` (socket factice, actions passées par les vrais contrôleurs,
  * délai entre les actions pour rester lisible), mais le choix du coup vient d'une recherche
- * (`decideNextMoves`) au lieu de l'ordre d'énumération.
+ * (`decideNextMoves` / `decideExpertMoves`) au lieu de l'ordre d'énumération.
  *
  * On re-décide avant CHAQUE action : l'aléatoire du jeu fait diverger l'état réel de l'état
  * simulé, un plan déroulé aveuglément deviendrait vite faux.
@@ -20,8 +23,41 @@ const MAX_ACTIONS_PER_TURN = 40;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const runAdvancedAiTurn = async (gameId: number, aiUserId: number): Promise<void> => {
+const getOpponentUserId = (data: GameData, aiUserId: number): number =>
+    data.playerOne.userId === aiUserId ? data.playerTwo.userId : data.playerOne.userId;
+
+/** Un décideur par difficulté, pour que la boucle de tour reste unique. */
+type MoveDecider = (data: GameData, seed: number) => Promise<AiDecision>;
+
+const createMoveDecider = async (
+    difficulty: AiDifficulty,
+    aiUserId: number,
+): Promise<MoveDecider> => {
+    if (difficulty === "EXPERT") {
+        const config = await loadExpertAiConfig();
+
+        return (data, seed) =>
+            decideExpertMoves(data, {
+                aiUserId,
+                opponentUserId: getOpponentUserId(data, aiUserId),
+                profile: data.aiDeckProfile,
+                config,
+                seed,
+            });
+    }
+
     const config = await loadAdvancedAiConfig();
+
+    return (data, seed) =>
+        decideNextMoves(data, { aiUserId, profile: data.aiDeckProfile, config, seed });
+};
+
+export const runAdvancedAiTurn = async (
+    gameId: number,
+    aiUserId: number,
+    difficulty: AiDifficulty = DEFAULT_AI_DIFFICULTY,
+): Promise<void> => {
+    const decideMoves = await createMoveDecider(difficulty, aiUserId);
 
     await withAiSocket(gameId, aiUserId, async (socketId) => {
         let actionsThisTurn = 0;
@@ -36,12 +72,7 @@ export const runAdvancedAiTurn = async (gameId: number, aiUserId: number): Promi
             // résout de son côté et relancera le tour.
             if (game.data.pendingDiscover) return;
 
-            const decision = await decideNextMoves(game.data, {
-                aiUserId,
-                profile: game.data.aiDeckProfile,
-                config,
-                seed: gameId * 1000 + actionsThisTurn,
-            });
+            const decision = await decideMoves(game.data, gameId * 1000 + actionsThisTurn);
 
             if (decision.moves.length === 0) break;
 

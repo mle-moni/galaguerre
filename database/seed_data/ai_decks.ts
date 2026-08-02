@@ -62,3 +62,25 @@ export const ADVANCED_AI_DECKS: AiDeckDefinition[] = [
     { profile: "AGGRO", name: "Aggro pets", recipe: AI_AGGRO_PETS_DECK_RECIPE },
     { profile: "MIDRANGE", name: "Mid-range", recipe: AI_MIDRANGE_DECK_RECIPE },
 ];
+
+/** Au-delà de ce coût moyen, un deck est considéré comme lent. */
+const SLOW_DECK_AVERAGE_COST = 3.2;
+
+/**
+ * Contre-pick du deck de l'IA « Expert ». Elle voit le deck du joueur avant la partie, autant
+ * qu'elle s'en serve : face à une liste lente on prend l'aggro, qui gagne avant que l'autre ne
+ * déroule ; face à une liste rapide on prend le mid-range, ses murs et ses retraits.
+ *
+ * L'IA « Avancé » continue de tirer son deck au hasard.
+ */
+export const pickAiDeckAgainstCosts = (opponentCardCosts: readonly number[]): AiDeckDefinition => {
+    const byProfile = (profile: AiDeckProfile): AiDeckDefinition =>
+        ADVANCED_AI_DECKS.find((deck) => deck.profile === profile) ?? ADVANCED_AI_DECKS[0]!;
+
+    if (opponentCardCosts.length === 0) return byProfile("MIDRANGE");
+
+    const averageCost =
+        opponentCardCosts.reduce((total, cost) => total + cost, 0) / opponentCardCosts.length;
+
+    return averageCost >= SLOW_DECK_AVERAGE_COST ? byProfile("AGGRO") : byProfile("MIDRANGE");
+};

@@ -126,4 +126,20 @@ test.group("ai:advanced:evaluate", () => {
             evaluateGameState(withMonsterDeck, AI_USER_ID, MIDRANGE_WEIGHTS),
         );
     });
+
+    test("omniscient mode does read the content of the opponent hand", ({ assert }) => {
+        const weakHand = [createMinionCard({ uuid: "weak", attack: 1, health: 1, cost: 1 })];
+        const monsterHand = [
+            createMinionCard({ uuid: "strong", attack: 12, health: 12, cost: 10 }),
+        ];
+
+        const facingWeak = createGameData({ playerTwo: { hand: weakHand } });
+        const facingMonster = createGameData({ playerTwo: { hand: monsterHand } });
+
+        // Mains de même TAILLE : seule la lecture du contenu peut les départager.
+        assert.isAbove(
+            evaluateGameState(facingWeak, AI_USER_ID, MIDRANGE_WEIGHTS, { omniscient: true }),
+            evaluateGameState(facingMonster, AI_USER_ID, MIDRANGE_WEIGHTS, { omniscient: true }),
+        );
+    });
 });

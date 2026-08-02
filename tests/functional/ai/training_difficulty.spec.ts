@@ -2,6 +2,7 @@ import { test } from "@japa/runner";
 import testUtils from "@adonisjs/core/services/test_utils";
 import type { HttpContext } from "@adonisjs/core/http";
 import { DateTime } from "luxon";
+import { AI_DIFFICULTIES } from "#api_types/game.types";
 import { createTrainingGame } from "#controllers/games/create_training_game";
 import { createTrainingGameSchema } from "#controllers/games/game_validators";
 import { parseMinionData } from "#galaguerre/card_definition.schema";
@@ -43,7 +44,7 @@ const createUser = async (prefix: string, onboarded = true) => {
     return user;
 };
 
-const createValidDeckForUser = async (userId: number, labelPrefix: string) => {
+const createValidDeckForUser = async (userId: number, labelPrefix: string, cost = 1) => {
     const deck = await Deck.create({
         name: `Difficulty deck ${labelPrefix}`,
         userId,
@@ -55,6 +56,7 @@ const createValidDeckForUser = async (userId: number, labelPrefix: string) => {
             cardSetId: await getActiveCardSetId(),
             data: parseMinionData({
                 ...defaultMinionData(),
+                cost,
                 name: `${labelPrefix}-card-${index}`,
             }),
             isCollectible: true,
@@ -127,6 +129,42 @@ test.group("training:difficulty", (group) => {
         assert.deepEqual(aiDeckCardIds(game), sortedIds(buildDeckCardIds(expectedDeck.recipe)));
     });
 
+    test("EXPERT counter-picks MIDRANGE against a fast deck", async ({ assert }) => {
+        await syncCards();
+        const user = await createUser("expert-fast");
+        // Une liste à 1 mana de moyenne : l'Expert répond par le mid-range et ses murs.
+        await createValidDeckForUser(user.id, "expert-fast", 1);
+
+        const result = (await createTrainingGame(createContext(user), "EXPERT")) as {
+            gameId: number;
+        };
+        const game = await Game.findOrFail(result.gameId);
+
+        assert.equal(game.data.aiDifficulty, "EXPERT");
+        assert.equal(game.data.aiDeckProfile, "MIDRANGE");
+        assert.equal(aiPseudo(game), TRAINING_AI_PSEUDOS.EXPERT);
+
+        const expectedDeck = ADVANCED_AI_DECKS.find(({ profile }) => profile === "MIDRANGE")!;
+        assert.deepEqual(aiDeckCardIds(game), sortedIds(buildDeckCardIds(expectedDeck.recipe)));
+    });
+
+    test("EXPERT counter-picks AGGRO against a slow deck", async ({ assert }) => {
+        await syncCards();
+        const user = await createUser("expert-slow");
+        // Une liste à 6 mana de moyenne : l'Expert la devance avec l'aggro.
+        await createValidDeckForUser(user.id, "expert-slow", 6);
+
+        const result = (await createTrainingGame(createContext(user), "EXPERT")) as {
+            gameId: number;
+        };
+        const game = await Game.findOrFail(result.gameId);
+
+        assert.equal(game.data.aiDeckProfile, "AGGRO");
+
+        const expectedDeck = ADVANCED_AI_DECKS.find(({ profile }) => profile === "AGGRO")!;
+        assert.deepEqual(aiDeckCardIds(game), sortedIds(buildDeckCardIds(expectedDeck.recipe)));
+    });
+
     test("the onboarding tutorial forces BEGINNER and its historical deck", async ({ assert }) => {
         await syncCards();
         // Le tutoriel s'appuie sur la main de départ exacte des DEUX joueurs : le deck humain
@@ -158,13 +196,13 @@ test.group("training:difficulty", (group) => {
         await assert.rejects(() => createTrainingGameSchema.validate({ difficulty: "IMPOSSIBLE" }));
     });
 
-    test("the route validator accepts both difficulties and an empty body", async ({ assert }) => {
+    test("the route validator accepts every difficulty and an empty body", async ({ assert }) => {
         assert.deepEqual(await createTrainingGameSchema.validate({}), {});
-        assert.deepEqual(await createTrainingGameSchema.validate({ difficulty: "BEGINNER" }), {
-            difficulty: "BEGINNER",
-        });
-        assert.deepEqual(await createTrainingGameSchema.validate({ difficulty: "ADVANCED" }), {
-            difficulty: "ADVANCED",
-        });
+
+        for (const difficulty of AI_DIFFICULTIES) {
+            assert.deepEqual(await createTrainingGameSchema.validate({ difficulty }), {
+                difficulty,
+            });
+        }
     });
 });

@@ -4,6 +4,7 @@ import {
     type GameData,
     type GamePlayer,
     type MinionState,
+    type PlayerCard,
 } from "#api_types/game.types";
 import {
     getMinionHasCharge,
@@ -17,10 +18,13 @@ import { getMinionHasStealth } from "#api_types/target_matching";
 /**
  * Score d'un état de partie du point de vue de l'IA. Plus c'est haut, mieux c'est pour elle.
  *
- * RÈGLE D'ÉQUITÉ : cette fonction ne lit JAMAIS le contenu de la main ni du deck adverse — l'IA
- * n'a pas le droit de tricher alors que `GameData` contient l'information complète. Seules les
- * TAILLES (`hand.length`, `deckCards.length`) sont utilisées, exactement comme un joueur humain
- * qui voit le nombre de cartes en main de son adversaire.
+ * RÈGLE D'ÉQUITÉ (défaut, `omniscient: false`) : cette fonction ne lit JAMAIS le contenu de la
+ * main ni du deck adverse. Seules les TAILLES (`hand.length`, `deckCards.length`) sont utilisées,
+ * exactement comme un joueur humain qui voit le nombre de cartes en main de son adversaire.
+ * C'est le régime des IA Débutant et Avancé.
+ *
+ * L'IA EXPERT assume l'inverse : appelée avec `omniscient: true`, elle lit le contenu réel des
+ * deux mains. C'est un choix de conception revendiqué (« robot omniscient »), pas un oubli.
  */
 
 /** Score attribué à une victoire : domine toute autre considération. */
@@ -125,19 +129,56 @@ const evaluateHeroHealth = (health: number, weights: EvaluationWeights): number 
     return weights.ownHeroHealth * safeHealth - weights.ownLowHealthPenalty * missingUnderThreshold;
 };
 
+/**
+ * Valeur d'une carte en main RELATIVE à une carte moyenne : positive pour une bombe, négative
+ * pour une carte faible ou injouable avant longtemps. Centrée pour que le terme de qualité de
+ * main s'annule entre deux mains banales et ne vienne pas concurrencer le plateau.
+ *
+ * N'a de sens que sous `omniscient` : sans ça, l'IA n'a pas le droit de regarder ces cartes.
+ */
+const AVERAGE_CARD_RAW_VALUE = 3.4;
+
+const rawCardValue = (card: PlayerCard): number => {
+    let raw = 0.55 * card.cost;
+
+    if (card.type === "MINION") {
+        raw += 0.2 * (card.attack + card.health);
+        raw +=
+            0.45 *
+            (card.battlecryActions.length + card.passives.length + card.deathrattleActions.length);
+    } else if (card.type === "SPELL") {
+        raw += 0.7 * card.spellActions.length;
+    } else {
+        raw += 0.2 * card.damage * card.durability;
+    }
+
+    return raw;
+};
+
+const evaluateHandQuality = (hand: readonly PlayerCard[]): number =>
+    hand.reduce((total, card) => total + (rawCardValue(card) - AVERAGE_CARD_RAW_VALUE), 0);
+
+/** Poids délibérément faible : la vraie lecture de la main adverse se fait par simulation. */
+const HAND_QUALITY_WEIGHT = 0.25;
+
 export interface EvaluateOptions {
     /**
      * `true` quand l'état évalué correspond à une fin de tour : le mana encore disponible est
      * alors du tempo définitivement perdu.
      */
     isEndOfTurn?: boolean;
+    /**
+     * `true` pour l'IA Expert uniquement : autorise la lecture du contenu de la main adverse.
+     * Voir la règle d'équité en tête de fichier.
+     */
+    omniscient?: boolean;
 }
 
 export const evaluateGameState = (
     data: GameData,
     aiUserId: number,
     weights: EvaluationWeights,
-    { isEndOfTurn = false }: EvaluateOptions = {},
+    { isEndOfTurn = false, omniscient = false }: EvaluateOptions = {},
 ): number => {
     const ai = data.playerOne.userId === aiUserId ? data.playerOne : data.playerTwo;
     const enemy = data.playerOne.userId === aiUserId ? data.playerTwo : data.playerOne;
@@ -156,6 +197,12 @@ export const evaluateGameState = (
     // Uniquement des TAILLES côté adverse : voir la règle d'équité en tête de fichier.
     score += weights.handCard * (ai.hand.length - enemy.hand.length);
     score += weights.deckCard * (ai.deckCards.length - enemy.deckCards.length);
+
+    if (omniscient) {
+        // Deux mains de même taille ne se valent pas : l'Expert le sait, il les a vues.
+        score +=
+            HAND_QUALITY_WEIGHT * (evaluateHandQuality(ai.hand) - evaluateHandQuality(enemy.hand));
+    }
 
     score += 0.7 * (ai.spellPower - enemy.spellPower);
     score += 0.4 * (ai.nextSpellCostReduction ?? 0);

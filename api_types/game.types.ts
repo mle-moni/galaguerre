@@ -315,8 +315,11 @@ export interface GamePendingCardPlay {
     queuedPassives: PendingPassiveTrigger[];
 }
 
-/** Niveau de l'IA d'entraînement. `BEGINNER` = IA historique, `ADVANCED` = IA avec recherche. */
-export const AI_DIFFICULTIES = ["BEGINNER", "ADVANCED"] as const;
+/**
+ * Niveau de l'IA d'entraînement. `BEGINNER` = IA historique, `ADVANCED` = IA avec recherche,
+ * `EXPERT` = recherche à deux plis qui anticipe le tour adverse en information parfaite.
+ */
+export const AI_DIFFICULTIES = ["BEGINNER", "ADVANCED", "EXPERT"] as const;
 
 export type AiDifficulty = (typeof AI_DIFFICULTIES)[number];
 

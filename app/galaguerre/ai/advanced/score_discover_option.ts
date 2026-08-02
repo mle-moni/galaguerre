@@ -40,13 +40,23 @@ const scoreCardValue = (card: PlayerCard): number => {
     }
 };
 
+export interface ScoreDiscoverOptions {
+    /**
+     * IA Expert uniquement : autorise la lecture du plateau adverse pour préférer la réponse
+     * qui traite ce qui est réellement en face (voir la règle d'équité de `evaluate_game_state`).
+     */
+    omniscient?: boolean;
+}
+
 export const scoreDiscoverOption = (
     card: PlayerCard,
     data: GameData,
     aiUserId: number,
     profile: AiDeckProfile | undefined,
+    { omniscient = false }: ScoreDiscoverOptions = {},
 ): number => {
     const ai = data.playerOne.userId === aiUserId ? data.playerOne : data.playerTwo;
+    const enemy = data.playerOne.userId === aiUserId ? data.playerTwo : data.playerOne;
 
     let score = scoreCardValue(card);
 
@@ -63,22 +73,29 @@ export const scoreDiscoverOption = (
         score -= 0.8 * card.cost;
     }
 
+    if (omniscient) {
+        // Une main adverse pleine annonce un tour chargé : la découverte doit tenir le plateau.
+        const pressure = enemy.board.length + 0.5 * enemy.hand.length;
+        if (card.type === "MINION" && card.minionPowers?.hasTaunt) score += 0.5 * pressure;
+    }
+
     return score;
 };
 
 export const createDiscoverPicker = (
     aiUserId: number,
     profile: AiDeckProfile | undefined,
+    options: ScoreDiscoverOptions = {},
 ): DiscoverOptionPicker => {
-    return (options, data) => {
-        let best = options[0]!;
+    return (cards, data) => {
+        let best = cards[0]!;
         let bestScore = -Infinity;
 
-        for (const option of options) {
-            const score = scoreDiscoverOption(option, data, aiUserId, profile);
+        for (const card of cards) {
+            const score = scoreDiscoverOption(card, data, aiUserId, profile, options);
             if (score > bestScore) {
                 bestScore = score;
-                best = option;
+                best = card;
             }
         }
 

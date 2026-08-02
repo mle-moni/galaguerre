@@ -26,6 +26,7 @@ const SEARCH_COMPASS_IMAGE = "/game/boussole.webp";
 const AI_DIFFICULTY_OPTIONS: { value: AiDifficulty; label: string }[] = [
     { value: "BEGINNER", label: "Débutant" },
     { value: "ADVANCED", label: "Avancé" },
+    { value: "EXPERT", label: "Expert" },
 ];
 
 export const MatchmakingPage = observer(() => {

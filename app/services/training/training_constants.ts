@@ -9,6 +9,7 @@ export const TRAINING_AI_USER_ID = -42;
 export const TRAINING_AI_PSEUDOS: Record<AiDifficulty, string> = {
     BEGINNER: "R2-D2 (IA)",
     ADVANCED: "WALL-E (IA)",
+    EXPERT: "Ultron (IA)",
 };
 
 /** Pseudo par défaut. Les parties créées avant l'ajout des difficultés gardent le leur ("IA"). */

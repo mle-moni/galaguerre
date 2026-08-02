@@ -14,7 +14,7 @@ import { getTrainingAiPseudo, TRAINING_AI_USER_ID } from "#services/training/tra
 import { loadTrainingBotCards } from "#services/training/load_training_bot_cards";
 import { DEFAULT_AI_DIFFICULTY, type AiDifficulty } from "#api_types/game.types";
 import type { HttpContext } from "@adonisjs/core/http";
-import { ADVANCED_AI_DECKS } from "../../../database/seed_data/ai_decks.js";
+import { ADVANCED_AI_DECKS, pickAiDeckAgainstCosts } from "../../../database/seed_data/ai_decks.js";
 import { DeckValidationError } from "../../galaguerre/validation/validate_deck.js";
 import { randomBoolean, randomIntInRange } from "../../utils/random.js";
 import { createGame } from "./create_game.js";
@@ -59,10 +59,13 @@ export const createTrainingGame = async (
     const aiDifficulty: AiDifficulty =
         isOnboardingTutorial || !difficulty ? DEFAULT_AI_DIFFICULTY : difficulty;
 
+    // L'Expert contre-pick en lisant le deck du joueur ; l'Avancé tire au hasard.
     const advancedDeck =
-        aiDifficulty === "ADVANCED"
-            ? ADVANCED_AI_DECKS[randomIntInRange(0, ADVANCED_AI_DECKS.length - 1)]!
-            : null;
+        aiDifficulty === "EXPERT"
+            ? pickAiDeckAgainstCosts(deck.cards.map((card) => card.data.cost))
+            : aiDifficulty === "ADVANCED"
+              ? ADVANCED_AI_DECKS[randomIntInRange(0, ADVANCED_AI_DECKS.length - 1)]!
+              : null;
 
     const botCards = await loadTrainingBotCards(advancedDeck?.recipe);
 

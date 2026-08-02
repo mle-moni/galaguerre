@@ -27,9 +27,16 @@ export interface SearchOptions {
     /** Timestamp (ms) au-delà duquel la recherche s'arrête et rend son meilleur résultat. */
     deadline: number;
     pickDiscoverOption: DiscoverOptionPicker;
+    /**
+     * Nombre de lignes candidates rendues en plus de la meilleure (défaut : 1, la meilleure).
+     * L'IA Expert en demande plusieurs pour les départager en simulant le tour adverse.
+     */
+    topResults?: number;
+    /** Évaluation en information parfaite : réservée à l'IA Expert. */
+    omniscient?: boolean;
 }
 
-interface SearchNode {
+export interface SearchNode {
     data: GameData;
     moves: AiMove[];
     /** Score de l'état si l'IA s'arrêtait ici (fin de tour). */
@@ -43,10 +50,59 @@ export interface SearchResult {
     score: number;
     /** Nombre de coups réellement simulés : utile pour le suivi de charge. */
     nodesExplored: number;
+    /**
+     * Les `topResults` meilleures lignes, meilleure d'abord, avec l'état de fin de tour associé.
+     * Contient toujours au moins la ligne rendue dans `moves`.
+     */
+    candidates: SearchNode[];
 }
 
-const scoreEndOfTurn = (data: GameData, aiUserId: number, weights: EvaluationWeights): number =>
-    evaluateGameState(data, aiUserId, weights, { isEndOfTurn: true });
+const scoreEndOfTurn = (
+    data: GameData,
+    aiUserId: number,
+    weights: EvaluationWeights,
+    omniscient: boolean,
+): number => evaluateGameState(data, aiUserId, weights, { isEndOfTurn: true, omniscient });
+
+/**
+ * Identifie un coup, pour regrouper les lignes qui commencent pareil.
+ */
+const moveKey = (move: AiMove): string => {
+    switch (move.type) {
+        case "pass_turn":
+            return "pass";
+        case "play_card":
+            return `play:${move.action.cardId}:${move.action.boardIndex}:${move.action.actionTarget?.owner ?? ""}:${move.action.actionTarget?.minionUuid ?? ""}`;
+        case "minion_action":
+            return `minion:${move.action.minionId}:${move.action.owner}:${move.action.minionUuid ?? "face"}`;
+        case "weapon_action":
+            return `weapon:${move.action.owner}:${move.action.minionUuid ?? "face"}`;
+    }
+};
+
+/**
+ * Ne garde que la MEILLEURE ligne par premier coup distinct.
+ *
+ * Sans ce regroupement, les `topResults` meilleures lignes sont presque toujours les préfixes
+ * successifs d'une même ligne (« joue A », « joue A puis B », « joue A puis B puis C »...) :
+ * chaque coup ajouté améliorant le score, la recherche remplit son palmarès avec une seule idée.
+ * L'appelant, lui, ne joue que le PREMIER coup — un palmarès de préfixes ne lui laisse donc rien
+ * à départager. On lui rend des alternatives réellement différentes.
+ */
+const bestLinePerFirstMove = (nodes: SearchNode[], limit: number): SearchNode[] => {
+    const bestByFirstMove = new Map<string, SearchNode>();
+
+    for (const node of nodes) {
+        const key = node.moves.length === 0 ? "pass" : moveKey(node.moves[0]!);
+        const current = bestByFirstMove.get(key);
+
+        if (!current || node.endScore > current.endScore) {
+            bestByFirstMove.set(key, node);
+        }
+    }
+
+    return [...bestByFirstMove.values()].sort((a, b) => b.endScore - a.endScore).slice(0, limit);
+};
 
 export const searchBestTurn = async (
     data: GameData,
@@ -59,6 +115,8 @@ export const searchBestTurn = async (
         maxDepth,
         deadline,
         pickDiscoverOption,
+        topResults = 1,
+        omniscient = false,
     }: SearchOptions,
 ): Promise<SearchResult> => {
     let nodesExplored = 0;
@@ -66,12 +124,13 @@ export const searchBestTurn = async (
     const root: SearchNode = {
         data,
         moves: [],
-        endScore: scoreEndOfTurn(data, aiUserId, weights),
+        endScore: scoreEndOfTurn(data, aiUserId, weights, omniscient),
         finished: false,
     };
 
     let beam: SearchNode[] = [root];
-    let best: SearchNode = root;
+    // Meilleures lignes toutes profondeurs confondues, la meilleure en tête.
+    let bestNodes: SearchNode[] = [root];
 
     for (let depth = 0; depth < maxDepth; depth++) {
         if (Date.now() > deadline || nodesExplored >= maxNodes) break;
@@ -94,8 +153,8 @@ export const searchBestTurn = async (
                 if (!result.applied) continue;
 
                 const endScore = result.finished
-                    ? evaluateGameState(result.data, aiUserId, weights)
-                    : scoreEndOfTurn(result.data, aiUserId, weights);
+                    ? evaluateGameState(result.data, aiUserId, weights, { omniscient })
+                    : scoreEndOfTurn(result.data, aiUserId, weights, omniscient);
 
                 candidates.push({
                     data: result.data,
@@ -108,15 +167,20 @@ export const searchBestTurn = async (
 
         if (candidates.length === 0) break;
 
-        for (const candidate of candidates) {
-            if (candidate.endScore > best.endScore) best = candidate;
-        }
+        bestNodes = bestLinePerFirstMove([...bestNodes, ...candidates], topResults);
 
         // Une victoire trouvée : inutile de chercher plus loin.
-        if (best.endScore >= WIN_SCORE) break;
+        if (bestNodes[0]!.endScore >= WIN_SCORE) break;
 
         beam = candidates.sort((a, b) => b.endScore - a.endScore).slice(0, beamWidth);
     }
 
-    return { moves: best.moves, score: best.endScore, nodesExplored };
+    const best = bestNodes[0]!;
+
+    return {
+        moves: best.moves,
+        score: best.endScore,
+        nodesExplored,
+        candidates: bestNodes,
+    };
 };

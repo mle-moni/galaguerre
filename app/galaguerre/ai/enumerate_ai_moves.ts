@@ -208,6 +208,36 @@ const enumerateMinionAttacks = (game: Game, player: GamePlayer, opponent: GamePl
     return moves;
 };
 
+/**
+ * Positions d'invocation à explorer pour un monstre.
+ *
+ * La position sur le plateau n'a d'incidence mécanique QUE pour les effets d'adjacence : partout
+ * ailleurs, énumérer plusieurs emplacements ne ferait que multiplier le facteur de branchement de
+ * la recherche pour des états rigoureusement équivalents. On ne paie donc ce coût que pour les
+ * cartes concernées — aujourd'hui une poignée dans le catalogue.
+ */
+const cardCaresAboutAdjacency = (card: MinionCard): boolean => {
+    const actions = [
+        ...card.battlecryActions,
+        ...card.comboActions,
+        ...card.deathrattleActions,
+        ...card.attackActions,
+        ...card.passives.flatMap((passive) => (passive.action ? [passive.action] : [])),
+    ];
+
+    if (actions.some((action) => getActionTarget(action)?.adjacency === "SOURCE")) return true;
+
+    return card.passives.some((passive) => passive.passiveBoost?.target?.adjacency === "SOURCE");
+};
+
+const enumerateBoardIndexes = (card: MinionCard, player: GamePlayer): number[] => {
+    const rightmost = countBoardMinionsOnBoard(player.board);
+    if (rightmost === 0 || !cardCaresAboutAdjacency(card)) return [rightmost];
+
+    // Chaque emplacement donne un couple de voisins différent : tous méritent d'être simulés.
+    return Array.from({ length: rightmost + 1 }, (_, index) => index);
+};
+
 const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMove[] => {
     const moves: AiMove[] = [];
     const playableCards = [...player.hand]
@@ -218,7 +248,7 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
         if (card.type === "MINION") {
             if (!playerHasBoardSpace(player)) continue;
 
-            const boardIndex = countBoardMinionsOnBoard(player.board);
+            const boardIndexes = enumerateBoardIndexes(card, player);
             const comboActive = isComboActive(player);
 
             if (actionRequiresTarget(card, { comboActive })) {
@@ -231,14 +261,16 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
                         { comboActive },
                     )
                 ) {
-                    moves.push({
-                        type: "play_card",
-                        action: {
-                            cardId: card.uuid,
-                            boardIndex,
-                            owner: "PLAYER",
-                        },
-                    });
+                    for (const boardIndex of boardIndexes) {
+                        moves.push({
+                            type: "play_card",
+                            action: {
+                                cardId: card.uuid,
+                                boardIndex,
+                                owner: "PLAYER",
+                            },
+                        });
+                    }
                     continue;
                 }
 
@@ -248,25 +280,29 @@ const enumeratePlayCardMoves = (player: GamePlayer, opponent: GamePlayer): AiMov
                         continue;
                     }
 
+                    for (const boardIndex of boardIndexes) {
+                        moves.push({
+                            type: "play_card",
+                            action: {
+                                cardId: card.uuid,
+                                boardIndex,
+                                owner: "PLAYER",
+                                actionTarget,
+                            },
+                        });
+                    }
+                }
+            } else {
+                for (const boardIndex of boardIndexes) {
                     moves.push({
                         type: "play_card",
                         action: {
                             cardId: card.uuid,
                             boardIndex,
                             owner: "PLAYER",
-                            actionTarget,
                         },
                     });
                 }
-            } else {
-                moves.push({
-                    type: "play_card",
-                    action: {
-                        cardId: card.uuid,
-                        boardIndex,
-                        owner: "PLAYER",
-                    },
-                });
             }
         } else if (card.type === "SPELL") {
             if (actionRequiresTarget(card)) {

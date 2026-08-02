@@ -1,5 +1,10 @@
 import { BaseCommand, flags } from "@adonisjs/core/ace";
-import type { AiDeckProfile, GameData } from "#api_types/game.types";
+import {
+    AI_DIFFICULTIES,
+    type AiDeckProfile,
+    type AiDifficulty,
+    type GameData,
+} from "#api_types/game.types";
 import { getDefaultGameData } from "#controllers/games/create_game";
 import { performPassTurn } from "#controllers/games/pass_game_turn";
 import { finalizeMulligan } from "#controllers/games/mulligan/finalize_mulligan";
@@ -10,8 +15,11 @@ import {
     ADVANCED_AI_DEFAULTS,
     type AdvancedAiConfig,
 } from "#galaguerre/ai/advanced/advanced_ai_config";
+import { EXPERT_AI_DEFAULTS, type ExpertAiConfig } from "#galaguerre/ai/advanced/expert_ai_config";
 import { selectMulliganCardUuids } from "#galaguerre/ai/advanced/advanced_mulligan";
 import { decideNextMoves } from "#galaguerre/ai/advanced/decide_next_move";
+import { decideExpertMoves } from "#galaguerre/ai/advanced/decide_expert_move";
+import type { AiDecision } from "#galaguerre/ai/advanced/decide_next_move";
 import { enumerateAiMoves } from "#galaguerre/ai/enumerate_ai_moves";
 import { applyAiMove } from "#galaguerre/simulation/apply_ai_move";
 import { createSimulationGame } from "#galaguerre/simulation/simulation_game";
@@ -20,30 +28,61 @@ import { loadTrainingBotCards } from "#services/training/load_training_bot_cards
 import { createSeededRng, runInSimulation } from "../app/utils/simulation_context.js";
 
 /**
- * Banc d'essai : fait s'affronter l'IA « Avancé » et l'IA « Débutant » entièrement en simulation
- * (aucune écriture en base) et rapporte le taux de victoire.
+ * Banc d'essai : fait s'affronter deux niveaux d'IA entièrement en simulation (aucune écriture en
+ * base) et rapporte le taux de victoire.
  *
- * C'est la mesure qui dit si l'IA avancée est réellement plus forte — les tests unitaires ne
- * valident que des comportements isolés.
+ * C'est la mesure qui dit si une IA est réellement plus forte qu'une autre — les tests unitaires
+ * ne valident que des comportements isolés. Exemples :
+ *
+ *   node ace dev:bench-ai --left=EXPERT --right=ADVANCED --mirror --games=100
+ *   node ace dev:bench-ai --left=ADVANCED --right=BEGINNER --games=100
+ *
+ * `--mirror` donne le MÊME deck aux deux camps : c'est ce qui isole la force de l'IA de celle de
+ * son deck. Sans lui, un écart de winrate peut n'être qu'un écart de liste.
  */
 
-const ADVANCED_USER_ID = -42;
-const BEGINNER_USER_ID = -43;
+const LEFT_USER_ID = -42;
+const RIGHT_USER_ID = -43;
 const MAX_ROUNDS = 60;
 const MAX_ACTIONS_PER_TURN = 40;
 
-type Side = "ADVANCED" | "BEGINNER";
+type Side = "LEFT" | "RIGHT";
+
+interface TurnStats {
+    /** Durée de chaque décision, en ms : sert au calcul des percentiles de latence. */
+    decisionMs: number[];
+}
 
 interface GameOutcome {
     winner: Side | null;
     rounds: number;
-    advancedThinkMs: number;
-    advancedDecisions: number;
+    leftDecisionMs: number[];
+    rightDecisionMs: number[];
 }
+
+/** Un camp du banc d'essai : sa difficulté, son deck et la façon dont il choisit ses coups. */
+interface Contender {
+    difficulty: AiDifficulty;
+    userId: number;
+    profile: AiDeckProfile;
+    recipe: DeckRecipeEntry[];
+}
+
+const percentile = (values: number[], ratio: number): number => {
+    if (values.length === 0) return 0;
+
+    const sorted = [...values].sort((a, b) => a - b);
+    const index = Math.min(sorted.length - 1, Math.floor(ratio * sorted.length));
+
+    return sorted[index]!;
+};
+
+const isAiDifficulty = (value: string): value is AiDifficulty =>
+    (AI_DIFFICULTIES as readonly string[]).includes(value);
 
 export default class BenchAi extends BaseCommand {
     static commandName = "dev:bench-ai";
-    static description = "Play the advanced AI against the beginner AI and report the win rate";
+    static description = "Play two AI difficulties against each other and report the win rate";
     static options = { startApp: true };
 
     @flags.number({ description: "Number of games to play", default: 20 })
@@ -52,126 +91,200 @@ export default class BenchAi extends BaseCommand {
     @flags.number({ description: "Max thinking time per action, in ms", default: 0 })
     declare thinkMs: number;
 
-    @flags.string({ description: "Force the advanced deck profile: AGGRO or MIDRANGE" })
+    @flags.string({ description: "Force the AI deck profile: AGGRO or MIDRANGE" })
     declare profile?: string;
 
+    @flags.string({
+        description: `Difficulty of the left side (${AI_DIFFICULTIES.join(" | ")})`,
+        default: "ADVANCED",
+    })
+    declare left: string;
+
+    @flags.string({
+        description: `Difficulty of the right side (${AI_DIFFICULTIES.join(" | ")})`,
+        default: "BEGINNER",
+    })
+    declare right: string;
+
     @flags.boolean({
-        description: "Give the advanced AI the beginner deck, to isolate AI strength from decks",
+        description: "Give both sides the same deck, to isolate AI strength from decks",
         default: false,
     })
     declare mirror: boolean;
 
     async run() {
-        const config = {
-            ...ADVANCED_AI_DEFAULTS,
-            maxThinkMs: this.thinkMs > 0 ? this.thinkMs : ADVANCED_AI_DEFAULTS.maxThinkMs,
-        };
+        const left = this.left.toUpperCase();
+        const right = this.right.toUpperCase();
 
-        const beginnerCards = await loadTrainingBotCards(TRAINING_BOT_DECK_RECIPE);
-        const advancedDecks = this.profile
+        if (!isAiDifficulty(left) || !isAiDifficulty(right)) {
+            this.logger.error(`--left/--right must be one of ${AI_DIFFICULTIES.join(", ")}`);
+            this.exitCode = 1;
+            return;
+        }
+
+        const decks = this.profile
             ? ADVANCED_AI_DECKS.filter(({ profile }) => profile === this.profile)
             : ADVANCED_AI_DECKS;
 
-        if (advancedDecks.length === 0) {
+        if (decks.length === 0) {
             this.logger.error(`Unknown profile "${this.profile}" (expected AGGRO or MIDRANGE)`);
             this.exitCode = 1;
             return;
         }
 
+        const advancedConfig: AdvancedAiConfig = {
+            ...ADVANCED_AI_DEFAULTS,
+            maxThinkMs: this.thinkMs > 0 ? this.thinkMs : ADVANCED_AI_DEFAULTS.maxThinkMs,
+        };
+        const expertConfig: ExpertAiConfig = {
+            ...EXPERT_AI_DEFAULTS,
+            maxThinkMs: this.thinkMs > 0 ? this.thinkMs : EXPERT_AI_DEFAULTS.maxThinkMs,
+        };
+
         const outcomes: GameOutcome[] = [];
 
         for (let index = 0; index < this.games; index++) {
-            const deck = advancedDecks[index % advancedDecks.length]!;
-            const advancedCards = this.mirror
-                ? await loadTrainingBotCards(TRAINING_BOT_DECK_RECIPE)
-                : await loadTrainingBotCards(deck.recipe as DeckRecipeEntry[]);
+            const deck = decks[index % decks.length]!;
+
+            const leftContender = this.buildContender(left, LEFT_USER_ID, deck);
+            // En miroir, le camp droit reprend exactement le deck du camp gauche.
+            const rightContender = this.buildContender(
+                right,
+                RIGHT_USER_ID,
+                this.mirror
+                    ? { profile: leftContender.profile, recipe: leftContender.recipe }
+                    : deck,
+            );
 
             const outcome = await this.playGame({
-                advancedCards,
-                beginnerCards,
-                profile: deck.profile,
+                left: leftContender,
+                right: rightContender,
                 // On alterne qui commence : le premier joueur a un avantage structurel.
-                advancedGoesFirst: index % 2 === 0,
-                config,
+                leftGoesFirst: index % 2 === 0,
+                advancedConfig,
+                expertConfig,
                 seed: index + 1,
             });
 
             outcomes.push(outcome);
             this.logger.info(
-                `game ${index + 1}/${this.games} (${deck.profile}) → ${outcome.winner ?? "DRAW"} in ${outcome.rounds} rounds`,
+                `game ${index + 1}/${this.games} → ${outcome.winner ?? "DRAW"} in ${outcome.rounds} rounds`,
             );
         }
 
-        this.report(outcomes);
+        this.report(outcomes, left, right);
     }
 
-    private report(outcomes: GameOutcome[]) {
-        const wins = outcomes.filter(({ winner }) => winner === "ADVANCED").length;
-        const losses = outcomes.filter(({ winner }) => winner === "BEGINNER").length;
+    /** Le Débutant garde son deck historique ; les IA à recherche prennent un deck d'IA. */
+    private buildContender(
+        difficulty: AiDifficulty,
+        userId: number,
+        deck: { profile: AiDeckProfile; recipe: DeckRecipeEntry[] },
+    ): Contender {
+        if (difficulty === "BEGINNER") {
+            return {
+                difficulty,
+                userId,
+                profile: "MIDRANGE",
+                recipe: TRAINING_BOT_DECK_RECIPE,
+            };
+        }
+
+        return { difficulty, userId, profile: deck.profile, recipe: deck.recipe };
+    }
+
+    private report(outcomes: GameOutcome[], left: AiDifficulty, right: AiDifficulty) {
+        const wins = outcomes.filter(({ winner }) => winner === "LEFT").length;
+        const losses = outcomes.filter(({ winner }) => winner === "RIGHT").length;
         const draws = outcomes.length - wins - losses;
 
-        const totalThinkMs = outcomes.reduce((sum, o) => sum + o.advancedThinkMs, 0);
-        const totalDecisions = outcomes.reduce((sum, o) => sum + o.advancedDecisions, 0);
+        const leftMs = outcomes.flatMap(({ leftDecisionMs }) => leftDecisionMs);
+        const rightMs = outcomes.flatMap(({ rightDecisionMs }) => rightDecisionMs);
         const avgRounds = outcomes.reduce((sum, o) => sum + o.rounds, 0) / outcomes.length;
 
         this.logger.info("");
-        this.logger.info(`ADVANCED wins : ${wins}/${outcomes.length}`);
-        this.logger.info(`BEGINNER wins : ${losses}/${outcomes.length}`);
-        this.logger.info(`draws / timeouts: ${draws}`);
-        this.logger.info(`win rate      : ${((wins / outcomes.length) * 100).toFixed(1)}%`);
-        this.logger.info(`avg rounds    : ${avgRounds.toFixed(1)}`);
+        this.logger.info(`${left} (left)  wins : ${wins}/${outcomes.length}`);
+        this.logger.info(`${right} (right) wins : ${losses}/${outcomes.length}`);
+        this.logger.info(`draws / timeouts     : ${draws}`);
         this.logger.info(
-            `avg think time: ${totalDecisions > 0 ? (totalThinkMs / totalDecisions).toFixed(0) : 0} ms/decision`,
+            `${left} win rate       : ${((wins / outcomes.length) * 100).toFixed(1)}%`,
+        );
+        this.logger.info(`avg rounds           : ${avgRounds.toFixed(1)}`);
+        this.logger.info(this.formatLatency(`${left} (left)`, leftMs));
+        this.logger.info(this.formatLatency(`${right} (right)`, rightMs));
+    }
+
+    private formatLatency(label: string, samples: number[]): string {
+        if (samples.length === 0) return `${label} latency: n/a`;
+
+        const mean = samples.reduce((sum, value) => sum + value, 0) / samples.length;
+
+        return (
+            `${label} latency: mean ${mean.toFixed(0)} ms, ` +
+            `p50 ${percentile(samples, 0.5).toFixed(0)} ms, ` +
+            `p95 ${percentile(samples, 0.95).toFixed(0)} ms ` +
+            `(${samples.length} decisions)`
         );
     }
 
     private async playGame({
-        advancedCards,
-        beginnerCards,
-        profile,
-        advancedGoesFirst,
-        config,
+        left,
+        right,
+        leftGoesFirst,
+        advancedConfig,
+        expertConfig,
         seed,
     }: {
-        advancedCards: Awaited<ReturnType<typeof loadTrainingBotCards>>;
-        beginnerCards: Awaited<ReturnType<typeof loadTrainingBotCards>>;
-        profile: AiDeckProfile;
-        advancedGoesFirst: boolean;
-        config: AdvancedAiConfig;
+        left: Contender;
+        right: Contender;
+        leftGoesFirst: boolean;
+        advancedConfig: AdvancedAiConfig;
+        expertConfig: ExpertAiConfig;
         seed: number;
     }): Promise<GameOutcome> {
-        const advancedPlayer = {
-            userId: ADVANCED_USER_ID,
-            pseudo: "Avancé",
+        const leftPlayer = {
+            userId: left.userId,
+            pseudo: `${left.difficulty} (left)`,
             avatarCardId: 1,
-            cards: advancedCards,
+            cards: await loadTrainingBotCards(left.recipe),
         };
-        const beginnerPlayer = {
-            userId: BEGINNER_USER_ID,
-            pseudo: "Débutant",
+        const rightPlayer = {
+            userId: right.userId,
+            pseudo: `${right.difficulty} (right)`,
             avatarCardId: 1,
-            cards: beginnerCards,
+            cards: await loadTrainingBotCards(right.recipe),
         };
 
-        let advancedThinkMs = 0;
-        let advancedDecisions = 0;
+        const leftDecisionMs: number[] = [];
+        const rightDecisionMs: number[] = [];
 
         return runInSimulation({ rng: createSeededRng(seed) }, async () => {
             const data: GameData = getDefaultGameData({
-                playerOne: advancedGoesFirst ? advancedPlayer : beginnerPlayer,
-                playerTwo: advancedGoesFirst ? beginnerPlayer : advancedPlayer,
+                playerOne: leftGoesFirst ? leftPlayer : rightPlayer,
+                playerTwo: leftGoesFirst ? rightPlayer : leftPlayer,
                 isTraining: true,
             });
 
             const game = createSimulationGame(data);
-            const advancedIsPlayerOne = advancedGoesFirst;
 
-            const advanced = advancedIsPlayerOne ? game.data.playerOne : game.data.playerTwo;
-            performMulliganOnPlayer(advanced, selectMulliganCardUuids(advanced, profile));
+            for (const contender of [left, right]) {
+                if (contender.difficulty === "BEGINNER") continue;
+
+                const isPlayerOne = (contender === left) === leftGoesFirst;
+                const player = isPlayerOne ? game.data.playerOne : game.data.playerTwo;
+                const opponent = isPlayerOne ? game.data.playerTwo : game.data.playerOne;
+
+                performMulliganOnPlayer(
+                    player,
+                    selectMulliganCardUuids(player, contender.profile, {
+                        opponent: contender.difficulty === "EXPERT" ? opponent : undefined,
+                    }),
+                );
+            }
+
             await finalizeMulligan(game);
 
             while (!game.isFinished && game.data.currentRound <= MAX_ROUNDS) {
-                const activeIsPlayerOne = game.data.state === "PLAYER_ONE_TURN";
                 if (
                     game.data.state !== "PLAYER_ONE_TURN" &&
                     game.data.state !== "PLAYER_TWO_TURN"
@@ -179,16 +292,18 @@ export default class BenchAi extends BaseCommand {
                     break;
                 }
 
-                const isAdvancedTurn = activeIsPlayerOne === advancedIsPlayerOne;
-                const activeUserId = isAdvancedTurn ? ADVANCED_USER_ID : BEGINNER_USER_ID;
+                const activeIsPlayerOne = game.data.state === "PLAYER_ONE_TURN";
+                const isLeftTurn = activeIsPlayerOne === leftGoesFirst;
+                const active = isLeftTurn ? left : right;
+                const passive = isLeftTurn ? right : left;
 
-                if (isAdvancedTurn) {
-                    const stats = await this.playAdvancedTurn(game, profile, config, seed);
-                    advancedThinkMs += stats.thinkMs;
-                    advancedDecisions += stats.decisions;
-                } else {
-                    await this.playBeginnerTurn(game, activeUserId);
-                }
+                const stats = await this.playTurn(game, active, passive, {
+                    advancedConfig,
+                    expertConfig,
+                    seed,
+                });
+
+                (isLeftTurn ? leftDecisionMs : rightDecisionMs).push(...stats.decisionMs);
 
                 if (game.isFinished) break;
 
@@ -197,48 +312,47 @@ export default class BenchAi extends BaseCommand {
             }
 
             return {
-                winner: this.resolveWinner(game.data, advancedIsPlayerOne),
+                winner: this.resolveWinner(game.data, left.userId),
                 rounds: game.data.currentRound,
-                advancedThinkMs,
-                advancedDecisions,
+                leftDecisionMs,
+                rightDecisionMs,
             };
         });
     }
 
-    private resolveWinner(data: GameData, advancedIsPlayerOne: boolean): Side | null {
-        const advanced = advancedIsPlayerOne ? data.playerOne : data.playerTwo;
-        const beginner = advancedIsPlayerOne ? data.playerTwo : data.playerOne;
+    private resolveWinner(data: GameData, leftUserId: number): Side | null {
+        const left = data.playerOne.userId === leftUserId ? data.playerOne : data.playerTwo;
+        const right = data.playerOne.userId === leftUserId ? data.playerTwo : data.playerOne;
 
-        if (beginner.health <= 0 && advanced.health > 0) return "ADVANCED";
-        if (advanced.health <= 0 && beginner.health > 0) return "BEGINNER";
+        if (right.health <= 0 && left.health > 0) return "LEFT";
+        if (left.health <= 0 && right.health > 0) return "RIGHT";
         return null;
     }
 
-    private async playAdvancedTurn(
+    private async playTurn(
         game: ReturnType<typeof createSimulationGame>,
-        profile: AiDeckProfile,
-        config: AdvancedAiConfig,
-        seed: number,
-    ): Promise<{ thinkMs: number; decisions: number }> {
-        let thinkMs = 0;
-        let decisions = 0;
+        active: Contender,
+        passive: Contender,
+        configs: { advancedConfig: AdvancedAiConfig; expertConfig: ExpertAiConfig; seed: number },
+    ): Promise<TurnStats> {
+        if (active.difficulty === "BEGINNER") {
+            await this.playBeginnerTurn(game, active.userId);
+            return { decisionMs: [] };
+        }
+
+        const decisionMs: number[] = [];
 
         for (let action = 0; action < MAX_ACTIONS_PER_TURN; action++) {
             if (game.isFinished || game.data.pendingDiscover) break;
 
-            const decision = await decideNextMoves(game.data, {
-                aiUserId: ADVANCED_USER_ID,
-                profile,
-                config,
-                seed: seed * 1000 + game.data.currentRound * 100 + action,
-            });
+            const seed = configs.seed * 1000 + game.data.currentRound * 100 + action;
+            const decision = await this.decide(game.data, active, passive, configs, seed);
 
-            thinkMs += decision.elapsedMs;
-            decisions++;
+            decisionMs.push(decision.elapsedMs);
 
             if (decision.moves.length === 0) break;
 
-            const result = await applyAiMove(game.data, ADVANCED_USER_ID, decision.moves[0]!);
+            const result = await applyAiMove(game.data, active.userId, decision.moves[0]!);
             if (!result.applied) break;
 
             game.data = result.data;
@@ -248,7 +362,32 @@ export default class BenchAi extends BaseCommand {
             }
         }
 
-        return { thinkMs, decisions };
+        return { decisionMs };
+    }
+
+    private decide(
+        data: GameData,
+        active: Contender,
+        passive: Contender,
+        configs: { advancedConfig: AdvancedAiConfig; expertConfig: ExpertAiConfig },
+        seed: number,
+    ): Promise<AiDecision> {
+        if (active.difficulty === "EXPERT") {
+            return decideExpertMoves(data, {
+                aiUserId: active.userId,
+                opponentUserId: passive.userId,
+                profile: active.profile,
+                config: configs.expertConfig,
+                seed,
+            });
+        }
+
+        return decideNextMoves(data, {
+            aiUserId: active.userId,
+            profile: active.profile,
+            config: configs.advancedConfig,
+            seed,
+        });
     }
 
     private async playBeginnerTurn(

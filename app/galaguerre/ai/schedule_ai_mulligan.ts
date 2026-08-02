@@ -3,17 +3,24 @@ import { confirmMulliganForPlayer } from "#controllers/games/mulligan/game_mulli
 import type { PlayerNumber } from "#api_types/game.types";
 import { isSimulating } from "../../utils/simulation_context.js";
 import { selectMulliganCardUuids } from "./advanced/advanced_mulligan.js";
-import { isAdvancedAi } from "./get_ai_difficulty.js";
+import { isExpertAi, usesSearchAi } from "./get_ai_difficulty.js";
 import { getAiPlayerSeat, isAiMulliganPending } from "./get_ai_player_seat.js";
 
 const runningAiMulligans = new Set<number>();
 
-/** L'IA débutante garde toute sa main ; l'avancée rejette ce qu'elle ne jouera pas tôt. */
+/**
+ * L'IA débutante garde toute sa main ; l'avancée rejette ce qu'elle ne jouera pas tôt ;
+ * l'experte accorde en plus sa courbe à celle du deck qu'elle a en face.
+ */
 const selectAiMulliganCardUuids = (game: Game, aiSeat: PlayerNumber): string[] => {
-    if (!isAdvancedAi(game)) return [];
+    if (!usesSearchAi(game)) return [];
 
     const player = aiSeat === "PLAYER_ONE" ? game.data.playerOne : game.data.playerTwo;
-    return selectMulliganCardUuids(player, game.data.aiDeckProfile);
+    const opponent = aiSeat === "PLAYER_ONE" ? game.data.playerTwo : game.data.playerOne;
+
+    return selectMulliganCardUuids(player, game.data.aiDeckProfile, {
+        opponent: isExpertAi(game) ? opponent : undefined,
+    });
 };
 
 export const confirmAiMulliganIfNeeded = async (game: Game): Promise<void> => {

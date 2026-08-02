@@ -4,7 +4,7 @@ import { TRAINING_AI_USER_ID } from "#services/training/training_constants";
 import { randomIntInRange } from "../../utils/random.js";
 import { isSimulating } from "../../utils/simulation_context.js";
 import { createDiscoverPicker } from "./advanced/score_discover_option.js";
-import { isAdvancedAi } from "./get_ai_difficulty.js";
+import { isExpertAi, usesSearchAi } from "./get_ai_difficulty.js";
 import { resolveDiscoverChoice } from "../discover/resolve_discover_choice.js";
 import { findPlayerByUserId } from "../discover/discover_types.js";
 import { runGameActionWithNarrative } from "../game_narrative/run_game_action_with_narrative.js";
@@ -14,11 +14,15 @@ const runningAiDiscovers = new Set<number>();
 
 /** L'IA débutante tire au hasard ; l'avancée note chaque option. */
 const pickAiDiscoverOption = (game: Game, options: PlayerCard[]): PlayerCard => {
-    if (!isAdvancedAi(game)) {
+    if (!usesSearchAi(game)) {
         return options[randomIntInRange(0, options.length - 1)]!;
     }
 
-    return createDiscoverPicker(TRAINING_AI_USER_ID, game.data.aiDeckProfile)(options, game.data);
+    const pick = createDiscoverPicker(TRAINING_AI_USER_ID, game.data.aiDeckProfile, {
+        omniscient: isExpertAi(game),
+    });
+
+    return pick(options, game.data);
 };
 
 export const isAiDiscoverPending = (game: Game): boolean => {
