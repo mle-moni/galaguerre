@@ -1,4 +1,5 @@
 import type { GameData } from "#api_types/game.types";
+import { createSeededRng, runInSimulation } from "../../../utils/simulation_context.js";
 import { applyAiMove, type DiscoverOptionPicker } from "../../simulation/apply_ai_move.js";
 import { createSimulationGame } from "../../simulation/simulation_game.js";
 import { enumerateAiMoves, type AiMove } from "../enumerate_ai_moves.js";
@@ -28,6 +29,11 @@ export interface SearchOptions {
     deadline: number;
     pickDiscoverOption: DiscoverOptionPicker;
     /**
+     * Graine de base du PRNG. Chaque branche en dérive la sienne (voir `branchSeed`), pour que
+     * deux lignes soient notées sur le même aléatoire plutôt que sur leur rang d'exploration.
+     */
+    seed: number;
+    /**
      * Nombre de lignes candidates rendues en plus de la meilleure (défaut : 1, la meilleure).
      * L'IA Expert en demande plusieurs pour les départager en simulant le tour adverse.
      */
@@ -51,11 +57,67 @@ export interface SearchResult {
     /** Nombre de coups réellement simulés : utile pour le suivi de charge. */
     nodesExplored: number;
     /**
+     * `true` quand la recherche s'est arrêtée sur son budget (échéance ou plafond de nœuds).
+     * Une séquence vide accompagnée de ce drapeau ne veut PAS dire « passer est le meilleur
+     * coup » : elle veut dire qu'on n'a pas fini de regarder.
+     */
+    budgetExhausted: boolean;
+    /**
      * Les `topResults` meilleures lignes, meilleure d'abord, avec l'état de fin de tour associé.
      * Contient toujours au moins la ligne rendue dans `moves`.
      */
     candidates: SearchNode[];
 }
+
+/**
+ * Graine du PRNG pour une ligne donnée, dérivée de la SÉQUENCE de coups qui y mène (FNV-1a).
+ *
+ * Sans elle, toutes les branches puisent dans un seul flux aléatoire mutable ouvert pour la durée
+ * de la décision : une invocation ou une cible aléatoire est alors résolue différemment selon
+ * l'ORDRE d'exploration, et les scores des branches ne sont plus comparables — c'est la branche
+ * chanceuse qui gagne le faisceau, pas la meilleure.
+ *
+ * Avec elle, une même ligne voit toujours le même aléatoire, quelle que soit sa position dans
+ * l'exploration : c'est la technique des « nombres aléatoires communs ».
+ */
+export const deriveSeed = (baseSeed: number, moves: AiMove[]): number => {
+    let hash = baseSeed >>> 0;
+
+    for (const move of moves) {
+        const key = moveKey(move);
+
+        for (let index = 0; index < key.length; index++) {
+            hash = (hash ^ key.charCodeAt(index)) >>> 0;
+            hash = Math.imul(hash, 0x01000193) >>> 0;
+        }
+    }
+
+    return hash;
+};
+
+/**
+ * Filet de sécurité contre une recherche qui n'a jamais tourné.
+ *
+ * `searchBestTurn` rend une séquence vide dans deux cas très différents : le faisceau a comparé
+ * des lignes et conclu que passer immédiatement était le mieux (résultat légitime), ou son budget
+ * a sauté avant qu'elle n'ait de quoi conclure — un seul `applyAiMove` lent y suffit. Les
+ * appelants traitent une séquence vide comme « passe ton tour », de sorte que le second cas
+ * faisait sauter un tour entier de l'IA.
+ *
+ * `budgetExhausted` sépare les deux. On rend alors le meilleur coup du pré-filtrage statique, qui
+ * ne coûte aucune simulation : l'IA joue glouton, un coup à la fois, ce qui est exactement la
+ * dégradation attendue sous charge.
+ */
+export const fallbackWhenSearchNeverRan = (
+    result: SearchResult,
+    legalMoves: AiMove[],
+    data: GameData,
+    aiUserId: number,
+): AiMove[] => {
+    if (result.moves.length > 0 || !result.budgetExhausted) return result.moves;
+
+    return prefilterMoves(legalMoves, data, aiUserId, 1);
+};
 
 const scoreEndOfTurn = (
     data: GameData,
@@ -65,7 +127,8 @@ const scoreEndOfTurn = (
 ): number => evaluateGameState(data, aiUserId, weights, { isEndOfTurn: true, omniscient });
 
 /**
- * Identifie un coup, pour regrouper les lignes qui commencent pareil.
+ * Identifie un coup, pour regrouper les lignes qui commencent pareil et pour dériver la graine
+ * d'une branche (voir `branchSeed`).
  */
 const moveKey = (move: AiMove): string => {
     switch (move.type) {
@@ -115,11 +178,19 @@ export const searchBestTurn = async (
         maxDepth,
         deadline,
         pickDiscoverOption,
+        seed,
         topResults = 1,
         omniscient = false,
     }: SearchOptions,
 ): Promise<SearchResult> => {
     let nodesExplored = 0;
+    let budgetExhausted = false;
+
+    const outOfBudget = (): boolean => {
+        if (Date.now() > deadline || nodesExplored >= maxNodes) budgetExhausted = true;
+
+        return budgetExhausted;
+    };
 
     const root: SearchNode = {
         data,
@@ -133,23 +204,29 @@ export const searchBestTurn = async (
     let bestNodes: SearchNode[] = [root];
 
     for (let depth = 0; depth < maxDepth; depth++) {
-        if (Date.now() > deadline || nodesExplored >= maxNodes) break;
+        if (outOfBudget()) break;
 
         const candidates: SearchNode[] = [];
 
         for (const node of beam) {
             if (node.finished) continue;
-            if (Date.now() > deadline || nodesExplored >= maxNodes) break;
+            if (outOfBudget()) break;
 
             const game = createSimulationGame(node.data);
             const legalMoves = enumerateAiMoves(game, aiUserId);
             const moves = prefilterMoves(legalMoves, node.data, aiUserId, topK);
 
             for (const move of moves) {
-                if (Date.now() > deadline || nodesExplored >= maxNodes) break;
+                if (outOfBudget()) break;
                 nodesExplored++;
 
-                const result = await applyAiMove(node.data, aiUserId, move, pickDiscoverOption);
+                // Chaque branche rejoue le moteur sur SON propre flux aléatoire : deux lignes
+                // sœurs voient le même hasard, leurs scores redeviennent comparables.
+                const result = await runInSimulation(
+                    { rng: createSeededRng(deriveSeed(seed, [...node.moves, move])) },
+                    () => applyAiMove(node.data, aiUserId, move, pickDiscoverOption),
+                );
+
                 if (!result.applied) continue;
 
                 const endScore = result.finished
@@ -172,7 +249,12 @@ export const searchBestTurn = async (
         // Une victoire trouvée : inutile de chercher plus loin.
         if (bestNodes[0]!.endScore >= WIN_SCORE) break;
 
-        beam = candidates.sort((a, b) => b.endScore - a.endScore).slice(0, beamWidth);
+        // Les nœuds terminaux sont ignorés à l'itération suivante : les garder dans le faisceau
+        // ne ferait que gaspiller des places d'exploration.
+        beam = candidates
+            .filter((node) => !node.finished)
+            .sort((a, b) => b.endScore - a.endScore)
+            .slice(0, beamWidth);
     }
 
     const best = bestNodes[0]!;
@@ -181,6 +263,7 @@ export const searchBestTurn = async (
         moves: best.moves,
         score: best.endScore,
         nodesExplored,
+        budgetExhausted,
         candidates: bestNodes,
     };
 };

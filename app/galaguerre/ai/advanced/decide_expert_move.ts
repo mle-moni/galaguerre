@@ -1,14 +1,14 @@
 import type { AiDeckProfile, GameData } from "#api_types/game.types";
 import { createSeededRng, runInSimulation } from "../../../utils/simulation_context.js";
 import { createSimulationGame } from "../../simulation/simulation_game.js";
-import { enumerateAiMoves } from "../enumerate_ai_moves.js";
+import { enumerateAiMoves, type AiMove } from "../enumerate_ai_moves.js";
 import { computeThinkBudgetMs, MAX_SEARCH_DEPTH } from "./advanced_ai_config.js";
 import type { AiDecision } from "./decide_next_move.js";
 import { getWeightsForProfile } from "./evaluate_game_state.js";
 import { EXPERT_BUDGET_SHARES, type ExpertAiConfig } from "./expert_ai_config.js";
 import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
-import { searchBestTurn } from "./search_best_turn.js";
+import { deriveSeed, fallbackWhenSearchNeverRan, searchBestTurn } from "./search_best_turn.js";
 import { scoreAfterOpponentReply } from "./search_opponent_reply.js";
 
 /**
@@ -23,6 +23,12 @@ import { scoreAfterOpponentReply } from "./search_opponent_reply.js";
  * Si le budget de temps est épuisé avant la re-notation, la ligne du faisceau est rendue telle
  * quelle : l'Expert dégrade proprement vers le comportement de l'IA Avancée.
  */
+
+/**
+ * En dessous de ce budget, simuler un tour adverse ne rend rien d'exploitable : on préfère ne pas
+ * évaluer la ligne du tout plutôt que de la noter sur une riposte imaginaire.
+ */
+const MIN_REPLY_SLICE_MS = 25;
 
 export interface DecideExpertMoveOptions {
     aiUserId: number;
@@ -64,9 +70,9 @@ export const decideExpertMoves = async (
             pickDiscoverOption,
         });
 
-        if (lethal && lethal.length > 0) {
+        if (lethal.moves && lethal.moves.length > 0) {
             return {
-                moves: lethal,
+                moves: lethal.moves,
                 isLethal: true,
                 nodesExplored: 0,
                 elapsedMs: Date.now() - startedAt,
@@ -82,32 +88,31 @@ export const decideExpertMoves = async (
             maxDepth: MAX_SEARCH_DEPTH,
             deadline: beamDeadline,
             pickDiscoverOption,
+            seed,
             topResults: config.replyCandidates,
             omniscient: true,
         });
 
         const candidates = result.candidates.slice(0, config.replyCandidates);
 
+        // Ligne du faisceau seul, sans le pli de riposte : c'est le choix de l'IA Avancée, et le
+        // repli de l'Expert chaque fois que la re-notation ne peut pas trancher.
+        const beamMoves = fallbackWhenSearchNeverRan(result, legalMoves, data, aiUserId);
+
         // Une seule ligne à considérer : la réplique ne peut rien départager.
         if (candidates.length <= 1) {
             return {
-                moves: result.moves,
+                moves: beamMoves,
                 isLethal: false,
                 nodesExplored: result.nodesExplored,
                 elapsedMs: Date.now() - startedAt,
             };
         }
 
-        // Budget de réplique partagé équitablement entre les lignes restantes.
-        const perCandidateMs = Math.max(
-            1,
-            Math.floor((replyDeadline - Date.now()) / candidates.length),
-        );
-
-        let bestMoves = result.moves;
+        let bestMoves: AiMove[] | null = null;
         let bestScore = -Infinity;
 
-        for (const candidate of candidates) {
+        for (const [index, candidate] of candidates.entries()) {
             // Une ligne qui gagne la partie ce tour-ci n'a pas de suite à simuler.
             if (candidate.finished) {
                 if (candidate.endScore > bestScore) {
@@ -117,9 +122,16 @@ export const decideExpertMoves = async (
                 continue;
             }
 
-            if (Date.now() >= replyDeadline) break;
+            // Tranche recalculée à chaque tour sur les candidats RESTANTS : figée d'avance, un
+            // candidat qui déborde affamerait tous les suivants.
+            const remainingMs = replyDeadline - Date.now();
+            const perCandidateMs = Math.floor(remainingMs / (candidates.length - index));
 
-            const score = await scoreAfterOpponentReply(candidate.data, {
+            // Sous le plancher, la riposte n'aurait pas le temps de simuler quoi que ce soit :
+            // mieux vaut un candidat écarté qu'un candidat noté sur un adversaire supposé passif.
+            if (perCandidateMs < MIN_REPLY_SLICE_MS) break;
+
+            const reply = await scoreAfterOpponentReply(candidate.data, {
                 aiUserId,
                 opponentUserId,
                 weights,
@@ -128,16 +140,27 @@ export const decideExpertMoves = async (
                 maxNodes: config.replyMaxNodes,
                 deadline: Math.min(replyDeadline, Date.now() + perCandidateMs),
                 pickDiscoverOption,
+                // Graine dérivée de la ligne candidate : sa riposte est donc simulée sur le même
+                // aléatoire quel que soit son rang dans le classement.
+                seed: deriveSeed(seed, candidate.moves),
             });
 
-            if (score > bestScore) {
-                bestScore = score;
+            // Une riposte tronquée rend le score d'un adversaire passif, très au-dessus de toute
+            // ligne réellement évaluée : la comparer reviendrait à préférer systématiquement la
+            // ligne qu'on a le moins regardée.
+            if (!reply.complete) continue;
+
+            if (reply.score > bestScore) {
+                bestScore = reply.score;
                 bestMoves = candidate.moves;
             }
         }
 
         return {
-            moves: bestMoves,
+            // Aucun candidat départagé : on rend la meilleure ligne du faisceau, c'est-à-dire le
+            // choix qu'aurait fait l'IA Avancée. C'est la dégradation propre annoncée en tête de
+            // fichier, et elle vaut mieux qu'un classement tiré au sort par le chronomètre.
+            moves: bestMoves ?? beamMoves,
             isLethal: false,
             nodesExplored: result.nodesExplored,
             elapsedMs: Date.now() - startedAt,

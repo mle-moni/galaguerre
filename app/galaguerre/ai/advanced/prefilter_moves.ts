@@ -118,6 +118,22 @@ export const scoreMoveStatically = (move: AiMove, data: GameData, aiUserId: numb
     }
 };
 
+const isAttackMove = (move: AiMove): boolean =>
+    move.type === "minion_action" || move.type === "weapon_action";
+
+/**
+ * Places du `topK` garanties aux meilleurs coups d'attaque.
+ *
+ * La note d'un coup de carte ne dépend quasiment pas de sa CIBLE (un `+0.5` pour le visage
+ * adverse) : un sort ciblé face à sept monstres produit donc sept coups notés à l'identique, tous
+ * au-dessus d'une attaque au visage. Deux cartes de ce genre suffisent à remplir le `topK`, et le
+ * faisceau ne simule alors plus une seule attaque à ce nœud.
+ *
+ * Deux places réservées suffisent à garder la meilleure paire d'attaques sous les yeux de la
+ * recherche, pour au plus deux simulations sur douze.
+ */
+const RESERVED_ATTACK_SLOTS = 2;
+
 /**
  * Trie les coups par intérêt estimé et ne garde que les `topK` meilleurs.
  * `pass_turn` est exclu : la fin de tour est gérée à part par la recherche.
@@ -134,5 +150,16 @@ export const prefilterMoves = (
         .filter(({ score }) => Number.isFinite(score))
         .sort((a, b) => b.score - a.score);
 
-    return scored.slice(0, topK).map(({ move }) => move);
+    const reserved = scored
+        .filter(({ move }) => isAttackMove(move))
+        .slice(0, Math.min(RESERVED_ATTACK_SLOTS, topK));
+
+    const reservedSet = new Set(reserved);
+    const rest = scored
+        .filter((entry) => !reservedSet.has(entry))
+        .slice(0, Math.max(0, topK - reserved.length));
+
+    // Quand les attaques figuraient déjà dans les `topK` meilleurs, l'ensemble rendu est
+    // rigoureusement le même qu'avant : le quota ne mord que sur les nœuds saturés de cartes.
+    return [...reserved, ...rest].sort((a, b) => b.score - a.score).map(({ move }) => move);
 };

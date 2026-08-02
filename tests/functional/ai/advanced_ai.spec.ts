@@ -171,6 +171,42 @@ test.group("ai:advanced", (group) => {
         assert.equal(playedCards.length, 2, "expected the AI to play both 2-mana minions");
     });
 
+    test("a starved budget still yields a move instead of skipping the turn", async ({
+        assert,
+    }) => {
+        // Budget nul : le faisceau ne simule pas un seul coup et rend une séquence VIDE, que la
+        // boucle de tour interprète comme « passe ton tour ». Sous charge, l'IA sautait ainsi des
+        // tours entiers alors qu'elle avait des coups évidents à jouer.
+        //
+        // On coupe par le plafond de NŒUDS plutôt que par l'échéance : une échéance très courte
+        // laisse encore passer un ou deux coups selon la machine, et le test ne prouverait alors
+        // plus rien. Le chemin de code testé est le même dans les deux cas.
+        const data = bindUserIds(
+            createGameData({
+                state: "PLAYER_TWO_TURN",
+                currentRound: 4,
+                isTraining: true,
+                playerTwo: {
+                    mana: 4,
+                    board: createEmptyBoard(),
+                    hand: [createMinionCard({ uuid: "h1", cost: 2, attack: 2, health: 3 })],
+                },
+            }),
+            1,
+            TRAINING_AI_USER_ID,
+        );
+
+        const decision = await decideNextMoves(data, {
+            aiUserId: TRAINING_AI_USER_ID,
+            profile: "MIDRANGE",
+            config: { ...ADVANCED_AI_DEFAULTS, maxNodes: 0 },
+            seed: 3,
+        });
+
+        assert.isNotEmpty(decision.moves, "expected a greedy fallback, not an empty turn");
+        assert.equal(decision.moves[0]?.type, "play_card");
+    });
+
     test("simulation never writes to the database", async ({ assert }) => {
         const attacker = createMinionState(
             createMinionCard({ uuid: "sim-att", attack: 10, health: 10 }),

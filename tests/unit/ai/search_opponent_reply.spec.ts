@@ -18,7 +18,7 @@ const OPPONENT_USER_ID = 2;
 
 const CURRENT_ROUND = 5;
 
-const scoreState = (data: GameData) =>
+const replyTo = (data: GameData, deadline = Date.now() + 5_000) =>
     runInSimulation({ rng: createSeededRng(7) }, () =>
         scoreAfterOpponentReply(data, {
             aiUserId: AI_USER_ID,
@@ -27,10 +27,13 @@ const scoreState = (data: GameData) =>
             beamWidth: 3,
             topK: 8,
             maxNodes: 400,
-            deadline: Date.now() + 5_000,
+            deadline,
             pickDiscoverOption: (options) => options[0]!,
+            seed: 7,
         }),
     );
+
+const scoreState = async (data: GameData) => (await replyTo(data)).score;
 
 /** Un monstre posé au round 0 : plus de mal des invocations, il peut attaquer. */
 const readyMinion = (uuid: string, attack: number, health: number) =>
@@ -80,5 +83,33 @@ test.group("ai:expert:opponent reply", () => {
         });
 
         assert.isBelow(await scoreState(facingBomb), await scoreState(facingDud));
+    });
+
+    test("a reply that ran out of budget is reported as incomplete", async ({ assert }) => {
+        // Sans budget, la riposte n'est pas simulée : le score rendu est celui d'un adversaire
+        // PASSIF, mécaniquement le plus haut possible. Un appelant qui le comparerait aux autres
+        // choisirait systématiquement la ligne qu'il a le moins regardée — y compris une ligne
+        // qui offre le létal. `complete: false` est ce qui l'en empêche.
+        const board = [readyMinion("a", 5, 5), readyMinion("b", 5, 5)];
+
+        const doomed = () =>
+            createGameData({
+                currentRound: CURRENT_ROUND,
+                playerOne: { health: 6 },
+                playerTwo: { board },
+            });
+
+        const evaluated = await replyTo(doomed());
+        const starved = await replyTo(doomed(), Date.now() - 1);
+
+        assert.isTrue(evaluated.complete);
+        assert.equal(evaluated.score, OPPONENT_LETHAL_PENALTY);
+
+        assert.isFalse(starved.complete, "a truncated reply must not pass for an evaluated one");
+        assert.isAbove(
+            starved.score,
+            evaluated.score,
+            "the starved score is the one that would win the ranking if it were trusted",
+        );
     });
 });

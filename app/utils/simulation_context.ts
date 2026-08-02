@@ -28,8 +28,13 @@ export const getSimulationRng = (): SimulationContext["rng"] | null =>
     simulationStorage.getStore()?.rng ?? null;
 
 /**
- * PRNG déterministe (mulberry32) : deux branches de recherche partant de la même graine voient
- * exactement le même aléatoire, ce qui rend leurs scores comparables.
+ * PRNG déterministe (mulberry32).
+ *
+ * Le flux rendu est MUTABLE : chaque tirage avance son état. Deux branches de recherche qui
+ * partagent une même instance ne voient donc pas le même aléatoire, elles se partagent une suite
+ * — et leurs scores dépendent alors de l'ordre d'exploration. C'est à l'appelant d'ouvrir une
+ * instance par branche s'il veut des scores comparables ; `searchBestTurn` le fait en dérivant sa
+ * graine de la séquence de coups (voir `deriveSeed`).
  */
 export const createSeededRng = (seed: number): SimulationContext["rng"] => {
     let state = seed >>> 0;

@@ -2,6 +2,7 @@ import { DEFAULT_AI_DIFFICULTY, type AiDifficulty, type GameData } from "#api_ty
 import Game from "#models/game";
 import { getAiActionDelayMs } from "../ai_action_delay.js";
 import { isAiTurn } from "../get_ai_player_seat.js";
+import { waitForAiDiscovers } from "../schedule_ai_discover.js";
 import { tryAiAction, withAiSocket } from "../try_ai_action.js";
 import { loadAdvancedAiConfig } from "./advanced_ai_config.js";
 import { decideExpertMoves } from "./decide_expert_move.js";
@@ -68,9 +69,14 @@ export const runAdvancedAiTurn = async (
 
             if (game.isFinished || !isAiTurn(game)) return;
 
-            // Une découverte en attente bloque toute action : `scheduleAiDiscoverIfNeeded` la
-            // résout de son côté et relancera le tour.
-            if (game.data.pendingDiscover) return;
+            // Une découverte en attente bloque toute action : on attend que l'IA ait choisi
+            // (Zoothérapie en enchaîne deux) avant de reprendre le tour. Rendre la main ici
+            // laisserait la partie figée jusqu'au minuteur, personne ne relançant le tour.
+            if (game.data.pendingDiscover) {
+                await waitForAiDiscovers(game);
+                if (game.data.pendingDiscover) return;
+                continue;
+            }
 
             const decision = await decideMoves(game.data, gameId * 1000 + actionsThisTurn);
 
@@ -96,11 +102,12 @@ export const runAdvancedAiTurn = async (
             }
 
             if (!actionSucceeded) break;
-            if (game.data.pendingDiscover) return;
         }
 
         const game = await Game.findOrFail(gameId);
         await game.refresh();
+
+        if (game.data.pendingDiscover) await waitForAiDiscovers(game);
 
         if (!game.isFinished && isAiTurn(game) && !game.data.pendingDiscover) {
             await tryAiAction(game, socketId, { type: "pass_turn" });

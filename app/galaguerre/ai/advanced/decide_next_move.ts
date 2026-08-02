@@ -10,7 +10,7 @@ import {
 import { getWeightsForProfile } from "./evaluate_game_state.js";
 import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
-import { searchBestTurn } from "./search_best_turn.js";
+import { fallbackWhenSearchNeverRan, searchBestTurn } from "./search_best_turn.js";
 
 /**
  * Décide de la suite du tour de l'IA avancée à partir de l'état courant.
@@ -66,9 +66,9 @@ export const decideNextMoves = async (
             pickDiscoverOption,
         });
 
-        if (lethal && lethal.length > 0) {
+        if (lethal.moves && lethal.moves.length > 0) {
             return {
-                moves: lethal,
+                moves: lethal.moves,
                 isLethal: true,
                 nodesExplored: 0,
                 elapsedMs: Date.now() - startedAt,
@@ -84,10 +84,11 @@ export const decideNextMoves = async (
             maxDepth: MAX_SEARCH_DEPTH,
             deadline,
             pickDiscoverOption,
+            seed,
         });
 
         return {
-            moves: result.moves,
+            moves: fallbackWhenSearchNeverRan(result, legalMoves, data, aiUserId),
             isLethal: false,
             nodesExplored: result.nodesExplored,
             elapsedMs: Date.now() - startedAt,

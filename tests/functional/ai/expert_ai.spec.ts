@@ -160,6 +160,24 @@ test.group("ai:expert", (group) => {
         assert.isAtMost(state.playerOne.health, 0);
     });
 
+    test("a starved budget still yields a move instead of skipping the turn", async ({
+        assert,
+    }) => {
+        // Budget nul : ni le létal, ni le faisceau, ni la riposte ne tournent. La recherche rend
+        // alors une séquence VIDE — que la boucle de tour interprète comme « passe ton tour ».
+        // Sous charge, l'IA sautait ainsi des tours entiers. On coupe par le plafond de NŒUDS,
+        // déterministe, plutôt que par une échéance courte qui dépend de la machine.
+        const decision = await decideExpertMoves(createRaceOrTradeState(), {
+            aiUserId: TRAINING_AI_USER_ID,
+            opponentUserId: HUMAN_USER_ID,
+            profile: "MIDRANGE",
+            config: { ...EXPERT_AI_DEFAULTS, maxNodes: 0 },
+            seed: 4,
+        });
+
+        assert.isNotEmpty(decision.moves, "expected a greedy fallback, not an empty turn");
+    });
+
     test("the simulation context is closed once the decision is made", async ({ assert }) => {
         const data = bindUserIds(
             createGameData({ state: "PLAYER_TWO_TURN", currentRound: 2, isTraining: true }),
