@@ -15,7 +15,7 @@ mkdirSync(OUTPUT_DIR, { recursive: true });
 
 const browser = await chromium.launch({
     headless: true,
-    executablePath: "/usr/bin/chromium",
+    executablePath: process.env.CHROMIUM_PATH ?? "/usr/bin/chromium",
     args: ["--disable-gpu"],
 });
 const context = await browser.newContext({
@@ -245,6 +245,14 @@ const moveCardIntoBattlefield = async (from) => {
     return releasePoint;
 };
 
+// The marker id carries the current validity (targeting-arrow-head-valid, …).
+const targetingArrowHead = () => page.locator('[id^="targeting-arrow-head"]');
+
+const getPlayerHealth = async () => {
+    const text = await page.locator(".mobile-bar--player .mobile-bar__badge--health").innerText();
+    return Number(text.replace(/\D/g, ""));
+};
+
 const getPlayerBoardUuids = () =>
     page
         .locator('[data-target-zone][data-spot-owner="PLAYER"][data-minion-uuid]')
@@ -306,7 +314,7 @@ const dragAttack = async ({ attacker, target, getStartPoint, getTargetPoint, exp
     await page.mouse.down();
     await pause(450);
     await moveWithPauses(start, end, 16, 1000);
-    assert.equal(await page.locator("#targeting-arrow-head").count(), 1);
+    assert.equal(await targetingArrowHead().count(), 1);
     assert.equal(await page.locator(".armed-card-hint").textContent(), expectedHint);
     await pause(650);
     await page.mouse.up();
@@ -317,7 +325,7 @@ const dragAttack = async ({ attacker, target, getStartPoint, getTargetPoint, exp
             .count(),
         0,
     );
-    assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
+    assert.equal(await targetingArrowHead().count(), 0);
 };
 
 await ensureGameReady();
@@ -406,17 +414,15 @@ assert.equal(await page.locator(".playing-card--armed").count(), 0);
 await pause(1200);
 
 await resetFixture();
-await setCaption("Retour dans la barre joueur : le geste est annulé");
+await setCaption("Retour dans la main : le geste est annulé");
 const canceledSpell = await pressAndBrowseTo(1);
 const liftedCanceledSpell = await liftCard(canceledSpell.start);
 const cancelFromBattlefield = await moveCardIntoBattlefield(liftedCanceledSpell);
-const playerBarBox = await page.locator(".mobile-bar--player").boundingBox();
-assert(playerBarBox, "The mobile player bar must be visible");
-const playerBarCancelPoint = {
+const handCancelPoint = {
     x: canceledSpell.start.x,
-    y: playerBarBox.y + 8,
+    y: canceledSpell.handBox.y + canceledSpell.handBox.height / 2,
 };
-await moveWithPauses(cancelFromBattlefield, playerBarCancelPoint, 10, 750);
+await moveWithPauses(cancelFromBattlefield, handCancelPoint, 10, 750);
 await pause(700);
 assert.equal(
     await page.locator("[data-mobile-hand-preview] .mobile-hand__preview-hint").textContent(),
@@ -548,6 +554,36 @@ assert.equal(
 );
 
 await resetFixture();
+await setCaption("Sort ciblé : viser son propre héros, colonne chrono comprise");
+const selfTargetSpell = await pressAndBrowseTo(7);
+const liftedSelfTargetSpell = await liftCard(selfTargetSpell.start);
+const playerActionsBox = await page
+    .locator(".mobile-bar--player .mobile-bar__actions")
+    .boundingBox();
+assert(playerActionsBox, "The player actions column must be visible");
+const playerHealthBefore = await getPlayerHealth();
+// Straight up from the right end of the hand lands on the timer / end turn column,
+// which is part of the hero row but not of its target zone.
+await moveWithPauses(
+    liftedSelfTargetSpell,
+    {
+        x: playerActionsBox.x + playerActionsBox.width / 2,
+        y: playerActionsBox.y + playerActionsBox.height / 2,
+    },
+    12,
+    800,
+);
+await pause(600);
+assert.equal(await targetingArrowHead().count(), 1);
+await page.mouse.up();
+await pause(1800);
+assert.equal(await getPlayerHealth(), playerHealthBefore - 2);
+assert.equal(await page.locator("[data-hand-card-index]").count(), 9);
+assert.equal(await targetingArrowHead().count(), 0);
+// The end turn button below the arrow release point must not have been triggered.
+assert.equal(await page.locator(".mobile-bar--player .mobile-bar__actions--hidden").count(), 0);
+
+await resetFixture();
 await setCaption("Arme : même geste, équipement immédiat");
 const weapon = await pressAndBrowseTo(2);
 const liftedWeapon = await liftCard(weapon.start);
@@ -564,7 +600,7 @@ assert.equal(
 );
 
 await resetFixture();
-await setCaption("Sort ciblé : déposer, puis annuler le choix");
+await setCaption("Sort ciblé : relâcher hors cible rend la carte");
 const targetedSpell = await pressAndBrowseTo(3);
 const liftedTargetedSpell = await liftCard(targetedSpell.start);
 const neutralPoint = { x: VIEWPORT.width / 2, y: 390 };
@@ -574,36 +610,36 @@ await pause(1200);
 const cancelTargetButton = page.getByRole("button", {
     name: "Annuler la sélection de cible",
 });
-assert.equal(await cancelTargetButton.count(), 1);
-assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
-assert.equal(await page.locator("[data-hand-card-index]").count(), 10);
-
-await setCaption("Annuler rend la main intacte");
-await cancelTargetButton.click();
-await pause(900);
 assert.equal(await cancelTargetButton.count(), 0);
+assert.equal(await targetingArrowHead().count(), 0);
 assert.equal(await page.locator("[data-hand-card-index]").count(), 10);
 
 await resetFixture();
-await setCaption("Sort ciblé : déposer, puis toucher la cible");
-const twoStepSpell = await pressAndBrowseTo(3);
-const liftedTwoStep = await liftCard(twoStepSpell.start);
-await moveWithPauses(liftedTwoStep, neutralPoint, 14, 900);
-await page.mouse.up();
-await pause(1200);
-assert.equal(await cancelTargetButton.count(), 1);
-assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
-
-await setCaption("Le second appui confirme la cible");
-const secondTarget = page
+await setCaption("Sort ciblé : glisser jusqu’à la cible confirme");
+const draggedSpell = await pressAndBrowseTo(3);
+const liftedDraggedSpell = await liftCard(draggedSpell.start);
+const spellTarget = page
     .locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]')
     .first();
-await secondTarget.click();
-await pause(2000);
+const spellTargetBox = await spellTarget.boundingBox();
+assert(spellTargetBox, "The opponent minion must be visible");
+await moveWithPauses(
+    liftedDraggedSpell,
+    {
+        x: spellTargetBox.x + spellTargetBox.width / 2,
+        y: spellTargetBox.y + spellTargetBox.height / 2,
+    },
+    14,
+    900,
+);
+assert.equal(await targetingArrowHead().count(), 1);
+await page.mouse.up();
+await spellTarget.waitFor({ state: "detached", timeout: 10_000 });
 assert.equal(
     await page.locator('[data-target-zone][data-spot-owner="OPPONENT"][data-minion-uuid]').count(),
     0,
 );
+assert.equal(await targetingArrowHead().count(), 0);
 
 await resetFixture();
 await setCaption("Cri de guerre ciblé : Annuler abandonne entièrement la pose");
@@ -629,7 +665,7 @@ assert.equal(
 await cancelTargetButton.click();
 await pause(900);
 assert.equal(await cancelTargetButton.count(), 0);
-assert.equal(await page.locator("#targeting-arrow-head").count(), 0);
+assert.equal(await targetingArrowHead().count(), 0);
 assert.equal(await page.locator("[data-hand-card-index]").count(), 10);
 assert.equal(
     await page.locator('[data-target-zone][data-spot-owner="PLAYER"][data-minion-uuid]').count(),

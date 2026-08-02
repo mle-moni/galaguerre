@@ -53,6 +53,10 @@ export const MobileHeroStrip = observer(
                 : undefined;
 
         const canAttackWithWeapon = !isOpponent && store.weaponDragStore.canAttackWithWeapon;
+        // A pending target selection owns the hero strip: confirming that target wins
+        // over starting a weapon attack.
+        const canStartWeaponAttack =
+            canAttackWithWeapon && !store.targetSelectionStore.isHighlightingTargets;
         const weaponLabel = player.weaponState?.originalCard.label;
         const isInteractiveTarget =
             store.targetSelectionStore.isHighlightingTargets ||
@@ -88,7 +92,7 @@ export const MobileHeroStrip = observer(
                 return;
             }
 
-            if (!isOpponent && canAttackWithWeapon) {
+            if (canStartWeaponAttack) {
                 if (store.weaponDragStore.isAttacking) {
                     store.weaponDragStore.cancelAttack();
                     return;
@@ -105,7 +109,7 @@ export const MobileHeroStrip = observer(
             event: PointerEvent | ReactPointerEvent<HTMLElement>,
             originElement: HTMLElement,
         ) => {
-            if (!canAttackWithWeapon) return;
+            if (!canStartWeaponAttack) return;
 
             event.preventDefault();
             originElement.setPointerCapture(event.pointerId);
@@ -125,7 +129,7 @@ export const MobileHeroStrip = observer(
         };
 
         const handleWeaponAttackPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-            if (!canAttackWithWeapon || isHeroStripControl(event.target)) return;
+            if (!canStartWeaponAttack || isHeroStripControl(event.target)) return;
 
             beginWeaponAttackDrag(event, event.currentTarget);
         };
