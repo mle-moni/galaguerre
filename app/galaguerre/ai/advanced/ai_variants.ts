@@ -128,13 +128,22 @@ export const AI_VARIANTS = {
     },
 
     /**
-     * Adversaire simulé nettement plus fort (faisceau de riposte doublé). Si l'Expert gagne du
-     * winrate ici, c'est que son modèle d'adversaire est aujourd'hui trop faible et qu'il se croit
-     * en sécurité trop souvent.
+     * MESURÉE ET REJETÉE. C'était le test décisif d'une hypothèse tentante : si l'Expert gagnait du
+     * winrate en simulant un adversaire plus fort, c'est que son modèle d'adversaire était trop
+     * faible et qu'il se croyait en sécurité trop souvent.
+     *
+     * Résultat sur 800 parties appariées, decks miroir, budget en nœuds :
+     *   49,3 % (IC 95 % : 46,1 % – 52,4 %), LLR -1,35. Latence 244 ms contre 195 ms.
+     *
+     * Ce que ça disqualifie : la faiblesse du modèle d'adversaire n'est PAS ce qui limite l'Expert.
+     * Doubler le faisceau de riposte et plus que doubler ses nœuds ne change rien à sa force. Avec
+     * `expert-deep-reply-lethal` et `expert-wide-reply`, cela fait trois façons différentes de
+     * donner plus de moyens au pli de riposte, pour trois fois rien. Le pli de riposte est un
+     * problème RÉSOLU : il départage déjà 89 % des décisions et le faire mieux ne paie plus.
      */
     "expert-strong-opponent-model": {
         difficulty: "EXPERT",
-        description: "Faisceau de riposte 6/14/2000 au lieu de 3/8/900",
+        description: "Faisceau de riposte 6/14/2000 — mesurée, sans gain (49,3 %)",
         config: { replyBeamWidth: 6, replyTopK: 14, replyMaxNodes: 2000 },
     },
 } as const satisfies Record<string, AiVariantDefinition>;

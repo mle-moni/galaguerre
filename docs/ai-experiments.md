@@ -36,6 +36,7 @@ veut dire que l'effet, s'il existe, est trop petit pour valoir son coût en late
 | Élargir le létal adverse du pli de riposte | `expert-deep-reply-lethal` | **Rejetée** | 51,2 % (400) |
 | Troisième pli : létal de l'IA au tour suivant | `expert-own-lethal` | **Rejetée** | 49,3 % (800) |
 | Élargir le pli de riposte à 8 lignes | `expert-wide-reply` | **Rejetée** | 48,4 % (800) |
+| Modèle d'adversaire plus fort | `expert-strong-opponent-model` | **Rejetée** | 49,3 % (800) |
 | Court-circuiter la décision de fin de tour | — | **Gardée** | neutre au jeu, gain de latence |
 
 ---
@@ -132,6 +133,49 @@ on a payé leur simulation pour ne rien pouvoir en faire. Le taux de départage 
 perdant, quel que soit le nombre — inutile d'essayer 6, 7 ou 12. La question n'a de sens
 qu'accompagnée d'un budget par candidat garanti, ou d'un approfondissement itératif qui n'accorde
 du temps supplémentaire qu'aux lignes encore en course.
+
+---
+
+## Rejetée — Modèle d'adversaire plus fort
+
+**Hypothèse.** C'était le test décisif d'une idée tentante : si l'Expert gagne du winrate en
+simulant un adversaire plus fort, c'est que son modèle d'adversaire est trop faible et qu'il se
+croit en sécurité trop souvent.
+
+**Protocole.** Faisceau de riposte porté de 3/8/900 à 6/14/2000. 800 parties appariées, decks
+miroir, budget en nœuds.
+
+**Résultat.** **49,3 %** (IC 95 % : 46,1 % – 52,4 %), LLR −1,35. Latence moyenne 244 ms contre
+195 ms.
+
+**Ce que ça disqualifie.** La faiblesse du modèle d'adversaire n'est pas ce qui limite l'Expert.
+
+Et surtout, en le rapprochant des deux précédents : **trois façons différentes de donner plus de
+moyens au pli de riposte** — plus de nœuds pour le létal adverse, plus de lignes candidates, un
+faisceau de riposte plus large et plus profond — pour trois fois rien. Le pli de riposte est un
+problème RÉSOLU : il départage déjà 89 % des décisions, et le faire mieux ne paie plus. Toute
+nouvelle idée dans cette zone part avec une très forte présomption d'échec.
+
+---
+
+## Le fil conducteur des cinq rejets
+
+Pris ensemble, ces verdicts dessinent une conclusion que chacun pris isolément ne donnait pas :
+
+**la marge restante n'est pas dans la RECHERCHE, elle est ailleurs.** Le faisceau ne contient pas
+de redondance à récupérer, le pli de riposte est saturé sous trois angles indépendants, et un pli
+supplémentaire est redondant avec la fonction d'évaluation.
+
+Ce qui reste, par élimination :
+
+1. **La fonction d'évaluation elle-même** (`evaluate_game_state.ts`), dont les coefficients sont
+   réglés à la main. Le verdict du troisième pli montre qu'elle porte déjà l'essentiel du signal —
+   ce qui en fait le point où une amélioration se répercuterait partout.
+2. **Le débit de simulation**, qui à budget de TEMPS de production se convertit directement en
+   profondeur de recherche. Toutes les mesures ci-dessus sont à budget de nœuds, un régime qui
+   neutralise délibérément la vitesse : elles ne disent donc rien sur cet axe.
+
+Les pistes correspondantes sont détaillées dans [`to_try/`](to_try/).
 
 ---
 
