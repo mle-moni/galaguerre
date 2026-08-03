@@ -543,7 +543,12 @@ export default class BenchAi extends BaseCommand {
         // zéros et laisserait croire à un repli permanent.
         if (variant.difficulty !== "EXPERT") return;
 
-        const searched = totals.decisions - totals.lethalDecisions;
+        // `NOTHING_TO_PLAY` sort du dénominateur : c'est la décision de fin de tour, une par tour
+        // joué, où il n'y a par construction rien à départager. La compter diluait toutes les
+        // parts d'environ un quart et faisait passer le pli de riposte pour bien plus souvent en
+        // échec qu'il ne l'est.
+        const searched =
+            totals.decisions - totals.lethalDecisions - totals.fallbacks.NOTHING_TO_PLAY;
         if (searched === 0) return;
 
         const share = (value: number): string => percent(value / searched);
@@ -551,8 +556,10 @@ export default class BenchAi extends BaseCommand {
         this.logger.info("");
         this.logger.info(`Pli de riposte — ${variant.name} (${side}) :`);
         this.logger.info(
-            `  décisions (dont ${totals.lethalDecisions} létales) : ${totals.decisions}`,
+            `  décisions : ${totals.decisions} ` +
+                `(${totals.lethalDecisions} létales, ${totals.fallbacks.NOTHING_TO_PLAY} fins de tour)`,
         );
+        this.logger.info(`  décisions à départager : ${searched}`);
         this.logger.info(`  départagées par la riposte : ${share(totals.decidedByReply)}`);
         this.logger.info(
             `  repli, une seule ligne candidate : ${share(totals.fallbacks.SINGLE_CANDIDATE)}`,

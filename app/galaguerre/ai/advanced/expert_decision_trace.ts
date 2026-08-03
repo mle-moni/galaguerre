@@ -14,6 +14,13 @@
 
 /** Pourquoi une décision est retombée sur le choix de l'IA Avancée. */
 export type ExpertFallbackReason =
+    /**
+     * Il ne restait aucun coup jouable : la décision rend une séquence vide et l'appelant termine
+     * le tour. Ce n'est PAS un repli subi, c'est la fin normale d'un tour — d'où sa catégorie
+     * propre. Confondu avec `SINGLE_CANDIDATE`, il gonflait ce dernier d'un point par tour joué et
+     * faisait passer pour une faiblesse du faisceau ce qui n'était que la sortie de boucle.
+     */
+    | "NOTHING_TO_PLAY"
     /** Le faisceau n'a rendu qu'une ligne : la riposte n'avait rien à départager. */
     | "SINGLE_CANDIDATE"
     /** Des lignes existaient, mais aucune riposte n'a pu être simulée jusqu'au bout. */

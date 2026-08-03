@@ -86,6 +86,22 @@ export const decideExpertMoves = async (
     const legalMoves = enumerateAiMoves(game, aiUserId);
     const ai = data.playerOne.userId === aiUserId ? data.playerOne : data.playerTwo;
 
+    // Fin de tour : plus rien à jouer que passer. Le faisceau ne peut alors produire aucun nœud et
+    // toute la machinerie — létal, faisceau, ripostes — revient inévitablement à la séquence vide.
+    // On le dit tout de suite plutôt que de le redécouvrir : c'est une décision par tour joué, et
+    // elle représentait à elle seule 23 % des décisions du banc, comptées à tort comme un repli.
+    if (legalMoves.every((move) => move.type === "pass_turn")) {
+        trace.fallback = "NOTHING_TO_PLAY";
+
+        return {
+            moves: [],
+            isLethal: false,
+            nodesExplored: 0,
+            elapsedMs: Date.now() - startedAt,
+            expertTrace: trace,
+        };
+    }
+
     const budgetMs = computeThinkBudgetMs(config, {
         legalMoveCount: legalMoves.length,
         mana: ai.mana,

@@ -60,7 +60,7 @@ export const createExpertTraceTotals = (): ExpertTraceTotals => ({
     repliesIncomplete: 0,
     repliesSkipped: 0,
     sawOpponentLethal: 0,
-    fallbacks: { SINGLE_CANDIDATE: 0, NO_COMPLETE_REPLY: 0 },
+    fallbacks: { NOTHING_TO_PLAY: 0, SINGLE_CANDIDATE: 0, NO_COMPLETE_REPLY: 0 },
 });
 
 export const mergeExpertTraceTotals = (
@@ -75,6 +75,7 @@ export const mergeExpertTraceTotals = (
     repliesSkipped: into.repliesSkipped + from.repliesSkipped,
     sawOpponentLethal: into.sawOpponentLethal + from.sawOpponentLethal,
     fallbacks: {
+        NOTHING_TO_PLAY: into.fallbacks.NOTHING_TO_PLAY + from.fallbacks.NOTHING_TO_PLAY,
         SINGLE_CANDIDATE: into.fallbacks.SINGLE_CANDIDATE + from.fallbacks.SINGLE_CANDIDATE,
         NO_COMPLETE_REPLY: into.fallbacks.NO_COMPLETE_REPLY + from.fallbacks.NO_COMPLETE_REPLY,
     },
