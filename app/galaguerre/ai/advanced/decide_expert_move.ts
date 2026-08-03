@@ -10,6 +10,7 @@ import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
 import { deriveSeed, fallbackWhenSearchNeverRan, searchBestTurn } from "./search_best_turn.js";
 import { scoreAfterOpponentReply } from "./search_opponent_reply.js";
+import { stripStateForSearch } from "../../simulation/strip_state_for_search.js";
 
 /**
  * Décision de l'IA « Expert ».
@@ -40,10 +41,14 @@ export interface DecideExpertMoveOptions {
 }
 
 export const decideExpertMoves = async (
-    data: GameData,
+    rawData: GameData,
     { aiUserId, opponentUserId, profile, config, seed }: DecideExpertMoveOptions,
 ): Promise<AiDecision> => {
     const startedAt = Date.now();
+
+    // Allégé une fois ici : le faisceau, la recherche de létal et chaque riposte partent de cet
+    // état et le recopieront à chaque nœud.
+    const data = stripStateForSearch(rawData);
 
     const game = createSimulationGame(data);
     const legalMoves = enumerateAiMoves(game, aiUserId);

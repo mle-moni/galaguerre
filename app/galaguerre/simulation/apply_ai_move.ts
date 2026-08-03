@@ -15,6 +15,8 @@ import { resolveDiscoverChoice } from "../discover/resolve_discover_choice.js";
 import { cloneGameData } from "../game_narrative/clone_game_data.js";
 import { runGameActionWithNarrative } from "../game_narrative/run_game_action_with_narrative.js";
 import { createSimulationGame } from "./simulation_game.js";
+import { countSimulatedMove } from "./simulation_metrics.js";
+import { yieldToEventLoopPeriodically } from "./yield_to_event_loop.js";
 
 /** Socket factice : en simulation, les erreurs éventuelles ne sont émises nulle part. */
 const SIMULATION_SOCKET_ID = "ai-simulation";
@@ -77,6 +79,9 @@ export const applyAiMove = async (
     move: AiMove,
     pickDiscoverOption: DiscoverOptionPicker = pickFirstOption,
 ): Promise<ApplyAiMoveResult> => {
+    countSimulatedMove();
+    await yieldToEventLoopPeriodically();
+
     const game = createSimulationGame(cloneGameData(data));
     const { player, opponent } = whichPlayerAmI(game, aiUserId);
 

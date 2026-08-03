@@ -6,8 +6,18 @@ import type {
 } from "#api_types/game.types";
 import type Game from "#models/game";
 import { randomUUID } from "node:crypto";
+import { isSimulating } from "../../utils/simulation_context.js";
 
+/**
+ * En simulation, le journal n'est jamais relu : aucune règle ne le consulte, et la narration qui
+ * lit sa dernière entrée est elle-même désactivée (voir `runGameActionWithNarrative`). Le nourrir
+ * pendant une recherche revient donc à faire grossir, à chaque coup exploré, une structure que
+ * `applyAiMove` recopiera intégralement au coup suivant — sur une branche profonde le journal
+ * devient l'essentiel du coût du clone.
+ */
 const appendLogEntry = (game: Game, entry: Omit<GameLogEntry, "id">): void => {
+    if (isSimulating()) return;
+
     game.data.actionLog.push({ ...entry, id: randomUUID() });
 };
 

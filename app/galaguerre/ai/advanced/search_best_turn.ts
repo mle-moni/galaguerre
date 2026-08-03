@@ -16,6 +16,14 @@ import { prefilterMoves } from "./prefilter_moves.js";
  * À chaque profondeur on ne garde que les `beamWidth` meilleures séquences, et à chaque nœud on
  * ne simule que les `topK` coups les plus prometteurs (pré-filtrage statique) : la simulation
  * étant l'opération coûteuse, c'est elle qu'il faut rationner.
+ *
+ * Pas de table de transposition ici, et ce n'est pas un oubli. L'idée est tentante — jouer A puis
+ * B et B puis A donnent souvent la même position, et le faisceau développe les deux — mais elle a
+ * été implémentée et mesurée : seuls 4,5 % des coups simulés aboutissaient à un état déjà vu,
+ * pour une empreinte d'état qui coûtait environ 17 % du débit. Le pré-filtrage `topK` et
+ * l'élagage du faisceau écartent en effet la plupart des permutations bien avant qu'elles ne se
+ * rejoignent. Le solde est négatif : reproduire la mesure avec `dev:bench-search` avant de
+ * réessayer.
  */
 
 export interface SearchOptions {

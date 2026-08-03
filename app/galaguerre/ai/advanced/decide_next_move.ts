@@ -11,6 +11,7 @@ import { getWeightsForProfile } from "./evaluate_game_state.js";
 import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
 import { fallbackWhenSearchNeverRan, searchBestTurn } from "./search_best_turn.js";
+import { stripStateForSearch } from "../../simulation/strip_state_for_search.js";
 
 /**
  * Décide de la suite du tour de l'IA avancée à partir de l'état courant.
@@ -38,10 +39,13 @@ export interface AiDecision {
 }
 
 export const decideNextMoves = async (
-    data: GameData,
+    rawData: GameData,
     { aiUserId, profile, config, seed }: DecideNextMoveOptions,
 ): Promise<AiDecision> => {
     const startedAt = Date.now();
+
+    // Allégé une fois ici : chaque nœud exploré en dessous recopiera l'état, jamais l'original.
+    const data = stripStateForSearch(rawData);
 
     const game = createSimulationGame(data);
     const legalMoves = enumerateAiMoves(game, aiUserId);
