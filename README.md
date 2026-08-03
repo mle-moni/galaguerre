@@ -8,3 +8,10 @@
 6. node ace db:seed
 7. yarn dev
 8. docker start galaguerre-postgres
+
+# docs
+
+- [Journal des expériences sur l'IA](docs/ai-experiments.md) — ce qui a été essayé, mesuré et
+  **rejeté**. À lire avant de toucher à l'IA « Expert » : plusieurs hypothèses séduisantes y sont
+  déjà réfutées, chiffres à l'appui.
+
