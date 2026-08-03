@@ -5,7 +5,12 @@ import { enumerateAiMoves, type AiMove } from "../enumerate_ai_moves.js";
 import { computeThinkBudgetMs, MAX_SEARCH_DEPTH } from "./advanced_ai_config.js";
 import type { AiDecision } from "./decide_next_move.js";
 import { getWeightsForProfile } from "./evaluate_game_state.js";
-import { EXPERT_BUDGET_SHARES, type ExpertAiConfig } from "./expert_ai_config.js";
+import {
+    EXPERT_BUDGET_SHARES,
+    EXPERT_REPLY_LETHAL_TIME_SHARE,
+    type ExpertAiConfig,
+} from "./expert_ai_config.js";
+import { createExpertDecisionTrace } from "./expert_decision_trace.js";
 import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
 import { deriveSeed, fallbackWhenSearchNeverRan, searchBestTurn } from "./search_best_turn.js";
@@ -31,6 +36,12 @@ import { stripStateForSearch } from "../../simulation/strip_state_for_search.js"
  */
 const MIN_REPLY_SLICE_MS = 25;
 
+/**
+ * Échéance hors d'atteinte, utilisée en mode déterministe : c'est alors le plafond de NŒUDS qui
+ * borne seul la recherche. Voir `deterministic` ci-dessous.
+ */
+const NO_DEADLINE = Number.POSITIVE_INFINITY;
+
 export interface DecideExpertMoveOptions {
     aiUserId: number;
     opponentUserId: number;
@@ -38,13 +49,34 @@ export interface DecideExpertMoveOptions {
     config: ExpertAiConfig;
     /** Graine du PRNG de simulation ; à faire varier entre deux décisions. */
     seed: number;
+    /**
+     * Mode du banc d'essai : la recherche n'est plus bornée par l'horloge, uniquement par ses
+     * plafonds de nœuds. Deux exécutions d'une même graine jouent alors EXACTEMENT la même partie,
+     * quelle que soit la charge de la machine.
+     *
+     * C'est la condition pour qu'un écart de winrate mesure une différence de politique et non un
+     * écart de vitesse d'exécution : à budget-temps, une variante plus lente perd des nœuds et
+     * paraît plus faible même quand son idée est meilleure. Le banc mesure les deux séparément.
+     *
+     * À ne jamais activer en production : sans échéance, une position complexe n'a plus de borne
+     * de latence.
+     */
+    deterministic?: boolean;
 }
 
 export const decideExpertMoves = async (
     rawData: GameData,
-    { aiUserId, opponentUserId, profile, config, seed }: DecideExpertMoveOptions,
+    {
+        aiUserId,
+        opponentUserId,
+        profile,
+        config,
+        seed,
+        deterministic = false,
+    }: DecideExpertMoveOptions,
 ): Promise<AiDecision> => {
     const startedAt = Date.now();
+    const trace = createExpertDecisionTrace();
 
     // Allégé une fois ici : le faisceau, la recherche de létal et chaque riposte partent de cet
     // état et le recopieront à chaque nœud.
@@ -59,9 +91,13 @@ export const decideExpertMoves = async (
         mana: ai.mana,
     });
 
-    const lethalDeadline = startedAt + budgetMs * EXPERT_BUDGET_SHARES.lethal;
-    const beamDeadline = lethalDeadline + budgetMs * EXPERT_BUDGET_SHARES.beam;
-    const replyDeadline = startedAt + budgetMs;
+    const lethalDeadline = deterministic
+        ? NO_DEADLINE
+        : startedAt + budgetMs * EXPERT_BUDGET_SHARES.lethal;
+    const beamDeadline = deterministic
+        ? NO_DEADLINE
+        : lethalDeadline + budgetMs * EXPERT_BUDGET_SHARES.beam;
+    const replyDeadline = deterministic ? NO_DEADLINE : startedAt + budgetMs;
 
     const pickDiscoverOption = createDiscoverPicker(aiUserId, profile, { omniscient: true });
     const weights = getWeightsForProfile(profile);
@@ -99,6 +135,7 @@ export const decideExpertMoves = async (
         });
 
         const candidates = result.candidates.slice(0, config.replyCandidates);
+        trace.candidates = candidates.length;
 
         // Ligne du faisceau seul, sans le pli de riposte : c'est le choix de l'IA Avancée, et le
         // repli de l'Expert chaque fois que la re-notation ne peut pas trancher.
@@ -106,11 +143,14 @@ export const decideExpertMoves = async (
 
         // Une seule ligne à considérer : la réplique ne peut rien départager.
         if (candidates.length <= 1) {
+            trace.fallback = "SINGLE_CANDIDATE";
+
             return {
                 moves: beamMoves,
                 isLethal: false,
                 nodesExplored: result.nodesExplored,
                 elapsedMs: Date.now() - startedAt,
+                expertTrace: trace,
             };
         }
 
@@ -128,13 +168,21 @@ export const decideExpertMoves = async (
             }
 
             // Tranche recalculée à chaque tour sur les candidats RESTANTS : figée d'avance, un
-            // candidat qui déborde affamerait tous les suivants.
+            // candidat qui déborde affamerait tous les suivants. En mode déterministe il n'y a pas
+            // d'horloge : chaque candidat reçoit son plein plafond de nœuds.
             const remainingMs = replyDeadline - Date.now();
             const perCandidateMs = Math.floor(remainingMs / (candidates.length - index));
 
             // Sous le plancher, la riposte n'aurait pas le temps de simuler quoi que ce soit :
             // mieux vaut un candidat écarté qu'un candidat noté sur un adversaire supposé passif.
-            if (perCandidateMs < MIN_REPLY_SLICE_MS) break;
+            if (!deterministic && perCandidateMs < MIN_REPLY_SLICE_MS) {
+                trace.repliesSkipped += candidates.length - index;
+                break;
+            }
+
+            const candidateDeadline = deterministic
+                ? NO_DEADLINE
+                : Math.min(replyDeadline, Date.now() + perCandidateMs);
 
             const reply = await scoreAfterOpponentReply(candidate.data, {
                 aiUserId,
@@ -143,23 +191,39 @@ export const decideExpertMoves = async (
                 beamWidth: config.replyBeamWidth,
                 topK: config.replyTopK,
                 maxNodes: config.replyMaxNodes,
-                deadline: Math.min(replyDeadline, Date.now() + perCandidateMs),
+                deadline: candidateDeadline,
+                lethalMaxNodes: config.replyLethalMaxNodes,
+                // Le létal adverse ne prend qu'une part de la tranche : le reste doit rester au
+                // faisceau de riposte, sans quoi la riposte revient incomplète et le candidat est
+                // écarté — on aurait payé la recherche pour ne rien pouvoir en faire.
+                lethalDeadline: deterministic
+                    ? NO_DEADLINE
+                    : Date.now() + perCandidateMs * EXPERT_REPLY_LETHAL_TIME_SHARE,
                 pickDiscoverOption,
                 // Graine dérivée de la ligne candidate : sa riposte est donc simulée sur le même
                 // aléatoire quel que soit son rang dans le classement.
                 seed: deriveSeed(seed, candidate.moves),
             });
 
+            if (reply.opponentHasLethal) trace.sawOpponentLethal = true;
+
             // Une riposte tronquée rend le score d'un adversaire passif, très au-dessus de toute
             // ligne réellement évaluée : la comparer reviendrait à préférer systématiquement la
             // ligne qu'on a le moins regardée.
-            if (!reply.complete) continue;
+            if (!reply.complete) {
+                trace.repliesIncomplete++;
+                continue;
+            }
+
+            trace.repliesScored++;
 
             if (reply.score > bestScore) {
                 bestScore = reply.score;
                 bestMoves = candidate.moves;
             }
         }
+
+        if (bestMoves === null) trace.fallback = "NO_COMPLETE_REPLY";
 
         return {
             // Aucun candidat départagé : on rend la meilleure ligne du faisceau, c'est-à-dire le
@@ -169,6 +233,7 @@ export const decideExpertMoves = async (
             isLethal: false,
             nodesExplored: result.nodesExplored,
             elapsedMs: Date.now() - startedAt,
+            expertTrace: trace,
         };
     });
 };

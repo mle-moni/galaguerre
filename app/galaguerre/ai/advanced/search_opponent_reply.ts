@@ -45,6 +45,24 @@ export interface OpponentReplyOptions {
     topK: number;
     maxNodes: number;
     deadline: number;
+    /**
+     * Plafond de nœuds de la recherche de létal ADVERSE, indépendant de celui du faisceau de
+     * riposte. Rater un létal adverse est l'erreur la plus chère de tout le moteur : la ligne est
+     * alors créditée d'une riposte inoffensive et l'IA meurt au tour suivant. Cette recherche
+     * n'est coûteuse que lorsqu'une menace existe — la borne optimiste de dégâts la coupe à la
+     * racine sinon — donc l'élargir se paie surtout dans les positions où il faut savoir.
+     *
+     * Défaut : la moitié de `maxNodes`, la valeur historique.
+     */
+    lethalMaxNodes?: number;
+    /**
+     * Échéance propre au létal adverse, bornée par `deadline`. Sans elle, le létal peut consommer
+     * toute la tranche de la ligne candidate et laisser le faisceau de riposte à zéro nœud — donc
+     * une riposte incomplète, donc un candidat écarté.
+     *
+     * Défaut : `deadline`, le comportement historique.
+     */
+    lethalDeadline?: number;
     pickDiscoverOption: DiscoverOptionPicker;
     /** Graine de base de la recherche adverse ; à faire varier d'une ligne candidate à l'autre. */
     seed: number;
@@ -52,6 +70,8 @@ export interface OpponentReplyOptions {
 
 export interface OpponentReplyResult {
     score: number;
+    /** `true` quand un létal adverse a été PROUVÉ sur cette ligne. */
+    opponentHasLethal: boolean;
     /**
      * `false` quand le budget a manqué avant d'avoir vraiment simulé la riposte. Le score rendu
      * est alors celui d'un adversaire PASSIF — mécaniquement le plus haut possible, et donc
@@ -80,6 +100,8 @@ export const scoreAfterOpponentReply = async (
         topK,
         maxNodes,
         deadline,
+        lethalMaxNodes = Math.max(50, Math.floor(maxNodes / 2)),
+        lethalDeadline = deadline,
         pickDiscoverOption,
         seed,
     }: OpponentReplyOptions,
@@ -96,6 +118,7 @@ export const scoreAfterOpponentReply = async (
     if (passed.finished) {
         return {
             score: evaluateGameState(passed.data, aiUserId, weights, AI_TURN_IS_OVER),
+            opponentHasLethal: false,
             complete: true,
         };
     }
@@ -108,13 +131,13 @@ export const scoreAfterOpponentReply = async (
     // Le létal adverse d'abord : c'est l'information qui doit dominer le choix de la ligne.
     const lethal = await findLethalSequence(passed.data, {
         aiUserId: opponentUserId,
-        maxNodes: Math.max(50, Math.floor(maxNodes / 2)),
-        deadline,
+        maxNodes: lethalMaxNodes,
+        deadline: Math.min(deadline, lethalDeadline),
         pickDiscoverOption: pickOpponentDiscoverOption,
     });
 
     if (lethal.moves && lethal.moves.length > 0) {
-        return { score: OPPONENT_LETHAL_PENALTY, complete: true };
+        return { score: OPPONENT_LETHAL_PENALTY, opponentHasLethal: true, complete: true };
     }
 
     // L'adversaire simulé joue en information INCOMPLÈTE, comme le joueur humain qu'il représente.
@@ -138,6 +161,7 @@ export const scoreAfterOpponentReply = async (
 
     return {
         score: evaluateGameState(afterReply, aiUserId, weights, AI_TURN_IS_OVER),
+        opponentHasLethal: false,
         // Un létal adverse non prouvé, ou un faisceau qui n'a rien simulé faute de temps : dans
         // les deux cas la riposte n'a pas été vue, elle a été supposée inexistante. Zéro nœud
         // exploré AVANT l'échéance est en revanche un résultat légitime — l'adversaire n'avait

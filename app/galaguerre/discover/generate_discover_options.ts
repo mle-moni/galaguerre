@@ -1,7 +1,7 @@
 import type { CardFilterSnapshot, PlayerCard } from "#api_types/game.types";
 import { deckCardMatchesFilter, cardFilterLabelTags } from "#api_types/card_filter_matching";
 import { getAllCardTemplates, getCollectibleCardTemplates } from "#api_types/card_preview";
-import { randomUUID } from "node:crypto";
+import { gameEntityUuid } from "../../utils/random.js";
 import { playerOwnsGoldenCard } from "../golden/resolve_is_golden_for_player.js";
 import { shuffleArray } from "../../utils/array.js";
 
@@ -10,7 +10,7 @@ const instantiateDiscoverOption = (
     ownedGoldenCardIds: readonly number[],
 ): PlayerCard => ({
     ...structuredClone(template),
-    uuid: randomUUID(),
+    uuid: gameEntityUuid(),
     isGolden: playerOwnsGoldenCard(template.cardId, template.goldenVideoUrl, ownedGoldenCardIds),
 });
 

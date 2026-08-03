@@ -1,6 +1,6 @@
 import type { DiscoverContinuation, GamePlayer, PlayerCard } from "#api_types/game.types";
 import type Game from "#models/game";
-import { randomUUID } from "node:crypto";
+import { gameEntityUuid } from "../../utils/random.js";
 import { instantiateDeckCard } from "../deck_card_operations.js";
 import { drawSpecificDeckCard } from "../draw_cards.js";
 import { giveCardToHand } from "../give_card_to_hand.js";
@@ -26,7 +26,7 @@ const buildChosenCard = (
 
     return {
         ...template,
-        uuid: isOpponentDeckDiscover ? randomUUID() : option.uuid,
+        uuid: isOpponentDeckDiscover ? gameEntityUuid() : option.uuid,
         isGolden: option.isGolden,
         generatedBy: {
             cardId: pending.sourceCardId,

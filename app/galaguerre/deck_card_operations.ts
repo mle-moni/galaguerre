@@ -1,7 +1,7 @@
 import type { CardActionFieldsSnapshot, GamePlayer, PlayerCard } from "#api_types/game.types";
 import type { PassiveTriggerEvent } from "#api_types/target_matching";
 import type Game from "#models/game";
-import { randomUUID } from "node:crypto";
+import { gameEntityUuid } from "../utils/random.js";
 import type { GalaguerreDeckPlacement } from "./galaguerre.types.js";
 import { getCardPreviewById } from "./card_catalog.js";
 import { playerOwnsGoldenCard } from "./golden/resolve_is_golden_for_player.js";
@@ -17,7 +17,7 @@ export const instantiateDeckCard = (
 
     return {
         ...template,
-        uuid: randomUUID(),
+        uuid: gameEntityUuid(),
         isStartingDeckCard: false,
         isGolden: playerOwnsGoldenCard(
             template.cardId,

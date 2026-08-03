@@ -12,7 +12,7 @@ import type {
     ReconvertParametersSnapshot,
 } from "#api_types/game.types";
 import type Game from "#models/game";
-import { randomUUID } from "node:crypto";
+import { gameEntityUuid } from "../../utils/random.js";
 import { randomIntInRange } from "../../utils/random.js";
 import { instantiateMinion } from "../../controllers/games/play_card/instantiate_minion.js";
 import { playerOwnsGoldenCard } from "../golden/resolve_is_golden_for_player.js";
@@ -29,7 +29,7 @@ const getOpponent = (game: Game, player: GamePlayer): GamePlayer => {
 
 const cloneTemplateForSummon = (template: MinionCard, owner: GamePlayer): MinionCard => ({
     ...template,
-    uuid: randomUUID(),
+    uuid: gameEntityUuid(),
     isGolden: playerOwnsGoldenCard(
         template.cardId,
         template.goldenVideoUrl,

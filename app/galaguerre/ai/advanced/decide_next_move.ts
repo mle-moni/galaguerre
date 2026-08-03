@@ -8,6 +8,7 @@ import {
     type AdvancedAiConfig,
 } from "./advanced_ai_config.js";
 import { getWeightsForProfile } from "./evaluate_game_state.js";
+import type { ExpertDecisionTrace } from "./expert_decision_trace.js";
 import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
 import { fallbackWhenSearchNeverRan, searchBestTurn } from "./search_best_turn.js";
@@ -28,6 +29,12 @@ export interface DecideNextMoveOptions {
     config: AdvancedAiConfig;
     /** Graine du PRNG de simulation ; à faire varier entre deux décisions. */
     seed: number;
+    /**
+     * Mode du banc d'essai : recherche bornée par les seuls plafonds de nœuds, sans échéance
+     * horloge, pour que deux exécutions d'une même graine jouent la même partie. Voir la même
+     * option sur `decideExpertMoves`. À ne jamais activer en production.
+     */
+    deterministic?: boolean;
 }
 
 export interface AiDecision {
@@ -36,11 +43,19 @@ export interface AiDecision {
     isLethal: boolean;
     nodesExplored: number;
     elapsedMs: number;
+    /**
+     * Diagnostic du pli de riposte, renseigné par l'IA Expert uniquement. Sert au banc d'essai à
+     * mesurer la fréquence à laquelle l'Expert retombe sur le choix de l'Avancé.
+     */
+    expertTrace?: ExpertDecisionTrace;
 }
+
+/** Échéance hors d'atteinte : en mode déterministe, seuls les plafonds de nœuds bornent. */
+const NO_DEADLINE = Number.POSITIVE_INFINITY;
 
 export const decideNextMoves = async (
     rawData: GameData,
-    { aiUserId, profile, config, seed }: DecideNextMoveOptions,
+    { aiUserId, profile, config, seed, deterministic = false }: DecideNextMoveOptions,
 ): Promise<AiDecision> => {
     const startedAt = Date.now();
 
@@ -55,7 +70,7 @@ export const decideNextMoves = async (
         legalMoveCount: legalMoves.length,
         mana: ai.mana,
     });
-    const deadline = startedAt + budgetMs;
+    const deadline = deterministic ? NO_DEADLINE : startedAt + budgetMs;
 
     const pickDiscoverOption = createDiscoverPicker(aiUserId, profile);
     const weights = getWeightsForProfile(profile);
@@ -66,7 +81,7 @@ export const decideNextMoves = async (
         const lethal = await findLethalSequence(data, {
             aiUserId,
             maxNodes: Math.floor(config.maxNodes / 2),
-            deadline: startedAt + Math.floor(budgetMs / 2),
+            deadline: deterministic ? NO_DEADLINE : startedAt + Math.floor(budgetMs / 2),
             pickDiscoverOption,
         });
 

@@ -7,7 +7,7 @@ import type {
 import { deckCardMatchesFilter } from "#api_types/card_filter_matching";
 import { getCollectibleCardTemplates } from "#api_types/card_preview";
 import type Game from "#models/game";
-import { randomUUID } from "node:crypto";
+import { gameEntityUuid } from "../utils/random.js";
 import { randomIntInRange } from "../utils/random.js";
 import { giveCardToHand } from "./give_card_to_hand.js";
 
@@ -16,7 +16,7 @@ const filterCardTemplates = (filter: CardFilterSnapshot): PlayerCard[] =>
 
 const instantiateRandomTemplate = (template: PlayerCard): PlayerCard => ({
     ...template,
-    uuid: randomUUID(),
+    uuid: gameEntityUuid(),
 });
 
 const pickRandomCardFromFilter = (filter: CardFilterSnapshot): PlayerCard | undefined => {

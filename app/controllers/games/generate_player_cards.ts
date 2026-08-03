@@ -15,7 +15,7 @@ import {
 } from "../../galaguerre/minion_card_metadata.js";
 import type Deck from "#models/deck";
 import type Card from "#models/card";
-import { randomUUID } from "node:crypto";
+import { gameEntityUuid } from "../../utils/random.js";
 import { shuffleArray } from "../../utils/array.js";
 
 type CardSource = Deck | Card[];
@@ -42,7 +42,7 @@ export const generatePlayerCards = (source: CardSource, options?: GeneratePlayer
         }
 
         const base: PlayerCardBase = {
-            uuid: randomUUID(),
+            uuid: gameEntityUuid(),
             cardId: card.id,
             label: card.data.name,
             imageUrl: card.data.imageUrl,

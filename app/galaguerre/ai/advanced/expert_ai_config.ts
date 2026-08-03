@@ -20,6 +20,7 @@ export const EXPERT_AI_SETTING_KEYS = {
     replyBeamWidth: "ai.expert.replyBeamWidth",
     replyTopK: "ai.expert.replyTopK",
     replyMaxNodes: "ai.expert.replyMaxNodes",
+    replyLethalMaxNodes: "ai.expert.replyLethalMaxNodes",
 } as const;
 
 export const EXPERT_AI_DEFAULTS = {
@@ -35,6 +36,18 @@ export const EXPERT_AI_DEFAULTS = {
     replyBeamWidth: 3,
     replyTopK: 8,
     replyMaxNodes: 900,
+    /**
+     * Plafond de nœuds du létal ADVERSE cherché dans chaque riposte. Distinct de `replyMaxNodes`
+     * pour que le létal et le faisceau de riposte cessent de se disputer un budget commun : un
+     * létal introuvable pouvait manger toute la tranche et laisser la riposte à zéro nœud, donc
+     * incomplète, donc le candidat écarté du classement.
+     *
+     * La VALEUR, elle, reste celle d'origine (`replyMaxNodes / 2`). Monter à 3000 a été mesuré sur
+     * 400 parties appariées : 51,2 % (IC 95 % : 46,6 % – 55,9 %), aucun gain démontré, pour une
+     * latence p95 multipliée par quatre. Voir `expert-deep-reply-lethal` dans `ai_variants.ts`
+     * avant de retoucher ce nombre.
+     */
+    replyLethalMaxNodes: 450,
 } as const;
 
 export interface ExpertAiConfig extends AdvancedAiConfig {
@@ -42,7 +55,15 @@ export interface ExpertAiConfig extends AdvancedAiConfig {
     replyBeamWidth: number;
     replyTopK: number;
     replyMaxNodes: number;
+    replyLethalMaxNodes: number;
 }
+
+/**
+ * Part de la tranche d'une ligne candidate réservée au létal adverse. Le reste va au faisceau de
+ * riposte : sans ce plafond, un létal introuvable peut manger toute la tranche et laisser la
+ * riposte à zéro nœud — donc incomplète, donc le candidat écarté du classement.
+ */
+export const EXPERT_REPLY_LETHAL_TIME_SHARE = 0.6;
 
 /**
  * Répartition du budget d'une décision. La recherche de réplique passe en dernier : si le temps
@@ -68,6 +89,7 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
         replyBeamWidth,
         replyTopK,
         replyMaxNodes,
+        replyLethalMaxNodes,
     ] = await Promise.all([
         getNumberAppSetting(EXPERT_AI_SETTING_KEYS.maxThinkMs, EXPERT_AI_DEFAULTS.maxThinkMs, {
             min: 50,
@@ -108,6 +130,11 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
             EXPERT_AI_DEFAULTS.replyMaxNodes,
             { min: 10, max: 20_000 },
         ),
+        getNumberAppSetting(
+            EXPERT_AI_SETTING_KEYS.replyLethalMaxNodes,
+            EXPERT_AI_DEFAULTS.replyLethalMaxNodes,
+            { min: 10, max: 50_000 },
+        ),
     ]);
 
     return {
@@ -120,5 +147,6 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
         replyBeamWidth: Math.round(replyBeamWidth),
         replyTopK: Math.round(replyTopK),
         replyMaxNodes: Math.round(replyMaxNodes),
+        replyLethalMaxNodes: Math.round(replyLethalMaxNodes),
     };
 };

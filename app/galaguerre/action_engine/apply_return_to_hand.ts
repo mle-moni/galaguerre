@@ -2,7 +2,7 @@ import { removeMinionByUuid } from "#api_types/board";
 import { getMinionCardDescription } from "#api_types/minion_card_description";
 import type { GamePlayer, MinionCard, MinionState } from "#api_types/game.types";
 import type Game from "#models/game";
-import { randomUUID } from "node:crypto";
+import { gameEntityUuid } from "../../utils/random.js";
 import { refreshGameDynamicCosts } from "../dynamic_cost/compute_effective_cost.js";
 import { instantiateDeckCard } from "../deck_card_operations.js";
 import { giveCardToHand } from "../give_card_to_hand.js";
@@ -30,7 +30,7 @@ const buildHandCardFromPrintedTemplate = (
     costReduction: number,
 ): MinionCard => ({
     ...template,
-    uuid: randomUUID(),
+    uuid: gameEntityUuid(),
     isGolden: source.isGolden,
     handCostReduction: (source.handCostReduction ?? 0) + costReduction,
 });
@@ -50,7 +50,7 @@ const reprintMinionCardFromBoardState = (
 
     return {
         ...structuredClone(source),
-        uuid: randomUUID(),
+        uuid: gameEntityUuid(),
         attack: source.attack,
         health: source.health,
         minionPowers,
