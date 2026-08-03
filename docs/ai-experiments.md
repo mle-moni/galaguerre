@@ -236,22 +236,17 @@ supplémentaire.
 
 ## Pistes non encore mesurées
 
-À traiter comme des hypothèses, pas comme des améliorations acquises.
+Détaillées dans [`to_try/`](to_try/) — une fiche par piste, avec sa mesure et ce qui la
+réfuterait. Résumé :
 
-- **Ne pas relancer toute la recherche à chaque action.** `run_advanced_ai_turn.ts` refait létal +
-  faisceau + ripostes avant chaque action alors qu'il ne joue que `moves[0]`. Mémoriser le plan
-  avec détection de divergence, un budget par TOUR et non par action, et un ordonnancement des
-  coups amorcé par la ligne précédente. Attention : re-chercher à chaque action donne aussi une
-  profondeur effective PLUS GRANDE — le gain est en latence, la force peut baisser. À mesurer à
-  budget-temps, pas à budget-nœuds, sinon la question n'a pas de sens.
-- **Approfondissement itératif du pli de riposte** : n'accorder du temps supplémentaire qu'aux
-  lignes encore en course, au lieu de diviser la tranche à l'avance. C'est la seule forme
-  d'élargissement que le verdict de `expert-wide-reply` laisse ouverte.
-- **Regrouper sur les DEUX premiers coups dans `bestLinePerFirstMove`** au lieu d'un seul, pour que
-  le palmarès contienne des idées réellement distinctes plutôt que des variantes d'un même début.
-- **Modèle d'adversaire plus fort** : `expert-strong-opponent-model` (faisceau de riposte 6/14/2000).
-  Un gain ici dirait que l'Expert se croit en sécurité trop souvent.
-- **Réglage automatique des coefficients de `evaluate_game_state`** (SPSA / CEM). Vu le verdict du
-  troisième pli — l'évaluation est déjà fortement corrélée à l'issue — c'est probablement là que se
-  trouve la marge restante, et non dans des plis supplémentaires.
-- **Mode gauntlet + Elo** pour classer plus de deux variantes à la fois. Non implémenté.
+| Piste | Axe | Espoir |
+|---|---|---|
+| [Alléger le clone par nœud](to_try/01-alleger-le-clone-par-noeud.md) | Débit | **Élevé** — 92 % des octets clonés sont immuables |
+| [Régler automatiquement l'évaluation](to_try/02-regler-la-fonction-devaluation.md) | Évaluation | **Élevé** — c'est elle qui porte le signal |
+| [Un budget par tour, pas par action](to_try/03-budget-par-tour.md) | Débit | Moyen |
+| [Ne plus jeter les ripostes incomplètes](to_try/04-ripostes-incompletes.md) | Recherche | Moyen — 11 % des décisions en dépendent |
+| [Pistes mineures](to_try/05-pistes-mineures.md) | Divers | Faible à moyen |
+
+Les deux premières sont les seules qui restent debout après les cinq rejets. Les pistes « débit »
+sont **invisibles à budget de nœuds** : elles n'ont de sens que mesurées avec
+`--no-deterministic --think-ms=...`.
