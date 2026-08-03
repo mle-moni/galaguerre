@@ -35,6 +35,7 @@ veut dire que l'effet, s'il existe, est trop petit pour valoir son coût en late
 | Table de transposition dans le faisceau | — | **Rejetée** | 4,5 % de collisions pour −17 % de débit |
 | Élargir le létal adverse du pli de riposte | `expert-deep-reply-lethal` | **Rejetée** | 51,2 % (400) |
 | Troisième pli : létal de l'IA au tour suivant | `expert-own-lethal` | **Rejetée** | 49,3 % (800) |
+| Élargir le pli de riposte à 8 lignes | `expert-wide-reply` | **Rejetée** | 48,4 % (800) |
 | Court-circuiter la décision de fin de tour | — | **Gardée** | neutre au jeu, gain de latence |
 
 ---
@@ -109,6 +110,31 @@ question.
 
 ---
 
+## Rejetée — Élargir le pli de riposte à 8 lignes candidates
+
+**Hypothèse.** Le pli de riposte ne départage que les 5 premiers coups, choisis sur le score
+STATIQUE de fin de tour. Une ligne médiocre statiquement mais excellente après riposte n'entre
+jamais dans la liste. En élargir le nombre devrait donc récupérer ces lignes.
+
+**Protocole.** `replyCandidates` porté de 5 à 8. 800 parties appariées, decks miroir, budget en
+nœuds.
+
+**Résultat.** **48,4 %** (IC 95 % : 45,3 % – 51,4 %), LLR −2,15 — à un cheveu de la borne de
+rejet. Latence moyenne 261 ms contre 200 ms.
+
+**Le mécanisme, lisible dans les compteurs.** Les ripostes TRONQUÉES passent de 13 802 à 21 152
+(+53 %). La tranche de temps d'une décision est fixe et se divise entre les candidats : en ajouter
+trois les affame tous. Les lignes ajoutées reviennent incomplètes, donc écartées du classement —
+on a payé leur simulation pour ne rien pouvoir en faire. Le taux de départage ne bouge pas :
+89,5 % contre 89,4 %.
+
+**Ce que ça disqualifie.** Élargir `replyCandidates` **à budget constant** est structurellement
+perdant, quel que soit le nombre — inutile d'essayer 6, 7 ou 12. La question n'a de sens
+qu'accompagnée d'un budget par candidat garanti, ou d'un approfondissement itératif qui n'accorde
+du temps supplémentaire qu'aux lignes encore en course.
+
+---
+
 ## Pièges de méthode déjà payés
 
 Ces trois-là ont produit des chiffres faux qu'on a cru vrais. Ils ne concernent pas une hypothèse
@@ -174,9 +200,11 @@ supplémentaire.
   coups amorcé par la ligne précédente. Attention : re-chercher à chaque action donne aussi une
   profondeur effective PLUS GRANDE — le gain est en latence, la force peut baisser. À mesurer à
   budget-temps, pas à budget-nœuds, sinon la question n'a pas de sens.
-- **Élargir ce que le pli de riposte peut départager** : `expert-wide-reply` (8 lignes re-notées au
-  lieu de 5), puis approfondissement itératif autour de la gagnante, puis regroupement sur les DEUX
-  premiers coups dans `bestLinePerFirstMove`.
+- **Approfondissement itératif du pli de riposte** : n'accorder du temps supplémentaire qu'aux
+  lignes encore en course, au lieu de diviser la tranche à l'avance. C'est la seule forme
+  d'élargissement que le verdict de `expert-wide-reply` laisse ouverte.
+- **Regrouper sur les DEUX premiers coups dans `bestLinePerFirstMove`** au lieu d'un seul, pour que
+  le palmarès contienne des idées réellement distinctes plutôt que des variantes d'un même début.
 - **Modèle d'adversaire plus fort** : `expert-strong-opponent-model` (faisceau de riposte 6/14/2000).
   Un gain ici dirait que l'Expert se croit en sécurité trop souvent.
 - **Réglage automatique des coefficients de `evaluate_game_state`** (SPSA / CEM). Vu le verdict du

@@ -68,14 +68,29 @@ export const AI_VARIANTS = {
     },
 
     /**
-     * Point D du plan. Le pli de riposte ne départage que 5 premiers coups, choisis sur le score
-     * STATIQUE de fin de tour : une ligne médiocre statiquement mais excellente après riposte
-     * n'entre jamais dans la liste. Élargir coûte du temps par candidat — arbitrage à mesurer,
-     * pas à deviner.
+     * MESURÉE ET REJETÉE — ne pas re-tester sans changer d'abord le BUDGET, pas le nombre.
+     *
+     * L'idée : le pli de riposte ne départage que 5 premiers coups, choisis sur le score STATIQUE
+     * de fin de tour. Une ligne médiocre statiquement mais excellente après riposte n'entre jamais
+     * dans la liste.
+     *
+     * Résultat sur 800 parties appariées, decks miroir, budget en nœuds :
+     *   48,4 % (IC 95 % : 45,3 % – 51,4 %), LLR -2,15 — à un cheveu de la borne de rejet.
+     *
+     * Le mécanisme est lisible dans les compteurs : les ripostes TRONQUÉES passent de 13802 à
+     * 21152 (+53 %). La tranche de temps d'une décision est fixe et se divise entre les candidats ;
+     * en ajouter trois les affame tous. Les lignes ajoutées reviennent incomplètes, donc écartées
+     * du classement — on a payé leur simulation pour ne rien pouvoir en faire. Le taux de
+     * départage ne bouge pas d'un cheveu : 89,5 % contre 89,4 %.
+     *
+     * Ce que ça disqualifie : élargir `replyCandidates` À BUDGET CONSTANT est structurellement
+     * perdant, quel que soit le nombre. La question n'a de sens qu'accompagnée d'un budget par
+     * candidat garanti, ou d'un approfondissement itératif qui n'accorde du temps supplémentaire
+     * qu'aux lignes encore en course.
      */
     "expert-wide-reply": {
         difficulty: "EXPERT",
-        description: "8 lignes re-notées au lieu de 5",
+        description: "8 lignes re-notées au lieu de 5 — mesurée, sans gain (48,4 %)",
         config: { replyCandidates: 8 },
     },
 
