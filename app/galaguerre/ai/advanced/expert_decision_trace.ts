@@ -37,6 +37,22 @@ export interface ExpertDecisionTrace {
     repliesSkipped: number;
     /** `true` quand un létal adverse a été prouvé sur au moins une ligne candidate. */
     sawOpponentLethal: boolean;
+    /**
+     * `true` quand au moins une ligne candidate laisse l'IA avec un létal à SON tour suivant, une
+     * fois la riposte adverse jouée. Mesure la fréquence à laquelle le troisième pli sert à
+     * quelque chose : à zéro, la recherche ne fait que coûter.
+     */
+    sawOwnLethal: boolean;
+    /**
+     * `true` quand la prime de létal propre a réellement DÉPLACÉ le choix, c'est-à-dire quand la
+     * ligne retenue n'est pas celle qu'aurait donnée le même classement sans la prime.
+     *
+     * C'est la seule mesure qui dit si le troisième pli sert à quelque chose. `sawOwnLethal` ne
+     * suffit pas : un létal repéré sur TOUTES les lignes candidates ne départage rien, la prime
+     * s'annule et le classement retombe sur le score statique. Un pli qui coûte du temps sans
+     * jamais déplacer un choix est un pli à retirer, pas à régler.
+     */
+    ownLethalChangedChoice: boolean;
     /** `null` quand le pli de riposte a réellement choisi la ligne jouée. */
     fallback: ExpertFallbackReason | null;
 }
@@ -47,5 +63,7 @@ export const createExpertDecisionTrace = (): ExpertDecisionTrace => ({
     repliesIncomplete: 0,
     repliesSkipped: 0,
     sawOpponentLethal: false,
+    sawOwnLethal: false,
+    ownLethalChangedChoice: false,
     fallback: null,
 });

@@ -21,6 +21,7 @@ export const EXPERT_AI_SETTING_KEYS = {
     replyTopK: "ai.expert.replyTopK",
     replyMaxNodes: "ai.expert.replyMaxNodes",
     replyLethalMaxNodes: "ai.expert.replyLethalMaxNodes",
+    replyOwnLethalMaxNodes: "ai.expert.replyOwnLethalMaxNodes",
 } as const;
 
 export const EXPERT_AI_DEFAULTS = {
@@ -48,6 +49,16 @@ export const EXPERT_AI_DEFAULTS = {
      * avant de retoucher ce nombre.
      */
     replyLethalMaxNodes: 450,
+    /**
+     * Plafond de nœuds du TROISIÈME pli : le létal de l'IA à son propre tour suivant, cherché sur
+     * l'état où la riposte adverse a été jouée. `0` désactive le pli.
+     *
+     * DÉSACTIVÉ après mesure : 49,3 % sur 800 parties appariées, pour une latence moyenne
+     * multipliée par 1,7. Le pli ne déplace le choix que sur 0,8 % des décisions où il trouve un
+     * létal — il est redondant avec la fonction d'évaluation. Lire `expert-own-lethal` dans
+     * `ai_variants.ts` avant de remettre une valeur ici.
+     */
+    replyOwnLethalMaxNodes: 0,
 } as const;
 
 export interface ExpertAiConfig extends AdvancedAiConfig {
@@ -56,6 +67,7 @@ export interface ExpertAiConfig extends AdvancedAiConfig {
     replyTopK: number;
     replyMaxNodes: number;
     replyLethalMaxNodes: number;
+    replyOwnLethalMaxNodes: number;
 }
 
 /**
@@ -64,6 +76,16 @@ export interface ExpertAiConfig extends AdvancedAiConfig {
  * riposte à zéro nœud — donc incomplète, donc le candidat écarté du classement.
  */
 export const EXPERT_REPLY_LETHAL_TIME_SHARE = 0.6;
+
+/**
+ * Part de la tranche d'une ligne candidate réservée au troisième pli (létal de l'IA au tour
+ * suivant). Prise sur ce qui reste après le létal adverse et le faisceau de riposte.
+ *
+ * Ce pli passe volontairement en DERNIER : une prime non attribuée faute de temps ne fait que
+ * ramener la ligne à sa note statique, alors qu'un létal adverse manqué fait mourir l'IA. Les
+ * deux erreurs n'ont pas le même prix, elles n'ont pas la même priorité de budget.
+ */
+export const EXPERT_REPLY_OWN_LETHAL_TIME_SHARE = 0.25;
 
 /**
  * Répartition du budget d'une décision. La recherche de réplique passe en dernier : si le temps
@@ -90,6 +112,7 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
         replyTopK,
         replyMaxNodes,
         replyLethalMaxNodes,
+        replyOwnLethalMaxNodes,
     ] = await Promise.all([
         getNumberAppSetting(EXPERT_AI_SETTING_KEYS.maxThinkMs, EXPERT_AI_DEFAULTS.maxThinkMs, {
             min: 50,
@@ -135,6 +158,13 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
             EXPERT_AI_DEFAULTS.replyLethalMaxNodes,
             { min: 10, max: 50_000 },
         ),
+        // Minimum 0 et non 10 : c'est la valeur qui DÉSACTIVE le troisième pli, donc le levier
+        // d'urgence pour le couper en production sans redéploiement.
+        getNumberAppSetting(
+            EXPERT_AI_SETTING_KEYS.replyOwnLethalMaxNodes,
+            EXPERT_AI_DEFAULTS.replyOwnLethalMaxNodes,
+            { min: 0, max: 50_000 },
+        ),
     ]);
 
     return {
@@ -148,5 +178,6 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
         replyTopK: Math.round(replyTopK),
         replyMaxNodes: Math.round(replyMaxNodes),
         replyLethalMaxNodes: Math.round(replyLethalMaxNodes),
+        replyOwnLethalMaxNodes: Math.round(replyOwnLethalMaxNodes),
     };
 };

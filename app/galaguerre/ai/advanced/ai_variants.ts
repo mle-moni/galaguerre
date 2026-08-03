@@ -80,6 +80,39 @@ export const AI_VARIANTS = {
     },
 
     /**
+     * MESURÉE ET REJETÉE — l'implémentation reste, désactivée par défaut. Lire la RAISON avant de
+     * la réactiver : elle disqualifie la famille d'idées entière, pas ce réglage.
+     *
+     * TROISIÈME PLI. L'Expert s'arrêtait après la riposte adverse et notait la position au jugé
+     * statique. L'hypothèse : il ne distingue pas une ligne qui cède deux points de plateau mais
+     * met l'adversaire à portée de létal d'une ligne qui les garde sans rien menacer. On pousse
+     * donc la simulation d'un pli de plus — mon tour, sa riposte, MON létal — et la ligne qui mène
+     * au létal reçoit une prime symétrique de `OPPONENT_LETHAL_PENALTY`.
+     *
+     * Résultat sur 800 parties appariées, decks miroir, budget en nœuds :
+     *   49,3 % (IC 95 % : 46,2 % – 52,3 %), LLR -1,42 → INDÉCIS, sans la moindre tendance au gain.
+     *   Latence moyenne 331 ms contre 197 ms, p95 1433 ms contre 931 ms.
+     *
+     * LA RAISON, et c'est elle qui compte : le pli repère un létal sur 7,6 % des décisions, mais
+     * ne DÉPLACE le choix que sur 0,8 % d'entre elles. Neuf fois sur dix, la ligne qui mène au
+     * létal dominait déjà le classement statique — la prime renchérit sur un gagnant déjà désigné.
+     *
+     * Autrement dit, `evaluate_game_state` est déjà un bon indicateur de « je suis sur le point de
+     * gagner » : plateau, dégâts au héros et tempo suffisent. Chercher explicitement le létal du
+     * tour suivant est REDONDANT avec l'évaluation, pas complémentaire. Toute variante du même
+     * genre — létal à deux tours, prime de portée — se heurtera au même mur tant que la fonction
+     * d'évaluation restera aussi corrélée à l'issue.
+     *
+     * Le compteur « dont la prime a déplacé le choix » (`ownLethalChangedChoice`) est ce qui a
+     * permis de le voir. Le taux de détection seul (7,6 %) donnait l'illusion d'un pli très actif.
+     */
+    "expert-own-lethal": {
+        difficulty: "EXPERT",
+        description: "Létal de l'IA au tour suivant — mesurée, sans gain (49,3 %)",
+        config: { replyOwnLethalMaxNodes: 600 },
+    },
+
+    /**
      * Adversaire simulé nettement plus fort (faisceau de riposte doublé). Si l'Expert gagne du
      * winrate ici, c'est que son modèle d'adversaire est aujourd'hui trop faible et qu'il se croit
      * en sécurité trop souvent.

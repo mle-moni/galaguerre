@@ -8,13 +8,14 @@ import { getWeightsForProfile } from "./evaluate_game_state.js";
 import {
     EXPERT_BUDGET_SHARES,
     EXPERT_REPLY_LETHAL_TIME_SHARE,
+    EXPERT_REPLY_OWN_LETHAL_TIME_SHARE,
     type ExpertAiConfig,
 } from "./expert_ai_config.js";
 import { createExpertDecisionTrace } from "./expert_decision_trace.js";
 import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
 import { deriveSeed, fallbackWhenSearchNeverRan, searchBestTurn } from "./search_best_turn.js";
-import { scoreAfterOpponentReply } from "./search_opponent_reply.js";
+import { OWN_LETHAL_BONUS, scoreAfterOpponentReply } from "./search_opponent_reply.js";
 import { stripStateForSearch } from "../../simulation/strip_state_for_search.js";
 
 /**
@@ -171,7 +172,14 @@ export const decideExpertMoves = async (
         }
 
         let bestMoves: AiMove[] | null = null;
-        let bestScore = -Infinity;
+        let bestScore = Number.NEGATIVE_INFINITY;
+
+        // Classement fantôme, mené en parallèle sans la prime de létal propre. Il ne pilote rien :
+        // il sert uniquement à savoir si le troisième pli a DÉPLACÉ le choix ou s'il s'est contenté
+        // de renchérir sur une ligne déjà en tête. Sans ce témoin, un pli inutile et un pli
+        // décisif rendent exactement les mêmes compteurs.
+        let bestUnprimedMoves: AiMove[] | null = null;
+        let bestUnprimedScore = Number.NEGATIVE_INFINITY;
 
         for (const [index, candidate] of candidates.entries()) {
             // Une ligne qui gagne la partie ce tour-ci n'a pas de suite à simuler.
@@ -180,13 +188,18 @@ export const decideExpertMoves = async (
                     bestScore = candidate.endScore;
                     bestMoves = candidate.moves;
                 }
+                if (candidate.endScore > bestUnprimedScore) {
+                    bestUnprimedScore = candidate.endScore;
+                    bestUnprimedMoves = candidate.moves;
+                }
                 continue;
             }
 
             // Tranche recalculée à chaque tour sur les candidats RESTANTS : figée d'avance, un
             // candidat qui déborde affamerait tous les suivants. En mode déterministe il n'y a pas
             // d'horloge : chaque candidat reçoit son plein plafond de nœuds.
-            const remainingMs = replyDeadline - Date.now();
+            const sliceStartedAt = Date.now();
+            const remainingMs = replyDeadline - sliceStartedAt;
             const perCandidateMs = Math.floor(remainingMs / (candidates.length - index));
 
             // Sous le plancher, la riposte n'aurait pas le temps de simuler quoi que ce soit :
@@ -196,9 +209,20 @@ export const decideExpertMoves = async (
                 break;
             }
 
+            const sliceEnd = Math.min(replyDeadline, sliceStartedAt + perCandidateMs);
+
+            // Le troisième pli, quand il est actif, se réserve la QUEUE de la tranche. Sans cette
+            // retenue il n'aurait que le reliquat du faisceau de riposte — souvent zéro — et la
+            // prime de létal ne tomberait que sur les candidats évalués les premiers : un
+            // classement décidé par l'ordre de passage, exactement ce que la tranche existe pour
+            // empêcher.
+            const ownLethalEnabled = config.replyOwnLethalMaxNodes > 0;
+            const replyMs = ownLethalEnabled
+                ? perCandidateMs * (1 - EXPERT_REPLY_OWN_LETHAL_TIME_SHARE)
+                : perCandidateMs;
             const candidateDeadline = deterministic
                 ? NO_DEADLINE
-                : Math.min(replyDeadline, Date.now() + perCandidateMs);
+                : Math.min(replyDeadline, sliceStartedAt + replyMs);
 
             const reply = await scoreAfterOpponentReply(candidate.data, {
                 aiUserId,
@@ -214,7 +238,9 @@ export const decideExpertMoves = async (
                 // écarté — on aurait payé la recherche pour ne rien pouvoir en faire.
                 lethalDeadline: deterministic
                     ? NO_DEADLINE
-                    : Date.now() + perCandidateMs * EXPERT_REPLY_LETHAL_TIME_SHARE,
+                    : sliceStartedAt + replyMs * EXPERT_REPLY_LETHAL_TIME_SHARE,
+                ownLethalMaxNodes: config.replyOwnLethalMaxNodes,
+                ownLethalDeadline: deterministic ? NO_DEADLINE : sliceEnd,
                 pickDiscoverOption,
                 // Graine dérivée de la ligne candidate : sa riposte est donc simulée sur le même
                 // aléatoire quel que soit son rang dans le classement.
@@ -222,6 +248,7 @@ export const decideExpertMoves = async (
             });
 
             if (reply.opponentHasLethal) trace.sawOpponentLethal = true;
+            if (reply.ownHasLethal) trace.sawOwnLethal = true;
 
             // Une riposte tronquée rend le score d'un adversaire passif, très au-dessus de toute
             // ligne réellement évaluée : la comparer reviendrait à préférer systématiquement la
@@ -237,7 +264,18 @@ export const decideExpertMoves = async (
                 bestScore = reply.score;
                 bestMoves = candidate.moves;
             }
+
+            const unprimedScore = reply.ownHasLethal ? reply.score - OWN_LETHAL_BONUS : reply.score;
+
+            if (unprimedScore > bestUnprimedScore) {
+                bestUnprimedScore = unprimedScore;
+                bestUnprimedMoves = candidate.moves;
+            }
         }
+
+        // Comparaison par IDENTITÉ : les lignes candidates sont des objets distincts rendus par le
+        // faisceau, deux d'entre elles ne sont jamais le même tableau.
+        trace.ownLethalChangedChoice = bestMoves !== bestUnprimedMoves;
 
         if (bestMoves === null) trace.fallback = "NO_COMPLETE_REPLY";
 

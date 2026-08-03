@@ -36,6 +36,20 @@ const OPPONENT_WEIGHTS: EvaluationWeights = getWeightsForProfile(undefined);
  */
 export const OPPONENT_LETHAL_PENALTY = -WIN_SCORE / 2;
 
+/**
+ * Prime d'une ligne qui laisse l'IA avec un létal à SON tour suivant, riposte adverse jouée.
+ *
+ * Symétrique de `OPPONENT_LETHAL_PENALTY`, et pour la même raison : l'information « je gagne au
+ * prochain tour » doit dominer toute considération de plateau, sans pour autant valoir la victoire
+ * déjà acquise (`WIN_SCORE`), qui reste réservée au létal jouable MAINTENANT.
+ *
+ * Elle s'AJOUTE au score statique au lieu de le remplacer : quand plusieurs lignes mènent au
+ * létal — le cas fréquent, le létal étant souvent robuste au choix de la ligne — c'est encore la
+ * qualité de la position qui les départage, et l'IA prend la route la plus sûre vers la même
+ * victoire plutôt que la première trouvée.
+ */
+export const OWN_LETHAL_BONUS = WIN_SCORE / 2;
+
 export interface OpponentReplyOptions {
     aiUserId: number;
     opponentUserId: number;
@@ -63,6 +77,23 @@ export interface OpponentReplyOptions {
      * Défaut : `deadline`, le comportement historique.
      */
     lethalDeadline?: number;
+    /**
+     * Plafond de nœuds du TROISIÈME pli : le létal de l'IA à son propre tour suivant, une fois la
+     * riposte adverse jouée. `0` désactive la recherche et rend le comportement à deux plis.
+     *
+     * Sans ce pli, le classement des lignes s'arrête sur une note de plateau : l'IA ne distingue
+     * pas une ligne qui cède deux points de plateau mais met l'adversaire à portée de létal d'une
+     * ligne qui les garde sans rien menacer. C'est la différence entre jouer la position et jouer
+     * la partie.
+     */
+    ownLethalMaxNodes?: number;
+    /**
+     * Échéance propre au troisième pli. Volontairement NON bornée par `deadline` : ce pli tourne
+     * après le faisceau de riposte, son échéance est donc légitimement postérieure. C'est à
+     * l'appelant, seul à connaître la tranche entière de la ligne candidate, de garantir qu'elle
+     * ne déborde pas. Défaut : `deadline`.
+     */
+    ownLethalDeadline?: number;
     pickDiscoverOption: DiscoverOptionPicker;
     /** Graine de base de la recherche adverse ; à faire varier d'une ligne candidate à l'autre. */
     seed: number;
@@ -72,6 +103,8 @@ export interface OpponentReplyResult {
     score: number;
     /** `true` quand un létal adverse a été PROUVÉ sur cette ligne. */
     opponentHasLethal: boolean;
+    /** `true` quand un létal de l'IA a été PROUVÉ à son tour suivant, riposte adverse jouée. */
+    ownHasLethal: boolean;
     /**
      * `false` quand le budget a manqué avant d'avoir vraiment simulé la riposte. Le score rendu
      * est alors celui d'un adversaire PASSIF — mécaniquement le plus haut possible, et donc
@@ -102,6 +135,8 @@ export const scoreAfterOpponentReply = async (
         deadline,
         lethalMaxNodes = Math.max(50, Math.floor(maxNodes / 2)),
         lethalDeadline = deadline,
+        ownLethalMaxNodes = 0,
+        ownLethalDeadline = deadline,
         pickDiscoverOption,
         seed,
     }: OpponentReplyOptions,
@@ -119,6 +154,7 @@ export const scoreAfterOpponentReply = async (
         return {
             score: evaluateGameState(passed.data, aiUserId, weights, AI_TURN_IS_OVER),
             opponentHasLethal: false,
+            ownHasLethal: false,
             complete: true,
         };
     }
@@ -137,7 +173,13 @@ export const scoreAfterOpponentReply = async (
     });
 
     if (lethal.moves && lethal.moves.length > 0) {
-        return { score: OPPONENT_LETHAL_PENALTY, opponentHasLethal: true, complete: true };
+        return {
+            score: OPPONENT_LETHAL_PENALTY,
+            opponentHasLethal: true,
+            // L'adversaire joue AVANT : son létal clôt la ligne, celui de l'IA n'arriverait jamais.
+            ownHasLethal: false,
+            complete: true,
+        };
     }
 
     // L'adversaire simulé joue en information INCOMPLÈTE, comme le joueur humain qu'il représente.
@@ -159,13 +201,84 @@ export const scoreAfterOpponentReply = async (
     const bestForOpponent = reply.candidates[0];
     const afterReply = bestForOpponent?.data ?? passed.data;
 
+    const staticScore = evaluateGameState(afterReply, aiUserId, weights, AI_TURN_IS_OVER);
+
+    const ownHasLethal = await hasOwnLethalNextTurn(afterReply, {
+        aiUserId,
+        opponentUserId,
+        maxNodes: ownLethalMaxNodes,
+        deadline: ownLethalDeadline,
+        pickDiscoverOption,
+        pickOpponentDiscoverOption,
+    });
+
     return {
-        score: evaluateGameState(afterReply, aiUserId, weights, AI_TURN_IS_OVER),
+        score: ownHasLethal ? staticScore + OWN_LETHAL_BONUS : staticScore,
         opponentHasLethal: false,
+        ownHasLethal,
         // Un létal adverse non prouvé, ou un faisceau qui n'a rien simulé faute de temps : dans
         // les deux cas la riposte n'a pas été vue, elle a été supposée inexistante. Zéro nœud
         // exploré AVANT l'échéance est en revanche un résultat légitime — l'adversaire n'avait
         // simplement aucun coup à jouer.
+        //
+        // Le troisième pli n'entre PAS dans ce critère : un létal de l'IA non trouvé faute de
+        // budget ne fait que priver la ligne d'une prime. Écarter le candidat pour autant
+        // reviendrait à préférer les lignes qu'on a le moins regardées — l'erreur exacte que ce
+        // drapeau existe pour empêcher côté adverse.
         complete: !lethal.exhausted && (reply.nodesExplored > 0 || Date.now() <= deadline),
     };
+};
+
+interface OwnLethalOptions {
+    aiUserId: number;
+    opponentUserId: number;
+    maxNodes: number;
+    deadline: number;
+    pickDiscoverOption: DiscoverOptionPicker;
+    pickOpponentDiscoverOption: DiscoverOptionPicker;
+}
+
+/**
+ * Troisième pli : l'IA a-t-elle un létal à son propre tour suivant, une fois la riposte jouée ?
+ *
+ * Il faut d'abord PASSER le tour pour l'adversaire. L'état rendu par le faisceau de riposte est
+ * un état de milieu de tour adverse : l'IA n'y a ni pioché, ni regagné son mana, et ses monstres
+ * y portent encore leurs attaques déjà consommées. Y chercher un létal ne rendrait que des
+ * réponses fausses, presque toujours négatives — le pli n'aurait l'air de rien coûter parce qu'il
+ * n'aurait rien trouvé.
+ *
+ * C'est `performPassTurn` via `applyAiMove` qui fait le travail, donc le vrai moteur : pioche,
+ * fatigue, passifs de début de tour et cristal supplémentaire compris.
+ */
+const hasOwnLethalNextTurn = async (
+    afterReply: GameData,
+    {
+        aiUserId,
+        opponentUserId,
+        maxNodes,
+        deadline,
+        pickDiscoverOption,
+        pickOpponentDiscoverOption,
+    }: OwnLethalOptions,
+): Promise<boolean> => {
+    if (maxNodes <= 0) return false;
+
+    const backToAi = await applyAiMove(
+        afterReply,
+        opponentUserId,
+        { type: "pass_turn" },
+        pickOpponentDiscoverOption,
+    );
+
+    // Le passage de tour a tué quelqu'un (fatigue, passif) : il n'y a plus de tour à jouer.
+    if (backToAi.finished) return false;
+
+    const ownLethal = await findLethalSequence(backToAi.data, {
+        aiUserId,
+        maxNodes,
+        deadline,
+        pickDiscoverOption,
+    });
+
+    return ownLethal.moves !== null && ownLethal.moves.length > 0;
 };

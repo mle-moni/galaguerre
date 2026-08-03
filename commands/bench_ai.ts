@@ -573,5 +573,11 @@ export default class BenchAi extends BaseCommand {
         this.logger.info(
             `  létal adverse détecté sur ${share(totals.sawOpponentLethal)} des tours`,
         );
+        this.logger.info(
+            `  létal propre au tour suivant sur ${share(totals.sawOwnLethal)} des tours`,
+        );
+        this.logger.info(
+            `  dont la prime a déplacé le choix : ${share(totals.ownLethalChangedChoice)}`,
+        );
     }
 }
