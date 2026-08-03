@@ -172,6 +172,7 @@ export const MatchmakingPage = observer(() => {
                                                 Difficulté de l&apos;IA
                                             </span>
                                             <SegmentedControl
+                                                className="matchmaking-difficulty__control"
                                                 fullWidth
                                                 size="sm"
                                                 value={difficulty}
