@@ -181,6 +181,12 @@ export const decideExpertMoves = async (
         let bestUnprimedMoves: AiMove[] | null = null;
         let bestUnprimedScore = Number.NEGATIVE_INFINITY;
 
+        // Classement de SECOURS, tenu sur les seules lignes dont le faisceau de riposte a bel et
+        // bien tourné mais dont le létal adverse n'a pas pu être réfuté. Il ne sert que si aucune
+        // ligne n'est complète — voir plus bas.
+        let bestUnprovenMoves: AiMove[] | null = null;
+        let bestUnprovenScore = Number.NEGATIVE_INFINITY;
+
         for (const [index, candidate] of candidates.entries()) {
             // Une ligne qui gagne la partie ce tour-ci n'a pas de suite à simuler.
             if (candidate.finished) {
@@ -255,6 +261,17 @@ export const decideExpertMoves = async (
             // ligne qu'on a le moins regardée.
             if (!reply.complete) {
                 trace.repliesIncomplete++;
+
+                // Une riposte SIMULÉE dont seul le létal adverse reste indécis n'est pas un score
+                // imaginaire : c'est un vrai score de riposte auquel il manque une preuve. On le
+                // garde de côté, à part, pour le seul cas où plus rien d'autre ne serait
+                // disponible. Il ne concourt jamais contre une ligne complète — l'absence de
+                // preuve de létal joue mécaniquement en sa faveur.
+                if (reply.replySearched && reply.score > bestUnprovenScore) {
+                    bestUnprovenScore = reply.score;
+                    bestUnprovenMoves = candidate.moves;
+                }
+
                 continue;
             }
 
@@ -279,11 +296,21 @@ export const decideExpertMoves = async (
 
         if (bestMoves === null) trace.fallback = "NO_COMPLETE_REPLY";
 
+        // Aucune ligne complète, mais des ripostes ont malgré tout été simulées : les départager
+        // entre elles vaut mieux que de rendre la main au faisceau, qui n'a JAMAIS regardé la
+        // riposte. Comparer des lignes également incertaines reste une comparaison ; renoncer,
+        // c'est jeter le pli entier de l'Expert pour une preuve manquante.
+        const rankedFallback =
+            config.replyRankIncomplete > 0 && bestMoves === null ? bestUnprovenMoves : null;
+
+        trace.incompleteRankingChangedChoice =
+            rankedFallback !== null && rankedFallback !== beamMoves;
+
         return {
             // Aucun candidat départagé : on rend la meilleure ligne du faisceau, c'est-à-dire le
             // choix qu'aurait fait l'IA Avancée. C'est la dégradation propre annoncée en tête de
             // fichier, et elle vaut mieux qu'un classement tiré au sort par le chronomètre.
-            moves: bestMoves ?? beamMoves,
+            moves: bestMoves ?? rankedFallback ?? beamMoves,
             isLethal: false,
             nodesExplored: result.nodesExplored,
             elapsedMs: Date.now() - startedAt,

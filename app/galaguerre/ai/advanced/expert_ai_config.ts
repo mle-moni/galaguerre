@@ -22,6 +22,7 @@ export const EXPERT_AI_SETTING_KEYS = {
     replyMaxNodes: "ai.expert.replyMaxNodes",
     replyLethalMaxNodes: "ai.expert.replyLethalMaxNodes",
     replyOwnLethalMaxNodes: "ai.expert.replyOwnLethalMaxNodes",
+    replyRankIncomplete: "ai.expert.replyRankIncomplete",
 } as const;
 
 export const EXPERT_AI_DEFAULTS = {
@@ -59,6 +60,18 @@ export const EXPERT_AI_DEFAULTS = {
      * `ai_variants.ts` avant de remettre une valeur ici.
      */
     replyOwnLethalMaxNodes: 0,
+    /**
+     * `1` autorise un classement de REPLI entre les lignes dont la riposte a été simulée mais dont
+     * le létal adverse n'a pas pu être réfuté. Ce classement n'entre en jeu que si AUCUNE ligne
+     * n'est complète — sinon l'Expert retombe sur le choix de l'IA Avancée, qui n'a jamais regardé
+     * la riposte du tout. `0` rend le comportement historique.
+     *
+     * DÉSACTIVÉ après mesure : 49,5 % sur 800 parties appariées. Le classement déplace pourtant la
+     * ligne jouée sur 3,0 % des décisions — il agit, il ne sert simplement à rien. Lire
+     * `expert-rank-incomplete` dans `ai_variants.ts` avant de remettre `1` ici : sa conclusion
+     * porte sur toute la famille des idées qui départagent mieux, pas sur ce réglage.
+     */
+    replyRankIncomplete: 0,
 } as const;
 
 export interface ExpertAiConfig extends AdvancedAiConfig {
@@ -68,6 +81,8 @@ export interface ExpertAiConfig extends AdvancedAiConfig {
     replyMaxNodes: number;
     replyLethalMaxNodes: number;
     replyOwnLethalMaxNodes: number;
+    /** Drapeau 0/1 : voir `EXPERT_AI_DEFAULTS.replyRankIncomplete`. */
+    replyRankIncomplete: number;
 }
 
 /**
@@ -113,6 +128,7 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
         replyMaxNodes,
         replyLethalMaxNodes,
         replyOwnLethalMaxNodes,
+        replyRankIncomplete,
     ] = await Promise.all([
         getNumberAppSetting(EXPERT_AI_SETTING_KEYS.maxThinkMs, EXPERT_AI_DEFAULTS.maxThinkMs, {
             min: 50,
@@ -165,6 +181,11 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
             EXPERT_AI_DEFAULTS.replyOwnLethalMaxNodes,
             { min: 0, max: 50_000 },
         ),
+        getNumberAppSetting(
+            EXPERT_AI_SETTING_KEYS.replyRankIncomplete,
+            EXPERT_AI_DEFAULTS.replyRankIncomplete,
+            { min: 0, max: 1 },
+        ),
     ]);
 
     return {
@@ -179,5 +200,6 @@ export const loadExpertAiConfig = async (): Promise<ExpertAiConfig> => {
         replyMaxNodes: Math.round(replyMaxNodes),
         replyLethalMaxNodes: Math.round(replyLethalMaxNodes),
         replyOwnLethalMaxNodes: Math.round(replyOwnLethalMaxNodes),
+        replyRankIncomplete: Math.round(replyRankIncomplete),
     };
 };

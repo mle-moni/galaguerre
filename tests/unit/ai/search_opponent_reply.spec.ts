@@ -216,3 +216,66 @@ test.group("ai:expert:own lethal after reply", () => {
         assert.isFalse(scored.ownHasLethal);
     });
 });
+
+/**
+ * `complete` recouvre deux échecs de nature très différente, et les confondre coûte cher : une
+ * riposte jamais simulée rend le score d'un adversaire imaginaire, alors qu'un létal adverse non
+ * réfuté rend un VRAI score de riposte auquel il ne manque qu'une preuve. `replySearched` sépare
+ * les deux, pour que l'appelant puisse encore exploiter le second.
+ */
+test.group("ai:expert:reply searched", () => {
+    /** Plateau adverse assez menaçant pour que la borne optimiste ne coupe pas à la racine. */
+    const underThreat = () =>
+        createGameData({
+            currentRound: CURRENT_ROUND,
+            playerOne: { health: 12 },
+            playerTwo: {
+                board: [readyMinion("a", 4, 4), readyMinion("b", 4, 4), readyMinion("c", 4, 4)],
+                hand: [createMinionCard({ uuid: "extra", cost: 1, attack: 2, health: 2 })],
+            },
+        });
+
+    const searchReply = (data: GameData, lethalMaxNodes: number, deadline: number) =>
+        runInSimulation({ rng: createSeededRng(7) }, () =>
+            scoreAfterOpponentReply(data, {
+                aiUserId: AI_USER_ID,
+                opponentUserId: OPPONENT_USER_ID,
+                weights: MIDRANGE_WEIGHTS,
+                beamWidth: 3,
+                topK: 8,
+                maxNodes: 400,
+                deadline,
+                lethalMaxNodes,
+                pickDiscoverOption: (options) => options[0]!,
+                seed: 7,
+            }),
+        );
+
+    test("an exhausted opponent-lethal search leaves the reply searched but incomplete", async ({
+        assert,
+    }) => {
+        // Un seul nœud de létal : la recherche s'épuise sans conclure. Le faisceau de riposte, lui,
+        // a tout son budget et tourne normalement.
+        const scored = await searchReply(underThreat(), 1, Date.now() + 5_000);
+
+        assert.isFalse(scored.complete);
+        assert.isTrue(scored.replySearched);
+    });
+
+    test("the same position is complete when the lethal search can conclude", async ({
+        assert,
+    }) => {
+        // Témoin : sans ce test, le précédent passerait aussi si `complete` était toujours faux.
+        const scored = await searchReply(underThreat(), 5_000, Date.now() + 5_000);
+
+        assert.isTrue(scored.complete);
+        assert.isTrue(scored.replySearched);
+    });
+
+    test("an expired deadline leaves the reply unsearched", async ({ assert }) => {
+        const scored = await searchReply(underThreat(), 5_000, Date.now() - 1);
+
+        assert.isFalse(scored.complete);
+        assert.isFalse(scored.replySearched);
+    });
+});

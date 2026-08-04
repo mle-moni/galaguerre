@@ -146,6 +146,48 @@ export const AI_VARIANTS = {
         description: "Faisceau de riposte 6/14/2000 — mesurée, sans gain (49,3 %)",
         config: { replyBeamWidth: 6, replyTopK: 14, replyMaxNodes: 2000 },
     },
+
+    /**
+     * MESURÉE ET REJETÉE — l'implémentation reste, désactivée par défaut. C'est le rejet le plus
+     * informatif de la série : lire la conclusion avant d'ouvrir une piste sur le CHOIX de la ligne.
+     *
+     * Première idée qui ne donnait PAS plus de moyens au pli de riposte — les trois rejets
+     * précédents avaient fermé cette famille. Elle changeait ce qu'on FAIT d'un résultat incertain.
+     *
+     * Une décision sur neuf retombe sur le choix de l'IA Avancée faute d'une seule riposte
+     * « complète ». Or « incomplète » ne veut pas dire « non simulée » : au banc, l'échéance étant
+     * infinie, le critère se réduit à « le létal adverse a épuisé ses 450 nœuds sans conclure ». Le
+     * faisceau de riposte, lui, a bel et bien tourné, et son score est exploitable. On départage
+     * donc ces lignes entre elles plutôt que de rendre la main au faisceau, qui n'a jamais regardé
+     * la riposte du tout — le classement de repli restant STRICTEMENT séparé du classement
+     * principal, sans quoi l'absence de preuve de létal jouerait en faveur de la ligne incertaine.
+     *
+     * Résultat sur 800 parties appariées, decks miroir, budget en nœuds :
+     *   49,5 % (IC 95 % : 46,4 % – 52,6 %), LLR -1,20. Latence 191 ms contre 185 ms.
+     *
+     * LA RAISON, et elle vaut pour toute une famille : le classement de repli a réellement DÉPLACÉ
+     * la ligne jouée sur 3,0 % des décisions — près de quatre fois le taux de déplacement du
+     * troisième pli, qui était déjà le mécanisme le plus actif jamais mesuré ici. Six cents
+     * décisions par lot de 800 parties ont donc changé, et le winrate n'a pas bougé d'un cheveu.
+     *
+     * Ce que ça disqualifie : DÉPARTAGER MIEUX les lignes que le faisceau propose ne paie plus. Ce
+     * n'est plus une conjecture sur un mécanisme particulier, c'est une mesure directe — on a changé
+     * le choix, souvent, sans rien gagner. Les lignes candidates d'une même position se valent trop
+     * pour que leur ordre compte. Ce qui reste ouvert est en amont (ce que le faisceau PRODUIT) et
+     * en dessous (comment une position est VALUÉE), pas dans l'arbitrage entre les deux.
+     *
+     * Corollaire immédiat, pour ne pas les re-tester : la pénalité d'incertitude et sa graduation
+     * par la borne optimiste de dégâts (points 1 et 3 de `docs/to_try/04-ripostes-incompletes.md`)
+     * sont mortes avec celle-ci. Elles ne diffèrent que par la FORCE avec laquelle une riposte
+     * incertaine pèse sur le classement ; on vient de mesurer que ce classement n'a pas de valeur
+     * dans ces positions, et elles ajoutent le risque de laisser une ligne non vérifiée écarter une
+     * ligne vérifiée.
+     */
+    "expert-rank-incomplete": {
+        difficulty: "EXPERT",
+        description: "Départager les ripostes au létal non réfuté — mesurée, sans gain (49,5 %)",
+        config: { replyRankIncomplete: 1 },
+    },
 } as const satisfies Record<string, AiVariantDefinition>;
 
 export type AiVariantName = keyof typeof AI_VARIANTS;

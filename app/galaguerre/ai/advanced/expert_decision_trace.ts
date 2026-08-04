@@ -53,6 +53,15 @@ export interface ExpertDecisionTrace {
      * jamais déplacer un choix est un pli à retirer, pas à régler.
      */
     ownLethalChangedChoice: boolean;
+    /**
+     * `true` quand le classement de repli entre ripostes incomplètes a réellement DÉPLACÉ le choix,
+     * c'est-à-dire quand la ligne jouée n'est pas celle qu'aurait rendue le faisceau seul.
+     *
+     * Même rôle que `ownLethalChangedChoice`, et pour la même raison : le taux de DÉCLENCHEMENT
+     * d'un mécanisme ne dit rien de son utilité. Un classement de repli qui redésigne à chaque fois
+     * la ligne déjà en tête du faisceau est un no-op coûteux, et seul ce compteur le révèle.
+     */
+    incompleteRankingChangedChoice: boolean;
     /** `null` quand le pli de riposte a réellement choisi la ligne jouée. */
     fallback: ExpertFallbackReason | null;
 }
@@ -65,5 +74,6 @@ export const createExpertDecisionTrace = (): ExpertDecisionTrace => ({
     sawOpponentLethal: false,
     sawOwnLethal: false,
     ownLethalChangedChoice: false,
+    incompleteRankingChangedChoice: false,
     fallback: null,
 });

@@ -112,6 +112,22 @@ export interface OpponentReplyResult {
      * candidats plutôt que de les créditer d'une riposte inoffensive qu'il n'a pas vérifiée.
      */
     complete: boolean;
+    /**
+     * `true` quand le FAISCEAU de riposte a réellement tourné, indépendamment du sort de la
+     * recherche de létal adverse.
+     *
+     * Ce drapeau existe parce que `complete` recouvre deux échecs de nature très différente, que
+     * son nom seul ne permet pas de distinguer :
+     *
+     * - le faisceau n'a rien simulé → le score est celui d'un adversaire imaginaire, il n'est
+     *   comparable à rien ;
+     * - le faisceau a tourné, mais le létal adverse s'est épuisé sans conclure → le score est un
+     *   VRAI score de riposte, seule la preuve d'absence de létal manque.
+     *
+     * Le second cas domine largement au banc, où l'échéance est infinie. Les confondre revient à
+     * jeter des évaluations parfaitement utilisables.
+     */
+    replySearched: boolean;
 }
 
 /**
@@ -156,6 +172,7 @@ export const scoreAfterOpponentReply = async (
             opponentHasLethal: false,
             ownHasLethal: false,
             complete: true,
+            replySearched: true,
         };
     }
 
@@ -179,6 +196,7 @@ export const scoreAfterOpponentReply = async (
             // L'adversaire joue AVANT : son létal clôt la ligne, celui de l'IA n'arriverait jamais.
             ownHasLethal: false,
             complete: true,
+            replySearched: true,
         };
     }
 
@@ -212,20 +230,23 @@ export const scoreAfterOpponentReply = async (
         pickOpponentDiscoverOption,
     });
 
+    // Zéro nœud exploré AVANT l'échéance est un résultat légitime — l'adversaire n'avait
+    // simplement aucun coup à jouer. C'est zéro nœud APRÈS l'échéance qui signe l'abandon.
+    const replySearched = reply.nodesExplored > 0 || Date.now() <= deadline;
+
     return {
         score: ownHasLethal ? staticScore + OWN_LETHAL_BONUS : staticScore,
         opponentHasLethal: false,
         ownHasLethal,
+        replySearched,
         // Un létal adverse non prouvé, ou un faisceau qui n'a rien simulé faute de temps : dans
-        // les deux cas la riposte n'a pas été vue, elle a été supposée inexistante. Zéro nœud
-        // exploré AVANT l'échéance est en revanche un résultat légitime — l'adversaire n'avait
-        // simplement aucun coup à jouer.
+        // les deux cas la riposte n'a pas été vue, elle a été supposée inexistante.
         //
         // Le troisième pli n'entre PAS dans ce critère : un létal de l'IA non trouvé faute de
         // budget ne fait que priver la ligne d'une prime. Écarter le candidat pour autant
         // reviendrait à préférer les lignes qu'on a le moins regardées — l'erreur exacte que ce
         // drapeau existe pour empêcher côté adverse.
-        complete: !lethal.exhausted && (reply.nodesExplored > 0 || Date.now() <= deadline),
+        complete: !lethal.exhausted && replySearched,
     };
 };
 

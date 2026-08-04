@@ -51,6 +51,8 @@ export interface ExpertTraceTotals {
     sawOpponentLethal: number;
     sawOwnLethal: number;
     ownLethalChangedChoice: number;
+    /** Décisions où le classement de repli entre ripostes incomplètes a changé la ligne jouée. */
+    incompleteRankingChangedChoice: number;
     fallbacks: Record<ExpertFallbackReason, number>;
 }
 
@@ -64,6 +66,7 @@ export const createExpertTraceTotals = (): ExpertTraceTotals => ({
     sawOpponentLethal: 0,
     sawOwnLethal: 0,
     ownLethalChangedChoice: 0,
+    incompleteRankingChangedChoice: 0,
     fallbacks: { NOTHING_TO_PLAY: 0, SINGLE_CANDIDATE: 0, NO_COMPLETE_REPLY: 0 },
 });
 
@@ -80,6 +83,8 @@ export const mergeExpertTraceTotals = (
     sawOpponentLethal: into.sawOpponentLethal + from.sawOpponentLethal,
     sawOwnLethal: into.sawOwnLethal + from.sawOwnLethal,
     ownLethalChangedChoice: into.ownLethalChangedChoice + from.ownLethalChangedChoice,
+    incompleteRankingChangedChoice:
+        into.incompleteRankingChangedChoice + from.incompleteRankingChangedChoice,
     fallbacks: {
         NOTHING_TO_PLAY: into.fallbacks.NOTHING_TO_PLAY + from.fallbacks.NOTHING_TO_PLAY,
         SINGLE_CANDIDATE: into.fallbacks.SINGLE_CANDIDATE + from.fallbacks.SINGLE_CANDIDATE,
@@ -104,6 +109,7 @@ const recordDecision = (totals: ExpertTraceTotals, decision: AiDecision): void =
     if (trace.sawOpponentLethal) totals.sawOpponentLethal++;
     if (trace.sawOwnLethal) totals.sawOwnLethal++;
     if (trace.ownLethalChangedChoice) totals.ownLethalChangedChoice++;
+    if (trace.incompleteRankingChangedChoice) totals.incompleteRankingChangedChoice++;
 
     if (trace.fallback) totals.fallbacks[trace.fallback]++;
     else totals.decidedByReply++;

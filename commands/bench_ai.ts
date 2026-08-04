@@ -567,6 +567,9 @@ export default class BenchAi extends BaseCommand {
         this.logger.info(
             `  repli, aucune riposte complète : ${share(totals.fallbacks.NO_COMPLETE_REPLY)}`,
         );
+        const ranked = share(totals.incompleteRankingChangedChoice);
+
+        this.logger.info(`  dont départagées entre incomplètes : ${ranked}`);
         const replies = `${totals.repliesScored} / ${totals.repliesIncomplete} / ${totals.repliesSkipped}`;
 
         this.logger.info(`  ripostes notées / tronquées / sautées : ${replies}`);
