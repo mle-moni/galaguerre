@@ -13,49 +13,74 @@ isolé ne fait gagner du temps qu'une fois, un verdict qui ferme une famille d'i
 ## À lire avant tout le reste : la recherche est déjà terminée
 
 Une mesure faite après coup explique les six rejets ci-dessous, et rend inutile toute une catégorie
-d'idées. Elle se relance en une commande :
+d'idées. Elle se relance en une commande, deck par deck :
 
 ```bash
-node ace dev:bench-prefilter --games=12 --rounds=16
+node ace dev:bench-prefilter --deck=MIDRANGE --games=10 --rounds=16
 ```
 
-Sur 75 positions de milieu de partie :
+Quatre listes du dépôt, positions de milieu de partie, `topK` de production = 18, plafond de
+12 000 nœuds :
 
-```
-coups à ordonner : médiane 6, maximum 24      (pour un topK de 18)
-positions où le pré-filtre TRONQUE : 5,3 %
-recherches arrêtées par le budget : 0 (0,0 %)  (plafond : 12 000 nœuds)
-nœuds simulés, production : médiane 40, maximum 684
-nœuds simulés, référence sans pré-filtre à 250 000 nœuds : médiane 40, maximum 712
-```
+| Deck | coups à ordonner (méd. / p90 / max) | tronque | nœuds simulés (méd. / max) | budget atteint |
+|---|---|---|---|---|
+| IA Aggro pets | 6 / 13 / 24 | 6,3 % | 40 / 684 | **0 sur 63** |
+| IA Mid-range | 8 / 23 / 35 | 15,8 % | 74 / 1 252 | **0 sur 95** |
+| Joueur mid-range | 7 / 15 / 27 | 5,3 % | 73 / 797 | **0 sur 94** |
+| Joueur aggro | 6 / 12 / 17 | 0 % | 44 / 414 | **0 sur 63** |
 
-**L'arbre d'un tour tient dans quelques dizaines de nœuds, et le faisceau le termine.** Pas une
-seule fois sur 75 positions la recherche principale n'a atteint son budget ; une référence à
-250 000 nœuds et sans aucun pré-filtre simule le même nombre de nœuds et trouve les mêmes coups.
-Le facteur de branchement du jeu est simplement petit : six coups légaux en médiane, trois ou
-quatre actions par tour.
+**L'arbre d'un tour tient dans quelques dizaines de nœuds, et le faisceau le termine.** Sur les 315
+positions des quatre decks, la recherche principale n'a pas atteint son budget une seule fois — au
+pire elle en consomme un dixième. Une référence à 250 000 nœuds et sans aucun pré-filtre simule le
+même nombre de nœuds et trouve les mêmes coups.
 
 Ce que ça implique, et ce qui aurait fait économiser six expériences :
 
-1. **Aucune amélioration de la RECHERCHE ne peut rapporter de force.** Élargir, approfondir,
-   ordonner mieux, mémoriser — il n'y a rien à trouver de plus, tout est déjà trouvé. Les six
-   rejets ci-dessous ne sont pas six coïncidences, c'est une seule et même cause mesurée six fois.
-2. **Le pré-filtre n'est pas un goulot.** Il ne tronque que 5,3 % des positions et n'y coûte aucun
-   désaccord. Régler les constantes de `scoreTrade` ou de `evaluateMinion` *pour le pré-filtre*
-   n'a aucun potentiel.
-3. **Le débit ne se convertit PAS en profondeur.** Les fiches `to_try/01` et `to_try/03` affirmaient
+1. **Élargir ou approfondir la recherche ne peut rien rapporter.** Il n'y a rien à trouver de plus,
+   tout est déjà trouvé. Les six rejets ci-dessous ne sont pas six coïncidences, c'est une seule et
+   même cause mesurée six fois.
+2. **Le débit ne se convertit PAS en profondeur.** Les fiches `to_try/01` et `to_try/03` affirmaient
    le contraire ; c'est faux ici. Une recherche qui finit avant son budget n'ira pas plus loin si on
    l'accélère. Ces pistes restent valables pour la LATENCE — qui est un vrai sujet, l'Expert étant à
    889 ms de p95 — mais leur effet sur la force est nul par construction.
-4. **La fonction d'évaluation porte donc 100 % de la force.** Quand la recherche est exhaustive, ce
-   qui reste est entièrement le choix du critère. C'est le seul axe qui subsiste.
+3. **Le pré-filtre est un goulot marginal, pas nul.** Sur le deck le plus riche il tronque 15,8 %
+   des positions et coûte UN désaccord sur 95. C'est trois fois plus que sur le deck Aggro, et
+   c'est la raison de la mise en garde ci-dessous.
 
-Réserves honnêtes sur cette mesure : les positions viennent de parties jouées à 120 nœuds par
-décision, donc d'un jeu plus faible que le vrai ; et `nodesExplored` ne compte que le faisceau
-PRINCIPAL, pas la recherche de létal ni le pli de riposte, qui font l'essentiel des 191 ms par
-décision. La complétude constatée porte donc sur le tour de l'IA, pas sur la simulation du tour
-adverse — mais le rejet de `expert-strong-opponent-model`, qui doublait le budget de riposte pour
-rien, va dans le même sens.
+### Ce que cette mesure NE dit pas
+
+**Elle dépend du deck, et le premier chiffre publié était le plus favorable.** La mesure d'origine
+portait sur le deck Aggro de l'IA, le moins ramifié des quatre : médiane 6, troncature 6,3 %. Sur le
+Mid-range de l'IA, tout double — p90 à 23 coups, troncature à 15,8 %, un désaccord réellement
+imputable au pré-filtre. La conclusion « le budget suffit » tient partout ; la conclusion « le
+pré-filtre ne mord jamais » ne tenait que sur un deck. **Refaire la mesure sur la liste concernée
+avant de conclure quoi que ce soit sur une liste nouvelle.**
+
+**Elle ne dit rien des decks à fort aléatoire, et c'est la limite la plus sérieuse.** Les quatre
+listes mesurées sont celles du dépôt ; un joueur peut en construire une empilant découvertes et
+effets aléatoires. Or — et c'est structurel, pas une question de deck — **la recherche ne se
+ramifie PAS sur l'aléatoire** :
+
+- `applyAiMove` résout les découvertes sur place via `pickDiscoverOption`, un sélecteur
+  déterministe (`resolveSimulatedDiscovers`) ;
+- les cibles aléatoires sont tirées du PRNG seedé, et `deriveSeed` fixe une graine par ligne.
+
+Une ligne dont la valeur dépend d'un tirage est donc évaluée sur **un seul tirage**. Bonne nouvelle
+pour la conclusion ci-dessus : l'aléatoire ne gonfle pas l'arbre, la complétude n'est pas menacée.
+Mauvaise nouvelle, et jamais mesurée : « exhaustive » veut dire exhaustive sur UN échantillon du
+hasard, pas sur le jeu. Plus un deck contient de découvertes et d'effets aléatoires, plus le
+classement des lignes repose sur un coup de dé unique.
+
+C'est un défaut de la RECHERCHE que ni les six rejets ni cette mesure ne ferment — ils portent tous
+sur la taille de l'arbre, pas sur la variance de son évaluation. Voir
+[`to_try/06-echantillonner-les-lignes-aleatoires.md`](to_try/06-echantillonner-les-lignes-aleatoires.md).
+
+**Autres réserves.** Les positions viennent de parties jouées à 120 nœuds par décision, donc d'un
+jeu plus faible que le vrai. Et `nodesExplored` ne compte que le faisceau PRINCIPAL, pas la
+recherche de létal ni le pli de riposte, qui font l'essentiel des 191 ms par décision : la
+complétude constatée porte sur le tour de l'IA, pas sur la simulation du tour adverse — le rejet de
+`expert-strong-opponent-model`, qui doublait le budget de riposte pour rien, va dans le même sens
+sans le prouver.
 
 ---
 
@@ -371,9 +396,10 @@ réfuterait. Résumé :
 | [Régler automatiquement l'évaluation](to_try/02-regler-la-fonction-devaluation.md) | Évaluation | **Élevé** — c'est elle qui porte le signal |
 | [Un budget par tour, pas par action](to_try/03-budget-par-tour.md) | Débit | Moyen |
 | [Ne plus jeter les ripostes incomplètes](to_try/04-ripostes-incompletes.md) | Recherche | **CLOSE** — mesurée et rejetée |
+| [Échantillonner les lignes aléatoires](to_try/06-echantillonner-les-lignes-aleatoires.md) | Recherche (variance) | **Inconnu** — angle mort des six rejets |
 | [Pistes mineures](to_try/05-pistes-mineures.md) | Divers | Faible à moyen |
 
-Les deux premières sont les seules qui restent debout après les six rejets. Les pistes « débit »
+Les fiches 02 et 06 sont les seules qui restent debout après les six rejets. Les pistes « débit »
 sont **invisibles à budget de nœuds** : elles n'ont de sens que mesurées avec
 `--no-deterministic --think-ms=...`.
 

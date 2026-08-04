@@ -23,8 +23,14 @@ Conséquence directe sur ces fiches : **les pistes « débit » ne peuvent plus 
 Une recherche qui finit avant son budget n'ira pas plus loin si on l'accélère. Elles restent des
 pistes de LATENCE, ce qui est un vrai sujet (889 ms de p95), mais il faut les lire comme telles.
 
-Reste un seul axe de force : **la fonction d'évaluation**, qui porte 100 % de la décision dès lors
-que la recherche est complète.
+Restent deux axes de force :
+
+- **la fonction d'évaluation**, qui porte l'essentiel de la décision dès lors que la recherche est
+  complète ;
+- **la variance de l'évaluation sur les lignes aléatoires** — angle mort découvert en vérifiant si
+  la conclusion ci-dessus tenait pour des decks à fort aléatoire. Elle tient, mais pour une raison
+  qui en ouvre un autre : la recherche ne se ramifie pas sur le hasard, elle en tire UN échantillon.
+  « Exhaustive » veut donc dire exhaustive sur un tirage, pas sur le jeu.
 
 | # | Piste | Axe | Effort | Espoir |
 |---|---|---|---|---|
@@ -32,6 +38,7 @@ que la recherche est complète.
 | [01](01-alleger-le-clone-par-noeud.md) | Alléger le clone par nœud | Latence | Moyen | Élevé pour la latence, **nul pour la force** |
 | [03](03-budget-par-tour.md) | Un budget par tour, pas par action | Latence | Moyen | Moyen pour la latence, **nul pour la force** |
 | ~~[04](04-ripostes-incompletes.md)~~ | ~~Ne plus jeter les ripostes incomplètes~~ | Recherche | — | **CLOSE** — mesurée, 49,5 % |
+| [06](06-echantillonner-les-lignes-aleatoires.md) | Évaluer les lignes aléatoires sur plus d'un tirage | Recherche (variance) | Moyen | **Inconnu — jamais mesuré** |
 | [05](05-pistes-mineures.md) | Pistes mineures | Divers | Faible | Faible à moyen |
 
 ## Deux avertissements de méthode
