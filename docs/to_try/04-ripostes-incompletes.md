@@ -1,6 +1,13 @@
-# Ne plus jeter les ripostes incomplètes
+# Ne plus jeter les ripostes incomplètes — PISTE CLOSE
 
-**Axe** : recherche · **Effort** : faible · **Espoir** : moyen
+**Axe** : recherche · **Effort** : faible · **Espoir** : *néant, mesuré*
+
+> **CETTE PISTE EST FERMÉE.** Le point 2 a été implémenté et mesuré : `expert-rank-incomplete`,
+> **49,5 %** sur 800 parties appariées, LLR −1,20. Les points 1 et 3 meurent avec lui, pour la
+> raison donnée en fin de fiche. Voir [`../ai-experiments.md`](../ai-experiments.md).
+>
+> La fiche est conservée parce que le raisonnement ci-dessous est bon — c'est *pour ça* qu'il faut
+> le lire : il montre à quoi ressemble une hypothèse séduisante et fausse dans ce moteur.
 
 ## Le constat
 
@@ -71,8 +78,33 @@ Surveiller `repli, aucune riposte complète` : il doit s'effondrer. S'il baisse 
 bouge, c'est le scénario `expert-deep-reply-lethal` qui se répète — et il faudra en tirer la
 conclusion qui s'impose plutôt que de régler le terme de pénalité indéfiniment.
 
-## Ce qui réfuterait la piste
+## Ce qui réfuterait la piste — et ce qui l'a réfutée
 
-Que le repli à 10,6 % disparaisse sans effet sur le winrate. Cela voudrait dire que le choix de
-l'IA Avancée était, dans ces positions-là, aussi bon que ce que le pli de riposte aurait produit —
-et donc que le pli de riposte ne vaut que dans les positions où il aboutit déjà.
+Le critère écrit d'avance : « que le repli disparaisse sans effet sur le winrate. Cela voudrait dire
+que le choix de l'IA Avancée était, dans ces positions-là, aussi bon que ce que le pli de riposte
+aurait produit. »
+
+C'est exactement ce qui s'est passé, et sous une forme encore plus nette qu'anticipé.
+
+Le classement de repli a **déplacé la ligne jouée sur 3,0 % des décisions** — pas « il n'a pas eu
+l'occasion d'agir » : il a agi, six cents fois par lot de 800 parties, quatre fois plus souvent que
+le troisième pli. Winrate : 49,5 %, immobile.
+
+### Pourquoi les points 1 et 3 meurent aussi
+
+Le point 1 (pénalité d'incertitude au lieu d'exclusion) et le point 3 (graduer cette pénalité par la
+borne optimiste de dégâts) ne diffèrent du point 2 que par la FORCE avec laquelle une riposte
+incertaine pèse sur le classement. Or on vient de mesurer que ce classement, dans ces positions, n'a
+pas de valeur. Les deux ajoutent en prime un risque que le point 2 n'avait pas : laisser une ligne
+non vérifiée écarter une ligne vérifiée.
+
+Il n'y a pas de réglage à trouver entre « exclure » et « pénaliser » quand les deux extrêmes valent
+la même chose.
+
+### La leçon qui dépasse cette fiche
+
+L'erreur de conception est en amont du code : la fiche postulait que **si le pli de riposte est
+utile, alors mieux départager doit être utile**. Les six rejets disent le contraire — le pli de
+riposte a de la valeur (il départage 89 % des décisions et l'Expert bat l'Avancé), mais l'ordre
+qu'il produit parmi les lignes survivantes n'en a plus. Ce sont deux propriétés différentes, et
+la seconde ne se déduit pas de la première.

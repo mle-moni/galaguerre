@@ -37,6 +37,7 @@ veut dire que l'effet, s'il existe, est trop petit pour valoir son coût en late
 | Troisième pli : létal de l'IA au tour suivant | `expert-own-lethal` | **Rejetée** | 49,3 % (800) |
 | Élargir le pli de riposte à 8 lignes | `expert-wide-reply` | **Rejetée** | 48,4 % (800) |
 | Modèle d'adversaire plus fort | `expert-strong-opponent-model` | **Rejetée** | 49,3 % (800) |
+| Départager les ripostes au létal non réfuté | `expert-rank-incomplete` | **Rejetée** | 49,5 % (800) |
 | Court-circuiter la décision de fin de tour | — | **Gardée** | neutre au jeu, gain de latence |
 
 ---
@@ -158,20 +159,70 @@ nouvelle idée dans cette zone part avec une très forte présomption d'échec.
 
 ---
 
-## Le fil conducteur des cinq rejets
+## Rejetée — Départager les ripostes au létal adverse non réfuté
 
-Pris ensemble, ces verdicts dessinent une conclusion que chacun pris isolément ne donnait pas :
+**Hypothèse.** La première qui ne donne PAS plus de moyens au pli de riposte, les trois rejets
+précédents ayant fermé cette famille. Elle change ce qu'on FAIT d'un résultat incertain.
 
-**la marge restante n'est pas dans la RECHERCHE, elle est ailleurs.** Le faisceau ne contient pas
-de redondance à récupérer, le pli de riposte est saturé sous trois angles indépendants, et un pli
-supplémentaire est redondant avec la fonction d'évaluation.
+Une décision sur neuf retombe sur le choix de l'IA Avancée faute d'une seule riposte « complète ».
+Or « incomplète » ne veut pas dire « non simulée » — voir le piège de méthode plus bas : au banc, le
+critère se réduit à « le létal adverse a épuisé ses 450 nœuds sans conclure ». Le faisceau de
+riposte, lui, a bel et bien tourné, et son score est un vrai score de riposte auquel il ne manque
+qu'une preuve. On jetait donc des évaluations utilisables pour rendre la main au faisceau, qui n'a
+jamais regardé la riposte du tout.
 
-Ce qui reste, par élimination :
+**Protocole.** `replySearched` sépare les deux échecs. Quand aucune ligne n'est complète, les lignes
+au létal non réfuté sont départagées entre elles, dans un classement STRICTEMENT séparé du
+classement principal — sans quoi l'absence de preuve de létal jouerait en faveur de la ligne
+incertaine. 800 parties appariées, decks miroir, budget en nœuds.
+
+**Résultat.** **49,5 %** (IC 95 % : 46,4 % – 52,6 %), LLR −1,20. Latence 191 ms contre 185 ms.
+
+**Ce que ça disqualifie.** C'est le rejet le plus large de la série, et il ne doit rien à une
+conjecture : le classement de repli a réellement DÉPLACÉ la ligne jouée sur **3,0 %** des décisions
+— près de quatre fois le taux du troisième pli, qui était déjà le mécanisme le plus actif jamais
+mesuré ici. Six cents décisions changées par lot de 800 parties, pour un winrate immobile.
+
+**Départager mieux les lignes que le faisceau propose ne paie plus.** Les cinq rejets précédents
+suggéraient que le pli de riposte était saturé ; celui-ci le démontre autrement — on a changé le
+choix, souvent, gratuitement. Les lignes candidates d'une même position se valent trop pour que leur
+ordre compte.
+
+Meurent avec elle, sans mesure supplémentaire, les deux variantes restantes de la même fiche : la
+**pénalité d'incertitude** (garder la ligne incertaine avec un score diminué) et sa **graduation par
+la borne optimiste de dégâts**. Elles ne diffèrent que par la force avec laquelle une riposte
+incertaine pèse sur un classement dont on vient de mesurer qu'il n'a pas de valeur dans ces
+positions — et elles ajoutent le risque de laisser une ligne non vérifiée écarter une ligne
+vérifiée.
+
+---
+
+## Le fil conducteur des six rejets
+
+Pris ensemble, ces verdicts dessinent une conclusion que chacun pris isolément ne donnait pas.
+
+Les six portent tous sur la même chose sans qu'on l'ait vu tout de suite : **le CHOIX d'une ligne
+parmi celles que le faisceau produit.** Plus de nœuds pour le létal adverse, plus de lignes à
+départager, un adversaire simulé plus fort, un pli de plus, un classement de repli — cinq façons
+d'améliorer l'arbitrage, plus une de le rendre moins coûteux. Aucune ne rapporte rien.
+
+Les deux derniers vont plus loin que « ça ne marche pas » : ils déplacent effectivement le choix,
+sur 0,8 % puis 3,0 % des décisions, sans effet mesurable. Ce n'est donc pas que les mécanismes
+échouent à agir — **c'est que l'arbitrage lui-même ne porte pas d'enjeu.** Une fois le faisceau
+passé, les lignes survivantes se valent.
+
+Ce qui reste, par élimination, est de part et d'autre de cet arbitrage :
 
 1. **La fonction d'évaluation elle-même** (`evaluate_game_state.ts`), dont les coefficients sont
    réglés à la main. Le verdict du troisième pli montre qu'elle porte déjà l'essentiel du signal —
-   ce qui en fait le point où une amélioration se répercuterait partout.
-2. **Le débit de simulation**, qui à budget de TEMPS de production se convertit directement en
+   ce qui en fait le point où une amélioration se répercuterait partout. C'est aussi elle qui rend
+   les lignes candidates si semblables : si elles se valent au classement, c'est peut-être qu'elle
+   ne voit pas ce qui les distingue.
+2. **Ce que le faisceau PRODUIT**, en amont du choix — `prefilterMoves`, `topK`, le regroupement
+   par premier coup. Aucune mesure ne l'a jamais touché. Si les lignes survivantes se valent, la
+   question n'est plus « laquelle prendre » mais « pourquoi n'y en a-t-il pas de meilleure dans le
+   lot ».
+3. **Le débit de simulation**, qui à budget de TEMPS de production se convertit directement en
    profondeur de recherche. Toutes les mesures ci-dessus sont à budget de nœuds, un régime qui
    neutralise délibérément la vitesse : elles ne disent donc rien sur cet axe.
 
@@ -181,7 +232,7 @@ Les pistes correspondantes sont détaillées dans [`to_try/`](to_try/).
 
 ## Pièges de méthode déjà payés
 
-Ces trois-là ont produit des chiffres faux qu'on a cru vrais. Ils ne concernent pas une hypothèse
+Ces quatre-là ont produit des chiffres faux qu'on a cru vrais. Ils ne concernent pas une hypothèse
 de jeu mais la façon de mesurer, et ils se re-tendent tout seuls.
 
 ### Un banc « déterministe » qui ne l'était pas
@@ -228,9 +279,32 @@ Le troisième pli se déclenchait sur 7,6 % des décisions, ce qui donnait l'ill
 très actif. Il ne changeait la ligne jouée que sur 0,8 %.
 
 **Pour toute heuristique nouvelle, instrumenter le taux auquel elle DÉPLACE le choix, pas celui
-auquel elle s'applique.** Le banc le fait désormais (`ownLethalChangedChoice`) : mener un
-classement fantôme sans l'heuristique et comparer les deux argmax ne coûte aucune recherche
-supplémentaire.
+auquel elle s'applique.** Le banc le fait désormais (`ownLethalChangedChoice`,
+`incompleteRankingChangedChoice`) : mener un classement fantôme sans l'heuristique et comparer les
+deux argmax ne coûte aucune recherche supplémentaire.
+
+Attention à la lecture inverse, tout aussi trompeuse : le classement de repli déplaçait le choix
+sur 3,0 % des décisions, un taux quatre fois supérieur, et n'a pas mieux marché. **Un taux de
+déplacement élevé ne promet rien non plus** — il rend seulement le verdict négatif interprétable,
+en excluant « le mécanisme ne s'est pas exprimé » parmi les explications.
+
+### « Riposte incomplète » ne veut pas dire « riposte non simulée »
+
+```ts
+complete: !lethal.exhausted && (reply.nodesExplored > 0 || Date.now() <= deadline);
+```
+
+En mode déterministe, `deadline` vaut `Infinity` : le second facteur est toujours vrai et le critère
+se réduit à `!lethal.exhausted`. Au banc, une riposte « tronquée » est donc une riposte dont la
+recherche de létal ADVERSE s'est épuisée — le faisceau de riposte, lui, a tourné normalement.
+
+Le nom du compteur laissait croire l'inverse, et deux expériences en ont pâti : `expert-deep-reply-lethal`
+a fait tomber le compteur sans rien gagner, ce qui n'a été compris qu'après coup, et la fiche
+`to_try/04` a été écrite en supposant qu'un budget manquant était en cause. `replySearched` sépare
+désormais les deux échecs.
+
+**Un compteur dont le nom décrit l'intention plutôt que la formule finit par être lu comme son
+nom.** Vérifier la formule à chaque fois qu'on bâtit une hypothèse dessus.
 
 ---
 
@@ -244,9 +318,12 @@ réfuterait. Résumé :
 | [Alléger le clone par nœud](to_try/01-alleger-le-clone-par-noeud.md) | Débit | **Élevé** — 92 % des octets clonés sont immuables |
 | [Régler automatiquement l'évaluation](to_try/02-regler-la-fonction-devaluation.md) | Évaluation | **Élevé** — c'est elle qui porte le signal |
 | [Un budget par tour, pas par action](to_try/03-budget-par-tour.md) | Débit | Moyen |
-| [Ne plus jeter les ripostes incomplètes](to_try/04-ripostes-incompletes.md) | Recherche | Moyen — 11 % des décisions en dépendent |
+| [Ne plus jeter les ripostes incomplètes](to_try/04-ripostes-incompletes.md) | Recherche | **CLOSE** — mesurée et rejetée |
 | [Pistes mineures](to_try/05-pistes-mineures.md) | Divers | Faible à moyen |
 
-Les deux premières sont les seules qui restent debout après les cinq rejets. Les pistes « débit »
+Les deux premières sont les seules qui restent debout après les six rejets. Les pistes « débit »
 sont **invisibles à budget de nœuds** : elles n'ont de sens que mesurées avec
 `--no-deterministic --think-ms=...`.
+
+La fiche 04 est conservée fermée plutôt que supprimée : elle contient le raisonnement qui rendait
+l'idée séduisante, et c'est ce raisonnement qu'il faut lire pour ne pas le refaire.
