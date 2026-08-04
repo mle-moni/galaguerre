@@ -1,6 +1,30 @@
 # Régler automatiquement la fonction d'évaluation
 
-**Axe** : évaluation · **Effort** : élevé · **Espoir** : élevé
+**Axe** : évaluation · **Effort** : élevé · **Espoir** : élevé — *seul axe de force restant*
+
+> **STATUT.** `dev:bench-prefilter` a montré que la recherche est exhaustive (voir
+> [`../ai-experiments.md`](../ai-experiments.md)). Quand la recherche est complète, l'évaluation
+> porte 100 % de la force : cette fiche n'est plus « la piste la plus prometteuse », c'est la
+> seule qui reste.
+>
+> **Outillage prêt.** `--left-weights` / `--right-weights` surchargent les sept coefficients de
+> `EvaluationWeights` au banc. Le travail d'implémentation annoncé plus bas est donc fait pour
+> eux ; il reste à faire pour les constantes de `evaluateMinion`, qui ne sont pas encore exposées.
+>
+> **Premier balayage, déjà négatif.** Trois perturbations d'un seul coefficient, 400 parties
+> appariées chacune, profil Mid-range :
+>
+> | Surcharge | Score |
+> |---|---|
+> | `board=1.5` (au lieu de 1,15) | 45,3 % |
+> | `board=0.85` | 46,0 % |
+> | `enemyHeroDamage=0.6` (au lieu de 0,4) | 46,8 % |
+>
+> `board` dégrade **dans les deux sens** : 1,15 est près d'un optimum local sur cet axe. Le réglage
+> à la main n'est donc pas grossièrement faux, et il ne faut pas espérer un gain facile en
+> bricolant un coefficient. C'est un argument POUR le réglage automatique — un optimum local se
+> quitte par un mouvement simultané sur plusieurs coordonnées, ce que SPSA fait et qu'un balayage
+> une-variable-à-la-fois ne peut par construction pas faire.
 
 ## Pourquoi c'est probablement là que se trouve la marge
 
@@ -46,9 +70,11 @@ itération, quel que soit le nombre de paramètres. Perturber tous les coefficie
 et déplacer les poids dans le sens du gagnant.
 
 Le banc actuel fournit déjà tout le nécessaire :
-- `--left-set` / `--right-set` acceptent des surcharges en ligne — mais **uniquement pour les clés
-  de `ExpertAiConfig`**. Il faudra étendre `parseConfigOverrides` aux poids d'évaluation, ce qui
-  est le vrai travail d'implémentation de cette piste ;
+- `--left-weights` / `--right-weights` surchargent les sept coefficients de `EvaluationWeights`
+  (`parseWeightOverrides` dans `ai_variants.ts`). Une clé inconnue est refusée, pas ignorée. Les
+  douze constantes de `evaluateMinion`, elles, ne sont **pas** exposées : c'est ce qui reste à
+  écrire, et il faudra les découpler du pré-filtre qui les partage, sans quoi une mesure testerait
+  deux mécanismes à la fois ;
 - l'appariement et les graines communes réduisent déjà fortement la variance, ce qui est vital :
   SPSA sur des mesures bruitées ne converge pas, il erre ;
 - `--workers` parallélise.

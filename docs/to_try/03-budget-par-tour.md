@@ -1,6 +1,16 @@
 # Un budget par tour, pas par action
 
-**Axe** : débit · **Effort** : moyen · **Espoir** : moyen
+**Axe** : latence · **Effort** : moyen · **Espoir** : moyen pour la latence, **nul pour la force**
+
+> **REQUALIFIÉE EN PISTE DE LATENCE.** `dev:bench-prefilter` montre que la recherche principale
+> finit avant son budget : 40 nœuds simulés en médiane pour un plafond de 12 000, budget atteint
+> sur 0 position sur 75. **Une recherche qui termine d'elle-même n'ira pas plus loin si on
+> l'accélère** — l'effet de cette piste sur la FORCE est nul par construction, et toute mesure de
+> winrate sur elle rendra 50 % quel que soit le gain de débit obtenu.
+>
+> Elle reste valable pour ce qu'elle fait réellement : baisser la latence, aujourd'hui à 191 ms de
+> moyenne et 889 ms de p95 par décision. Mesurer un temps, pas un winrate.
+> Voir [`../ai-experiments.md`](../ai-experiments.md).
 
 ## Le constat
 
@@ -25,6 +35,11 @@ périmé dès qu'un effet aléatoire diverge — c'est d'ailleurs la justificati
 
 **Le gain attendu est en latence, la force peut baisser.** C'est un arbitrage, pas une
 optimisation.
+
+Cette phrase, écrite avant la mesure du pré-filtre, était trop prudente dans un sens et pas assez
+dans l'autre : la profondeur supplémentaire évoquée ci-dessus n'existe pas non plus, puisque la
+recherche est déjà exhaustive à chaque re-décision. Ce qu'on paie en re-cherchant après chaque
+action, c'est la RÉSOLUTION des divergences aléatoires — pas de la profondeur.
 
 ## Les trois formes, de la plus sûre à la plus agressive
 

@@ -10,6 +10,55 @@ disqualifie au-delà du réglage testé**. C'est cette dernière ligne qui a de 
 isolé ne fait gagner du temps qu'une fois, un verdict qui ferme une famille d'idées en fait gagner
 à chaque fois.
 
+## À lire avant tout le reste : la recherche est déjà terminée
+
+Une mesure faite après coup explique les six rejets ci-dessous, et rend inutile toute une catégorie
+d'idées. Elle se relance en une commande :
+
+```bash
+node ace dev:bench-prefilter --games=12 --rounds=16
+```
+
+Sur 75 positions de milieu de partie :
+
+```
+coups à ordonner : médiane 6, maximum 24      (pour un topK de 18)
+positions où le pré-filtre TRONQUE : 5,3 %
+recherches arrêtées par le budget : 0 (0,0 %)  (plafond : 12 000 nœuds)
+nœuds simulés, production : médiane 40, maximum 684
+nœuds simulés, référence sans pré-filtre à 250 000 nœuds : médiane 40, maximum 712
+```
+
+**L'arbre d'un tour tient dans quelques dizaines de nœuds, et le faisceau le termine.** Pas une
+seule fois sur 75 positions la recherche principale n'a atteint son budget ; une référence à
+250 000 nœuds et sans aucun pré-filtre simule le même nombre de nœuds et trouve les mêmes coups.
+Le facteur de branchement du jeu est simplement petit : six coups légaux en médiane, trois ou
+quatre actions par tour.
+
+Ce que ça implique, et ce qui aurait fait économiser six expériences :
+
+1. **Aucune amélioration de la RECHERCHE ne peut rapporter de force.** Élargir, approfondir,
+   ordonner mieux, mémoriser — il n'y a rien à trouver de plus, tout est déjà trouvé. Les six
+   rejets ci-dessous ne sont pas six coïncidences, c'est une seule et même cause mesurée six fois.
+2. **Le pré-filtre n'est pas un goulot.** Il ne tronque que 5,3 % des positions et n'y coûte aucun
+   désaccord. Régler les constantes de `scoreTrade` ou de `evaluateMinion` *pour le pré-filtre*
+   n'a aucun potentiel.
+3. **Le débit ne se convertit PAS en profondeur.** Les fiches `to_try/01` et `to_try/03` affirmaient
+   le contraire ; c'est faux ici. Une recherche qui finit avant son budget n'ira pas plus loin si on
+   l'accélère. Ces pistes restent valables pour la LATENCE — qui est un vrai sujet, l'Expert étant à
+   889 ms de p95 — mais leur effet sur la force est nul par construction.
+4. **La fonction d'évaluation porte donc 100 % de la force.** Quand la recherche est exhaustive, ce
+   qui reste est entièrement le choix du critère. C'est le seul axe qui subsiste.
+
+Réserves honnêtes sur cette mesure : les positions viennent de parties jouées à 120 nœuds par
+décision, donc d'un jeu plus faible que le vrai ; et `nodesExplored` ne compte que le faisceau
+PRINCIPAL, pas la recherche de létal ni le pli de riposte, qui font l'essentiel des 191 ms par
+décision. La complétude constatée porte donc sur le tour de l'IA, pas sur la simulation du tour
+adverse — mais le rejet de `expert-strong-opponent-model`, qui doublait le budget de riposte pour
+rien, va dans le même sens.
+
+---
+
 ## Comment mesurer
 
 ```bash
@@ -211,20 +260,23 @@ sur 0,8 % puis 3,0 % des décisions, sans effet mesurable. Ce n'est donc pas que
 échouent à agir — **c'est que l'arbitrage lui-même ne porte pas d'enjeu.** Une fois le faisceau
 passé, les lignes survivantes se valent.
 
-Ce qui reste, par élimination, est de part et d'autre de cet arbitrage :
+La mesure du pré-filtre, en tête de ce fichier, donne la cause commune : **la recherche est
+exhaustive.** L'arbre d'un tour tient dans quelques dizaines de nœuds pour un budget de douze
+mille. Les lignes survivantes se valent parce qu'il n'y a rien à survivre — elles y sont toutes.
 
-1. **La fonction d'évaluation elle-même** (`evaluate_game_state.ts`), dont les coefficients sont
-   réglés à la main. Le verdict du troisième pli montre qu'elle porte déjà l'essentiel du signal —
-   ce qui en fait le point où une amélioration se répercuterait partout. C'est aussi elle qui rend
-   les lignes candidates si semblables : si elles se valent au classement, c'est peut-être qu'elle
-   ne voit pas ce qui les distingue.
-2. **Ce que le faisceau PRODUIT**, en amont du choix — `prefilterMoves`, `topK`, le regroupement
-   par premier coup. Aucune mesure ne l'a jamais touché. Si les lignes survivantes se valent, la
-   question n'est plus « laquelle prendre » mais « pourquoi n'y en a-t-il pas de meilleure dans le
-   lot ».
-3. **Le débit de simulation**, qui à budget de TEMPS de production se convertit directement en
-   profondeur de recherche. Toutes les mesures ci-dessus sont à budget de nœuds, un régime qui
-   neutralise délibérément la vitesse : elles ne disent donc rien sur cet axe.
+Ce qui reste, par élimination, tient donc en un point :
+
+**La fonction d'évaluation** (`evaluate_game_state.ts`), dont les coefficients sont réglés à la
+main. Quand la recherche est complète, elle porte 100 % de la force : le choix ne dépend plus que du
+critère. C'est aussi elle qui rend les lignes candidates indiscernables — si elles se valent au
+classement, c'est qu'elle ne voit pas ce qui les distingue.
+
+Deux axes qu'on croyait ouverts et qui ne le sont pas :
+
+- **Ce que le faisceau PRODUIT** (`prefilterMoves`, `topK`) — mesuré depuis : il ne tronque que
+  5,3 % des positions, sans un seul désaccord avec une référence sans pré-filtre. Clos.
+- **Le débit de simulation** — il ne se convertit pas en profondeur, puisque la recherche finit
+  avant son budget. Il reste un sujet de LATENCE (889 ms de p95), pas de force.
 
 Les pistes correspondantes sont détaillées dans [`to_try/`](to_try/).
 

@@ -1,6 +1,16 @@
 # Alléger le clone par nœud
 
-**Axe** : débit de simulation · **Effort** : moyen · **Espoir** : élevé
+**Axe** : latence · **Effort** : moyen · **Espoir** : élevé pour la latence, **nul pour la force**
+
+> **REQUALIFIÉE EN PISTE DE LATENCE.** `dev:bench-prefilter` montre que la recherche principale
+> finit avant son budget : 40 nœuds simulés en médiane pour un plafond de 12 000, budget atteint
+> sur 0 position sur 75. **Une recherche qui termine d'elle-même n'ira pas plus loin si on
+> l'accélère** — l'effet de cette piste sur la FORCE est nul par construction, et toute mesure de
+> winrate sur elle rendra 50 % quel que soit le gain de débit obtenu.
+>
+> Elle reste valable pour ce qu'elle fait réellement : baisser la latence, aujourd'hui à 191 ms de
+> moyenne et 889 ms de p95 par décision. Mesurer un temps, pas un winrate.
+> Voir [`../ai-experiments.md`](../ai-experiments.md).
 
 ## Le constat, mesuré
 
