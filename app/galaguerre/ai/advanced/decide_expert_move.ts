@@ -4,7 +4,7 @@ import { createSimulationGame } from "../../simulation/simulation_game.js";
 import { enumerateAiMoves, type AiMove } from "../enumerate_ai_moves.js";
 import { computeThinkBudgetMs, MAX_SEARCH_DEPTH } from "./advanced_ai_config.js";
 import type { AiDecision } from "./decide_next_move.js";
-import { getWeightsForProfile } from "./evaluate_game_state.js";
+import { getWeightsForProfile, type EvaluationWeights } from "./evaluate_game_state.js";
 import {
     EXPERT_BUDGET_SHARES,
     EXPERT_REPLY_LETHAL_TIME_SHARE,
@@ -48,6 +48,14 @@ export interface DecideExpertMoveOptions {
     opponentUserId: number;
     profile: AiDeckProfile | undefined;
     config: ExpertAiConfig;
+    /**
+     * Surcharges des coefficients d'évaluation, appliquées par-dessus ceux du profil de deck.
+     * Réservé au réglage hors ligne (banc d'essai) : en production, `profile` décide seul.
+     *
+     * Ne touche QUE la façon dont l'IA note ses propres positions. L'adversaire simulé garde ses
+     * poids mid-range (`search_opponent_reply.ts`) : on règle un joueur, pas un monde.
+     */
+    weightOverrides?: Partial<EvaluationWeights>;
     /** Graine du PRNG de simulation ; à faire varier entre deux décisions. */
     seed: number;
     /**
@@ -72,6 +80,7 @@ export const decideExpertMoves = async (
         opponentUserId,
         profile,
         config,
+        weightOverrides,
         seed,
         deterministic = false,
     }: DecideExpertMoveOptions,
@@ -117,7 +126,8 @@ export const decideExpertMoves = async (
     const replyDeadline = deterministic ? NO_DEADLINE : startedAt + budgetMs;
 
     const pickDiscoverOption = createDiscoverPicker(aiUserId, profile, { omniscient: true });
-    const weights = getWeightsForProfile(profile);
+    // Les poids du profil de deck servent de base ; une surcharge n'écrase que ce qu'elle nomme.
+    const weights = { ...getWeightsForProfile(profile), ...weightOverrides };
 
     return runInSimulation({ rng: createSeededRng(seed) }, async () => {
         // Un létal gagne la partie : aucune réplique adverse à évaluer.

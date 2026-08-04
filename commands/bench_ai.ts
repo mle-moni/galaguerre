@@ -9,6 +9,7 @@ import {
     AI_VARIANT_NAMES,
     AI_VARIANTS,
     parseConfigOverrides,
+    parseWeightOverrides,
     resolveAiVariant,
     type ResolvedAiVariant,
 } from "#galaguerre/ai/advanced/ai_variants";
@@ -145,6 +146,14 @@ export default class BenchAi extends BaseCommand {
     @flags.string({ description: "Surcharges du camp droit" })
     declare rightSet?: string;
 
+    @flags.string({
+        description: "Coefficients d'évaluation du camp gauche, ex. board=1.3,handCard=2.0",
+    })
+    declare leftWeights?: string;
+
+    @flags.string({ description: "Coefficients d'évaluation du camp droit" })
+    declare rightWeights?: string;
+
     @flags.boolean({
         description: "Jouer chaque graine deux fois, camps échangés (réduit fortement la variance)",
         default: true,
@@ -202,8 +211,16 @@ export default class BenchAi extends BaseCommand {
         let right: ResolvedAiVariant;
 
         try {
-            left = resolveAiVariant(this.left, parseConfigOverrides(this.leftSet));
-            right = resolveAiVariant(this.right, parseConfigOverrides(this.rightSet));
+            left = resolveAiVariant(
+                this.left,
+                parseConfigOverrides(this.leftSet),
+                parseWeightOverrides(this.leftWeights),
+            );
+            right = resolveAiVariant(
+                this.right,
+                parseConfigOverrides(this.rightSet),
+                parseWeightOverrides(this.rightWeights),
+            );
         } catch (error) {
             this.logger.error(error instanceof Error ? error.message : String(error));
             this.exitCode = 1;
@@ -411,6 +428,8 @@ export default class BenchAi extends BaseCommand {
 
         if (this.leftSet) args.push(`--left-set=${this.leftSet}`);
         if (this.rightSet) args.push(`--right-set=${this.rightSet}`);
+        if (this.leftWeights) args.push(`--left-weights=${this.leftWeights}`);
+        if (this.rightWeights) args.push(`--right-weights=${this.rightWeights}`);
         if (this.profile) args.push(`--profile=${this.profile}`);
 
         // Pas de délai : une recherche peut légitimement tenir plusieurs minutes sur un lot.

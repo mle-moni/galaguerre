@@ -1,5 +1,6 @@
 import { AI_DIFFICULTIES, type AiDifficulty } from "#api_types/game.types";
 import { ADVANCED_AI_DEFAULTS } from "./advanced_ai_config.js";
+import { MIDRANGE_WEIGHTS, type EvaluationWeights } from "./evaluate_game_state.js";
 import { EXPERT_AI_DEFAULTS, type ExpertAiConfig } from "./expert_ai_config.js";
 
 /**
@@ -24,6 +25,15 @@ export interface AiVariantDefinition {
     description: string;
     /** Surcharges appliquées aux réglages par défaut de la difficulté. */
     config?: Partial<ExpertAiConfig>;
+    /**
+     * Surcharges des poids d'évaluation, appliquées PAR-DESSUS le jeu de poids du profil de deck.
+     *
+     * Séparées de `config` à dessein : ce ne sont pas des réglages de recherche, elles ne
+     * s'exposent pas en base et ne se règlent pas en production. Ce sont les coefficients de
+     * `evaluate_game_state.ts`, réglés à la main et jamais mesurés — l'objet même de la fiche
+     * `docs/to_try/02-regler-la-fonction-devaluation.md`.
+     */
+    weights?: Partial<EvaluationWeights>;
 }
 
 export const AI_VARIANTS = {
@@ -199,6 +209,12 @@ export interface ResolvedAiVariant {
     name: string;
     difficulty: AiDifficulty;
     config: ExpertAiConfig;
+    /**
+     * Vide pour toute variante qui ne touche pas à l'évaluation, c'est-à-dire pour toutes celles
+     * mesurées jusqu'ici. Reste PARTIEL : les poids du profil de deck servent de base, et une
+     * surcharge n'écrase que les coefficients qu'elle nomme.
+     */
+    weights: Partial<EvaluationWeights>;
 }
 
 /**
@@ -228,6 +244,7 @@ const isVariantName = (value: string): value is AiVariantName => value in AI_VAR
 export const resolveAiVariant = (
     spec: string,
     overrides: Partial<ExpertAiConfig> = {},
+    weightOverrides: Partial<EvaluationWeights> = {},
 ): ResolvedAiVariant => {
     const trimmed = spec.trim();
 
@@ -242,6 +259,7 @@ export const resolveAiVariant = (
                 ...variant.config,
                 ...overrides,
             },
+            weights: { ...variant.weights, ...weightOverrides },
         };
     }
 
@@ -252,6 +270,7 @@ export const resolveAiVariant = (
             name: upper,
             difficulty: upper,
             config: { ...defaultsForDifficulty(upper), ...overrides },
+            weights: { ...weightOverrides },
         };
     }
 
@@ -264,16 +283,23 @@ export const resolveAiVariant = (
 /** Champs de `ExpertAiConfig` surchargeables en ligne de commande. */
 const OVERRIDABLE_KEYS = Object.keys(EXPERT_AI_DEFAULTS) as (keyof ExpertAiConfig)[];
 
+/** Coefficients d'évaluation surchargeables en ligne de commande. */
+const OVERRIDABLE_WEIGHT_KEYS = Object.keys(MIDRANGE_WEIGHTS) as (keyof EvaluationWeights)[];
+
 /**
- * Analyse `--left-set=beamWidth=14,replyCandidates=8`.
+ * Analyse une liste `cle=nombre,cle=nombre`.
  *
  * On refuse une clé inconnue plutôt que de l'ignorer : une faute de frappe silencieuse ferait
  * tourner des heures de banc d'essai sur le réglage qu'on croyait avoir changé.
  */
-export const parseConfigOverrides = (raw: string | undefined): Partial<ExpertAiConfig> => {
+const parseNumericOverrides = <Key extends string>(
+    raw: string | undefined,
+    allowedKeys: Key[],
+    label: string,
+): Partial<Record<Key, number>> => {
     if (!raw) return {};
 
-    const overrides: Partial<ExpertAiConfig> = {};
+    const overrides: Partial<Record<Key, number>> = {};
 
     for (const entry of raw.split(",")) {
         const trimmed = entry.trim();
@@ -286,12 +312,10 @@ export const parseConfigOverrides = (raw: string | undefined): Partial<ExpertAiC
             throw new Error(`Surcharge invalide « ${trimmed} » (attendu : cle=nombre).`);
         }
 
-        const typedKey = OVERRIDABLE_KEYS.find((candidate) => candidate === key);
+        const typedKey = allowedKeys.find((candidate) => candidate === key);
 
         if (!typedKey) {
-            throw new Error(
-                `Réglage inconnu « ${key} ». Attendu : ${OVERRIDABLE_KEYS.join(", ")}.`,
-            );
+            throw new Error(`${label} inconnu « ${key} ». Attendu : ${allowedKeys.join(", ")}.`);
         }
 
         overrides[typedKey] = parsed;
@@ -299,3 +323,16 @@ export const parseConfigOverrides = (raw: string | undefined): Partial<ExpertAiC
 
     return overrides;
 };
+
+/** Analyse `--left-set=beamWidth=14,replyCandidates=8`. */
+export const parseConfigOverrides = (raw: string | undefined): Partial<ExpertAiConfig> =>
+    parseNumericOverrides(raw, OVERRIDABLE_KEYS, "Réglage");
+
+/**
+ * Analyse `--left-weights=board=1.3,handCard=2.0`.
+ *
+ * Ces coefficients ne sont surchargeables QU'ICI, pas en base : ce sont des paramètres de réglage
+ * hors ligne, pas des leviers d'exploitation. Voir `docs/to_try/02-regler-la-fonction-devaluation.md`.
+ */
+export const parseWeightOverrides = (raw: string | undefined): Partial<EvaluationWeights> =>
+    parseNumericOverrides(raw, OVERRIDABLE_WEIGHT_KEYS, "Coefficient d'évaluation");

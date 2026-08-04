@@ -316,6 +316,7 @@ const decide = (
             opponentUserId: passive.userId,
             profile: active.profile,
             config,
+            weightOverrides: active.variant.weights,
             seed,
             deterministic,
         });
@@ -325,6 +326,7 @@ const decide = (
         aiUserId: active.userId,
         profile: active.profile,
         config,
+        weightOverrides: active.variant.weights,
         seed,
         deterministic,
     });

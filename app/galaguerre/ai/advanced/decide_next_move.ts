@@ -7,7 +7,7 @@ import {
     MAX_SEARCH_DEPTH,
     type AdvancedAiConfig,
 } from "./advanced_ai_config.js";
-import { getWeightsForProfile } from "./evaluate_game_state.js";
+import { getWeightsForProfile, type EvaluationWeights } from "./evaluate_game_state.js";
 import type { ExpertDecisionTrace } from "./expert_decision_trace.js";
 import { findLethalSequence } from "./find_lethal.js";
 import { createDiscoverPicker } from "./score_discover_option.js";
@@ -27,6 +27,11 @@ export interface DecideNextMoveOptions {
     aiUserId: number;
     profile: AiDeckProfile | undefined;
     config: AdvancedAiConfig;
+    /**
+     * Surcharges des coefficients d'évaluation, appliquées par-dessus ceux du profil de deck.
+     * Réservé au réglage hors ligne (banc d'essai) : en production, `profile` décide seul.
+     */
+    weightOverrides?: Partial<EvaluationWeights>;
     /** Graine du PRNG de simulation ; à faire varier entre deux décisions. */
     seed: number;
     /**
@@ -55,7 +60,14 @@ const NO_DEADLINE = Number.POSITIVE_INFINITY;
 
 export const decideNextMoves = async (
     rawData: GameData,
-    { aiUserId, profile, config, seed, deterministic = false }: DecideNextMoveOptions,
+    {
+        aiUserId,
+        profile,
+        config,
+        weightOverrides,
+        seed,
+        deterministic = false,
+    }: DecideNextMoveOptions,
 ): Promise<AiDecision> => {
     const startedAt = Date.now();
 
@@ -73,7 +85,8 @@ export const decideNextMoves = async (
     const deadline = deterministic ? NO_DEADLINE : startedAt + budgetMs;
 
     const pickDiscoverOption = createDiscoverPicker(aiUserId, profile);
-    const weights = getWeightsForProfile(profile);
+    // Les poids du profil de deck servent de base ; une surcharge n'écrase que ce qu'elle nomme.
+    const weights = { ...getWeightsForProfile(profile), ...weightOverrides };
 
     return runInSimulation({ rng: createSeededRng(seed) }, async () => {
         // Le létal d'abord : c'est l'erreur la plus chère à commettre, on ne la délègue pas à
