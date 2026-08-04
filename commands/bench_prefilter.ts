@@ -5,6 +5,10 @@ import { performPassTurn } from "#controllers/games/pass_game_turn";
 import { finalizeMulligan } from "#controllers/games/mulligan/finalize_mulligan";
 import { performMulliganOnPlayer } from "#controllers/games/mulligan/perform_mulligan";
 import { ADVANCED_AI_DECKS } from "#database/seed_data/ai_decks";
+import {
+    GALADRIM_AGGRO_DECK_RECIPE,
+    GALADRIM_MIDRANGE_DECK_RECIPE,
+} from "#database/seed_data/balanced_decks";
 import { MAX_SEARCH_DEPTH } from "#galaguerre/ai/advanced/advanced_ai_config";
 import { selectMulliganCardUuids } from "#galaguerre/ai/advanced/advanced_mulligan";
 import { decideNextMoves } from "#galaguerre/ai/advanced/decide_next_move";
@@ -110,6 +114,23 @@ const sameMove = (left: AiMove | undefined, right: AiMove | undefined): boolean 
 const percent = (count: number, total: number): string =>
     total === 0 ? "—" : `${((100 * count) / total).toFixed(1)} %`;
 
+/** Percentile d'une série DÉJÀ triée. */
+const percentile = (sorted: number[], ratio: number): number =>
+    sorted.length === 0
+        ? 0
+        : sorted[Math.min(sorted.length - 1, Math.floor(ratio * sorted.length))]!;
+
+/**
+ * Listes jouables. Les deux premières sont celles de l'IA ; les suivantes viennent des decks
+ * proposés aux joueurs, qui n'ont aucune raison d'avoir le même facteur de branchement — c'est
+ * précisément ce que cette commande doit pouvoir vérifier avant de généraliser un résultat.
+ */
+const DECKS = [
+    ...ADVANCED_AI_DECKS.map((deck) => ({ name: deck.profile, recipe: deck.recipe })),
+    { name: "joueur-aggro", recipe: GALADRIM_AGGRO_DECK_RECIPE },
+    { name: "joueur-midrange", recipe: GALADRIM_MIDRANGE_DECK_RECIPE },
+];
+
 export default class BenchPrefilter extends BaseCommand {
     static commandName = "dev:bench-prefilter";
     static description = "Mesure ce que le pré-filtre de coups coûte au faisceau";
@@ -123,6 +144,11 @@ export default class BenchPrefilter extends BaseCommand {
 
     @flags.number({ description: "Tours joués par partie collectée", default: 12 })
     declare rounds: number;
+
+    @flags.string({
+        description: `Deck joué des deux côtés (${DECKS.map((deck) => deck.name).join(" | ")})`,
+    })
+    declare deck?: string;
 
     @flags.number({ description: "Graine de la première partie", default: 7 })
     declare seed: number;
@@ -241,7 +267,10 @@ export default class BenchPrefilter extends BaseCommand {
         this.logger.info("");
         this.logger.info(`Pré-filtre — topK de production : ${EXPERT_AI_DEFAULTS.topK}`);
         this.logger.info(`  positions comparées : ${total}`);
-        this.logger.info(`  coups à ordonner : médiane ${medianCount}, maximum ${maxCount}`);
+        this.logger.info(
+            `  coups à ordonner : médiane ${medianCount}, p90 ${percentile(counts, 0.9)}` +
+                `, maximum ${maxCount}`,
+        );
         this.logger.info(
             `  positions où le pré-filtre TRONQUE : ${saturated.length} ` +
                 `(${percent(saturated.length, total)})`,
@@ -295,9 +324,40 @@ export default class BenchPrefilter extends BaseCommand {
         }
     }
 
+    /**
+     * Deck utilisé des deux côtés. Sans `--deck`, le premier deck de l'IA — celui sur lequel la
+     * mesure d'origine a été faite, et donc celui qu'il faut rejouer pour la reproduire.
+     */
+    private selectedDeck(): {
+        name: string;
+        profile: "AGGRO" | "MIDRANGE";
+        recipe: (typeof DECKS)[number]["recipe"];
+    } {
+        const fallback = ADVANCED_AI_DECKS[0]!;
+
+        if (!this.deck) {
+            return { name: fallback.profile, profile: fallback.profile, recipe: fallback.recipe };
+        }
+
+        const wanted = this.deck.trim().toLowerCase();
+        const found = DECKS.find((entry) => entry.name.toLowerCase() === wanted);
+
+        if (!found) {
+            throw new Error(
+                `Deck inconnu « ${this.deck} ». Attendu : ${DECKS.map((d) => d.name).join(", ")}.`,
+            );
+        }
+
+        // Le profil ne sert qu'à choisir le mulligan et les poids : à défaut d'archétype déclaré
+        // sur les listes joueurs, on les traite en mid-range, comme le fait le pli de riposte.
+        const profile = found.name === "AGGRO" ? "AGGRO" : "MIDRANGE";
+
+        return { name: found.name, profile, recipe: found.recipe };
+    }
+
     /** Déroule une partie seedée et retient l'état au début de chaque tour du camp gauche. */
     private async collectPositions(seed: number): Promise<Position[]> {
-        const deck = ADVANCED_AI_DECKS[0]!;
+        const deck = this.selectedDeck();
 
         const leftPlayer = {
             userId: LEFT_USER_ID,
